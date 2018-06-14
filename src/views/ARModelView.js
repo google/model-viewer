@@ -45,6 +45,10 @@ export default class ARView extends EventDispatcher {
   start() {
     this.enabled = true;
     this.model.scale.set(1, 1, 1);
+    this._setupScene();
+    this._setupRenderer();
+    this._showCanvas();
+    this.scene.remove(this.model);
     this.enterAR();
   }
 
@@ -84,9 +88,7 @@ export default class ARView extends EventDispatcher {
       document.body.appendChild(this.outputCanvas);
     }
 
-    this._setupRenderer();
     await this._setupSession();
-    this._showCanvas();
     this._tick();
   }
 
@@ -116,6 +118,7 @@ export default class ARView extends EventDispatcher {
                                targetPos.z - this.model.position.z);
       this.model.rotation.set(0, angle, 0);
 
+      this.scene.add(this.model);
       this.shadow.position.y = this.model.position.y;
     }
   }
@@ -172,8 +175,6 @@ export default class ARView extends EventDispatcher {
 
     this.camera = new PerspectiveCamera();
     this.camera.matrixAutoUpdate = false;
-
-    this._setupScene();
   }
 
   _setupScene() {
