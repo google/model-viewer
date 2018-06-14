@@ -20,6 +20,10 @@ import { openIOSARQuickLook, getModelSource, getUSDZSource } from './utils.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+/**
+ * Note: in this template, we need to wrap the disc in a
+ * div so that we can `overflow:hidden` the excess blur filter.
+ */
 const template = document.createElement('template');
 template.innerHTML = `
   <style>
@@ -30,13 +34,34 @@ template.innerHTML = `
       position: relative;
     }
     a.enter-ar {
-      width: 48px;
-      height: 48px;
+      width: 75px;
+      height: 75px;
       position: absolute;
       display: block;
-      right: 0;
-      top: 0;
+      right: 20px;
+      top: 20px;
       display: none;
+    }
+    a.enter-ar svg {
+      position: absolute;
+    }
+    a.enter-ar .disc-container {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.2)
+      position: absolute;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+    }
+    a.enter-ar .disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      opacity: 0.7;
+      background-color: #fff;
+      filter: blur(5px);
     }
     canvas {
       width: 100%;
@@ -45,6 +70,9 @@ template.innerHTML = `
   </style>
   <div class="container">
     <a class="enter-ar" href="#">
+      <div class="disc-container">
+        <div class="disc"></div>
+      </div>
       ${ARKitSVG}
     </a>
     <canvas></canvas>
@@ -86,7 +114,7 @@ export default class ModelViewComponent extends HTMLElement {
       this.enterAR()
     });
 
-    if (IS_IOS || this.modelView.hasAR()) {
+    if (true || IS_IOS || this.modelView.hasAR()) {
       enterARButton.style.display = 'block';
     }
 
