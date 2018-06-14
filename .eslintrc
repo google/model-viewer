@@ -1,0 +1,24 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended", "google"],
+  "rules": {
+    "max-len": ["error", { "code": 100 }],
+    "object-curly-spacing": ["error", "always"],
+    "arrow-parens": ["error", "as-needed"],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-invalid-this": ["off"], // disable due to transform-class-properties,
+    "space-infix-ops": ["error", {"int32Hint": false}]
+  },
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "globals": {
+    "global": false,
+    "VRFrameData": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  }
+}

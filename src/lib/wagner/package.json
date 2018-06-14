@@ -1,0 +1,51 @@
+{
+  "_from": "@alex_toudic/wagner",
+  "_id": "@alex_toudic/wagner@0.1.20",
+  "_inBundle": false,
+  "_integrity": "sha1-YLUJaxh2Vh9wrDeK1tHtqXxrIp8=",
+  "_location": "/@alex_toudic/wagner",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@alex_toudic/wagner",
+    "name": "@alex_toudic/wagner",
+    "escapedName": "@alex_toudic%2fwagner",
+    "scope": "@alex_toudic",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@alex_toudic/wagner/-/wagner-0.1.20.tgz",
+  "_shasum": "60b5096b1876561f70ac378ad6d1eda97c6b229f",
+  "_spec": "@alex_toudic/wagner",
+  "_where": "/Users/jsantell/Dev/butterfly",
+  "author": {
+    "name": "Alex Toudic",
+    "email": "alexandre.toudic@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexToudic/Wagner/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "raf": "^3.2.0",
+    "three": "^0.81.2"
+  },
+  "deprecated": false,
+  "description": "Fork of spite/Wagner in commonjs for webpack.",
+  "homepage": "http://github.com/AlexToudic/Wagner",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "@alex_toudic/wagner",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AlexToudic/Wagner.git"
+  },
+  "scripts": {},
+  "version": "0.1.20"
+}
