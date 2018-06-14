@@ -26,9 +26,9 @@ import {
 } from 'three';
 
 import Shadow from '../three-components/Shadow.js';
-import WAGNER from '../lib/wagner';
+import { Composer } from '../lib/wagner/index.js';
 import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
-import OrbitControls from '../../third_party/three.js/OrbitControls.js';
+import OrbitControls from '../../third_party/three/OrbitControls.js';
 
 const BOUNDING_BOX_SIZE = 10;
 
@@ -90,7 +90,7 @@ export default class DOMModelView {
     this.scene.add(new Shadow());
 
     // Set up post processing
-    this.composer = new WAGNER.Composer(this.renderer);
+    this.composer = new Composer(this.renderer);
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};

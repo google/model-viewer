@@ -18,8 +18,8 @@ const path = require('path');
 const rollup = require('rollup');
 const commonjs = require('rollup-plugin-commonjs');
 const resolve = require('rollup-plugin-node-resolve');
+const glsl = require('rollup-plugin-glsl');
 const json = require('rollup-plugin-json');
-const alias = require('rollup-plugin-import-alias');
 const string = require('rollup-plugin-string');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
@@ -34,10 +34,10 @@ export default {
     include: 'src/**',
   },
   plugins: [
-    alias({
-      Paths: {
-        three: './third_party/three.js/three.js',
-      },
+    commonjs(),
+    glsl({
+      include: ['src/**/*.vert', 'src/**/*.frag', 'src/**/*.glsl'],
+      sourceMap: false,
     }),
     string({
       include: '**/*.svg',
