@@ -49437,6 +49437,7 @@ class DOMModelView {
 
   start() {
     this.enabled = true;
+    this.scene.add(this.model);
     this.renderer.setFramebuffer(null);
     this._tick();
   }
@@ -49490,6 +49491,11 @@ class DOMModelView {
  * limitations under the License.
  */
 
+/**
+ * The Reticle class creates an object that repeatedly calls
+ * `xrSession.requestHitTest()` to render a ring along a found
+ * horizontal surface.
+ */
 class Reticle extends Object3D {
   /**
    * @param {XRSession} xrSession
@@ -49863,7 +49869,11 @@ class ARView extends EventDispatcher {
 
       this.outputCanvas.addEventListener('click', this.onTap);
 
+      // Cannot make the XRPresentationContext canvas fullscreen
+      // directly due to bug, so put it in a wrapper.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=853324
       this.container = document.createElement('div');
+      this.container.setAttribute('xr-model-component-canvas', '');
       this.container.appendChild(this.outputCanvas);
       document.body.appendChild(this.container);
     }
@@ -52821,6 +52831,13 @@ class Model extends Object3D {
  * limitations under the License.
  */
 
+/**
+ * Takes a URL to a USDZ file and sets the appropriate
+ * fields so that Safari iOS can intent to their
+ * AR Quick Look.
+ *
+ * @param {String} url
+ */
 const openIOSARQuickLook = url => {
   const anchor = document.createElement('a');
   anchor.setAttribute('rel', 'ar');

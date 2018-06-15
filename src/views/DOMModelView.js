@@ -80,6 +80,7 @@ export default class DOMModelView {
 
   start() {
     this.enabled = true;
+    this.scene.add(this.model);
     this.renderer.setFramebuffer(null);
     this._tick();
   }

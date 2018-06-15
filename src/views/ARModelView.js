@@ -154,7 +154,7 @@ export default class ARView extends EventDispatcher {
       // directly due to bug, so put it in a wrapper.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=853324
       this.container = document.createElement('div');
-      this.container.setAttribute('xr-model-component-canvas');
+      this.container.setAttribute('xr-model-component-canvas', '');
       this.container.appendChild(this.outputCanvas);
       document.body.appendChild(this.container);
     }
