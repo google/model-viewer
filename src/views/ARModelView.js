@@ -210,7 +210,7 @@ export default class ARView extends EventDispatcher {
     this.scene.add(this.reticle);
 
     this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
-    this.frameOfRef = await this.session.requestFrameOfReference('eyeLevel');
+    this.frameOfRef = await this.session.requestFrameOfReference('eye-level');
   }
 
   _hideCanvas() {
