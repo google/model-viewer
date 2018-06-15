@@ -27,53 +27,118 @@ import {
 } from 'three';
 import Reticle from '../three-components/Reticle.js';
 import Shadow from '../three-components/Shadow.js';
-import WAGNER from '../lib/wagner';
-import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
+import screenfull from 'screenfull';
 
 export default class ARView extends EventDispatcher {
-  constructor({ canvas, model }) {
+  constructor({ canvas, context, model }) {
     super();
+    this.context = context;
     this.canvas = canvas;
     this.model = model;
 
     this.onTap = this.onTap.bind(this);
     this.onFrame = this.onFrame.bind(this);
-    this.onModelLoad = this.onModelLoad.bind(this);
-    this.model.addEventListener('model-load', this.onModelLoad);
+    this.onResize = this.onResize.bind(this);
+    this.onFullscreenChange = this.onFullscreenChange.bind(this);
+
+    this._devicePromise = navigator.xr.requestDevice();
+    this._devicePromise.then(device => this.device = device);
+   
+    screenfull.on('change', this.onFullscreenChange);
+    window.addEventListener('resize', this.onResize);
+  }
+
+  /**
+   * Returns a boolean indicating whether or not
+   * the browser is capable of running the AR experience
+   * (WebXR AR features, fullscreen)
+   *
+   * @return {Boolean}
+   */
+  hasAR() {
+    return screenfull.enabled &&
+           navigator.xr && window.XRSession && window.XRSession.prototype.requestHitTest;
+  }
+
+  /**
+   * Returns a promise that is resolved once an XRDevice
+   * is found.
+   *
+   * @return {Promise<XRDevice>}
+   */
+  whenARReady() {
+    return this._devicePromise;
   }
 
   start() {
+    if (!this.hasAR() || this.enabled) {
+      return;
+    }
+
+    if (!this.device) {
+      throw new Error('Must wait until XRDevice found; use `await arView.whenARReady()` first.');
+    }
+
     this.enabled = true;
-    this.model.scale.set(1, 1, 1);
+    this.stabilized = false;
+    this._setupCanvas();
     this._setupScene();
     this._setupRenderer();
     this._showCanvas();
-    this.scene.remove(this.model);
-    this.enterAR();
+    this._enterFullscreen();
+
+    return this._setupSession().then(() => {
+      this._tick();
+    });
   }
 
   async stop() {
+    if (!this.hasAR() || !this.enabled) {
+      return;
+    }
     this.enabled = false;
     if (this.session) {
       this.session.cancelAnimationFrame(this.lastFrameId);
-      this._showCanvas = false;
-      this.session.end();
+      this._hideCanvas();
+      const ending = this.session.end();
       this.session = null;
+      ending.then(() => this.dispatchEvent({ type: 'end' }));
     }
   }
 
-  onModelLoad() {
-    if (this.enabled) {
-      this.model.scale.set(1, 1, 1);
+  _tick() {
+    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
+  }
+
+  onFrame(time, frame) {
+    let session = frame.session;
+    let pose = frame.getDevicePose(this.frameOfRef);
+
+    this.reticle.update(this.frameOfRef);
+
+    if (this.reticle.visible && !this.stabilized) {
+      this.stabilized = true;
+      this.dispatchEvent({ type: 'stabilized' });
+    }
+
+    this._tick();
+
+    if (pose) {
+      for (let view of frame.views) {
+        const viewport = session.baseLayer.getViewport(view);
+        this.renderer.setViewport(0, 0, viewport.width, viewport.height);
+        this.renderer.setSize(viewport.width, viewport.height);
+        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
+        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
+        this.camera.matrix.getInverse(viewMatrix);
+        this.camera.updateMatrixWorld(true);
+        this.renderer.clearDepth();
+        this.renderer.render(this.scene, this.camera);
+      }
     }
   }
 
-  async enterAR() {
-    this.stabilized = false;
-    if (!this.device) {
-      this.device = await navigator.xr.requestDevice();
-    }
-
+  _setupCanvas() {
     if (!this.outputContext) {
       this.outputCanvas = document.createElement('canvas');
       this.outputCanvas.style.position = 'absolute';
@@ -85,11 +150,100 @@ export default class ARView extends EventDispatcher {
 
       this.outputCanvas.addEventListener('click', this.onTap);
 
-      document.body.appendChild(this.outputCanvas);
+      // Cannot make the XRPresentationContext canvas fullscreen
+      // directly due to bug, so put it in a wrapper.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=853324
+      this.container = document.createElement('div');
+      this.container.setAttribute('xr-model-component-canvas');
+      this.container.appendChild(this.outputCanvas);
+      document.body.appendChild(this.container);
     }
+  }
 
-    await this._setupSession();
-    this._tick();
+  _setupRenderer() {
+    this.renderer = new WebGLRenderer({
+      context: this.context,
+      canvas: this.canvas,
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(1);
+    this.renderer.autoClear = false;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.gammaInput = true;
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
+
+    this.gl = this.renderer.getContext();
+
+    this.camera = new PerspectiveCamera();
+    this.camera.matrixAutoUpdate = false;
+  }
+
+  _setupScene() {
+    this.scene = new Scene();
+
+    const light = new AmbientLight(0xffffff, 1);
+    this.scene.add(light);
+
+    const directionalLight = new DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(1000, 1000, 1000);
+    directionalLight.castShadow = true;
+    this.scene.add(directionalLight);
+
+    this.shadow = new Shadow();
+    this.scene.add(this.shadow);
+  }
+
+  async _setupSession() {
+    this.session = await this.device.requestSession({
+      outputContext: this.outputContext,
+    });
+
+    await this.gl.setCompatibleXRDevice(this.device);
+
+    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl, {
+      alpha: true,
+    });
+
+    this.reticle = new Reticle(this.session, this.camera);
+    this.scene.add(this.reticle);
+
+    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
+    this.frameOfRef = await this.session.requestFrameOfReference('eyeLevel');
+  }
+
+  _hideCanvas() {
+    if (this.container) {
+      this.container.style.display = 'none';
+    }
+  }
+
+  _showCanvas() {
+    if (this.container) {
+      this.container.style.display = 'block';
+    }
+  }
+
+  _enterFullscreen() {
+    if (screenfull.isFullscreen) {
+      throw new Error('Another element is already fullscreen');
+    }
+    screenfull.request(this.container);
+  }
+
+  onFullscreenChange() {
+    // If leaving fullscreen mode, and we're still in AR mode,
+    // shut down AR mode
+    if (!screenfull.isFullscreen && this.enabled) {
+      this.stop();
+    }
+  }
+
+  onResize() {
+    if (!this.enabled) {
+      return;
+    }
   }
 
   async onTap() {
@@ -123,103 +277,4 @@ export default class ARView extends EventDispatcher {
     }
   }
 
-  _tick() {
-    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
-  }
-
-  onFrame(time, frame) {
-    let session = frame.session;
-    let pose = frame.getDevicePose(this.frameOfRef);
-
-    this.reticle.update(this.frameOfRef);
-
-    if (this.reticle.visible && !this.stabilized) {
-      this.stabilized = true;
-      this.dispatchEvent({ type: 'stabilized' });
-    }
-
-    this._tick();
-
-    if (pose) {
-      for (let view of frame.views) {
-        const viewport = session.baseLayer.getViewport(view);
-        this.renderer.setSize(viewport.width, viewport.height);
-        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
-        this.camera.matrix.getInverse(viewMatrix);
-        this.camera.updateMatrixWorld(true);
-        this.renderer.clearDepth();
-        this.renderer.render(this.scene, this.camera);
-      }
-    }
-  }
-
-  _setupRenderer() {
-    if (this.renderer) {
-      return this.renderer;
-    }
-
-    this.renderer = new WebGLRenderer({
-      alpha: true,
-      preserveDrawingBuffer: true,
-      canvas: this.canvas,
-    });
-    this.renderer.autoClear = false;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.2;
-
-    this.gl = this.renderer.getContext();
-
-    this.camera = new PerspectiveCamera();
-    this.camera.matrixAutoUpdate = false;
-  }
-
-  _setupScene() {
-    if (this.scene) {
-      return this.scene;
-    }
-
-    this.scene = new Scene();
-
-    const light = new AmbientLight(0xffffff, 1);
-    this.scene.add(light);
-
-    const directionalLight = new DirectionalLight(0xffffff, 0.3);
-    directionalLight.position.set(1000, 1000, 1000);
-    directionalLight.castShadow = true;
-    this.scene.add(directionalLight);
-
-    this.shadow = new Shadow();
-    this.scene.add(this.shadow);
-  }
-
-  async _setupSession() {
-    this.session = await this.device.requestSession({
-      outputContext: this.outputContext,
-    });
-
-    await this.gl.setCompatibleXRDevice(this.device);
-
-    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl);
-
-    if (this.reticle) {
-      this.scene.remove(this.reticle);
-    }
-    this.reticle = new Reticle(this.session, this.camera);
-    this.scene.add(this.reticle);
-
-    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
-    this.frameOfRef = await this.session.requestFrameOfReference('eyeLevel');
-  }
-
-  _hideCanvas() {
-    this.outputCanvas.style.display = 'none';
-  }
-
-  _showCanvas() {
-    this.outputCanvas.style.display = 'block';
-  }
 }

@@ -49387,40 +49387,15 @@ Object.defineProperties( OrbitControls.prototype, {
  * limitations under the License.
  */
 
-const BOUNDING_BOX_SIZE = 10;
-
-/**
- * Takes a size limit and an object and sets the scale
- * such that it is as large as it can be within a bounding
- * box of (limit)x(limit)x(limit) dimensions.
- *
- * @param {number} limit
- * @param {Object3D} object
- */
-const setScaleFromLimit = (function() {
-  const box = new Box3();
-  const size = new Vector3();
-  return (limit, object) => {
-    box.setFromObject(object);
-    box.getSize(size);
-
-    const max = Math.max(size.x, size.y, size.z);
-    const scale = limit / max;
-    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
-      object.scale.set(scale, scale, scale);
-    }
-  };
-})();
-
 class DOMModelView {
-  constructor({ canvas, model, width, height }) {
+  constructor({ canvas, context, model, width, height }) {
+    this.context = context;
     this.canvas = canvas;
     this.model = model;
     this.enabled = false;
     this.render = this.render.bind(this);
-    this.onModelLoad = this.onModelLoad.bind(this);
 
-    this.renderer = new WebGLRenderer({ canvas });
+    this.renderer = new WebGLRenderer({ canvas, context });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.setClearColor(0xeeeeee);
@@ -49458,21 +49433,11 @@ class DOMModelView {
     this.scene.add(this.pivot);
     this.camera.position.z = 15;
     this.camera.position.y = 5;
-
-    this.model.addEventListener('model-load', this.onModelLoad);
-  }
-
-  onModelLoad() {
-    if (this.enabled) {
-      setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
-    }
   }
 
   start() {
     this.enabled = true;
-    setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
     this.renderer.setFramebuffer(null);
-    this.model.rotation.set(0, 0, 0);
     this._tick();
   }
 
@@ -49482,6 +49447,9 @@ class DOMModelView {
   }
 
   setSize(width, height) {
+    if (!this.enabled) {
+      return;
+    }
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -49557,9 +49525,9 @@ class Reticle extends Object3D {
 
     const origin = new Float32Array(ray.origin.toArray());
     const direction = new Float32Array(ray.direction.toArray());
-    const hits = await this.session.requestHitTest(origin,
+    this.session.requestHitTest(origin,
                                                    direction,
-                                                   frameOfRef);
+                                                   frameOfRef).then(hits => {
 
     if (hits.length) {
       const hit = hits[0];
@@ -49574,10 +49542,190 @@ class Reticle extends Object3D {
                                targetPos.z - this.position.z);
       this.rotation.set(0, angle, 0);
 
+      try {
       this.visible = true;
+      } catch (e) {
+        console.error(e);
+        window.e = e;
+      }
     }
-  }
+  });}
 }
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var screenfull = createCommonjsModule(function (module) {
+/*!
+* screenfull
+* v3.3.2 - 2017-10-27
+* (c) Sindre Sorhus; MIT License
+*/
+(function () {
+	'use strict';
+
+	var document = typeof window !== 'undefined' && typeof window.document !== 'undefined' ? window.document : {};
+	var isCommonjs = 'object' !== 'undefined' && module.exports;
+	var keyboardAllowed = typeof Element !== 'undefined' && 'ALLOW_KEYBOARD_INPUT' in Element;
+
+	var fn = (function () {
+		var val;
+
+		var fnMap = [
+			[
+				'requestFullscreen',
+				'exitFullscreen',
+				'fullscreenElement',
+				'fullscreenEnabled',
+				'fullscreenchange',
+				'fullscreenerror'
+			],
+			// New WebKit
+			[
+				'webkitRequestFullscreen',
+				'webkitExitFullscreen',
+				'webkitFullscreenElement',
+				'webkitFullscreenEnabled',
+				'webkitfullscreenchange',
+				'webkitfullscreenerror'
+
+			],
+			// Old WebKit (Safari 5.1)
+			[
+				'webkitRequestFullScreen',
+				'webkitCancelFullScreen',
+				'webkitCurrentFullScreenElement',
+				'webkitCancelFullScreen',
+				'webkitfullscreenchange',
+				'webkitfullscreenerror'
+
+			],
+			[
+				'mozRequestFullScreen',
+				'mozCancelFullScreen',
+				'mozFullScreenElement',
+				'mozFullScreenEnabled',
+				'mozfullscreenchange',
+				'mozfullscreenerror'
+			],
+			[
+				'msRequestFullscreen',
+				'msExitFullscreen',
+				'msFullscreenElement',
+				'msFullscreenEnabled',
+				'MSFullscreenChange',
+				'MSFullscreenError'
+			]
+		];
+
+		var i = 0;
+		var l = fnMap.length;
+		var ret = {};
+
+		for (; i < l; i++) {
+			val = fnMap[i];
+			if (val && val[1] in document) {
+				for (i = 0; i < val.length; i++) {
+					ret[fnMap[0][i]] = val[i];
+				}
+				return ret;
+			}
+		}
+
+		return false;
+	})();
+
+	var eventNameMap = {
+		change: fn.fullscreenchange,
+		error: fn.fullscreenerror
+	};
+
+	var screenfull = {
+		request: function (elem) {
+			var request = fn.requestFullscreen;
+
+			elem = elem || document.documentElement;
+
+			// Work around Safari 5.1 bug: reports support for
+			// keyboard in fullscreen even though it doesn't.
+			// Browser sniffing, since the alternative with
+			// setTimeout is even worse.
+			if (/ Version\/5\.1(?:\.\d+)? Safari\//.test(navigator.userAgent)) {
+				elem[request]();
+			} else {
+				elem[request](keyboardAllowed && Element.ALLOW_KEYBOARD_INPUT);
+			}
+		},
+		exit: function () {
+			document[fn.exitFullscreen]();
+		},
+		toggle: function (elem) {
+			if (this.isFullscreen) {
+				this.exit();
+			} else {
+				this.request(elem);
+			}
+		},
+		onchange: function (callback) {
+			this.on('change', callback);
+		},
+		onerror: function (callback) {
+			this.on('error', callback);
+		},
+		on: function (event, callback) {
+			var eventName = eventNameMap[event];
+			if (eventName) {
+				document.addEventListener(eventName, callback, false);
+			}
+		},
+		off: function (event, callback) {
+			var eventName = eventNameMap[event];
+			if (eventName) {
+				document.removeEventListener(eventName, callback, false);
+			}
+		},
+		raw: fn
+	};
+
+	if (!fn) {
+		if (isCommonjs) {
+			module.exports = false;
+		} else {
+			window.screenfull = false;
+		}
+
+		return;
+	}
+
+	Object.defineProperties(screenfull, {
+		isFullscreen: {
+			get: function () {
+				return Boolean(document[fn.fullscreenElement]);
+			}
+		},
+		element: {
+			enumerable: true,
+			get: function () {
+				return document[fn.fullscreenElement];
+			}
+		},
+		enabled: {
+			enumerable: true,
+			get: function () {
+				// Coerce to boolean in case of old WebKit
+				return Boolean(document[fn.fullscreenEnabled]);
+			}
+		}
+	});
+
+	if (isCommonjs) {
+		module.exports = screenfull;
+	} else {
+		window.screenfull = screenfull;
+	}
+})();
+});
 
 /*
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -49595,49 +49743,115 @@ class Reticle extends Object3D {
  */
 
 class ARView extends EventDispatcher {
-  constructor({ canvas, model }) {
+  constructor({ canvas, context, model }) {
     super();
+    this.context = context;
     this.canvas = canvas;
     this.model = model;
 
     this.onTap = this.onTap.bind(this);
     this.onFrame = this.onFrame.bind(this);
-    this.onModelLoad = this.onModelLoad.bind(this);
-    this.model.addEventListener('model-load', this.onModelLoad);
+    this.onResize = this.onResize.bind(this);
+    this.onFullscreenChange = this.onFullscreenChange.bind(this);
+
+    this._devicePromise = navigator.xr.requestDevice();
+    this._devicePromise.then(device => this.device = device);
+   
+    screenfull.on('change', this.onFullscreenChange);
+    window.addEventListener('resize', this.onResize);
+  }
+
+  /**
+   * Returns a boolean indicating whether or not
+   * the browser is capable of running the AR experience
+   * (WebXR AR features, fullscreen)
+   *
+   * @return {Boolean}
+   */
+  hasAR() {
+    return screenfull.enabled &&
+           navigator.xr && window.XRSession && window.XRSession.prototype.requestHitTest;
+  }
+
+  /**
+   * Returns a promise that is resolved once an XRDevice
+   * is found.
+   *
+   * @return {Promise<XRDevice>}
+   */
+  whenARReady() {
+    return this._devicePromise;
   }
 
   start() {
+    if (!this.hasAR() || this.enabled) {
+      return;
+    }
+
+    if (!this.device) {
+      throw new Error('Must wait until XRDevice found; use `await arView.whenARReady()` first.');
+    }
+
     this.enabled = true;
-    this.model.scale.set(1, 1, 1);
+    this.stabilized = false;
+    this._setupCanvas();
     this._setupScene();
     this._setupRenderer();
     this._showCanvas();
-    this.scene.remove(this.model);
-    this.enterAR();
+    this._enterFullscreen();
+
+    return this._setupSession().then(() => {
+      this._tick();
+    });
   }
 
   async stop() {
+    if (!this.hasAR() || !this.enabled) {
+      return;
+    }
     this.enabled = false;
     if (this.session) {
       this.session.cancelAnimationFrame(this.lastFrameId);
-      this._showCanvas = false;
-      this.session.end();
+      this._hideCanvas();
+      const ending = this.session.end();
       this.session = null;
+      ending.then(() => this.dispatchEvent({ type: 'end' }));
     }
   }
 
-  onModelLoad() {
-    if (this.enabled) {
-      this.model.scale.set(1, 1, 1);
+  _tick() {
+    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
+  }
+
+  onFrame(time, frame) {
+    let session = frame.session;
+    let pose = frame.getDevicePose(this.frameOfRef);
+
+    this.reticle.update(this.frameOfRef);
+
+    if (this.reticle.visible && !this.stabilized) {
+      this.stabilized = true;
+      this.dispatchEvent({ type: 'stabilized' });
+    }
+
+    this._tick();
+
+    if (pose) {
+      for (let view of frame.views) {
+        const viewport = session.baseLayer.getViewport(view);
+        this.renderer.setViewport(0, 0, viewport.width, viewport.height);
+        this.renderer.setSize(viewport.width, viewport.height);
+        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
+        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
+        this.camera.matrix.getInverse(viewMatrix);
+        this.camera.updateMatrixWorld(true);
+        this.renderer.clearDepth();
+        this.renderer.render(this.scene, this.camera);
+      }
     }
   }
 
-  async enterAR() {
-    this.stabilized = false;
-    if (!this.device) {
-      this.device = await navigator.xr.requestDevice();
-    }
-
+  _setupCanvas() {
     if (!this.outputContext) {
       this.outputCanvas = document.createElement('canvas');
       this.outputCanvas.style.position = 'absolute';
@@ -49649,11 +49863,96 @@ class ARView extends EventDispatcher {
 
       this.outputCanvas.addEventListener('click', this.onTap);
 
-      document.body.appendChild(this.outputCanvas);
+      this.container = document.createElement('div');
+      this.container.appendChild(this.outputCanvas);
+      document.body.appendChild(this.container);
     }
+  }
 
-    await this._setupSession();
-    this._tick();
+  _setupRenderer() {
+    this.renderer = new WebGLRenderer({
+      context: this.context,
+      canvas: this.canvas,
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(1);
+    this.renderer.autoClear = false;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.gammaInput = true;
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
+
+    this.gl = this.renderer.getContext();
+
+    this.camera = new PerspectiveCamera();
+    this.camera.matrixAutoUpdate = false;
+  }
+
+  _setupScene() {
+    this.scene = new Scene();
+
+    const light = new AmbientLight(0xffffff, 1);
+    this.scene.add(light);
+
+    const directionalLight = new DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(1000, 1000, 1000);
+    directionalLight.castShadow = true;
+    this.scene.add(directionalLight);
+
+    this.shadow = new Shadow();
+    this.scene.add(this.shadow);
+  }
+
+  async _setupSession() {
+    this.session = await this.device.requestSession({
+      outputContext: this.outputContext,
+    });
+
+    await this.gl.setCompatibleXRDevice(this.device);
+
+    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl, {
+      alpha: true,
+    });
+
+    this.reticle = new Reticle(this.session, this.camera);
+    this.scene.add(this.reticle);
+
+    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
+    this.frameOfRef = await this.session.requestFrameOfReference('eyeLevel');
+  }
+
+  _hideCanvas() {
+    if (this.container) {
+      this.container.style.display = 'none';
+    }
+  }
+
+  _showCanvas() {
+    if (this.container) {
+      this.container.style.display = 'block';
+    }
+  }
+
+  _enterFullscreen() {
+    if (screenfull.isFullscreen) {
+      throw new Error('Another element is already fullscreen');
+    }
+    screenfull.request(this.container);
+  }
+
+  onFullscreenChange() {
+    // If leaving fullscreen mode, and we're still in AR mode,
+    // shut down AR mode
+    if (!screenfull.isFullscreen && this.enabled) {
+      this.stop();
+    }
+  }
+
+  onResize() {
+    if (!this.enabled) {
+      return;
+    }
   }
 
   async onTap() {
@@ -49687,105 +49986,6 @@ class ARView extends EventDispatcher {
     }
   }
 
-  _tick() {
-    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
-  }
-
-  onFrame(time, frame) {
-    let session = frame.session;
-    let pose = frame.getDevicePose(this.frameOfRef);
-
-    this.reticle.update(this.frameOfRef);
-
-    if (this.reticle.visible && !this.stabilized) {
-      this.stabilized = true;
-      this.dispatchEvent({ type: 'stabilized' });
-    }
-
-    this._tick();
-
-    if (pose) {
-      for (let view of frame.views) {
-        const viewport = session.baseLayer.getViewport(view);
-        this.renderer.setSize(viewport.width, viewport.height);
-        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
-        this.camera.matrix.getInverse(viewMatrix);
-        this.camera.updateMatrixWorld(true);
-        this.renderer.clearDepth();
-        this.renderer.render(this.scene, this.camera);
-      }
-    }
-  }
-
-  _setupRenderer() {
-    if (this.renderer) {
-      return this.renderer;
-    }
-
-    this.renderer = new WebGLRenderer({
-      alpha: true,
-      preserveDrawingBuffer: true,
-      canvas: this.canvas,
-    });
-    this.renderer.autoClear = false;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.2;
-
-    this.gl = this.renderer.getContext();
-
-    this.camera = new PerspectiveCamera();
-    this.camera.matrixAutoUpdate = false;
-  }
-
-  _setupScene() {
-    if (this.scene) {
-      return this.scene;
-    }
-
-    this.scene = new Scene();
-
-    const light = new AmbientLight(0xffffff, 1);
-    this.scene.add(light);
-
-    const directionalLight = new DirectionalLight(0xffffff, 0.3);
-    directionalLight.position.set(1000, 1000, 1000);
-    directionalLight.castShadow = true;
-    this.scene.add(directionalLight);
-
-    this.shadow = new Shadow();
-    this.scene.add(this.shadow);
-  }
-
-  async _setupSession() {
-    this.session = await this.device.requestSession({
-      outputContext: this.outputContext,
-    });
-
-    await this.gl.setCompatibleXRDevice(this.device);
-
-    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl);
-
-    if (this.reticle) {
-      this.scene.remove(this.reticle);
-    }
-    this.reticle = new Reticle(this.session, this.camera);
-    this.scene.add(this.reticle);
-
-    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
-    this.frameOfRef = await this.session.requestFrameOfReference('eyeLevel');
-  }
-
-  _hideCanvas() {
-    this.outputCanvas.style.display = 'none';
-  }
-
-  _showCanvas() {
-    this.outputCanvas.style.display = 'block';
-  }
 }
 
 /**
@@ -52621,76 +52821,6 @@ class Model extends Object3D {
  * limitations under the License.
  */
 
-class ModelView {
-  constructor({ canvas, width, height }) {
-    this.width = width;
-    this.height = height;
-
-    this.mode = null;
-
-    const model = this.model = new Model();
-    this.domView = new DOMModelView({ canvas, model, width, height });
-    this.arView = this.hasAR() ? new ARView({ canvas, model }) : null;
-
-    this.enterDOM();
-  }
-
-  setModelSource(source, type) {
-    this.model.setSource(source, type);
-  }
-
-  hasAR() {
-    return navigator.xr && window.XRSession && window.XRSession.prototype.requestHitTest;
-  }
-
-  setSize(width, height) {
-    this.width = width;
-    this.height = height;
-    this.domView.setSize(width, height);
-  }
-
-  enterDOM() {
-    this.mode = 'dom';
-    this.domView.start();
-    if (this.arView) {
-      this.arView.stop();
-    }
-  }
-
-  enterAR() {
-    if (!this.hasAR()) {
-      return;
-    }
-    this.mode = 'ar';
-    this.domView.stop();
-    this.arView.start();
-  }
-}
-
-var ARKitSVG = "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 78 78\"><defs><style>.cls-1{fill:none;}.cls-2{clip-path:url(#clip-path);}.cls-3{opacity:0.6;}.cls-4{clip-path:url(#clip-path-3);}.cls-5{opacity:0.5;}.cls-6{fill:#fff;}.cls-7{opacity:0.2;}.cls-8{clip-path:url(#clip-path-5);}.cls-9{clip-path:url(#clip-path-6);}.cls-10{clip-path:url(#clip-path-7);}.cls-11{clip-path:url(#clip-path-8);}.cls-12{clip-path:url(#clip-path-9);}.cls-13{clip-path:url(#clip-path-10);}.cls-14{clip-path:url(#clip-path-11);}.cls-15{clip-path:url(#clip-path-12);}.cls-16{clip-path:url(#clip-path-13);}</style><clipPath id=\"clip-path\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-3\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-5\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"12.49\" width=\"23.67\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-6\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-7\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"23.64\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-8\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-9\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"51.28\" width=\"23.67\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-10\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"51.28\" width=\"23.64\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-11\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-12\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"60.23\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-13\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"1.28\" height=\"52.96\"/></clipPath></defs><title>ARKit-Badge-Glyph-Only</title><g class=\"cls-2\"><g class=\"cls-2\"><g class=\"cls-3\"><g class=\"cls-4\"><path d=\"M45,18a1.12,1.12,0,0,1-.56-.15l-6-3.44-6,3.45a1.12,1.12,0,1,1-1.12-1.95L38,12.15a1.12,1.12,0,0,1,1.12,0l6.51,3.77A1.12,1.12,0,0,1,45,18\" transform=\"translate(0 0)\"/><path d=\"M38.51,47.65a1.12,1.12,0,0,1-1.12-1.12V39a1.12,1.12,0,1,1,2.25,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M16.12,34.71A1.12,1.12,0,0,1,15,33.58V26a1.12,1.12,0,1,1,2.24,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,34.71a1.12,1.12,0,0,1-1.12-1.12V26A1.12,1.12,0,1,1,62,26v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-1.12-1.12V44.39a1.12,1.12,0,0,1,1.12-1.12h0A1.12,1.12,0,0,1,62,44.39v7.54A1.12,1.12,0,0,1,60.88,53Z\" transform=\"translate(0 0)\"/><path d=\"M16.12,53A1.12,1.12,0,0,1,15,51.93V44.39a1.12,1.12,0,1,1,2.24,0v7.54A1.12,1.12,0,0,1,16.12,53\" transform=\"translate(0 0)\"/><path d=\"M38.51,22.47a1.12,1.12,0,0,1-1.12-1.12V13.13a1.12,1.12,0,1,1,2.25,0v8.22a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.12,1.12,0,0,1-1.12-1.12V57.34a1.12,1.12,0,1,1,2.25,0v7.54A1.12,1.12,0,0,1,38.51,66\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.13,1.13,0,0,1-.56-.15l-6.56-3.79a1.12,1.12,0,0,1,1.12-1.95l6,3.47,5.91-3.43a1.12,1.12,0,0,1,1.13,1.95l-6.48,3.75a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M38.51,40.11A1.13,1.13,0,0,1,38,40l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95l6,3.45,6-3.45a1.12,1.12,0,0,1,1.13,1.95L39.08,40a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.35,30.94a1.12,1.12,0,0,1-.56-2.1l6.52-3.77A1.12,1.12,0,0,1,61.44,27l-6.52,3.77a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.87,27.17a1.12,1.12,0,0,1-.56-.15l-6.53-3.77A1.12,1.12,0,1,1,54.9,21.3l6.53,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,30.94a1.12,1.12,0,0,1-.56-.15L15.56,27a1.12,1.12,0,0,1,1.12-1.95l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,27.17a1.12,1.12,0,0,1-.56-2.1l6.52-3.76a1.12,1.12,0,0,1,1.12,1.95L16.68,27a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.34,56.82a1.12,1.12,0,0,1-.56-2.1L60.32,51a1.12,1.12,0,1,1,1.12,1.95L54.9,56.67a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-.56-.15l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95L61.44,51a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,56.82a1.13,1.13,0,0,1-.56-.15L15.56,52.9A1.12,1.12,0,0,1,16.69,51l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,53a1.12,1.12,0,0,1-.56-2.1l6.51-3.77a1.12,1.12,0,0,1,1.13,1.95L16.69,52.9a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><g class=\"cls-7\"><g class=\"cls-8\"><path d=\"M16.12,26.69a.64.64,0,0,1-.32-1.2L38.19,12.57a.64.64,0,0,1,.64,1.11L16.44,26.6a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-9\"><path d=\"M16.12,52.57a.64.64,0,0,1-.32-1.2L60.56,25.49a.64.64,0,0,1,.64,1.11L16.44,52.48a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-10\"><path d=\"M60.87,26.69a.64.64,0,0,1-.32-.09L38.19,13.68a.64.64,0,0,1,.64-1.11L61.19,25.49a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-11\"><path d=\"M60.88,52.57a.63.63,0,0,1-.32-.09L15.8,26.6a.64.64,0,0,1,.64-1.11L61.2,51.37a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-12\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-.09l-22.39-13a.64.64,0,0,1,.64-1.11l22.39,13a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-13\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-1.2l22.36-13a.64.64,0,0,1,.64,1.11l-22.36,13a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-14\"><path d=\"M16.12,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-15\"><path d=\"M60.88,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-16\"><path d=\"M38.51,65.45a.64.64,0,0,1-.64-.64V13.13a.64.64,0,0,1,1.28,0V64.81a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g></g></g></g></g></svg>\n";
-
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Takes a URL to a USDZ file and sets the appropriate
- * fields so that Safari iOS can intent to their
- * AR Quick Look.
- *
- * @param {String} url
- */
 const openIOSARQuickLook = url => {
   const anchor = document.createElement('a');
   anchor.setAttribute('rel', 'ar');
@@ -52766,6 +52896,148 @@ const getUSDZSource = element => {
     }
   }
 };
+
+/**
+ * Takes a size limit and an object and sets the scale
+ * such that it is as large as it can be within a bounding
+ * box of (limit)x(limit)x(limit) dimensions.
+ *
+ * @param {number} limit
+ * @param {Object3D} object
+ */
+const setScaleFromLimit = (function() {
+  const box = new Box3();
+  const size = new Vector3();
+  return (limit, object) => {
+    box.setFromObject(object);
+    box.getSize(size);
+
+    const max = Math.max(size.x, size.y, size.z);
+    const scale = limit / max;
+    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
+      object.scale.set(scale, scale, scale);
+    }
+  };
+})();
+
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const BOUNDING_BOX_SIZE = 10;
+
+class ModelView extends EventDispatcher {
+  constructor({ canvas, width, height }) {
+    super();
+
+    this.width = width;
+    this.height = height;
+
+    this.mode = null;
+    this.updateModelScale = this.updateModelScale.bind(this);
+    this.onAREnd = this.onAREnd.bind(this);
+    this.onARStabilized = this.onARStabilized.bind(this);
+
+    const model = this.model = new Model();
+    const context = canvas.getContext('webgl', {
+      preserveDrawingBuffer: true,
+      antialias: true,
+    });
+    this.domView = new DOMModelView({ canvas, context, model, width, height });
+    this.arView = new ARView({ canvas, context, model });
+
+    this.arView.addEventListener('end', this.onAREnd);
+    this.arView.addEventListener('stabilized', this.onARStabilized);
+    this.model.addEventListener('model-load', this.updateModelScale);
+    this.enterDOM();
+
+    // DEBUG
+    window.view = this;
+  }
+
+  setModelSource(source, type) {
+    this.model.setSource(source, type);
+  }
+
+  hasAR() {
+    return this.arView.hasAR();
+  }
+
+  whenARReady() {
+    return this.arView.whenARReady();
+  }
+
+  setSize(width, height) {
+    this.width = width;
+    this.height = height;
+    this.domView.setSize(width, height);
+  }
+
+  enterDOM() {
+    this.mode = 'dom';
+    this.arView.stop();
+    this.resetModel();
+    this.domView.start();
+    this.domView.setSize(this.width, this.height);
+    this.dispatchEvent({ type: 'enter-dom' });
+  }
+
+  enterAR() {
+    if (!this.hasAR()) {
+      return;
+    }
+
+    this.mode = 'ar';
+    this.domView.stop();
+    this.resetModel();
+    this.arView.start();
+    this.dispatchEvent({ type: 'enter-ar' });
+  }
+
+  /**
+   * Called when AR mode is shut down.
+   */
+  onAREnd() {
+    this.enterDOM();
+  }
+
+  onARStabilized() {
+    this.dispatchEvent({ type: 'stabilized' });
+  }
+
+  /**
+   * Updates the scale of the model, called when a new model is loaded,
+   * or when switching modes. In the DOM view, we want it to fit as large
+   * as it can within a cube of BOUNDING_BOX_SIZE, and for AR, we want it
+   * to be the original scale.
+   */
+  updateModelScale() {
+    if (this.mode === 'dom') {
+      setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
+    } else {
+      this.model.scale.set(1, 1, 1);
+    }
+  }
+
+  resetModel() {
+    this.model.position.set(0, 0, 0);
+    this.model.rotation.set(0, 0, 0);
+    this.updateModelScale();
+  }
+}
+
+var ARKitSVG = "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 78 78\"><defs><style>.cls-1{fill:none;}.cls-2{clip-path:url(#clip-path);}.cls-3{opacity:0.6;}.cls-4{clip-path:url(#clip-path-3);}.cls-5{opacity:0.5;}.cls-6{fill:#fff;}.cls-7{opacity:0.2;}.cls-8{clip-path:url(#clip-path-5);}.cls-9{clip-path:url(#clip-path-6);}.cls-10{clip-path:url(#clip-path-7);}.cls-11{clip-path:url(#clip-path-8);}.cls-12{clip-path:url(#clip-path-9);}.cls-13{clip-path:url(#clip-path-10);}.cls-14{clip-path:url(#clip-path-11);}.cls-15{clip-path:url(#clip-path-12);}.cls-16{clip-path:url(#clip-path-13);}</style><clipPath id=\"clip-path\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-3\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-5\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"12.49\" width=\"23.67\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-6\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-7\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"23.64\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-8\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-9\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"51.28\" width=\"23.67\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-10\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"51.28\" width=\"23.64\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-11\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-12\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"60.23\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-13\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"1.28\" height=\"52.96\"/></clipPath></defs><title>ARKit-Badge-Glyph-Only</title><g class=\"cls-2\"><g class=\"cls-2\"><g class=\"cls-3\"><g class=\"cls-4\"><path d=\"M45,18a1.12,1.12,0,0,1-.56-.15l-6-3.44-6,3.45a1.12,1.12,0,1,1-1.12-1.95L38,12.15a1.12,1.12,0,0,1,1.12,0l6.51,3.77A1.12,1.12,0,0,1,45,18\" transform=\"translate(0 0)\"/><path d=\"M38.51,47.65a1.12,1.12,0,0,1-1.12-1.12V39a1.12,1.12,0,1,1,2.25,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M16.12,34.71A1.12,1.12,0,0,1,15,33.58V26a1.12,1.12,0,1,1,2.24,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,34.71a1.12,1.12,0,0,1-1.12-1.12V26A1.12,1.12,0,1,1,62,26v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-1.12-1.12V44.39a1.12,1.12,0,0,1,1.12-1.12h0A1.12,1.12,0,0,1,62,44.39v7.54A1.12,1.12,0,0,1,60.88,53Z\" transform=\"translate(0 0)\"/><path d=\"M16.12,53A1.12,1.12,0,0,1,15,51.93V44.39a1.12,1.12,0,1,1,2.24,0v7.54A1.12,1.12,0,0,1,16.12,53\" transform=\"translate(0 0)\"/><path d=\"M38.51,22.47a1.12,1.12,0,0,1-1.12-1.12V13.13a1.12,1.12,0,1,1,2.25,0v8.22a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.12,1.12,0,0,1-1.12-1.12V57.34a1.12,1.12,0,1,1,2.25,0v7.54A1.12,1.12,0,0,1,38.51,66\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.13,1.13,0,0,1-.56-.15l-6.56-3.79a1.12,1.12,0,0,1,1.12-1.95l6,3.47,5.91-3.43a1.12,1.12,0,0,1,1.13,1.95l-6.48,3.75a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M38.51,40.11A1.13,1.13,0,0,1,38,40l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95l6,3.45,6-3.45a1.12,1.12,0,0,1,1.13,1.95L39.08,40a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.35,30.94a1.12,1.12,0,0,1-.56-2.1l6.52-3.77A1.12,1.12,0,0,1,61.44,27l-6.52,3.77a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.87,27.17a1.12,1.12,0,0,1-.56-.15l-6.53-3.77A1.12,1.12,0,1,1,54.9,21.3l6.53,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,30.94a1.12,1.12,0,0,1-.56-.15L15.56,27a1.12,1.12,0,0,1,1.12-1.95l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,27.17a1.12,1.12,0,0,1-.56-2.1l6.52-3.76a1.12,1.12,0,0,1,1.12,1.95L16.68,27a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.34,56.82a1.12,1.12,0,0,1-.56-2.1L60.32,51a1.12,1.12,0,1,1,1.12,1.95L54.9,56.67a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-.56-.15l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95L61.44,51a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,56.82a1.13,1.13,0,0,1-.56-.15L15.56,52.9A1.12,1.12,0,0,1,16.69,51l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,53a1.12,1.12,0,0,1-.56-2.1l6.51-3.77a1.12,1.12,0,0,1,1.13,1.95L16.69,52.9a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><g class=\"cls-7\"><g class=\"cls-8\"><path d=\"M16.12,26.69a.64.64,0,0,1-.32-1.2L38.19,12.57a.64.64,0,0,1,.64,1.11L16.44,26.6a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-9\"><path d=\"M16.12,52.57a.64.64,0,0,1-.32-1.2L60.56,25.49a.64.64,0,0,1,.64,1.11L16.44,52.48a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-10\"><path d=\"M60.87,26.69a.64.64,0,0,1-.32-.09L38.19,13.68a.64.64,0,0,1,.64-1.11L61.19,25.49a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-11\"><path d=\"M60.88,52.57a.63.63,0,0,1-.32-.09L15.8,26.6a.64.64,0,0,1,.64-1.11L61.2,51.37a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-12\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-.09l-22.39-13a.64.64,0,0,1,.64-1.11l22.39,13a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-13\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-1.2l22.36-13a.64.64,0,0,1,.64,1.11l-22.36,13a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-14\"><path d=\"M16.12,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-15\"><path d=\"M60.88,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-16\"><path d=\"M38.51,65.45a.64.64,0,0,1-.64-.64V13.13a.64.64,0,0,1,1.28,0V64.81a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g></g></g></g></g></svg>\n";
 
 /*
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -52867,8 +53139,13 @@ class ModelViewComponent extends HTMLElement {
       this.enterAR();
     });
 
-    if (IS_IOS || this.modelView.hasAR()) {
+    // On iOS, always enable the AR button. On non-iOS,
+    // see if AR is supported, and if so, display the button after
+    // an XRDevice has been initialized
+    if (IS_IOS) {
       enterARButton.style.display = 'block';
+    } else if (this.modelView.hasAR()) {
+      this.modelView.whenARReady().then(() => enterARButton.style.display = 'block');
     }
 
     // Observe changes in this element, mainly for new <source> children,

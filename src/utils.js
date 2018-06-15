@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { Box3, Vector3 } from 'three';
+
 /**
  * Takes a URL to a USDZ file and sets the appropriate
  * fields so that Safari iOS can intent to their
@@ -95,3 +97,27 @@ export const getUSDZSource = element => {
     }
   }
 };
+
+/**
+ * Takes a size limit and an object and sets the scale
+ * such that it is as large as it can be within a bounding
+ * box of (limit)x(limit)x(limit) dimensions.
+ *
+ * @param {number} limit
+ * @param {Object3D} object
+ */
+export const setScaleFromLimit = (function() {
+  const box = new Box3();
+  const size = new Vector3();
+  return (limit, object) => {
+    box.setFromObject(object);
+    box.getSize(size);
+
+    const max = Math.max(size.x, size.y, size.z);
+    const scale = limit / max;
+    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
+      object.scale.set(scale, scale, scale);
+    }
+  };
+})();
+

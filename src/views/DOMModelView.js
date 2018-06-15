@@ -30,40 +30,15 @@ import { Composer } from '../lib/wagner/index.js';
 import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
 import OrbitControls from '../../third_party/three/OrbitControls.js';
 
-const BOUNDING_BOX_SIZE = 10;
-
-/**
- * Takes a size limit and an object and sets the scale
- * such that it is as large as it can be within a bounding
- * box of (limit)x(limit)x(limit) dimensions.
- *
- * @param {number} limit
- * @param {Object3D} object
- */
-export const setScaleFromLimit = (function() {
-  const box = new Box3();
-  const size = new Vector3();
-  return (limit, object) => {
-    box.setFromObject(object);
-    box.getSize(size);
-
-    const max = Math.max(size.x, size.y, size.z);
-    const scale = limit / max;
-    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
-      object.scale.set(scale, scale, scale);
-    }
-  };
-})();
-
 export default class DOMModelView {
-  constructor({ canvas, model, width, height }) {
+  constructor({ canvas, context, model, width, height }) {
+    this.context = context;
     this.canvas = canvas;
     this.model = model;
     this.enabled = false;
     this.render = this.render.bind(this);
-    this.onModelLoad = this.onModelLoad.bind(this);
 
-    this.renderer = new WebGLRenderer({ canvas });
+    this.renderer = new WebGLRenderer({ canvas, context });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.setClearColor(0xeeeeee);
@@ -101,21 +76,11 @@ export default class DOMModelView {
     this.scene.add(this.pivot);
     this.camera.position.z = 15;
     this.camera.position.y = 5;
-
-    this.model.addEventListener('model-load', this.onModelLoad);
-  }
-
-  onModelLoad() {
-    if (this.enabled) {
-      setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
-    }
   }
 
   start() {
     this.enabled = true;
-    setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
     this.renderer.setFramebuffer(null);
-    this.model.rotation.set(0, 0, 0);
     this._tick();
   }
 
@@ -125,6 +90,9 @@ export default class DOMModelView {
   }
 
   setSize(width, height) {
+    if (!this.enabled) {
+      return;
+    }
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();

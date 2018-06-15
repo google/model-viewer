@@ -37,6 +37,7 @@
   ],
   "repository": "https://github.com/google-ar/xr-model-component",
   "dependencies": {
-    "resize-observer-polyfill": "^1.4.2"
+    "resize-observer-polyfill": "^1.4.2",
+    "screenfull": "^3.3.2"
   }
 }
