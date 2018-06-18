@@ -59,30 +59,6 @@ export default class Model extends Object3D {
       });
     }
 
-    // Apply environment incase those were triggered before
-    // the model was loaded
-    //this._applyEnv();
     this.dispatchEvent({ type: 'model-load' });
   }
-  /*
-  _applyEnv() {
-    this.traverse(obj => {
-      if (obj.material) {
-        obj.material.envMap = this.envMap;
-        obj.material.envMapIntensity = this.envMapIntensity;
-        obj.material.needsUpdate = true;
-      }
-    });
-  }
-
-  setEnvMap(cubemap) {
-    this.envMap = cubemap;
-    this._applyEnv();
-  }
-
-  setEnvMapIntensity(value) {
-    this.envMapIntensity = value;
-    this._applyEnv();
-  }
-  */
 }

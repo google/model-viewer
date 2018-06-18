@@ -26,8 +26,6 @@ import {
 } from 'three';
 
 import Shadow from '../three-components/Shadow.js';
-import { Composer } from '../lib/wagner/index.js';
-import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
 import OrbitControls from '../../third_party/three/OrbitControls.js';
 
 export default class DOMModelView {
@@ -64,13 +62,6 @@ export default class DOMModelView {
 
     this.scene.add(new Shadow());
 
-    // Set up post processing
-    this.composer = new Composer(this.renderer);
-    // Not sure why onBeforeRender doesn't exist, probably
-    // a dependency mismatch?
-    this.composer.scene.onBeforeRender = () => {};
-    this.vignettePass = new VignettePass(1.1, 0.3);
-
     this.pivot = new Object3D();
     this.pivot.add(this.camera);
     this.scene.add(this.pivot);
@@ -105,11 +96,7 @@ export default class DOMModelView {
     }
 
     this.pivot.rotation.y += 0.001;
-
-    this.composer.reset();
-    this.composer.render(this.scene, this.camera);
-    this.composer.pass(this.vignettePass);
-    this.composer.toScreen();
+    this.renderer.render(this.scene, this.camera);
 
     this._tick();
   }

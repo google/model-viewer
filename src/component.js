@@ -70,7 +70,7 @@ template.innerHTML = `
 `;
 
 /**
- * Definition for a <arview> component.
+ * Definition for a <xr-model> component.
  *
  */
 export default class ModelViewComponent extends HTMLElement {
@@ -86,7 +86,6 @@ export default class ModelViewComponent extends HTMLElement {
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-
     // Create the underlying ModelView app.
     const { width, height } = this.getBoundingClientRect();
     this.modelView = new ModelView({
@@ -95,9 +94,8 @@ export default class ModelViewComponent extends HTMLElement {
       height,
     });
 
-    
     const enterARButton = shadowRoot.querySelector('.enter-ar');
-    
+
     enterARButton.addEventListener('click', e => {
       e.preventDefault();
       this.enterAR()
@@ -136,7 +134,6 @@ export default class ModelViewComponent extends HTMLElement {
       }
     });
     this.resizeObserver.observe(this);
-
   }
 
   enterAR() {
@@ -149,38 +146,14 @@ export default class ModelViewComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    console.log("CONNECTED");
   }
 
   disconnectedCallback() {
-    console.log("DISCONNECTED");
   }
 
   attributeChangedCallback(name, oldVal, newVal, namespace) {
-    /*
-    switch (name) {
-      case 'src':
-        this.src = newVal;
-        break;
-      case 'env-map':
-        this['env-map'] = newVal;
-        break;
-      case 'env-map-intensity':
-        this['env-map-intensity'] = newVal;
-        break;
-      case 'bloom-blur-amount':
-        this['bloom-blur-amount'] = newVal;
-        break;
-    }
-
-    this.modelView.updateValue(name, newVal);
-    */
   }
 
-  /**
-   * Custom element has been moved into a new document.
-   */
   adoptedCallback(oldDoc, newDoc) {
-    throw new Error('not supported');
   }
 }
