@@ -26,9 +26,9 @@ const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 export default {
   input: './index.js',
   output: {
-    file: './dist/xr-model-component.js',
+    file: './dist/xr-model-element.js',
     format: 'umd',
-    name: 'XRModel',
+    name: 'XRModelElement',
   },
   watch: {
     include: 'src/**',

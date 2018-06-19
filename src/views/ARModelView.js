@@ -41,8 +41,10 @@ export default class ARView extends EventDispatcher {
     this.onResize = this.onResize.bind(this);
     this.onFullscreenChange = this.onFullscreenChange.bind(this);
 
-    this._devicePromise = navigator.xr.requestDevice();
-    this._devicePromise.then(device => this.device = device);
+    if (this.hasAR()) {
+      this._devicePromise = navigator.xr.requestDevice();
+      this._devicePromise.then(device => this.device = device);
+    }
 
     screenfull.on('change', this.onFullscreenChange);
     window.addEventListener('resize', this.onResize);
@@ -69,7 +71,7 @@ export default class ARView extends EventDispatcher {
    * @return {Promise<XRDevice>}
    */
   whenARReady() {
-    return this._devicePromise;
+    return this.hasAR() ? this._devicePromise : Promise.reject();
   }
 
   start() {
