@@ -26,9 +26,17 @@ import {
   Color,
 } from 'three';
 
+import WAGNER from '../lib/wagner';
+import BloomPass from '../lib/wagner/src/passes/bloom/MultiPassBloomPass.js';
+import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
+import FXAAPass from '../lib/wagner/src/passes/fxaa/FXAAPass.js';
+import DOFPass from '../lib/wagner/src/passes/dof/DOFPass.js';
 import Shadow from '../three-components/Shadow.js';
 import OrbitControls from '../../third_party/three/OrbitControls.js';
 
+import { isMobile } from '../utils.js';
+
+const USE_POST_PROCESSING = !isMobile();
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
 export default class DOMModelView {
@@ -76,6 +84,21 @@ export default class DOMModelView {
     this.camera.position.y = 5;
     this.orbitCamera.position.z = 15;
     this.orbitCamera.position.y = 5;
+
+    this.composer = new WAGNER.Composer(this.renderer);
+    // Not sure why onBeforeRender doesn't exist, probably
+    // a dependency mismatch?
+    this.composer.scene.onBeforeRender = () => {};
+    this.bloomPass = new BloomPass({
+      blurAmount: 0.05,
+    });
+    this.vignettePass = new VignettePass(1.1, 0.7);
+    this.fxaaPass = new FXAAPass();
+    this.passes = [
+      // this.bloomPass,
+      this.vignettePass,
+      this.fxaaPass,
+    ];
   }
 
   start() {
@@ -117,6 +140,10 @@ export default class DOMModelView {
     }
   }
 
+  setVignette(isEnabled) {
+    this.vignetteEnabled = isEnabled;
+  }
+
   setBackgroundColor(color) {
     if (color && typeof color === 'string') {
       this.renderer.setClearColor(new Color(color));
@@ -135,7 +162,19 @@ export default class DOMModelView {
     }
 
     const camera = this.controls.enabled ? this.orbitCamera : this.camera;
-    this.renderer.render(this.scene, camera);
+
+    // If we're not on mobile, and a pass is enabled,
+    // use post processing
+    if (USE_POST_PROCESSING && this.vignetteEnabled) {
+      this.composer.reset();
+      this.composer.render(this.scene, camera);
+      for (let pass of this.passes) {
+        this.composer.pass(pass);
+      }
+      this.composer.toScreen();
+    } else {
+      this.renderer.render(this.scene, camera);
+    }
 
     this._tick();
   }

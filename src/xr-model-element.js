@@ -32,6 +32,7 @@ export default class ModelViewComponent extends HTMLElement {
       'controls',
       'auto-rotate',
       'background-color',
+      'vignette',
     ];
   }
 
@@ -116,6 +117,9 @@ export default class ModelViewComponent extends HTMLElement {
         break;
       case 'background-color':
         this.__modelView.setBackgroundColor(newVal);
+        break;
+      case 'vignette':
+        this.__modelView.setVignette(this.getAttribute('vignette') !== null);
         break;
     }
   }

@@ -97,6 +97,10 @@ export default class ModelView extends EventDispatcher {
     this.domView.setBackgroundColor(color);
   }
 
+  setVignette(isEnabled) {
+    this.domView.setVignette(isEnabled);
+  }
+
   enterAR() {
     if (!this.hasAR()) {
       return;

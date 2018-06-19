@@ -39,9 +39,12 @@ The base element for rendering 3D models.
 
 #### Attributes
 
-* *`src`*: The URL to the 3D model. **It's recommended to use children `<source>` elements documented below to support all platforms and explicitly define types.**
+* *`src`*: The URL to the 3D model. **It's recommended to use children `<source>` elements documented below to support all platforms and explicitly define types.** Not currently implemented.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
 * *`ar`*: Enables the option to enter AR and place the 3D model in the real world if the platform supports it.
+* *`background-color`*: Sets the background color of the flat view. Takes any valid CSS color string.
+* *`auto-rotate`*: Enables the auto rotation of the model.
+* *`vignette`*: Enables vignette rendering when not on mobile.
 
 ### `<source>`
 
