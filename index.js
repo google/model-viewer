@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-import XRModelComponent from './src/component.js';
+import XRModelElement from './src/xr-model-element.js';
 
-customElements.define('xr-model', XRModelComponent);
+customElements.define('xr-model', XRModelElement);

@@ -50,12 +50,19 @@ export const relativeToAbsoluteLink = url => {
  * 3D model using an element's <source> children.
  *
  * @param {HTMLElement} element
- * @return {?string}
+ * @return {Object}
  */
 export const getModelSource = element => {
+  // If the <xr-model> has a `src` attribute, use that,
+  // and infer the type later
+  const rootSrc = element.getAttribute('src');
+  if (rootSrc) {
+    return { src: rootSrc };
+  }
+
   const sources = element.querySelectorAll('source');
 
-  let modelSrc;
+  let modelSrc, modelType;
   for (let source of sources) {
     const src = source.getAttribute('src');
     const type = source.getAttribute('type');
@@ -64,6 +71,7 @@ export const getModelSource = element => {
       case 'model/gltf-binary':
       case 'model/gltf+json':
         if (!modelSrc) {
+          modelType = type;
           modelSrc = src;
         }
         break;
@@ -74,7 +82,10 @@ export const getModelSource = element => {
     }
   }
 
-  return relativeToAbsoluteLink(modelSrc);
+  return {
+    src: relativeToAbsoluteLink(modelSrc),
+    type: modelType,
+  };
 };
 
 /**

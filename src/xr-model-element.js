@@ -15,59 +15,10 @@
 
 import ResizeObserver from 'resize-observer-polyfill';
 import ModelView from './views/ModelView.js';
-import ARKitSVG from './assets/arkit-glyph.svg';
+import template from './template.js';
 import { openIOSARQuickLook, getModelSource, getUSDZSource } from './utils.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-const template = document.createElement('template');
-template.innerHTML = `
-  <style>
-    :host {
-      display: block;
-    }
-    .container {
-      position: relative;
-    }
-    a.enter-ar {
-      width: 75px;
-      height: 75px;
-      position: absolute;
-      display: block;
-      right: 20px;
-      top: 20px;
-      display: none;
-    }
-    a.enter-ar svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    a.enter-ar .disc {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      opacity: 0.6;
-      background-color: #fff;
-      box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.2);
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-  <div class="container">
-    <a class="enter-ar" href="#">
-      <div class="disc"></div>
-      ${ARKitSVG}
-    </a>
-    <canvas></canvas>
-  </div>
-  <slot></slot>
-`;
 
 /**
  * Definition for a <xr-model> component.
@@ -88,7 +39,7 @@ export default class ModelViewComponent extends HTMLElement {
 
     // Create the underlying ModelView app.
     const { width, height } = this.getBoundingClientRect();
-    this.modelView = new ModelView({
+    this.__modelView = new ModelView({
       canvas: shadowRoot.querySelector('canvas'),
       width,
       height,
@@ -106,30 +57,39 @@ export default class ModelViewComponent extends HTMLElement {
     // an XRDevice has been initialized
     if (IS_IOS) {
       enterARButton.style.display = 'block';
-    } else if (this.modelView.hasAR()) {
-      this.modelView.whenARReady().then(() => enterARButton.style.display = 'block');
+    } else if (this.__modelView.hasAR()) {
+      this.__modelView.whenARReady().then(() => enterARButton.style.display = 'block');
     }
+
+    window.app = this.__modelView;
 
     // Observe changes in this element, mainly for new <source> children,
     // or <source> changes. Update underlying ModelView if a new source
     // file becomes valid.
-    this.mutationObserver = new MutationObserver(() => {
-      this.modelView.setModelSource(getModelSource(this));
-    });
+    this.mutationObserver = new MutationObserver(() => this.__updateSource(this));
     this.mutationObserver.observe(this, {
       childList: true,
       attributes: true,
       subtree: true,
     });
+
     // Update the sources on construction
-    this.modelView.setModelSource(getModelSource(this));
+    this.__updateSource(this);
 
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
     this.resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         if (entry.target === this) {
-          this.modelView.setSize(entry.contentRect.width, entry.contentRect.height);
+          const { width, height } = this.__modelView.getSize();
+          if (entry.contentRect.width !== width ||
+              entry.contentRect.height !== height) {
+            console.log(entry.contentRect.width, entry.contentRect.height);
+            //this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
+            //this.__modelView.setSize(this.getBoundingClientRect().width, this.getBoundingClientRect().height);
+            const { width, height } = this.getBoundingClientRect();
+            console.log(width, height);
+          }
         }
       }
     });
@@ -141,7 +101,7 @@ export default class ModelViewComponent extends HTMLElement {
     if (IS_IOS && usdzSource) {
       openIOSARQuickLook(usdzSource);
     } else {
-      this.modelView.enterAR();
+      this.__modelView.enterAR();
     }
   }
 
@@ -155,5 +115,10 @@ export default class ModelViewComponent extends HTMLElement {
   }
 
   adoptedCallback(oldDoc, newDoc) {
+  }
+
+  __updateSource() {
+    const { src, type } = getModelSource(this);
+    this.__modelView.setModelSource(src, type);
   }
 }

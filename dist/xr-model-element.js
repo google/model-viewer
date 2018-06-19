@@ -39152,9 +39152,8 @@ var TEXTURE_FILTER = {
 };
 
 /**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * minimal class for proxing functions to Path. Replaces old "extractSubpaths()"
- **/
+ * @author thespite / http://clicktorelease.com/
+ */
 
 function ShapePath() {
 
@@ -45603,7 +45602,9 @@ function AxesHelper( size ) {
 AxesHelper.prototype = Object.create( LineSegments.prototype );
 AxesHelper.prototype.constructor = AxesHelper;
 
-//
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 Curve.create = function ( construct, getPoint ) {
 
@@ -45708,6 +45709,8 @@ Object.assign( Spline.prototype, {
 
 } );
 
+//
+
 GridHelper.prototype.setColors = function () {
 
 	console.error( 'THREE.GridHelper: setColors() has been deprecated, pass them in the constructor instead.' );
@@ -45720,8 +45723,6 @@ SkeletonHelper.prototype.update = function () {
 
 };
 
-//
-
 Object.assign( Loader.prototype, {
 
 	extractUrlBase: function ( url ) {
@@ -45732,8 +45733,6 @@ Object.assign( Loader.prototype, {
 	}
 
 } );
-
-//
 
 Object.assign( Box2.prototype, {
 
@@ -47025,6 +47024,8 @@ CubeCamera.prototype.updateCubeMap = function ( renderer, scene ) {
 
 };
 
+//
+
 /*
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -48183,11 +48184,6 @@ class DOMModelView {
  * limitations under the License.
  */
 
-/**
- * The Reticle class creates an object that repeatedly calls
- * `xrSession.requestHitTest()` to render a ring along a found
- * horizontal surface.
- */
 class Reticle extends Object3D {
   /**
    * @param {XRSession} xrSession
@@ -51503,13 +51499,6 @@ class Model extends Object3D {
  * limitations under the License.
  */
 
-/**
- * Takes a URL to a USDZ file and sets the appropriate
- * fields so that Safari iOS can intent to their
- * AR Quick Look.
- *
- * @param {String} url
- */
 const openIOSARQuickLook = url => {
   const anchor = document.createElement('a');
   anchor.setAttribute('rel', 'ar');
@@ -51538,12 +51527,19 @@ const relativeToAbsoluteLink = url => {
  * 3D model using an element's <source> children.
  *
  * @param {HTMLElement} element
- * @return {?string}
+ * @return {Object}
  */
 const getModelSource = element => {
+  // If the <xr-model> has a `src` attribute, use that,
+  // and infer the type later
+  const rootSrc = element.getAttribute('src');
+  if (rootSrc) {
+    return { src: rootSrc };
+  }
+
   const sources = element.querySelectorAll('source');
 
-  let modelSrc;
+  let modelSrc, modelType;
   for (let source of sources) {
     const src = source.getAttribute('src');
     const type = source.getAttribute('type');
@@ -51552,6 +51548,7 @@ const getModelSource = element => {
       case 'model/gltf-binary':
       case 'model/gltf+json':
         if (!modelSrc) {
+          modelType = type;
           modelSrc = src;
         }
         break;
@@ -51562,7 +51559,10 @@ const getModelSource = element => {
     }
   }
 
-  return relativeToAbsoluteLink(modelSrc);
+  return {
+    src: relativeToAbsoluteLink(modelSrc),
+    type: modelType,
+  };
 };
 
 /**
@@ -51671,6 +51671,15 @@ class ModelView extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.domView.setSize(width, height);
+    console.log('setSize', width, height);
+    this.updateModelScale();
+  }
+
+  getSize() {
+    return {
+      width: this.width,
+      height: this.height,
+    };
   }
 
   enterDOM() {
@@ -51717,9 +51726,11 @@ class ModelView extends EventDispatcher {
     } else {
       this.model.scale.set(1, 1, 1);
     }
+    console.log('update model scale', this.mode, this.model.scale);
   }
 
   resetModel() {
+    console.log('reset model');
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
     this.updateModelScale();
@@ -51742,8 +51753,6 @@ var ARKitSVG = "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -51794,6 +51803,23 @@ template.innerHTML = `
   <slot></slot>
 `;
 
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 /**
  * Definition for a <xr-model> component.
  *
@@ -51813,7 +51839,7 @@ class ModelViewComponent extends HTMLElement {
 
     // Create the underlying ModelView app.
     const { width, height } = this.getBoundingClientRect();
-    this.modelView = new ModelView({
+    this.__modelView = new ModelView({
       canvas: shadowRoot.querySelector('canvas'),
       width,
       height,
@@ -51831,30 +51857,39 @@ class ModelViewComponent extends HTMLElement {
     // an XRDevice has been initialized
     if (IS_IOS) {
       enterARButton.style.display = 'block';
-    } else if (this.modelView.hasAR()) {
-      this.modelView.whenARReady().then(() => enterARButton.style.display = 'block');
+    } else if (this.__modelView.hasAR()) {
+      this.__modelView.whenARReady().then(() => enterARButton.style.display = 'block');
     }
+
+    window.app = this.__modelView;
 
     // Observe changes in this element, mainly for new <source> children,
     // or <source> changes. Update underlying ModelView if a new source
     // file becomes valid.
-    this.mutationObserver = new MutationObserver(() => {
-      this.modelView.setModelSource(getModelSource(this));
-    });
+    this.mutationObserver = new MutationObserver(() => this.__updateSource(this));
     this.mutationObserver.observe(this, {
       childList: true,
       attributes: true,
       subtree: true,
     });
+
     // Update the sources on construction
-    this.modelView.setModelSource(getModelSource(this));
+    this.__updateSource(this);
 
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
     this.resizeObserver = new index(entries => {
       for (let entry of entries) {
         if (entry.target === this) {
-          this.modelView.setSize(entry.contentRect.width, entry.contentRect.height);
+          const { width, height } = this.__modelView.getSize();
+          if (entry.contentRect.width !== width ||
+              entry.contentRect.height !== height) {
+            console.log(entry.contentRect.width, entry.contentRect.height);
+            //this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
+            //this.__modelView.setSize(this.getBoundingClientRect().width, this.getBoundingClientRect().height);
+            const { width, height } = this.getBoundingClientRect();
+            console.log(width, height);
+          }
         }
       }
     });
@@ -51866,7 +51901,7 @@ class ModelViewComponent extends HTMLElement {
     if (IS_IOS && usdzSource) {
       openIOSARQuickLook(usdzSource);
     } else {
-      this.modelView.enterAR();
+      this.__modelView.enterAR();
     }
   }
 
@@ -51880,6 +51915,11 @@ class ModelViewComponent extends HTMLElement {
   }
 
   adoptedCallback(oldDoc, newDoc) {
+  }
+
+  __updateSource() {
+    const { src, type } = getModelSource(this);
+    this.__modelView.setModelSource(src, type);
   }
 }
 
