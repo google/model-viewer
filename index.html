@@ -21,17 +21,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
+  <link href="third_party/prism/prism.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
+<style>
+  body {
+    font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
+  }
+  #container {
+    text-align: center;
+    max-width: 1000px;
+  }
+  h1 {
+    font-weight: 200;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+</style>
 </head>
 <body>
     <div id="container">
+        <h1>XRModelElement</h1>
         <ul>
             <li class="model">
-                <div class="code">
-                    &lt;xr-model ar controls&gt;
-                        &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;
-                        &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;
-                    &lt;/xr-model&gt;
-                </div>
+                <pre class="language-markup">
+                    <code>&lt;xr-model ar controls&gt;</code>
+                    <code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
+                    <code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
+                    <code>&lt;/xr-model&gt;</code>
+                </pre>
                 <xr-model ar controls>
                     <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
                     <source src="assets/Astronaut.glb" type="model/gltf-binary">
@@ -40,5 +59,6 @@
         </ul>
     </div>
     <script src="dist/xr-model-element.js"></script>
+    <script src="third_party/prism/prism.js"></script>
 </body>
 </html>

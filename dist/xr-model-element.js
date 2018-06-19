@@ -51453,6 +51453,12 @@ class Model extends Object3D {
       return;
     }
 
+    if (url === this.url && type === this.type) {
+      return;
+    }
+
+    this.url = url;
+    this.type = type;
     // Remove all current children
     while (this.children.length) {
       this.remove(this.children[0]);
@@ -51604,7 +51610,7 @@ const setScaleFromLimit = (function() {
     const max = Math.max(size.x, size.y, size.z);
     const scale = limit / max;
     if (!Number.isNaN(scale) && Number.isFinite(scale)) {
-      object.scale.set(scale, scale, scale);
+      object.scale.multiplyScalar(scale, scale, scale);
     }
   };
 })();
@@ -51671,7 +51677,6 @@ class ModelView extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.domView.setSize(width, height);
-    console.log('setSize', width, height);
     this.updateModelScale();
   }
 
@@ -51726,11 +51731,9 @@ class ModelView extends EventDispatcher {
     } else {
       this.model.scale.set(1, 1, 1);
     }
-    console.log('update model scale', this.mode, this.model.scale);
   }
 
   resetModel() {
-    console.log('reset model');
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
     this.updateModelScale();
@@ -51791,6 +51794,7 @@ template.innerHTML = `
     canvas {
       width: 100%;
       height: 100%;
+      display: block;
     }
   </style>
   <div class="container">
@@ -51884,11 +51888,7 @@ class ModelViewComponent extends HTMLElement {
           const { width, height } = this.__modelView.getSize();
           if (entry.contentRect.width !== width ||
               entry.contentRect.height !== height) {
-            console.log(entry.contentRect.width, entry.contentRect.height);
-            //this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
-            //this.__modelView.setSize(this.getBoundingClientRect().width, this.getBoundingClientRect().height);
-            const { width, height } = this.getBoundingClientRect();
-            console.log(width, height);
+            this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
           }
         }
       }
