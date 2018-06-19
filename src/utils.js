@@ -127,7 +127,7 @@ export const setScaleFromLimit = (function() {
     const max = Math.max(size.x, size.y, size.z);
     const scale = limit / max;
     if (!Number.isNaN(scale) && Number.isFinite(scale)) {
-      object.scale.set(scale, scale, scale);
+      object.scale.multiplyScalar(scale, scale, scale);
     }
   };
 })();

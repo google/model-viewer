@@ -32,6 +32,12 @@ export default class Model extends Object3D {
       return;
     }
 
+    if (url === this.url && type === this.type) {
+      return;
+    }
+
+    this.url = url;
+    this.type = type;
     // Remove all current children
     while (this.children.length) {
       this.remove(this.children[0]);

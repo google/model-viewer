@@ -84,11 +84,7 @@ export default class ModelViewComponent extends HTMLElement {
           const { width, height } = this.__modelView.getSize();
           if (entry.contentRect.width !== width ||
               entry.contentRect.height !== height) {
-            console.log(entry.contentRect.width, entry.contentRect.height);
-            //this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
-            //this.__modelView.setSize(this.getBoundingClientRect().width, this.getBoundingClientRect().height);
-            const { width, height } = this.getBoundingClientRect();
-            console.log(width, height);
+            this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
           }
         }
       }

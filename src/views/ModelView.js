@@ -66,7 +66,6 @@ export default class ModelView extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.domView.setSize(width, height);
-    console.log('setSize', width, height);
     this.updateModelScale();
   }
 
@@ -121,11 +120,9 @@ export default class ModelView extends EventDispatcher {
     } else {
       this.model.scale.set(1, 1, 1);
     }
-    console.log('update model scale', this.mode, this.model.scale);
   }
 
   resetModel() {
-    console.log('reset model');
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
     this.updateModelScale();
