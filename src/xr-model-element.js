@@ -28,6 +28,10 @@ export default class ModelViewComponent extends HTMLElement {
 
   static get observedAttributes() {
     return [
+      'ar',
+      'controls',
+      'auto-rotate',
+      'background-color',
     ];
   }
 
@@ -45,23 +49,12 @@ export default class ModelViewComponent extends HTMLElement {
       height,
     });
 
-    const enterARButton = shadowRoot.querySelector('.enter-ar');
-
-    enterARButton.addEventListener('click', e => {
+    // Set up the "Enter AR" button
+    this.__enterARButton = shadowRoot.querySelector('.enter-ar');
+    this.__enterARButton.addEventListener('click', e => {
       e.preventDefault();
       this.enterAR()
     });
-
-    // On iOS, always enable the AR button. On non-iOS,
-    // see if AR is supported, and if so, display the button after
-    // an XRDevice has been initialized
-    if (IS_IOS) {
-      enterARButton.style.display = 'block';
-    } else if (this.__modelView.hasAR()) {
-      this.__modelView.whenARReady().then(() => enterARButton.style.display = 'block');
-    }
-
-    window.app = this.__modelView;
 
     // Observe changes in this element, mainly for new <source> children,
     // or <source> changes. Update underlying ModelView if a new source
@@ -107,14 +100,43 @@ export default class ModelViewComponent extends HTMLElement {
   disconnectedCallback() {
   }
 
-  attributeChangedCallback(name, oldVal, newVal, namespace) {
+  adoptedCallback(oldDoc, newDoc) {
   }
 
-  adoptedCallback(oldDoc, newDoc) {
+  attributeChangedCallback(name, oldVal, newVal, namespace) {
+    switch (name) {
+      case 'ar':
+        this.__updateARButtonVisibility();
+        break;
+      case 'auto-rotate':
+        this.__modelView.setRotate(this.getAttribute('auto-rotate') !== null);
+        break;
+      case 'controls':
+        this.__modelView.setControls(this.getAttribute('controls') !== null);
+        break;
+      case 'background-color':
+        this.__modelView.setBackgroundColor(newVal);
+        break;
+    }
   }
 
   __updateSource() {
     const { src, type } = getModelSource(this);
     this.__modelView.setModelSource(src, type);
+  }
+
+  __updateARButtonVisibility() {
+    // On iOS, always enable the AR button. On non-iOS,
+    // see if AR is supported, and if so, display the button after
+    // an XRDevice has been initialized
+    if (this.getAttribute('ar') !== null) {
+      this.__enterARButton.style.display = 'none';
+    } else {
+      if (IS_IOS) {
+        this.__enterARButton.style.display = 'block';
+      } else if (this.__modelView.hasAR()) {
+        this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');
+      }
+    }
   }
 }

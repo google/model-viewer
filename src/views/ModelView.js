@@ -85,6 +85,18 @@ export default class ModelView extends EventDispatcher {
     this.dispatchEvent({ type: 'enter-dom' });
   }
 
+  setRotate(isEnabled) {
+    this.domView.setRotate(isEnabled);
+  }
+
+  setControls(isEnabled) {
+    this.domView.setControls(isEnabled);
+  }
+
+  setBackgroundColor(color) {
+    this.domView.setBackgroundColor(color);
+  }
+
   enterAR() {
     if (!this.hasAR()) {
       return;

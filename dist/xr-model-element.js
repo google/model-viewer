@@ -48091,6 +48091,8 @@ Object.defineProperties( OrbitControls.prototype, {
  * limitations under the License.
  */
 
+const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
+
 class DOMModelView {
   constructor({ canvas, context, model, width, height }) {
     this.context = context;
@@ -48102,7 +48104,7 @@ class DOMModelView {
     this.renderer = new WebGLRenderer({ canvas, context });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(0xeeeeee);
+    this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.gammaInput = true;
@@ -48110,7 +48112,8 @@ class DOMModelView {
     this.renderer.gammaFactor = 2.2;
 
     this.camera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
+    this.controls = new OrbitControls(this.orbitCamera, this.canvas);
     this.controls.target = new Vector3(0, 5, 0);
 
     this.scene = new Scene();
@@ -48125,11 +48128,16 @@ class DOMModelView {
 
     this.scene.add(new Shadow());
 
+    this.rotateEnabled = false;
+
     this.pivot = new Object3D();
     this.pivot.add(this.camera);
+    this.pivot.add(this.orbitCamera);
     this.scene.add(this.pivot);
     this.camera.position.z = 15;
     this.camera.position.y = 5;
+    this.orbitCamera.position.z = 15;
+    this.orbitCamera.position.y = 5;
   }
 
   start() {
@@ -48151,6 +48159,32 @@ class DOMModelView {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.orbitCamera.aspect = width / height;
+    this.orbitCamera.updateProjectionMatrix();
+  }
+
+  setRotate(isEnabled) {
+    this.rotateEnabled = isEnabled;
+    if (!isEnabled) {
+      this.pivot.rotation.set(0, 0, 0);
+    }
+  }
+
+  setControls(isEnabled) {
+    this.controls.enabled = isEnabled;
+
+    if (this.controls.enabled) {
+      this.orbitCamera.position.set(0, 5, 15);
+      this.orbitCamera.rotation.set(0, 0, 0);
+    }
+  }
+
+  setBackgroundColor(color) {
+    if (color && typeof color === 'string') {
+      this.renderer.setClearColor(new Color(color));
+    } else {
+      this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
+    }
   }
 
   render() {
@@ -48158,8 +48192,12 @@ class DOMModelView {
       return;
     }
 
-    this.pivot.rotation.y += 0.001;
-    this.renderer.render(this.scene, this.camera);
+    if (this.rotateEnabled) {
+      this.pivot.rotation.y += 0.001;
+    }
+
+    const camera = this.controls.enabled ? this.orbitCamera : this.camera;
+    this.renderer.render(this.scene, camera);
 
     this._tick();
   }
@@ -51696,6 +51734,18 @@ class ModelView extends EventDispatcher {
     this.dispatchEvent({ type: 'enter-dom' });
   }
 
+  setRotate(isEnabled) {
+    this.domView.setRotate(isEnabled);
+  }
+
+  setControls(isEnabled) {
+    this.domView.setControls(isEnabled);
+  }
+
+  setBackgroundColor(color) {
+    this.domView.setBackgroundColor(color);
+  }
+
   enterAR() {
     if (!this.hasAR()) {
       return;
@@ -51832,6 +51882,10 @@ class ModelViewComponent extends HTMLElement {
 
   static get observedAttributes() {
     return [
+      'ar',
+      'controls',
+      'auto-rotate',
+      'background-color',
     ];
   }
 
@@ -51849,23 +51903,12 @@ class ModelViewComponent extends HTMLElement {
       height,
     });
 
-    const enterARButton = shadowRoot.querySelector('.enter-ar');
-
-    enterARButton.addEventListener('click', e => {
+    // Set up the "Enter AR" button
+    this.__enterARButton = shadowRoot.querySelector('.enter-ar');
+    this.__enterARButton.addEventListener('click', e => {
       e.preventDefault();
       this.enterAR();
     });
-
-    // On iOS, always enable the AR button. On non-iOS,
-    // see if AR is supported, and if so, display the button after
-    // an XRDevice has been initialized
-    if (IS_IOS) {
-      enterARButton.style.display = 'block';
-    } else if (this.__modelView.hasAR()) {
-      this.__modelView.whenARReady().then(() => enterARButton.style.display = 'block');
-    }
-
-    window.app = this.__modelView;
 
     // Observe changes in this element, mainly for new <source> children,
     // or <source> changes. Update underlying ModelView if a new source
@@ -51911,15 +51954,44 @@ class ModelViewComponent extends HTMLElement {
   disconnectedCallback() {
   }
 
-  attributeChangedCallback(name, oldVal, newVal, namespace) {
+  adoptedCallback(oldDoc, newDoc) {
   }
 
-  adoptedCallback(oldDoc, newDoc) {
+  attributeChangedCallback(name, oldVal, newVal, namespace) {
+    switch (name) {
+      case 'ar':
+        this.__updateARButtonVisibility();
+        break;
+      case 'auto-rotate':
+        this.__modelView.setRotate(this.getAttribute('auto-rotate') !== null);
+        break;
+      case 'controls':
+        this.__modelView.setControls(this.getAttribute('controls') !== null);
+        break;
+      case 'background-color':
+        this.__modelView.setBackgroundColor(newVal);
+        break;
+    }
   }
 
   __updateSource() {
     const { src, type } = getModelSource(this);
     this.__modelView.setModelSource(src, type);
+  }
+
+  __updateARButtonVisibility() {
+    // On iOS, always enable the AR button. On non-iOS,
+    // see if AR is supported, and if so, display the button after
+    // an XRDevice has been initialized
+    if (this.getAttribute('ar') !== null) {
+      this.__enterARButton.style.display = 'none';
+    } else {
+      if (IS_IOS) {
+        this.__enterARButton.style.display = 'block';
+      } else if (this.__modelView.hasAR()) {
+        this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');
+      }
+    }
   }
 }
 

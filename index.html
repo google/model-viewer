@@ -30,6 +30,7 @@
   #container {
     text-align: center;
     max-width: 1000px;
+    margin: 0 auto;
   }
   h1 {
     font-weight: 200;
@@ -46,12 +47,12 @@
         <ul>
             <li class="model">
                 <pre class="language-markup">
-                    <code>&lt;xr-model ar controls&gt;</code>
+                    <code>&lt;xr-model ar controls auto-rotate background-color=&quot;#eee&quot; &gt;</code>
                     <code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
                     <code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
                     <code>&lt;/xr-model&gt;</code>
                 </pre>
-                <xr-model ar controls>
+                <xr-model ar controls auto-rotate background-color="#eee">
                     <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
                     <source src="assets/Astronaut.glb" type="model/gltf-binary">
                 </xr-model>

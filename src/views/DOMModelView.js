@@ -23,10 +23,13 @@ import {
   PCFSoftShadowMap,
   Box3,
   Vector3,
+  Color,
 } from 'three';
 
 import Shadow from '../three-components/Shadow.js';
 import OrbitControls from '../../third_party/three/OrbitControls.js';
+
+const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
 export default class DOMModelView {
   constructor({ canvas, context, model, width, height }) {
@@ -39,7 +42,7 @@ export default class DOMModelView {
     this.renderer = new WebGLRenderer({ canvas, context });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(0xeeeeee);
+    this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.gammaInput = true;
@@ -47,7 +50,8 @@ export default class DOMModelView {
     this.renderer.gammaFactor = 2.2;
 
     this.camera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
+    this.controls = new OrbitControls(this.orbitCamera, this.canvas);
     this.controls.target = new Vector3(0, 5, 0);
 
     this.scene = new Scene();
@@ -62,11 +66,16 @@ export default class DOMModelView {
 
     this.scene.add(new Shadow());
 
+    this.rotateEnabled = false;
+
     this.pivot = new Object3D();
     this.pivot.add(this.camera);
+    this.pivot.add(this.orbitCamera);
     this.scene.add(this.pivot);
     this.camera.position.z = 15;
     this.camera.position.y = 5;
+    this.orbitCamera.position.z = 15;
+    this.orbitCamera.position.y = 5;
   }
 
   start() {
@@ -88,6 +97,32 @@ export default class DOMModelView {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.orbitCamera.aspect = width / height;
+    this.orbitCamera.updateProjectionMatrix();
+  }
+
+  setRotate(isEnabled) {
+    this.rotateEnabled = isEnabled;
+    if (!isEnabled) {
+      this.pivot.rotation.set(0, 0, 0);
+    }
+  }
+
+  setControls(isEnabled) {
+    this.controls.enabled = isEnabled;
+
+    if (this.controls.enabled) {
+      this.orbitCamera.position.set(0, 5, 15);
+      this.orbitCamera.rotation.set(0, 0, 0);
+    }
+  }
+
+  setBackgroundColor(color) {
+    if (color && typeof color === 'string') {
+      this.renderer.setClearColor(new Color(color));
+    } else {
+      this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
+    }
   }
 
   render() {
@@ -95,8 +130,12 @@ export default class DOMModelView {
       return;
     }
 
-    this.pivot.rotation.y += 0.001;
-    this.renderer.render(this.scene, this.camera);
+    if (this.rotateEnabled) {
+      this.pivot.rotation.y += 0.001;
+    }
+
+    const camera = this.controls.enabled ? this.orbitCamera : this.camera;
+    this.renderer.render(this.scene, camera);
 
     this._tick();
   }
