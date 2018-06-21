@@ -26,13 +26,13 @@ import {
   Color,
 } from 'three';
 
-import WAGNER from '../lib/wagner';
-import BloomPass from '../lib/wagner/src/passes/bloom/MultiPassBloomPass.js';
-import VignettePass from '../lib/wagner/src/passes/vignette/VignettePass.js';
-import FXAAPass from '../lib/wagner/src/passes/fxaa/FXAAPass.js';
-import DOFPass from '../lib/wagner/src/passes/dof/DOFPass.js';
+import Composer from 'wagner/src/Composer.js';
+import BloomPass from 'wagner/src/passes/bloom/MultiPassBloomPass.js';
+import VignettePass from 'wagner/src/passes/vignette/VignettePass.js';
+import FXAAPass from 'wagner/src/passes/fxaa/FXAAPass.js';
+import DOFPass from 'wagner/src/passes/dof/DOFPass.js';
 import Shadow from '../three-components/Shadow.js';
-import OrbitControls from '../../third_party/three/OrbitControls.js';
+import OrbitControls from 'orbit-controls';
 
 import { isMobile } from '../utils.js';
 
@@ -85,7 +85,7 @@ export default class DOMModelView {
     this.orbitCamera.position.z = 15;
     this.orbitCamera.position.y = 5;
 
-    this.composer = new WAGNER.Composer(this.renderer);
+    this.composer = new Composer(this.renderer);
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};

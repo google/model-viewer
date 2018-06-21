@@ -55,12 +55,9 @@ MultiPassBloomPass.prototype.run = function(composer) {
 
   this.blurPass.params.amount = this.params.blurAmount;
   this.composer.pass(this.blurPass);
-
+  
   if (this.params.applyZoomBlur) {
-    this.zoomBlur.params.center.set(
-      this.params.zoomBlurCenter.x,
-      this.params.zoomBlurCenter.y
-    );
+    this.zoomBlur.params.center.set(0.5, 0.5);
     this.zoomBlur.params.strength = this.params.zoomBlurStrength;
     this.composer.pass(this.zoomBlur);
   }

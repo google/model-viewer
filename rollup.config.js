@@ -20,6 +20,7 @@ const resolve = require('rollup-plugin-node-resolve');
 const glsl = require('rollup-plugin-glsl');
 const json = require('rollup-plugin-json');
 const string = require('rollup-plugin-string');
+const alias = require('rollup-plugin-alias');
 
 export default {
   input: './index.js',
@@ -33,16 +34,25 @@ export default {
   },
   plugins: [
     commonjs(),
+    json({
+      include: ['src/**', 'third_party/**'],
+      exclude: ['node_modules/**'],
+    }),
+    alias({
+      'three': path.join(__dirname, 'third_party', 'three', 'three.module'),
+      'orbit-controls': path.join(__dirname, 'third_party', 'three', 'OrbitControls'),
+      'gltf-loader': path.join(__dirname, 'third_party', 'three', 'GLTFLoader'),
+      'wagner': path.join(__dirname, 'third_party', 'wagner'),
+    }),
     glsl({
-      include: ['src/**/*.vert', 'src/**/*.frag', 'src/**/*.glsl'],
+      include: ['src/**/*.vert', 'src/**/*.frag', 'src/**/*.glsl',
+                'third_party/wagner/**/*.vert',
+                'third_party/wagner/**/*.frag',
+                'third_party/wagner/**/*.glsl'],
       sourceMap: false,
     }),
     string({
       include: '**/*.svg',
-    }),
-    json({
-      include: ['src/**'],
-      exclude: ['node_modules/**'],
     }),
     resolve(),
   ],

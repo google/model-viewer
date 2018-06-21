@@ -15,7 +15,7 @@
 
 import { Object3D, Box3, Vector3, Matrix4, TextureLoader } from 'three';
 
-import GLTFLoader from '../../third_party/three/GLTFLoader.js';
+import GLTFLoader from 'gltf-loader';
 
 const loadGLTF = (loader, url) =>
   new Promise((resolve, reject) =>

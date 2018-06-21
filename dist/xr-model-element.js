@@ -48063,15 +48063,15 @@ var fragment = ( copyFs$1 && copyFs ) || copyFs$1;
 
 
 
-function CopyPass$1() {
+function CopyPass() {
   Pass_1.call(this);
   this.setShader(vertex, fragment);
 }
 
-var CopyPass_1 = CopyPass$1;
+var CopyPass_1 = CopyPass;
 
-CopyPass$1.prototype = Object.create(Pass_1.prototype);
-CopyPass$1.prototype.constructor = CopyPass$1;
+CopyPass.prototype = Object.create(Pass_1.prototype);
+CopyPass.prototype.constructor = CopyPass;
 
 'use strict';
 
@@ -48159,7 +48159,7 @@ Stack.prototype.getPasses = function() {
 
 
 
-function Composer$1(renderer, settings) {
+function Composer(renderer, settings) {
   var pixelRatio = renderer.getPixelRatio();
 
   this.width  = Math.floor(renderer.context.canvas.width  / pixelRatio) || 1;
@@ -48199,9 +48199,9 @@ function Composer$1(renderer, settings) {
   this.setSize(this.width, this.height);
 }
 
-var Composer_1 = Composer$1;
+var Composer_1 = Composer;
 
-Composer$1.prototype.swapBuffers = function() {
+Composer.prototype.swapBuffers = function() {
   this.output = this.write;
   this.input = this.read;
 
@@ -48210,26 +48210,26 @@ Composer$1.prototype.swapBuffers = function() {
   this.read = t;
 };
 
-Composer$1.prototype.render = function(scene, camera, keep, output) {
+Composer.prototype.render = function(scene, camera, keep, output) {
   if (keep) this.swapBuffers();
   this.renderer.render(scene, camera, output ? output : this.write, true);
   if (!output) this.swapBuffers();
 };
 
-Composer$1.prototype.toScreen = function() {
+Composer.prototype.toScreen = function() {
   this.quad.material = this.copyPass.shader;
   this.quad.material.uniforms.tInput.value = this.read;
   this.quad.material.uniforms.resolution.value.set(this.width, this.height);
   this.renderer.render(this.scene, this.camera);
 };
 
-Composer$1.prototype.toTexture = function(t) {
+Composer.prototype.toTexture = function(t) {
   this.quad.material = this.copyPass.shader;
   this.quad.material.uniforms.tInput.value = this.read;
   this.renderer.render(this.scene, this.camera, t, false);
 };
 
-Composer$1.prototype.pass = function(pass) {
+Composer.prototype.pass = function(pass) {
   if (pass instanceof Stack_1) {
     this.passStack(pass);
   }
@@ -48253,27 +48253,27 @@ Composer$1.prototype.pass = function(pass) {
   }
 };
 
-Composer$1.prototype.passStack = function(stack) {
+Composer.prototype.passStack = function(stack) {
   stack.getPasses().forEach(function(pass) {
     this.pass(pass);
   }.bind(this));
 };
 
-Composer$1.prototype.reset = function() {
+Composer.prototype.reset = function() {
   this.read = this.front;
   this.write = this.back;
   this.output = this.write;
   this.input = this.read;
 };
 
-Composer$1.prototype.setSource = function(src) {
+Composer.prototype.setSource = function(src) {
   this.quad.material = this.copyPass.shader;
   this.quad.material.uniforms.tInput.value = src;
   this.renderer.render(this.scene, this.camera, this.write, true);
   this.swapBuffers();
 };
 
-Composer$1.prototype.setSize = function(w, h) {
+Composer.prototype.setSize = function(w, h) {
   this.width = w;
   this.height = h;
 
@@ -48286,9 +48286,9 @@ Composer$1.prototype.setSize = function(w, h) {
 
 'use strict';
 
-var Composer = Composer_1;
-var CopyPass = CopyPass_1;
-var BlendMode = {
+var Composer$2 = Composer_1;
+var CopyPass$1 = CopyPass_1;
+var BlendMode$1 = {
   Normal: 1,
   Dissolve: 2, // UNAVAILABLE
   Darken: 3,
@@ -48315,9 +48315,9 @@ var BlendMode = {
 };
 
 var wagner = {
-	Composer: Composer,
-	CopyPass: CopyPass,
-	BlendMode: BlendMode
+	Composer: Composer$2,
+	CopyPass: CopyPass$1,
+	BlendMode: BlendMode$1
 };
 
 var boxBlurFs = "varying vec2 vUv;uniform sampler2D tInput;uniform vec2 delta;uniform vec2 resolution;void main(){vec4 sum=vec4(0.);vec2 inc=delta/resolution;sum+=texture2D(tInput,(vUv-inc*4.))*0.051;sum+=texture2D(tInput,(vUv-inc*3.))*0.0918;sum+=texture2D(tInput,(vUv-inc*2.))*0.12245;sum+=texture2D(tInput,(vUv-inc*1.))*0.1531;sum+=texture2D(tInput,(vUv+inc*0.))*0.1633;sum+=texture2D(tInput,(vUv+inc*1.))*0.1531;sum+=texture2D(tInput,(vUv+inc*2.))*0.12245;sum+=texture2D(tInput,(vUv+inc*3.))*0.0918;sum+=texture2D(tInput,(vUv+inc*4.))*0.051;gl_FragColor=sum;}";
@@ -48502,7 +48502,7 @@ BrightnessContrastPass.prototype.run = function(composer) {
 
 
 
-var BlendMode$1 = wagner.BlendMode;
+var BlendMode = wagner.BlendMode;
 
 
 
@@ -48529,7 +48529,7 @@ function MultiPassBloomPass(options) {
   this.params.zoomBlurStrength = options.zoomBlurStrength || 0.2;
   this.params.useTexture = options.useTexture || false;
   this.params.zoomBlurCenter = options.zoomBlurCenter || new THREE$1.Vector2(0.5, 0.5);
-  this.params.blendMode = options.blendMode || BlendMode$1.Screen;
+  this.params.blendMode = options.blendMode || BlendMode.Screen;
   this.params.glowTexture = null;
 }
 
@@ -48554,18 +48554,15 @@ MultiPassBloomPass.prototype.run = function(composer) {
 
   this.blurPass.params.amount = this.params.blurAmount;
   this.composer.pass(this.blurPass);
-
+  
   if (this.params.applyZoomBlur) {
-    this.zoomBlur.params.center.set(
-      this.params.zoomBlurCenter.x,
-      this.params.zoomBlurCenter.y
-    );
+    this.zoomBlur.params.center.set(0.5, 0.5);
     this.zoomBlur.params.strength = this.params.zoomBlurStrength;
     this.composer.pass(this.zoomBlur);
   }
 
   if (this.params.useTexture === true) {
-    this.blendPass.params.mode = BlendMode$1.Screen;
+    this.blendPass.params.mode = BlendMode.Screen;
     this.blendPass.params.tInput = this.params.glowTexture;
     composer.pass(this.blendPass);
   }
@@ -49929,7 +49926,7 @@ class DOMModelView {
     this.orbitCamera.position.z = 15;
     this.orbitCamera.position.y = 5;
 
-    this.composer = new wagner.Composer(this.renderer);
+    this.composer = new Composer_1(this.renderer);
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};
@@ -50043,6 +50040,11 @@ class DOMModelView {
  * limitations under the License.
  */
 
+/**
+ * The Reticle class creates an object that repeatedly calls
+ * `xrSession.requestHitTest()` to render a ring along a found
+ * horizontal surface.
+ */
 class Reticle extends Object3D {
   /**
    * @param {XRSession} xrSession
