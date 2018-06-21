@@ -18,6 +18,7 @@
     "eslint-config-google": "^0.9.1",
     "rollup": "^0.50.0",
     "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-cleanup": "^3.0.0-beta.1",
     "rollup-plugin-commonjs": "^8.2.1",
     "rollup-plugin-glsl": "^1.2.0",
     "rollup-plugin-json": "^2.3.0",

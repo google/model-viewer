@@ -21,6 +21,7 @@ const glsl = require('rollup-plugin-glsl');
 const json = require('rollup-plugin-json');
 const string = require('rollup-plugin-string');
 const alias = require('rollup-plugin-alias');
+const cleanup = require('rollup-plugin-cleanup');
 
 export default {
   input: './index.js',
@@ -34,14 +35,20 @@ export default {
   },
   plugins: [
     commonjs(),
-    json({
+    cleanup({
+      // Ideally we'd also clean third_party/three, which saves
+      // ~45kb in filesize alone... but takes 2 minutes to build
+      include: ['src/**'],
+      comments: 'none',
+    }),
+   json({
       include: ['src/**', 'third_party/**'],
       exclude: ['node_modules/**'],
     }),
     alias({
-      'three': path.join(__dirname, 'third_party', 'three', 'three.module'),
-      'orbit-controls': path.join(__dirname, 'third_party', 'three', 'OrbitControls'),
-      'gltf-loader': path.join(__dirname, 'third_party', 'three', 'GLTFLoader'),
+      'three': path.join(__dirname, 'third_party', 'three', 'three.module.js'),
+      'orbit-controls': path.join(__dirname, 'third_party', 'three', 'OrbitControls.js'),
+      'gltf-loader': path.join(__dirname, 'third_party', 'three', 'GLTFLoader.js'),
       'wagner': path.join(__dirname, 'third_party', 'wagner'),
     }),
     glsl({
