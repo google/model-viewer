@@ -7,11 +7,15 @@
     "build": "rollup -c",
     "build-min": "rollup -c rollup.config.min.js",
     "build-all": "npm run build && npm run build-min",
-    "watch": "rollup -c -w"
+    "watch": "rollup -c -w",
+    "test": "eslint src/"
   },
   "author": "Jordan Santell <jsantell@google.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
+    "eslint-config-google": "^0.9.1",
     "rollup": "^0.50.0",
     "rollup-plugin-alias": "^1.4.0",
     "rollup-plugin-commonjs": "^8.2.1",

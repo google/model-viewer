@@ -20,9 +20,8 @@ import {
   Object3D,
   Matrix4,
   Vector3,
-  Geometry,
   Raycaster,
-  Math as ThreeMath
+  Math as ThreeMath,
 } from 'three';
 
 /**
@@ -65,9 +64,9 @@ export default class Reticle extends Object3D {
 
     const origin = new Float32Array(ray.origin.toArray());
     const direction = new Float32Array(ray.direction.toArray());
-    this.session.requestHitTest(origin,
+    const hits = await this.session.requestHitTest(origin,
                                                    direction,
-                                                   frameOfRef).then(hits => {
+                                                   frameOfRef);
 
     if (hits.length) {
       const hit = hits[0];
@@ -82,12 +81,7 @@ export default class Reticle extends Object3D {
                                targetPos.z - this.position.z);
       this.rotation.set(0, angle, 0);
 
-      try {
       this.visible = true;
-      } catch (e) {
-        console.error(e);
-        window.e = e;
-      }
     }
-  })}
+  }
 }

@@ -23,13 +23,22 @@ import {
   DirectionalLight,
   Matrix4,
   Raycaster,
-  Vector3
+  Vector3,
 } from 'three';
 import Reticle from '../three-components/Reticle.js';
 import Shadow from '../three-components/Shadow.js';
 import screenfull from 'screenfull';
 
+/**
+ * Creates an AR model placement experience with WebXR.
+ */
 export default class ARView extends EventDispatcher {
+  /**
+   * @param {Object} config
+   * @param {HTMLCanvasElement} config.canvas
+   * @param {WebGLRenderingContext} config.context
+   * @param {THREE.Object3D} config.model
+   */
   constructor({ canvas, context, model }) {
     super();
     this.context = context;
@@ -38,7 +47,6 @@ export default class ARView extends EventDispatcher {
 
     this.onTap = this.onTap.bind(this);
     this.onFrame = this.onFrame.bind(this);
-    this.onResize = this.onResize.bind(this);
     this.onFullscreenChange = this.onFullscreenChange.bind(this);
 
     if (this.hasAR()) {
@@ -47,7 +55,6 @@ export default class ARView extends EventDispatcher {
     }
 
     screenfull.on('change', this.onFullscreenChange);
-    window.addEventListener('resize', this.onResize);
   }
 
   /**
@@ -74,6 +81,11 @@ export default class ARView extends EventDispatcher {
     return this.hasAR() ? this._devicePromise : Promise.reject();
   }
 
+  /**
+   * Starts rendering the AR viewer.
+   *
+   * @return {Promise<undefined>}
+   */
   start() {
     if (!this.hasAR() || this.enabled) {
       return;
@@ -96,7 +108,10 @@ export default class ARView extends EventDispatcher {
     });
   }
 
-  async stop() {
+  /**
+   * Stops rendering the AR viewer.
+   */
+  stop() {
     if (!this.hasAR() || !this.enabled) {
       return;
     }
@@ -110,10 +125,19 @@ export default class ARView extends EventDispatcher {
     }
   }
 
+  /**
+   * Used to request the next animation frame.
+   */
   _tick() {
     this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
   }
 
+  /**
+   * On WebXR render frame.
+   *
+   * @param {Number} time
+   * @param {XRPresentationFrame} frame
+   */
   onFrame(time, frame) {
     let session = frame.session;
     let pose = frame.getDevicePose(this.frameOfRef);
@@ -142,6 +166,9 @@ export default class ARView extends EventDispatcher {
     }
   }
 
+  /**
+   * Sets up the output canvas.
+   */
   _setupCanvas() {
     if (!this.outputContext) {
       this.outputCanvas = document.createElement('canvas');
@@ -164,6 +191,9 @@ export default class ARView extends EventDispatcher {
     }
   }
 
+  /**
+   * Sets up the THREE.WebGLRenderer.
+   */
   _setupRenderer() {
     this.renderer = new WebGLRenderer({
       context: this.context,
@@ -184,6 +214,9 @@ export default class ARView extends EventDispatcher {
     this.camera.matrixAutoUpdate = false;
   }
 
+  /**
+   * Sets up the THREE.Scene.
+   */
   _setupScene() {
     this.scene = new Scene();
 
@@ -199,6 +232,9 @@ export default class ARView extends EventDispatcher {
     this.scene.add(this.shadow);
   }
 
+  /**
+   * Sets up a new XRSession.
+   */
   async _setupSession() {
     this.session = await this.device.requestSession({
       outputContext: this.outputContext,
@@ -217,18 +253,27 @@ export default class ARView extends EventDispatcher {
     this.frameOfRef = await this.session.requestFrameOfReference('eye-level');
   }
 
+  /**
+   * Hides the output canvas.
+   */
   _hideCanvas() {
     if (this.container) {
       this.container.style.display = 'none';
     }
   }
 
+  /**
+   * Shows the output canvas.
+   */
   _showCanvas() {
     if (this.container) {
       this.container.style.display = 'block';
     }
   }
 
+  /**
+   * Enters fullscreen.
+   */
   _enterFullscreen() {
     if (screenfull.isFullscreen) {
       throw new Error('Another element is already fullscreen');
@@ -236,6 +281,9 @@ export default class ARView extends EventDispatcher {
     screenfull.request(this.container);
   }
 
+  /**
+   * Fired when fullscreen state changes.
+   */
   onFullscreenChange() {
     // If leaving fullscreen mode, and we're still in AR mode,
     // shut down AR mode
@@ -244,12 +292,10 @@ export default class ARView extends EventDispatcher {
     }
   }
 
-  onResize() {
-    if (!this.enabled) {
-      return;
-    }
-  }
-
+  /**
+   * Fired when the screen is touched when viewing
+   * the model in AR.
+   */
   async onTap() {
     if (!this.enabled || !this.session) {
       return;
@@ -280,5 +326,4 @@ export default class ARView extends EventDispatcher {
       this.shadow.position.y = this.model.position.y;
     }
   }
-
 }

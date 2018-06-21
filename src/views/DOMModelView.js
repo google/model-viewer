@@ -21,16 +21,13 @@ import {
   Object3D,
   AmbientLight,
   PCFSoftShadowMap,
-  Box3,
   Vector3,
   Color,
 } from 'three';
 
 import Composer from 'wagner/src/Composer.js';
-import BloomPass from 'wagner/src/passes/bloom/MultiPassBloomPass.js';
 import VignettePass from 'wagner/src/passes/vignette/VignettePass.js';
 import FXAAPass from 'wagner/src/passes/fxaa/FXAAPass.js';
-import DOFPass from 'wagner/src/passes/dof/DOFPass.js';
 import Shadow from '../three-components/Shadow.js';
 import OrbitControls from 'orbit-controls';
 
@@ -39,7 +36,18 @@ import { isMobile } from '../utils.js';
 const USE_POST_PROCESSING = !isMobile();
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
+/**
+ * Creates a model viewer for rendering in the DOM.
+ */
 export default class DOMModelView {
+  /**
+   * @param {Object} config
+   * @param {HTMLCanvasElement} config.canvas
+   * @param {WebGLRenderingContext} config.context
+   * @param {THREE.Object3D} config.model
+   * @param {number} config.width
+   * @param {number} config.height
+   */
   constructor({ canvas, context, model, width, height }) {
     this.context = context;
     this.canvas = canvas;
@@ -89,18 +97,17 @@ export default class DOMModelView {
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};
-    this.bloomPass = new BloomPass({
-      blurAmount: 0.05,
-    });
     this.vignettePass = new VignettePass(1.1, 0.7);
     this.fxaaPass = new FXAAPass();
     this.passes = [
-      // this.bloomPass,
       this.vignettePass,
       this.fxaaPass,
     ];
   }
 
+  /**
+   * Starts the rendering loop
+   */
   start() {
     this.enabled = true;
     this.scene.add(this.model);
@@ -108,11 +115,20 @@ export default class DOMModelView {
     this._tick();
   }
 
+  /**
+   * Stops the rendering loop
+   */
   stop() {
     this.enabled = false;
     window.cancelAnimationFrame(this.lastFrameId);
   }
 
+  /**
+   * Sets the canvas size.
+   *
+   * @param {number} width
+   * @param {number} height
+   */
   setSize(width, height) {
     if (!this.enabled) {
       return;
@@ -124,6 +140,11 @@ export default class DOMModelView {
     this.orbitCamera.updateProjectionMatrix();
   }
 
+  /**
+   * Enables or disables auto rotation based off of boolean.
+   *
+   * @param {boolean} isEnabled
+   */
   setRotate(isEnabled) {
     this.rotateEnabled = isEnabled;
     if (!isEnabled) {
@@ -131,6 +152,11 @@ export default class DOMModelView {
     }
   }
 
+  /**
+   * Enables or disables orbit controls based off of boolean.
+   *
+   * @param {boolean} isEnabled
+   */
   setControls(isEnabled) {
     this.controls.enabled = isEnabled;
 
@@ -140,10 +166,20 @@ export default class DOMModelView {
     }
   }
 
+  /**
+   * Enables or disables vignette post processing based off of boolean.
+   *
+   * @param {boolean} isEnabled
+   */
   setVignette(isEnabled) {
     this.vignetteEnabled = isEnabled;
   }
 
+  /**
+   * Sets the background color of the WebGL environment.
+   *
+   * @param {String} color
+   */
   setBackgroundColor(color) {
     if (color && typeof color === 'string') {
       this.renderer.setClearColor(new Color(color));
@@ -152,6 +188,9 @@ export default class DOMModelView {
     }
   }
 
+  /**
+   * Renders a frame.
+   */
   render() {
     if (!this.enabled) {
       return;
@@ -179,6 +218,9 @@ export default class DOMModelView {
     this._tick();
   }
 
+  /**
+   * Queues up the next render frame.
+   */
   _tick() {
     this.lastFrameId = window.requestAnimationFrame(this.render);
   }

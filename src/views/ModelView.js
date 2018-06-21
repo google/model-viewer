@@ -21,7 +21,18 @@ import { setScaleFromLimit } from '../utils.js';
 
 const BOUNDING_BOX_SIZE = 10;
 
+/**
+ * Wrapper around the underlying DOMModelView and ARModelView
+ * and coordinates between the two determining when they should
+ * be enabled and rendered.
+ */
 export default class ModelView extends EventDispatcher {
+  /**
+   * @param {Object} config
+   * @param {HTMLCanvasElement} config.canvas
+   * @param {number} config.width
+   * @param {number} config.height
+   */
   constructor({ canvas, width, height }) {
     super();
 
@@ -45,23 +56,43 @@ export default class ModelView extends EventDispatcher {
     this.arView.addEventListener('stabilized', this.onARStabilized);
     this.model.addEventListener('model-load', this.updateModelScale);
     this.enterDOM();
-
-    // DEBUG
-    window.view = this;
   }
 
+  /**
+   * Sets the model via URL.
+   *
+   * @param {String} source
+   * @param {?String} type
+   */
   setModelSource(source, type) {
     this.model.setSource(source, type);
   }
 
+  /**
+   * Whether or not this platform supports WebXR AR features.
+   *
+   * @return {Boolean}
+   */
   hasAR() {
     return this.arView.hasAR();
   }
 
+  /**
+   * Returns a promise that is resolved once WebXR can start
+   * an AR experience. Rejects if platform does not support AR.
+   *
+   * @return {Promise<XRDevice>}
+   */
   whenARReady() {
     return this.arView.whenARReady();
   }
 
+  /**
+   * Sets the size of the DOMModelView.
+   *
+   * @param {number} width
+   * @param {number} height
+   */
   setSize(width, height) {
     this.width = width;
     this.height = height;
@@ -69,6 +100,11 @@ export default class ModelView extends EventDispatcher {
     this.updateModelScale();
   }
 
+  /**
+   * Returns the width/height of DOMModelView.
+   *
+   * @return {Object}
+   */
   getSize() {
     return {
       width: this.width,
@@ -76,6 +112,9 @@ export default class ModelView extends EventDispatcher {
     };
   }
 
+  /**
+   * Starts the DOM player, disables other views.
+   */
   enterDOM() {
     this.mode = 'dom';
     this.arView.stop();
@@ -85,22 +124,9 @@ export default class ModelView extends EventDispatcher {
     this.dispatchEvent({ type: 'enter-dom' });
   }
 
-  setRotate(isEnabled) {
-    this.domView.setRotate(isEnabled);
-  }
-
-  setControls(isEnabled) {
-    this.domView.setControls(isEnabled);
-  }
-
-  setBackgroundColor(color) {
-    this.domView.setBackgroundColor(color);
-  }
-
-  setVignette(isEnabled) {
-    this.domView.setVignette(isEnabled);
-  }
-
+  /**
+   * Starts the AR player, disables other views.
+   */
   enterAR() {
     if (!this.hasAR()) {
       return;
@@ -114,12 +140,51 @@ export default class ModelView extends EventDispatcher {
   }
 
   /**
+   * Sets the auto rotation option via boolean.
+   *
+   * @param {Boolean} isEnabled
+   */
+  setRotate(isEnabled) {
+    this.domView.setRotate(isEnabled);
+  }
+
+  /**
+   * Sets orbit controls via boolean.
+   *
+   * @param {Boolean} isEnabled
+   */
+  setControls(isEnabled) {
+    this.domView.setControls(isEnabled);
+  }
+
+  /**
+   * Sets background color of DOMModelView.
+   *
+   * @param {String} color
+   */
+  setBackgroundColor(color) {
+    this.domView.setBackgroundColor(color);
+  }
+
+  /**
+   * Enables or disables vignette post processing for DOMModelView.
+   *
+   * @param {Boolean} isEnabled
+   */
+  setVignette(isEnabled) {
+    this.domView.setVignette(isEnabled);
+  }
+
+  /**
    * Called when AR mode is shut down.
    */
   onAREnd() {
     this.enterDOM();
   }
 
+  /**
+   * Called when a plane is found in AR mode.
+   */
   onARStabilized() {
     this.dispatchEvent({ type: 'stabilized' });
   }
@@ -138,6 +203,9 @@ export default class ModelView extends EventDispatcher {
     }
   }
 
+  /**
+   * Resets the models scale, position and rotation.
+   */
   resetModel() {
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);

@@ -15,7 +15,7 @@
   },
   "globals": {
     "global": false,
-    "VRFrameData": false
+    "XRWebGLLayer": false
   },
   "parserOptions": {
     "ecmaVersion": 6,

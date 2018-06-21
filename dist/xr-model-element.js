@@ -53303,12 +53303,23 @@ const loadGLTF = (loader, url) =>
   new Promise((resolve, reject) =>
     loader.load(url, resolve, ()=>{}, reject));
 
+/**
+ * An Object3D that can swap out its underlying
+ * model.
+ */
 class Model extends Object3D {
+  /**
+   * @class Model
+   */
   constructor() {
     super();
     this.loader = new GLTFLoader();
   }
 
+  /**
+   * @param {String} url
+   * @param {String} type
+   */
   async setSource(url, type) {
     if (!url) {
       return;

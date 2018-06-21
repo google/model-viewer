@@ -21,11 +21,13 @@ import { openIOSARQuickLook, getModelSource, getUSDZSource } from './utils.js';
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 /**
- * Definition for a <xr-model> component.
+ * Definition for a <xr-model> element.
  *
  */
-export default class ModelViewComponent extends HTMLElement {
-
+export default class XRModelElement extends HTMLElement {
+  /**
+   * Attributes that fire `attributeChangedCallback`.
+   */
   static get observedAttributes() {
     return [
       'ar',
@@ -36,6 +38,9 @@ export default class ModelViewComponent extends HTMLElement {
     ];
   }
 
+  /**
+   * Creates a new XRModelElement.
+   */
   constructor() {
     super();
 
@@ -62,7 +67,7 @@ export default class ModelViewComponent extends HTMLElement {
     this.__enterARButton = shadowRoot.querySelector('.enter-ar');
     this.__enterARButton.addEventListener('click', e => {
       e.preventDefault();
-      this.enterAR()
+      this.enterAR();
     });
 
     // Observe changes in this element, mainly for new <source> children,
@@ -100,24 +105,50 @@ export default class ModelViewComponent extends HTMLElement {
     this.resizeObserver.observe(this);
   }
 
+  /**
+   * Enables the AR
+   */
   enterAR() {
-    const usdzSource = getUSDZSource(this);
-    if (IS_IOS && usdzSource) {
-      openIOSARQuickLook(usdzSource);
-    } else {
-      this.__modelView.enterAR();
+    if (IS_IOS || this.__modelView.hasAR()) {
+      const usdzSource = getUSDZSource(this);
+      if (IS_IOS && usdzSource) {
+        openIOSARQuickLook(usdzSource);
+      } else {
+        this.__modelView.enterAR();
+      }
     }
   }
 
+  /**
+   * Called when custom element is first connected to document's DOM.
+   */
   connectedCallback() {
   }
 
+  /**
+   * Called when custom element is disconnected connected to document's DOM.
+   */
   disconnectedCallback() {
   }
 
+  /**
+   * Called when custom element is moved to a new document
+   *
+   * @param {Document} oldDoc
+   * @param {Document} newDoc
+   */
   adoptedCallback(oldDoc, newDoc) {
   }
 
+  /**
+   * Called when custom element's attribute in observedAttributes
+   * has changed.
+   *
+   * @param {String} name
+   * @param {?String} oldVal
+   * @param {?String} newVal
+   * @param {String} namespace
+   */
   attributeChangedCallback(name, oldVal, newVal, namespace) {
     switch (name) {
       case 'ar':
@@ -138,11 +169,19 @@ export default class ModelViewComponent extends HTMLElement {
     }
   }
 
+  /**
+   * Parses the element for an appropriate source URL and
+   * sets the views to use the new model.
+   */
   __updateSource() {
     const { src, type } = getModelSource(this);
     this.__modelView.setModelSource(src, type);
   }
 
+  /**
+   * Updates the visibility of the AR button based off of attributes
+   * and platform.
+   */
   __updateARButtonVisibility() {
     // On iOS, always enable the AR button. On non-iOS,
     // see if AR is supported, and if so, display the button after

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Object3D, Box3, Vector3, Matrix4, TextureLoader } from 'three';
+import { Object3D } from 'three';
 
 import GLTFLoader from 'gltf-loader';
 
@@ -21,12 +21,25 @@ const loadGLTF = (loader, url) =>
   new Promise((resolve, reject) =>
     loader.load(url, resolve, ()=>{}, reject));
 
+/**
+ * An Object3D that can swap out its underlying
+ * model.
+ *
+ * @extends THREE.Object3D
+ */
 export default class Model extends Object3D {
+  /**
+   * Creates a model.
+   */
   constructor() {
     super();
     this.loader = new GLTFLoader();
   }
 
+  /**
+   * @param {String} url
+   * @param {String} type
+   */
   async setSource(url, type) {
     if (!url) {
       return;

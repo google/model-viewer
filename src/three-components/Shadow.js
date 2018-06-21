@@ -19,14 +19,20 @@ import {
   Mesh,
 } from 'three';
 
+/**
+ * Creates a mesh that can receive and render shadows.
+ */
 export default class Shadow extends Mesh {
+  /**
+   * Create a shadow mesh.
+   */
   constructor() {
     const geometry = new PlaneGeometry(2000, 2000);
     geometry.rotateX(-Math.PI / 2);
 
     const material = new ShadowMaterial({
       color: 0x111111,
-      opacity: 0.2
+      opacity: 0.2,
     });
 
     super(geometry, material);
