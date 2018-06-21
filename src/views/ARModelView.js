@@ -58,10 +58,10 @@ export default class ARView extends EventDispatcher {
    * @return {Boolean}
    */
   hasAR() {
-    return screenfull.enabled &&
+    return !!(screenfull.enabled &&
            navigator.xr &&
            window.XRSession &&
-           window.XRSession.prototype.requestHitTest;
+           window.XRSession.prototype.requestHitTest);
   }
 
   /**

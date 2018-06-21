@@ -50043,6 +50043,11 @@ class DOMModelView {
  * limitations under the License.
  */
 
+/**
+ * The Reticle class creates an object that repeatedly calls
+ * `xrSession.requestHitTest()` to render a ring along a found
+ * horizontal surface.
+ */
 class Reticle extends Object3D {
   /**
    * @param {XRSession} xrSession
@@ -50324,10 +50329,10 @@ class ARView extends EventDispatcher {
    * @return {Boolean}
    */
   hasAR() {
-    return screenfull.enabled &&
+    return !!(screenfull.enabled &&
            navigator.xr &&
            window.XRSession &&
-           window.XRSession.prototype.requestHitTest;
+           window.XRSession.prototype.requestHitTest);
   }
 
   /**
@@ -53687,7 +53692,7 @@ class ModelViewComponent extends HTMLElement {
     // On iOS, always enable the AR button. On non-iOS,
     // see if AR is supported, and if so, display the button after
     // an XRDevice has been initialized
-    if (this.getAttribute('ar') !== null) {
+    if (this.getAttribute('ar') === null) {
       this.__enterARButton.style.display = 'none';
     } else {
       if (IS_IOS) {

@@ -133,7 +133,7 @@ export default class ModelViewComponent extends HTMLElement {
     // On iOS, always enable the AR button. On non-iOS,
     // see if AR is supported, and if so, display the button after
     // an XRDevice has been initialized
-    if (this.getAttribute('ar') !== null) {
+    if (this.getAttribute('ar') === null) {
       this.__enterARButton.style.display = 'none';
     } else {
       if (IS_IOS) {
