@@ -50,6 +50,14 @@ export default class ModelViewComponent extends HTMLElement {
       height,
     });
 
+    this.__mode = 'dom';
+    this.__modelView.addEventListener('enter-ar', () => {
+      this.__mode = 'ar';
+    });
+    this.__modelView.addEventListener('enter-dom', () => {
+      this.__mode = 'dom';
+    });
+
     // Set up the "Enter AR" button
     this.__enterARButton = shadowRoot.querySelector('.enter-ar');
     this.__enterARButton.addEventListener('click', e => {
@@ -73,6 +81,12 @@ export default class ModelViewComponent extends HTMLElement {
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
     this.resizeObserver = new ResizeObserver(entries => {
+      // Don't resize anything if in AR mode; otherwise the canvas
+      // scaling to fullscreen on entering AR will clobber the flat/2d
+      // dimensions of the element.
+      if (this.__mode === 'ar') {
+        return;
+      }
       for (let entry of entries) {
         if (entry.target === this) {
           const { width, height } = this.__modelView.getSize();
