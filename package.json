@@ -1,12 +1,10 @@
 {
   "name": "xr-model-element",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./dist/xr-model-element.js",
   "scripts": {
     "build": "rollup -c",
-    "build-min": "rollup -c rollup.config.min.js",
-    "build-all": "npm run build && npm run build-min",
     "watch": "rollup -c -w",
     "test": "eslint src/"
   },

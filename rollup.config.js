@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+const fs = require('fs');
 const path = require('path');
 const rollup = require('rollup');
 const commonjs = require('rollup-plugin-commonjs');
@@ -22,6 +23,7 @@ const json = require('rollup-plugin-json');
 const string = require('rollup-plugin-string');
 const alias = require('rollup-plugin-alias');
 const cleanup = require('rollup-plugin-cleanup');
+const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
 export default {
   input: './index.js',
@@ -33,6 +35,7 @@ export default {
   watch: {
     include: 'src/**',
   },
+  banner,
   plugins: [
     commonjs(),
     cleanup({

@@ -1,5 +1,11 @@
 # XRModelElement
 
+[![Build Status](http://img.shields.io/travis/google/xr-model-element.svg?style=flat-square)](https://travis-ci.org/google/xr-model-element)
+[![Build Status](http://img.shields.io/npm/v/xr-model-element.svg?style=flat-square)](https://www.npmjs.org/package/xr-model-element)
+[![Build Status](http://img.shields.io/npm/dt/xr-model-element.svg?style=flat-square)](https://www.npmjs.org/package/xr-model-element)
+[![Build Status](http://img.shields.io/npm/l/xr-model-element.svg?style=flat-square)](https://www.npmjs.org/package/xr-model-element)
+
+
 `<xr-model>` is a web component for rendering interactive 3D models, optionally in AR,
 supporting multiple formats.
 
@@ -70,9 +76,15 @@ across different platforms.
 | [GLB] | `model/gltf-binary` |
 | [glTF] | `model/gltf+json` |
 
-## TODOs
+## Development
 
-* The DOM view is using post processing, but due to [WebGLRenderTargets not supporting antialiasing](https://github.com/mrdoob/three.js/issues/568), we get aliasing. Perhaps there are other solutions.
+* `npm run build` - Builds the distributable from the `src/` directory.
+* `npm run watch` - Watches the `src/` directory, rebuilding when a file changes
+* `npm test` - Runs tests. As of now, only a linter.
+
+## TODOs/Questions
+
+* The DOM view is using post processing, but due to [WebGLRenderTargets not supporting antialiasing](https://github.com/mrdoob/three.js/issues/568), we get aliasing. Perhaps there are other solutions. Currently using a FXAA pass if post processing is used.
 * three.js 94dev includes the `WebGLRenderer.prototype.setFramebuffer` function which we need in order to bind WebXR's framebuffer easily. This version is not yet in npm, so a local version is committed in third_party/three, and some extra rollup work to work around this. Upgrade to r94 once its on npm.
 * There is currently no way to tell whether an iOS device has AR Quick Look support. Possibly check for other features added in Safari iOS 12 (like CSS font-display): https://css-tricks.com/font-display-masses/
 * Since there are no USDZ three.js loaders (and seems that it'd be difficult to do), Safari iOS users would either need to load a poster image, or if they load the 3D model content before entering AR, they'd download both glTF and USDZ formats, which are already generally rather large.
