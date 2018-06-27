@@ -50,11 +50,11 @@ export default class ARView extends EventDispatcher {
     this.onFullscreenChange = this.onFullscreenChange.bind(this);
 
     if (this.hasAR()) {
+      screenfull.on('change', this.onFullscreenChange);
+
       this._devicePromise = navigator.xr.requestDevice();
       this._devicePromise.then(device => this.device = device);
     }
-
-    screenfull.on('change', this.onFullscreenChange);
   }
 
   /**
@@ -65,10 +65,11 @@ export default class ARView extends EventDispatcher {
    * @return {Boolean}
    */
   hasAR() {
-    return !!(screenfull.enabled &&
-           navigator.xr &&
-           window.XRSession &&
-           window.XRSession.prototype.requestHitTest);
+    return !!(screenfull &&
+              screenfull.enabled &&
+              navigator.xr &&
+              window.XRSession &&
+              window.XRSession.prototype.requestHitTest);
   }
 
   /**
