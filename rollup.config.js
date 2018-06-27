@@ -22,6 +22,7 @@ const glsl = require('rollup-plugin-glsl');
 const json = require('rollup-plugin-json');
 const string = require('rollup-plugin-string');
 const alias = require('rollup-plugin-alias');
+const nodestdlib = require('rollup-plugin-node-builtins');
 const cleanup = require('rollup-plugin-cleanup');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
@@ -38,6 +39,7 @@ export default {
   banner,
   plugins: [
     commonjs(),
+    nodestdlib(),
     cleanup({
       // Ideally we'd also clean third_party/three, which saves
       // ~45kb in filesize alone... but takes 2 minutes to build
