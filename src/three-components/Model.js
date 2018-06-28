@@ -41,11 +41,16 @@ export default class Model extends Object3D {
    * @param {String} type
    */
   async setSource(url, type) {
-    if (!url) {
+    if (!url || !type) {
       return;
     }
 
     if (url === this.url && type === this.type) {
+      return;
+    }
+
+    // This Model component can only load glb and gltf
+    if (['model/gltf-binary', 'model/gltf+json'].indexOf(type) === -1) {
       return;
     }
 
