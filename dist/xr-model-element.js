@@ -49819,46 +49819,33 @@ const getTypeFromName = (name = '') => {
       return undefined;
   }
 };
-const getModelSource = element => {
+const getModelSource = (element, acceptedTypes) => {
   const rootSrc = element.getAttribute('src');
   if (rootSrc) {
     const src = relativeToAbsoluteURL(rootSrc);
     const type = getTypeFromName(rootSrc);
-    return { src, type };
+    if (acceptedTypes.indexOf(type) !== -1) {
+      return { src, type };
+    }
+    else {
+      return null;
+    }
   }
   const sources = element.querySelectorAll('source');
-  let modelSrc;
-  let modelType;
   for (let source of sources) {
-    const src = source.getAttribute('src');
+    const src = relativeToAbsoluteURL(source.getAttribute('src'));
     const type = source.getAttribute('type') || getTypeFromName(src);
-    switch (type) {
-      case 'model/gltf-binary':
-      case 'model/gltf+json':
-        if (!modelSrc) {
-          modelType = type;
-          modelSrc = src;
-        }
-        break;
-    }
-    if (modelSrc) {
-      break;
+    if (acceptedTypes.indexOf(type) !== -1) {
+      return { src, type };
     }
   }
-  return {
-    src: relativeToAbsoluteURL(modelSrc),
-    type: modelType,
-  };
+  return null;
 };
-const getUSDZSource = element => {
-  const sources = element.querySelectorAll('source');
-  for (let source of sources) {
-    const src = source.getAttribute('src');
-    const type = source.getAttribute('type');
-    if (src && type === 'model/vnd.usd+zip') {
-      return relativeToAbsoluteURL(src);
-    }
-  }
+const getWebGLSource = (element) => {
+  return getModelSource(element, ['model/gltf-binary', 'model/gltf+json']);
+};
+const getiOSSource = (element) => {
+  return getModelSource(element, ['model/vnd.usd+zip']);
 };
 const setScaleFromLimit = (function() {
   const box = new Box3();
@@ -53371,9 +53358,9 @@ class XRModelElement extends HTMLElement {
   }
   enterAR() {
     if (IS_IOS || this.__modelView.hasAR()) {
-      const usdzSource = getUSDZSource(this);
+      const usdzSource = getiOSSource(this);
       if (IS_IOS && usdzSource) {
-        openIOSARQuickLook(usdzSource);
+        openIOSARQuickLook(usdzSource.src);
       } else {
         this.__modelView.enterAR();
       }
@@ -53405,14 +53392,14 @@ class XRModelElement extends HTMLElement {
     }
   }
   __updateSource() {
-    const { src, type } = getModelSource(this);
-    this.__modelView.setModelSource(src, type);
+    const source = getWebGLSource(this) || {};
+    this.__modelView.setModelSource(source.src, source.type);
   }
   __updateARButtonVisibility() {
     if (this.getAttribute('ar') === null) {
       this.__enterARButton.style.display = 'none';
     } else {
-      if (IS_IOS) {
+      if (IS_IOS && getiOSSource(this)) {
         this.__enterARButton.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
         this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');

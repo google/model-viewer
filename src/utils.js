@@ -72,70 +72,68 @@ export const getTypeFromName = (name = '') => {
 };
 
 /**
- * Return a URL for the closest match for a three.js-loadable
- * 3D model using an element's <source> children.
+ * Return a URL for the best asset to use from an xr-model element
+ * using the element's <source> children and its `src` attribute.
+ * Takes an array of accepted MIME types. Returns `null` if no
+ * match found, otherwise an object with `src` and `type` values.
  *
  * @param {HTMLElement} element
- * @return {Object}
+ * @param {Array<String>} acceptedTypes
+ * @return {?Object}
  */
-export const getModelSource = element => {
+export const getModelSource = (element, acceptedTypes) => {
   // If the <xr-model> has a `src` attribute, use that,
   // and infer the type.
   const rootSrc = element.getAttribute('src');
   if (rootSrc) {
     const src = relativeToAbsoluteURL(rootSrc);
     const type = getTypeFromName(rootSrc);
-    return { src, type };
+
+    if (acceptedTypes.indexOf(type) !== -1) {
+      return { src, type };
+    }
+    // If the `src` attribute is not a valid type, do not check
+    // any children <source> elements.
+    else {
+      return null;
+    }
   }
 
   const sources = element.querySelectorAll('source');
 
-  let modelSrc;
-  let modelType;
   for (let source of sources) {
-    const src = source.getAttribute('src');
+    const src = relativeToAbsoluteURL(source.getAttribute('src'));
     const type = source.getAttribute('type') || getTypeFromName(src);
 
-    switch (type) {
-      case 'model/gltf-binary':
-      case 'model/gltf+json':
-        if (!modelSrc) {
-          modelType = type;
-          modelSrc = src;
-        }
-        break;
-    }
-
-    if (modelSrc) {
-      break;
+    if (acceptedTypes.indexOf(type) !== -1) {
+      return { src, type };
     }
   }
 
-  return {
-    src: relativeToAbsoluteURL(modelSrc),
-    type: modelType,
-  };
+  return null;
 };
 
 /**
- * Return a URL for the closest match for a loadable
- * USDZ 3D model using an element's <source> children
- * for displaying in AR Quick Look on iOS Safari.
+ * Return a URL and type of the best source from
+ * an XRModelElement for use with rendering within THREE/WebGL
+ * in flat mode as well in WebXR+AR mode.
  *
  * @param {HTMLElement} element
- * @return {?string}
+ * @return {?Object}
  */
-export const getUSDZSource = element => {
-  const sources = element.querySelectorAll('source');
+export const getWebGLSource = (element) => {
+  return getModelSource(element, ['model/gltf-binary', 'model/gltf+json']);
+};
 
-  for (let source of sources) {
-    const src = source.getAttribute('src');
-    const type = source.getAttribute('type');
-
-    if (src && type === 'model/vnd.usd+zip') {
-      return relativeToAbsoluteURL(src);
-    }
-  }
+/**
+ * Return a URL and type of the best source from
+ * an XRModelElement for use within iOS's AR Quick Look.
+ *
+ * @param {HTMLElement} element
+ * @return {?Object}
+ */
+export const getiOSSource = (element) => {
+  return getModelSource(element, ['model/vnd.usd+zip']);
 };
 
 /**

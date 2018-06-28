@@ -16,7 +16,7 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import ModelView from './views/ModelView.js';
 import template from './template.js';
-import { openIOSARQuickLook, getModelSource, getUSDZSource } from './utils.js';
+import { openIOSARQuickLook, getWebGLSource, getiOSSource } from './utils.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -110,9 +110,9 @@ export default class XRModelElement extends HTMLElement {
    */
   enterAR() {
     if (IS_IOS || this.__modelView.hasAR()) {
-      const usdzSource = getUSDZSource(this);
+      const usdzSource = getiOSSource(this);
       if (IS_IOS && usdzSource) {
-        openIOSARQuickLook(usdzSource);
+        openIOSARQuickLook(usdzSource.src);
       } else {
         this.__modelView.enterAR();
       }
@@ -174,8 +174,8 @@ export default class XRModelElement extends HTMLElement {
    * sets the views to use the new model.
    */
   __updateSource() {
-    const { src, type } = getModelSource(this);
-    this.__modelView.setModelSource(src, type);
+    const source = getWebGLSource(this) || {};
+    this.__modelView.setModelSource(source.src, source.type);
   }
 
   /**
@@ -189,7 +189,7 @@ export default class XRModelElement extends HTMLElement {
     if (this.getAttribute('ar') === null) {
       this.__enterARButton.style.display = 'none';
     } else {
-      if (IS_IOS) {
+      if (IS_IOS && getiOSSource(this)) {
         this.__enterARButton.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
         this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');
