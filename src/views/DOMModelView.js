@@ -133,6 +133,7 @@ export default class DOMModelView {
     if (!this.enabled) {
       return;
     }
+    this.composer.setSize(width, height);
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
