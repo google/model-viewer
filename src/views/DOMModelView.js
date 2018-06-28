@@ -69,6 +69,8 @@ export default class DOMModelView {
     this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
     this.controls = new OrbitControls(this.orbitCamera, this.canvas);
     this.controls.target = new Vector3(0, 5, 0);
+    // Disable by default
+    this.controls.enabled = false;
 
     this.scene = new Scene();
     this.scene.add(this.model);
