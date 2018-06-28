@@ -49799,11 +49799,13 @@ const openIOSARQuickLook = url => {
   anchor.appendChild(document.createElement('img'));
   anchor.click();
 };
-const relativeToAbsoluteLink = url => {
+const relativeToAbsoluteURL = (function () {
   const anchor = document.createElement('a');
-  anchor.href = url;
-  return anchor.href;
-};
+  return (url) => {
+    anchor.href = url;
+    return anchor.href;
+  }
+})();
 const getTypeFromName = (name = '') => {
   const ext = extname(name).toLowerCase();
   switch (ext) {
@@ -49820,8 +49822,9 @@ const getTypeFromName = (name = '') => {
 const getModelSource = element => {
   const rootSrc = element.getAttribute('src');
   if (rootSrc) {
+    const src = relativeToAbsoluteURL(rootSrc);
     const type = getTypeFromName(rootSrc);
-    return { src: rootSrc, type };
+    return { src, type };
   }
   const sources = element.querySelectorAll('source');
   let modelSrc;
@@ -49829,7 +49832,6 @@ const getModelSource = element => {
   for (let source of sources) {
     const src = source.getAttribute('src');
     const type = source.getAttribute('type') || getTypeFromName(src);
-    console.log("TYPE", type);
     switch (type) {
       case 'model/gltf-binary':
       case 'model/gltf+json':
@@ -49844,7 +49846,7 @@ const getModelSource = element => {
     }
   }
   return {
-    src: relativeToAbsoluteLink(modelSrc),
+    src: relativeToAbsoluteURL(modelSrc),
     type: modelType,
   };
 };
@@ -49854,7 +49856,7 @@ const getUSDZSource = element => {
     const src = source.getAttribute('src');
     const type = source.getAttribute('type');
     if (src && type === 'model/vnd.usd+zip') {
-      return relativeToAbsoluteLink(src);
+      return relativeToAbsoluteURL(src);
     }
   }
 };
@@ -49899,6 +49901,7 @@ class DOMModelView {
     this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
     this.controls = new OrbitControls(this.orbitCamera, this.canvas);
     this.controls.target = new Vector3(0, 5, 0);
+    this.controls.enabled = false;
     this.scene = new Scene();
     this.scene.add(this.model);
     this.light = new AmbientLight(0xffffff, 0.9);
@@ -49940,6 +49943,7 @@ class DOMModelView {
     if (!this.enabled) {
       return;
     }
+    this.composer.setSize(width, height);
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -53133,10 +53137,13 @@ class Model extends Object3D {
     this.loader = new GLTFLoader();
   }
   async setSource(url, type) {
-    if (!url) {
+    if (!url || !type) {
       return;
     }
     if (url === this.url && type === this.type) {
+      return;
+    }
+    if (['model/gltf-binary', 'model/gltf+json'].indexOf(type) === -1) {
       return;
     }
     this.url = url;
@@ -53179,8 +53186,12 @@ class ModelView extends EventDispatcher {
     this.model.addEventListener('model-load', this.updateModelScale);
     this.enterDOM();
   }
-  setModelSource(source, type) {
-    this.model.setSource(source, type);
+  async setModelSource(source, type) {
+    try {
+      await this.model.setSource(source, type);
+    } catch (e) {
+      console.error(`Could not set model source: ${source}`);
+    }
   }
   hasAR() {
     return this.arView.hasAR();
