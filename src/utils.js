@@ -40,11 +40,13 @@ export const openIOSARQuickLook = url => {
  * @param {String} url
  * @return {String}
  */
-export const relativeToAbsoluteLink = url => {
+export const relativeToAbsoluteURL = (function () {
   const anchor = document.createElement('a');
-  anchor.href = url;
-  return anchor.href;
-};
+  return (url) => {
+    anchor.href = url;
+    return anchor.href;
+  }
+})();
 
 /**
  * Takes a string of a filename, like "model.usdz",
@@ -81,8 +83,9 @@ export const getModelSource = element => {
   // and infer the type.
   const rootSrc = element.getAttribute('src');
   if (rootSrc) {
+    const src = relativeToAbsoluteURL(rootSrc);
     const type = getTypeFromName(rootSrc);
-    return { src: rootSrc, type };
+    return { src, type };
   }
 
   const sources = element.querySelectorAll('source');
@@ -109,7 +112,7 @@ export const getModelSource = element => {
   }
 
   return {
-    src: relativeToAbsoluteLink(modelSrc),
+    src: relativeToAbsoluteURL(modelSrc),
     type: modelType,
   };
 };
@@ -130,7 +133,7 @@ export const getUSDZSource = element => {
     const type = source.getAttribute('type');
 
     if (src && type === 'model/vnd.usd+zip') {
-      return relativeToAbsoluteLink(src);
+      return relativeToAbsoluteURL(src);
     }
   }
 };
