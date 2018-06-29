@@ -53430,7 +53430,7 @@ class XRModelElement extends HTMLElement {
       case 'poster':
         this.__updatePoster(newVal);
         break;
-      case 'poster':
+      case 'preload':
         this.__updateSource();
         break;
     }
@@ -53441,6 +53441,7 @@ class XRModelElement extends HTMLElement {
     if (preload !== null || this.__userInput) {
       this.__canvasElement.classList.add('show');
       this.__modelView.setModelSource(source.src, source.type);
+      this.__clickToViewElement.classList.remove('show');
     }
   }
   __updatePoster(src) {
