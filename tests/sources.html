@@ -17,40 +17,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement</title>
+  <title>XRModelElement - Sources</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
   <link href="../third_party/prism/prism.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
-<style>
-  body {
-    font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
-  }
-  #container {
-    text-align: center;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-  h1, h2 {
-    font-weight: 200;
-  }
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  li {
-    display: flex;
-  }
-  xr-model {
-    height: 400px;
-  }
-</style>
+  <link type="text/css" href="style.css" rel="stylesheet" />
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement</h1>
-
+        <h1>XRModelElement - Sources</h1>
+        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using different 3D formats, <code>&lt;source&gt;</code> elements, and error scenarios loading a 3D file.</p>
         <h2>Multiple sources</h2>
         <pre class="language-markup">
 <code>&lt;xr-model ar controls auto-rotate vignette background-color=&quot;#4885ed&quot;&gt;</code>
@@ -59,49 +37,44 @@
 <code>&lt;/xr-model&gt;</code>
         </pre>
         <xr-model class="model" ar controls auto-rotate vignette background-color="#4885ed">
-          <source src="../assets/Astronaut.usdz" type="model/vnd.usd+zip">
-          <source src="../assets/Astronaut.glb" type="model/gltf-binary">
+          <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
+          <source src="assets/Astronaut.glb" type="model/gltf-binary">
         </xr-model>
 
         <h2>Single glb source</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;../assets/Astronaut.glb&quot;
+<code>&lt;xr-model src=&quot;assets/Astronaut.glb&quot;
           ar controls auto-rotate vignette background-color=&quot;#3cba54&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model src="../assets/Astronaut.glb" ar controls auto-rotate vignette background-color="#3cba54">
+        <xr-model src="assets/Astronaut.glb" ar controls auto-rotate vignette background-color="#3cba54">
         </xr-model>
-        
+
         <h2>Single gltf source</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;../assets/Astronaut.gltf&quot;
+<code>&lt;xr-model src=&quot;assets/Astronaut.gltf&quot;
           ar controls auto-rotate vignette background-color=&quot;#f4c20d&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model src="../assets/Astronaut.gltf" ar controls auto-rotate vignette background-color="#f4c20d">
+        <xr-model src="assets/Astronaut.gltf" ar controls auto-rotate vignette background-color="#f4c20d">
         </xr-model>
 
         <h2>Single usdz source</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;../assets/Astronaut.usdz&quot;
+<code>&lt;xr-model src=&quot;assets/Astronaut.usdz&quot;
           ar controls auto-rotate vignette background-color=&quot;#db3236&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model src="../assets/Astronaut.usdz" ar controls auto-rotate vignette background-color="#db3236">
+        <xr-model src="assets/Astronaut.usdz" ar controls auto-rotate vignette background-color="#db3236">
         </xr-model>
-        
-        <h2>Barebones</h2>
-        <pre class="language-markup">
-<code>&lt;xr-model src=&quot;../assets/Astronaut.glb&quot;&gt;&lt;/xr-model&gt;</code>
-        </pre>
-        <xr-model src="../assets/Astronaut.glb"></xr-model>
 
         <h2>Missing model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;../assets/i-do-not-exist.glb&quot;&gt;&lt;/xr-model&gt;</code>
+<code>&lt;xr-model src=&quot;assets/i-do-not-exist.glb&quot;&gt;&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model src="../assets/i-do-not-exist.glb"></xr-model>
+        <xr-model src="assets/i-do-not-exist.glb"></xr-model>
 
+    </div>
     </div>
     <script src="../dist/xr-model-element.js"></script>
     <script src="../third_party/prism/prism.js"></script>
