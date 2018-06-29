@@ -1,0 +1,56 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>XRModelElement - Core</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link href="../third_party/prism/prism.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
+  <link type="text/css" href="style.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="container">
+        <h1>XRModelElement - Core</h1>
+        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using defaults and features not covered in other tests.</p>
+
+        <h2>Defaults</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model src="assets/Astronaut.glb">
+        </xr-model>
+        
+        <h2>A handful of attributes</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model ar preload controls auto-rotate vignette background-color=&quot;#4885ed&quot;&gt;</code>
+<code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
+<code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model class="model" ar preload controls auto-rotate vignette background-color="#4885ed">
+          <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
+          <source src="assets/Astronaut.glb" type="model/gltf-binary">
+        </xr-model>
+
+    <script src="../dist/xr-model-element.js"></script>
+    <script src="../third_party/prism/prism.js"></script>
+</body>
+</html>

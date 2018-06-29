@@ -90,7 +90,7 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARKitSVG}
     </a>
-    <div class="click-to-view">${CLICK_TO_VIEW_TEXT}</div>
+    <div class="click-to-view show">${CLICK_TO_VIEW_TEXT}</div>
     <img class="poster"/>
     <canvas></canvas>
   </div>
