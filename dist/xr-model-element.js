@@ -49746,8 +49746,6 @@ Object.defineProperties( OrbitControls.prototype, {
 // must be no slashes, empty elements, or device names (c:\) in the array
 // (so also no leading and trailing slashes - it does not distinguish
 // relative and absolute paths)
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
 var splitPathRe =
     /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
 var splitPath = function(filename) {
@@ -49784,7 +49782,6 @@ var splitPath = function(filename) {
 function extname(path) {
   return splitPath(path)[3];
 }
-// String.prototype.substr - negative index don't work in IE8
 var substr = 'ab'.substr(-1) === 'b' ?
     function (str, start, len) { return str.substr(start, len) } :
     function (str, start, len) {
@@ -53250,6 +53247,7 @@ class ModelView extends EventDispatcher {
 
 var ARKitSVG = "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 78 78\"><defs><style>.cls-1{fill:none;}.cls-2{clip-path:url(#clip-path);}.cls-3{opacity:0.6;}.cls-4{clip-path:url(#clip-path-3);}.cls-5{opacity:0.5;}.cls-6{fill:#fff;}.cls-7{opacity:0.2;}.cls-8{clip-path:url(#clip-path-5);}.cls-9{clip-path:url(#clip-path-6);}.cls-10{clip-path:url(#clip-path-7);}.cls-11{clip-path:url(#clip-path-8);}.cls-12{clip-path:url(#clip-path-9);}.cls-13{clip-path:url(#clip-path-10);}.cls-14{clip-path:url(#clip-path-11);}.cls-15{clip-path:url(#clip-path-12);}.cls-16{clip-path:url(#clip-path-13);}</style><clipPath id=\"clip-path\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-3\" transform=\"translate(0 0)\"><rect class=\"cls-1\" width=\"78\" height=\"78\"/></clipPath><clipPath id=\"clip-path-5\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"12.49\" width=\"23.67\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-6\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-7\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"23.64\" height=\"14.2\"/></clipPath><clipPath id=\"clip-path-8\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"46.03\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-9\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"51.28\" width=\"23.67\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-10\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"51.28\" width=\"23.64\" height=\"14.24\"/></clipPath><clipPath id=\"clip-path-11\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"15.48\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-12\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"60.23\" y=\"25.41\" width=\"1.28\" height=\"27.16\"/></clipPath><clipPath id=\"clip-path-13\" transform=\"translate(0 0)\"><rect class=\"cls-1\" x=\"37.87\" y=\"12.49\" width=\"1.28\" height=\"52.96\"/></clipPath></defs><title>ARKit-Badge-Glyph-Only</title><g class=\"cls-2\"><g class=\"cls-2\"><g class=\"cls-3\"><g class=\"cls-4\"><path d=\"M45,18a1.12,1.12,0,0,1-.56-.15l-6-3.44-6,3.45a1.12,1.12,0,1,1-1.12-1.95L38,12.15a1.12,1.12,0,0,1,1.12,0l6.51,3.77A1.12,1.12,0,0,1,45,18\" transform=\"translate(0 0)\"/><path d=\"M38.51,47.65a1.12,1.12,0,0,1-1.12-1.12V39a1.12,1.12,0,1,1,2.25,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M16.12,34.71A1.12,1.12,0,0,1,15,33.58V26a1.12,1.12,0,1,1,2.24,0v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,34.71a1.12,1.12,0,0,1-1.12-1.12V26A1.12,1.12,0,1,1,62,26v7.54a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-1.12-1.12V44.39a1.12,1.12,0,0,1,1.12-1.12h0A1.12,1.12,0,0,1,62,44.39v7.54A1.12,1.12,0,0,1,60.88,53Z\" transform=\"translate(0 0)\"/><path d=\"M16.12,53A1.12,1.12,0,0,1,15,51.93V44.39a1.12,1.12,0,1,1,2.24,0v7.54A1.12,1.12,0,0,1,16.12,53\" transform=\"translate(0 0)\"/><path d=\"M38.51,22.47a1.12,1.12,0,0,1-1.12-1.12V13.13a1.12,1.12,0,1,1,2.25,0v8.22a1.12,1.12,0,0,1-1.12,1.12\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.12,1.12,0,0,1-1.12-1.12V57.34a1.12,1.12,0,1,1,2.25,0v7.54A1.12,1.12,0,0,1,38.51,66\" transform=\"translate(0 0)\"/><path d=\"M38.51,66a1.13,1.13,0,0,1-.56-.15l-6.56-3.79a1.12,1.12,0,0,1,1.12-1.95l6,3.47,5.91-3.43a1.12,1.12,0,0,1,1.13,1.95l-6.48,3.75a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M38.51,40.11A1.13,1.13,0,0,1,38,40l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95l6,3.45,6-3.45a1.12,1.12,0,0,1,1.13,1.95L39.08,40a1.11,1.11,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.35,30.94a1.12,1.12,0,0,1-.56-2.1l6.52-3.77A1.12,1.12,0,0,1,61.44,27l-6.52,3.77a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.87,27.17a1.12,1.12,0,0,1-.56-.15l-6.53-3.77A1.12,1.12,0,1,1,54.9,21.3l6.53,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,30.94a1.12,1.12,0,0,1-.56-.15L15.56,27a1.12,1.12,0,0,1,1.12-1.95l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,27.17a1.12,1.12,0,0,1-.56-2.1l6.52-3.76a1.12,1.12,0,0,1,1.12,1.95L16.68,27a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M54.34,56.82a1.12,1.12,0,0,1-.56-2.1L60.32,51a1.12,1.12,0,1,1,1.12,1.95L54.9,56.67a1.13,1.13,0,0,1-.56.15\" transform=\"translate(0 0)\"/><path d=\"M60.88,53a1.12,1.12,0,0,1-.56-.15l-6.53-3.77a1.12,1.12,0,0,1,1.12-1.95L61.44,51a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M22.65,56.82a1.13,1.13,0,0,1-.56-.15L15.56,52.9A1.12,1.12,0,0,1,16.69,51l6.52,3.77a1.12,1.12,0,0,1-.56,2.1\" transform=\"translate(0 0)\"/><path d=\"M16.12,53a1.12,1.12,0,0,1-.56-2.1l6.51-3.77a1.12,1.12,0,0,1,1.13,1.95L16.69,52.9a1.12,1.12,0,0,1-.56.15\" transform=\"translate(0 0)\"/><g class=\"cls-7\"><g class=\"cls-8\"><path d=\"M16.12,26.69a.64.64,0,0,1-.32-1.2L38.19,12.57a.64.64,0,0,1,.64,1.11L16.44,26.6a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-9\"><path d=\"M16.12,52.57a.64.64,0,0,1-.32-1.2L60.56,25.49a.64.64,0,0,1,.64,1.11L16.44,52.48a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-10\"><path d=\"M60.87,26.69a.64.64,0,0,1-.32-.09L38.19,13.68a.64.64,0,0,1,.64-1.11L61.19,25.49a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-11\"><path d=\"M60.88,52.57a.63.63,0,0,1-.32-.09L15.8,26.6a.64.64,0,0,1,.64-1.11L61.2,51.37a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-12\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-.09l-22.39-13a.64.64,0,0,1,.64-1.11l22.39,13a.64.64,0,0,1-.32,1.2\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-13\"><path d=\"M38.51,65.52a.64.64,0,0,1-.32-1.2l22.36-13a.64.64,0,0,1,.64,1.11l-22.36,13a.64.64,0,0,1-.32.09\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-14\"><path d=\"M16.12,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-15\"><path d=\"M60.88,52.57a.64.64,0,0,1-.64-.64V26a.64.64,0,1,1,1.28,0V51.93a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g><g class=\"cls-7\"><g class=\"cls-16\"><path d=\"M38.51,65.45a.64.64,0,0,1-.64-.64V13.13a.64.64,0,0,1,1.28,0V64.81a.64.64,0,0,1-.64.64\" transform=\"translate(0 0)\"/></g></g></g></g></g></g></svg>\n";
 
+const CLICK_TO_VIEW_TEXT = 'Select to view 3D content.';
 const template = document.createElement('template');
 template.innerHTML = `
   <style>
@@ -53259,6 +53257,23 @@ template.innerHTML = `
     .container {
       position: relative;
     }
+    .poster {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      display: none;
+    }
+    .poster.show {
+      display: block;
+    }
+
+    .click-to-view {
+      display: none;
+    }
+    .click-to-view.show {
+      display: block;
+    }
+
     a.enter-ar {
       width: 75px;
       height: 75px;
@@ -53295,6 +53310,8 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARKitSVG}
     </a>
+    <img class="poster"/>
+    <div class="click-to-view">${CLICK_TO_VIEW_TEXT}</div>
     <canvas></canvas>
   </div>
   <slot></slot>
@@ -53309,18 +53326,29 @@ class XRModelElement extends HTMLElement {
       'auto-rotate',
       'background-color',
       'vignette',
+      'poster',
     ];
   }
   constructor() {
     super();
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
+    this.__posterElement = shadowRoot.querySelector('.poster');
+    this.__canvasElement = shadowRoot.querySelector('canvas');
+    this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
+    this.__enterARElement = shadowRoot.querySelector('.enter-ar');
     const { width, height } = this.getBoundingClientRect();
     this.__modelView = new ModelView({
-      canvas: shadowRoot.querySelector('canvas'),
+      canvas: this.__canvasElement,
       width,
       height,
     });
+    this.__userInput = false;
+    this.addEventListener('click', () => {
+      this.__posterElement.classList.remove('show');
+      this.__clickToViewElement.classList.remove('show');
+      this.__userInput = true;
+    }, { once: true });
     this.__mode = 'dom';
     this.__modelView.addEventListener('enter-ar', () => {
       this.__mode = 'ar';
@@ -53328,8 +53356,7 @@ class XRModelElement extends HTMLElement {
     this.__modelView.addEventListener('enter-dom', () => {
       this.__mode = 'dom';
     });
-    this.__enterARButton = shadowRoot.querySelector('.enter-ar');
-    this.__enterARButton.addEventListener('click', e => {
+    this.__enterARElement.addEventListener('click', e => {
       e.preventDefault();
       this.enterAR();
     });
@@ -53389,20 +53416,34 @@ class XRModelElement extends HTMLElement {
       case 'vignette':
         this.__modelView.setVignette(this.getAttribute('vignette') !== null);
         break;
+      case 'poster':
+        this.__updatePoster(newVal);
+        break;
     }
   }
   __updateSource() {
     const source = getWebGLSource(this) || {};
     this.__modelView.setModelSource(source.src, source.type);
   }
+  __updatePoster(src) {
+    if (src) {
+      if (!this.__userInput) {
+        this.__posterElement.classList.add('show');
+      }
+      this.__posterElement.setAttribute('src', src);
+    } else {
+      this.__posterElement.removeAttribute('src');
+      this.__posterElement.classList.remove('show');
+    }
+  }
   __updateARButtonVisibility() {
     if (this.getAttribute('ar') === null) {
-      this.__enterARButton.style.display = 'none';
+      this.__enterARElement.style.display = 'none';
     } else {
       if (IS_IOS && getiOSSource(this)) {
-        this.__enterARButton.style.display = 'block';
+        this.__enterARElement.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
-        this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');
+        this.__modelView.whenARReady().then(() => this.__enterARElement.style.display = 'block');
       }
     }
   }

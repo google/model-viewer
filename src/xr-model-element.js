@@ -35,6 +35,7 @@ export default class XRModelElement extends HTMLElement {
       'auto-rotate',
       'background-color',
       'vignette',
+      'poster',
     ];
   }
 
@@ -47,13 +48,34 @@ export default class XRModelElement extends HTMLElement {
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
 
+    this.__posterElement = shadowRoot.querySelector('.poster');
+    this.__canvasElement = shadowRoot.querySelector('canvas');
+    this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
+    this.__enterARElement = shadowRoot.querySelector('.enter-ar');
+
     // Create the underlying ModelView app.
     const { width, height } = this.getBoundingClientRect();
     this.__modelView = new ModelView({
-      canvas: shadowRoot.querySelector('canvas'),
+      canvas: this.__canvasElement,
       width,
       height,
     });
+
+    // Tracks whether or not the user has interacted with this element;
+    // used to determine whether or not to display a poster image or 
+    // to load the model if not preloaded.
+    this.__userInput = false;
+
+    // Fired when a user first clicks the model element. Used to
+    // change the visibility of a poster image, or start loading
+    // a model.
+    this.addEventListener('click', () => {
+      // Hide the poster always whether it exists or not
+      this.__posterElement.classList.remove('show');
+      this.__clickToViewElement.classList.remove('show');
+
+      this.__userInput = true;
+    }, { once: true });
 
     this.__mode = 'dom';
     this.__modelView.addEventListener('enter-ar', () => {
@@ -64,8 +86,7 @@ export default class XRModelElement extends HTMLElement {
     });
 
     // Set up the "Enter AR" button
-    this.__enterARButton = shadowRoot.querySelector('.enter-ar');
-    this.__enterARButton.addEventListener('click', e => {
+    this.__enterARElement.addEventListener('click', e => {
       e.preventDefault();
       this.enterAR();
     });
@@ -166,6 +187,9 @@ export default class XRModelElement extends HTMLElement {
       case 'vignette':
         this.__modelView.setVignette(this.getAttribute('vignette') !== null);
         break;
+      case 'poster':
+        this.__updatePoster(newVal);
+        break;
     }
   }
 
@@ -179,6 +203,25 @@ export default class XRModelElement extends HTMLElement {
   }
 
   /**
+   * Called when the `poster` attribute changes. Display
+   * the poster image if it's valid and the user has not interacted
+   * with the content yet.
+   *
+   * @param {?String} src
+   */
+  __updatePoster(src) {
+    if (src) {
+      if (!this.__userInput) {
+        this.__posterElement.classList.add('show');
+      }
+      this.__posterElement.setAttribute('src', src);
+    } else {
+      this.__posterElement.removeAttribute('src');
+      this.__posterElement.classList.remove('show');
+    }
+  }
+
+  /**
    * Updates the visibility of the AR button based off of attributes
    * and platform.
    */
@@ -187,12 +230,12 @@ export default class XRModelElement extends HTMLElement {
     // see if AR is supported, and if so, display the button after
     // an XRDevice has been initialized
     if (this.getAttribute('ar') === null) {
-      this.__enterARButton.style.display = 'none';
+      this.__enterARElement.style.display = 'none';
     } else {
       if (IS_IOS && getiOSSource(this)) {
-        this.__enterARButton.style.display = 'block';
+        this.__enterARElement.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
-        this.__modelView.whenARReady().then(() => this.__enterARButton.style.display = 'block');
+        this.__modelView.whenARReady().then(() => this.__enterARElement.style.display = 'block');
       }
     }
   }

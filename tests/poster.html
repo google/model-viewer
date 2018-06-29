@@ -30,15 +30,23 @@
         <h1>XRModelElement - Poster</h1>
         <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>poster</code> attribute.</p>
 
-        <h2>Poster with Model</h2>
+        <h2>Poster with model</h2>
         <pre class="language-markup">
 <code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
         <xr-model poster="assets/poster.png" src="assets/Astronaut.glb">
         </xr-model>
+        
+        <h2>Invalid poster with model</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model poster=&quot;assets/i-do-not-exist.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model poster="assets/i-do-not-exist.png" src="assets/Astronaut.glb">
+        </xr-model>
 
-        <h2>Poster with no Model</h2>
+        <h2>Poster with no model</h2>
         <pre class="language-markup">
 <code>&lt;xr-model poster=&quot;assets/poster.png&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
@@ -46,7 +54,7 @@
         <xr-model poster="assets/poster.png">
         </xr-model>
 
-        <h2>Poster with invalid Model</h2>
+        <h2>Poster with invalid model</h2>
         <pre class="language-markup">
 <code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/i-do-not-exist.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>

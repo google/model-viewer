@@ -15,6 +15,8 @@
 
 import ARKitSVG from './assets/arkit-glyph.svg';
 
+const CLICK_TO_VIEW_TEXT = 'Select to view 3D content.';
+
 const template = document.createElement('template');
 template.innerHTML = `
   <style>
@@ -24,6 +26,23 @@ template.innerHTML = `
     .container {
       position: relative;
     }
+    .poster {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      display: none;
+    }
+    .poster.show {
+      display: block;
+    }
+
+    .click-to-view {
+      display: none;
+    }
+    .click-to-view.show {
+      display: block;
+    }
+
     a.enter-ar {
       width: 75px;
       height: 75px;
@@ -60,6 +79,8 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARKitSVG}
     </a>
+    <img class="poster"/>
+    <div class="click-to-view">${CLICK_TO_VIEW_TEXT}</div>
     <canvas></canvas>
   </div>
   <slot></slot>
