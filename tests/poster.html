@@ -37,7 +37,23 @@
         </pre>
         <xr-model poster="assets/poster.png" src="assets/Astronaut.glb">
         </xr-model>
-    </div>
+
+        <h2>Poster with no Model</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model poster=&quot;assets/poster.png&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model poster="assets/poster.png">
+        </xr-model>
+
+        <h2>Poster with invalid Model</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/i-do-not-exist.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model poster="assets/poster.png">
+        </xr-model>
+
     </div>
     <script src="../dist/xr-model-element.js"></script>
     <script src="../third_party/prism/prism.js"></script>
