@@ -37,7 +37,7 @@
         </pre>
         <xr-model poster="assets/poster.png" src="assets/Astronaut.glb">
         </xr-model>
-        
+
         <h2>Invalid poster with model</h2>
         <pre class="language-markup">
 <code>&lt;xr-model poster=&quot;assets/i-do-not-exist.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
@@ -62,7 +62,24 @@
         <xr-model poster="assets/poster.png">
         </xr-model>
 
+        <h2>Poster toggling between two different posters (2s timer)</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model id="toggle-model" poster="assets/poster.png" src="assets/Astronaut.glb">
+        </xr-model>
+
     </div>
+    <script>
+        setInterval(() => {
+            const toggleModel = document.querySelector('#toggle-model');
+            const poster = toggleModel.getAttribute('poster');
+            toggleModel.setAttribute('poster', poster === 'assets/poster.png' ?
+                                               'assets/poster2.png' :
+                                               'assets/poster.png');
+        }, 2000);
+    </script>
     <script src="../dist/xr-model-element.js"></script>
     <script src="../third_party/prism/prism.js"></script>
 </body>

@@ -1,0 +1,69 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>XRModelElement - Preload</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link href="../third_party/prism/prism.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
+  <link type="text/css" href="style.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="container">
+        <h1>XRModelElement - Preload</h1>
+        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>preload</code> attribute.</p>
+
+        <h2>Preload with poster</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model preload poster="assets/poster.png" src="assets/Astronaut.glb">
+        </xr-model>
+
+        <h2>Preload with poster, no model</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model preload poster=&quot;assets/poster.png&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model preload poster="assets/poster.png">
+        </xr-model>
+
+        <h2>Preload with no poster</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model preload src="assets/Astronaut.glb">
+        </xr-model>
+
+        <h2>Preload with no poster, no model</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model preload&gt;</code>
+<code>&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model preload>
+        </xr-model>
+
+    </div>
+    <script src="../dist/xr-model-element.js"></script>
+    <script src="../third_party/prism/prism.js"></script>
+</body>
+</html>

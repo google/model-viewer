@@ -36,6 +36,7 @@ export default class XRModelElement extends HTMLElement {
       'background-color',
       'vignette',
       'poster',
+      'preload',
     ];
   }
 
@@ -48,6 +49,7 @@ export default class XRModelElement extends HTMLElement {
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
 
+    this.__containerElement = shadowRoot.querySelector('.container');
     this.__posterElement = shadowRoot.querySelector('.poster');
     this.__canvasElement = shadowRoot.querySelector('canvas');
     this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
@@ -62,7 +64,7 @@ export default class XRModelElement extends HTMLElement {
     });
 
     // Tracks whether or not the user has interacted with this element;
-    // used to determine whether or not to display a poster image or 
+    // used to determine whether or not to display a poster image or
     // to load the model if not preloaded.
     this.__userInput = false;
 
@@ -73,8 +75,11 @@ export default class XRModelElement extends HTMLElement {
       // Hide the poster always whether it exists or not
       this.__posterElement.classList.remove('show');
       this.__clickToViewElement.classList.remove('show');
-
       this.__userInput = true;
+
+      // Update the source so it can start loading if
+      // not preloaded
+      this.__updateSource();
     }, { once: true });
 
     this.__mode = 'dom';
@@ -104,6 +109,9 @@ export default class XRModelElement extends HTMLElement {
     // Update the sources on construction
     this.__updateSource(this);
 
+    // Update initial size
+    this.__updateSize(this.getBoundingClientRect(), true);
+
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
     this.resizeObserver = new ResizeObserver(entries => {
@@ -115,11 +123,7 @@ export default class XRModelElement extends HTMLElement {
       }
       for (let entry of entries) {
         if (entry.target === this) {
-          const { width, height } = this.__modelView.getSize();
-          if (entry.contentRect.width !== width ||
-              entry.contentRect.height !== height) {
-            this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
-          }
+          this.__updateSize(entry.contentRect);
         }
       }
     });
@@ -190,16 +194,25 @@ export default class XRModelElement extends HTMLElement {
       case 'poster':
         this.__updatePoster(newVal);
         break;
+      case 'poster':
+        this.__updateSource();
+        break;
     }
   }
 
   /**
    * Parses the element for an appropriate source URL and
-   * sets the views to use the new model.
+   * sets the views to use the new model based off of the `preload`
+   * attribute.
    */
   __updateSource() {
+    const preload = this.getAttribute('preload');
     const source = getWebGLSource(this) || {};
-    this.__modelView.setModelSource(source.src, source.type);
+
+    if (preload !== null || this.__userInput) {
+      this.__canvasElement.classList.add('show');
+      this.__modelView.setModelSource(source.src, source.type);
+    }
   }
 
   /**
@@ -213,11 +226,25 @@ export default class XRModelElement extends HTMLElement {
     if (src) {
       if (!this.__userInput) {
         this.__posterElement.classList.add('show');
+        this.__clickToViewElement.classList.add('show');
       }
       this.__posterElement.setAttribute('src', src);
     } else {
       this.__posterElement.removeAttribute('src');
       this.__posterElement.classList.remove('show');
+    }
+  }
+
+  /**
+   * Called on initialization and when the resize observer fires.
+   */
+  __updateSize({ width, height }, forceApply) {
+    const { width: prevWidth, height: prevHeight } = this.__modelView.getSize();
+
+    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
+      this.__containerElement.style.width = `${width}px`;
+      this.__containerElement.style.height = `${height}px`;
+      this.__modelView.setSize(width, height);
     }
   }
 

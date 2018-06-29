@@ -46,7 +46,8 @@ The base element for rendering 3D models.
 #### Attributes
 
 * *`src`*: The URL to the 3D model. **It's recommended to use children `<source>` elements documented below to support all platforms and explicitly define types.**
-* *`poster`*: Displays an image instead of the model until user interaction. Best when combined with `preload='none'`.
+* *`preload`*: Whether or not the user must select the element first before the model begins to download. Keep in mind models can be heavy on bandwidth and use preloading with caution.
+* *`poster`*: Displays an image instead of the model until user interaction.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
 * *`ar`*: Enables the option to enter AR and place the 3D model in the real world if the platform supports it.
 * *`background-color`*: Sets the background color of the flat view. Takes any valid CSS color string.

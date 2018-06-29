@@ -38,6 +38,14 @@ template.innerHTML = `
 
     .click-to-view {
       display: none;
+      position: absolute;
+      z-index: 9999;
+      width: 100%;
+      margin: 0 auto;
+      bottom: 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: white;
+      font-size: 120%;
     }
     .click-to-view.show {
       display: block;
@@ -71,6 +79,9 @@ template.innerHTML = `
     canvas {
       width: 100%;
       height: 100%;
+      display: none;
+    }
+    canvas.show {
       display: block;
     }
   </style>
@@ -79,8 +90,8 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARKitSVG}
     </a>
-    <img class="poster"/>
     <div class="click-to-view">${CLICK_TO_VIEW_TEXT}</div>
+    <img class="poster"/>
     <canvas></canvas>
   </div>
   <slot></slot>

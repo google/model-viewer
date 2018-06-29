@@ -53269,6 +53269,14 @@ template.innerHTML = `
 
     .click-to-view {
       display: none;
+      position: absolute;
+      z-index: 9999;
+      width: 100%;
+      margin: 0 auto;
+      bottom: 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: white;
+      font-size: 120%;
     }
     .click-to-view.show {
       display: block;
@@ -53302,6 +53310,9 @@ template.innerHTML = `
     canvas {
       width: 100%;
       height: 100%;
+      display: none;
+    }
+    canvas.show {
       display: block;
     }
   </style>
@@ -53310,8 +53321,8 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARKitSVG}
     </a>
-    <img class="poster"/>
     <div class="click-to-view">${CLICK_TO_VIEW_TEXT}</div>
+    <img class="poster"/>
     <canvas></canvas>
   </div>
   <slot></slot>
@@ -53327,12 +53338,14 @@ class XRModelElement extends HTMLElement {
       'background-color',
       'vignette',
       'poster',
+      'preload',
     ];
   }
   constructor() {
     super();
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
+    this.__containerElement = shadowRoot.querySelector('.container');
     this.__posterElement = shadowRoot.querySelector('.poster');
     this.__canvasElement = shadowRoot.querySelector('canvas');
     this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
@@ -53348,6 +53361,7 @@ class XRModelElement extends HTMLElement {
       this.__posterElement.classList.remove('show');
       this.__clickToViewElement.classList.remove('show');
       this.__userInput = true;
+      this.__updateSource();
     }, { once: true });
     this.__mode = 'dom';
     this.__modelView.addEventListener('enter-ar', () => {
@@ -53367,17 +53381,14 @@ class XRModelElement extends HTMLElement {
       subtree: true,
     });
     this.__updateSource(this);
+    this.__updateSize(this.getBoundingClientRect(), true);
     this.resizeObserver = new index(entries => {
       if (this.__mode === 'ar') {
         return;
       }
       for (let entry of entries) {
         if (entry.target === this) {
-          const { width, height } = this.__modelView.getSize();
-          if (entry.contentRect.width !== width ||
-              entry.contentRect.height !== height) {
-            this.__modelView.setSize(entry.contentRect.width, entry.contentRect.height);
-          }
+          this.__updateSize(entry.contentRect);
         }
       }
     });
@@ -53419,21 +53430,37 @@ class XRModelElement extends HTMLElement {
       case 'poster':
         this.__updatePoster(newVal);
         break;
+      case 'poster':
+        this.__updateSource();
+        break;
     }
   }
   __updateSource() {
+    const preload = this.getAttribute('preload');
     const source = getWebGLSource(this) || {};
-    this.__modelView.setModelSource(source.src, source.type);
+    if (preload !== null || this.__userInput) {
+      this.__canvasElement.classList.add('show');
+      this.__modelView.setModelSource(source.src, source.type);
+    }
   }
   __updatePoster(src) {
     if (src) {
       if (!this.__userInput) {
         this.__posterElement.classList.add('show');
+        this.__clickToViewElement.classList.add('show');
       }
       this.__posterElement.setAttribute('src', src);
     } else {
       this.__posterElement.removeAttribute('src');
       this.__posterElement.classList.remove('show');
+    }
+  }
+  __updateSize({ width, height }, forceApply) {
+    const { width: prevWidth, height: prevHeight } = this.__modelView.getSize();
+    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
+      this.__containerElement.style.width = `${width}px`;
+      this.__containerElement.style.height = `${height}px`;
+      this.__modelView.setSize(width, height);
     }
   }
   __updateARButtonVisibility() {
