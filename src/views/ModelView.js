@@ -41,6 +41,7 @@ export default class ModelView extends EventDispatcher {
 
     this.mode = null;
     this.updateModelScale = this.updateModelScale.bind(this);
+    this.onModelLoad = this.onModelLoad.bind(this);
     this.onAREnd = this.onAREnd.bind(this);
     this.onARStabilized = this.onARStabilized.bind(this);
 
@@ -54,7 +55,7 @@ export default class ModelView extends EventDispatcher {
 
     this.arView.addEventListener('end', this.onAREnd);
     this.arView.addEventListener('stabilized', this.onARStabilized);
-    this.model.addEventListener('model-load', this.updateModelScale);
+    this.model.addEventListener('model-load', this.onModelLoad);
     this.enterDOM();
   }
 
@@ -191,6 +192,14 @@ export default class ModelView extends EventDispatcher {
    */
   onARStabilized() {
     this.dispatchEvent({ type: 'stabilized' });
+  }
+
+  /**
+   * Called when a new model has been parsed and loaded.
+   */
+  onModelLoad() {
+    this.updateModelScale();
+    this.dispatchEvent({ type: 'model-load' });
   }
 
   /**

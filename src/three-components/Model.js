@@ -54,14 +54,16 @@ export default class Model extends Object3D {
       return;
     }
 
+    const data = await loadGLTF(this.loader, url);
+
+    // If parsing the GLTF does not throw, then clear out the current
+    // model and replace with the new.
     this.url = url;
     this.type = type;
     // Remove all current children
     while (this.children.length) {
       this.remove(this.children[0]);
     }
-
-    const data = await loadGLTF(this.loader, url);
 
     // data.animations = [];
     // data.cameras = [];

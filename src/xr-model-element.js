@@ -89,6 +89,9 @@ export default class XRModelElement extends HTMLElement {
     this.__modelView.addEventListener('enter-dom', () => {
       this.__mode = 'dom';
     });
+    this.__modelView.addEventListener('model-load', () => {
+      this.dispatchEvent(new Event('load'));
+    });
 
     // Set up the "Enter AR" button
     this.__enterARElement.addEventListener('click', e => {

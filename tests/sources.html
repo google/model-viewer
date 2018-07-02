@@ -82,6 +82,25 @@
         <xr-model src="assets/Astronaut.obj" preload background-color="#db3236"></xr-model>
         </xr-model>
 
+        <h2>Alternating between models (2s after model load)</h2>
+        <pre class="language-markup">
+<code>&lt;xr-model src=&quot;assets/Astronaut.glb&quot; controls preload background-color=&quot;#db3236&quot;&gt;&lt;/xr-model&gt;</code>
+        </pre>
+        <xr-model id="toggle-model" src="assets/Astronaut.glb" controls preload background-color="#db3236"></xr-model>
+        </xr-model>
+
+    <script>
+        const toggleModel = document.querySelector('#toggle-model');
+        toggleModel.addEventListener('load', () => {
+            const src = toggleModel.getAttribute('src');
+            setTimeout(() => {
+                toggleModel.setAttribute('src', src === 'assets/Astronaut.glb' ?
+                    'assets/shishkebab.glb' :
+                    'assets/Astronaut.glb');
+            }, 2000);
+        });
+    </script>
+
     </div>
     </div>
     <script src="../dist/xr-model-element.js"></script>

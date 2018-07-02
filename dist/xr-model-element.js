@@ -53130,12 +53130,12 @@ class Model extends Object3D {
     if (['model/gltf-binary', 'model/gltf+json'].indexOf(type) === -1) {
       return;
     }
+    const data = await loadGLTF(this.loader, url);
     this.url = url;
     this.type = type;
     while (this.children.length) {
       this.remove(this.children[0]);
     }
-    const data = await loadGLTF(this.loader, url);
     while (data.scene && data.scene.children.length) {
       this.add(data.scene.children.shift());
       this.traverse(obj => {
@@ -53156,6 +53156,7 @@ class ModelView extends EventDispatcher {
     this.height = height;
     this.mode = null;
     this.updateModelScale = this.updateModelScale.bind(this);
+    this.onModelLoad = this.onModelLoad.bind(this);
     this.onAREnd = this.onAREnd.bind(this);
     this.onARStabilized = this.onARStabilized.bind(this);
     const model = this.model = new Model();
@@ -53167,7 +53168,7 @@ class ModelView extends EventDispatcher {
     this.arView = new ARView({ canvas, context, model });
     this.arView.addEventListener('end', this.onAREnd);
     this.arView.addEventListener('stabilized', this.onARStabilized);
-    this.model.addEventListener('model-load', this.updateModelScale);
+    this.model.addEventListener('model-load', this.onModelLoad);
     this.enterDOM();
   }
   async setModelSource(source, type) {
@@ -53230,6 +53231,10 @@ class ModelView extends EventDispatcher {
   }
   onARStabilized() {
     this.dispatchEvent({ type: 'stabilized' });
+  }
+  onModelLoad() {
+    this.updateModelScale();
+    this.dispatchEvent({ type: 'model-load' });
   }
   updateModelScale() {
     if (this.mode === 'dom') {
@@ -53369,6 +53374,9 @@ class XRModelElement extends HTMLElement {
     });
     this.__modelView.addEventListener('enter-dom', () => {
       this.__mode = 'dom';
+    });
+    this.__modelView.addEventListener('model-load', () => {
+      this.dispatchEvent(new Event('load'));
     });
     this.__enterARElement.addEventListener('click', e => {
       e.preventDefault();
