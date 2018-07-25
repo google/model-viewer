@@ -89,8 +89,11 @@
 
 /**
  * @license
- * wagner
- * Copyright Alex Toudic 2016
+ * @jsantell/wagner
+ * Copyright (c) 2018 Jordan Santell
+ * Copyright (c) 2016 Alex Toudic
+ * Copyright (c) 2014 Jaume Sanchez
+ * All shaders are copyright of their respective authors.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

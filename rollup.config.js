@@ -18,10 +18,7 @@ const path = require('path');
 const rollup = require('rollup');
 const commonjs = require('rollup-plugin-commonjs');
 const resolve = require('rollup-plugin-node-resolve');
-const glsl = require('rollup-plugin-glsl');
-const json = require('rollup-plugin-json');
 const string = require('rollup-plugin-string');
-const alias = require('rollup-plugin-alias');
 const nodestdlib = require('rollup-plugin-node-builtins');
 const cleanup = require('rollup-plugin-cleanup');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
@@ -45,23 +42,6 @@ export default {
       // ~45kb in filesize alone... but takes 2 minutes to build
       include: ['src/**'],
       comments: 'none',
-    }),
-   json({
-      include: ['src/**', 'third_party/**'],
-      exclude: ['node_modules/**'],
-    }),
-    alias({
-      'three': path.join(__dirname, 'third_party', 'three', 'three.module.js'),
-      'orbit-controls': path.join(__dirname, 'third_party', 'three', 'OrbitControls.js'),
-      'gltf-loader': path.join(__dirname, 'third_party', 'three', 'GLTFLoader.js'),
-      'wagner': path.join(__dirname, 'third_party', 'wagner'),
-    }),
-    glsl({
-      include: ['src/**/*.vert', 'src/**/*.frag', 'src/**/*.glsl',
-                'third_party/wagner/**/*.vert',
-                'third_party/wagner/**/*.frag',
-                'third_party/wagner/**/*.glsl'],
-      sourceMap: false,
     }),
     string({
       include: '**/*.svg',

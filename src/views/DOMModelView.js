@@ -25,11 +25,11 @@ import {
   Color,
 } from 'three';
 
-import Composer from 'wagner/src/Composer.js';
-import VignettePass from 'wagner/src/passes/vignette/VignettePass.js';
-import FXAAPass from 'wagner/src/passes/fxaa/FXAAPass.js';
+import { Composer } from '@jsantell/wagner';
+import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
+import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import Shadow from '../three-components/Shadow.js';
-import OrbitControls from 'orbit-controls';
+import OrbitControls from '../../third_party/three/OrbitControls.js';
 
 import { isMobile } from '../utils.js';
 
@@ -99,7 +99,10 @@ export default class DOMModelView {
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};
-    this.vignettePass = new VignettePass(1.1, 0.7);
+    this.vignettePass = new VignettePass({
+      boost: 1.1,
+      reduction: 0.7
+    });
     this.fxaaPass = new FXAAPass();
     this.passes = [
       this.vignettePass,
