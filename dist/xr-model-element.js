@@ -52551,6 +52551,11 @@ class Model extends Object3D {
   constructor() {
     super();
     this.loader = new GLTFLoader();
+    this.modelContainer = new Object3D();
+    this.add(this.modelContainer);
+  }
+  hasModel() {
+    return !!this.modelContainer.children.length;
   }
   async setSource(url, type) {
     if (!url || !type) {
@@ -52565,17 +52570,17 @@ class Model extends Object3D {
     const data = await loadGLTF(this.loader, url);
     this.url = url;
     this.type = type;
-    while (this.children.length) {
-      this.remove(this.children[0]);
+    while (this.modelContainer.children.length) {
+      this.modelContainer.remove(this.modelContainer.children[0]);
     }
     while (data.scene && data.scene.children.length) {
-      this.add(data.scene.children.shift());
-      this.traverse(obj => {
-        if (obj && obj.type === 'Mesh') {
-          obj.castShadow = true;
-        }
-      });
+      this.modelContainer.add(data.scene.children.shift());
     }
+    this.modelContainer.traverse(obj => {
+      if (obj && obj.type === 'Mesh') {
+        obj.castShadow = true;
+      }
+    });
     this.dispatchEvent({ type: 'model-load' });
   }
 }
