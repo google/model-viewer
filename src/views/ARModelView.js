@@ -55,6 +55,8 @@ export default class ARView extends EventDispatcher {
       this._devicePromise = navigator.xr.requestDevice();
       this._devicePromise.then(device => this.device = device);
     }
+
+    this.model.addEventListener('model-load', () => this.updateModelScale());
   }
 
   /**
@@ -82,6 +84,15 @@ export default class ARView extends EventDispatcher {
     return this.hasAR() ? this._devicePromise : Promise.reject();
   }
 
+  updateModelScale() {
+    if (!this.enabled) {
+      return;
+    }
+    this.model.position.set(0, 0, 0);
+    this.model.rotation.set(0, 0, 0);
+    this.model.scale.set(1, 1, 1);
+  }
+
   /**
    * Starts rendering the AR viewer.
    *
@@ -103,6 +114,8 @@ export default class ARView extends EventDispatcher {
     this._setupRenderer();
     this._showCanvas();
     this._enterFullscreen();
+
+    this.updateModelScale();
 
     return this._setupSession().then(() => {
       this._tick();
@@ -238,6 +251,7 @@ export default class ARView extends EventDispatcher {
    */
   async _setupSession() {
     this.session = await this.device.requestSession({
+      environmentIntegration: true,
       outputContext: this.outputContext,
     });
 

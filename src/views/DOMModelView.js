@@ -31,8 +31,10 @@ import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import Shadow from '../three-components/Shadow.js';
 import OrbitControls from '../../third_party/three/OrbitControls.js';
 
-import { isMobile } from '../utils.js';
+import { isMobile, setScaleFromLimit } from '../utils.js';
 
+
+const BOUNDING_BOX_SIZE = 10;
 const USE_POST_PROCESSING = !isMobile();
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
@@ -108,6 +110,8 @@ export default class DOMModelView {
       this.vignettePass,
       this.fxaaPass,
     ];
+
+    this.model.addEventListener('model-load', () => this.updateModelScale());
   }
 
   /**
@@ -117,6 +121,10 @@ export default class DOMModelView {
     this.enabled = true;
     this.scene.add(this.model);
     this.renderer.setFramebuffer(null);
+
+    // Update size and model scale
+    this.setSize(this.width, this.height);
+
     this._tick();
   }
 
@@ -135,6 +143,8 @@ export default class DOMModelView {
    * @param {number} height
    */
   setSize(width, height) {
+    this.width = width;
+    this.height = height;
     if (!this.enabled) {
       return;
     }
@@ -144,6 +154,18 @@ export default class DOMModelView {
     this.camera.updateProjectionMatrix();
     this.orbitCamera.aspect = width / height;
     this.orbitCamera.updateProjectionMatrix();
+
+    this.updateModelScale();
+  }
+
+  updateModelScale() {
+    if (!this.enabled) {
+      return;
+    }
+    this.model.position.set(0, 0, 0);
+    this.model.rotation.set(0, 0, 0);
+    this.model.scale.set(1, 1, 1);
+    setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
   }
 
   /**

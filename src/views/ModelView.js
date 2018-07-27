@@ -40,7 +40,6 @@ export default class ModelView extends EventDispatcher {
     this.height = height;
 
     this.mode = null;
-    this.updateModelScale = this.updateModelScale.bind(this);
     this.onModelLoad = this.onModelLoad.bind(this);
     this.onAREnd = this.onAREnd.bind(this);
     this.onARStabilized = this.onARStabilized.bind(this);
@@ -102,7 +101,6 @@ export default class ModelView extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.domView.setSize(width, height);
-    this.updateModelScale();
   }
 
   /**
@@ -123,9 +121,7 @@ export default class ModelView extends EventDispatcher {
   enterDOM() {
     this.mode = 'dom';
     this.arView.stop();
-    this.resetModel();
     this.domView.start();
-    this.domView.setSize(this.width, this.height);
     this.dispatchEvent({ type: 'enter-dom' });
   }
 
@@ -139,7 +135,6 @@ export default class ModelView extends EventDispatcher {
 
     this.mode = 'ar';
     this.domView.stop();
-    this.resetModel();
     this.arView.start();
     this.dispatchEvent({ type: 'enter-ar' });
   }
@@ -198,30 +193,6 @@ export default class ModelView extends EventDispatcher {
    * Called when a new model has been parsed and loaded.
    */
   onModelLoad() {
-    this.updateModelScale();
     this.dispatchEvent({ type: 'model-load' });
-  }
-
-  /**
-   * Updates the scale of the model, called when a new model is loaded,
-   * or when switching modes. In the DOM view, we want it to fit as large
-   * as it can within a cube of BOUNDING_BOX_SIZE, and for AR, we want it
-   * to be the original scale.
-   */
-  updateModelScale() {
-    if (this.mode === 'dom') {
-      setScaleFromLimit(BOUNDING_BOX_SIZE, this.model);
-    } else {
-      this.model.scale.set(1, 1, 1);
-    }
-  }
-
-  /**
-   * Resets the models scale, position and rotation.
-   */
-  resetModel() {
-    this.model.position.set(0, 0, 0);
-    this.model.rotation.set(0, 0, 0);
-    this.updateModelScale();
   }
 }
