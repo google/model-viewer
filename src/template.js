@@ -22,6 +22,8 @@ template.innerHTML = `
   <style>
     :host {
       display: block;
+      width: 300px;
+      height: 150px;
     }
     .container {
       position: relative;
