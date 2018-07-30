@@ -33,6 +33,7 @@ template.innerHTML = `
       height: 100%;
       position: absolute;
       display: none;
+      background-size: cover;
     }
     .poster.show {
       display: block;
@@ -93,7 +94,7 @@ template.innerHTML = `
       ${ARKitSVG}
     </a>
     <div class="click-to-view show">${CLICK_TO_VIEW_TEXT}</div>
-    <img class="poster"/>
+    <div class="poster"></div>
     <canvas></canvas>
   </div>
   <slot></slot>

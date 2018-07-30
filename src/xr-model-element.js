@@ -232,9 +232,9 @@ export default class XRModelElement extends HTMLElement {
         this.__posterElement.classList.add('show');
         this.__clickToViewElement.classList.add('show');
       }
-      this.__posterElement.setAttribute('src', src);
+      this.__posterElement.style.backgroundImage = `url("${src}")`;
     } else {
-      this.__posterElement.removeAttribute('src');
+      this.__posterElement.style.backgroundImage = '';
       this.__posterElement.classList.remove('show');
     }
   }

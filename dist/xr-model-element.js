@@ -52687,6 +52687,7 @@ template.innerHTML = `
       height: 100%;
       position: absolute;
       display: none;
+      background-size: cover;
     }
     .poster.show {
       display: block;
@@ -52747,7 +52748,7 @@ template.innerHTML = `
       ${ARKitSVG}
     </a>
     <div class="click-to-view show">${CLICK_TO_VIEW_TEXT}</div>
-    <img class="poster"/>
+    <div class="poster"></div>
     <canvas></canvas>
   </div>
   <slot></slot>
@@ -52878,9 +52879,9 @@ class XRModelElement extends HTMLElement {
         this.__posterElement.classList.add('show');
         this.__clickToViewElement.classList.add('show');
       }
-      this.__posterElement.setAttribute('src', src);
+      this.__posterElement.style.backgroundImage = `url("${src}")`;
     } else {
-      this.__posterElement.removeAttribute('src');
+      this.__posterElement.style.backgroundImage = '';
       this.__posterElement.classList.remove('show');
     }
   }
