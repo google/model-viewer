@@ -32,11 +32,13 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       position: absolute;
-      display: none;
       background-size: cover;
+      opacity: 0;
+      transition: opacity 1s;
     }
+
     .poster.show {
-      display: block;
+      opacity: 1;
     }
 
     .click-to-view {

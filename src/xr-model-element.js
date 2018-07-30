@@ -83,6 +83,11 @@ export default class XRModelElement extends HTMLElement {
     }, { once: true });
 
     this.__mode = 'dom';
+
+    // Keeps track whether the model is loaded or not; refreshes
+    // when updating `src`.
+    this.__loaded = false;
+
     this.__modelView.addEventListener('enter-ar', () => {
       this.__mode = 'ar';
     });
@@ -90,6 +95,11 @@ export default class XRModelElement extends HTMLElement {
       this.__mode = 'dom';
     });
     this.__modelView.addEventListener('model-load', () => {
+      // Hide the poster always whether it exists or not
+      this.__posterElement.classList.remove('show');
+      this.__clickToViewElement.classList.remove('show');
+      this.__loaded = true;
+
       this.dispatchEvent(new Event('load'));
     });
 
@@ -228,7 +238,7 @@ export default class XRModelElement extends HTMLElement {
    */
   __updatePoster(src) {
     if (src) {
-      if (!this.__userInput) {
+      if (!this.__loaded && !this.__userInput) {
         this.__posterElement.classList.add('show');
         this.__clickToViewElement.classList.add('show');
       }

@@ -39739,9 +39739,9 @@ var TEXTURE_FILTER = {
 };
 
 /**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * minimal class for proxing functions to Path. Replaces old "extractSubpaths()"
- **/
+ * @author thespite / http://clicktorelease.com/
+ */
+
 
 function ShapePath() {
 
@@ -46226,7 +46226,9 @@ function AxesHelper( size ) {
 AxesHelper.prototype = Object.create( LineSegments.prototype );
 AxesHelper.prototype.constructor = AxesHelper;
 
-//
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 Curve.create = function ( construct, getPoint ) {
 
@@ -46331,6 +46333,8 @@ Object.assign( Spline.prototype, {
 
 } );
 
+//
+
 GridHelper.prototype.setColors = function () {
 
 	console.error( 'THREE.GridHelper: setColors() has been deprecated, pass them in the constructor instead.' );
@@ -46343,8 +46347,6 @@ SkeletonHelper.prototype.update = function () {
 
 };
 
-//
-
 Object.assign( Loader.prototype, {
 
 	extractUrlBase: function ( url ) {
@@ -46355,8 +46357,6 @@ Object.assign( Loader.prototype, {
 	}
 
 } );
-
-//
 
 Object.assign( Box2.prototype, {
 
@@ -47647,6 +47647,8 @@ CubeCamera.prototype.updateCubeMap = function ( renderer, scene ) {
 	return this.update( renderer, scene );
 
 };
+
+//
 
 'use strict';
 
@@ -49146,8 +49148,6 @@ Object.defineProperties( OrbitControls.prototype, {
 // must be no slashes, empty elements, or device names (c:\) in the array
 // (so also no leading and trailing slashes - it does not distinguish
 // relative and absolute paths)
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
 var splitPathRe =
     /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
 var splitPath = function(filename) {
@@ -49184,7 +49184,6 @@ var splitPath = function(filename) {
 function extname(path) {
   return splitPath(path)[3];
 }
-// String.prototype.substr - negative index don't work in IE8
 var substr = 'ab'.substr(-1) === 'b' ?
     function (str, start, len) { return str.substr(start, len) } :
     function (str, start, len) {
@@ -52686,11 +52685,13 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       position: absolute;
-      display: none;
       background-size: cover;
+      opacity: 0;
+      transition: opacity 1s;
     }
+
     .poster.show {
-      display: block;
+      opacity: 1;
     }
 
     .click-to-view {
@@ -52790,6 +52791,7 @@ class XRModelElement extends HTMLElement {
       this.__updateSource();
     }, { once: true });
     this.__mode = 'dom';
+    this.__loaded = false;
     this.__modelView.addEventListener('enter-ar', () => {
       this.__mode = 'ar';
     });
@@ -52797,6 +52799,9 @@ class XRModelElement extends HTMLElement {
       this.__mode = 'dom';
     });
     this.__modelView.addEventListener('model-load', () => {
+      this.__posterElement.classList.remove('show');
+      this.__clickToViewElement.classList.remove('show');
+      this.__loaded = true;
       this.dispatchEvent(new Event('load'));
     });
     this.__enterARElement.addEventListener('click', e => {
@@ -52875,7 +52880,7 @@ class XRModelElement extends HTMLElement {
   }
   __updatePoster(src) {
     if (src) {
-      if (!this.__userInput) {
+      if (!this.__loaded && !this.__userInput) {
         this.__posterElement.classList.add('show');
         this.__clickToViewElement.classList.add('show');
       }
