@@ -17,6 +17,17 @@ import {extname} from 'path';
 import {Box3, Vector3} from 'three';
 
 /**
+ * Converts a partial URL string to a fully qualified URL string.
+ *
+ * @param {String} url
+ * @return {String}
+ */
+export const toFullUrl = (partialUrl) => {
+  const url = new URL(partialUrl, window.location.toString());
+  return url.toString();
+};
+
+/**
  * Takes a URL to a USDZ file and sets the appropriate
  * fields so that Safari iOS can intent to their
  * AR Quick Look.
@@ -49,80 +60,16 @@ export const relativeToAbsoluteURL = (function() {
 })();
 
 /**
- * Takes a string of a filename, like "model.usdz",
- * and returns the MIME-type based off of the file extension.
- * Used as a backup if MIME-type isn't explicitly defined.
- *
- * @param {String} name
- * @return {?String}
- */
-export const getTypeFromName = (name = '') => {
-  const ext = extname(name).toLowerCase();
-
-  switch (ext) {
-    case '.glb':
-      return 'model/gltf-binary';
-    case '.gltf':
-      return 'model/gltf+json';
-    case '.usdz':
-      return 'model/vnd.usd+zip';
-    default:
-      return undefined;
-  }
-};
-
-/**
- * Return a URL for the best asset to use from an xr-model element
- * using the element's <source> children and its `src` attribute.
- * Takes an array of accepted MIME types. Returns `null` if no
- * match found, otherwise an object with `src` and `type` values.
- *
- * @param {HTMLElement} element
- * @param {Array<String>} acceptedTypes
- * @return {?Object}
- */
-export const getModelSource = (element, acceptedTypes) => {
-  // If the <xr-model> has a `src` attribute, use that,
-  // and infer the type.
-  const rootSrc = element.getAttribute('src');
-  if (rootSrc) {
-    const src = relativeToAbsoluteURL(rootSrc);
-    const type = getTypeFromName(rootSrc);
-
-    if (acceptedTypes.indexOf(type) !== -1) {
-      return {src, type};
-    }
-    // If the `src` attribute is not a valid type, do not check
-    // any children <source> elements.
-    else {
-      return null;
-    }
-  }
-
-  const sources = element.querySelectorAll('source');
-
-  for (let source of sources) {
-    const src = relativeToAbsoluteURL(source.getAttribute('src'));
-    const type = source.getAttribute('type') || getTypeFromName(src);
-
-    if (acceptedTypes.indexOf(type) !== -1) {
-      return {src, type};
-    }
-  }
-
-  return null;
-};
-
-/**
  * Return a URL and type of the best source from
  * an XRModelElement for use with rendering within THREE/WebGL
  * in flat mode as well in WebXR+AR mode.
  *
  * @param {HTMLElement} element
- * @return {?Object}
+ * @return {?String} A string representing the URL of a GLTF/GLB file
  */
 export const getWebGLSource = (element) => {
-  return getModelSource(element, ['model/gltf-binary', 'model/gltf+json']);
+  return element.hasAttribute('src') ? toFullUrl(element.getAttribute('src')) :
+                                       null;
 };
 
 /**
@@ -133,7 +80,9 @@ export const getWebGLSource = (element) => {
  * @return {?Object}
  */
 export const getiOSSource = (element) => {
-  return getModelSource(element, ['model/vnd.usd+zip']);
+  return element.hasAttribute('ios-src') ?
+      toFullUrl(element.getAttribute('ios-src')) :
+      null;
 };
 
 /**

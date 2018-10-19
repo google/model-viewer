@@ -108,19 +108,8 @@ export default class XRModelElement extends HTMLElement {
       this.enterAR();
     });
 
-    // Observe changes in this element, mainly for new <source> children,
-    // or <source> changes. Update underlying ModelView if a new source
-    // file becomes valid.
-    this.mutationObserver =
-        new MutationObserver(() => this.__updateSource(this));
-    this.mutationObserver.observe(this, {
-      childList: true,
-      attributes: true,
-      subtree: true,
-    });
-
     // Update the sources on construction
-    this.__updateSource(this);
+    this.__updateSource();
 
     // Update initial size
     this.__updateSize(this.getBoundingClientRect(), true);
@@ -220,11 +209,15 @@ export default class XRModelElement extends HTMLElement {
    */
   __updateSource() {
     const preload = this.getAttribute('preload');
-    const source = getWebGLSource(this) || {};
+    const source = getWebGLSource(this);
+
+    if (source == null) {
+      return;
+    }
 
     if (preload !== null || this.__userInput) {
       this.__canvasElement.classList.add('show');
-      this.__modelView.setModelSource(source.src, source.type);
+      this.__modelView.setModelSource(source);
       this.__clickToViewElement.classList.remove('show');
     }
   }

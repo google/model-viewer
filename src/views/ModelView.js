@@ -66,9 +66,9 @@ export default class ModelView extends EventDispatcher {
    * @param {String} source
    * @param {?String} type
    */
-  async setModelSource(source, type) {
+  async setModelSource(source) {
     try {
-      await this.model.setSource(source, type);
+      await this.model.setSource(source);
     } catch (e) {
       console.error(`Could not set model source: ${source}`);
     }
