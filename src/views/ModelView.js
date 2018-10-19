@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import { EventDispatcher } from 'three';
-import DOMModelView from './DOMModelView.js';
-import ARModelView from './ARModelView.js';
+import {EventDispatcher} from 'three';
+
 import Model from '../three-components/Model.js';
-import { setScaleFromLimit } from '../utils.js';
+import {setScaleFromLimit} from '../utils.js';
+
+import ARModelView from './ARModelView.js';
+import DOMModelView from './DOMModelView.js';
 
 const BOUNDING_BOX_SIZE = 10;
 
@@ -33,7 +35,7 @@ export default class ModelView extends EventDispatcher {
    * @param {number} config.width
    * @param {number} config.height
    */
-  constructor({ canvas, width, height }) {
+  constructor({canvas, width, height}) {
     super();
 
     this.width = width;
@@ -49,8 +51,8 @@ export default class ModelView extends EventDispatcher {
       preserveDrawingBuffer: true,
       antialias: true,
     });
-    this.domView = new DOMModelView({ canvas, context, model, width, height });
-    this.arView = new ARModelView({ canvas, context, model });
+    this.domView = new DOMModelView({canvas, context, model, width, height});
+    this.arView = new ARModelView({canvas, context, model});
 
     this.arView.addEventListener('end', this.onAREnd);
     this.arView.addEventListener('stabilized', this.onARStabilized);
@@ -122,7 +124,7 @@ export default class ModelView extends EventDispatcher {
     this.mode = 'dom';
     this.arView.stop();
     this.domView.start();
-    this.dispatchEvent({ type: 'enter-dom' });
+    this.dispatchEvent({type: 'enter-dom'});
   }
 
   /**
@@ -136,7 +138,7 @@ export default class ModelView extends EventDispatcher {
     this.mode = 'ar';
     this.domView.stop();
     this.arView.start();
-    this.dispatchEvent({ type: 'enter-ar' });
+    this.dispatchEvent({type: 'enter-ar'});
   }
 
   /**
@@ -186,13 +188,13 @@ export default class ModelView extends EventDispatcher {
    * Called when a plane is found in AR mode.
    */
   onARStabilized() {
-    this.dispatchEvent({ type: 'stabilized' });
+    this.dispatchEvent({type: 'stabilized'});
   }
 
   /**
    * Called when a new model has been parsed and loaded.
    */
   onModelLoad() {
-    this.dispatchEvent({ type: 'model-load' });
+    this.dispatchEvent({type: 'model-load'});
   }
 }

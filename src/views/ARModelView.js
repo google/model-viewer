@@ -13,21 +13,11 @@
  * limitations under the License.
  */
 
-import {
-  WebGLRenderer,
-  PCFSoftShadowMap,
-  EventDispatcher,
-  Scene,
-  PerspectiveCamera,
-  AmbientLight,
-  DirectionalLight,
-  Matrix4,
-  Raycaster,
-  Vector3,
-} from 'three';
+import screenfull from 'screenfull';
+import {AmbientLight, DirectionalLight, EventDispatcher, Matrix4, PCFSoftShadowMap, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer,} from 'three';
+
 import Reticle from '../three-components/Reticle.js';
 import Shadow from '../three-components/Shadow.js';
-import screenfull from 'screenfull';
 
 /**
  * Creates an AR model placement experience with WebXR.
@@ -39,7 +29,7 @@ export default class ARView extends EventDispatcher {
    * @param {WebGLRenderingContext} config.context
    * @param {THREE.Object3D} config.model
    */
-  constructor({ canvas, context, model }) {
+  constructor({canvas, context, model}) {
     super();
     this.context = context;
     this.canvas = canvas;
@@ -67,11 +57,9 @@ export default class ARView extends EventDispatcher {
    * @return {Boolean}
    */
   hasAR() {
-    return !!(screenfull &&
-              screenfull.enabled &&
-              navigator.xr &&
-              window.XRSession &&
-              window.XRSession.prototype.requestHitTest);
+    return !!(
+        screenfull && screenfull.enabled && navigator.xr && window.XRSession &&
+        window.XRSession.prototype.requestHitTest);
   }
 
   /**
@@ -104,7 +92,8 @@ export default class ARView extends EventDispatcher {
     }
 
     if (!this.device) {
-      throw new Error('Must wait until XRDevice found; use `await arView.whenARReady()` first.');
+      throw new Error(
+          'Must wait until XRDevice found; use `await arView.whenARReady()` first.');
     }
 
     this.enabled = true;
@@ -135,7 +124,7 @@ export default class ARView extends EventDispatcher {
       this._hideCanvas();
       const ending = this.session.end();
       this.session = null;
-      ending.then(() => this.dispatchEvent({ type: 'end' }));
+      ending.then(() => this.dispatchEvent({type: 'end'}));
     }
   }
 
@@ -160,7 +149,7 @@ export default class ARView extends EventDispatcher {
 
     if (this.reticle.visible && !this.stabilized) {
       this.stabilized = true;
-      this.dispatchEvent({ type: 'stabilized' });
+      this.dispatchEvent({type: 'stabilized'});
     }
 
     this._tick();
@@ -319,22 +308,23 @@ export default class ARView extends EventDispatcher {
     const x = 0;
     const y = 0;
     this.raycaster = this.raycaster || new Raycaster();
-    this.raycaster.setFromCamera({ x, y }, this.camera);
+    this.raycaster.setFromCamera({x, y}, this.camera);
 
     const ray = this.raycaster.ray;
     const origin = new Float32Array(ray.origin.toArray());
     const direction = new Float32Array(ray.direction.toArray());
-    const hits = await this.session.requestHitTest(origin,
-                                                   direction,
-                                                   this.frameOfRef);
+    const hits =
+        await this.session.requestHitTest(origin, direction, this.frameOfRef);
     if (hits.length) {
       const hit = hits[0];
       const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
       this.model.position.setFromMatrixPosition(hitMatrix);
 
-      const targetPos = new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
-      const angle = Math.atan2(targetPos.x - this.model.position.x,
-                               targetPos.z - this.model.position.z);
+      const targetPos =
+          new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
+      const angle = Math.atan2(
+          targetPos.x - this.model.position.x,
+          targetPos.z - this.model.position.z);
       this.model.rotation.set(0, angle, 0);
 
       this.scene.add(this.model);

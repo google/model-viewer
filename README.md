@@ -37,6 +37,26 @@ Once the component has been included on your page, you can start using the
 </xr-model>
 ```
 
+### Browser Support
+
+The following emerging web platform APIs are used by this library:
+
+ - [Web XR Device API](https://immersive-web.github.io/webxr/) ([CanIUse](https://caniuse.com/#feat=webvr), [Platform Status](https://www.chromestatus.com/features/5680169905815552))
+ - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements) ([CanIUse](https://caniuse.com/#feat=custom-elementsv1), [Platform Status](https://www.chromestatus.com/features/4696261944934400))
+ - [Shadow DOM](https://dom.spec.whatwg.org/#shadow-trees) ([CanIUse](https://caniuse.com/#feat=shadowdomv1), [Platform Status](https://www.chromestatus.com/features/4667415417847808))
+ - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Platform Status](https://www.chromestatus.com/features/5705346022637568))
+
+Some browser support for these features can be enabled with polyfills. Any
+polyfills that faithfully implement the required platform features should be
+fine. The following is a selection of recommended polyfill implementations:
+
+ - [Web XR Device API Polyfill](https://github.com/immersive-web/webxr-polyfill)
+ - [Web Components Polyfill](https://github.com/webcomponents/webcomponentsjs) (includes Custom Elements and Shadow DOM)
+ - [Resize Observer Polyfill](https://github.com/que-etc/resize-observer-polyfill)
+
+Please keep in mind that your mileage may vary depending on the browsers you
+need to support and the fidelity of the polyfills used.
+
 ## API
 
 ### `<xr-model>`

@@ -34,18 +34,19 @@ export default {
     include: 'src/**',
   },
   banner,
-  plugins: [
-    commonjs(),
-    nodestdlib(),
-    cleanup({
-      // Ideally we'd also clean third_party/three, which saves
-      // ~45kb in filesize alone... but takes 2 minutes to build
-      include: ['src/**'],
-      comments: 'none',
-    }),
-    string({
-      include: '**/*.svg',
-    }),
-    resolve(),
-  ],
+  plugins:
+      [
+        commonjs(),
+        nodestdlib(),
+        cleanup({
+          // Ideally we'd also clean third_party/three, which saves
+          // ~45kb in filesize alone... but takes 2 minutes to build
+          include: ['src/**'],
+          comments: 'none',
+        }),
+        string({
+          include: '**/*.svg',
+        }),
+        resolve(),
+      ],
 };

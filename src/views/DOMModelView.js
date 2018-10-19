@@ -13,25 +13,14 @@
  * limitations under the License.
  */
 
-import {
-  WebGLRenderer,
-  Scene,
-  PerspectiveCamera,
-  DirectionalLight,
-  Object3D,
-  AmbientLight,
-  PCFSoftShadowMap,
-  Vector3,
-  Color,
-} from 'three';
-
-import { Composer } from '@jsantell/wagner';
-import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
+import {Composer} from '@jsantell/wagner';
 import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
-import Shadow from '../three-components/Shadow.js';
-import OrbitControls from '../../third_party/three/OrbitControls.js';
+import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
+import {AmbientLight, Color, DirectionalLight, Object3D, PCFSoftShadowMap, PerspectiveCamera, Scene, Vector3, WebGLRenderer,} from 'three';
 
-import { isMobile, setScaleFromLimit } from '../utils.js';
+import OrbitControls from '../../third_party/three/OrbitControls.js';
+import Shadow from '../three-components/Shadow.js';
+import {isMobile, setScaleFromLimit} from '../utils.js';
 
 
 const BOUNDING_BOX_SIZE = 10;
@@ -50,14 +39,14 @@ export default class DOMModelView {
    * @param {number} config.width
    * @param {number} config.height
    */
-  constructor({ canvas, context, model, width, height }) {
+  constructor({canvas, context, model, width, height}) {
     this.context = context;
     this.canvas = canvas;
     this.model = model;
     this.enabled = false;
     this.render = this.render.bind(this);
 
-    this.renderer = new WebGLRenderer({ canvas, context });
+    this.renderer = new WebGLRenderer({canvas, context});
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
@@ -101,10 +90,7 @@ export default class DOMModelView {
     // Not sure why onBeforeRender doesn't exist, probably
     // a dependency mismatch?
     this.composer.scene.onBeforeRender = () => {};
-    this.vignettePass = new VignettePass({
-      boost: 1.1,
-      reduction: 0.7
-    });
+    this.vignettePass = new VignettePass({boost: 1.1, reduction: 0.7});
     this.fxaaPass = new FXAAPass();
     this.passes = [
       this.vignettePass,
