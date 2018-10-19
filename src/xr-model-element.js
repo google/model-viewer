@@ -16,7 +16,7 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import ModelView from './views/ModelView.js';
 import template from './template.js';
-import { openIOSARQuickLook, getWebGLSource, getiOSSource } from './utils.js';
+import {openIOSARQuickLook, getWebGLSource, getiOSSource} from './utils.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -46,7 +46,7 @@ export default class XRModelElement extends HTMLElement {
   constructor() {
     super();
 
-    const shadowRoot = this.attachShadow({ mode: 'open' });
+    const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this.__containerElement = shadowRoot.querySelector('.container');
@@ -56,7 +56,7 @@ export default class XRModelElement extends HTMLElement {
     this.__enterARElement = shadowRoot.querySelector('.enter-ar');
 
     // Create the underlying ModelView app.
-    const { width, height } = this.getBoundingClientRect();
+    const {width, height} = this.getBoundingClientRect();
     this.__modelView = new ModelView({
       canvas: this.__canvasElement,
       width,
@@ -80,7 +80,7 @@ export default class XRModelElement extends HTMLElement {
       // Update the source so it can start loading if
       // not preloaded
       this.__updateSource();
-    }, { once: true });
+    }, {once: true});
 
     this.__mode = 'dom';
 
@@ -112,7 +112,8 @@ export default class XRModelElement extends HTMLElement {
     // Observe changes in this element, mainly for new <source> children,
     // or <source> changes. Update underlying ModelView if a new source
     // file becomes valid.
-    this.mutationObserver = new MutationObserver(() => this.__updateSource(this));
+    this.mutationObserver =
+        new MutationObserver(() => this.__updateSource(this));
     this.mutationObserver.observe(this, {
       childList: true,
       attributes: true,
@@ -252,8 +253,8 @@ export default class XRModelElement extends HTMLElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  __updateSize({ width, height }, forceApply) {
-    const { width: prevWidth, height: prevHeight } = this.__modelView.getSize();
+  __updateSize({width, height}, forceApply) {
+    const {width: prevWidth, height: prevHeight} = this.__modelView.getSize();
 
     if (forceApply || (prevWidth !== width || prevHeight !== height)) {
       this.__containerElement.style.width = `${width}px`;
@@ -276,7 +277,8 @@ export default class XRModelElement extends HTMLElement {
       if (IS_IOS && getiOSSource(this)) {
         this.__enterARElement.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
-        this.__modelView.whenARReady().then(() => this.__enterARElement.style.display = 'block');
+        this.__modelView.whenARReady().then(
+            () => this.__enterARElement.style.display = 'block');
       }
     }
   }

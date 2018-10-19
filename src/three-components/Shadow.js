@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-import {
-  PlaneGeometry,
-  ShadowMaterial,
-  Mesh,
-} from 'three';
+import {Mesh, PlaneGeometry, ShadowMaterial,} from 'three';
 
 /**
  * Creates a mesh that can receive and render shadows.

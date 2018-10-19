@@ -13,16 +13,7 @@
  * limitations under the License.
  */
 
-import {
-  Mesh,
-  RingGeometry,
-  MeshBasicMaterial,
-  Object3D,
-  Matrix4,
-  Vector3,
-  Raycaster,
-  Math as ThreeMath,
-} from 'three';
+import {Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
 /**
  * The Reticle class creates an object that repeatedly calls
@@ -38,7 +29,7 @@ export default class Reticle extends Object3D {
     super();
 
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
-    let material = new MeshBasicMaterial({ color: 0xffffff });
+    let material = new MeshBasicMaterial({color: 0xffffff});
     // Orient the geometry so its position is flat on a horizontal surface
     geometry.applyMatrix(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
 
@@ -59,14 +50,13 @@ export default class Reticle extends Object3D {
    */
   async update(frameOfRef) {
     this.raycaster = this.raycaster || new Raycaster();
-    this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
+    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
     const ray = this.raycaster.ray;
 
     const origin = new Float32Array(ray.origin.toArray());
     const direction = new Float32Array(ray.direction.toArray());
-    const hits = await this.session.requestHitTest(origin,
-                                                   direction,
-                                                   frameOfRef);
+    const hits =
+        await this.session.requestHitTest(origin, direction, frameOfRef);
 
     if (hits.length) {
       const hit = hits[0];
@@ -76,9 +66,10 @@ export default class Reticle extends Object3D {
       this.position.setFromMatrixPosition(hitMatrix);
 
       // Rotate the anchor to face the camera
-      const targetPos = new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
-      const angle = Math.atan2(targetPos.x - this.position.x,
-                               targetPos.z - this.position.z);
+      const targetPos =
+          new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
+      const angle = Math.atan2(
+          targetPos.x - this.position.x, targetPos.z - this.position.z);
       this.rotation.set(0, angle, 0);
 
       this.visible = true;

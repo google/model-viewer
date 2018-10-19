@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import { Object3D } from 'three';
+import {Object3D} from 'three';
 
 import GLTFLoader from '../../third_party/three/GLTFLoader.js';
 
-const loadGLTF = (loader, url) =>
-  new Promise((resolve, reject) =>
-    loader.load(url, resolve, ()=>{}, reject));
+const loadGLTF = (loader, url) => new Promise(
+    (resolve, reject) => loader.load(url, resolve, () => {}, reject));
 
 /**
  * An Object3D that can swap out its underlying
@@ -98,6 +97,6 @@ export default class Model extends Object3D {
       }
     });
 
-    this.dispatchEvent({ type: 'model-load' });
+    this.dispatchEvent({type: 'model-load'});
   }
 }
