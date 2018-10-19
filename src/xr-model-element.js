@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import ResizeObserver from 'resize-observer-polyfill';
 import ModelView from './views/ModelView.js';
 import template from './template.js';
 import {openIOSARQuickLook, getWebGLSource, getiOSSource} from './utils.js';

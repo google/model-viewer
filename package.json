@@ -14,6 +14,7 @@
     "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
+    "resize-observer-polyfill": "^1.5.0",
     "rollup": "^0.50.0",
     "rollup-plugin-cleanup": "^3.0.0-beta.1",
     "rollup-plugin-commonjs": "^8.2.1",
@@ -36,7 +37,6 @@
   "repository": "https://github.com/jsantell/XRModelElement",
   "dependencies": {
     "@jsantell/wagner": "0.0.3",
-    "resize-observer-polyfill": "^1.4.2",
     "screenfull": "^3.3.2",
     "three": "^0.94.0"
   }
