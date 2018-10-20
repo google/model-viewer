@@ -31,9 +31,7 @@ Once the component has been included on your page, you can start using the
 `<xr-model>` tag.
 
 ```html
-<xr-model controls ar style="height: 500px">
-    <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
-    <source src="assets/Astronaut.glb" type="model/gltf-binary">
+<xr-model controls ar style="height: 500px" src="assets/Astronaut.glb" ios-src="assets/Astronaut.usdz">
 </xr-model>
 ```
 
@@ -65,7 +63,8 @@ The base element for rendering 3D models.
 
 #### Attributes
 
-* *`src`*: The URL to the 3D model. **It's recommended to use children `<source>` elements documented below to support all platforms and explicitly define types.**
+* *`src`*: The URL to the 3D model.
+* *`ios-src`*: The url to a USDZ model will be used in iOS Safari to launch Quick Look for AR.
 * *`preload`*: Whether or not the user must select the element first before the model begins to download. Keep in mind models can be heavy on bandwidth and use preloading with caution.
 * *`poster`*: Displays an image instead of the model until the model is loaded or a user action.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
@@ -78,14 +77,6 @@ The base element for rendering 3D models.
 
 * *`'load'`*: Fired when a model is loaded. Can fire multiple times per XRModelElement if changing the `src` attribute.
 
-### `<source>`
-
-The [`<source>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source)
-elements that are children of an `<xr-model>` are used similarly to their `<audio>` and `<video>`
-counterparts. The `<source>` elements specify multiple media resources for its parent
-`<xr-model>`, used to serve media content in multiple formats supported by different browsers.
-The parent `<xr-model>` must not have a `src` attribute defined if using `<source>` elements.
-
 #### Attributes
 
 * *`src`*: (**required**) The URL to the 3D model.
@@ -93,14 +84,14 @@ The parent `<xr-model>` must not have a `src` attribute defined if using `<sourc
 
 ## Supported Formats
 
-An `<xr-model>`'s `<source>` element allows developers to specify multiple file types to work
-across different platforms.
+An `<xr-model>`'s attributes allows developers to specify multiple file types to work
+across different platforms. For WebGL and Web XR purposes, both GLTF and GLB are
+supported out of the box. Additionally, developers can specify a USDZ file (using
+the `ios-src` attribute) that will be used to launch Quick Look on iOS Safari.
 
-| Name | MIME Type | Support
-| --- | --- | --- |
-| [USDZ] | `model/vnd.usd+zip` |
-| [GLB] | `model/gltf-binary` |
-| [glTF] | `model/gltf+json` |
+Note: iOS Quick Look only supports model files that use the USDZ format. This means
+that iOS users who see a live-rendered model in the browser (loaded as GLTF / GLB) will
+have to download the same model a _second time_ in USDZ format when they launch Quick Look.
 
 ## Development
 

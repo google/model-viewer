@@ -32,14 +32,14 @@
         <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using different 3D formats, <code>&lt;source&gt;</code> elements, and error scenarios loading a 3D file.</p>
         <h2>Multiple sources</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar preload controls auto-rotate vignette background-color=&quot;#4885ed&quot;&gt;</code>
-<code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
-<code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
+<code>&lt;xr-model ar preload controls auto-rotate vignette background-color=&quot;#4885ed&quot;
+  src=&quot;assets/Astronaut.usdz&quot;
+  ios-src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model class="model" ar preload controls auto-rotate vignette background-color="#4885ed">
-          <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
-          <source src="assets/Astronaut.glb" type="model/gltf-binary">
+        <xr-model class="model" ar preload controls auto-rotate vignette background-color="#4885ed"
+            src="assets/Astronaut.glb"
+            ios-src="assets/Astronaut.usdz">
         </xr-model>
 
         <h2>Single glb source</h2>
@@ -62,7 +62,7 @@
 
         <h2>Single usdz source</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;assets/Astronaut.usdz&quot;
+<code>&lt;xr-model ios-src=&quot;assets/Astronaut.usdz&quot;
           ar preload controls auto-rotate vignette background-color=&quot;#db3236&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>

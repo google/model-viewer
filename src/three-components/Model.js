@@ -49,19 +49,9 @@ export default class Model extends Object3D {
 
   /**
    * @param {String} url
-   * @param {String} type
    */
-  async setSource(url, type) {
-    if (!url || !type) {
-      return;
-    }
-
-    if (url === this.url && type === this.type) {
-      return;
-    }
-
-    // This Model component can only load glb and gltf
-    if (['model/gltf-binary', 'model/gltf+json'].indexOf(type) === -1) {
+  async setSource(url) {
+    if (!url || url === this.url) {
       return;
     }
 
@@ -70,7 +60,6 @@ export default class Model extends Object3D {
     // If parsing the GLTF does not throw, then clear out the current
     // model and replace with the new.
     this.url = url;
-    this.type = type;
     // Remove all current children
     while (this.modelContainer.children.length) {
       this.modelContainer.remove(this.modelContainer.children[0]);

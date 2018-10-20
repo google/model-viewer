@@ -114,1022 +114,6 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-/**
- * A collection of shims that provide minimal functionality of the ES6 collections.
- *
- * These implementations are not meant to be used outside of the ResizeObserver
- * modules as they cover only a limited range of use cases.
- */
-/* eslint-disable require-jsdoc, valid-jsdoc */
-var MapShim = (function () {
-    if (typeof Map != 'undefined') {
-        return Map;
-    }
-
-    /**
-     * Returns index in provided array that matches the specified key.
-     *
-     * @param {Array<Array>} arr
-     * @param {*} key
-     * @returns {number}
-     */
-    function getIndex(arr, key) {
-        var result = -1;
-
-        arr.some(function (entry, index) {
-            if (entry[0] === key) {
-                result = index;
-
-                return true;
-            }
-
-            return false;
-        });
-
-        return result;
-    }
-
-    return (function () {
-        function anonymous() {
-            this.__entries__ = [];
-        }
-
-        var prototypeAccessors = { size: {} };
-
-        /**
-         * @returns {boolean}
-         */
-        prototypeAccessors.size.get = function () {
-            return this.__entries__.length;
-        };
-
-        /**
-         * @param {*} key
-         * @returns {*}
-         */
-        anonymous.prototype.get = function (key) {
-            var index = getIndex(this.__entries__, key);
-            var entry = this.__entries__[index];
-
-            return entry && entry[1];
-        };
-
-        /**
-         * @param {*} key
-         * @param {*} value
-         * @returns {void}
-         */
-        anonymous.prototype.set = function (key, value) {
-            var index = getIndex(this.__entries__, key);
-
-            if (~index) {
-                this.__entries__[index][1] = value;
-            } else {
-                this.__entries__.push([key, value]);
-            }
-        };
-
-        /**
-         * @param {*} key
-         * @returns {void}
-         */
-        anonymous.prototype.delete = function (key) {
-            var entries = this.__entries__;
-            var index = getIndex(entries, key);
-
-            if (~index) {
-                entries.splice(index, 1);
-            }
-        };
-
-        /**
-         * @param {*} key
-         * @returns {void}
-         */
-        anonymous.prototype.has = function (key) {
-            return !!~getIndex(this.__entries__, key);
-        };
-
-        /**
-         * @returns {void}
-         */
-        anonymous.prototype.clear = function () {
-            this.__entries__.splice(0);
-        };
-
-        /**
-         * @param {Function} callback
-         * @param {*} [ctx=null]
-         * @returns {void}
-         */
-        anonymous.prototype.forEach = function (callback, ctx) {
-            if ( ctx === void 0 ) ctx = null;
-
-            for (var i = 0, list = this.__entries__; i < list.length; i += 1) {
-                var entry = list[i];
-
-                callback.call(ctx, entry[1], entry[0]);
-            }
-        };
-
-        Object.defineProperties( anonymous.prototype, prototypeAccessors );
-
-        return anonymous;
-    }());
-})();
-
-/**
- * Detects whether window and document objects are available in current environment.
- */
-var isBrowser = typeof window != 'undefined' && typeof document != 'undefined' && window.document === document;
-
-/**
- * A shim for the requestAnimationFrame which falls back to the setTimeout if
- * first one is not supported.
- *
- * @returns {number} Requests' identifier.
- */
-var requestAnimationFrame$1 = (function () {
-    if (typeof requestAnimationFrame === 'function') {
-        return requestAnimationFrame;
-    }
-
-    return function (callback) { return setTimeout(function () { return callback(Date.now()); }, 1000 / 60); };
-})();
-
-// Defines minimum timeout before adding a trailing call.
-var trailingTimeout = 2;
-
-/**
- * Creates a wrapper function which ensures that provided callback will be
- * invoked only once during the specified delay period.
- *
- * @param {Function} callback - Function to be invoked after the delay period.
- * @param {number} delay - Delay after which to invoke callback.
- * @returns {Function}
- */
-var throttle = function (callback, delay) {
-    var leadingCall = false,
-        trailingCall = false,
-        lastCallTime = 0;
-
-    /**
-     * Invokes the original callback function and schedules new invocation if
-     * the "proxy" was called during current request.
-     *
-     * @returns {void}
-     */
-    function resolvePending() {
-        if (leadingCall) {
-            leadingCall = false;
-
-            callback();
-        }
-
-        if (trailingCall) {
-            proxy();
-        }
-    }
-
-    /**
-     * Callback invoked after the specified delay. It will further postpone
-     * invocation of the original function delegating it to the
-     * requestAnimationFrame.
-     *
-     * @returns {void}
-     */
-    function timeoutCallback() {
-        requestAnimationFrame$1(resolvePending);
-    }
-
-    /**
-     * Schedules invocation of the original function.
-     *
-     * @returns {void}
-     */
-    function proxy() {
-        var timeStamp = Date.now();
-
-        if (leadingCall) {
-            // Reject immediately following calls.
-            if (timeStamp - lastCallTime < trailingTimeout) {
-                return;
-            }
-
-            // Schedule new call to be in invoked when the pending one is resolved.
-            // This is important for "transitions" which never actually start
-            // immediately so there is a chance that we might miss one if change
-            // happens amids the pending invocation.
-            trailingCall = true;
-        } else {
-            leadingCall = true;
-            trailingCall = false;
-
-            setTimeout(timeoutCallback, delay);
-        }
-
-        lastCallTime = timeStamp;
-    }
-
-    return proxy;
-};
-
-// Minimum delay before invoking the update of observers.
-var REFRESH_DELAY = 20;
-
-// A list of substrings of CSS properties used to find transition events that
-// might affect dimensions of observed elements.
-var transitionKeys = ['top', 'right', 'bottom', 'left', 'width', 'height', 'size', 'weight'];
-
-// Detect whether running in IE 11 (facepalm).
-var isIE11 = typeof navigator != 'undefined' && /Trident\/.*rv:11/.test(navigator.userAgent);
-
-// MutationObserver should not be used if running in Internet Explorer 11 as it's
-// implementation is unreliable. Example: https://jsfiddle.net/x2r3jpuz/2/
-//
-// It's a real bummer that there is no other way to check for this issue but to
-// use the UA information.
-var mutationObserverSupported = typeof MutationObserver != 'undefined' && !isIE11;
-
-/**
- * Singleton controller class which handles updates of ResizeObserver instances.
- */
-var ResizeObserverController = function() {
-    /**
-     * Indicates whether DOM listeners have been added.
-     *
-     * @private {boolean}
-     */
-    this.connected_ = false;
-
-    /**
-     * Tells that controller has subscribed for Mutation Events.
-     *
-     * @private {boolean}
-     */
-    this.mutationEventsAdded_ = false;
-
-    /**
-     * Keeps reference to the instance of MutationObserver.
-     *
-     * @private {MutationObserver}
-     */
-    this.mutationsObserver_ = null;
-
-    /**
-     * A list of connected observers.
-     *
-     * @private {Array<ResizeObserverSPI>}
-     */
-    this.observers_ = [];
-
-    this.onTransitionEnd_ = this.onTransitionEnd_.bind(this);
-    this.refresh = throttle(this.refresh.bind(this), REFRESH_DELAY);
-};
-
-/**
- * Adds observer to observers list.
- *
- * @param {ResizeObserverSPI} observer - Observer to be added.
- * @returns {void}
- */
-ResizeObserverController.prototype.addObserver = function (observer) {
-    if (!~this.observers_.indexOf(observer)) {
-        this.observers_.push(observer);
-    }
-
-    // Add listeners if they haven't been added yet.
-    if (!this.connected_) {
-        this.connect_();
-    }
-};
-
-/**
- * Removes observer from observers list.
- *
- * @param {ResizeObserverSPI} observer - Observer to be removed.
- * @returns {void}
- */
-ResizeObserverController.prototype.removeObserver = function (observer) {
-    var observers = this.observers_;
-    var index = observers.indexOf(observer);
-
-    // Remove observer if it's present in registry.
-    if (~index) {
-        observers.splice(index, 1);
-    }
-
-    // Remove listeners if controller has no connected observers.
-    if (!observers.length && this.connected_) {
-        this.disconnect_();
-    }
-};
-
-/**
- * Invokes the update of observers. It will continue running updates insofar
- * it detects changes.
- *
- * @returns {void}
- */
-ResizeObserverController.prototype.refresh = function () {
-    var changesDetected = this.updateObservers_();
-
-    // Continue running updates if changes have been detected as there might
-    // be future ones caused by CSS transitions.
-    if (changesDetected) {
-        this.refresh();
-    }
-};
-
-/**
- * Updates every observer from observers list and notifies them of queued
- * entries.
- *
- * @private
- * @returns {boolean} Returns "true" if any observer has detected changes in
- *  dimensions of it's elements.
- */
-ResizeObserverController.prototype.updateObservers_ = function () {
-    // Collect observers that have active observations.
-    var activeObservers = this.observers_.filter(function (observer) {
-        return observer.gatherActive(), observer.hasActive();
-    });
-
-    // Deliver notifications in a separate cycle in order to avoid any
-    // collisions between observers, e.g. when multiple instances of
-    // ResizeObserver are tracking the same element and the callback of one
-    // of them changes content dimensions of the observed target. Sometimes
-    // this may result in notifications being blocked for the rest of observers.
-    activeObservers.forEach(function (observer) { return observer.broadcastActive(); });
-
-    return activeObservers.length > 0;
-};
-
-/**
- * Initializes DOM listeners.
- *
- * @private
- * @returns {void}
- */
-ResizeObserverController.prototype.connect_ = function () {
-    // Do nothing if running in a non-browser environment or if listeners
-    // have been already added.
-    if (!isBrowser || this.connected_) {
-        return;
-    }
-
-    // Subscription to the "Transitionend" event is used as a workaround for
-    // delayed transitions. This way it's possible to capture at least the
-    // final state of an element.
-    document.addEventListener('transitionend', this.onTransitionEnd_);
-
-    window.addEventListener('resize', this.refresh);
-
-    if (mutationObserverSupported) {
-        this.mutationsObserver_ = new MutationObserver(this.refresh);
-
-        this.mutationsObserver_.observe(document, {
-            attributes: true,
-            childList: true,
-            characterData: true,
-            subtree: true
-        });
-    } else {
-        document.addEventListener('DOMSubtreeModified', this.refresh);
-
-        this.mutationEventsAdded_ = true;
-    }
-
-    this.connected_ = true;
-};
-
-/**
- * Removes DOM listeners.
- *
- * @private
- * @returns {void}
- */
-ResizeObserverController.prototype.disconnect_ = function () {
-    // Do nothing if running in a non-browser environment or if listeners
-    // have been already removed.
-    if (!isBrowser || !this.connected_) {
-        return;
-    }
-
-    document.removeEventListener('transitionend', this.onTransitionEnd_);
-    window.removeEventListener('resize', this.refresh);
-
-    if (this.mutationsObserver_) {
-        this.mutationsObserver_.disconnect();
-    }
-
-    if (this.mutationEventsAdded_) {
-        document.removeEventListener('DOMSubtreeModified', this.refresh);
-    }
-
-    this.mutationsObserver_ = null;
-    this.mutationEventsAdded_ = false;
-    this.connected_ = false;
-};
-
-/**
- * "Transitionend" event handler.
- *
- * @private
- * @param {TransitionEvent} event
- * @returns {void}
- */
-ResizeObserverController.prototype.onTransitionEnd_ = function (ref) {
-        var propertyName = ref.propertyName;
-
-    // Detect whether transition may affect dimensions of an element.
-    var isReflowProperty = transitionKeys.some(function (key) {
-        return !!~propertyName.indexOf(key);
-    });
-
-    if (isReflowProperty) {
-        this.refresh();
-    }
-};
-
-/**
- * Returns instance of the ResizeObserverController.
- *
- * @returns {ResizeObserverController}
- */
-ResizeObserverController.getInstance = function () {
-    if (!this.instance_) {
-        this.instance_ = new ResizeObserverController();
-    }
-
-    return this.instance_;
-};
-
-/**
- * Holds reference to the controller's instance.
- *
- * @private {ResizeObserverController}
- */
-ResizeObserverController.instance_ = null;
-
-/**
- * Defines non-writable/enumerable properties of the provided target object.
- *
- * @param {Object} target - Object for which to define properties.
- * @param {Object} props - Properties to be defined.
- * @returns {Object} Target object.
- */
-var defineConfigurable = (function (target, props) {
-    for (var i = 0, list = Object.keys(props); i < list.length; i += 1) {
-        var key = list[i];
-
-        Object.defineProperty(target, key, {
-            value: props[key],
-            enumerable: false,
-            writable: false,
-            configurable: true
-        });
-    }
-
-    return target;
-});
-
-// Placeholder of an empty content rectangle.
-var emptyRect = createRectInit(0, 0, 0, 0);
-
-/**
- * Converts provided string to a number.
- *
- * @param {number|string} value
- * @returns {number}
- */
-function toFloat(value) {
-    return parseFloat(value) || 0;
-}
-
-/**
- * Extracts borders size from provided styles.
- *
- * @param {CSSStyleDeclaration} styles
- * @param {...string} positions - Borders positions (top, right, ...)
- * @returns {number}
- */
-function getBordersSize(styles) {
-    var positions = Array.prototype.slice.call(arguments, 1);
-
-    return positions.reduce(function (size, position) {
-        var value = styles['border-' + position + '-width'];
-
-        return size + toFloat(value);
-    }, 0);
-}
-
-/**
- * Extracts paddings sizes from provided styles.
- *
- * @param {CSSStyleDeclaration} styles
- * @returns {Object} Paddings box.
- */
-function getPaddings(styles) {
-    var positions = ['top', 'right', 'bottom', 'left'];
-    var paddings = {};
-
-    for (var i = 0, list = positions; i < list.length; i += 1) {
-        var position = list[i];
-
-        var value = styles['padding-' + position];
-
-        paddings[position] = toFloat(value);
-    }
-
-    return paddings;
-}
-
-/**
- * Calculates content rectangle of provided SVG element.
- *
- * @param {SVGGraphicsElement} target - Element content rectangle of which needs
- *      to be calculated.
- * @returns {DOMRectInit}
- */
-function getSVGContentRect(target) {
-    var bbox = target.getBBox();
-
-    return createRectInit(0, 0, bbox.width, bbox.height);
-}
-
-/**
- * Calculates content rectangle of provided HTMLElement.
- *
- * @param {HTMLElement} target - Element for which to calculate the content rectangle.
- * @returns {DOMRectInit}
- */
-function getHTMLElementContentRect(target) {
-    // Client width & height properties can't be
-    // used exclusively as they provide rounded values.
-    var clientWidth = target.clientWidth;
-    var clientHeight = target.clientHeight;
-
-    // By this condition we can catch all non-replaced inline, hidden and
-    // detached elements. Though elements with width & height properties less
-    // than 0.5 will be discarded as well.
-    //
-    // Without it we would need to implement separate methods for each of
-    // those cases and it's not possible to perform a precise and performance
-    // effective test for hidden elements. E.g. even jQuery's ':visible' filter
-    // gives wrong results for elements with width & height less than 0.5.
-    if (!clientWidth && !clientHeight) {
-        return emptyRect;
-    }
-
-    var styles = getComputedStyle(target);
-    var paddings = getPaddings(styles);
-    var horizPad = paddings.left + paddings.right;
-    var vertPad = paddings.top + paddings.bottom;
-
-    // Computed styles of width & height are being used because they are the
-    // only dimensions available to JS that contain non-rounded values. It could
-    // be possible to utilize the getBoundingClientRect if only it's data wasn't
-    // affected by CSS transformations let alone paddings, borders and scroll bars.
-    var width = toFloat(styles.width),
-        height = toFloat(styles.height);
-
-    // Width & height include paddings and borders when the 'border-box' box
-    // model is applied (except for IE).
-    if (styles.boxSizing === 'border-box') {
-        // Following conditions are required to handle Internet Explorer which
-        // doesn't include paddings and borders to computed CSS dimensions.
-        //
-        // We can say that if CSS dimensions + paddings are equal to the "client"
-        // properties then it's either IE, and thus we don't need to subtract
-        // anything, or an element merely doesn't have paddings/borders styles.
-        if (Math.round(width + horizPad) !== clientWidth) {
-            width -= getBordersSize(styles, 'left', 'right') + horizPad;
-        }
-
-        if (Math.round(height + vertPad) !== clientHeight) {
-            height -= getBordersSize(styles, 'top', 'bottom') + vertPad;
-        }
-    }
-
-    // Following steps can't be applied to the document's root element as its
-    // client[Width/Height] properties represent viewport area of the window.
-    // Besides, it's as well not necessary as the <html> itself neither has
-    // rendered scroll bars nor it can be clipped.
-    if (!isDocumentElement(target)) {
-        // In some browsers (only in Firefox, actually) CSS width & height
-        // include scroll bars size which can be removed at this step as scroll
-        // bars are the only difference between rounded dimensions + paddings
-        // and "client" properties, though that is not always true in Chrome.
-        var vertScrollbar = Math.round(width + horizPad) - clientWidth;
-        var horizScrollbar = Math.round(height + vertPad) - clientHeight;
-
-        // Chrome has a rather weird rounding of "client" properties.
-        // E.g. for an element with content width of 314.2px it sometimes gives
-        // the client width of 315px and for the width of 314.7px it may give
-        // 314px. And it doesn't happen all the time. So just ignore this delta
-        // as a non-relevant.
-        if (Math.abs(vertScrollbar) !== 1) {
-            width -= vertScrollbar;
-        }
-
-        if (Math.abs(horizScrollbar) !== 1) {
-            height -= horizScrollbar;
-        }
-    }
-
-    return createRectInit(paddings.left, paddings.top, width, height);
-}
-
-/**
- * Checks whether provided element is an instance of the SVGGraphicsElement.
- *
- * @param {Element} target - Element to be checked.
- * @returns {boolean}
- */
-var isSVGGraphicsElement = (function () {
-    // Some browsers, namely IE and Edge, don't have the SVGGraphicsElement
-    // interface.
-    if (typeof SVGGraphicsElement != 'undefined') {
-        return function (target) { return target instanceof SVGGraphicsElement; };
-    }
-
-    // If it's so, then check that element is at least an instance of the
-    // SVGElement and that it has the "getBBox" method.
-    // eslint-disable-next-line no-extra-parens
-    return function (target) { return target instanceof SVGElement && typeof target.getBBox === 'function'; };
-})();
-
-/**
- * Checks whether provided element is a document element (<html>).
- *
- * @param {Element} target - Element to be checked.
- * @returns {boolean}
- */
-function isDocumentElement(target) {
-    return target === document.documentElement;
-}
-
-/**
- * Calculates an appropriate content rectangle for provided html or svg element.
- *
- * @param {Element} target - Element content rectangle of which needs to be calculated.
- * @returns {DOMRectInit}
- */
-function getContentRect(target) {
-    if (!isBrowser) {
-        return emptyRect;
-    }
-
-    if (isSVGGraphicsElement(target)) {
-        return getSVGContentRect(target);
-    }
-
-    return getHTMLElementContentRect(target);
-}
-
-/**
- * Creates rectangle with an interface of the DOMRectReadOnly.
- * Spec: https://drafts.fxtf.org/geometry/#domrectreadonly
- *
- * @param {DOMRectInit} rectInit - Object with rectangle's x/y coordinates and dimensions.
- * @returns {DOMRectReadOnly}
- */
-function createReadOnlyRect(ref) {
-    var x = ref.x;
-    var y = ref.y;
-    var width = ref.width;
-    var height = ref.height;
-
-    // If DOMRectReadOnly is available use it as a prototype for the rectangle.
-    var Constr = typeof DOMRectReadOnly != 'undefined' ? DOMRectReadOnly : Object;
-    var rect = Object.create(Constr.prototype);
-
-    // Rectangle's properties are not writable and non-enumerable.
-    defineConfigurable(rect, {
-        x: x, y: y, width: width, height: height,
-        top: y,
-        right: x + width,
-        bottom: height + y,
-        left: x
-    });
-
-    return rect;
-}
-
-/**
- * Creates DOMRectInit object based on the provided dimensions and the x/y coordinates.
- * Spec: https://drafts.fxtf.org/geometry/#dictdef-domrectinit
- *
- * @param {number} x - X coordinate.
- * @param {number} y - Y coordinate.
- * @param {number} width - Rectangle's width.
- * @param {number} height - Rectangle's height.
- * @returns {DOMRectInit}
- */
-function createRectInit(x, y, width, height) {
-    return { x: x, y: y, width: width, height: height };
-}
-
-/**
- * Class that is responsible for computations of the content rectangle of
- * provided DOM element and for keeping track of it's changes.
- */
-var ResizeObservation = function(target) {
-    /**
-     * Broadcasted width of content rectangle.
-     *
-     * @type {number}
-     */
-    this.broadcastWidth = 0;
-
-    /**
-     * Broadcasted height of content rectangle.
-     *
-     * @type {number}
-     */
-    this.broadcastHeight = 0;
-
-    /**
-     * Reference to the last observed content rectangle.
-     *
-     * @private {DOMRectInit}
-     */
-    this.contentRect_ = createRectInit(0, 0, 0, 0);
-
-    /**
-     * Reference to the observed element.
-     *
-     * @type {Element}
-     */
-    this.target = target;
-};
-
-/**
- * Updates content rectangle and tells whether it's width or height properties
- * have changed since the last broadcast.
- *
- * @returns {boolean}
- */
-ResizeObservation.prototype.isActive = function () {
-    var rect = getContentRect(this.target);
-
-    this.contentRect_ = rect;
-
-    return rect.width !== this.broadcastWidth || rect.height !== this.broadcastHeight;
-};
-
-/**
- * Updates 'broadcastWidth' and 'broadcastHeight' properties with a data
- * from the corresponding properties of the last observed content rectangle.
- *
- * @returns {DOMRectInit} Last observed content rectangle.
- */
-ResizeObservation.prototype.broadcastRect = function () {
-    var rect = this.contentRect_;
-
-    this.broadcastWidth = rect.width;
-    this.broadcastHeight = rect.height;
-
-    return rect;
-};
-
-var ResizeObserverEntry = function(target, rectInit) {
-    var contentRect = createReadOnlyRect(rectInit);
-
-    // According to the specification following properties are not writable
-    // and are also not enumerable in the native implementation.
-    //
-    // Property accessors are not being used as they'd require to define a
-    // private WeakMap storage which may cause memory leaks in browsers that
-    // don't support this type of collections.
-    defineConfigurable(this, { target: target, contentRect: contentRect });
-};
-
-var ResizeObserverSPI = function(callback, controller, callbackCtx) {
-    if (typeof callback !== 'function') {
-        throw new TypeError('The callback provided as parameter 1 is not a function.');
-    }
-
-    /**
-     * Collection of resize observations that have detected changes in dimensions
-     * of elements.
-     *
-     * @private {Array<ResizeObservation>}
-     */
-    this.activeObservations_ = [];
-
-    /**
-     * Registry of the ResizeObservation instances.
-     *
-     * @private {Map<Element, ResizeObservation>}
-     */
-    this.observations_ = new MapShim();
-
-    /**
-     * Reference to the callback function.
-     *
-     * @private {ResizeObserverCallback}
-     */
-    this.callback_ = callback;
-
-    /**
-     * Reference to the associated ResizeObserverController.
-     *
-     * @private {ResizeObserverController}
-     */
-    this.controller_ = controller;
-
-    /**
-     * Public ResizeObserver instance which will be passed to the callback
-     * function and used as a value of it's "this" binding.
-     *
-     * @private {ResizeObserver}
-     */
-    this.callbackCtx_ = callbackCtx;
-};
-
-/**
- * Starts observing provided element.
- *
- * @param {Element} target - Element to be observed.
- * @returns {void}
- */
-ResizeObserverSPI.prototype.observe = function (target) {
-    if (!arguments.length) {
-        throw new TypeError('1 argument required, but only 0 present.');
-    }
-
-    // Do nothing if current environment doesn't have the Element interface.
-    if (typeof Element === 'undefined' || !(Element instanceof Object)) {
-        return;
-    }
-
-    if (!(target instanceof Element)) {
-        throw new TypeError('parameter 1 is not of type "Element".');
-    }
-
-    var observations = this.observations_;
-
-    // Do nothing if element is already being observed.
-    if (observations.has(target)) {
-        return;
-    }
-
-    observations.set(target, new ResizeObservation(target));
-
-    this.controller_.addObserver(this);
-
-    // Force the update of observations.
-    this.controller_.refresh();
-};
-
-/**
- * Stops observing provided element.
- *
- * @param {Element} target - Element to stop observing.
- * @returns {void}
- */
-ResizeObserverSPI.prototype.unobserve = function (target) {
-    if (!arguments.length) {
-        throw new TypeError('1 argument required, but only 0 present.');
-    }
-
-    // Do nothing if current environment doesn't have the Element interface.
-    if (typeof Element === 'undefined' || !(Element instanceof Object)) {
-        return;
-    }
-
-    if (!(target instanceof Element)) {
-        throw new TypeError('parameter 1 is not of type "Element".');
-    }
-
-    var observations = this.observations_;
-
-    // Do nothing if element is not being observed.
-    if (!observations.has(target)) {
-        return;
-    }
-
-    observations.delete(target);
-
-    if (!observations.size) {
-        this.controller_.removeObserver(this);
-    }
-};
-
-/**
- * Stops observing all elements.
- *
- * @returns {void}
- */
-ResizeObserverSPI.prototype.disconnect = function () {
-    this.clearActive();
-    this.observations_.clear();
-    this.controller_.removeObserver(this);
-};
-
-/**
- * Collects observation instances the associated element of which has changed
- * it's content rectangle.
- *
- * @returns {void}
- */
-ResizeObserverSPI.prototype.gatherActive = function () {
-        var this$1 = this;
-
-    this.clearActive();
-
-    this.observations_.forEach(function (observation) {
-        if (observation.isActive()) {
-            this$1.activeObservations_.push(observation);
-        }
-    });
-};
-
-/**
- * Invokes initial callback function with a list of ResizeObserverEntry
- * instances collected from active resize observations.
- *
- * @returns {void}
- */
-ResizeObserverSPI.prototype.broadcastActive = function () {
-    // Do nothing if observer doesn't have active observations.
-    if (!this.hasActive()) {
-        return;
-    }
-
-    var ctx = this.callbackCtx_;
-
-    // Create ResizeObserverEntry instance for every active observation.
-    var entries = this.activeObservations_.map(function (observation) {
-        return new ResizeObserverEntry(observation.target, observation.broadcastRect());
-    });
-
-    this.callback_.call(ctx, entries, ctx);
-    this.clearActive();
-};
-
-/**
- * Clears the collection of active observations.
- *
- * @returns {void}
- */
-ResizeObserverSPI.prototype.clearActive = function () {
-    this.activeObservations_.splice(0);
-};
-
-/**
- * Tells whether observer has active observations.
- *
- * @returns {boolean}
- */
-ResizeObserverSPI.prototype.hasActive = function () {
-    return this.activeObservations_.length > 0;
-};
-
-// Registry of internal observers. If WeakMap is not available use current shim
-// for the Map collection as it has all required methods and because WeakMap
-// can't be fully polyfilled anyway.
-var observers = typeof WeakMap != 'undefined' ? new WeakMap() : new MapShim();
-
-/**
- * ResizeObserver API. Encapsulates the ResizeObserver SPI implementation
- * exposing only those methods and properties that are defined in the spec.
- */
-var ResizeObserver$1 = function(callback) {
-    if (!(this instanceof ResizeObserver$1)) {
-        throw new TypeError('Cannot call a class as a function');
-    }
-
-    if (!arguments.length) {
-        throw new TypeError('1 argument required, but only 0 present.');
-    }
-
-    var controller = ResizeObserverController.getInstance();
-    var observer = new ResizeObserverSPI(callback, controller, this);
-
-    observers.set(this, observer);
-};
-
-// Expose public methods of ResizeObserver.
-['observe', 'unobserve', 'disconnect'].forEach(function (method) {
-    ResizeObserver$1.prototype[method] = function () {
-        return (ref = observers.get(this))[method].apply(ref, arguments);
-        var ref;
-    };
-});
-
-var index = (function () {
-    // Export existing implementation if available.
-    if (typeof ResizeObserver != 'undefined') {
-        // eslint-disable-next-line no-undef
-        return ResizeObserver;
-    }
-
-    return ResizeObserver$1;
-})();
-
 // Polyfills
 
 if ( Number.EPSILON === undefined ) {
@@ -39739,9 +38723,9 @@ var TEXTURE_FILTER = {
 };
 
 /**
- * @author thespite / http://clicktorelease.com/
- */
-
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * minimal class for proxing functions to Path. Replaces old "extractSubpaths()"
+ **/
 
 function ShapePath() {
 
@@ -46226,9 +45210,7 @@ function AxesHelper( size ) {
 AxesHelper.prototype = Object.create( LineSegments.prototype );
 AxesHelper.prototype.constructor = AxesHelper;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
+//
 
 Curve.create = function ( construct, getPoint ) {
 
@@ -46333,8 +45315,6 @@ Object.assign( Spline.prototype, {
 
 } );
 
-//
-
 GridHelper.prototype.setColors = function () {
 
 	console.error( 'THREE.GridHelper: setColors() has been deprecated, pass them in the constructor instead.' );
@@ -46347,6 +45327,8 @@ SkeletonHelper.prototype.update = function () {
 
 };
 
+//
+
 Object.assign( Loader.prototype, {
 
 	extractUrlBase: function ( url ) {
@@ -46357,6 +45339,8 @@ Object.assign( Loader.prototype, {
 	}
 
 } );
+
+//
 
 Object.assign( Box2.prototype, {
 
@@ -47647,2168 +46631,6 @@ CubeCamera.prototype.updateCubeMap = function ( renderer, scene ) {
 	return this.update( renderer, scene );
 
 };
-
-//
-
-'use strict';
-
-function processShader(vertexShaderCode, fragmentShaderCode) {
-
-  var regExp = /uniform\s+([^\s]+)\s+([^\s]+)\s*;/gi;
-  var regExp2 = /uniform\s+([^\s]+)\s+([^\s]+)\s*\[\s*(\w+)\s*\]*\s*;/gi;
-
-  var typesMap = {
-    sampler2D: { type: 't', value: function() { return new Texture(); } },
-    samplerCube: { type: 't', value: function() {} },
-
-    bool: { type: 'b', value: function() { return 0; } },
-    int: { type: 'i', value: function() { return 0; } },
-    float: { type: 'f', value: function() { return 0; } },
-
-    vec2: { type: 'v2', value: function() { return new Vector2(); } },
-    vec3: { type: 'v3', value: function() { return new Vector3(); } },
-    vec4: { type: 'v4', value: function() { return new Vector4(); } },
-
-    bvec2: { type: 'v2', value: function() { return new Vector2(); } },
-    bvec3: { type: 'v3', value: function() { return new Vector3(); } },
-    bvec4: { type: 'v4', value: function() { return new Vector4(); } },
-
-    ivec2: { type: 'v2', value: function() { return new Vector2(); } },
-    ivec3: { type: 'v3', value: function() { return new Vector3(); } },
-    ivec4: { type: 'v4', value: function() { return new Vector4(); } },
-
-    mat3: { type: 'v3', value: function() { return new Matrix3(); } },
-    mat4: { type: 'v4', value: function() { return new Matrix4(); } }
-  };
-
-  var arrayTypesMap = {
-    float: { type: 'fv', value: function() { return []; } },
-    vec3: { type: 'v3v', value: function() { return []; } }
-  };
-
-  var matches;
-  var uniforms = {
-    resolution: { type: 'v2', value: new Vector2( 1, 1 ), default: true },
-    time: { type: 'f', value: Date.now(), default: true },
-    tInput: { type: 't', value: new Texture(), default: true }
-  };
-
-  var uniformType, uniformName;
-
-  while ((matches = regExp.exec(fragmentShaderCode)) !== null) {
-    if (matches.index === regExp.lastIndex) {
-      regExp.lastIndex++;
-    }
-    uniformType = matches[1];
-    uniformName = matches[2];
-
-    uniforms[uniformName] = {
-      type: typesMap[uniformType].type,
-      value: typesMap[uniformType].value()
-    };
-  }
-
-  while ((matches = regExp2.exec(fragmentShaderCode)) !== null) {
-    if (matches.index === regExp.lastIndex) {
-      regExp.lastIndex++;
-    }
-    uniformType = matches[1];
-    uniformName = matches[2];
-    uniforms[uniformName] = {
-      type: arrayTypesMap[uniformType].type,
-      value: arrayTypesMap[uniformType].value()
-    };
-  }
-
-  var shader = new ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: vertexShaderCode,
-    fragmentShader: fragmentShaderCode,
-    shading: FlatShading,
-    depthWrite: false,
-    depthTest: false,
-    transparent: true
-  });
-
-  return shader;
-}
-
-class Pass {
-  constructor() {
-    this.shader = null;
-    this.loaded = null;
-    this.params = {};
-    this.isSim = false;
-  }
-
-  setShader(vs, fs) {
-    this.shader = processShader(vs, fs);
-  }
-
-  run(composer) {
-    composer.pass(this.shader);
-  }
-
-  getOfflineTexture(w, h, useRGBA) {
-    return new WebGLRenderTarget(w, h, {
-      minFilter: LinearFilter,
-      magFilter: LinearFilter,
-      format: useRGBA ? RGBAFormat : RGBFormat
-    });
-  }
-}
-
-var vertex = `
-varying vec2 vUv;
-
-void main() {
-
-  vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-}
-`;
-
-var fragment = `
-varying vec2 vUv;
-uniform sampler2D tInput;
-
-void main() {
-  gl_FragColor = texture2D( tInput, vUv );
-
-}
-`;
-
-class CopyPass extends Pass {
-  constructor() {
-    super();
-    this.setShader(vertex, fragment);
-  }
-}
-
-class Stack {
-  constructor(shadersPool) {
-    this.passItems = [];
-    this.shadersPool = shadersPool;
-    this.passes = [];
-  }
-
-  addPass(shaderName, enabled, params, index) {
-    var length = 0;
-    var passItem = {
-      shaderName: shaderName,
-      enabled: enabled || false
-    };
-
-    // TODO use and store params values
-
-    this.passItems.push(passItem);
-    length = this.passItems.length;
-
-    this.updatePasses();
-
-    if (index) {
-      return this.movePassToIndex(this.passItems[length], index);
-    }
-    else {
-      return length - 1;
-    }
-  }
-
-  removePass(index) {
-    this.passItems.splice(index, 1);
-    this.updatePasses();
-  }
-
-  enablePass(index) {
-    this.passItems[index].enabled = true;
-    this.updatePasses();
-  }
-
-  disablePass(index) {
-    this.passItems[index].enabled = false;
-    this.updatePasses();
-  }
-
-  isPassEnabled(index) {
-    return this.passItems[index].enabled;
-  }
-
-  movePassToIndex(index, destIndex) {
-    this.passItems.splice(destIndex, 0, this.passItems.splice(index, 1)[0]);
-    this.updatePasses();
-
-    // TODO check if destIndex is final index
-    return destIndex;
-  }
-
-  reverse() {
-    this.passItems.reverse();
-    this.updatePasses();
-  }
-
-  updatePasses() {
-    this.passes = this.shadersPool.getPasses(this.passItems);
-
-    // init default params for new passItems
-    this.passItems.forEach(function(passItem, index) {
-      if (passItem.params === undefined) {
-        passItem.params = JSON.parse(JSON.stringify(this.passes[index].params)); // clone params without reference to the real shader instance params
-      }
-    }.bind(this));
-  }
-
-  getPasses() {
-    return this.passes;
-  }
-}
-
-class Composer {
-  constructor(renderer, settings) {
-    var pixelRatio = renderer.getPixelRatio();
-
-    this.width  = Math.floor(renderer.context.canvas.width  / pixelRatio) || 1;
-    this.height = Math.floor(renderer.context.canvas.height / pixelRatio) || 1;
-
-    this.output = null;
-    this.input = null;
-    this.read = null;
-    this.write = null;
-
-    this.settings = settings || {};
-    this.useRGBA = this.settings.useRGBA || false;
-
-    this.renderer = renderer;
-    this.copyPass = new CopyPass(this.settings);
-
-    this.defaultMaterial = new MeshBasicMaterial({color: 0x00FF00, wireframe: false});
-    this.scene = new Scene();
-    this.quad = new Mesh(new PlaneBufferGeometry(1, 1), this.defaultMaterial);
-    this.scene.add(this.quad);
-    this.camera = new OrthographicCamera(1, 1, 1, 1, -10000, 10000);
-
-    this.front = new WebGLRenderTarget(1, 1, {
-      minFilter: this.settings.minFilter !== undefined ? this.settings.minFilter : LinearFilter,
-      magFilter: this.settings.magFilter !== undefined ? this.settings.magFilter : LinearFilter,
-      wrapS: this.settings.wrapS !== undefined ? this.settings.wrapS : ClampToEdgeWrapping,
-      wrapT: this.settings.wrapT !== undefined ? this.settings.wrapT : ClampToEdgeWrapping,
-      format: this.useRGBA ? RGBAFormat : RGBFormat,
-      type: this.settings.type !== undefined ? this.settings.type : UnsignedByteType,
-      stencilBuffer: this.settings.stencilBuffer !== undefined ? this.settings.stencilBuffer : true
-    });
-
-    this.back = this.front.clone();
-    this.startTime = Date.now();
-    this.passes = {};
-
-    this.setSize(this.width, this.height);
-  }
-
-  swapBuffers() {
-    this.output = this.write;
-    this.input = this.read;
-
-    var t = this.write;
-    this.write = this.read;
-    this.read = t;
-  }
-
-  render(scene, camera, keep, output) {
-    if (keep) this.swapBuffers();
-    this.renderer.render(scene, camera, output ? output : this.write, true);
-    if (!output) this.swapBuffers();
-  }
-
-  toScreen() {
-    this.quad.material = this.copyPass.shader;
-    this.quad.material.uniforms.tInput.value = this.read;
-    this.quad.material.uniforms.resolution.value.set(this.width, this.height);
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  toTexture(t) {
-    this.quad.material = this.copyPass.shader;
-    this.quad.material.uniforms.tInput.value = this.read;
-    this.renderer.render(this.scene, this.camera, t, false);
-  }
-
-  pass(pass) {
-    if (pass instanceof Stack) {
-      this.passStack(pass);
-    }
-    else {
-      if (pass instanceof ShaderMaterial) {
-        this.quad.material = pass;
-      }
-      if (pass instanceof Pass) {
-        pass.run(this);
-        return;
-      }
-
-      if (!pass.isSim) {
-        this.quad.material.uniforms.tInput.value = this.read;
-      }
-
-      this.quad.material.uniforms.resolution.value.set(this.width, this.height);
-      this.quad.material.uniforms.time.value = 0.001 * (Date.now() - this.startTime);
-      this.renderer.render(this.scene, this.camera, this.write, false);
-      this.swapBuffers();
-    }
-  }
-
-  passStack(stack) {
-    stack.getPasses().forEach(function(pass) {
-      this.pass(pass);
-    }.bind(this));
-  }
-
-  reset() {
-    this.read = this.front;
-    this.write = this.back;
-    this.output = this.write;
-    this.input = this.read;
-  }
-
-  setSource(src) {
-    this.quad.material = this.copyPass.shader;
-    this.quad.material.uniforms.tInput.value = src;
-    this.renderer.render(this.scene, this.camera, this.write, true);
-    this.swapBuffers();
-  }
-
-  setSize(w, h) {
-    this.width = w;
-    this.height = h;
-
-    this.camera.projectionMatrix.makeOrthographic( w / - 2, w / 2, h / 2, h / - 2, this.camera.near, this.camera.far );
-    this.quad.scale.set( w, h, 1 );
-
-    this.front.setSize( w, h );
-    this.back.setSize( w, h );
-  }
-}
-
-var fragment$1 = `
-varying vec2 vUv;
-uniform sampler2D tInput;
-uniform vec2 resolution;
-
-uniform float reduction;
-uniform float boost;
-
-void main() {
-
-  vec4 color = texture2D( tInput, vUv );
-
-  vec2 center = resolution * 0.5;
-  float vignette = distance( center, gl_FragCoord.xy ) / resolution.x;
-  vignette = boost - vignette * reduction;
-
-  color.rgb *= vignette;
-  gl_FragColor = color;
-
-}
-`;
-
-class VignettePass extends Pass {
-  constructor({ boost, reduction } = {}) {
-    super();
-    this.setShader(vertex, fragment$1);
-
-    this.params.boost = boost !== undefined ? boost : 2;
-    this.params.reduction = reduction !== undefined ? reduction : 2;
-  }
-
-  run(composer) {
-    this.shader.uniforms.boost.value = this.params.boost;
-    this.shader.uniforms.reduction.value = this.params.reduction;
-    composer.pass(this.shader);
-  }
-}
-
-var fragment$2 = `
-uniform sampler2D tInput;
-uniform vec2 resolution;
-varying vec2 vUv;
-
-#define FXAA_REDUCE_MIN   (1.0/128.0)
-#define FXAA_REDUCE_MUL   (1.0/8.0)
-#define FXAA_SPAN_MAX     8.0
-
-void main() {
-
-    vec2 res = 1. / resolution;
-
-    vec3 rgbNW = texture2D( tInput, ( vUv.xy + vec2( -1.0, -1.0 ) * res ) ).xyz;
-    vec3 rgbNE = texture2D( tInput, ( vUv.xy + vec2( 1.0, -1.0 ) * res ) ).xyz;
-    vec3 rgbSW = texture2D( tInput, ( vUv.xy + vec2( -1.0, 1.0 ) * res ) ).xyz;
-    vec3 rgbSE = texture2D( tInput, ( vUv.xy + vec2( 1.0, 1.0 ) * res ) ).xyz;
-    vec4 rgbaM  = texture2D( tInput,  vUv.xy  * res );
-    vec3 rgbM  = rgbaM.xyz;
-    vec3 luma = vec3( 0.299, 0.587, 0.114 );
-
-    float lumaNW = dot( rgbNW, luma );
-    float lumaNE = dot( rgbNE, luma );
-    float lumaSW = dot( rgbSW, luma );
-    float lumaSE = dot( rgbSE, luma );
-    float lumaM  = dot( rgbM,  luma );
-    float lumaMin = min( lumaM, min( min( lumaNW, lumaNE ), min( lumaSW, lumaSE ) ) );
-    float lumaMax = max( lumaM, max( max( lumaNW, lumaNE) , max( lumaSW, lumaSE ) ) );
-
-    vec2 dir;
-    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
-    dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
-
-    float dirReduce = max( ( lumaNW + lumaNE + lumaSW + lumaSE ) * ( 0.25 * FXAA_REDUCE_MUL ), FXAA_REDUCE_MIN );
-
-    float rcpDirMin = 1.0 / ( min( abs( dir.x ), abs( dir.y ) ) + dirReduce );
-    dir = min( vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX),
-          max( vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-                dir * rcpDirMin)) * res;
-    vec4 rgbA = (1.0/2.0) * (
-    texture2D(tInput,  vUv.xy + dir * (1.0/3.0 - 0.5)) +
-    texture2D(tInput,  vUv.xy + dir * (2.0/3.0 - 0.5)));
-    vec4 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
-    texture2D(tInput,  vUv.xy + dir * (0.0/3.0 - 0.5)) +
-    texture2D(tInput,  vUv.xy + dir * (3.0/3.0 - 0.5)));
-    float lumaB = dot(rgbB, vec4(luma, 0.0));
-
-    if ( ( lumaB < lumaMin ) || ( lumaB > lumaMax ) ) {
-        gl_FragColor = rgbA;
-    } else {
-        gl_FragColor = rgbB;
-    }
-
-    //gl_FragColor = vec4( texture2D( tInput,vUv ).xyz, 1. );
-}
-`;
-
-class FXAAPass extends Pass {
-  constructor() {
-    super();
-    this.setShader(vertex, fragment$2);
-  }
-}
-
-class Shadow extends Mesh {
-  constructor() {
-    const geometry = new PlaneGeometry(2000, 2000);
-    geometry.rotateX(-Math.PI / 2);
-    const material = new ShadowMaterial({
-      color: 0x111111,
-      opacity: 0.2,
-    });
-    super(geometry, material);
-    this.receiveShadow = true;
-  }
-}
-
-/**
- * @author qiao / https://github.com/qiao
- * @author mrdoob / http://mrdoob.com
- * @author alteredq / http://alteredqualia.com/
- * @author WestLangley / http://github.com/WestLangley
- * @author erich666 / http://erichaines.com
- */
-
-// This set of controls performs orbiting, dollying (zooming), and panning.
-// Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
-//
-//    Orbit - left mouse / touch: one-finger move
-//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
-//    Pan - right mouse, or arrow keys / touch: two-finger move
-
-function OrbitControls ( object, domElement ) {
-
-	this.object = object;
-
-	this.domElement = ( domElement !== undefined ) ? domElement : document;
-
-	// Set to false to disable this control
-	this.enabled = true;
-
-	// "target" sets the location of focus, where the object orbits around
-	this.target = new Vector3();
-
-	// How far you can dolly in and out ( PerspectiveCamera only )
-	this.minDistance = 0;
-	this.maxDistance = Infinity;
-
-	// How far you can zoom in and out ( OrthographicCamera only )
-	this.minZoom = 0;
-	this.maxZoom = Infinity;
-
-	// How far you can orbit vertically, upper and lower limits.
-	// Range is 0 to Math.PI radians.
-	this.minPolarAngle = 0; // radians
-	this.maxPolarAngle = Math.PI; // radians
-
-	// How far you can orbit horizontally, upper and lower limits.
-	// If set, must be a sub-interval of the interval [ - Math.PI, Math.PI ].
-	this.minAzimuthAngle = - Infinity; // radians
-	this.maxAzimuthAngle = Infinity; // radians
-
-	// Set to true to enable damping (inertia)
-	// If damping is enabled, you must call controls.update() in your animation loop
-	this.enableDamping = false;
-	this.dampingFactor = 0.25;
-
-	// This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
-	// Set to false to disable zooming
-	this.enableZoom = true;
-	this.zoomSpeed = 1.0;
-
-	// Set to false to disable rotating
-	this.enableRotate = true;
-	this.rotateSpeed = 1.0;
-
-	// Set to false to disable panning
-	this.enablePan = true;
-	this.panSpeed = 1.0;
-	this.screenSpacePanning = false; // if true, pan in screen-space
-	this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
-
-	// Set to true to automatically rotate around the target
-	// If auto-rotate is enabled, you must call controls.update() in your animation loop
-	this.autoRotate = false;
-	this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
-
-	// Set to false to disable use of the keys
-	this.enableKeys = true;
-
-	// The four arrow keys
-	this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
-
-	// Mouse buttons
-	this.mouseButtons = { ORBIT: MOUSE.LEFT, ZOOM: MOUSE.MIDDLE, PAN: MOUSE.RIGHT };
-
-	// for reset
-	this.target0 = this.target.clone();
-	this.position0 = this.object.position.clone();
-	this.zoom0 = this.object.zoom;
-
-	//
-	// public methods
-	//
-
-	this.getPolarAngle = function () {
-
-		return spherical.phi;
-
-	};
-
-	this.getAzimuthalAngle = function () {
-
-		return spherical.theta;
-
-	};
-
-	this.saveState = function () {
-
-		scope.target0.copy( scope.target );
-		scope.position0.copy( scope.object.position );
-		scope.zoom0 = scope.object.zoom;
-
-	};
-
-	this.reset = function () {
-
-		scope.target.copy( scope.target0 );
-		scope.object.position.copy( scope.position0 );
-		scope.object.zoom = scope.zoom0;
-
-		scope.object.updateProjectionMatrix();
-		scope.dispatchEvent( changeEvent );
-
-		scope.update();
-
-		state = STATE.NONE;
-
-	};
-
-	// this method is exposed, but perhaps it would be better if we can make it private...
-	this.update = function () {
-
-		var offset = new Vector3();
-
-		// so camera.up is the orbit axis
-		var quat = new Quaternion().setFromUnitVectors( object.up, new Vector3( 0, 1, 0 ) );
-		var quatInverse = quat.clone().inverse();
-
-		var lastPosition = new Vector3();
-		var lastQuaternion = new Quaternion();
-
-		return function update() {
-
-			var position = scope.object.position;
-
-			offset.copy( position ).sub( scope.target );
-
-			// rotate offset to "y-axis-is-up" space
-			offset.applyQuaternion( quat );
-
-			// angle from z-axis around y-axis
-			spherical.setFromVector3( offset );
-
-			if ( scope.autoRotate && state === STATE.NONE ) {
-
-				rotateLeft( getAutoRotationAngle() );
-
-			}
-
-			spherical.theta += sphericalDelta.theta;
-			spherical.phi += sphericalDelta.phi;
-
-			// restrict theta to be between desired limits
-			spherical.theta = Math.max( scope.minAzimuthAngle, Math.min( scope.maxAzimuthAngle, spherical.theta ) );
-
-			// restrict phi to be between desired limits
-			spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
-
-			spherical.makeSafe();
-
-
-			spherical.radius *= scale;
-
-			// restrict radius to be between desired limits
-			spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
-
-			// move target to panned location
-			scope.target.add( panOffset );
-
-			offset.setFromSpherical( spherical );
-
-			// rotate offset back to "camera-up-vector-is-up" space
-			offset.applyQuaternion( quatInverse );
-
-			position.copy( scope.target ).add( offset );
-
-			scope.object.lookAt( scope.target );
-
-			if ( scope.enableDamping === true ) {
-
-				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
-				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
-
-				panOffset.multiplyScalar( 1 - scope.dampingFactor );
-
-			} else {
-
-				sphericalDelta.set( 0, 0, 0 );
-
-				panOffset.set( 0, 0, 0 );
-
-			}
-
-			scale = 1;
-
-			// update condition is:
-			// min(camera displacement, camera rotation in radians)^2 > EPS
-			// using small-angle approximation cos(x/2) = 1 - x^2 / 8
-
-			if ( zoomChanged ||
-				lastPosition.distanceToSquared( scope.object.position ) > EPS ||
-				8 * ( 1 - lastQuaternion.dot( scope.object.quaternion ) ) > EPS ) {
-
-				scope.dispatchEvent( changeEvent );
-
-				lastPosition.copy( scope.object.position );
-				lastQuaternion.copy( scope.object.quaternion );
-				zoomChanged = false;
-
-				return true;
-
-			}
-
-			return false;
-
-		};
-
-	}();
-
-	this.dispose = function () {
-
-		scope.domElement.removeEventListener( 'contextmenu', onContextMenu, false );
-		scope.domElement.removeEventListener( 'mousedown', onMouseDown, false );
-		scope.domElement.removeEventListener( 'wheel', onMouseWheel, false );
-
-		scope.domElement.removeEventListener( 'touchstart', onTouchStart, false );
-		scope.domElement.removeEventListener( 'touchend', onTouchEnd, false );
-		scope.domElement.removeEventListener( 'touchmove', onTouchMove, false );
-
-		document.removeEventListener( 'mousemove', onMouseMove, false );
-		document.removeEventListener( 'mouseup', onMouseUp, false );
-
-		window.removeEventListener( 'keydown', onKeyDown, false );
-
-		//scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
-
-	};
-
-	//
-	// internals
-	//
-
-	var scope = this;
-
-	var changeEvent = { type: 'change' };
-	var startEvent = { type: 'start' };
-	var endEvent = { type: 'end' };
-
-	var STATE = { NONE: - 1, ROTATE: 0, DOLLY: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_DOLLY_PAN: 4 };
-
-	var state = STATE.NONE;
-
-	var EPS = 0.000001;
-
-	// current position in spherical coordinates
-	var spherical = new Spherical();
-	var sphericalDelta = new Spherical();
-
-	var scale = 1;
-	var panOffset = new Vector3();
-	var zoomChanged = false;
-
-	var rotateStart = new Vector2();
-	var rotateEnd = new Vector2();
-	var rotateDelta = new Vector2();
-
-	var panStart = new Vector2();
-	var panEnd = new Vector2();
-	var panDelta = new Vector2();
-
-	var dollyStart = new Vector2();
-	var dollyEnd = new Vector2();
-	var dollyDelta = new Vector2();
-
-	function getAutoRotationAngle() {
-
-		return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
-
-	}
-
-	function getZoomScale() {
-
-		return Math.pow( 0.95, scope.zoomSpeed );
-
-	}
-
-	function rotateLeft( angle ) {
-
-		sphericalDelta.theta -= angle;
-
-	}
-
-	function rotateUp( angle ) {
-
-		sphericalDelta.phi -= angle;
-
-	}
-
-	var panLeft = function () {
-
-		var v = new Vector3();
-
-		return function panLeft( distance, objectMatrix ) {
-
-			v.setFromMatrixColumn( objectMatrix, 0 ); // get X column of objectMatrix
-			v.multiplyScalar( - distance );
-
-			panOffset.add( v );
-
-		};
-
-	}();
-
-	var panUp = function () {
-
-		var v = new Vector3();
-
-		return function panUp( distance, objectMatrix ) {
-
-			if ( scope.screenSpacePanning === true ) {
-
-				v.setFromMatrixColumn( objectMatrix, 1 );
-
-			} else {
-
-				v.setFromMatrixColumn( objectMatrix, 0 );
-				v.crossVectors( scope.object.up, v );
-
-			}
-
-			v.multiplyScalar( distance );
-
-			panOffset.add( v );
-
-		};
-
-	}();
-
-	// deltaX and deltaY are in pixels; right and down are positive
-	var pan = function () {
-
-		var offset = new Vector3();
-
-		return function pan( deltaX, deltaY ) {
-
-			var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
-
-			if ( scope.object.isPerspectiveCamera ) {
-
-				// perspective
-				var position = scope.object.position;
-				offset.copy( position ).sub( scope.target );
-				var targetDistance = offset.length();
-
-				// half of the fov is center to top of screen
-				targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
-
-				// we use only clientHeight here so aspect ratio does not distort speed
-				panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
-				panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
-
-			} else if ( scope.object.isOrthographicCamera ) {
-
-				// orthographic
-				panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
-				panUp( deltaY * ( scope.object.top - scope.object.bottom ) / scope.object.zoom / element.clientHeight, scope.object.matrix );
-
-			} else {
-
-				// camera neither orthographic nor perspective
-				console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
-				scope.enablePan = false;
-
-			}
-
-		};
-
-	}();
-
-	function dollyIn( dollyScale ) {
-
-		if ( scope.object.isPerspectiveCamera ) {
-
-			scale /= dollyScale;
-
-		} else if ( scope.object.isOrthographicCamera ) {
-
-			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
-			scope.object.updateProjectionMatrix();
-			zoomChanged = true;
-
-		} else {
-
-			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
-			scope.enableZoom = false;
-
-		}
-
-	}
-
-	function dollyOut( dollyScale ) {
-
-		if ( scope.object.isPerspectiveCamera ) {
-
-			scale *= dollyScale;
-
-		} else if ( scope.object.isOrthographicCamera ) {
-
-			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
-			scope.object.updateProjectionMatrix();
-			zoomChanged = true;
-
-		} else {
-
-			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
-			scope.enableZoom = false;
-
-		}
-
-	}
-
-	//
-	// event callbacks - update the object state
-	//
-
-	function handleMouseDownRotate( event ) {
-
-		//console.log( 'handleMouseDownRotate' );
-
-		rotateStart.set( event.clientX, event.clientY );
-
-	}
-
-	function handleMouseDownDolly( event ) {
-
-		//console.log( 'handleMouseDownDolly' );
-
-		dollyStart.set( event.clientX, event.clientY );
-
-	}
-
-	function handleMouseDownPan( event ) {
-
-		//console.log( 'handleMouseDownPan' );
-
-		panStart.set( event.clientX, event.clientY );
-
-	}
-
-	function handleMouseMoveRotate( event ) {
-
-		//console.log( 'handleMouseMoveRotate' );
-
-		rotateEnd.set( event.clientX, event.clientY );
-
-		rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
-
-		var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
-
-		rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
-
-		rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
-
-		rotateStart.copy( rotateEnd );
-
-		scope.update();
-
-	}
-
-	function handleMouseMoveDolly( event ) {
-
-		//console.log( 'handleMouseMoveDolly' );
-
-		dollyEnd.set( event.clientX, event.clientY );
-
-		dollyDelta.subVectors( dollyEnd, dollyStart );
-
-		if ( dollyDelta.y > 0 ) {
-
-			dollyIn( getZoomScale() );
-
-		} else if ( dollyDelta.y < 0 ) {
-
-			dollyOut( getZoomScale() );
-
-		}
-
-		dollyStart.copy( dollyEnd );
-
-		scope.update();
-
-	}
-
-	function handleMouseMovePan( event ) {
-
-		//console.log( 'handleMouseMovePan' );
-
-		panEnd.set( event.clientX, event.clientY );
-
-		panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
-
-		pan( panDelta.x, panDelta.y );
-
-		panStart.copy( panEnd );
-
-		scope.update();
-
-	}
-
-	function handleMouseWheel( event ) {
-
-		// console.log( 'handleMouseWheel' );
-
-		if ( event.deltaY < 0 ) {
-
-			dollyOut( getZoomScale() );
-
-		} else if ( event.deltaY > 0 ) {
-
-			dollyIn( getZoomScale() );
-
-		}
-
-		scope.update();
-
-	}
-
-	function handleKeyDown( event ) {
-
-		//console.log( 'handleKeyDown' );
-
-		switch ( event.keyCode ) {
-
-			case scope.keys.UP:
-				pan( 0, scope.keyPanSpeed );
-				scope.update();
-				break;
-
-			case scope.keys.BOTTOM:
-				pan( 0, - scope.keyPanSpeed );
-				scope.update();
-				break;
-
-			case scope.keys.LEFT:
-				pan( scope.keyPanSpeed, 0 );
-				scope.update();
-				break;
-
-			case scope.keys.RIGHT:
-				pan( - scope.keyPanSpeed, 0 );
-				scope.update();
-				break;
-
-		}
-
-	}
-
-	function handleTouchStartRotate( event ) {
-
-		//console.log( 'handleTouchStartRotate' );
-
-		rotateStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
-
-	}
-
-	function handleTouchStartDollyPan( event ) {
-
-		//console.log( 'handleTouchStartDollyPan' );
-
-		if ( scope.enableZoom ) {
-
-			var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
-			var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
-
-			var distance = Math.sqrt( dx * dx + dy * dy );
-
-			dollyStart.set( 0, distance );
-
-		}
-
-		if ( scope.enablePan ) {
-
-			var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
-			var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
-
-			panStart.set( x, y );
-
-		}
-
-	}
-
-	function handleTouchMoveRotate( event ) {
-
-		//console.log( 'handleTouchMoveRotate' );
-
-		rotateEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
-
-		rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
-
-		var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
-
-		rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
-
-		rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
-
-		rotateStart.copy( rotateEnd );
-
-		scope.update();
-
-	}
-
-	function handleTouchMoveDollyPan( event ) {
-
-		//console.log( 'handleTouchMoveDollyPan' );
-
-		if ( scope.enableZoom ) {
-
-			var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
-			var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
-
-			var distance = Math.sqrt( dx * dx + dy * dy );
-
-			dollyEnd.set( 0, distance );
-
-			dollyDelta.set( 0, Math.pow( dollyEnd.y / dollyStart.y, scope.zoomSpeed ) );
-
-			dollyIn( dollyDelta.y );
-
-			dollyStart.copy( dollyEnd );
-
-		}
-
-		if ( scope.enablePan ) {
-
-			var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
-			var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
-
-			panEnd.set( x, y );
-
-			panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
-
-			pan( panDelta.x, panDelta.y );
-
-			panStart.copy( panEnd );
-
-		}
-
-		scope.update();
-
-	}
-
-	function onMouseDown( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		event.preventDefault();
-
-		switch ( event.button ) {
-
-			case scope.mouseButtons.ORBIT:
-
-				if ( scope.enableRotate === false ) return;
-
-				handleMouseDownRotate( event );
-
-				state = STATE.ROTATE;
-
-				break;
-
-			case scope.mouseButtons.ZOOM:
-
-				if ( scope.enableZoom === false ) return;
-
-				handleMouseDownDolly( event );
-
-				state = STATE.DOLLY;
-
-				break;
-
-			case scope.mouseButtons.PAN:
-
-				if ( scope.enablePan === false ) return;
-
-				handleMouseDownPan( event );
-
-				state = STATE.PAN;
-
-				break;
-
-		}
-
-		if ( state !== STATE.NONE ) {
-
-			document.addEventListener( 'mousemove', onMouseMove, false );
-			document.addEventListener( 'mouseup', onMouseUp, false );
-
-			scope.dispatchEvent( startEvent );
-
-		}
-
-	}
-
-	function onMouseMove( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		event.preventDefault();
-
-		switch ( state ) {
-
-			case STATE.ROTATE:
-
-				if ( scope.enableRotate === false ) return;
-
-				handleMouseMoveRotate( event );
-
-				break;
-
-			case STATE.DOLLY:
-
-				if ( scope.enableZoom === false ) return;
-
-				handleMouseMoveDolly( event );
-
-				break;
-
-			case STATE.PAN:
-
-				if ( scope.enablePan === false ) return;
-
-				handleMouseMovePan( event );
-
-				break;
-
-		}
-
-	}
-
-	function onMouseUp( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		document.removeEventListener( 'mousemove', onMouseMove, false );
-		document.removeEventListener( 'mouseup', onMouseUp, false );
-
-		scope.dispatchEvent( endEvent );
-
-		state = STATE.NONE;
-
-	}
-
-	function onMouseWheel( event ) {
-
-		if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
-
-		event.preventDefault();
-		event.stopPropagation();
-
-		scope.dispatchEvent( startEvent );
-
-		handleMouseWheel( event );
-
-		scope.dispatchEvent( endEvent );
-
-	}
-
-	function onKeyDown( event ) {
-
-		if ( scope.enabled === false || scope.enableKeys === false || scope.enablePan === false ) return;
-
-		handleKeyDown( event );
-
-	}
-
-	function onTouchStart( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		event.preventDefault();
-
-		switch ( event.touches.length ) {
-
-			case 1:	// one-fingered touch: rotate
-
-				if ( scope.enableRotate === false ) return;
-
-				handleTouchStartRotate( event );
-
-				state = STATE.TOUCH_ROTATE;
-
-				break;
-
-			case 2:	// two-fingered touch: dolly-pan
-
-				if ( scope.enableZoom === false && scope.enablePan === false ) return;
-
-				handleTouchStartDollyPan( event );
-
-				state = STATE.TOUCH_DOLLY_PAN;
-
-				break;
-
-			default:
-
-				state = STATE.NONE;
-
-		}
-
-		if ( state !== STATE.NONE ) {
-
-			scope.dispatchEvent( startEvent );
-
-		}
-
-	}
-
-	function onTouchMove( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		event.preventDefault();
-		event.stopPropagation();
-
-		switch ( event.touches.length ) {
-
-			case 1: // one-fingered touch: rotate
-
-				if ( scope.enableRotate === false ) return;
-				if ( state !== STATE.TOUCH_ROTATE ) return; // is this needed?
-
-				handleTouchMoveRotate( event );
-
-				break;
-
-			case 2: // two-fingered touch: dolly-pan
-
-				if ( scope.enableZoom === false && scope.enablePan === false ) return;
-				if ( state !== STATE.TOUCH_DOLLY_PAN ) return; // is this needed?
-
-				handleTouchMoveDollyPan( event );
-
-				break;
-
-			default:
-
-				state = STATE.NONE;
-
-		}
-
-	}
-
-	function onTouchEnd( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		scope.dispatchEvent( endEvent );
-
-		state = STATE.NONE;
-
-	}
-
-	function onContextMenu( event ) {
-
-		if ( scope.enabled === false ) return;
-
-		event.preventDefault();
-
-	}
-
-	//
-
-	scope.domElement.addEventListener( 'contextmenu', onContextMenu, false );
-
-	scope.domElement.addEventListener( 'mousedown', onMouseDown, false );
-	scope.domElement.addEventListener( 'wheel', onMouseWheel, false );
-
-	scope.domElement.addEventListener( 'touchstart', onTouchStart, false );
-	scope.domElement.addEventListener( 'touchend', onTouchEnd, false );
-	scope.domElement.addEventListener( 'touchmove', onTouchMove, false );
-
-	window.addEventListener( 'keydown', onKeyDown, false );
-
-	// force an update at start
-
-	this.update();
-
-}
-
-OrbitControls.prototype = Object.create( EventDispatcher.prototype );
-OrbitControls.prototype.constructor = OrbitControls;
-
-Object.defineProperties( OrbitControls.prototype, {
-
-	center: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .center has been renamed to .target' );
-			return this.target;
-
-		}
-
-	},
-
-	// backward compatibility
-
-	noZoom: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-			return ! this.enableZoom;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-			this.enableZoom = ! value;
-
-		}
-
-	},
-
-	noRotate: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
-			return ! this.enableRotate;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
-			this.enableRotate = ! value;
-
-		}
-
-	},
-
-	noPan: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
-			return ! this.enablePan;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
-			this.enablePan = ! value;
-
-		}
-
-	},
-
-	noKeys: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
-			return ! this.enableKeys;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
-			this.enableKeys = ! value;
-
-		}
-
-	},
-
-	staticMoving: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
-			return ! this.enableDamping;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
-			this.enableDamping = ! value;
-
-		}
-
-	},
-
-	dynamicDampingFactor: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
-			return this.dampingFactor;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
-			this.dampingFactor = value;
-
-		}
-
-	}
-
-} );
-
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-
-
-// path.normalize(path)
-// posix version
-
-
-// posix version
-
-
-// posix version
-
-
-
-// path.relative(from, to)
-// posix version
-
-
-
-
-
-
-
-
-
-
-function extname(path) {
-  return splitPath(path)[3];
-}
-var substr = 'ab'.substr(-1) === 'b' ?
-    function (str, start, len) { return str.substr(start, len) } :
-    function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    };
-
-const openIOSARQuickLook = url => {
-  const anchor = document.createElement('a');
-  anchor.setAttribute('rel', 'ar');
-  anchor.setAttribute('href', url);
-  anchor.appendChild(document.createElement('img'));
-  anchor.click();
-};
-const relativeToAbsoluteURL = (function () {
-  const anchor = document.createElement('a');
-  return (url) => {
-    anchor.href = url;
-    return anchor.href;
-  }
-})();
-const getTypeFromName = (name = '') => {
-  const ext = extname(name).toLowerCase();
-  switch (ext) {
-    case '.glb':
-      return 'model/gltf-binary';
-    case '.gltf':
-      return 'model/gltf+json';
-    case '.usdz':
-      return 'model/vnd.usd+zip';
-    default:
-      return undefined;
-  }
-};
-const getModelSource = (element, acceptedTypes) => {
-  const rootSrc = element.getAttribute('src');
-  if (rootSrc) {
-    const src = relativeToAbsoluteURL(rootSrc);
-    const type = getTypeFromName(rootSrc);
-    if (acceptedTypes.indexOf(type) !== -1) {
-      return { src, type };
-    }
-    else {
-      return null;
-    }
-  }
-  const sources = element.querySelectorAll('source');
-  for (let source of sources) {
-    const src = relativeToAbsoluteURL(source.getAttribute('src'));
-    const type = source.getAttribute('type') || getTypeFromName(src);
-    if (acceptedTypes.indexOf(type) !== -1) {
-      return { src, type };
-    }
-  }
-  return null;
-};
-const getWebGLSource = (element) => {
-  return getModelSource(element, ['model/gltf-binary', 'model/gltf+json']);
-};
-const getiOSSource = (element) => {
-  return getModelSource(element, ['model/vnd.usd+zip']);
-};
-const setScaleFromLimit = (function() {
-  const box = new Box3();
-  const size = new Vector3();
-  return (limit, object) => {
-    box.setFromObject(object);
-    box.getSize(size);
-    const max = Math.max(size.x, size.y, size.z);
-    const scale = limit / max;
-    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
-      object.scale.multiplyScalar(scale, scale, scale);
-    }
-  };
-})();
-const isMobile = function() {
-  let check = false;
-  (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true;})(navigator.userAgent||navigator.vendor||window.opera);
-  return check;
-};
-
-const BOUNDING_BOX_SIZE$1 = 10;
-const USE_POST_PROCESSING = !isMobile();
-const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
-class DOMModelView {
-  constructor({ canvas, context, model, width, height }) {
-    this.context = context;
-    this.canvas = canvas;
-    this.model = model;
-    this.enabled = false;
-    this.render = this.render.bind(this);
-    this.renderer = new WebGLRenderer({ canvas, context });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
-    this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.2;
-    this.camera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.controls = new OrbitControls(this.orbitCamera, this.canvas);
-    this.controls.target = new Vector3(0, 5, 0);
-    this.controls.enabled = false;
-    this.scene = new Scene();
-    this.scene.add(this.model);
-    this.light = new AmbientLight(0xffffff, 0.9);
-    this.dLight = new DirectionalLight(0xffffff, 2);
-    this.dLight.position.set(0, 10, 1);
-    this.dLight.castShadow = true;
-    this.scene.add(this.light);
-    this.scene.add(this.dLight);
-    this.scene.add(new Shadow());
-    this.rotateEnabled = false;
-    this.pivot = new Object3D();
-    this.pivot.add(this.camera);
-    this.pivot.add(this.orbitCamera);
-    this.scene.add(this.pivot);
-    this.camera.position.z = 15;
-    this.camera.position.y = 5;
-    this.orbitCamera.position.z = 15;
-    this.orbitCamera.position.y = 5;
-    this.composer = new Composer(this.renderer);
-    this.composer.scene.onBeforeRender = () => {};
-    this.vignettePass = new VignettePass({
-      boost: 1.1,
-      reduction: 0.7
-    });
-    this.fxaaPass = new FXAAPass();
-    this.passes = [
-      this.vignettePass,
-      this.fxaaPass,
-    ];
-    this.model.addEventListener('model-load', () => this.updateModelScale());
-  }
-  start() {
-    this.enabled = true;
-    this.scene.add(this.model);
-    this.renderer.setFramebuffer(null);
-    this.setSize(this.width, this.height);
-    this._tick();
-  }
-  stop() {
-    this.enabled = false;
-    window.cancelAnimationFrame(this.lastFrameId);
-  }
-  setSize(width, height) {
-    this.width = width;
-    this.height = height;
-    if (!this.enabled) {
-      return;
-    }
-    this.composer.setSize(width, height);
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.orbitCamera.aspect = width / height;
-    this.orbitCamera.updateProjectionMatrix();
-    this.updateModelScale();
-  }
-  updateModelScale() {
-    if (!this.enabled) {
-      return;
-    }
-    this.model.position.set(0, 0, 0);
-    this.model.rotation.set(0, 0, 0);
-    this.model.scale.set(1, 1, 1);
-    setScaleFromLimit(BOUNDING_BOX_SIZE$1, this.model);
-  }
-  setRotate(isEnabled) {
-    this.rotateEnabled = isEnabled;
-    if (!isEnabled) {
-      this.pivot.rotation.set(0, 0, 0);
-    }
-  }
-  setControls(isEnabled) {
-    this.controls.enabled = isEnabled;
-    if (this.controls.enabled) {
-      this.orbitCamera.position.set(0, 5, 15);
-      this.orbitCamera.rotation.set(0, 0, 0);
-    }
-  }
-  setVignette(isEnabled) {
-    this.vignetteEnabled = isEnabled;
-  }
-  setBackgroundColor(color) {
-    if (color && typeof color === 'string') {
-      this.renderer.setClearColor(new Color(color));
-    } else {
-      this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
-    }
-  }
-  render() {
-    if (!this.enabled) {
-      return;
-    }
-    if (this.rotateEnabled) {
-      this.pivot.rotation.y += 0.001;
-    }
-    const camera = this.controls.enabled ? this.orbitCamera : this.camera;
-    if (USE_POST_PROCESSING && this.vignetteEnabled) {
-      this.composer.reset();
-      this.composer.render(this.scene, camera);
-      for (let pass of this.passes) {
-        this.composer.pass(pass);
-      }
-      this.composer.toScreen();
-    } else {
-      this.renderer.render(this.scene, camera);
-    }
-    this._tick();
-  }
-  _tick() {
-    this.lastFrameId = window.requestAnimationFrame(this.render);
-  }
-}
-
-class Reticle extends Object3D {
-  constructor(xrSession, camera) {
-    super();
-    let geometry = new RingGeometry(0.1, 0.11, 24, 1);
-    let material = new MeshBasicMaterial({ color: 0xffffff });
-    geometry.applyMatrix(new Matrix4().makeRotationX(_Math.degToRad(-90)));
-    this.ring = new Mesh(geometry, material);
-    this.add(this.ring);
-    this.session = xrSession;
-    this.visible = false;
-    this.camera = camera;
-  }
-  async update(frameOfRef) {
-    this.raycaster = this.raycaster || new Raycaster();
-    this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
-    const ray = this.raycaster.ray;
-    const origin = new Float32Array(ray.origin.toArray());
-    const direction = new Float32Array(ray.direction.toArray());
-    const hits = await this.session.requestHitTest(origin,
-                                                   direction,
-                                                   frameOfRef);
-    if (hits.length) {
-      const hit = hits[0];
-      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
-      this.position.setFromMatrixPosition(hitMatrix);
-      const targetPos = new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
-      const angle = Math.atan2(targetPos.x - this.position.x,
-                               targetPos.z - this.position.z);
-      this.rotation.set(0, angle, 0);
-      this.visible = true;
-    }
-  }
-}
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var screenfull = createCommonjsModule(function (module) {
-/*!
-* screenfull
-* v3.3.2 - 2017-10-27
-* (c) Sindre Sorhus; MIT License
-*/
-(function () {
-	'use strict';
-
-	var document = typeof window !== 'undefined' && typeof window.document !== 'undefined' ? window.document : {};
-	var isCommonjs = 'object' !== 'undefined' && module.exports;
-	var keyboardAllowed = typeof Element !== 'undefined' && 'ALLOW_KEYBOARD_INPUT' in Element;
-
-	var fn = (function () {
-		var val;
-
-		var fnMap = [
-			[
-				'requestFullscreen',
-				'exitFullscreen',
-				'fullscreenElement',
-				'fullscreenEnabled',
-				'fullscreenchange',
-				'fullscreenerror'
-			],
-			// New WebKit
-			[
-				'webkitRequestFullscreen',
-				'webkitExitFullscreen',
-				'webkitFullscreenElement',
-				'webkitFullscreenEnabled',
-				'webkitfullscreenchange',
-				'webkitfullscreenerror'
-
-			],
-			// Old WebKit (Safari 5.1)
-			[
-				'webkitRequestFullScreen',
-				'webkitCancelFullScreen',
-				'webkitCurrentFullScreenElement',
-				'webkitCancelFullScreen',
-				'webkitfullscreenchange',
-				'webkitfullscreenerror'
-
-			],
-			[
-				'mozRequestFullScreen',
-				'mozCancelFullScreen',
-				'mozFullScreenElement',
-				'mozFullScreenEnabled',
-				'mozfullscreenchange',
-				'mozfullscreenerror'
-			],
-			[
-				'msRequestFullscreen',
-				'msExitFullscreen',
-				'msFullscreenElement',
-				'msFullscreenEnabled',
-				'MSFullscreenChange',
-				'MSFullscreenError'
-			]
-		];
-
-		var i = 0;
-		var l = fnMap.length;
-		var ret = {};
-
-		for (; i < l; i++) {
-			val = fnMap[i];
-			if (val && val[1] in document) {
-				for (i = 0; i < val.length; i++) {
-					ret[fnMap[0][i]] = val[i];
-				}
-				return ret;
-			}
-		}
-
-		return false;
-	})();
-
-	var eventNameMap = {
-		change: fn.fullscreenchange,
-		error: fn.fullscreenerror
-	};
-
-	var screenfull = {
-		request: function (elem) {
-			var request = fn.requestFullscreen;
-
-			elem = elem || document.documentElement;
-
-			// Work around Safari 5.1 bug: reports support for
-			// keyboard in fullscreen even though it doesn't.
-			// Browser sniffing, since the alternative with
-			// setTimeout is even worse.
-			if (/ Version\/5\.1(?:\.\d+)? Safari\//.test(navigator.userAgent)) {
-				elem[request]();
-			} else {
-				elem[request](keyboardAllowed && Element.ALLOW_KEYBOARD_INPUT);
-			}
-		},
-		exit: function () {
-			document[fn.exitFullscreen]();
-		},
-		toggle: function (elem) {
-			if (this.isFullscreen) {
-				this.exit();
-			} else {
-				this.request(elem);
-			}
-		},
-		onchange: function (callback) {
-			this.on('change', callback);
-		},
-		onerror: function (callback) {
-			this.on('error', callback);
-		},
-		on: function (event, callback) {
-			var eventName = eventNameMap[event];
-			if (eventName) {
-				document.addEventListener(eventName, callback, false);
-			}
-		},
-		off: function (event, callback) {
-			var eventName = eventNameMap[event];
-			if (eventName) {
-				document.removeEventListener(eventName, callback, false);
-			}
-		},
-		raw: fn
-	};
-
-	if (!fn) {
-		if (isCommonjs) {
-			module.exports = false;
-		} else {
-			window.screenfull = false;
-		}
-
-		return;
-	}
-
-	Object.defineProperties(screenfull, {
-		isFullscreen: {
-			get: function () {
-				return Boolean(document[fn.fullscreenElement]);
-			}
-		},
-		element: {
-			enumerable: true,
-			get: function () {
-				return document[fn.fullscreenElement];
-			}
-		},
-		enabled: {
-			enumerable: true,
-			get: function () {
-				// Coerce to boolean in case of old WebKit
-				return Boolean(document[fn.fullscreenEnabled]);
-			}
-		}
-	});
-
-	if (isCommonjs) {
-		module.exports = screenfull;
-	} else {
-		window.screenfull = screenfull;
-	}
-})();
-});
-
-class ARView extends EventDispatcher {
-  constructor({ canvas, context, model }) {
-    super();
-    this.context = context;
-    this.canvas = canvas;
-    this.model = model;
-    this.onTap = this.onTap.bind(this);
-    this.onFrame = this.onFrame.bind(this);
-    this.onFullscreenChange = this.onFullscreenChange.bind(this);
-    if (this.hasAR()) {
-      screenfull.on('change', this.onFullscreenChange);
-      this._devicePromise = navigator.xr.requestDevice();
-      this._devicePromise.then(device => this.device = device);
-    }
-    this.model.addEventListener('model-load', () => this.updateModelScale());
-  }
-  hasAR() {
-    return !!(screenfull &&
-              screenfull.enabled &&
-              navigator.xr &&
-              window.XRSession &&
-              window.XRSession.prototype.requestHitTest);
-  }
-  whenARReady() {
-    return this.hasAR() ? this._devicePromise : Promise.reject();
-  }
-  updateModelScale() {
-    if (!this.enabled) {
-      return;
-    }
-    this.model.position.set(0, 0, 0);
-    this.model.rotation.set(0, 0, 0);
-    this.model.scale.set(1, 1, 1);
-  }
-  start() {
-    if (!this.hasAR() || this.enabled) {
-      return;
-    }
-    if (!this.device) {
-      throw new Error('Must wait until XRDevice found; use `await arView.whenARReady()` first.');
-    }
-    this.enabled = true;
-    this.stabilized = false;
-    this._setupCanvas();
-    this._setupScene();
-    this._setupRenderer();
-    this._showCanvas();
-    this._enterFullscreen();
-    this.updateModelScale();
-    return this._setupSession().then(() => {
-      this._tick();
-    });
-  }
-  stop() {
-    if (!this.hasAR() || !this.enabled) {
-      return;
-    }
-    this.enabled = false;
-    if (this.session) {
-      this.session.cancelAnimationFrame(this.lastFrameId);
-      this._hideCanvas();
-      const ending = this.session.end();
-      this.session = null;
-      ending.then(() => this.dispatchEvent({ type: 'end' }));
-    }
-  }
-  _tick() {
-    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
-  }
-  onFrame(time, frame) {
-    let session = frame.session;
-    let pose = frame.getDevicePose(this.frameOfRef);
-    this.reticle.update(this.frameOfRef);
-    if (this.reticle.visible && !this.stabilized) {
-      this.stabilized = true;
-      this.dispatchEvent({ type: 'stabilized' });
-    }
-    this._tick();
-    if (pose) {
-      for (let view of frame.views) {
-        const viewport = session.baseLayer.getViewport(view);
-        this.renderer.setViewport(0, 0, viewport.width, viewport.height);
-        this.renderer.setSize(viewport.width, viewport.height);
-        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
-        this.camera.matrix.getInverse(viewMatrix);
-        this.camera.updateMatrixWorld(true);
-        this.renderer.clearDepth();
-        this.renderer.render(this.scene, this.camera);
-      }
-    }
-  }
-  _setupCanvas() {
-    if (!this.outputContext) {
-      this.outputCanvas = document.createElement('canvas');
-      this.outputCanvas.style.position = 'absolute';
-      this.outputCanvas.style.top = '0';
-      this.outputCanvas.style.left = '0';
-      this.outputCanvas.style.height = '100%';
-      this.outputCanvas.style.width = '100%';
-      this.outputContext = this.outputCanvas.getContext('xrpresent');
-      this.outputCanvas.addEventListener('click', this.onTap);
-      this.container = document.createElement('div');
-      this.container.setAttribute('xr-model-component-canvas', '');
-      this.container.appendChild(this.outputCanvas);
-      document.body.appendChild(this.container);
-    }
-  }
-  _setupRenderer() {
-    this.renderer = new WebGLRenderer({
-      context: this.context,
-      canvas: this.canvas,
-    });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(1);
-    this.renderer.autoClear = false;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.2;
-    this.gl = this.renderer.getContext();
-    this.camera = new PerspectiveCamera();
-    this.camera.matrixAutoUpdate = false;
-  }
-  _setupScene() {
-    this.scene = new Scene();
-    const light = new AmbientLight(0xffffff, 1);
-    this.scene.add(light);
-    const directionalLight = new DirectionalLight(0xffffff, 0.3);
-    directionalLight.position.set(1000, 1000, 1000);
-    directionalLight.castShadow = true;
-    this.scene.add(directionalLight);
-    this.shadow = new Shadow();
-    this.scene.add(this.shadow);
-  }
-  async _setupSession() {
-    this.session = await this.device.requestSession({
-      environmentIntegration: true,
-      outputContext: this.outputContext,
-    });
-    await this.gl.setCompatibleXRDevice(this.device);
-    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl, {
-      alpha: true,
-    });
-    this.reticle = new Reticle(this.session, this.camera);
-    this.scene.add(this.reticle);
-    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
-    this.frameOfRef = await this.session.requestFrameOfReference('eye-level');
-  }
-  _hideCanvas() {
-    if (this.container) {
-      this.container.style.display = 'none';
-    }
-  }
-  _showCanvas() {
-    if (this.container) {
-      this.container.style.display = 'block';
-    }
-  }
-  _enterFullscreen() {
-    if (screenfull.isFullscreen) {
-      throw new Error('Another element is already fullscreen');
-    }
-    screenfull.request(this.container);
-  }
-  onFullscreenChange() {
-    if (!screenfull.isFullscreen && this.enabled) {
-      this.stop();
-    }
-  }
-  async onTap() {
-    if (!this.enabled || !this.session) {
-      return;
-    }
-    const x = 0;
-    const y = 0;
-    this.raycaster = this.raycaster || new Raycaster();
-    this.raycaster.setFromCamera({ x, y }, this.camera);
-    const ray = this.raycaster.ray;
-    const origin = new Float32Array(ray.origin.toArray());
-    const direction = new Float32Array(ray.direction.toArray());
-    const hits = await this.session.requestHitTest(origin,
-                                                   direction,
-                                                   this.frameOfRef);
-    if (hits.length) {
-      const hit = hits[0];
-      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
-      this.model.position.setFromMatrixPosition(hitMatrix);
-      const targetPos = new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
-      const angle = Math.atan2(targetPos.x - this.model.position.x,
-                               targetPos.z - this.model.position.z);
-      this.model.rotation.set(0, angle, 0);
-      this.scene.add(this.model);
-      this.shadow.position.y = this.model.position.y;
-    }
-  }
-}
 
 /**
  * @author Rich Tibbett / https://github.com/richtr
@@ -52543,9 +49365,8 @@ var GLTFLoader = ( function () {
 
 } )();
 
-const loadGLTF = (loader, url) =>
-  new Promise((resolve, reject) =>
-    loader.load(url, resolve, ()=>{}, reject));
+const loadGLTF = (loader, url) => new Promise(
+    (resolve, reject) => loader.load(url, resolve, () => {}, reject));
 class Model extends Object3D {
   constructor() {
     super();
@@ -52556,19 +49377,12 @@ class Model extends Object3D {
   hasModel() {
     return !!this.modelContainer.children.length;
   }
-  async setSource(url, type) {
-    if (!url || !type) {
-      return;
-    }
-    if (url === this.url && type === this.type) {
-      return;
-    }
-    if (['model/gltf-binary', 'model/gltf+json'].indexOf(type) === -1) {
+  async setSource(url) {
+    if (!url || url === this.url) {
       return;
     }
     const data = await loadGLTF(this.loader, url);
     this.url = url;
-    this.type = type;
     while (this.modelContainer.children.length) {
       this.modelContainer.remove(this.modelContainer.children[0]);
     }
@@ -52580,12 +49394,2140 @@ class Model extends Object3D {
         obj.castShadow = true;
       }
     });
-    this.dispatchEvent({ type: 'model-load' });
+    this.dispatchEvent({type: 'model-load'});
+  }
+}
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+// path.resolve([from ...], to)
+// posix version
+
+
+// path.normalize(path)
+// posix version
+
+
+// posix version
+
+
+// posix version
+
+
+
+// path.relative(from, to)
+// posix version
+
+
+
+
+
+
+
+
+
+
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b' ?
+    function (str, start, len) { return str.substr(start, len) } :
+    function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    };
+
+const toFullUrl = (partialUrl) => {
+  const url = new URL(partialUrl, window.location.toString());
+  return url.toString();
+};
+const openIOSARQuickLook = url => {
+  const anchor = document.createElement('a');
+  anchor.setAttribute('rel', 'ar');
+  anchor.setAttribute('href', url);
+  anchor.appendChild(document.createElement('img'));
+  anchor.click();
+};
+const relativeToAbsoluteURL = (function() {
+  const anchor = document.createElement('a');
+  return (url) => {
+    anchor.href = url;
+    return anchor.href;
+  }
+})();
+const getWebGLSource = (element) => {
+  return element.hasAttribute('src') ? toFullUrl(element.getAttribute('src')) :
+                                       null;
+};
+const getiOSSource = (element) => {
+  return element.hasAttribute('ios-src') ?
+      toFullUrl(element.getAttribute('ios-src')) :
+      null;
+};
+const setScaleFromLimit = (function() {
+  const box = new Box3();
+  const size = new Vector3();
+  return (limit, object) => {
+    box.setFromObject(object);
+    box.getSize(size);
+    const max = Math.max(size.x, size.y, size.z);
+    const scale = limit / max;
+    if (!Number.isNaN(scale) && Number.isFinite(scale)) {
+      object.scale.multiplyScalar(scale, scale, scale);
+    }
+  };
+})();
+const isMobile = function() {
+  let check = false;
+  (function(a) {
+    if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
+            .test(a) ||
+        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i
+            .test(a.substr(0, 4)))
+      check = true;
+  })(navigator.userAgent || navigator.vendor || window.opera);
+  return check;
+};
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var screenfull = createCommonjsModule(function (module) {
+/*!
+* screenfull
+* v3.3.2 - 2017-10-27
+* (c) Sindre Sorhus; MIT License
+*/
+(function () {
+	'use strict';
+
+	var document = typeof window !== 'undefined' && typeof window.document !== 'undefined' ? window.document : {};
+	var isCommonjs = 'object' !== 'undefined' && module.exports;
+	var keyboardAllowed = typeof Element !== 'undefined' && 'ALLOW_KEYBOARD_INPUT' in Element;
+
+	var fn = (function () {
+		var val;
+
+		var fnMap = [
+			[
+				'requestFullscreen',
+				'exitFullscreen',
+				'fullscreenElement',
+				'fullscreenEnabled',
+				'fullscreenchange',
+				'fullscreenerror'
+			],
+			// New WebKit
+			[
+				'webkitRequestFullscreen',
+				'webkitExitFullscreen',
+				'webkitFullscreenElement',
+				'webkitFullscreenEnabled',
+				'webkitfullscreenchange',
+				'webkitfullscreenerror'
+
+			],
+			// Old WebKit (Safari 5.1)
+			[
+				'webkitRequestFullScreen',
+				'webkitCancelFullScreen',
+				'webkitCurrentFullScreenElement',
+				'webkitCancelFullScreen',
+				'webkitfullscreenchange',
+				'webkitfullscreenerror'
+
+			],
+			[
+				'mozRequestFullScreen',
+				'mozCancelFullScreen',
+				'mozFullScreenElement',
+				'mozFullScreenEnabled',
+				'mozfullscreenchange',
+				'mozfullscreenerror'
+			],
+			[
+				'msRequestFullscreen',
+				'msExitFullscreen',
+				'msFullscreenElement',
+				'msFullscreenEnabled',
+				'MSFullscreenChange',
+				'MSFullscreenError'
+			]
+		];
+
+		var i = 0;
+		var l = fnMap.length;
+		var ret = {};
+
+		for (; i < l; i++) {
+			val = fnMap[i];
+			if (val && val[1] in document) {
+				for (i = 0; i < val.length; i++) {
+					ret[fnMap[0][i]] = val[i];
+				}
+				return ret;
+			}
+		}
+
+		return false;
+	})();
+
+	var eventNameMap = {
+		change: fn.fullscreenchange,
+		error: fn.fullscreenerror
+	};
+
+	var screenfull = {
+		request: function (elem) {
+			var request = fn.requestFullscreen;
+
+			elem = elem || document.documentElement;
+
+			// Work around Safari 5.1 bug: reports support for
+			// keyboard in fullscreen even though it doesn't.
+			// Browser sniffing, since the alternative with
+			// setTimeout is even worse.
+			if (/ Version\/5\.1(?:\.\d+)? Safari\//.test(navigator.userAgent)) {
+				elem[request]();
+			} else {
+				elem[request](keyboardAllowed && Element.ALLOW_KEYBOARD_INPUT);
+			}
+		},
+		exit: function () {
+			document[fn.exitFullscreen]();
+		},
+		toggle: function (elem) {
+			if (this.isFullscreen) {
+				this.exit();
+			} else {
+				this.request(elem);
+			}
+		},
+		onchange: function (callback) {
+			this.on('change', callback);
+		},
+		onerror: function (callback) {
+			this.on('error', callback);
+		},
+		on: function (event, callback) {
+			var eventName = eventNameMap[event];
+			if (eventName) {
+				document.addEventListener(eventName, callback, false);
+			}
+		},
+		off: function (event, callback) {
+			var eventName = eventNameMap[event];
+			if (eventName) {
+				document.removeEventListener(eventName, callback, false);
+			}
+		},
+		raw: fn
+	};
+
+	if (!fn) {
+		if (isCommonjs) {
+			module.exports = false;
+		} else {
+			window.screenfull = false;
+		}
+
+		return;
+	}
+
+	Object.defineProperties(screenfull, {
+		isFullscreen: {
+			get: function () {
+				return Boolean(document[fn.fullscreenElement]);
+			}
+		},
+		element: {
+			enumerable: true,
+			get: function () {
+				return document[fn.fullscreenElement];
+			}
+		},
+		enabled: {
+			enumerable: true,
+			get: function () {
+				// Coerce to boolean in case of old WebKit
+				return Boolean(document[fn.fullscreenEnabled]);
+			}
+		}
+	});
+
+	if (isCommonjs) {
+		module.exports = screenfull;
+	} else {
+		window.screenfull = screenfull;
+	}
+})();
+});
+
+class Reticle extends Object3D {
+  constructor(xrSession, camera) {
+    super();
+    let geometry = new RingGeometry(0.1, 0.11, 24, 1);
+    let material = new MeshBasicMaterial({color: 0xffffff});
+    geometry.applyMatrix(new Matrix4().makeRotationX(_Math.degToRad(-90)));
+    this.ring = new Mesh(geometry, material);
+    this.add(this.ring);
+    this.session = xrSession;
+    this.visible = false;
+    this.camera = camera;
+  }
+  async update(frameOfRef) {
+    this.raycaster = this.raycaster || new Raycaster();
+    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
+    const ray = this.raycaster.ray;
+    const origin = new Float32Array(ray.origin.toArray());
+    const direction = new Float32Array(ray.direction.toArray());
+    const hits =
+        await this.session.requestHitTest(origin, direction, frameOfRef);
+    if (hits.length) {
+      const hit = hits[0];
+      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
+      this.position.setFromMatrixPosition(hitMatrix);
+      const targetPos =
+          new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
+      const angle = Math.atan2(
+          targetPos.x - this.position.x, targetPos.z - this.position.z);
+      this.rotation.set(0, angle, 0);
+      this.visible = true;
+    }
+  }
+}
+
+class Shadow extends Mesh {
+  constructor() {
+    const geometry = new PlaneGeometry(2000, 2000);
+    geometry.rotateX(-Math.PI / 2);
+    const material = new ShadowMaterial({
+      color: 0x111111,
+      opacity: 0.2,
+    });
+    super(geometry, material);
+    this.receiveShadow = true;
+  }
+}
+
+class ARView extends EventDispatcher {
+  constructor({canvas, context, model}) {
+    super();
+    this.context = context;
+    this.canvas = canvas;
+    this.model = model;
+    this.onTap = this.onTap.bind(this);
+    this.onFrame = this.onFrame.bind(this);
+    this.onFullscreenChange = this.onFullscreenChange.bind(this);
+    if (this.hasAR()) {
+      screenfull.on('change', this.onFullscreenChange);
+      this._devicePromise = navigator.xr.requestDevice();
+      this._devicePromise.then(device => this.device = device);
+    }
+    this.model.addEventListener('model-load', () => this.updateModelScale());
+  }
+  hasAR() {
+    return !!(
+        screenfull && screenfull.enabled && navigator.xr && window.XRSession &&
+        window.XRSession.prototype.requestHitTest);
+  }
+  whenARReady() {
+    return this.hasAR() ? this._devicePromise : Promise.reject();
+  }
+  updateModelScale() {
+    if (!this.enabled) {
+      return;
+    }
+    this.model.position.set(0, 0, 0);
+    this.model.rotation.set(0, 0, 0);
+    this.model.scale.set(1, 1, 1);
+  }
+  start() {
+    if (!this.hasAR() || this.enabled) {
+      return;
+    }
+    if (!this.device) {
+      throw new Error(
+          'Must wait until XRDevice found; use `await arView.whenARReady()` first.');
+    }
+    this.enabled = true;
+    this.stabilized = false;
+    this._setupCanvas();
+    this._setupScene();
+    this._setupRenderer();
+    this._showCanvas();
+    this._enterFullscreen();
+    this.updateModelScale();
+    return this._setupSession().then(() => {
+      this._tick();
+    });
+  }
+  stop() {
+    if (!this.hasAR() || !this.enabled) {
+      return;
+    }
+    this.enabled = false;
+    if (this.session) {
+      this.session.cancelAnimationFrame(this.lastFrameId);
+      this._hideCanvas();
+      const ending = this.session.end();
+      this.session = null;
+      ending.then(() => this.dispatchEvent({type: 'end'}));
+    }
+  }
+  _tick() {
+    this.lastFrameId = this.session.requestAnimationFrame(this.onFrame);
+  }
+  onFrame(time, frame) {
+    let session = frame.session;
+    let pose = frame.getDevicePose(this.frameOfRef);
+    this.reticle.update(this.frameOfRef);
+    if (this.reticle.visible && !this.stabilized) {
+      this.stabilized = true;
+      this.dispatchEvent({type: 'stabilized'});
+    }
+    this._tick();
+    if (pose) {
+      for (let view of frame.views) {
+        const viewport = session.baseLayer.getViewport(view);
+        this.renderer.setViewport(0, 0, viewport.width, viewport.height);
+        this.renderer.setSize(viewport.width, viewport.height);
+        this.camera.projectionMatrix.fromArray(view.projectionMatrix);
+        const viewMatrix = new Matrix4().fromArray(pose.getViewMatrix(view));
+        this.camera.matrix.getInverse(viewMatrix);
+        this.camera.updateMatrixWorld(true);
+        this.renderer.clearDepth();
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+  }
+  _setupCanvas() {
+    if (!this.outputContext) {
+      this.outputCanvas = document.createElement('canvas');
+      this.outputCanvas.style.position = 'absolute';
+      this.outputCanvas.style.top = '0';
+      this.outputCanvas.style.left = '0';
+      this.outputCanvas.style.height = '100%';
+      this.outputCanvas.style.width = '100%';
+      this.outputContext = this.outputCanvas.getContext('xrpresent');
+      this.outputCanvas.addEventListener('click', this.onTap);
+      this.container = document.createElement('div');
+      this.container.setAttribute('xr-model-component-canvas', '');
+      this.container.appendChild(this.outputCanvas);
+      document.body.appendChild(this.container);
+    }
+  }
+  _setupRenderer() {
+    this.renderer = new WebGLRenderer({
+      context: this.context,
+      canvas: this.canvas,
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(1);
+    this.renderer.autoClear = false;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.gammaInput = true;
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
+    this.gl = this.renderer.getContext();
+    this.camera = new PerspectiveCamera();
+    this.camera.matrixAutoUpdate = false;
+  }
+  _setupScene() {
+    this.scene = new Scene();
+    const light = new AmbientLight(0xffffff, 1);
+    this.scene.add(light);
+    const directionalLight = new DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(1000, 1000, 1000);
+    directionalLight.castShadow = true;
+    this.scene.add(directionalLight);
+    this.shadow = new Shadow();
+    this.scene.add(this.shadow);
+  }
+  async _setupSession() {
+    this.session = await this.device.requestSession({
+      environmentIntegration: true,
+      outputContext: this.outputContext,
+    });
+    await this.gl.setCompatibleXRDevice(this.device);
+    this.session.baseLayer = new XRWebGLLayer(this.session, this.gl, {
+      alpha: true,
+    });
+    this.reticle = new Reticle(this.session, this.camera);
+    this.scene.add(this.reticle);
+    this.renderer.setFramebuffer(this.session.baseLayer.framebuffer);
+    this.frameOfRef = await this.session.requestFrameOfReference('eye-level');
+  }
+  _hideCanvas() {
+    if (this.container) {
+      this.container.style.display = 'none';
+    }
+  }
+  _showCanvas() {
+    if (this.container) {
+      this.container.style.display = 'block';
+    }
+  }
+  _enterFullscreen() {
+    if (screenfull.isFullscreen) {
+      throw new Error('Another element is already fullscreen');
+    }
+    screenfull.request(this.container);
+  }
+  onFullscreenChange() {
+    if (!screenfull.isFullscreen && this.enabled) {
+      this.stop();
+    }
+  }
+  async onTap() {
+    if (!this.enabled || !this.session) {
+      return;
+    }
+    const x = 0;
+    const y = 0;
+    this.raycaster = this.raycaster || new Raycaster();
+    this.raycaster.setFromCamera({x, y}, this.camera);
+    const ray = this.raycaster.ray;
+    const origin = new Float32Array(ray.origin.toArray());
+    const direction = new Float32Array(ray.direction.toArray());
+    const hits =
+        await this.session.requestHitTest(origin, direction, this.frameOfRef);
+    if (hits.length) {
+      const hit = hits[0];
+      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
+      this.model.position.setFromMatrixPosition(hitMatrix);
+      const targetPos =
+          new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
+      const angle = Math.atan2(
+          targetPos.x - this.model.position.x,
+          targetPos.z - this.model.position.z);
+      this.model.rotation.set(0, angle, 0);
+      this.scene.add(this.model);
+      this.shadow.position.y = this.model.position.y;
+    }
+  }
+}
+
+'use strict';
+
+function processShader(vertexShaderCode, fragmentShaderCode) {
+
+  var regExp = /uniform\s+([^\s]+)\s+([^\s]+)\s*;/gi;
+  var regExp2 = /uniform\s+([^\s]+)\s+([^\s]+)\s*\[\s*(\w+)\s*\]*\s*;/gi;
+
+  var typesMap = {
+    sampler2D: { type: 't', value: function() { return new Texture(); } },
+    samplerCube: { type: 't', value: function() {} },
+
+    bool: { type: 'b', value: function() { return 0; } },
+    int: { type: 'i', value: function() { return 0; } },
+    float: { type: 'f', value: function() { return 0; } },
+
+    vec2: { type: 'v2', value: function() { return new Vector2(); } },
+    vec3: { type: 'v3', value: function() { return new Vector3(); } },
+    vec4: { type: 'v4', value: function() { return new Vector4(); } },
+
+    bvec2: { type: 'v2', value: function() { return new Vector2(); } },
+    bvec3: { type: 'v3', value: function() { return new Vector3(); } },
+    bvec4: { type: 'v4', value: function() { return new Vector4(); } },
+
+    ivec2: { type: 'v2', value: function() { return new Vector2(); } },
+    ivec3: { type: 'v3', value: function() { return new Vector3(); } },
+    ivec4: { type: 'v4', value: function() { return new Vector4(); } },
+
+    mat3: { type: 'v3', value: function() { return new Matrix3(); } },
+    mat4: { type: 'v4', value: function() { return new Matrix4(); } }
+  };
+
+  var arrayTypesMap = {
+    float: { type: 'fv', value: function() { return []; } },
+    vec3: { type: 'v3v', value: function() { return []; } }
+  };
+
+  var matches;
+  var uniforms = {
+    resolution: { type: 'v2', value: new Vector2( 1, 1 ), default: true },
+    time: { type: 'f', value: Date.now(), default: true },
+    tInput: { type: 't', value: new Texture(), default: true }
+  };
+
+  var uniformType, uniformName;
+
+  while ((matches = regExp.exec(fragmentShaderCode)) !== null) {
+    if (matches.index === regExp.lastIndex) {
+      regExp.lastIndex++;
+    }
+    uniformType = matches[1];
+    uniformName = matches[2];
+
+    uniforms[uniformName] = {
+      type: typesMap[uniformType].type,
+      value: typesMap[uniformType].value()
+    };
+  }
+
+  while ((matches = regExp2.exec(fragmentShaderCode)) !== null) {
+    if (matches.index === regExp.lastIndex) {
+      regExp.lastIndex++;
+    }
+    uniformType = matches[1];
+    uniformName = matches[2];
+    uniforms[uniformName] = {
+      type: arrayTypesMap[uniformType].type,
+      value: arrayTypesMap[uniformType].value()
+    };
+  }
+
+  var shader = new ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: vertexShaderCode,
+    fragmentShader: fragmentShaderCode,
+    shading: FlatShading,
+    depthWrite: false,
+    depthTest: false,
+    transparent: true
+  });
+
+  return shader;
+}
+
+class Pass {
+  constructor() {
+    this.shader = null;
+    this.loaded = null;
+    this.params = {};
+    this.isSim = false;
+  }
+
+  setShader(vs, fs) {
+    this.shader = processShader(vs, fs);
+  }
+
+  run(composer) {
+    composer.pass(this.shader);
+  }
+
+  getOfflineTexture(w, h, useRGBA) {
+    return new WebGLRenderTarget(w, h, {
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
+      format: useRGBA ? RGBAFormat : RGBFormat
+    });
+  }
+}
+
+var vertex = `
+varying vec2 vUv;
+
+void main() {
+
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+}
+`;
+
+var fragment = `
+varying vec2 vUv;
+uniform sampler2D tInput;
+
+void main() {
+  gl_FragColor = texture2D( tInput, vUv );
+
+}
+`;
+
+class CopyPass extends Pass {
+  constructor() {
+    super();
+    this.setShader(vertex, fragment);
+  }
+}
+
+class Stack {
+  constructor(shadersPool) {
+    this.passItems = [];
+    this.shadersPool = shadersPool;
+    this.passes = [];
+  }
+
+  addPass(shaderName, enabled, params, index) {
+    var length = 0;
+    var passItem = {
+      shaderName: shaderName,
+      enabled: enabled || false
+    };
+
+    // TODO use and store params values
+
+    this.passItems.push(passItem);
+    length = this.passItems.length;
+
+    this.updatePasses();
+
+    if (index) {
+      return this.movePassToIndex(this.passItems[length], index);
+    }
+    else {
+      return length - 1;
+    }
+  }
+
+  removePass(index) {
+    this.passItems.splice(index, 1);
+    this.updatePasses();
+  }
+
+  enablePass(index) {
+    this.passItems[index].enabled = true;
+    this.updatePasses();
+  }
+
+  disablePass(index) {
+    this.passItems[index].enabled = false;
+    this.updatePasses();
+  }
+
+  isPassEnabled(index) {
+    return this.passItems[index].enabled;
+  }
+
+  movePassToIndex(index, destIndex) {
+    this.passItems.splice(destIndex, 0, this.passItems.splice(index, 1)[0]);
+    this.updatePasses();
+
+    // TODO check if destIndex is final index
+    return destIndex;
+  }
+
+  reverse() {
+    this.passItems.reverse();
+    this.updatePasses();
+  }
+
+  updatePasses() {
+    this.passes = this.shadersPool.getPasses(this.passItems);
+
+    // init default params for new passItems
+    this.passItems.forEach(function(passItem, index) {
+      if (passItem.params === undefined) {
+        passItem.params = JSON.parse(JSON.stringify(this.passes[index].params)); // clone params without reference to the real shader instance params
+      }
+    }.bind(this));
+  }
+
+  getPasses() {
+    return this.passes;
+  }
+}
+
+class Composer {
+  constructor(renderer, settings) {
+    var pixelRatio = renderer.getPixelRatio();
+
+    this.width  = Math.floor(renderer.context.canvas.width  / pixelRatio) || 1;
+    this.height = Math.floor(renderer.context.canvas.height / pixelRatio) || 1;
+
+    this.output = null;
+    this.input = null;
+    this.read = null;
+    this.write = null;
+
+    this.settings = settings || {};
+    this.useRGBA = this.settings.useRGBA || false;
+
+    this.renderer = renderer;
+    this.copyPass = new CopyPass(this.settings);
+
+    this.defaultMaterial = new MeshBasicMaterial({color: 0x00FF00, wireframe: false});
+    this.scene = new Scene();
+    this.quad = new Mesh(new PlaneBufferGeometry(1, 1), this.defaultMaterial);
+    this.scene.add(this.quad);
+    this.camera = new OrthographicCamera(1, 1, 1, 1, -10000, 10000);
+
+    this.front = new WebGLRenderTarget(1, 1, {
+      minFilter: this.settings.minFilter !== undefined ? this.settings.minFilter : LinearFilter,
+      magFilter: this.settings.magFilter !== undefined ? this.settings.magFilter : LinearFilter,
+      wrapS: this.settings.wrapS !== undefined ? this.settings.wrapS : ClampToEdgeWrapping,
+      wrapT: this.settings.wrapT !== undefined ? this.settings.wrapT : ClampToEdgeWrapping,
+      format: this.useRGBA ? RGBAFormat : RGBFormat,
+      type: this.settings.type !== undefined ? this.settings.type : UnsignedByteType,
+      stencilBuffer: this.settings.stencilBuffer !== undefined ? this.settings.stencilBuffer : true
+    });
+
+    this.back = this.front.clone();
+    this.startTime = Date.now();
+    this.passes = {};
+
+    this.setSize(this.width, this.height);
+  }
+
+  swapBuffers() {
+    this.output = this.write;
+    this.input = this.read;
+
+    var t = this.write;
+    this.write = this.read;
+    this.read = t;
+  }
+
+  render(scene, camera, keep, output) {
+    if (keep) this.swapBuffers();
+    this.renderer.render(scene, camera, output ? output : this.write, true);
+    if (!output) this.swapBuffers();
+  }
+
+  toScreen() {
+    this.quad.material = this.copyPass.shader;
+    this.quad.material.uniforms.tInput.value = this.read;
+    this.quad.material.uniforms.resolution.value.set(this.width, this.height);
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  toTexture(t) {
+    this.quad.material = this.copyPass.shader;
+    this.quad.material.uniforms.tInput.value = this.read;
+    this.renderer.render(this.scene, this.camera, t, false);
+  }
+
+  pass(pass) {
+    if (pass instanceof Stack) {
+      this.passStack(pass);
+    }
+    else {
+      if (pass instanceof ShaderMaterial) {
+        this.quad.material = pass;
+      }
+      if (pass instanceof Pass) {
+        pass.run(this);
+        return;
+      }
+
+      if (!pass.isSim) {
+        this.quad.material.uniforms.tInput.value = this.read;
+      }
+
+      this.quad.material.uniforms.resolution.value.set(this.width, this.height);
+      this.quad.material.uniforms.time.value = 0.001 * (Date.now() - this.startTime);
+      this.renderer.render(this.scene, this.camera, this.write, false);
+      this.swapBuffers();
+    }
+  }
+
+  passStack(stack) {
+    stack.getPasses().forEach(function(pass) {
+      this.pass(pass);
+    }.bind(this));
+  }
+
+  reset() {
+    this.read = this.front;
+    this.write = this.back;
+    this.output = this.write;
+    this.input = this.read;
+  }
+
+  setSource(src) {
+    this.quad.material = this.copyPass.shader;
+    this.quad.material.uniforms.tInput.value = src;
+    this.renderer.render(this.scene, this.camera, this.write, true);
+    this.swapBuffers();
+  }
+
+  setSize(w, h) {
+    this.width = w;
+    this.height = h;
+
+    this.camera.projectionMatrix.makeOrthographic( w / - 2, w / 2, h / 2, h / - 2, this.camera.near, this.camera.far );
+    this.quad.scale.set( w, h, 1 );
+
+    this.front.setSize( w, h );
+    this.back.setSize( w, h );
+  }
+}
+
+var fragment$1 = `
+uniform sampler2D tInput;
+uniform vec2 resolution;
+varying vec2 vUv;
+
+#define FXAA_REDUCE_MIN   (1.0/128.0)
+#define FXAA_REDUCE_MUL   (1.0/8.0)
+#define FXAA_SPAN_MAX     8.0
+
+void main() {
+
+    vec2 res = 1. / resolution;
+
+    vec3 rgbNW = texture2D( tInput, ( vUv.xy + vec2( -1.0, -1.0 ) * res ) ).xyz;
+    vec3 rgbNE = texture2D( tInput, ( vUv.xy + vec2( 1.0, -1.0 ) * res ) ).xyz;
+    vec3 rgbSW = texture2D( tInput, ( vUv.xy + vec2( -1.0, 1.0 ) * res ) ).xyz;
+    vec3 rgbSE = texture2D( tInput, ( vUv.xy + vec2( 1.0, 1.0 ) * res ) ).xyz;
+    vec4 rgbaM  = texture2D( tInput,  vUv.xy  * res );
+    vec3 rgbM  = rgbaM.xyz;
+    vec3 luma = vec3( 0.299, 0.587, 0.114 );
+
+    float lumaNW = dot( rgbNW, luma );
+    float lumaNE = dot( rgbNE, luma );
+    float lumaSW = dot( rgbSW, luma );
+    float lumaSE = dot( rgbSE, luma );
+    float lumaM  = dot( rgbM,  luma );
+    float lumaMin = min( lumaM, min( min( lumaNW, lumaNE ), min( lumaSW, lumaSE ) ) );
+    float lumaMax = max( lumaM, max( max( lumaNW, lumaNE) , max( lumaSW, lumaSE ) ) );
+
+    vec2 dir;
+    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
+    dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
+
+    float dirReduce = max( ( lumaNW + lumaNE + lumaSW + lumaSE ) * ( 0.25 * FXAA_REDUCE_MUL ), FXAA_REDUCE_MIN );
+
+    float rcpDirMin = 1.0 / ( min( abs( dir.x ), abs( dir.y ) ) + dirReduce );
+    dir = min( vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX),
+          max( vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+                dir * rcpDirMin)) * res;
+    vec4 rgbA = (1.0/2.0) * (
+    texture2D(tInput,  vUv.xy + dir * (1.0/3.0 - 0.5)) +
+    texture2D(tInput,  vUv.xy + dir * (2.0/3.0 - 0.5)));
+    vec4 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
+    texture2D(tInput,  vUv.xy + dir * (0.0/3.0 - 0.5)) +
+    texture2D(tInput,  vUv.xy + dir * (3.0/3.0 - 0.5)));
+    float lumaB = dot(rgbB, vec4(luma, 0.0));
+
+    if ( ( lumaB < lumaMin ) || ( lumaB > lumaMax ) ) {
+        gl_FragColor = rgbA;
+    } else {
+        gl_FragColor = rgbB;
+    }
+
+    //gl_FragColor = vec4( texture2D( tInput,vUv ).xyz, 1. );
+}
+`;
+
+class FXAAPass extends Pass {
+  constructor() {
+    super();
+    this.setShader(vertex, fragment$1);
+  }
+}
+
+var fragment$2 = `
+varying vec2 vUv;
+uniform sampler2D tInput;
+uniform vec2 resolution;
+
+uniform float reduction;
+uniform float boost;
+
+void main() {
+
+  vec4 color = texture2D( tInput, vUv );
+
+  vec2 center = resolution * 0.5;
+  float vignette = distance( center, gl_FragCoord.xy ) / resolution.x;
+  vignette = boost - vignette * reduction;
+
+  color.rgb *= vignette;
+  gl_FragColor = color;
+
+}
+`;
+
+class VignettePass extends Pass {
+  constructor({ boost, reduction } = {}) {
+    super();
+    this.setShader(vertex, fragment$2);
+
+    this.params.boost = boost !== undefined ? boost : 2;
+    this.params.reduction = reduction !== undefined ? reduction : 2;
+  }
+
+  run(composer) {
+    this.shader.uniforms.boost.value = this.params.boost;
+    this.shader.uniforms.reduction.value = this.params.reduction;
+    composer.pass(this.shader);
+  }
+}
+
+/**
+ * @author qiao / https://github.com/qiao
+ * @author mrdoob / http://mrdoob.com
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author erich666 / http://erichaines.com
+ */
+
+// This set of controls performs orbiting, dollying (zooming), and panning.
+// Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
+//
+//    Orbit - left mouse / touch: one-finger move
+//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
+//    Pan - right mouse, or arrow keys / touch: two-finger move
+
+function OrbitControls ( object, domElement ) {
+
+	this.object = object;
+
+	this.domElement = ( domElement !== undefined ) ? domElement : document;
+
+	// Set to false to disable this control
+	this.enabled = true;
+
+	// "target" sets the location of focus, where the object orbits around
+	this.target = new Vector3();
+
+	// How far you can dolly in and out ( PerspectiveCamera only )
+	this.minDistance = 0;
+	this.maxDistance = Infinity;
+
+	// How far you can zoom in and out ( OrthographicCamera only )
+	this.minZoom = 0;
+	this.maxZoom = Infinity;
+
+	// How far you can orbit vertically, upper and lower limits.
+	// Range is 0 to Math.PI radians.
+	this.minPolarAngle = 0; // radians
+	this.maxPolarAngle = Math.PI; // radians
+
+	// How far you can orbit horizontally, upper and lower limits.
+	// If set, must be a sub-interval of the interval [ - Math.PI, Math.PI ].
+	this.minAzimuthAngle = - Infinity; // radians
+	this.maxAzimuthAngle = Infinity; // radians
+
+	// Set to true to enable damping (inertia)
+	// If damping is enabled, you must call controls.update() in your animation loop
+	this.enableDamping = false;
+	this.dampingFactor = 0.25;
+
+	// This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
+	// Set to false to disable zooming
+	this.enableZoom = true;
+	this.zoomSpeed = 1.0;
+
+	// Set to false to disable rotating
+	this.enableRotate = true;
+	this.rotateSpeed = 1.0;
+
+	// Set to false to disable panning
+	this.enablePan = true;
+	this.panSpeed = 1.0;
+	this.screenSpacePanning = false; // if true, pan in screen-space
+	this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
+
+	// Set to true to automatically rotate around the target
+	// If auto-rotate is enabled, you must call controls.update() in your animation loop
+	this.autoRotate = false;
+	this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
+
+	// Set to false to disable use of the keys
+	this.enableKeys = true;
+
+	// The four arrow keys
+	this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
+
+	// Mouse buttons
+	this.mouseButtons = { ORBIT: MOUSE.LEFT, ZOOM: MOUSE.MIDDLE, PAN: MOUSE.RIGHT };
+
+	// for reset
+	this.target0 = this.target.clone();
+	this.position0 = this.object.position.clone();
+	this.zoom0 = this.object.zoom;
+
+	//
+	// public methods
+	//
+
+	this.getPolarAngle = function () {
+
+		return spherical.phi;
+
+	};
+
+	this.getAzimuthalAngle = function () {
+
+		return spherical.theta;
+
+	};
+
+	this.saveState = function () {
+
+		scope.target0.copy( scope.target );
+		scope.position0.copy( scope.object.position );
+		scope.zoom0 = scope.object.zoom;
+
+	};
+
+	this.reset = function () {
+
+		scope.target.copy( scope.target0 );
+		scope.object.position.copy( scope.position0 );
+		scope.object.zoom = scope.zoom0;
+
+		scope.object.updateProjectionMatrix();
+		scope.dispatchEvent( changeEvent );
+
+		scope.update();
+
+		state = STATE.NONE;
+
+	};
+
+	// this method is exposed, but perhaps it would be better if we can make it private...
+	this.update = function () {
+
+		var offset = new Vector3();
+
+		// so camera.up is the orbit axis
+		var quat = new Quaternion().setFromUnitVectors( object.up, new Vector3( 0, 1, 0 ) );
+		var quatInverse = quat.clone().inverse();
+
+		var lastPosition = new Vector3();
+		var lastQuaternion = new Quaternion();
+
+		return function update() {
+
+			var position = scope.object.position;
+
+			offset.copy( position ).sub( scope.target );
+
+			// rotate offset to "y-axis-is-up" space
+			offset.applyQuaternion( quat );
+
+			// angle from z-axis around y-axis
+			spherical.setFromVector3( offset );
+
+			if ( scope.autoRotate && state === STATE.NONE ) {
+
+				rotateLeft( getAutoRotationAngle() );
+
+			}
+
+			spherical.theta += sphericalDelta.theta;
+			spherical.phi += sphericalDelta.phi;
+
+			// restrict theta to be between desired limits
+			spherical.theta = Math.max( scope.minAzimuthAngle, Math.min( scope.maxAzimuthAngle, spherical.theta ) );
+
+			// restrict phi to be between desired limits
+			spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
+
+			spherical.makeSafe();
+
+
+			spherical.radius *= scale;
+
+			// restrict radius to be between desired limits
+			spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
+
+			// move target to panned location
+			scope.target.add( panOffset );
+
+			offset.setFromSpherical( spherical );
+
+			// rotate offset back to "camera-up-vector-is-up" space
+			offset.applyQuaternion( quatInverse );
+
+			position.copy( scope.target ).add( offset );
+
+			scope.object.lookAt( scope.target );
+
+			if ( scope.enableDamping === true ) {
+
+				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
+				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+
+				panOffset.multiplyScalar( 1 - scope.dampingFactor );
+
+			} else {
+
+				sphericalDelta.set( 0, 0, 0 );
+
+				panOffset.set( 0, 0, 0 );
+
+			}
+
+			scale = 1;
+
+			// update condition is:
+			// min(camera displacement, camera rotation in radians)^2 > EPS
+			// using small-angle approximation cos(x/2) = 1 - x^2 / 8
+
+			if ( zoomChanged ||
+				lastPosition.distanceToSquared( scope.object.position ) > EPS ||
+				8 * ( 1 - lastQuaternion.dot( scope.object.quaternion ) ) > EPS ) {
+
+				scope.dispatchEvent( changeEvent );
+
+				lastPosition.copy( scope.object.position );
+				lastQuaternion.copy( scope.object.quaternion );
+				zoomChanged = false;
+
+				return true;
+
+			}
+
+			return false;
+
+		};
+
+	}();
+
+	this.dispose = function () {
+
+		scope.domElement.removeEventListener( 'contextmenu', onContextMenu, false );
+		scope.domElement.removeEventListener( 'mousedown', onMouseDown, false );
+		scope.domElement.removeEventListener( 'wheel', onMouseWheel, false );
+
+		scope.domElement.removeEventListener( 'touchstart', onTouchStart, false );
+		scope.domElement.removeEventListener( 'touchend', onTouchEnd, false );
+		scope.domElement.removeEventListener( 'touchmove', onTouchMove, false );
+
+		document.removeEventListener( 'mousemove', onMouseMove, false );
+		document.removeEventListener( 'mouseup', onMouseUp, false );
+
+		window.removeEventListener( 'keydown', onKeyDown, false );
+
+		//scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
+
+	};
+
+	//
+	// internals
+	//
+
+	var scope = this;
+
+	var changeEvent = { type: 'change' };
+	var startEvent = { type: 'start' };
+	var endEvent = { type: 'end' };
+
+	var STATE = { NONE: - 1, ROTATE: 0, DOLLY: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_DOLLY_PAN: 4 };
+
+	var state = STATE.NONE;
+
+	var EPS = 0.000001;
+
+	// current position in spherical coordinates
+	var spherical = new Spherical();
+	var sphericalDelta = new Spherical();
+
+	var scale = 1;
+	var panOffset = new Vector3();
+	var zoomChanged = false;
+
+	var rotateStart = new Vector2();
+	var rotateEnd = new Vector2();
+	var rotateDelta = new Vector2();
+
+	var panStart = new Vector2();
+	var panEnd = new Vector2();
+	var panDelta = new Vector2();
+
+	var dollyStart = new Vector2();
+	var dollyEnd = new Vector2();
+	var dollyDelta = new Vector2();
+
+	function getAutoRotationAngle() {
+
+		return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+
+	}
+
+	function getZoomScale() {
+
+		return Math.pow( 0.95, scope.zoomSpeed );
+
+	}
+
+	function rotateLeft( angle ) {
+
+		sphericalDelta.theta -= angle;
+
+	}
+
+	function rotateUp( angle ) {
+
+		sphericalDelta.phi -= angle;
+
+	}
+
+	var panLeft = function () {
+
+		var v = new Vector3();
+
+		return function panLeft( distance, objectMatrix ) {
+
+			v.setFromMatrixColumn( objectMatrix, 0 ); // get X column of objectMatrix
+			v.multiplyScalar( - distance );
+
+			panOffset.add( v );
+
+		};
+
+	}();
+
+	var panUp = function () {
+
+		var v = new Vector3();
+
+		return function panUp( distance, objectMatrix ) {
+
+			if ( scope.screenSpacePanning === true ) {
+
+				v.setFromMatrixColumn( objectMatrix, 1 );
+
+			} else {
+
+				v.setFromMatrixColumn( objectMatrix, 0 );
+				v.crossVectors( scope.object.up, v );
+
+			}
+
+			v.multiplyScalar( distance );
+
+			panOffset.add( v );
+
+		};
+
+	}();
+
+	// deltaX and deltaY are in pixels; right and down are positive
+	var pan = function () {
+
+		var offset = new Vector3();
+
+		return function pan( deltaX, deltaY ) {
+
+			var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
+
+			if ( scope.object.isPerspectiveCamera ) {
+
+				// perspective
+				var position = scope.object.position;
+				offset.copy( position ).sub( scope.target );
+				var targetDistance = offset.length();
+
+				// half of the fov is center to top of screen
+				targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
+
+				// we use only clientHeight here so aspect ratio does not distort speed
+				panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
+				panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
+
+			} else if ( scope.object.isOrthographicCamera ) {
+
+				// orthographic
+				panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
+				panUp( deltaY * ( scope.object.top - scope.object.bottom ) / scope.object.zoom / element.clientHeight, scope.object.matrix );
+
+			} else {
+
+				// camera neither orthographic nor perspective
+				console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
+				scope.enablePan = false;
+
+			}
+
+		};
+
+	}();
+
+	function dollyIn( dollyScale ) {
+
+		if ( scope.object.isPerspectiveCamera ) {
+
+			scale /= dollyScale;
+
+		} else if ( scope.object.isOrthographicCamera ) {
+
+			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
+			scope.object.updateProjectionMatrix();
+			zoomChanged = true;
+
+		} else {
+
+			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+			scope.enableZoom = false;
+
+		}
+
+	}
+
+	function dollyOut( dollyScale ) {
+
+		if ( scope.object.isPerspectiveCamera ) {
+
+			scale *= dollyScale;
+
+		} else if ( scope.object.isOrthographicCamera ) {
+
+			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
+			scope.object.updateProjectionMatrix();
+			zoomChanged = true;
+
+		} else {
+
+			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+			scope.enableZoom = false;
+
+		}
+
+	}
+
+	//
+	// event callbacks - update the object state
+	//
+
+	function handleMouseDownRotate( event ) {
+
+		//console.log( 'handleMouseDownRotate' );
+
+		rotateStart.set( event.clientX, event.clientY );
+
+	}
+
+	function handleMouseDownDolly( event ) {
+
+		//console.log( 'handleMouseDownDolly' );
+
+		dollyStart.set( event.clientX, event.clientY );
+
+	}
+
+	function handleMouseDownPan( event ) {
+
+		//console.log( 'handleMouseDownPan' );
+
+		panStart.set( event.clientX, event.clientY );
+
+	}
+
+	function handleMouseMoveRotate( event ) {
+
+		//console.log( 'handleMouseMoveRotate' );
+
+		rotateEnd.set( event.clientX, event.clientY );
+
+		rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+
+		var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
+
+		rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+
+		rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+
+		rotateStart.copy( rotateEnd );
+
+		scope.update();
+
+	}
+
+	function handleMouseMoveDolly( event ) {
+
+		//console.log( 'handleMouseMoveDolly' );
+
+		dollyEnd.set( event.clientX, event.clientY );
+
+		dollyDelta.subVectors( dollyEnd, dollyStart );
+
+		if ( dollyDelta.y > 0 ) {
+
+			dollyIn( getZoomScale() );
+
+		} else if ( dollyDelta.y < 0 ) {
+
+			dollyOut( getZoomScale() );
+
+		}
+
+		dollyStart.copy( dollyEnd );
+
+		scope.update();
+
+	}
+
+	function handleMouseMovePan( event ) {
+
+		//console.log( 'handleMouseMovePan' );
+
+		panEnd.set( event.clientX, event.clientY );
+
+		panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+
+		pan( panDelta.x, panDelta.y );
+
+		panStart.copy( panEnd );
+
+		scope.update();
+
+	}
+
+	function handleMouseWheel( event ) {
+
+		// console.log( 'handleMouseWheel' );
+
+		if ( event.deltaY < 0 ) {
+
+			dollyOut( getZoomScale() );
+
+		} else if ( event.deltaY > 0 ) {
+
+			dollyIn( getZoomScale() );
+
+		}
+
+		scope.update();
+
+	}
+
+	function handleKeyDown( event ) {
+
+		//console.log( 'handleKeyDown' );
+
+		switch ( event.keyCode ) {
+
+			case scope.keys.UP:
+				pan( 0, scope.keyPanSpeed );
+				scope.update();
+				break;
+
+			case scope.keys.BOTTOM:
+				pan( 0, - scope.keyPanSpeed );
+				scope.update();
+				break;
+
+			case scope.keys.LEFT:
+				pan( scope.keyPanSpeed, 0 );
+				scope.update();
+				break;
+
+			case scope.keys.RIGHT:
+				pan( - scope.keyPanSpeed, 0 );
+				scope.update();
+				break;
+
+		}
+
+	}
+
+	function handleTouchStartRotate( event ) {
+
+		//console.log( 'handleTouchStartRotate' );
+
+		rotateStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+	}
+
+	function handleTouchStartDollyPan( event ) {
+
+		//console.log( 'handleTouchStartDollyPan' );
+
+		if ( scope.enableZoom ) {
+
+			var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+			var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+
+			var distance = Math.sqrt( dx * dx + dy * dy );
+
+			dollyStart.set( 0, distance );
+
+		}
+
+		if ( scope.enablePan ) {
+
+			var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+			var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+
+			panStart.set( x, y );
+
+		}
+
+	}
+
+	function handleTouchMoveRotate( event ) {
+
+		//console.log( 'handleTouchMoveRotate' );
+
+		rotateEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+		rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+
+		var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
+
+		rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+
+		rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+
+		rotateStart.copy( rotateEnd );
+
+		scope.update();
+
+	}
+
+	function handleTouchMoveDollyPan( event ) {
+
+		//console.log( 'handleTouchMoveDollyPan' );
+
+		if ( scope.enableZoom ) {
+
+			var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+			var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+
+			var distance = Math.sqrt( dx * dx + dy * dy );
+
+			dollyEnd.set( 0, distance );
+
+			dollyDelta.set( 0, Math.pow( dollyEnd.y / dollyStart.y, scope.zoomSpeed ) );
+
+			dollyIn( dollyDelta.y );
+
+			dollyStart.copy( dollyEnd );
+
+		}
+
+		if ( scope.enablePan ) {
+
+			var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+			var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+
+			panEnd.set( x, y );
+
+			panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+
+			pan( panDelta.x, panDelta.y );
+
+			panStart.copy( panEnd );
+
+		}
+
+		scope.update();
+
+	}
+
+	function onMouseDown( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		event.preventDefault();
+
+		switch ( event.button ) {
+
+			case scope.mouseButtons.ORBIT:
+
+				if ( scope.enableRotate === false ) return;
+
+				handleMouseDownRotate( event );
+
+				state = STATE.ROTATE;
+
+				break;
+
+			case scope.mouseButtons.ZOOM:
+
+				if ( scope.enableZoom === false ) return;
+
+				handleMouseDownDolly( event );
+
+				state = STATE.DOLLY;
+
+				break;
+
+			case scope.mouseButtons.PAN:
+
+				if ( scope.enablePan === false ) return;
+
+				handleMouseDownPan( event );
+
+				state = STATE.PAN;
+
+				break;
+
+		}
+
+		if ( state !== STATE.NONE ) {
+
+			document.addEventListener( 'mousemove', onMouseMove, false );
+			document.addEventListener( 'mouseup', onMouseUp, false );
+
+			scope.dispatchEvent( startEvent );
+
+		}
+
+	}
+
+	function onMouseMove( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		event.preventDefault();
+
+		switch ( state ) {
+
+			case STATE.ROTATE:
+
+				if ( scope.enableRotate === false ) return;
+
+				handleMouseMoveRotate( event );
+
+				break;
+
+			case STATE.DOLLY:
+
+				if ( scope.enableZoom === false ) return;
+
+				handleMouseMoveDolly( event );
+
+				break;
+
+			case STATE.PAN:
+
+				if ( scope.enablePan === false ) return;
+
+				handleMouseMovePan( event );
+
+				break;
+
+		}
+
+	}
+
+	function onMouseUp( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		document.removeEventListener( 'mousemove', onMouseMove, false );
+		document.removeEventListener( 'mouseup', onMouseUp, false );
+
+		scope.dispatchEvent( endEvent );
+
+		state = STATE.NONE;
+
+	}
+
+	function onMouseWheel( event ) {
+
+		if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		scope.dispatchEvent( startEvent );
+
+		handleMouseWheel( event );
+
+		scope.dispatchEvent( endEvent );
+
+	}
+
+	function onKeyDown( event ) {
+
+		if ( scope.enabled === false || scope.enableKeys === false || scope.enablePan === false ) return;
+
+		handleKeyDown( event );
+
+	}
+
+	function onTouchStart( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		event.preventDefault();
+
+		switch ( event.touches.length ) {
+
+			case 1:	// one-fingered touch: rotate
+
+				if ( scope.enableRotate === false ) return;
+
+				handleTouchStartRotate( event );
+
+				state = STATE.TOUCH_ROTATE;
+
+				break;
+
+			case 2:	// two-fingered touch: dolly-pan
+
+				if ( scope.enableZoom === false && scope.enablePan === false ) return;
+
+				handleTouchStartDollyPan( event );
+
+				state = STATE.TOUCH_DOLLY_PAN;
+
+				break;
+
+			default:
+
+				state = STATE.NONE;
+
+		}
+
+		if ( state !== STATE.NONE ) {
+
+			scope.dispatchEvent( startEvent );
+
+		}
+
+	}
+
+	function onTouchMove( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		switch ( event.touches.length ) {
+
+			case 1: // one-fingered touch: rotate
+
+				if ( scope.enableRotate === false ) return;
+				if ( state !== STATE.TOUCH_ROTATE ) return; // is this needed?
+
+				handleTouchMoveRotate( event );
+
+				break;
+
+			case 2: // two-fingered touch: dolly-pan
+
+				if ( scope.enableZoom === false && scope.enablePan === false ) return;
+				if ( state !== STATE.TOUCH_DOLLY_PAN ) return; // is this needed?
+
+				handleTouchMoveDollyPan( event );
+
+				break;
+
+			default:
+
+				state = STATE.NONE;
+
+		}
+
+	}
+
+	function onTouchEnd( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		scope.dispatchEvent( endEvent );
+
+		state = STATE.NONE;
+
+	}
+
+	function onContextMenu( event ) {
+
+		if ( scope.enabled === false ) return;
+
+		event.preventDefault();
+
+	}
+
+	//
+
+	scope.domElement.addEventListener( 'contextmenu', onContextMenu, false );
+
+	scope.domElement.addEventListener( 'mousedown', onMouseDown, false );
+	scope.domElement.addEventListener( 'wheel', onMouseWheel, false );
+
+	scope.domElement.addEventListener( 'touchstart', onTouchStart, false );
+	scope.domElement.addEventListener( 'touchend', onTouchEnd, false );
+	scope.domElement.addEventListener( 'touchmove', onTouchMove, false );
+
+	window.addEventListener( 'keydown', onKeyDown, false );
+
+	// force an update at start
+
+	this.update();
+
+}
+
+OrbitControls.prototype = Object.create( EventDispatcher.prototype );
+OrbitControls.prototype.constructor = OrbitControls;
+
+Object.defineProperties( OrbitControls.prototype, {
+
+	center: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .center has been renamed to .target' );
+			return this.target;
+
+		}
+
+	},
+
+	// backward compatibility
+
+	noZoom: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
+			return ! this.enableZoom;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
+			this.enableZoom = ! value;
+
+		}
+
+	},
+
+	noRotate: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
+			return ! this.enableRotate;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
+			this.enableRotate = ! value;
+
+		}
+
+	},
+
+	noPan: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
+			return ! this.enablePan;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
+			this.enablePan = ! value;
+
+		}
+
+	},
+
+	noKeys: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
+			return ! this.enableKeys;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
+			this.enableKeys = ! value;
+
+		}
+
+	},
+
+	staticMoving: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
+			return ! this.enableDamping;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
+			this.enableDamping = ! value;
+
+		}
+
+	},
+
+	dynamicDampingFactor: {
+
+		get: function () {
+
+			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
+			return this.dampingFactor;
+
+		},
+
+		set: function ( value ) {
+
+			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
+			this.dampingFactor = value;
+
+		}
+
+	}
+
+} );
+
+const BOUNDING_BOX_SIZE$1 = 10;
+const USE_POST_PROCESSING = !isMobile();
+const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
+class DOMModelView {
+  constructor({canvas, context, model, width, height}) {
+    this.context = context;
+    this.canvas = canvas;
+    this.model = model;
+    this.enabled = false;
+    this.render = this.render.bind(this);
+    this.renderer = new WebGLRenderer({canvas, context});
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(width, height);
+    this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.gammaInput = true;
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
+    this.camera = new PerspectiveCamera(45, width / height, 0.1, 100);
+    this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
+    this.controls = new OrbitControls(this.orbitCamera, this.canvas);
+    this.controls.target = new Vector3(0, 5, 0);
+    this.controls.enabled = false;
+    this.scene = new Scene();
+    this.scene.add(this.model);
+    this.light = new AmbientLight(0xffffff, 0.9);
+    this.dLight = new DirectionalLight(0xffffff, 2);
+    this.dLight.position.set(0, 10, 1);
+    this.dLight.castShadow = true;
+    this.scene.add(this.light);
+    this.scene.add(this.dLight);
+    this.scene.add(new Shadow());
+    this.rotateEnabled = false;
+    this.pivot = new Object3D();
+    this.pivot.add(this.camera);
+    this.pivot.add(this.orbitCamera);
+    this.scene.add(this.pivot);
+    this.camera.position.z = 15;
+    this.camera.position.y = 5;
+    this.orbitCamera.position.z = 15;
+    this.orbitCamera.position.y = 5;
+    this.composer = new Composer(this.renderer);
+    this.composer.scene.onBeforeRender = () => {};
+    this.vignettePass = new VignettePass({boost: 1.1, reduction: 0.7});
+    this.fxaaPass = new FXAAPass();
+    this.passes = [
+      this.vignettePass,
+      this.fxaaPass,
+    ];
+    this.model.addEventListener('model-load', () => this.updateModelScale());
+  }
+  start() {
+    this.enabled = true;
+    this.scene.add(this.model);
+    this.renderer.setFramebuffer(null);
+    this.setSize(this.width, this.height);
+    this._tick();
+  }
+  stop() {
+    this.enabled = false;
+    window.cancelAnimationFrame(this.lastFrameId);
+  }
+  setSize(width, height) {
+    this.width = width;
+    this.height = height;
+    if (!this.enabled) {
+      return;
+    }
+    this.composer.setSize(width, height);
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.orbitCamera.aspect = width / height;
+    this.orbitCamera.updateProjectionMatrix();
+    this.updateModelScale();
+  }
+  updateModelScale() {
+    if (!this.enabled) {
+      return;
+    }
+    this.model.position.set(0, 0, 0);
+    this.model.rotation.set(0, 0, 0);
+    this.model.scale.set(1, 1, 1);
+    setScaleFromLimit(BOUNDING_BOX_SIZE$1, this.model);
+  }
+  setRotate(isEnabled) {
+    this.rotateEnabled = isEnabled;
+    if (!isEnabled) {
+      this.pivot.rotation.set(0, 0, 0);
+    }
+  }
+  setControls(isEnabled) {
+    this.controls.enabled = isEnabled;
+    if (this.controls.enabled) {
+      this.orbitCamera.position.set(0, 5, 15);
+      this.orbitCamera.rotation.set(0, 0, 0);
+    }
+  }
+  setVignette(isEnabled) {
+    this.vignetteEnabled = isEnabled;
+  }
+  setBackgroundColor(color) {
+    if (color && typeof color === 'string') {
+      this.renderer.setClearColor(new Color(color));
+    } else {
+      this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
+    }
+  }
+  render() {
+    if (!this.enabled) {
+      return;
+    }
+    if (this.rotateEnabled) {
+      this.pivot.rotation.y += 0.001;
+    }
+    const camera = this.controls.enabled ? this.orbitCamera : this.camera;
+    if (USE_POST_PROCESSING && this.vignetteEnabled) {
+      this.composer.reset();
+      this.composer.render(this.scene, camera);
+      for (let pass of this.passes) {
+        this.composer.pass(pass);
+      }
+      this.composer.toScreen();
+    } else {
+      this.renderer.render(this.scene, camera);
+    }
+    this._tick();
+  }
+  _tick() {
+    this.lastFrameId = window.requestAnimationFrame(this.render);
   }
 }
 
 class ModelView extends EventDispatcher {
-  constructor({ canvas, width, height }) {
+  constructor({canvas, width, height}) {
     super();
     this.width = width;
     this.height = height;
@@ -52598,16 +51540,16 @@ class ModelView extends EventDispatcher {
       preserveDrawingBuffer: true,
       antialias: true,
     });
-    this.domView = new DOMModelView({ canvas, context, model, width, height });
-    this.arView = new ARView({ canvas, context, model });
+    this.domView = new DOMModelView({canvas, context, model, width, height});
+    this.arView = new ARView({canvas, context, model});
     this.arView.addEventListener('end', this.onAREnd);
     this.arView.addEventListener('stabilized', this.onARStabilized);
     this.model.addEventListener('model-load', this.onModelLoad);
     this.enterDOM();
   }
-  async setModelSource(source, type) {
+  async setModelSource(source) {
     try {
-      await this.model.setSource(source, type);
+      await this.model.setSource(source);
     } catch (e) {
       console.error(`Could not set model source: ${source}`);
     }
@@ -52633,7 +51575,7 @@ class ModelView extends EventDispatcher {
     this.mode = 'dom';
     this.arView.stop();
     this.domView.start();
-    this.dispatchEvent({ type: 'enter-dom' });
+    this.dispatchEvent({type: 'enter-dom'});
   }
   enterAR() {
     if (!this.hasAR()) {
@@ -52642,7 +51584,7 @@ class ModelView extends EventDispatcher {
     this.mode = 'ar';
     this.domView.stop();
     this.arView.start();
-    this.dispatchEvent({ type: 'enter-ar' });
+    this.dispatchEvent({type: 'enter-ar'});
   }
   setRotate(isEnabled) {
     this.domView.setRotate(isEnabled);
@@ -52660,10 +51602,10 @@ class ModelView extends EventDispatcher {
     this.enterDOM();
   }
   onARStabilized() {
-    this.dispatchEvent({ type: 'stabilized' });
+    this.dispatchEvent({type: 'stabilized'});
   }
   onModelLoad() {
-    this.dispatchEvent({ type: 'model-load' });
+    this.dispatchEvent({type: 'model-load'});
   }
 }
 
@@ -52770,14 +51712,14 @@ class XRModelElement extends HTMLElement {
   }
   constructor() {
     super();
-    const shadowRoot = this.attachShadow({ mode: 'open' });
+    const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(template.content.cloneNode(true));
     this.__containerElement = shadowRoot.querySelector('.container');
     this.__posterElement = shadowRoot.querySelector('.poster');
     this.__canvasElement = shadowRoot.querySelector('canvas');
     this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
     this.__enterARElement = shadowRoot.querySelector('.enter-ar');
-    const { width, height } = this.getBoundingClientRect();
+    const {width, height} = this.getBoundingClientRect();
     this.__modelView = new ModelView({
       canvas: this.__canvasElement,
       width,
@@ -52789,7 +51731,7 @@ class XRModelElement extends HTMLElement {
       this.__clickToViewElement.classList.remove('show');
       this.__userInput = true;
       this.__updateSource();
-    }, { once: true });
+    }, {once: true});
     this.__mode = 'dom';
     this.__loaded = false;
     this.__modelView.addEventListener('enter-ar', () => {
@@ -52808,15 +51750,9 @@ class XRModelElement extends HTMLElement {
       e.preventDefault();
       this.enterAR();
     });
-    this.mutationObserver = new MutationObserver(() => this.__updateSource(this));
-    this.mutationObserver.observe(this, {
-      childList: true,
-      attributes: true,
-      subtree: true,
-    });
-    this.__updateSource(this);
+    this.__updateSource();
     this.__updateSize(this.getBoundingClientRect(), true);
-    this.resizeObserver = new index(entries => {
+    this.resizeObserver = new ResizeObserver(entries => {
       if (this.__mode === 'ar') {
         return;
       }
@@ -52871,10 +51807,13 @@ class XRModelElement extends HTMLElement {
   }
   __updateSource() {
     const preload = this.getAttribute('preload');
-    const source = getWebGLSource(this) || {};
+    const source = getWebGLSource(this);
+    if (source == null) {
+      return;
+    }
     if (preload !== null || this.__userInput) {
       this.__canvasElement.classList.add('show');
-      this.__modelView.setModelSource(source.src, source.type);
+      this.__modelView.setModelSource(source);
       this.__clickToViewElement.classList.remove('show');
     }
   }
@@ -52890,8 +51829,8 @@ class XRModelElement extends HTMLElement {
       this.__posterElement.classList.remove('show');
     }
   }
-  __updateSize({ width, height }, forceApply) {
-    const { width: prevWidth, height: prevHeight } = this.__modelView.getSize();
+  __updateSize({width, height}, forceApply) {
+    const {width: prevWidth, height: prevHeight} = this.__modelView.getSize();
     if (forceApply || (prevWidth !== width || prevHeight !== height)) {
       this.__containerElement.style.width = `${width}px`;
       this.__containerElement.style.height = `${height}px`;
@@ -52905,7 +51844,8 @@ class XRModelElement extends HTMLElement {
       if (IS_IOS && getiOSSource(this)) {
         this.__enterARElement.style.display = 'block';
       } else if (this.__modelView.hasAR()) {
-        this.__modelView.whenARReady().then(() => this.__enterARElement.style.display = 'block');
+        this.__modelView.whenARReady().then(
+            () => this.__enterARElement.style.display = 'block');
       }
     }
   }
