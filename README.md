@@ -89,6 +89,10 @@ across different platforms. For WebGL and Web XR purposes, both GLTF and GLB are
 supported out of the box. Additionally, developers can specify a USDZ file (using
 the `ios-src` attribute) that will be used to launch Quick Look on iOS Safari.
 
+Note: iOS Quick Look only supports model files that use the USDZ format. This means
+that iOS users who see a live-rendered model in the browser (loaded as GLTF / GLB) will
+have to download the same model a _second time_ in USDZ format when they launch Quick Look.
+
 ## Development
 
 * `npm run build` - Builds the distributable from the `src/` directory.
