@@ -16,8 +16,14 @@
 import ModelView from './views/ModelView.js';
 import template from './template.js';
 import {openIOSARQuickLook, getWebGLSource, getiOSSource} from './utils.js';
+import {Component, BooleanComponent, UrlComponent} from './component.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+const $makeComponents = Symbol('makeComponents');
+const $components = Symbol('components');
+const $updateTriggered = Symbol('updateTriggered');
+const $update = Symbol('update');
 
 /**
  * Definition for a <xr-model> element.
@@ -25,18 +31,47 @@ const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
  */
 export default class XRModelElement extends HTMLElement {
   /**
-   * Attributes that fire `attributeChangedCallback`.
+   * Declare components to be associated with the model element. Components are
+   * made available to the element's modes when they initialize and render the
+   * model.
+   *
+   * Component names should be kebab-style attribute names. Every component that
+   * is registered will be made configurable by the element user as an
+   * attribute. The value of components will be updated as their associated
+   * attributes change.
    */
+  static get components() {
+    return {
+      'src': UrlComponent,
+      'ios-src': UrlComponent,
+      'poster': UrlComponent,
+      'background-color': Component,
+      'vignette': BooleanComponent,
+      'ar': BooleanComponent,
+      'controls': BooleanComponent,
+      'auto-rotate': BooleanComponent,
+      'preload': BooleanComponent
+    };
+  }
+
   static get observedAttributes() {
-    return [
-      'ar',
-      'controls',
-      'auto-rotate',
-      'background-color',
-      'vignette',
-      'poster',
-      'preload',
-    ];
+    return Object.keys(this.components);
+  }
+
+  [$makeComponents]() {
+    const components = new Map();
+    const implementations = this.constructor.components;
+
+    for (const name in implementations) {
+      const Implementation = implementations[name];
+      components.set(name, new Implementation(this));
+    }
+
+    return components;
+  }
+
+  get components() {
+    return this[$components];
   }
 
   /**
@@ -44,6 +79,9 @@ export default class XRModelElement extends HTMLElement {
    */
   constructor() {
     super();
+
+    this[$components] = this[$makeComponents]();
+    this[$updateTriggered] = false;
 
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(template.content.cloneNode(true));
@@ -147,27 +185,6 @@ export default class XRModelElement extends HTMLElement {
   }
 
   /**
-   * Called when custom element is first connected to document's DOM.
-   */
-  connectedCallback() {
-  }
-
-  /**
-   * Called when custom element is disconnected connected to document's DOM.
-   */
-  disconnectedCallback() {
-  }
-
-  /**
-   * Called when custom element is moved to a new document
-   *
-   * @param {Document} oldDoc
-   * @param {Document} newDoc
-   */
-  adoptedCallback(oldDoc, newDoc) {
-  }
-
-  /**
    * Called when custom element's attribute in observedAttributes
    * has changed.
    *
@@ -177,29 +194,42 @@ export default class XRModelElement extends HTMLElement {
    * @param {String} namespace
    */
   attributeChangedCallback(name, oldVal, newVal, namespace) {
-    switch (name) {
-      case 'ar':
-        this.__updateARButtonVisibility();
-        break;
-      case 'auto-rotate':
-        this.__modelView.setRotate(this.getAttribute('auto-rotate') !== null);
-        break;
-      case 'controls':
-        this.__modelView.setControls(this.getAttribute('controls') !== null);
-        break;
-      case 'background-color':
-        this.__modelView.setBackgroundColor(newVal);
-        break;
-      case 'vignette':
-        this.__modelView.setVignette(this.getAttribute('vignette') !== null);
-        break;
-      case 'poster':
-        this.__updatePoster(newVal);
-        break;
-      case 'preload':
-        this.__updateSource();
-        break;
+    if (this[$components].has(name)) {
+      this[$components].get(name).value = newVal;
+      this[$update]();
     }
+  }
+
+  /**
+   * Batch-updates the model with the latest component data on microtask
+   * timing.
+   */
+  [$update]() {
+    if (this[$updateTriggered]) {
+      return;
+    }
+    this[$updateTriggered] = true;
+
+    Promise.resolve().then(() => {
+      this[$updateTriggered] = false;
+      const {components} = this;
+
+      // ar
+      this.__updateARButtonVisibility(components.get('ar').enabled);
+      // auto-rotate
+      this.__modelView.setRotate(components.get('auto-rotate').enabled);
+      // controls
+      this.__modelView.setControls(components.get('controls').enabled);
+      // background-color
+      this.__modelView.setBackgroundColor(
+          components.get('background-color').value);
+      // vignette
+      this.__modelView.setVignette(components.get('vignette').enabled);
+      // poster
+      this.__updatePoster(components.get('poster').fullUrl);
+      // preload
+      this.__updateSource(components.get('preload').enabled);
+    });
   }
 
   /**
@@ -259,11 +289,11 @@ export default class XRModelElement extends HTMLElement {
    * Updates the visibility of the AR button based off of attributes
    * and platform.
    */
-  __updateARButtonVisibility() {
+  __updateARButtonVisibility(buttonIsVisible) {
     // On iOS, always enable the AR button. On non-iOS,
     // see if AR is supported, and if so, display the button after
     // an XRDevice has been initialized
-    if (this.getAttribute('ar') === null) {
+    if (!buttonIsVisible) {
       this.__enterARElement.style.display = 'none';
     } else {
       if (IS_IOS && getiOSSource(this)) {

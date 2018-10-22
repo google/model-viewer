@@ -51697,21 +51697,67 @@ template.innerHTML = `
   <slot></slot>
 `;
 
+const $element = Symbol('element');
+class Component {
+  get element() {
+    return this[$element];
+  }
+  constructor(element) {
+    this[$element] = element;
+    this.value = null;
+  }
+  update() {
+  }
+}
+class BooleanComponent extends Component {
+  get enabled() {
+    return this.value !== null;
+  }
+}
+class UrlComponent extends Component {
+  get fullUrl() {
+    return new URL(this.value, window.location.toString()).toString();
+  }
+}
+
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const $makeComponents = Symbol('makeComponents');
+const $components = Symbol('components');
+const $updateTriggered = Symbol('updateTriggered');
+const $update = Symbol('update');
 class XRModelElement extends HTMLElement {
+  static get components() {
+    return {
+      'src': UrlComponent,
+      'ios-src': UrlComponent,
+      'poster': UrlComponent,
+      'background-color': Component,
+      'vignette': BooleanComponent,
+      'ar': BooleanComponent,
+      'controls': BooleanComponent,
+      'auto-rotate': BooleanComponent,
+      'preload': BooleanComponent
+    };
+  }
   static get observedAttributes() {
-    return [
-      'ar',
-      'controls',
-      'auto-rotate',
-      'background-color',
-      'vignette',
-      'poster',
-      'preload',
-    ];
+    return Object.keys(this.components);
+  }
+  [$makeComponents]() {
+    const components = new Map();
+    const implementations = this.constructor.components;
+    for (const name in implementations) {
+      const Implementation = implementations[name];
+      components.set(name, new Implementation(this));
+    }
+    return components;
+  }
+  get components() {
+    return this[$components];
   }
   constructor() {
     super();
+    this[$components] = this[$makeComponents]();
+    this[$updateTriggered] = false;
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(template.content.cloneNode(true));
     this.__containerElement = shadowRoot.querySelector('.container');
@@ -51774,36 +51820,29 @@ class XRModelElement extends HTMLElement {
       }
     }
   }
-  connectedCallback() {
-  }
-  disconnectedCallback() {
-  }
-  adoptedCallback(oldDoc, newDoc) {
-  }
   attributeChangedCallback(name, oldVal, newVal, namespace) {
-    switch (name) {
-      case 'ar':
-        this.__updateARButtonVisibility();
-        break;
-      case 'auto-rotate':
-        this.__modelView.setRotate(this.getAttribute('auto-rotate') !== null);
-        break;
-      case 'controls':
-        this.__modelView.setControls(this.getAttribute('controls') !== null);
-        break;
-      case 'background-color':
-        this.__modelView.setBackgroundColor(newVal);
-        break;
-      case 'vignette':
-        this.__modelView.setVignette(this.getAttribute('vignette') !== null);
-        break;
-      case 'poster':
-        this.__updatePoster(newVal);
-        break;
-      case 'preload':
-        this.__updateSource();
-        break;
+    if (this[$components].has(name)) {
+      this[$components].get(name).value = newVal;
+      this[$update]();
     }
+  }
+  [$update]() {
+    if (this[$updateTriggered]) {
+      return;
+    }
+    this[$updateTriggered] = true;
+    Promise.resolve().then(() => {
+      this[$updateTriggered] = false;
+      const {components} = this;
+      this.__updateARButtonVisibility(components.get('ar').enabled);
+      this.__modelView.setRotate(components.get('auto-rotate').enabled);
+      this.__modelView.setControls(components.get('controls').enabled);
+      this.__modelView.setBackgroundColor(
+          components.get('background-color').value);
+      this.__modelView.setVignette(components.get('vignette').enabled);
+      this.__updatePoster(components.get('poster').fullUrl);
+      this.__updateSource(components.get('preload').enabled);
+    });
   }
   __updateSource() {
     const preload = this.getAttribute('preload');
@@ -51837,8 +51876,8 @@ class XRModelElement extends HTMLElement {
       this.__modelView.setSize(width, height);
     }
   }
-  __updateARButtonVisibility() {
-    if (this.getAttribute('ar') === null) {
+  __updateARButtonVisibility(buttonIsVisible) {
+    if (!buttonIsVisible) {
       this.__enterARElement.style.display = 'none';
     } else {
       if (IS_IOS && getiOSSource(this)) {

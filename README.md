@@ -77,11 +77,6 @@ The base element for rendering 3D models.
 
 * *`'load'`*: Fired when a model is loaded. Can fire multiple times per XRModelElement if changing the `src` attribute.
 
-#### Attributes
-
-* *`src`*: (**required**) The URL to the 3D model.
-* *`type`*: (**required**) The [MIME-type](https://tools.ietf.org/html/rfc4281) of the resource. See [Supported Formats](#supported-formats).
-
 ## Supported Formats
 
 An `<xr-model>`'s attributes allows developers to specify multiple file types to work
