@@ -17,19 +17,26 @@ import ModelView from './views/ModelView.js';
 import template from './template.js';
 import {openIOSARQuickLook, getWebGLSource, getiOSSource} from './utils.js';
 import {Component, BooleanComponent, UrlComponent} from './component.js';
+import {BackgroundColorMixin} from './features/background-color.js';
+import {ControlsMixin} from './features/controls.js';
+import {AutoRotateMixin} from './features/auto-rotate.js';
+import {ARMixin} from './features/ar.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 const $makeComponents = Symbol('makeComponents');
 const $components = Symbol('components');
-const $updateTriggered = Symbol('updateTriggered');
-const $update = Symbol('update');
+const $featureUpdateTriggered = Symbol('featureUpdateTriggered');
+const $triggerFeatureUpdate = Symbol('triggerFeatureUpdate');
+export const $updateSize = Symbol('updateSize');
+export const $updateFeatures = Symbol('updateFeatures');
+export const $tick = Symbol('tick');
 
 /**
- * Definition for a <xr-model> element.
+ * Definition for a basic <xr-model> element.
  *
  */
-export default class XRModelElement extends HTMLElement {
+export class XRModelElementBase extends HTMLElement {
   /**
    * Declare components to be associated with the model element. Components are
    * made available to the element's modes when they initialize and render the
@@ -45,11 +52,7 @@ export default class XRModelElement extends HTMLElement {
       'src': UrlComponent,
       'ios-src': UrlComponent,
       'poster': UrlComponent,
-      'background-color': Component,
       'vignette': BooleanComponent,
-      'ar': BooleanComponent,
-      'controls': BooleanComponent,
-      'auto-rotate': BooleanComponent,
       'preload': BooleanComponent
     };
   }
@@ -70,10 +73,6 @@ export default class XRModelElement extends HTMLElement {
     return components;
   }
 
-  get components() {
-    return this[$components];
-  }
-
   /**
    * Creates a new XRModelElement.
    */
@@ -81,7 +80,7 @@ export default class XRModelElement extends HTMLElement {
     super();
 
     this[$components] = this[$makeComponents]();
-    this[$updateTriggered] = false;
+    this[$featureUpdateTriggered] = false;
 
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(template.content.cloneNode(true));
@@ -90,7 +89,6 @@ export default class XRModelElement extends HTMLElement {
     this.__posterElement = shadowRoot.querySelector('.poster');
     this.__canvasElement = shadowRoot.querySelector('canvas');
     this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
-    this.__enterARElement = shadowRoot.querySelector('.enter-ar');
 
     // Create the underlying ModelView app.
     const {width, height} = this.getBoundingClientRect();
@@ -98,6 +96,7 @@ export default class XRModelElement extends HTMLElement {
       canvas: this.__canvasElement,
       width,
       height,
+      tickCallback: () => this[$tick]()
     });
 
     // Tracks whether or not the user has interacted with this element;
@@ -140,17 +139,14 @@ export default class XRModelElement extends HTMLElement {
       this.dispatchEvent(new Event('load'));
     });
 
-    // Set up the "Enter AR" button
-    this.__enterARElement.addEventListener('click', e => {
-      e.preventDefault();
-      this.enterAR();
-    });
-
     // Update the sources on construction
     this.__updateSource();
 
-    // Update initial size
-    this.__updateSize(this.getBoundingClientRect(), true);
+    // Update initial size on microtask timing so that subclasses have a chance
+    // to initialize
+    Promise.resolve().then(() => {
+      this[$updateSize](this.getBoundingClientRect(), true);
+    });
 
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
@@ -163,25 +159,11 @@ export default class XRModelElement extends HTMLElement {
       }
       for (let entry of entries) {
         if (entry.target === this) {
-          this.__updateSize(entry.contentRect);
+          this[$updateSize](entry.contentRect);
         }
       }
     });
     this.resizeObserver.observe(this);
-  }
-
-  /**
-   * Enables the AR
-   */
-  enterAR() {
-    if (IS_IOS || this.__modelView.hasAR()) {
-      const usdzSource = getiOSSource(this);
-      if (IS_IOS && usdzSource) {
-        openIOSARQuickLook(usdzSource.src);
-      } else {
-        this.__modelView.enterAR();
-      }
-    }
   }
 
   /**
@@ -196,7 +178,7 @@ export default class XRModelElement extends HTMLElement {
   attributeChangedCallback(name, oldVal, newVal, namespace) {
     if (this[$components].has(name)) {
       this[$components].get(name).value = newVal;
-      this[$update]();
+      this[$triggerFeatureUpdate]();
     }
   }
 
@@ -204,32 +186,44 @@ export default class XRModelElement extends HTMLElement {
    * Batch-updates the model with the latest component data on microtask
    * timing.
    */
-  [$update]() {
-    if (this[$updateTriggered]) {
+  [$triggerFeatureUpdate]() {
+    if (this[$featureUpdateTriggered]) {
       return;
     }
-    this[$updateTriggered] = true;
+    this[$featureUpdateTriggered] = true;
 
     Promise.resolve().then(() => {
-      this[$updateTriggered] = false;
-      const {components} = this;
-
-      // ar
-      this.__updateARButtonVisibility(components.get('ar').enabled);
-      // auto-rotate
-      this.__modelView.setRotate(components.get('auto-rotate').enabled);
-      // controls
-      this.__modelView.setControls(components.get('controls').enabled);
-      // background-color
-      this.__modelView.setBackgroundColor(
-          components.get('background-color').value);
-      // vignette
-      this.__modelView.setVignette(components.get('vignette').enabled);
-      // poster
-      this.__updatePoster(components.get('poster').fullUrl);
-      // preload
-      this.__updateSource(components.get('preload').enabled);
+      this[$featureUpdateTriggered] = false;
+      this[$updateFeatures](this.__modelView, this[$components]);
     });
+  }
+
+  [$updateFeatures](modelView, components) {
+    // vignette
+    this.__modelView.setVignette(components.get('vignette').enabled);
+    // poster
+    this.__updatePoster(components.get('poster').fullUrl);
+    // preload
+    this.__updateSource(components.get('preload').enabled);
+  }
+
+  /**
+   * Called on initialization and when the resize observer fires.
+   */
+  [$updateSize]({width, height}, forceApply) {
+    const {width: prevWidth, height: prevHeight} = this.__modelView.getSize();
+
+    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
+      this.__containerElement.style.width = `${width}px`;
+      this.__containerElement.style.height = `${height}px`;
+      this.__modelView.setSize(width, height);
+    }
+  }
+
+  /**
+   * Implement to make changes every tick on the current mode's rAF timing.
+   */
+  [$tick]() {
   }
 
   /**
@@ -271,37 +265,8 @@ export default class XRModelElement extends HTMLElement {
       this.__posterElement.classList.remove('show');
     }
   }
-
-  /**
-   * Called on initialization and when the resize observer fires.
-   */
-  __updateSize({width, height}, forceApply) {
-    const {width: prevWidth, height: prevHeight} = this.__modelView.getSize();
-
-    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
-      this.__containerElement.style.width = `${width}px`;
-      this.__containerElement.style.height = `${height}px`;
-      this.__modelView.setSize(width, height);
-    }
-  }
-
-  /**
-   * Updates the visibility of the AR button based off of attributes
-   * and platform.
-   */
-  __updateARButtonVisibility(buttonIsVisible) {
-    // On iOS, always enable the AR button. On non-iOS,
-    // see if AR is supported, and if so, display the button after
-    // an XRDevice has been initialized
-    if (!buttonIsVisible) {
-      this.__enterARElement.style.display = 'none';
-    } else {
-      if (IS_IOS && getiOSSource(this)) {
-        this.__enterARElement.style.display = 'block';
-      } else if (this.__modelView.hasAR()) {
-        this.__modelView.whenARReady().then(
-            () => this.__enterARElement.style.display = 'block');
-      }
-    }
-  }
 }
+
+
+export default ARMixin(
+    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase))));
