@@ -15,9 +15,9 @@
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
     "resize-observer-polyfill": "^1.5.0",
-    "rollup": "^0.50.0",
+    "rollup": "^0.66.0",
     "rollup-plugin-cleanup": "^3.0.0-beta.1",
-    "rollup-plugin-commonjs": "^8.2.1",
+    "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-string": "^2.0.2"
