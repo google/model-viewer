@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
-import XRModelElement from './src/xr-model-element.js';
+import {ARMixin} from './src/features/ar.js';
+import {AutoRotateMixin} from './src/features/auto-rotate.js';
+import {BackgroundColorMixin} from './src/features/background-color.js';
+import {ControlsMixin} from './src/features/controls.js';
+import {PosterMixin} from './src/features/poster.js';
+import XRModelElementBase from './src/xr-model-element-base.js';
+
+const XRModelElement = PosterMixin(ARMixin(
+    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));
 
 customElements.define('xr-model', XRModelElement);

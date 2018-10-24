@@ -14,7 +14,7 @@
  */
 
 import {UrlComponent} from '../component.js';
-import {$updateFeatures} from '../xr-model-element.js';
+import {$updateFeatures} from '../xr-model-element-base.js';
 
 const $posterElement = Symbol('posterElement');
 const $clickToViewElement = Symbol('clickToViewElement');

@@ -16,7 +16,7 @@
 import {Color} from 'three';
 
 import {Component} from '../component.js';
-import {$updateFeatures} from '../xr-model-element.js';
+import {$updateFeatures} from '../xr-model-element-base.js';
 
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 

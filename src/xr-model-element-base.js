@@ -15,20 +15,14 @@
 
 import ModelView from './views/ModelView.js';
 import template from './template.js';
-import {openIOSARQuickLook, getWebGLSource, getiOSSource} from './utils.js';
-import {Component, BooleanComponent, UrlComponent} from './component.js';
-import {BackgroundColorMixin} from './features/background-color.js';
-import {ControlsMixin} from './features/controls.js';
-import {AutoRotateMixin} from './features/auto-rotate.js';
-import {ARMixin} from './features/ar.js';
-import {PosterMixin} from './features/poster.js';
-
-const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+import {getWebGLSource} from './utils.js';
+import {BooleanComponent, UrlComponent} from './component.js';
 
 const $makeComponents = Symbol('makeComponents');
 const $components = Symbol('components');
 const $featureUpdateTriggered = Symbol('featureUpdateTriggered');
 const $triggerFeatureUpdate = Symbol('triggerFeatureUpdate');
+
 export const $updateSize = Symbol('updateSize');
 export const $updateFeatures = Symbol('updateFeatures');
 export const $tick = Symbol('tick');
@@ -37,11 +31,9 @@ export const $tick = Symbol('tick');
  * Definition for a basic <xr-model> element.
  *
  */
-export class XRModelElementBase extends HTMLElement {
+export default class XRModelElementBase extends HTMLElement {
   /**
-   * Declare components to be associated with the model element. Components are
-   * made available to the element's modes when they initialize and render the
-   * model.
+   * Declare components to be associated with the model element.
    *
    * Component names should be kebab-style attribute names. Every component that
    * is registered will be made configurable by the element user as an
@@ -67,7 +59,7 @@ export class XRModelElementBase extends HTMLElement {
 
     for (const name in implementations) {
       const Implementation = implementations[name];
-      components.set(name, new Implementation(this));
+      components.set(name, new Implementation());
     }
 
     return components;
@@ -239,7 +231,3 @@ export class XRModelElementBase extends HTMLElement {
     }
   }
 }
-
-
-export default PosterMixin(ARMixin(
-    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));

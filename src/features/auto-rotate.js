@@ -14,7 +14,7 @@
  */
 
 import {BooleanComponent} from '../component.js';
-import {$tick, $updateFeatures} from '../xr-model-element.js';
+import {$tick, $updateFeatures} from '../xr-model-element-base.js';
 
 const $rotateEnabled = Symbol('rotate-enabled');
 

@@ -17,7 +17,7 @@ import {PerspectiveCamera, Vector3} from 'three';
 
 import OrbitControls from '../../third_party/three/OrbitControls.js';
 import {BooleanComponent} from '../component.js';
-import {$updateFeatures, $updateSize} from '../xr-model-element.js';
+import {$updateFeatures, $updateSize} from '../xr-model-element-base.js';
 
 const $controls = Symbol('controls');
 const $orbitCamera = Symbol('orbitCamera');

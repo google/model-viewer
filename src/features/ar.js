@@ -15,7 +15,7 @@
 
 import {BooleanComponent} from '../component.js';
 import {getiOSSource, openIOSARQuickLook} from '../utils.js';
-import {$updateFeatures} from '../xr-model-element.js';
+import {$updateFeatures} from '../xr-model-element-base.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
