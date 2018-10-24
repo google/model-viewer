@@ -16,6 +16,8 @@
 import {extname} from 'path';
 import {Box3, Vector3} from 'three';
 
+export const deserializeUrl = (url) => url != null ? toFullUrl(url) : url;
+
 /**
  * Converts a partial URL string to a fully qualified URL string.
  *
@@ -58,19 +60,6 @@ export const relativeToAbsoluteURL = (function() {
     return anchor.href;
   }
 })();
-
-/**
- * Return a URL and type of the best source from
- * an XRModelElement for use with rendering within THREE/WebGL
- * in flat mode as well in WebXR+AR mode.
- *
- * @param {HTMLElement} element
- * @return {?String} A string representing the URL of a GLTF/GLB file
- */
-export const getWebGLSource = (element) => {
-  return element.hasAttribute('src') ? toFullUrl(element.getAttribute('src')) :
-                                       null;
-};
 
 /**
  * Return a URL and type of the best source from

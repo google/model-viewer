@@ -34,8 +34,9 @@ export default class ModelView extends EventDispatcher {
    * @param {HTMLCanvasElement} config.canvas
    * @param {number} config.width
    * @param {number} config.height
+   * @param {Function} config.tickCallback
    */
-  constructor({canvas, width, height}) {
+  constructor({canvas, width, height, tickCallback}) {
     super();
 
     this.width = width;
@@ -51,8 +52,9 @@ export default class ModelView extends EventDispatcher {
       preserveDrawingBuffer: true,
       antialias: true,
     });
-    this.domView = new DOMModelView({canvas, context, model, width, height});
-    this.arView = new ARModelView({canvas, context, model});
+    this.domView =
+        new DOMModelView({canvas, context, model, width, height, tickCallback});
+    this.arView = new ARModelView({canvas, context, model, tickCallback});
 
     this.arView.addEventListener('end', this.onAREnd);
     this.arView.addEventListener('stabilized', this.onARStabilized);
@@ -72,6 +74,13 @@ export default class ModelView extends EventDispatcher {
     } catch (e) {
       console.error(`Could not set model source: ${source}`);
     }
+  }
+
+  /**
+   * @type THREE.WebGLRenderer
+   */
+  get renderer() {
+    return this.domView.renderer;
   }
 
   /**
@@ -142,30 +151,12 @@ export default class ModelView extends EventDispatcher {
   }
 
   /**
-   * Sets the auto rotation option via boolean.
-   *
-   * @param {Boolean} isEnabled
-   */
-  setRotate(isEnabled) {
-    this.domView.setRotate(isEnabled);
-  }
-
-  /**
    * Sets orbit controls via boolean.
    *
    * @param {Boolean} isEnabled
    */
   setControls(isEnabled) {
     this.domView.setControls(isEnabled);
-  }
-
-  /**
-   * Sets background color of DOMModelView.
-   *
-   * @param {String} color
-   */
-  setBackgroundColor(color) {
-    this.domView.setBackgroundColor(color);
   }
 
   /**

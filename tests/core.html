@@ -41,14 +41,22 @@
 
         <h2>A handful of attributes</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar preload controls auto-rotate vignette background-color=&quot;#4885ed&quot;&gt;</code>
-<code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
-<code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
+<code>&lt;xr-model
+    src=&quot;assets/Astronaut.glb&quot;
+    ios-src=&quot;assets/Astronaut.usdz&quot;
+    ar preload controls auto-rotate vignette
+    background-color=&quot;#4885ed&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model class="model" ar preload controls auto-rotate vignette background-color="#4885ed">
-          <source src="assets/Astronaut.usdz" type="model/vnd.usd+zip">
-          <source src="assets/Astronaut.glb" type="model/gltf-binary">
+        <xr-model class="model"
+          src="assets/Astronaut.glb"
+          ios-src="assets/Astronaut.usdz"
+          ar
+          preload
+          controls
+          auto-rotate
+          vignette
+          background-color="#4885ed">
         </xr-model>
 
     <script src="../dist/xr-model-element.js"></script>

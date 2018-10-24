@@ -18,14 +18,12 @@ import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {AmbientLight, Color, DirectionalLight, Object3D, PCFSoftShadowMap, PerspectiveCamera, Scene, Vector3, WebGLRenderer,} from 'three';
 
-import OrbitControls from '../../third_party/three/OrbitControls.js';
 import Shadow from '../three-components/Shadow.js';
 import {isMobile, setScaleFromLimit} from '../utils.js';
 
 
 const BOUNDING_BOX_SIZE = 10;
 const USE_POST_PROCESSING = !isMobile();
-const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
 /**
  * Creates a model viewer for rendering in the DOM.
@@ -38,8 +36,10 @@ export default class DOMModelView {
    * @param {THREE.Object3D} config.model
    * @param {number} config.width
    * @param {number} config.height
+   * @param {Function} config.tickCallback
    */
-  constructor({canvas, context, model, width, height}) {
+  constructor({canvas, context, model, width, height, tickCallback}) {
+    this.tickCallback = tickCallback;
     this.context = context;
     this.canvas = canvas;
     this.model = model;
@@ -49,7 +49,6 @@ export default class DOMModelView {
     this.renderer = new WebGLRenderer({canvas, context});
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.gammaInput = true;
@@ -57,11 +56,6 @@ export default class DOMModelView {
     this.renderer.gammaFactor = 2.2;
 
     this.camera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.orbitCamera = new PerspectiveCamera(45, width / height, 0.1, 100);
-    this.controls = new OrbitControls(this.orbitCamera, this.canvas);
-    this.controls.target = new Vector3(0, 5, 0);
-    // Disable by default
-    this.controls.enabled = false;
 
     this.scene = new Scene();
     this.scene.add(this.model);
@@ -75,16 +69,11 @@ export default class DOMModelView {
 
     this.scene.add(new Shadow());
 
-    this.rotateEnabled = false;
-
     this.pivot = new Object3D();
     this.pivot.add(this.camera);
-    this.pivot.add(this.orbitCamera);
     this.scene.add(this.pivot);
     this.camera.position.z = 15;
     this.camera.position.y = 5;
-    this.orbitCamera.position.z = 15;
-    this.orbitCamera.position.y = 5;
 
     this.composer = new Composer(this.renderer);
     // Not sure why onBeforeRender doesn't exist, probably
@@ -138,8 +127,6 @@ export default class DOMModelView {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.orbitCamera.aspect = width / height;
-    this.orbitCamera.updateProjectionMatrix();
 
     this.updateModelScale();
   }
@@ -155,51 +142,12 @@ export default class DOMModelView {
   }
 
   /**
-   * Enables or disables auto rotation based off of boolean.
-   *
-   * @param {boolean} isEnabled
-   */
-  setRotate(isEnabled) {
-    this.rotateEnabled = isEnabled;
-    if (!isEnabled) {
-      this.pivot.rotation.set(0, 0, 0);
-    }
-  }
-
-  /**
-   * Enables or disables orbit controls based off of boolean.
-   *
-   * @param {boolean} isEnabled
-   */
-  setControls(isEnabled) {
-    this.controls.enabled = isEnabled;
-
-    if (this.controls.enabled) {
-      this.orbitCamera.position.set(0, 5, 15);
-      this.orbitCamera.rotation.set(0, 0, 0);
-    }
-  }
-
-  /**
    * Enables or disables vignette post processing based off of boolean.
    *
    * @param {boolean} isEnabled
    */
   setVignette(isEnabled) {
     this.vignetteEnabled = isEnabled;
-  }
-
-  /**
-   * Sets the background color of the WebGL environment.
-   *
-   * @param {String} color
-   */
-  setBackgroundColor(color) {
-    if (color && typeof color === 'string') {
-      this.renderer.setClearColor(new Color(color));
-    } else {
-      this.renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
-    }
   }
 
   /**
@@ -210,23 +158,19 @@ export default class DOMModelView {
       return;
     }
 
-    if (this.rotateEnabled) {
-      this.pivot.rotation.y += 0.001;
-    }
-
-    const camera = this.controls.enabled ? this.orbitCamera : this.camera;
+    this.tickCallback();
 
     // If we're not on mobile, and a pass is enabled,
     // use post processing
     if (USE_POST_PROCESSING && this.vignetteEnabled) {
       this.composer.reset();
-      this.composer.render(this.scene, camera);
+      this.composer.render(this.scene, this.camera);
       for (let pass of this.passes) {
         this.composer.pass(pass);
       }
       this.composer.toScreen();
     } else {
-      this.renderer.render(this.scene, camera);
+      this.renderer.render(this.scene, this.camera);
     }
 
     this._tick();

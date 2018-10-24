@@ -28,9 +28,11 @@ export default class ARView extends EventDispatcher {
    * @param {HTMLCanvasElement} config.canvas
    * @param {WebGLRenderingContext} config.context
    * @param {THREE.Object3D} config.model
+   * @param {Function} config.tickCallback
    */
-  constructor({canvas, context, model}) {
+  constructor({canvas, context, model, tickCallback}) {
     super();
+    this.tickCallback = tickCallback;
     this.context = context;
     this.canvas = canvas;
     this.model = model;
@@ -153,6 +155,7 @@ export default class ARView extends EventDispatcher {
     }
 
     this._tick();
+    this.tickCallback();
 
     if (pose) {
       for (let view of frame.views) {
