@@ -151,15 +151,6 @@ export default class ModelView extends EventDispatcher {
   }
 
   /**
-   * Sets the auto rotation option via boolean.
-   *
-   * @param {Boolean} isEnabled
-   */
-  // setRotate(isEnabled) {
-  // this.domView.setRotate(isEnabled);
-  //}
-
-  /**
    * Sets orbit controls via boolean.
    *
    * @param {Boolean} isEnabled

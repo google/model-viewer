@@ -69,8 +69,6 @@ export default class DOMModelView {
 
     this.scene.add(new Shadow());
 
-    // this.rotateEnabled = false;
-
     this.pivot = new Object3D();
     this.pivot.add(this.camera);
     this.scene.add(this.pivot);
@@ -144,18 +142,6 @@ export default class DOMModelView {
   }
 
   /**
-   * Enables or disables auto rotation based off of boolean.
-   *
-   * @param {boolean} isEnabled
-   */
-  // setRotate(isEnabled) {
-  // this.rotateEnabled = isEnabled;
-  // if (!isEnabled) {
-  // this.pivot.rotation.set(0, 0, 0);
-  //}
-  //}
-
-  /**
    * Enables or disables vignette post processing based off of boolean.
    *
    * @param {boolean} isEnabled
@@ -171,10 +157,6 @@ export default class DOMModelView {
     if (!this.enabled) {
       return;
     }
-
-    // if (this.rotateEnabled) {
-    // this.pivot.rotation.y += 0.001;
-    //}
 
     this.tickCallback();
 
