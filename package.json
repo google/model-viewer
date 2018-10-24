@@ -5,6 +5,7 @@
   "main": "./dist/xr-model-element.js",
   "scripts": {
     "build": "rollup -c",
+    "prepare": "npm run build",
     "watch": "rollup -c -w",
     "test": "eslint src/"
   },
