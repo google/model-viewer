@@ -16,8 +16,7 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import OrbitControls from '../../third_party/three/OrbitControls.js';
-import {BooleanComponent} from '../component.js';
-import {$updateFeatures, $updateSize} from '../xr-model-element-base.js';
+import {$updateSize} from '../xr-model-element-base.js';
 
 const $controls = Symbol('controls');
 const $orbitCamera = Symbol('orbitCamera');
@@ -25,8 +24,8 @@ const $defaultCamera = Symbol('defaultCamera');
 
 export const ControlsMixin = (XRModelElement) => {
   return class extends XRModelElement {
-    static get components() {
-      return {...super.components, 'controls': BooleanComponent};
+    static get properties() {
+      return {...super.properties, controls: {type: Boolean}};
     }
 
     constructor() {
@@ -47,10 +46,10 @@ export const ControlsMixin = (XRModelElement) => {
       this[$defaultCamera] = this.__modelView.domView.camera;
     }
 
-    [$updateFeatures](modelView, components) {
-      super[$updateFeatures](modelView, components);
+    update(changedProperties) {
+      super.update(changedProperties);
 
-      const {enabled} = components.get('controls');
+      const enabled = this.controls;
 
       this[$controls].enabled = enabled;
 

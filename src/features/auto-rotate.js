@@ -13,33 +13,35 @@
  * limitations under the License.
  */
 
-import {BooleanComponent} from '../component.js';
-import {$tick, $updateFeatures} from '../xr-model-element-base.js';
+import {$tick} from '../xr-model-element-base.js';
 
 const $rotateEnabled = Symbol('rotate-enabled');
 
 export const AutoRotateMixin = (XRModelElement) => {
   return class extends XRModelElement {
-    static get components() {
-      return {...super.components, 'auto-rotate': BooleanComponent};
+    static get properties() {
+      return {
+        ...super.properties,
+        autoRotate: {type: Boolean, attribute: 'auto-rotate'}
+      };
     }
 
-    [$updateFeatures](modelView, components) {
-      super[$updateFeatures](modelView, components);
+    update(changedProperties) {
+      super.update(changedProperties);
 
-      const {enabled} = components.get('auto-rotate');
-
-      if (!enabled) {
-        this.__modelView.domView.pivot.rotation.set(0, 0, 0);
+      if (!changedProperties.has('autoRotate')) {
+        return;
       }
 
-      this[$rotateEnabled] = enabled;
+      if (this.autoRotate) {
+        this.__modelView.domView.pivot.rotation.set(0, 0, 0);
+      }
     }
 
     [$tick]() {
       super[$tick]();
 
-      if (this[$rotateEnabled]) {
+      if (this.autoRotate) {
         this.__modelView.domView.pivot.rotation.y += 0.001;
       }
     }

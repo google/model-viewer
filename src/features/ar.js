@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {BooleanComponent} from '../component.js';
 import {getiOSSource, openIOSARQuickLook} from '../utils.js';
-import {$updateFeatures} from '../xr-model-element-base.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -23,8 +21,8 @@ const $enterARElement = Symbol('enterARElement');
 
 export const ARMixin = (XRModelElement) => {
   return class extends XRModelElement {
-    static get components() {
-      return {...super.components, 'ar': BooleanComponent};
+    static get properties() {
+      return {...super.properties, ar: {type: Boolean}};
     }
 
     constructor() {
@@ -54,10 +52,14 @@ export const ARMixin = (XRModelElement) => {
       }
     }
 
-    [$updateFeatures](modelView, components) {
-      super[$updateFeatures](modelView, components);
+    update(changedProperties) {
+      super.update(changedProperties);
 
-      const buttonIsVisible = components.get('ar').enabled;
+      if (!changedProperties.has('ar')) {
+        return;
+      }
+
+      const buttonIsVisible = this.ar;
 
       // On iOS, always enable the AR button. On non-iOS,
       // see if AR is supported, and if so, display the button after
