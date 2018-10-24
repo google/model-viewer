@@ -21,6 +21,7 @@ import {BackgroundColorMixin} from './features/background-color.js';
 import {ControlsMixin} from './features/controls.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
 import {ARMixin} from './features/ar.js';
+import {PosterMixin} from './features/poster.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -51,7 +52,6 @@ export class XRModelElementBase extends HTMLElement {
     return {
       'src': UrlComponent,
       'ios-src': UrlComponent,
-      'poster': UrlComponent,
       'vignette': BooleanComponent,
       'preload': BooleanComponent
     };
@@ -86,9 +86,7 @@ export class XRModelElementBase extends HTMLElement {
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this.__containerElement = shadowRoot.querySelector('.container');
-    this.__posterElement = shadowRoot.querySelector('.poster');
     this.__canvasElement = shadowRoot.querySelector('canvas');
-    this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
 
     // Create the underlying ModelView app.
     const {width, height} = this.getBoundingClientRect();
@@ -109,8 +107,6 @@ export class XRModelElementBase extends HTMLElement {
     // a model.
     this.addEventListener('click', () => {
       // Hide the poster always whether it exists or not
-      this.__posterElement.classList.remove('show');
-      this.__clickToViewElement.classList.remove('show');
       this.__userInput = true;
 
       // Update the source so it can start loading if
@@ -132,8 +128,6 @@ export class XRModelElementBase extends HTMLElement {
     });
     this.__modelView.addEventListener('model-load', () => {
       // Hide the poster always whether it exists or not
-      this.__posterElement.classList.remove('show');
-      this.__clickToViewElement.classList.remove('show');
       this.__loaded = true;
 
       this.dispatchEvent(new Event('load'));
@@ -201,8 +195,6 @@ export class XRModelElementBase extends HTMLElement {
   [$updateFeatures](modelView, components) {
     // vignette
     this.__modelView.setVignette(components.get('vignette').enabled);
-    // poster
-    this.__updatePoster(components.get('poster').fullUrl);
     // preload
     this.__updateSource(components.get('preload').enabled);
   }
@@ -242,31 +234,12 @@ export class XRModelElementBase extends HTMLElement {
     if (preload !== null || this.__userInput) {
       this.__canvasElement.classList.add('show');
       this.__modelView.setModelSource(source);
-      this.__clickToViewElement.classList.remove('show');
-    }
-  }
-
-  /**
-   * Called when the `poster` attribute changes. Display
-   * the poster image if it's valid and the user has not interacted
-   * with the content yet.
-   *
-   * @param {?String} src
-   */
-  __updatePoster(src) {
-    if (src) {
-      if (!this.__loaded && !this.__userInput) {
-        this.__posterElement.classList.add('show');
-        this.__clickToViewElement.classList.add('show');
-      }
-      this.__posterElement.style.backgroundImage = `url("${src}")`;
-    } else {
-      this.__posterElement.style.backgroundImage = '';
-      this.__posterElement.classList.remove('show');
+      // NOTE(cdata): We previously hid the click to view element
+      // What is this condition? How do we cover it?
     }
   }
 }
 
 
-export default ARMixin(
-    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase))));
+export default PosterMixin(ARMixin(
+    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));

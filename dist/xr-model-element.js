@@ -51633,6 +51633,42 @@ void main() {
 	  };
 	};
 
+	const $posterElement = Symbol('posterElement');
+	const $clickToViewElement = Symbol('clickToViewElement');
+	const PosterMixin = (XRModelElement$$1) => {
+	  return class extends XRModelElement$$1 {
+	    static get components() {
+	      return {...super.components, 'poster': UrlComponent};
+	    }
+	    constructor() {
+	      super();
+	      this[$posterElement] = this.shadowRoot.querySelector('.poster');
+	      this[$clickToViewElement] =
+	          this.shadowRoot.querySelector('.click-to-view');
+	      this.addEventListener('click', () => this.hidePoster());
+	      this.__modelView.addEventListener('model-load', () => this.hidePoster());
+	    }
+	    hidePoster() {
+	      this[$posterElement].classList.remove('show');
+	      this[$clickToViewElement].classList.remove('show');
+	    }
+	    [$updateFeatures](modelView, components) {
+	      super[$updateFeatures](modelView, components);
+	      const {fullUrl: src} = components.get('poster');
+	      if (src) {
+	        if (!this.__loaded && !this.__userInput) {
+	          this[$posterElement].classList.add('show');
+	          this[$clickToViewElement].classList.add('show');
+	        }
+	        this[$posterElement].style.backgroundImage = `url("${src}")`;
+	      } else {
+	        this[$posterElement].style.backgroundImage = '';
+	        this.hidePoster();
+	      }
+	    }
+	  };
+	};
+
 	const IS_IOS$1 = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 	const $makeComponents = Symbol('makeComponents');
 	const $components = Symbol('components');
@@ -51646,9 +51682,7 @@ void main() {
 	    return {
 	      'src': UrlComponent,
 	      'ios-src': UrlComponent,
-	      'poster': UrlComponent,
 	      'vignette': BooleanComponent,
-	      'ar': BooleanComponent,
 	      'preload': BooleanComponent
 	    };
 	  }
@@ -51671,9 +51705,7 @@ void main() {
 	    const shadowRoot = this.attachShadow({mode: 'open'});
 	    shadowRoot.appendChild(template.content.cloneNode(true));
 	    this.__containerElement = shadowRoot.querySelector('.container');
-	    this.__posterElement = shadowRoot.querySelector('.poster');
 	    this.__canvasElement = shadowRoot.querySelector('canvas');
-	    this.__clickToViewElement = shadowRoot.querySelector('.click-to-view');
 	    const {width, height} = this.getBoundingClientRect();
 	    this.__modelView = new ModelView({
 	      canvas: this.__canvasElement,
@@ -51683,8 +51715,6 @@ void main() {
 	    });
 	    this.__userInput = false;
 	    this.addEventListener('click', () => {
-	      this.__posterElement.classList.remove('show');
-	      this.__clickToViewElement.classList.remove('show');
 	      this.__userInput = true;
 	      this.__updateSource();
 	    }, {once: true});
@@ -51697,8 +51727,6 @@ void main() {
 	      this.__mode = 'dom';
 	    });
 	    this.__modelView.addEventListener('model-load', () => {
-	      this.__posterElement.classList.remove('show');
-	      this.__clickToViewElement.classList.remove('show');
 	      this.__loaded = true;
 	      this.dispatchEvent(new Event('load'));
 	    });
@@ -51736,7 +51764,6 @@ void main() {
 	  }
 	  [$updateFeatures](modelView, components) {
 	    this.__modelView.setVignette(components.get('vignette').enabled);
-	    this.__updatePoster(components.get('poster').fullUrl);
 	    this.__updateSource(components.get('preload').enabled);
 	  }
 	  [$updateSize]({width, height}, forceApply) {
@@ -51758,24 +51785,11 @@ void main() {
 	    if (preload !== null || this.__userInput) {
 	      this.__canvasElement.classList.add('show');
 	      this.__modelView.setModelSource(source);
-	      this.__clickToViewElement.classList.remove('show');
-	    }
-	  }
-	  __updatePoster(src) {
-	    if (src) {
-	      if (!this.__loaded && !this.__userInput) {
-	        this.__posterElement.classList.add('show');
-	        this.__clickToViewElement.classList.add('show');
-	      }
-	      this.__posterElement.style.backgroundImage = `url("${src}")`;
-	    } else {
-	      this.__posterElement.style.backgroundImage = '';
-	      this.__posterElement.classList.remove('show');
 	    }
 	  }
 	}
-	var XRModelElement = ARMixin(
-	    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase))));
+	var XRModelElement = PosterMixin(ARMixin(
+	    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));
 
 	/*
 	 * Copyright 2018 Google Inc. All Rights Reserved.
