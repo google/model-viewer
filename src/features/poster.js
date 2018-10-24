@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-import {UrlComponent} from '../component.js';
-import {$updateFeatures} from '../xr-model-element-base.js';
+import {deserializeUrl} from '../utils.js';
 
 const $posterElement = Symbol('posterElement');
 const $clickToViewElement = Symbol('clickToViewElement');
 
 export const PosterMixin = (XRModelElement) => {
   return class extends XRModelElement {
-    static get components() {
-      return {...super.components, 'poster': UrlComponent};
+    static get properties() {
+      return {...super.properties, poster: {type: deserializeUrl}};
     }
 
     constructor() {
@@ -42,10 +41,14 @@ export const PosterMixin = (XRModelElement) => {
       this[$clickToViewElement].classList.remove('show');
     }
 
-    [$updateFeatures](modelView, components) {
-      super[$updateFeatures](modelView, components);
+    update(changedProperties) {
+      super.update(changedProperties);
 
-      const {fullUrl: src} = components.get('poster');
+      if (!changedProperties.has('poster')) {
+        return;
+      }
+
+      const src = this.poster;
 
       if (src) {
         if (!this.__loaded && !this.__userInput) {

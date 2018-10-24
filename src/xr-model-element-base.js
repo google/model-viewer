@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
+import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
+
 import ModelView from './views/ModelView.js';
 import template from './template.js';
-import {getWebGLSource} from './utils.js';
-import {BooleanComponent, UrlComponent} from './component.js';
+import {deserializeUrl} from './utils.js';
 
-const $makeComponents = Symbol('makeComponents');
-const $components = Symbol('components');
 const $featureUpdateTriggered = Symbol('featureUpdateTriggered');
 const $triggerFeatureUpdate = Symbol('triggerFeatureUpdate');
 
@@ -27,42 +26,19 @@ export const $updateSize = Symbol('updateSize');
 export const $updateFeatures = Symbol('updateFeatures');
 export const $tick = Symbol('tick');
 
+
 /**
  * Definition for a basic <xr-model> element.
  *
  */
-export default class XRModelElementBase extends HTMLElement {
-  /**
-   * Declare components to be associated with the model element.
-   *
-   * Component names should be kebab-style attribute names. Every component that
-   * is registered will be made configurable by the element user as an
-   * attribute. The value of components will be updated as their associated
-   * attributes change.
-   */
-  static get components() {
+export default class XRModelElementBase extends UpdatingElement {
+  static get properties() {
     return {
-      'src': UrlComponent,
-      'ios-src': UrlComponent,
-      'vignette': BooleanComponent,
-      'preload': BooleanComponent
+      src: {type: deserializeUrl},
+      iosSrc: {type: deserializeUrl, attribute: 'ios-src'},
+      vignette: {type: Boolean},
+      preload: {type: Boolean}
     };
-  }
-
-  static get observedAttributes() {
-    return Object.keys(this.components);
-  }
-
-  [$makeComponents]() {
-    const components = new Map();
-    const implementations = this.constructor.components;
-
-    for (const name in implementations) {
-      const Implementation = implementations[name];
-      components.set(name, new Implementation());
-    }
-
-    return components;
   }
 
   /**
@@ -71,10 +47,7 @@ export default class XRModelElementBase extends HTMLElement {
   constructor() {
     super();
 
-    this[$components] = this[$makeComponents]();
-    this[$featureUpdateTriggered] = false;
-
-    const shadowRoot = this.attachShadow({mode: 'open'});
+    const {shadowRoot} = this;
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this.__containerElement = shadowRoot.querySelector('.container');
@@ -152,43 +125,14 @@ export default class XRModelElementBase extends HTMLElement {
     this.resizeObserver.observe(this);
   }
 
-  /**
-   * Called when custom element's attribute in observedAttributes
-   * has changed.
-   *
-   * @param {String} name
-   * @param {?String} oldVal
-   * @param {?String} newVal
-   * @param {String} namespace
-   */
-  attributeChangedCallback(name, oldVal, newVal, namespace) {
-    if (this[$components].has(name)) {
-      this[$components].get(name).value = newVal;
-      this[$triggerFeatureUpdate]();
+  update(changedProperties) {
+    if (changedProperties.has('vignette')) {
+      this.__modelView.setVignette(this.vignette);
     }
-  }
 
-  /**
-   * Batch-updates the model with the latest component data on microtask
-   * timing.
-   */
-  [$triggerFeatureUpdate]() {
-    if (this[$featureUpdateTriggered]) {
-      return;
+    if (changedProperties.has('preload') || changedProperties.has('src')) {
+      this.__updateSource();
     }
-    this[$featureUpdateTriggered] = true;
-
-    Promise.resolve().then(() => {
-      this[$featureUpdateTriggered] = false;
-      this[$updateFeatures](this.__modelView, this[$components]);
-    });
-  }
-
-  [$updateFeatures](modelView, components) {
-    // vignette
-    this.__modelView.setVignette(components.get('vignette').enabled);
-    // preload
-    this.__updateSource(components.get('preload').enabled);
   }
 
   /**
@@ -216,8 +160,8 @@ export default class XRModelElementBase extends HTMLElement {
    * attribute.
    */
   __updateSource() {
-    const preload = this.getAttribute('preload');
-    const source = getWebGLSource(this);
+    const preload = this.preload;
+    const source = this.src;
 
     if (source == null) {
       return;

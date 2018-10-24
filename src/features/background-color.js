@@ -15,22 +15,28 @@
 
 import {Color} from 'three';
 
-import {Component} from '../component.js';
 import {$updateFeatures} from '../xr-model-element-base.js';
 
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
 export const BackgroundColorMixin = (XRModelElement) => {
   return class extends XRModelElement {
-    static get components() {
-      return {...super.components, 'background-color': Component};
+    static get properties() {
+      return {
+        ...super.properties,
+        backgroundColor: {type: String, attribute: 'background-color'}
+      };
     }
 
-    [$updateFeatures](modelView, components) {
-      super[$updateFeatures](modelView, components);
+    update(changedProperties) {
+      super.update(changedProperties);
 
-      const {renderer} = modelView;
-      const color = components.get('background-color').value;
+      if (!changedProperties.has('backgroundColor')) {
+        return;
+      }
+
+      const {renderer} = this.__modelView;
+      const color = this.backgroundColor;
 
       if (color && typeof color === 'string') {
         renderer.setClearColor(new Color(color));
