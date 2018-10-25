@@ -41,6 +41,10 @@ template.innerHTML = `
       opacity: 1;
     }
 
+    .poster:not(.show) {
+      pointer-events: none;
+    }
+
     .click-to-view {
       display: none;
       position: absolute;
