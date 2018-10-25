@@ -45,23 +45,6 @@ export const openIOSARQuickLook = url => {
 };
 
 /**
- * Takes a relative URL, like 'assets/file.glb'
- * or '../../file.usdz' and converts it to an absolute
- * link, since our <source> `src` attributes do not
- * handle this for us automatically.
- *
- * @param {String} url
- * @return {String}
- */
-export const relativeToAbsoluteURL = (function() {
-  const anchor = document.createElement('a');
-  return (url) => {
-    anchor.href = url;
-    return anchor.href;
-  }
-})();
-
-/**
  * Return a URL and type of the best source from
  * an XRModelElement for use within iOS's AR Quick Look.
  *

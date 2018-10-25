@@ -23,30 +23,47 @@ const nodestdlib = require('rollup-plugin-node-builtins');
 const cleanup = require('rollup-plugin-cleanup');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
-export default {
-  input: './index.js',
-  output: {
-    file: './dist/xr-model-element.js',
-    format: 'umd',
-    name: 'XRModelElement',
+
+const plugins = [
+  commonjs(),
+  nodestdlib(),
+  cleanup({
+    // Ideally we'd also clean third_party/three, which saves
+    // ~45kb in filesize alone... but takes 2 minutes to build
+    include: ['src/**'],
+    comments: 'none',
+  }),
+  string({
+    include: '**/*.svg',
+  }),
+  resolve(),
+];
+
+export default [
+  {
+    input: './index.js',
+    output: {
+      file: './dist/xr-model-element.js',
+      format: 'umd',
+      name: 'XRModelElement',
+      banner
+    },
+    watch: {
+      include: 'src/**',
+    },
+    plugins
   },
-  watch: {
-    include: 'src/**',
-  },
-  banner,
-  plugins:
-      [
-        commonjs(),
-        nodestdlib(),
-        cleanup({
-          // Ideally we'd also clean third_party/three, which saves
-          // ~45kb in filesize alone... but takes 2 minutes to build
-          include: ['src/**'],
-          comments: 'none',
-        }),
-        string({
-          include: '**/*.svg',
-        }),
-        resolve(),
-      ],
-};
+  {
+    input: './src/test/index.js',
+    output: {
+      file: './dist/unit-tests.js',
+      format: 'umd',
+      name: 'XRModelElementUnitTests',
+      banner
+    },
+    watch: {
+      include: 'src/**',
+    },
+    plugins
+  }
+];
