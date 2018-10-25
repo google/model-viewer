@@ -15,3 +15,4 @@
 
 import './utils-spec.js';
 import './xr-model-element-base-spec.js';
+import './features/poster-spec.js';

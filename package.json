@@ -26,7 +26,7 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-string": "^2.0.2",
     "wct-browser-legacy": "^1.0.1",
-    "web-component-tester": "^6.8.0"
+    "web-component-tester": "^6.9.0"
   },
   "keywords": [
     "webar",
