@@ -51,14 +51,12 @@
         <ul>
             <li class="model">
                 <pre class="language-markup">
-                    <code>&lt;xr-model ar controls auto-rotate vignette background-color=&quot;#4885ed&quot;&gt;</code>
-                    <code>  &lt;source src=&quot;assets/Astronaut.usdz&quot; type=&quot;model/vnd.usd+zip&quot;&gt;</code>
-                    <code>  &lt;source src=&quot;assets/Astronaut.glb&quot; type=&quot;model/gltf-binary&quot;&gt;</code>
+                    <code>&lt;xr-model ar controls auto-rotate vignette background-color=&quot;#4885ed&quot;
+                      src=&quot;test/smoke/assets/Astronaut.glb&quot;
+                      ios-src=&quot;test/smoke/assets/Astronaut.usdz&quot;&gt;</code>
                     <code>&lt;/xr-model&gt;</code>
                 </pre>
-                <xr-model ar controls auto-rotate vignette background-color="#4885ed">
-                    <source src="tests/assets/Astronaut.usdz" type="model/vnd.usd+zip">
-                    <source src="tests/assets/Astronaut.glb" type="model/gltf-binary">
+                <xr-model ar controls auto-rotate vignette background-color="#4885ed" src="test/smoke/assets/Astronaut.glb" ios-src="test/smoke/assets/Astronaut.usdz">
                 </xr-model>
             </li>
         </ul>
