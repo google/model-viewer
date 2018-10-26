@@ -2,12 +2,16 @@
   "name": "xr-model-element",
   "version": "0.0.1",
   "description": "",
-  "main": "./dist/xr-model-element.js",
+  "main": "./lib/xr-model-element.js",
+  "files": [
+    "lib",
+    "dist"
+  ],
   "scripts": {
-    "build": "rollup -c",
+    "clean": "rm -r ./lib ./dist",
+    "build": "tsc && rollup -c",
     "prepare": "npm run build",
-    "watch": "rollup -c -w",
-    "test": "npm run build && wct"
+    "test": "npm run clean && npm run build && wct"
   },
   "author": "Jordan Santell <jsantell@google.com>",
   "license": "Apache-2.0",
@@ -24,7 +28,7 @@
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-string": "^2.0.2",
+    "typescript": "^3.1.3",
     "wct-browser-legacy": "^1.0.1",
     "web-component-tester": "^6.9.0"
   },

@@ -17,54 +17,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - Preload</title>
+  <title>XRModelElement - AR</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
-  <link href="../../third_party/prism/prism.css" rel="stylesheet" />
+  <link href="./third_party/prism/prism.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
   <link type="text/css" href="style.css" rel="stylesheet" />
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - Preload</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>preload</code> attribute.</p>
+        <h1>XRModelElement - AR</h1>
+        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>ar</code> attribute.</p>
 
-        <h2>Preload with poster</h2>
+        <h2>AR with model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;xr-model ar src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model preload poster="assets/poster.png" src="assets/Astronaut.glb">
+        <xr-model ar src="assets/Astronaut.glb">
         </xr-model>
 
-        <h2>Preload with poster, no model</h2>
+        <h2>AR with poster and preload</h2>
         <pre class="language-markup">
-<code>&lt;xr-model preload poster=&quot;assets/poster.png&quot;&gt;</code>
+<code>&lt;xr-model ar preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model preload poster="assets/poster.png">
+        <xr-model ar preload poster="assets/poster.png" src="assets/Astronaut.glb">
         </xr-model>
 
-        <h2>Preload with no poster</h2>
+        <h2>AR with poster</h2>
         <pre class="language-markup">
-<code>&lt;xr-model preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;xr-model ar poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model preload src="assets/Astronaut.glb">
+        <xr-model ar poster="assets/poster.png" src="assets/Astronaut.glb">
         </xr-model>
 
-        <h2>Preload with no poster, no model</h2>
+        <h2>AR with preload</h2>
         <pre class="language-markup">
-<code>&lt;xr-model preload&gt;</code>
+<code>&lt;xr-model ar preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
 <code>&lt;/xr-model&gt;</code>
         </pre>
-        <xr-model preload>
+        <xr-model ar preload src="assets/Astronaut.glb">
         </xr-model>
 
     </div>
-    <script src="../../dist/xr-model-element.js"></script>
-    <script src="../../third_party/prism/prism.js"></script>
+    <script src="../dist/xr-model-element.js"></script>
+    <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

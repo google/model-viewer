@@ -1,4 +1,7 @@
 {
   "npm": true,
-  "moduleResolution": "node"
+  "moduleResolution": "node",
+  "suites": [
+    "./test.html"
+  ]
 }
