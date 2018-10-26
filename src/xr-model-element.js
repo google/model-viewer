@@ -1,4 +1,3 @@
-<!--
 /*
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -13,18 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
--->
-<!doctype html>
-<html>
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>XR Model Unit Tests</title>
-  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-  <script src="../node_modules/web-component-tester/browser.js"></script>
-</head>
-<body>
-  <script type="module" src="../dist/unit-tests.js"></script>
-</body>
-</html>
+
+import {ARMixin} from './features/ar.js';
+import {AutoRotateMixin} from './features/auto-rotate.js';
+import {BackgroundColorMixin} from './features/background-color.js';
+import {ControlsMixin} from './features/controls.js';
+import {PosterMixin} from './features/poster.js';
+import XRModelElementBase from './xr-model-element-base.js';
+
+const XRModelElement = PosterMixin(ARMixin(
+    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));
+
+customElements.define('xr-model', XRModelElement);

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {extname} from 'path';
 import {Box3, Vector3} from 'three';
 
 export const deserializeUrl = (url) => url != null ? toFullUrl(url) : url;

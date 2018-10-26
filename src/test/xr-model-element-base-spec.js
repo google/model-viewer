@@ -63,7 +63,7 @@ suite('XRModelElementBase', () => {
         };
 
         element.addEventListener('load', onLoad);
-        element.src = './smoke/assets/Astronaut.glb';
+        element.src = './examples/assets/Astronaut.glb';
       });
     });
   });

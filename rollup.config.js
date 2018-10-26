@@ -16,32 +16,23 @@
 const fs = require('fs');
 const path = require('path');
 const rollup = require('rollup');
-const commonjs = require('rollup-plugin-commonjs');
 const resolve = require('rollup-plugin-node-resolve');
-const string = require('rollup-plugin-string');
-const nodestdlib = require('rollup-plugin-node-builtins');
 const cleanup = require('rollup-plugin-cleanup');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
-
 const plugins = [
-  commonjs(),
-  nodestdlib(),
   cleanup({
     // Ideally we'd also clean third_party/three, which saves
     // ~45kb in filesize alone... but takes 2 minutes to build
-    include: ['src/**'],
+    include: ['lib/**'],
     comments: 'none',
-  }),
-  string({
-    include: '**/*.svg',
   }),
   resolve(),
 ];
 
 export default [
   {
-    input: './index.js',
+    input: './lib/xr-model-element.js',
     output: {
       file: './dist/xr-model-element.js',
       format: 'umd',
@@ -49,7 +40,7 @@ export default [
       banner
     },
     watch: {
-      include: 'src/**',
+      include: 'lib/**',
     },
     plugins
   },
@@ -62,7 +53,7 @@ export default [
       banner
     },
     watch: {
-      include: 'src/**',
+      include: 'lib/**',
     },
     plugins
   }

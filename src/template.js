@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ARKitSVG from './assets/arkit-glyph.svg';
+import ARKitSVG from './assets/arkit-glyph.js';
 
 const CLICK_TO_VIEW_TEXT = 'Select to view 3D content.';
 

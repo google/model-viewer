@@ -79,7 +79,7 @@ suite('XRModelElementBase with PosterMixin', () => {
           };
 
           element.addEventListener('load', onLoad);
-          element.src = '../test/smoke/assets/Astronaut.glb';
+          element.src = './examples/assets/Astronaut.glb';
         });
 
         suite('when hidden', () => {

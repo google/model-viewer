@@ -15,7 +15,7 @@
 
 import {Object3D} from 'three';
 
-import GLTFLoader from '../../third_party/three/GLTFLoader.js';
+import GLTFLoader from '../third_party/three/GLTFLoader.js';
 
 const loadGLTF = (loader, url) => new Promise(
     (resolve, reject) => loader.load(url, resolve, () => {}, reject));

@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import screenfull from 'screenfull';
+import 'screenfull';
 import {AmbientLight, DirectionalLight, EventDispatcher, Matrix4, PCFSoftShadowMap, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer,} from 'three';
 
 import Reticle from '../three-components/Reticle.js';
 import Shadow from '../three-components/Shadow.js';
+
+const {screenfull} = self;
 
 /**
  * Creates an AR model placement experience with WebXR.
