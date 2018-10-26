@@ -16,9 +16,10 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import OrbitControls from '../third_party/three/OrbitControls.js';
-import {$updateSize} from '../xr-model-element-base.js';
+import {$onResize, $scene, $needsRender} from '../xr-model-element-base.js';
 
 const $controls = Symbol('controls');
+const $onControlsChange = Symbol('onControlsChange');
 const $orbitCamera = Symbol('orbitCamera');
 const $defaultCamera = Symbol('defaultCamera');
 
@@ -30,20 +31,26 @@ export const ControlsMixin = (XRModelElement) => {
 
     constructor() {
       super();
+      this[$onControlsChange] = this[$onControlsChange].bind(this);
 
       const {width, height} = this.getBoundingClientRect();
 
-      this[$orbitCamera] = new PerspectiveCamera(45, width / height, 0.1, 100);
-      this.__modelView.domView.pivot.add(this[$orbitCamera]);
+      const scene = this[$scene];
+      this[$defaultCamera] = scene.getCamera();
 
-      this[$controls] =
-          new OrbitControls(this[$orbitCamera], this.__canvasElement);
-      this[$controls].target = new Vector3(0, 5, 0);
-
-      // Disable by default
+      this[$orbitCamera] = scene.camera.clone();
+      this[$controls] = new OrbitControls(this[$orbitCamera], scene.canvas);
       this[$controls].enabled = false;
+    }
 
-      this[$defaultCamera] = this.__modelView.domView.camera;
+    connectedCallback() {
+      super.connectedCallback();
+      this[$controls].addEventListener('change', this[$onControlsChange]);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this[$controls].removeEventListener('change', this[$onControlsChange]);
     }
 
     update(changedProperties) {
@@ -54,22 +61,28 @@ export const ControlsMixin = (XRModelElement) => {
       this[$controls].enabled = enabled;
 
       if (enabled) {
-        this[$orbitCamera].position.set(0, 5, 15);
-        this[$orbitCamera].rotation.set(0, 0, 0);
-
-        this.__modelView.domView.camera = this[$orbitCamera];
+        this[$scene].setCamera(this[$orbitCamera]);
       } else {
-        this.__modelView.domView.camera = this[$defaultCamera];
+        this[$scene].setCamera(this[$defaultCamera]);
       }
     }
 
-    [$updateSize](size, forceApply) {
-      super[$updateSize](size, forceApply);
+    [$onResize](e) {
+      super[$onResize](e);
 
-      const {width, height} = size;
+      const {width, height} = e;
 
+      // @TODO need to appropriately position the camera
+      // @see ModelScene#setSize
+      this[$controls].target.set(0, 5, 0);
+      this[$orbitCamera].position.set(0, 5, 15);
+      this[$orbitCamera].rotation.set(0, 0, 0);
       this[$orbitCamera].aspect = width / height;
       this[$orbitCamera].updateProjectionMatrix();
+    }
+
+    [$onControlsChange](e) {
+      this[$needsRender]();
     }
   };
 };

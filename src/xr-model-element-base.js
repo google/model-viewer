@@ -15,17 +15,22 @@
 
 import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
 
-import ModelView from './views/ModelView.js';
+import Renderer from './three-components/Renderer.js';
+import ModelScene from './three-components/ModelScene.js';
 import template from './template.js';
 import {deserializeUrl} from './utils.js';
 
-const $featureUpdateTriggered = Symbol('featureUpdateTriggered');
-const $triggerFeatureUpdate = Symbol('triggerFeatureUpdate');
+const renderer = new Renderer();
 
-export const $updateSize = Symbol('updateSize');
-export const $updateFeatures = Symbol('updateFeatures');
+const $updateSize = Symbol('updateSize');
+const $container = Symbol('container');
+
+export const $canvas = Symbol('canvas');
+export const $scene = Symbol('scene');
+export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
-
+export const $onModelLoad = Symbol('onModelLoad');
+export const $onResize = Symbol('onResize');
 
 /**
  * Definition for a basic <xr-model> element.
@@ -46,20 +51,19 @@ export default class XRModelElementBase extends UpdatingElement {
    */
   constructor() {
     super();
-
     const {shadowRoot} = this;
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.__containerElement = shadowRoot.querySelector('.container');
-    this.__canvasElement = shadowRoot.querySelector('canvas');
+    this[$container] = shadowRoot.querySelector('.container');
+    this[$canvas] = shadowRoot.querySelector('canvas');
 
-    // Create the underlying ModelView app.
+    // Create the underlying ModelScene.
     const {width, height} = this.getBoundingClientRect();
-    this.__modelView = new ModelView({
-      canvas: this.__canvasElement,
+    this[$scene] = new ModelScene({
+      canvas: this[$canvas],
+      element: this,
       width,
       height,
-      tickCallback: () => this[$tick]()
     });
 
     // Tracks whether or not the user has interacted with this element;
@@ -85,15 +89,11 @@ export default class XRModelElementBase extends UpdatingElement {
     // when updating `src`.
     this.__loaded = false;
 
-    this.__modelView.addEventListener('enter-ar', () => {
-      this.__mode = 'ar';
-    });
-    this.__modelView.addEventListener('enter-dom', () => {
-      this.__mode = 'dom';
-    });
-    this.__modelView.addEventListener('model-load', () => {
+    this[$scene].addEventListener('model-load', () => {
       // Hide the poster always whether it exists or not
       this.__loaded = true;
+
+      this[$onModelLoad]();
 
       this.dispatchEvent(new Event('load'));
     });
@@ -125,9 +125,19 @@ export default class XRModelElementBase extends UpdatingElement {
     this.resizeObserver.observe(this);
   }
 
+  connectedCallback() {
+    renderer.registerScene(this[$scene]);
+    this[$scene].isDirty = true;
+  }
+
+  disconnectedCallback() {
+    renderer.unregisterScene(this[$scene]);
+  }
+
   update(changedProperties) {
     if (changedProperties.has('vignette')) {
-      this.__modelView.setVignette(this.vignette);
+      // @TODO renable as a feature to access the renderer, or remove?
+      // this[$scene].setVignette(this.vignette);
     }
 
     if (changedProperties.has('preload') || changedProperties.has('src')) {
@@ -139,19 +149,31 @@ export default class XRModelElementBase extends UpdatingElement {
    * Called on initialization and when the resize observer fires.
    */
   [$updateSize]({width, height}, forceApply) {
-    const {width: prevWidth, height: prevHeight} = this.__modelView.getSize();
+    const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
+    // Round off the pixel size
+    width = parseInt(width, 10);
+    height = parseInt(height, 10);
 
     if (forceApply || (prevWidth !== width || prevHeight !== height)) {
-      this.__containerElement.style.width = `${width}px`;
-      this.__containerElement.style.height = `${height}px`;
-      this.__modelView.setSize(width, height);
+      this[$container].style.width = `${width}px`;
+      this[$container].style.height = `${height}px`;
+      this[$onResize]({ width, height });
     }
   }
 
-  /**
-   * Implement to make changes every tick on the current mode's rAF timing.
-   */
-  [$tick]() {
+  [$tick](time){}
+
+  [$needsRender]() {
+    this[$scene].isDirty = true;
+  }
+
+  [$onModelLoad](e) {
+    this[$needsRender]();
+  }
+
+  [$onResize](e) {
+    this[$scene].setSize(e.width, e.height);
+    this[$needsRender]();
   }
 
   /**
@@ -168,8 +190,8 @@ export default class XRModelElementBase extends UpdatingElement {
     }
 
     if (preload !== null || this.__userInput) {
-      this.__canvasElement.classList.add('show');
-      this.__modelView.setModelSource(source);
+      this[$canvas].classList.add('show');
+      this[$scene].setModelSource(source);
       // NOTE(cdata): We previously hid the click to view element
       // What is this condition? How do we cover it?
     }

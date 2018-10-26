@@ -20,7 +20,12 @@ import {ControlsMixin} from './features/controls.js';
 import {PosterMixin} from './features/poster.js';
 import XRModelElementBase from './xr-model-element-base.js';
 
-const XRModelElement = PosterMixin(ARMixin(
-    AutoRotateMixin(BackgroundColorMixin(ControlsMixin(XRModelElementBase)))));
+const XRModelElement = [
+  PosterMixin,
+  ARMixin,
+  AutoRotateMixin,
+  BackgroundColorMixin,
+  ControlsMixin
+].reduce((Base, Mixin) => Mixin(Base), XRModelElementBase);
 
 customElements.define('xr-model', XRModelElement);
