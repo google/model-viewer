@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {$tick} from '../xr-model-element-base.js';
-
-const $rotateEnabled = Symbol('rotate-enabled');
+import {
+  $scene, $tick, $needsRender
+} from '../xr-model-element-base.js';
 
 export const AutoRotateMixin = (XRModelElement) => {
   return class extends XRModelElement {
@@ -34,15 +34,17 @@ export const AutoRotateMixin = (XRModelElement) => {
       }
 
       if (this.autoRotate) {
-        this.__modelView.domView.pivot.rotation.set(0, 0, 0);
+        this[$scene].pivot.rotation.set(0, 0, 0);
+        this[$needsRender]();
       }
     }
 
-    [$tick]() {
-      super[$tick]();
+    [$tick](time) {
+      super[$tick](time);
 
       if (this.autoRotate) {
-        this.__modelView.domView.pivot.rotation.y += 0.001;
+        this[$scene].pivot.rotation.y += 0.001;
+        this[$needsRender]();
       }
     }
   };

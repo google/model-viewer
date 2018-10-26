@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {$scene} from '../xr-model-element-base.js';
 import {deserializeUrl} from '../utils.js';
 
 const $posterElement = Symbol('posterElement');
@@ -33,7 +34,7 @@ export const PosterMixin = (XRModelElement) => {
       this[$clickToViewElement] =
           this.shadowRoot.querySelector('.click-to-view');
       this.addEventListener('click', () => this.hidePoster());
-      this.__modelView.addEventListener('model-load', () => this.hidePoster());
+      this[$scene].addEventListener('model-load', () => this.hidePoster());
     }
 
     hidePoster() {

@@ -14,7 +14,7 @@
  */
 
 import {PosterMixin} from '../../features/poster.js';
-import XRModelElementBase from '../../xr-model-element-base.js';
+import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
 import {pickShadowDescendant, timePasses} from '../helpers.js';
 
 const expect = chai.expect;
@@ -84,8 +84,7 @@ suite('XRModelElementBase with PosterMixin', () => {
 
         suite('when hidden', () => {
           test('allows the canvas to be interactive', () => {
-            // TODO(cdata): Fix leaky privacy here:
-            const canvas = element.__canvasElement;
+            const canvas = element[$canvas];
 
             element.hidePoster();
 

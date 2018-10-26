@@ -42,6 +42,11 @@ export const ARMixin = (XRModelElement) => {
      * Enables the AR
      */
     enterAR() {
+      // @TODO temporarily disable AR until we can clean it up in one pass
+      // should be handled by the Renderer since we'll want to stop all other
+      // elements from being rendered.
+      console.warn("AR temporarily under construction");
+
       if (IS_IOS || this.__modelView.hasAR()) {
         const usdzSource = getiOSSource(this);
         if (IS_IOS && usdzSource) {
@@ -54,6 +59,10 @@ export const ARMixin = (XRModelElement) => {
 
     update(changedProperties) {
       super.update(changedProperties);
+      // @TODO temporarily disable AR until we can clean it up in one pass
+      // should be handled by the Renderer since we'll want to stop all other
+      // elements from being rendered.
+      return;
 
       if (!changedProperties.has('ar')) {
         return;

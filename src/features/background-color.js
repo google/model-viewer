@@ -14,8 +14,7 @@
  */
 
 import {Color} from 'three';
-
-import {$updateFeatures} from '../xr-model-element-base.js';
+import {$scene} from '../xr-model-element-base.js';
 
 const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
 
@@ -28,6 +27,11 @@ export const BackgroundColorMixin = (XRModelElement) => {
       };
     }
 
+    connectedCallback() {
+      super.connectedCallback();
+      this[$scene].background = new Color(DEFAULT_BACKGROUND_COLOR);
+    }
+
     update(changedProperties) {
       super.update(changedProperties);
 
@@ -35,14 +39,7 @@ export const BackgroundColorMixin = (XRModelElement) => {
         return;
       }
 
-      const {renderer} = this.__modelView;
-      const color = this.backgroundColor;
-
-      if (color && typeof color === 'string') {
-        renderer.setClearColor(new Color(color));
-      } else {
-        renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
-      }
+      this[$scene].background.set(this.backgroundColor);
     }
   };
 };
