@@ -18,3 +18,4 @@ import './xr-model-element-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
 import './features/poster-spec.js';
+import './features/magic-leap-spec.js';
