@@ -91,7 +91,9 @@ have to download the same model a _second time_ in USDZ format when they launch 
 ## Development
 
 * `npm run build` - Builds the distributable from the `src/` directory.
-* `npm run watch` - Watches the `src/` directory, rebuilding when a file changes
+* `npm run watch` - Watches the `src/` directory, rebuilding when a file changes.
+* `npm run serve` - Serves a static server on port `8000` from the project root.
+* `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
 * `npm test` - Runs tests. As of now, only a linter.
 
 ## TODOs/Questions
