@@ -45,7 +45,7 @@ export default [
     plugins
   },
   {
-    input: './src/test/index.js',
+    input: './lib/test/index.js',
     output: {
       file: './dist/unit-tests.js',
       format: 'umd',

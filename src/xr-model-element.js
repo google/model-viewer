@@ -17,6 +17,7 @@ import {ARMixin} from './features/ar.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
 import {BackgroundColorMixin} from './features/background-color.js';
 import {ControlsMixin} from './features/controls.js';
+import {MagicLeapMixin} from './features/magic-leap.js';
 import {PosterMixin} from './features/poster.js';
 import XRModelElementBase from './xr-model-element-base.js';
 
@@ -25,7 +26,8 @@ const XRModelElement = [
   ARMixin,
   AutoRotateMixin,
   BackgroundColorMixin,
-  ControlsMixin
+  ControlsMixin,
+  MagicLeapMixin
 ].reduce((Base, Mixin) => Mixin(Base), XRModelElementBase);
 
 customElements.define('xr-model', XRModelElement);
