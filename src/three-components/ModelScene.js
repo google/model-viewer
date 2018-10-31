@@ -18,11 +18,13 @@ import {
   DirectionalLight,
   Scene,
   Object3D,
+  Box3,
+  Vector3,
   PerspectiveCamera,
 } from 'three';
 import Model from './Model.js';
 import Shadow from './Shadow.js';
-import {setScaleFromLimit} from '../utils.js';
+import {fitWithinBox} from '../utils.js';
 
 // Valid types for `setScaleType` -- 'framed' scales the model
 // so that it fits within its 2D plane nicely. 'lifesize' is
@@ -34,12 +36,12 @@ export const ScaleTypes = {
 };
 const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 
-// The max size (width or height) of the canvas in meters.
-// This normalizes all of our scaling and camera positions to
-// properly frame the model within view. For example, if
-// the containing canvas is 800px x 400px, then the scene
-// would be 10m x 5m if FRAMED_SIZE === 10.
-export const FRAMED_SIZE = 10;
+// This (arbitrary) value represents the height of the scene in
+// meters. With a fixed dimension, we can scale everything accordingly
+// to fit within this space and properly frame the model within view.
+// For example, if the containing canvas is 800px x 400px, then the scene
+// would be 20m x 10m if FRAMED_HEIGHT === 10.
+export const FRAMED_HEIGHT = 10;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
@@ -76,7 +78,6 @@ export default class ModelScene extends Scene {
     this.directionalLight.castShadow = true;
 
     this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
-    this.camera.position.z = 15;
     this.camera.position.y = 5;
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
@@ -89,9 +90,12 @@ export default class ModelScene extends Scene {
 
     this.isDirty = false;
     this.hasLoaded = false;
-    this.model.addEventListener('model-load', this.onModelLoad);
 
+    this.roomBox = new Box3();
+    this.modelSize = new Vector3();
     this.setSize(width, height);
+
+    this.model.addEventListener('model-load', this.onModelLoad);
   }
 
   /**
@@ -123,9 +127,31 @@ export default class ModelScene extends Scene {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
 
-    this.camera.aspect = this.aspect;
-    this.camera.updateProjectionMatrix();
+    // Use the room width as the room depth as well, since
+    // the model can rotate on its Y axis
+    const roomWidth =  this.aspect * FRAMED_HEIGHT;
+    this.roomBox.min.set(roomWidth / -2, 0, roomWidth / -2);
+    this.roomBox.max.set(roomWidth / 2, FRAMED_HEIGHT, roomWidth / 2);
+
+    // Scale the model accordingly to the new room size
     this.setScaleType(this.scaleType);
+
+    // Abort if our model is invalid or not yet loaded.
+    if (this.modelSize.length() === 0) {
+      return;
+    }
+
+    // Now we can reduce the depth of the room if we can
+    // so we can get a closer shot. We take the larger of the x and z sizes
+    // due to the rotation on the Y axis.
+    this.roomBox.min.z = Math.max(this.modelSize.x, this.modelSize.z) / -2;
+    this.roomBox.max.z = Math.max(this.modelSize.x, this.modelSize.z) / 2;
+
+    // Position the camera such that the element is perfectly framed
+    this.camera.near = (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
+    this.camera.aspect = this.aspect;
+    this.camera.position.z = (this.roomBox.max.z) + this.camera.near;
+    this.camera.updateProjectionMatrix();
   }
 
   /**
@@ -157,7 +183,11 @@ export default class ModelScene extends Scene {
     this.model.scale.set(1, 1, 1);
 
     if (type === ScaleTypes.Framed) {
-      setScaleFromLimit(FRAMED_SIZE, this.model);
+      try {
+        fitWithinBox(this.roomBox, this.model, this.modelSize);
+      } catch (e) {
+        console.warn('Could not scale model that does not contain geometry.');
+      }
     }
   }
 
@@ -182,7 +212,7 @@ export default class ModelScene extends Scene {
    */
   onModelLoad() {
     this.hasLoaded = true;
-    this.setScaleType(this.scaleType);
+    this.setSize(this.width, this.height);
     this.dispatchEvent({ type: 'model-load' });
   }
 }
