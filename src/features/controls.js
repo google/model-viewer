@@ -16,8 +16,9 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import OrbitControls from '../third_party/three/OrbitControls.js';
-import {$onResize, $scene, $needsRender} from '../xr-model-element-base.js';
+import {$onResize, $onModelLoad, $scene, $needsRender} from '../xr-model-element-base.js';
 
+const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $controls = Symbol('controls');
 const $onControlsChange = Symbol('onControlsChange');
 const $orbitCamera = Symbol('orbitCamera');
@@ -67,18 +68,28 @@ export const ControlsMixin = (XRModelElement) => {
       }
     }
 
+    /**
+     * Copies over the default camera's values in order to frame
+     * the scene correctly.
+     */
+    [$updateOrbitCamera]() {
+      // The default camera already has positioned itself correctly
+      // to frame the canvas. Copy its values.
+      this[$controls].target.set(0, 5, 0);
+      this[$orbitCamera].position.copy(this[$defaultCamera].position);
+      this[$orbitCamera].aspect = this[$defaultCamera].aspect;
+      this[$orbitCamera].rotation.set(0, 0, 0);
+      this[$orbitCamera].updateProjectionMatrix();
+    }
+
     [$onResize](e) {
       super[$onResize](e);
+      this[$updateOrbitCamera]();
+    }
 
-      const {width, height} = e;
-
-      // @TODO need to appropriately position the camera
-      // @see ModelScene#setSize
-      this[$controls].target.set(0, 5, 0);
-      this[$orbitCamera].position.set(0, 5, 15);
-      this[$orbitCamera].rotation.set(0, 0, 0);
-      this[$orbitCamera].aspect = width / height;
-      this[$orbitCamera].updateProjectionMatrix();
+    [$onModelLoad](e) {
+      super[$onModelLoad](e);
+      this[$updateOrbitCamera]();
     }
 
     [$onControlsChange](e) {
