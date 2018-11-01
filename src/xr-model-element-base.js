@@ -15,16 +15,17 @@
 
 import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
 
-import Renderer from './three-components/Renderer.js';
 import ModelScene from './three-components/ModelScene.js';
+import Renderer from './three-components/Renderer.js';
+
 import template from './template.js';
 import {deserializeUrl} from './utils.js';
 
 const renderer = new Renderer();
 
 const $updateSize = Symbol('updateSize');
-const $container = Symbol('container');
 
+export const $container = Symbol('container');
 export const $canvas = Symbol('canvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
@@ -157,11 +158,12 @@ export default class XRModelElementBase extends UpdatingElement {
     if (forceApply || (prevWidth !== width || prevHeight !== height)) {
       this[$container].style.width = `${width}px`;
       this[$container].style.height = `${height}px`;
-      this[$onResize]({ width, height });
+      this[$onResize]({width, height});
     }
   }
 
-  [$tick](time){}
+  [$tick](time) {
+  }
 
   [$needsRender]() {
     this[$scene].isDirty = true;

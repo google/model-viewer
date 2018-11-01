@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-import {
-  AmbientLight,
-  DirectionalLight,
-  Scene,
-  Object3D,
-  Box3,
-  Vector3,
-  PerspectiveCamera,
-} from 'three';
+import {AmbientLight, Box3, DirectionalLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+
+import {fitWithinBox} from '../utils.js';
+
 import Model from './Model.js';
 import Shadow from './Shadow.js';
-import {fitWithinBox} from '../utils.js';
 
 // Valid types for `setScaleType` -- 'framed' scales the model
 // so that it fits within its 2D plane nicely. 'lifesize' is
@@ -48,6 +42,8 @@ const FOV = 45;
 
 const DPR = window.devicePixelRatio;
 
+const $paused = Symbol('paused');
+
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
  * constructs a framed scene based off of the canvas dimensions.
@@ -64,6 +60,7 @@ export default class ModelScene extends Scene {
     super();
 
     this.onModelLoad = this.onModelLoad.bind(this);
+    this[$paused] = false;
 
     this.element = element;
     this.canvas = canvas;
@@ -98,6 +95,18 @@ export default class ModelScene extends Scene {
     this.model.addEventListener('model-load', this.onModelLoad);
   }
 
+  get paused() {
+    return this[$paused];
+  }
+
+  pause() {
+    this[$paused] = true;
+  }
+
+  resume() {
+    this[$paused] = false;
+  }
+
   /**
    * Sets the model via URL.
    *
@@ -129,7 +138,7 @@ export default class ModelScene extends Scene {
 
     // Use the room width as the room depth as well, since
     // the model can rotate on its Y axis
-    const roomWidth =  this.aspect * FRAMED_HEIGHT;
+    const roomWidth = this.aspect * FRAMED_HEIGHT;
     this.roomBox.min.set(roomWidth / -2, 0, roomWidth / -2);
     this.roomBox.max.set(roomWidth / 2, FRAMED_HEIGHT, roomWidth / 2);
 
@@ -148,7 +157,8 @@ export default class ModelScene extends Scene {
     this.roomBox.max.z = Math.max(this.modelSize.x, this.modelSize.z) / 2;
 
     // Position the camera such that the element is perfectly framed
-    this.camera.near = (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
+    this.camera.near =
+        (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
     this.camera.aspect = this.aspect;
     this.camera.position.z = (this.roomBox.max.z) + this.camera.near;
     this.camera.updateProjectionMatrix();
@@ -159,7 +169,7 @@ export default class ModelScene extends Scene {
    * @return {Object}
    */
   getSize() {
-    return { width: this.width, height: this.height };
+    return {width: this.width, height: this.height};
   }
 
   /**
@@ -213,6 +223,6 @@ export default class ModelScene extends Scene {
   onModelLoad() {
     this.hasLoaded = true;
     this.setSize(this.width, this.height);
-    this.dispatchEvent({ type: 'model-load' });
+    this.dispatchEvent({type: 'model-load'});
   }
 }

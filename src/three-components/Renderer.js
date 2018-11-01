@@ -17,11 +17,11 @@ import {Composer} from '@jsantell/wagner';
 import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
-import {$tick} from '../xr-model-element-base.js';
 
 import {isMobile} from '../utils.js';
+import {$tick} from '../xr-model-element-base.js';
 
-const USE_POST_PROCESSING = false; //!isMobile();
+const USE_POST_PROCESSING = false;  //! isMobile();
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
 
@@ -88,10 +88,10 @@ export default class Renderer extends EventDispatcher {
 
   render(t) {
     for (let scene of this.scenes) {
-      const { element, width, height, context } = scene;
+      const {element, width, height, context} = scene;
       element[$tick](t);
 
-      if (!scene.isDirty) {
+      if (!scene.isDirty || scene.paused) {
         continue;
       }
 
@@ -110,7 +110,7 @@ export default class Renderer extends EventDispatcher {
         this.composer.reset();
         this.composer.render(scene, camera);
         for (let pass of this.passes) {
-            this.composer.pass(pass);
+          this.composer.pass(pass);
         }
         this.composer.toScreen();
       } else {
@@ -118,10 +118,17 @@ export default class Renderer extends EventDispatcher {
       }
 
       const widthDPR = width * DPR;
-      const heightDPR= height * DPR;
-      context.drawImage(this.renderer.domElement,
-                        0, 0, widthDPR, heightDPR,
-                        0, 0, widthDPR, heightDPR);
+      const heightDPR = height * DPR;
+      context.drawImage(
+          this.renderer.domElement,
+          0,
+          0,
+          widthDPR,
+          heightDPR,
+          0,
+          0,
+          widthDPR,
+          heightDPR);
 
       scene.isDirty = false;
     }
