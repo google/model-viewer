@@ -22,8 +22,13 @@ const expect = chai.expect;
 suite('Renderer', () => {
   let element;
   let scene;
+  let renderer = new Renderer();
   let XRModelElement = class extends XRModelElementBase {};
   customElements.define('xr-model-renderer', XRModelElement);
+
+  teardown(() => {
+    renderer.scenes.clear();
+  });
 
   function createScene () {
     const element = new XRModelElement();
@@ -32,6 +37,7 @@ suite('Renderer', () => {
       canvas: element[$canvas],
       width: 200,
       height: 100,
+      renderer,
     });
 
     scene.renderCount = 0;
@@ -48,7 +54,6 @@ suite('Renderer', () => {
     test('renders only dirty scenes', async function () {
       let scene1 = createScene();
       let scene2 = createScene();
-      let renderer = new Renderer();
       renderer.registerScene(scene1);
       renderer.registerScene(scene2);
 
@@ -64,7 +69,6 @@ suite('Renderer', () => {
 
     test('marks scenes no longer dirty after rendering', async function () {
       let scene = createScene();
-      let renderer = new Renderer();
       renderer.registerScene(scene);
 
       scene.isDirty = true;

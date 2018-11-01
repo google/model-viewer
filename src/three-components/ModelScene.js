@@ -37,9 +37,7 @@ export const FRAMED_HEIGHT = 10;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
-const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DPR = window.devicePixelRatio;
-const $updateBackground = Symbol('updateBackground');
 
 const $paused = Symbol('paused');
 
@@ -70,16 +68,15 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new Shadow();
-    this.light = new AmbientLight(0xffffff, 0.9);
-    this.directionalLight = new DirectionalLight(0xffffff, 2);
-    this.directionalLight.position.set(0, 10, 1);
+    this.light = new AmbientLight(0xffffff, 0.3);
+    this.directionalLight = new DirectionalLight(0xffffff, 1.4);
+    this.directionalLight.position.set(0, 10, 10);
     this.directionalLight.castShadow = true;
 
     this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
     this.camera.position.y = 5;
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
-
 
     const skysphereGeo = new SphereBufferGeometry(1, 32, 32);
     const skysphereMat = new MeshBasicMaterial({
@@ -101,7 +98,6 @@ export default class ModelScene extends Scene {
     this.roomBox = new Box3();
     this.roomSize = new Vector3();
     this.setSize(width, height);
-    this.background = new Color(DEFAULT_BACKGROUND_COLOR);
 
     this.model.addEventListener('model-load', this.onModelLoad);
   }
@@ -172,10 +168,12 @@ export default class ModelScene extends Scene {
     // when the model is scale-limited on the Y axis, since
     // otherwise, width === depth must be equal for rotation.
     const modelSize = this.model.size;
-    if (modelSize.y >= modelSize.x && modelSize.y > modelSize.z) {
+    if (modelSize.length() !== 0 && modelSize.y >= modelSize.x &&
+        modelSize.y >= modelSize.z) {
       const depth = Math.max(modelSize.x, modelSize.z) * this.model.scale.z;
       this.roomBox.max.z = depth / 2;
       this.roomBox.min.z = depth / -2;
+      this.roomSize.z = depth;
     }
 
     // Position the camera such that the element is perfectly framed
