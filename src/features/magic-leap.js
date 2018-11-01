@@ -21,6 +21,16 @@ const $isHeliosBrowser = Symbol('isHeliosBrowser');
 const $mlModel = Symbol('mlModel');
 
 
+// NOTE(cdata): In tests, this seemed to line the hologram up with the scale of
+// an inline rendering in WebGL. Probably needs some tweaking, and possibly even
+// user-configuration, before we perfect this:
+const DEFAULT_HOLOGRAM_INLINE_SCALE = 0.65;
+
+// NOTE(cdata): This probably needs to scale proportionally with the dimensions
+// of the inline model, but we need more experimentation to decide how that
+// should work:
+const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
+
 /**
  * In order to use Magic Leap support, please include prismatic.js in your
  * page. If you do not include prismatic.js, Magic Leap support will not work.
@@ -89,8 +99,12 @@ export const MagicLeapMixin = (XRModelElement) => {
             'style',
             'display: block; top: 0; left: 0; width: 100%; height: 100%');
         // @see https://creator.magicleap.com/learn/guides/prismatic-getting-started
-        this[$mlModel].setAttribute('model-scale', '0.65 0.65 0.65');
-        this[$mlModel].setAttribute('z-offset', '500px');
+        this[$mlModel].setAttribute(
+            'model-scale',
+            `${DEFAULT_HOLOGRAM_INLINE_SCALE} ${
+                DEFAULT_HOLOGRAM_INLINE_SCALE} ${
+                DEFAULT_HOLOGRAM_INLINE_SCALE}`);
+        this[$mlModel].setAttribute('z-offset', DEFAULT_HOLOGRAM_Z_OFFSET);
         this[$mlModel].setAttribute('extractable', 'true');
         this[$mlModel].setAttribute('extracted-scale', '1');
         this[$mlModel].setAttribute(
