@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// import '@magicleap/prismatic/prismatic.min.js';
+import {$container, $scene} from '../xr-model-element-base.js';
 
 const $showMlModel = Symbol('showMlModel');
 const $hideMlModel = Symbol('hideMlModel');
@@ -57,7 +57,7 @@ export const MagicLeapMixin = (XRModelElement) => {
         return;
       }
 
-      const modelView = this.__modelView;
+      const scene = this[$scene];
 
       if (this.magicLeap) {
         const hasMlModel = !!customElements.get('ml-model');
@@ -66,8 +66,8 @@ export const MagicLeapMixin = (XRModelElement) => {
           console.warn('<ml-model> is not registered. Is prismatic.js loaded?');
         }
 
-        modelView.pause();
-        this.__containerElement.setAttribute('style', 'display: none;');
+        scene.pause();
+        this[$container].setAttribute('style', 'display: none;');
         this[$showMlModel]();
 
         if (changedProperties.has('src') && this.src &&
@@ -77,8 +77,8 @@ export const MagicLeapMixin = (XRModelElement) => {
 
       } else {
         this[$hideMlModel]();
-        modelView.resume();
-        this.__containerElement.removeAttribute('style');
+        scene.resume();
+        this[$container].removeAttribute('style');
       }
     }
 
@@ -96,13 +96,12 @@ export const MagicLeapMixin = (XRModelElement) => {
         this[$mlModel].setAttribute(
             'environment-lighting', 'color-intensity: 1;');
 
-
         if (this.src != null) {
           this[$mlModel].setAttribute('src', this.src);
         }
       }
 
-      this.appendChild(this[$mlModel]);
+      this.shadowRoot.appendChild(this[$mlModel]);
     }
 
     [$hideMlModel]() {

@@ -51,7 +51,7 @@ suite('XRModelElementBase with MagicLeapMixin', () => {
           element.magicLeap = true;
 
           // Wait at least a microtask for size calculations
-          await timePasses();
+          await timePasses(1);
         });
 
         teardown(() => {
@@ -76,7 +76,7 @@ suite('XRModelElementBase with MagicLeapMixin', () => {
           element.magicLeap = true;
 
           // Wait at least a microtask for size calculations
-          await timePasses();
+          await timePasses(10);
         });
 
         teardown(() => {
