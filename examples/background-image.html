@@ -31,12 +31,16 @@
         <h1>XRModelElement - background-image</h1>
         <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using <code>background-image</code>.</p>
 
-        <h2>Defaults</h2>
-        <pre class="language-markup">
-<code>&lt;xr-model src=&quot;assets/reflective-sphere.gltf&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
-        </pre>
+        <h2>With Equirectangular background-image</h2>
+        <xr-model controls background-image="assets/equirectangular.png" src="assets/DamagedHelmet/DamagedHelmet.gltf">
+        </xr-model>
+
+        <h2>With very reflective model</h2>
         <xr-model controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/reflective-sphere.gltf">
+        </xr-model>
+
+        <h2>With unlit model</h2>
+        <xr-model controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/Astronaut.glb">
         </xr-model>
     <script src="../dist/xr-model-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>

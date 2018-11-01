@@ -16,6 +16,7 @@
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelScene, {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
+import Renderer from '../../three-components/Renderer.js';
 import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
 
 const expect = chai.expect;
@@ -38,6 +39,7 @@ suite('ModelScene', () => {
   let scene;
   let dummyMesh;
   let XRModelElement = class extends XRModelElementBase {};
+  let renderer = new Renderer();
   customElements.define('xr-model-modelscene', XRModelElement);
 
   setup(() => {
@@ -50,6 +52,7 @@ suite('ModelScene', () => {
       canvas: element[$canvas],
       width: 200,
       height: 100,
+      renderer,
     });
   });
 
