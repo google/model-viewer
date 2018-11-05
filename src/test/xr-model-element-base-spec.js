@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import XRModelElementBase from '../xr-model-element-base.js';
+import XRModelElementBase, {$renderer, $scene} from '../xr-model-element-base.js';
+
+import {until, waitForEvent} from './helpers.js';
 
 const expect = chai.expect;
-
-const timePasses = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 suite('XRModelElementBase', () => {
   test('is not registered as a custom element by default', () => {
@@ -64,6 +64,46 @@ suite('XRModelElementBase', () => {
 
         element.addEventListener('load', onLoad);
         element.src = './examples/assets/Astronaut.glb';
+      });
+    });
+
+    suite('orchestrates rendering', () => {
+      let elements = [];
+
+      setup(async () => {
+        elements.push(new XRModelElement());
+        elements.push(new XRModelElement());
+        elements.push(new XRModelElement());
+
+        const loaded = elements.map(e => waitForEvent(e, 'load'));
+
+        for (let element of elements) {
+          element.style.height = '100vh';
+          element.style.width = '100vw';
+          element.autoRotate = true;
+          element.src = './examples/assets/cube.gltf';
+          document.body.appendChild(element);
+        }
+
+        await Promise.all(loaded);
+      });
+
+      teardown(() => {
+        elements.forEach(e => e.remove());
+      });
+
+      test('only models visible in the viewport', async () => {
+        const renderer = elements[0][$renderer];
+
+        // IntersectionObserver needs to set appropriate
+        // visibility on the scene, lots of timing issues when
+        // running -- wait for the visibility flags to be flipped
+        await until(
+            () => elements.map((e, i) => (i === 0) === e[$scene].isVisible));
+
+        expect(elements[0][$scene].isVisible).to.be.ok;
+        expect(elements[1][$scene].isVisible).to.not.be.ok;
+        expect(elements[2][$scene].isVisible).to.not.be.ok;
       });
     });
   });

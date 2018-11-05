@@ -63,6 +63,7 @@ export default class Renderer extends EventDispatcher {
     ];
 
     this.scenes = new Set();
+    this.scenesRendered = 0;
     this.setRendererSize(1, 1);
   }
 
@@ -87,11 +88,12 @@ export default class Renderer extends EventDispatcher {
   }
 
   render(t) {
+    this.scenesRendered = 0;
     for (let scene of this.scenes) {
       const {element, width, height, context} = scene;
       element[$tick](t);
 
-      if (!scene.isDirty || scene.paused) {
+      if (!scene.isVisible || !scene.isDirty || scene.paused) {
         continue;
       }
 
@@ -131,6 +133,7 @@ export default class Renderer extends EventDispatcher {
           heightDPR);
 
       scene.isDirty = false;
+      this.scenesRendered++;
     }
   }
 }
