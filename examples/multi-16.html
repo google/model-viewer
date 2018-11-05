@@ -24,7 +24,23 @@
   <link href="../../third_party/prism/prism.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
   <link type="text/css" href="style.css" rel="stylesheet" />
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+  <!-- Include prismatic.js for Magic Leap support: -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
+  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 <style>
     .grid {
         width: 100%;

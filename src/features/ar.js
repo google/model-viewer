@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {getiOSSource, openIOSARQuickLook} from '../utils.js';
+import {IS_AR_CANDIDATE, openIOSARQuickLook} from '../utils.js';
+import {$renderer, $scene} from '../xr-model-element-base.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -36,52 +37,86 @@ export const ARMixin = (XRModelElement) => {
         e.preventDefault();
         this.enterAR();
       });
+
+      const renderer = this[$renderer];
+      const scene = this[$scene];
+      const onFullscreenchange = () => {
+        if (document.fullscreenElement !== this &&
+            renderer.presentedScene === scene) {
+          try {
+            renderer.stopPresenting();
+          } catch (error) {
+            console.warn('Unexpected error while stopping AR presentation');
+            console.error(error);
+          }
+        }
+      };
+
+      document.addEventListener('fullscreenchange', onFullscreenchange);
     }
 
     /**
      * Enables the AR
      */
     enterAR() {
-      // @TODO temporarily disable AR until we can clean it up in one pass
-      // should be handled by the Renderer since we'll want to stop all other
-      // elements from being rendered.
-      console.warn("AR temporarily under construction");
-
-      if (IS_IOS || this.__modelView.hasAR()) {
-        const usdzSource = getiOSSource(this);
-        if (IS_IOS && usdzSource) {
-          openIOSARQuickLook(usdzSource.src);
-        } else {
-          this.__modelView.enterAR();
-        }
+      if (IS_IOS) {
+        this.enterARWithQuickLook();
+      } else if (IS_AR_CANDIDATE) {
+        this.enterARWithWebXR();
       }
     }
 
-    update(changedProperties) {
+    async enterARWithQuickLook() {
+      openIOSARQuickLook(this.iosSrc);
+    }
+
+    async enterARWithWebXR() {
+      const renderer = this[$renderer];
+
+      console.log('Attempting to enter fullscreen and present in AR...');
+
+      try {
+        const enterFullscreen = this.requestFullscreen();
+
+        try {
+          const outputElement = await renderer.present(this[$scene]);
+          this.shadowRoot.appendChild(outputElement);
+          await enterFullscreen;
+        } catch (error) {
+          console.warn('Error while trying to present to AR');
+          console.error(error);
+          await enterFullscreen;
+          if (document.fullscreenElement === this) {
+            console.warn('Exiting fullscreen under dire circumstances');
+            document.exitFullscreen();
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        console.warn('AR will not activate without fullscreen permission');
+      }
+    }
+
+    async update(changedProperties) {
       super.update(changedProperties);
-      // @TODO temporarily disable AR until we can clean it up in one pass
-      // should be handled by the Renderer since we'll want to stop all other
-      // elements from being rendered.
-      return;
 
       if (!changedProperties.has('ar')) {
         return;
       }
 
-      const buttonIsVisible = this.ar;
+      const canShowButton = this.ar && IS_AR_CANDIDATE;
+      const iosCandidate = IS_IOS && this.iosSrc != null;
+      const renderer = this[$renderer];
 
       // On iOS, always enable the AR button. On non-iOS,
       // see if AR is supported, and if so, display the button after
       // an XRDevice has been initialized
-      if (!buttonIsVisible) {
-        this[$enterARElement].style.display = 'none';
+      if (canShowButton &&
+          (iosCandidate || await renderer.supportsPresentation())) {
+        console.log('SHOWING BUTTON');
+        this[$enterARElement].style.display = 'block';
       } else {
-        if (IS_IOS && getiOSSource(this)) {
-          this[$enterARElement].style.display = 'block';
-        } else if (this.__modelView.hasAR()) {
-          this.__modelView.whenARReady().then(
-              () => this[$enterARElement].style.display = 'block');
-        }
+        this[$enterARElement].style.display = 'none';
       }
     }
   };

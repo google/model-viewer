@@ -29,7 +29,7 @@ export const timePasses = (ms = 0) =>
     new Promise(resolve => setTimeout(resolve, ms));
 
 export const until =
-    async function(predicate) {
+    async (predicate) => {
   while (!predicate()) {
     await timePasses();
   }

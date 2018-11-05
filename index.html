@@ -23,30 +23,41 @@
   minimum-scale=1.0, maximum-scale=1.0">
   <link href="./examples/third_party/prism/prism.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+  <!-- Include prismatic.js for Magic Leap support: -->
   <script src="./node_modules/@magicleap/prismatic/prismatic.min.js"></script>
+
+  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-<style>
-  body {
-    font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
-  }
-  #container {
-    text-align: center;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-  h1 {
-    font-weight: 200;
-  }
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  xr-model {
-    height: 500px;
-    width: 100%;
-  }
-</style>
+
+  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <script src="./node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <style>
+    body {
+      font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
+    }
+    #container {
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-weight: 200;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    xr-model {
+      height: 500px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
     <div id="container">
@@ -59,7 +70,7 @@
                       ios-src=&quot;examples/assets/Astronaut.usdz&quot;&gt;</code>
                     <code>&lt;/xr-model&gt;</code>
                 </pre>
-                <xr-model ar controls auto-rotate vignette background-color="#4885ed" src="examples/assets/Astronaut.glb" ios-src="examples/assets/Astronaut.usdz" magic-leap>
+                <xr-model controls ar auto-rotate vignette background-color="#4885ed" src="examples/assets/Astronaut.glb" ios-src="examples/assets/Astronaut.usdz" magic-leap>
                 </xr-model>
             </li>
         </ul>

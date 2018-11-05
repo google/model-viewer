@@ -15,6 +15,11 @@
 
 import {Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
+const matrix4 = new Matrix4();
+const vector3 = new Vector3();
+const originArray = new Float32Array(3);
+const directionArray = new Float32Array(3);
+
 /**
  * The Reticle class creates an object that repeatedly calls
  * `xrSession.requestHitTest()` to render a ring along a found
@@ -25,7 +30,7 @@ export default class Reticle extends Object3D {
    * @param {XRSession} xrSession
    * @param {THREE.Camera} camera
    */
-  constructor(xrSession, camera) {
+  constructor(camera) {
     super();
 
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
@@ -37,7 +42,6 @@ export default class Reticle extends Object3D {
 
     this.add(this.ring);
 
-    this.session = xrSession;
     this.visible = false;
     this.camera = camera;
   }
@@ -46,17 +50,27 @@ export default class Reticle extends Object3D {
    * Fires a hit test in the middle of the screen and places the reticle
    * upon the surface if found.
    *
+   * @param {XRSession} session
    * @param {XRCoordinateSystem} frameOfRef
    */
-  async update(frameOfRef) {
+  async update(session, frameOfRef) {
     this.raycaster = this.raycaster || new Raycaster();
     this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
     const ray = this.raycaster.ray;
 
-    const origin = new Float32Array(ray.origin.toArray());
-    const direction = new Float32Array(ray.direction.toArray());
-    const hits =
-        await this.session.requestHitTest(origin, direction, frameOfRef);
+    originArray.set(ray.origin.toArray());
+    directionArray.set(ray.direction.toArray());
+
+    let hits;
+
+    try {
+      hits =
+          await session.requestHitTest(originArray, directionArray, frameOfRef);
+    } catch (error) {
+      console.warn('Error requesting WebXR hit test');
+      console.error(error);
+      hits = [];
+    }
 
     if (hits.length) {
       const hit = hits[0];

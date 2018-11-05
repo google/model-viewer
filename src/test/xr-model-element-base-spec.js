@@ -98,8 +98,13 @@ suite('XRModelElementBase', () => {
         // IntersectionObserver needs to set appropriate
         // visibility on the scene, lots of timing issues when
         // running -- wait for the visibility flags to be flipped
-        await until(
-            () => elements.map((e, i) => (i === 0) === e[$scene].isVisible));
+        await until(() => {
+          return elements
+              .map((element, index) => {
+                return (index === 0) === element[$scene].isVisible;
+              })
+              .reduce(((l, r) => l && r), true);
+        });
 
         expect(elements[0][$scene].isVisible).to.be.ok;
         expect(elements[1][$scene].isVisible).to.not.be.ok;
