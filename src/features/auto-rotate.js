@@ -17,6 +17,10 @@ import {
   $scene, $tick, $needsRender
 } from '../xr-model-element-base.js';
 
+// How much the model should rotate per
+// second in radians.
+const ROTATION_SPEED = Math.PI / 32;
+
 export const AutoRotateMixin = (XRModelElement) => {
   return class extends XRModelElement {
     static get properties() {
@@ -39,11 +43,11 @@ export const AutoRotateMixin = (XRModelElement) => {
       }
     }
 
-    [$tick](time) {
-      super[$tick](time);
+    [$tick](time, delta) {
+      super[$tick](time, delta);
 
       if (this.autoRotate) {
-        this[$scene].pivot.rotation.y += 0.001;
+        this[$scene].pivot.rotation.y += ROTATION_SPEED * delta * 0.001;
         this[$needsRender]();
       }
     }

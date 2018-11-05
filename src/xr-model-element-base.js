@@ -180,7 +180,7 @@ export default class XRModelElementBase extends UpdatingElement {
     }
   }
 
-  [$tick](time) {
+  [$tick](time, delta) {
   }
 
   [$needsRender]() {

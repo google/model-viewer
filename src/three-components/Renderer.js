@@ -65,6 +65,7 @@ export default class Renderer extends EventDispatcher {
     this.scenes = new Set();
     this.scenesRendered = 0;
     this.setRendererSize(1, 1);
+    this.lastTick = performance.now();
   }
 
   setRendererSize(width, height) {
@@ -89,9 +90,10 @@ export default class Renderer extends EventDispatcher {
 
   render(t) {
     this.scenesRendered = 0;
+    const delta = t - this.lastTick;
     for (let scene of this.scenes) {
       const {element, width, height, context} = scene;
-      element[$tick](t);
+      element[$tick](t, delta);
 
       if (!scene.isVisible || !scene.isDirty || scene.paused) {
         continue;
@@ -135,5 +137,6 @@ export default class Renderer extends EventDispatcher {
       scene.isDirty = false;
       this.scenesRendered++;
     }
+    this.lastTick = t;
   }
 }
