@@ -25,7 +25,6 @@ const renderer = new Renderer();
 
 const $updateSize = Symbol('updateSize');
 
-export const $renderer = Symbol('renderer');
 export const $container = Symbol('container');
 export const $canvas = Symbol('canvas');
 export const $scene = Symbol('scene');
@@ -33,6 +32,7 @@ export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
+export const $renderer = Symbol('renderer');
 
 /**
  * Definition for a basic <xr-model> element.
@@ -111,6 +111,8 @@ export default class XRModelElementBase extends UpdatingElement {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
 
+    this[$renderer] = renderer;
+
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes
     this.resizeObserver = new ResizeObserver(entries => {
@@ -127,6 +129,19 @@ export default class XRModelElementBase extends UpdatingElement {
       }
     });
     this.resizeObserver.observe(this);
+
+    this.intersectionObserver = new IntersectionObserver(entries => {
+      for (let entry of entries) {
+        if (entry.target === this) {
+          this[$scene].isVisible = entry.isIntersecting;
+        }
+      }
+    }, {
+      root: null,
+      rootMargin: '10px',
+      threshold: 0.1,
+    });
+    this.intersectionObserver.observe(this);
   }
 
   connectedCallback() {

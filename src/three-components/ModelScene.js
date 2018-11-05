@@ -92,6 +92,7 @@ export default class ModelScene extends Scene {
     this.add(this.directionalLight);
     this.pivot.add(this.model);
 
+    this.isVisible = false;
     this.isDirty = false;
     this.hasLoaded = false;
 

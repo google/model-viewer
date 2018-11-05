@@ -39,6 +39,7 @@ suite('Renderer', () => {
       height: 100,
       renderer,
     });
+    scene.isVisible = true;
 
     scene.renderCount = 0;
     const drawImage = scene.context.drawImage;
@@ -60,11 +61,13 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene1.renderCount).to.be.equal(0);
       expect(scene2.renderCount).to.be.equal(0);
+      expect(renderer.scenesRendered).to.be.equal(0);
 
       scene1.isDirty = true;
       renderer.render(performance.now());
       expect(scene1.renderCount).to.be.equal(1);
       expect(scene2.renderCount).to.be.equal(0);
+      expect(renderer.scenesRendered).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function () {
@@ -80,6 +83,27 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
+    });
+
+    test('does not render scenes marked as !isVisible', async function () {
+      let scene = createScene();
+      let renderer = new Renderer();
+      renderer.registerScene(scene);
+
+      scene.isVisible = false;
+      scene.isDirty = true;
+
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(0);
+      expect(scene.isDirty).to.be.ok;
+      expect(renderer.scenesRendered).to.be.equal(0);
+
+      scene.isVisible = true;
+
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(1);
+      expect(!scene.isDirty).to.be.ok;
+      expect(renderer.scenesRendered).to.be.equal(1);
     });
   });
 });

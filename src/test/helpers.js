@@ -50,4 +50,3 @@ export const waitForEvent = (target, eventName, predicate) =>
       }
       target.addEventListener(eventName, handler);
     });
-
