@@ -18,6 +18,8 @@ import {PerspectiveCamera, Vector3} from 'three';
 import OrbitControls from '../third_party/three/OrbitControls.js';
 import {$onResize, $onModelLoad, $scene, $needsRender} from '../xr-model-element-base.js';
 
+const ORBIT_NEAR_PLANE = 0.01;
+
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $controls = Symbol('controls');
 const $onControlsChange = Symbol('onControlsChange');
@@ -40,6 +42,9 @@ export const ControlsMixin = (XRModelElement) => {
       this[$defaultCamera] = scene.getCamera();
 
       this[$orbitCamera] = scene.camera.clone();
+      this[$orbitCamera].near = ORBIT_NEAR_PLANE;
+      this[$orbitCamera].updateProjectionMatrix();
+
       this[$controls] = new OrbitControls(this[$orbitCamera], scene.canvas);
       this[$controls].enabled = false;
     }
