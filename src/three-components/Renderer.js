@@ -16,14 +16,18 @@
 import {Composer} from '@jsantell/wagner';
 import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
-import {EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {EventDispatcher, WebGLRenderer} from 'three';
 
-import {isMobile} from '../utils.js';
+import {IS_AR_CANDIDATE, isMobile} from '../utils.js';
 import {$tick} from '../xr-model-element-base.js';
+
+import {ARRenderer} from './ARRenderer.js';
 
 const USE_POST_PROCESSING = false;  //! isMobile();
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
+
+const $arRenderer = Symbol('arRenderer');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -39,14 +43,13 @@ const DPR = window.devicePixelRatio;
 export default class Renderer extends EventDispatcher {
   constructor() {
     super();
-    this.render = this.render.bind(this);
-
-    this.renderer = new WebGLRenderer({
-      antialias: true,
-    });
+    this.canvas = document.createElement('canvas');
+    this.context = this.canvas.getContext(
+        'webgl', {antialias: true, alpha: true, preserveDrawingBuffer: true});
+    this.renderer =
+        new WebGLRenderer({canvas: this.canvas, context: this.context});
     this.renderer.setPixelRatio(DPR);
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = GAMMA_FACTOR;
@@ -61,6 +64,8 @@ export default class Renderer extends EventDispatcher {
       this.vignettePass,
       this.fxaaPass,
     ];
+
+    this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
 
     this.scenes = new Set();
     this.scenesRendered = 0;
@@ -77,7 +82,7 @@ export default class Renderer extends EventDispatcher {
   registerScene(scene) {
     this.scenes.add(scene);
     if (this.scenes.size > 0) {
-      this.renderer.setAnimationLoop(this.render);
+      this.renderer.setAnimationLoop((time) => this.render(time));
     }
   }
 
@@ -88,9 +93,40 @@ export default class Renderer extends EventDispatcher {
     }
   }
 
+  async supportsPresentation() {
+    return this[$arRenderer].supportsPresentation();
+  }
+
+  get presentedScene() {
+    return this[$arRenderer].presentedScene;
+  }
+
+  async present(scene) {
+    try {
+      return await this[$arRenderer].present(scene);
+    } catch (error) {
+      this[$arRenderer].stopPresenting();
+      throw error;
+    } finally {
+      // NOTE(cdata): Setting width and height to 0 will have the effect of
+      // invoking a `setSize` the next time we render in this renderer
+      this.width = this.height = 0;
+    }
+  }
+
+  stopPresenting() {
+    return this[$arRenderer].stopPresenting();
+  }
+
   render(t) {
+    if (this[$arRenderer] != null && this[$arRenderer].isPresenting) {
+      return;
+    }
+
     this.scenesRendered = 0;
+
     const delta = t - this.lastTick;
+
     for (let scene of this.scenes) {
       const {element, width, height, context} = scene;
       element[$tick](t, delta);

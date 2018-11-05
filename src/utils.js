@@ -17,6 +17,42 @@ import {Vector3} from 'three';
 
 export const deserializeUrl = (url) => url != null ? toFullUrl(url) : url;
 
+export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
+    window.XRSession != null && window.XRDevice != null &&
+    window.XRDevice.prototype.supportsSession != null;
+
+export const HAS_WEBXR_HIT_TEST_API =
+    HAS_WEBXR_DEVICE_API && window.XRSession.prototype.requestHitTest;
+
+export const HAS_FULLSCREEN_API = document.documentElement != null &&
+    document.documentElement.requestFullscreen != null;
+
+export const IS_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
+
+export const assertIsArCandidate = () => {
+  if (IS_AR_CANDIDATE) {
+    return;
+  }
+
+  const missingApis = [];
+
+  if (!HAS_FULLSCREEN_API) {
+    missingApis.push('Fullscreen API');
+  }
+
+  if (!HAS_WEBXR_DEVICE_API) {
+    missingApis.push('WebXR Device API');
+  }
+
+  if (!HAS_WEBXR_HIT_TEST_API) {
+    missingApis.push('WebXR Hit Test API');
+  }
+
+  throw new Error(
+      `The following APIs are required for AR, but are missing in this browser: ${
+          missingApis.join(',')}`);
+};
+
 /**
  * Converts a partial URL string to a fully qualified URL string.
  *

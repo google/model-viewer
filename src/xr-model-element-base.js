@@ -48,6 +48,10 @@ export default class XRModelElementBase extends UpdatingElement {
     };
   }
 
+  get[$renderer]() {
+    return renderer;
+  }
+
   /**
    * Creates a new XRModelElement.
    */
@@ -68,7 +72,6 @@ export default class XRModelElementBase extends UpdatingElement {
       height,
       renderer,
     });
-    this[$renderer] = renderer;
 
     // Tracks whether or not the user has interacted with this element;
     // used to determine whether or not to display a poster image or
@@ -110,8 +113,6 @@ export default class XRModelElementBase extends UpdatingElement {
     Promise.resolve().then(() => {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
-
-    this[$renderer] = renderer;
 
     // Set a resize observer so we can scale our canvas
     // if our <xr-model> changes

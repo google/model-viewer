@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {
-  $scene, $tick, $needsRender
-} from '../xr-model-element-base.js';
+import {$needsRender, $scene, $tick} from '../xr-model-element-base.js';
 
 // How much the model should rotate per
 // second in radians.
