@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {AmbientLight, Box3, DirectionalLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
-
-import {fitWithinBox} from '../utils.js';
+import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import Model from './Model.js';
 import Shadow from './Shadow.js';
@@ -39,8 +37,9 @@ export const FRAMED_HEIGHT = 10;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
-
+const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DPR = window.devicePixelRatio;
+const $updateBackground = Symbol('updateBackground');
 
 const $paused = Symbol('paused');
 
@@ -55,8 +54,9 @@ export default class ModelScene extends Scene {
    * @param {CanvasHTMLElement} options.canvas
    * @param {number} options.width
    * @param {number} options.height
+   * @param {THREE.WebGLRenderer} options.renderer
    */
-  constructor({canvas, element, width, height}) {
+  constructor({canvas, element, width, height, renderer}) {
     super();
 
     this.onModelLoad = this.onModelLoad.bind(this);
@@ -65,6 +65,7 @@ export default class ModelScene extends Scene {
     this.element = element;
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
+    this.renderer = renderer;
     this.scaleType = ScaleTypes.Framed;
 
     this.model = new Model();
@@ -79,9 +80,18 @@ export default class ModelScene extends Scene {
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
 
+
+    const skysphereGeo = new SphereBufferGeometry(1, 32, 32);
+    const skysphereMat = new MeshBasicMaterial({
+      side: BackSide,
+      color: 0xffffff,
+    });
+    this.skysphere = new Mesh(skysphereGeo, skysphereMat);
+
     this.add(this.pivot);
     this.add(this.shadow);
     this.add(this.light);
+    this.add(this.skysphere);
     this.add(this.directionalLight);
     this.pivot.add(this.model);
 
@@ -89,8 +99,9 @@ export default class ModelScene extends Scene {
     this.hasLoaded = false;
 
     this.roomBox = new Box3();
-    this.modelSize = new Vector3();
+    this.roomSize = new Vector3();
     this.setSize(width, height);
+    this.background = new Color(DEFAULT_BACKGROUND_COLOR);
 
     this.model.addEventListener('model-load', this.onModelLoad);
   }
@@ -128,33 +139,44 @@ export default class ModelScene extends Scene {
    * @param {number} height
    */
   setSize(width, height) {
-    this.width = Math.max(width, 1);
-    this.height = Math.max(height, 1);
-    this.aspect = this.width / this.height;
+    if (width !== this.width || height !== this.height) {
+      this.width = Math.max(width, 1);
+      this.height = Math.max(height, 1);
+      this.aspect = this.width / this.height;
+      this.applyRoomSize();
+    }
+  }
+
+  /**
+   * Updates the 3D room and model scale based on the 2D
+   * dimensions for the encapsulating element.
+   */
+  applyRoomSize() {
     this.canvas.width = this.width * DPR;
     this.canvas.height = this.height * DPR;
-    this.canvas.style.width = `${width}px`;
-    this.canvas.style.height = `${height}px`;
+    this.canvas.style.width = `${this.width}px`;
+    this.canvas.style.height = `${this.height}px`;
 
     // Use the room width as the room depth as well, since
     // the model can rotate on its Y axis
-    const roomWidth = this.aspect * FRAMED_HEIGHT;
-    this.roomBox.min.set(roomWidth / -2, 0, roomWidth / -2);
-    this.roomBox.max.set(roomWidth / 2, FRAMED_HEIGHT, roomWidth / 2);
+    const halfWidth = this.aspect * FRAMED_HEIGHT / 2;
+    this.roomBox.min.set(-halfWidth, 0, -halfWidth);
+    this.roomBox.max.set(halfWidth, FRAMED_HEIGHT, halfWidth);
+    this.roomBox.getSize(this.roomSize);
 
-    // Scale the model accordingly to the new room size
-    this.setScaleType(this.scaleType);
+    this.scaleModelToFitRoom();
 
-    // Abort if our model is invalid or not yet loaded.
-    if (this.modelSize.length() === 0) {
-      return;
+    // Now that the room has been scaled with width === depth,
+    // we may be able to reduce the depth so that the camera
+    // doesn't have to be so far back. This can only occur
+    // when the model is scale-limited on the Y axis, since
+    // otherwise, width === depth must be equal for rotation.
+    const modelSize = this.model.size;
+    if (modelSize.y >= modelSize.x && modelSize.y > modelSize.z) {
+      const depth = Math.max(modelSize.x, modelSize.z) * this.model.scale.z;
+      this.roomBox.max.z = depth / 2;
+      this.roomBox.min.z = depth / -2;
     }
-
-    // Now we can reduce the depth of the room if we can
-    // so we can get a closer shot. We take the larger of the x and z sizes
-    // due to the rotation on the Y axis.
-    this.roomBox.min.z = Math.max(this.modelSize.x, this.modelSize.z) / -2;
-    this.roomBox.max.z = Math.max(this.modelSize.x, this.modelSize.z) / 2;
 
     // Position the camera such that the element is perfectly framed
     this.camera.near =
@@ -162,6 +184,17 @@ export default class ModelScene extends Scene {
     this.camera.aspect = this.aspect;
     this.camera.position.z = (this.roomBox.max.z) + this.camera.near;
     this.camera.updateProjectionMatrix();
+
+    // We want to scale our skysphere such that it's larger than the room.
+    // Take the largest side of the room, assume it's as large as possible
+    // on all sides (cube), find the diagonal of the cube, and set the
+    // skysphere's diameter to that.
+    // width == depth, so check the aspect ratio to find largest side.
+    const longestWall = this.aspect > 1 ? halfWidth * 2 : FRAMED_HEIGHT;
+
+    // `x * sqrt(3)` is the length of the longest diagonal through a cube
+    // with longest side of `x`.
+    this.skysphere.scale.setScalar(longestWall * Math.sqrt(3));
   }
 
   /**
@@ -173,32 +206,34 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Sets the type of scaling that should be performed on the model.
-   * @see ScaleTypes
-   *
-   * @param {ScaleTypes} type
+   * Scales the model to fit the enclosed room.
    */
-  setScaleType(type) {
-    if (ScaleTypeNames.indexOf(type) === -1) {
-      throw new Error(`Unknown scale type ${type}.`);
-    }
-
-    if (!this.hasLoaded) {
+  scaleModelToFitRoom() {
+    if (!this.hasLoaded || this.model.size.length() === 0) {
       return;
     }
 
-    // Always reset
+    this.resetModelPose();
+
+    const roomSize = this.roomSize;
+    const modelSize = this.model.size;
+    const roomCenter = this.roomBox.getCenter(new Vector3());
+    const modelCenter = this.model.boundingBox.getCenter(new Vector3());
+
+    const scale = Math.min(
+        roomSize.x / modelSize.x,
+        roomSize.y / modelSize.y,
+        roomSize.z / modelSize.z);
+
+    modelCenter.multiplyScalar(scale);
+    this.model.scale.multiplyScalar(scale);
+    this.model.position.subVectors(roomCenter, modelCenter);
+  }
+
+  resetModelPose() {
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
     this.model.scale.set(1, 1, 1);
-
-    if (type === ScaleTypes.Framed) {
-      try {
-        fitWithinBox(this.roomBox, this.model, this.modelSize);
-      } catch (e) {
-        console.warn('Could not scale model that does not contain geometry.');
-      }
-    }
   }
 
   /**
@@ -222,7 +257,7 @@ export default class ModelScene extends Scene {
    */
   onModelLoad() {
     this.hasLoaded = true;
-    this.setSize(this.width, this.height);
+    this.applyRoomSize();
     this.dispatchEvent({type: 'model-load'});
   }
 }

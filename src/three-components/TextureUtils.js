@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-import './utils-spec.js';
-import './xr-model-element-base-spec.js';
-import './three-components/ModelScene-spec.js';
-import './three-components/Renderer-spec.js';
-import './features/background-image-spec.js';
-import './features/poster-spec.js';
-import './features/magic-leap-spec.js';
+import {TextureLoader} from 'three';
+import EquirectangularToCubemap from 'three.equirectangular-to-cubemap';
+
+const CUBE_MAP_SIZE = 1024;
+const loader = new TextureLoader();
+
+export const loadTexture = (url) =>
+    new Promise((res, rej) => loader.load(url, res, undefined, rej));
+
+export const equirectangularToCubemap = async function(renderer, texture) {
+  const equiToCube = new EquirectangularToCubemap(renderer);
+  const cubemap = equiToCube.convert(texture, CUBE_MAP_SIZE);
+  return cubemap;
+}

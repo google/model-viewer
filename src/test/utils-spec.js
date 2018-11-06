@@ -15,7 +15,7 @@
 
 import {BoxBufferGeometry, Mesh, Box3, Vector3} from 'three';
 
-import {deserializeUrl, fitWithinBox} from '../utils.js';
+import {deserializeUrl} from '../utils.js';
 
 const expect = chai.expect;
 
@@ -35,36 +35,6 @@ suite('utils', () => {
       const {origin} = window.location;
 
       expect(deserializeUrl('foo').indexOf(origin)).to.be.equal(0);
-    });
-  });
-
-  suite('fitWithinBox', () => {
-    test('increases the scale of a small object to fill the limit', () => {
-      const room = new Box3().set(new Vector3(-5, 0, -5), new Vector3(5, 10, 5));
-      const object = new Mesh(new BoxBufferGeometry(1, 1, 1));
-
-      fitWithinBox(room, object);
-
-      expect(object.scale).to.be.eql(new Vector3(10, 10, 10));
-    });
-
-    test('decreases the scale of a large object to fit the limit', () => {
-      const room = new Box3().set(new Vector3(-5, 0, -5), new Vector3(5, 10, 5));
-      const object = new Mesh(new BoxBufferGeometry(100, 100, 100));
-
-      fitWithinBox(room, object);
-
-      expect(object.scale).to.be.eql(new Vector3(0.1, 0.1, 0.1));
-    });
-    
-    test('updates object position to center its volume within box', () => {
-      const room = new Box3().set(new Vector3(-5, 0, -5), new Vector3(5, 10, 5));
-      const object = new Mesh(new BoxBufferGeometry(1, 2, 1));
-
-      fitWithinBox(room, object);
-
-      expect(object.scale).to.be.eql(new Vector3(5, 5, 5));
-      expect(object.position).to.be.eql(new Vector3(0, 5, 0));
     });
   });
 });

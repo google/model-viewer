@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Object3D} from 'three';
+import {Box3, Object3D, Vector3} from 'three';
 
 import GLTFLoader from '../third_party/three/GLTFLoader.js';
 
@@ -34,6 +34,8 @@ export default class Model extends Object3D {
     super();
     this.loader = new GLTFLoader();
     this.modelContainer = new Object3D();
+    this.boundingBox = new Box3();
+    this.size = new Vector3();
     this.add(this.modelContainer);
   }
 
@@ -47,6 +49,29 @@ export default class Model extends Object3D {
     return !!this.modelContainer.children.length;
   }
 
+  applyEnvironmentMap(map) {
+    this.modelContainer.traverse(obj => {
+      if (obj && obj.isMesh && obj.material) {
+        obj.material.envMap = map;
+        obj.material.needsUpdate = true;
+      }
+    });
+    this.dispatchEvent({type: 'envmap-change', value: map});
+  }
+
+  /**
+   * Pass in a THREE.Object3D to be controlled
+   * by this model.
+   *
+   * @param {THREE.Object3D}
+   */
+  setObject(model) {
+    this.clear();
+    this.modelContainer.add(model);
+    this.updateBoundingBox();
+    this.dispatchEvent({type: 'model-load'});
+  }
+
   /**
    * @param {String} url
    */
@@ -57,24 +82,8 @@ export default class Model extends Object3D {
 
     const data = await loadGLTF(this.loader, url);
 
-    // If parsing the GLTF does not throw, then clear out the current
-    // model and replace with the new.
+    this.clear();
     this.url = url;
-    // Remove all current children
-    while (this.modelContainer.children.length) {
-      this.modelContainer.remove(this.modelContainer.children[0]);
-    }
-
-    // data.animations = [];
-    // data.cameras = [];
-    // data.scenes = [x];
-    // data.scene = x
-    // data.asset.extras.author
-    // data.asset.extras.license
-    // data.asset.extras.source
-    // data.asset.extras.title
-    // data.asset.generator
-    // data.asset.version
 
     while (data.scene && data.scene.children.length) {
       this.modelContainer.add(data.scene.children.shift());
@@ -86,6 +95,23 @@ export default class Model extends Object3D {
       }
     });
 
+    this.updateBoundingBox();
+
     this.dispatchEvent({type: 'model-load'});
+  }
+
+  clear() {
+    this.url = null;
+    // Remove all current children
+    while (this.modelContainer.children.length) {
+      this.modelContainer.remove(this.modelContainer.children[0]);
+    }
+  }
+
+  updateBoundingBox() {
+    this.remove(this.modelContainer);
+    this.boundingBox.setFromObject(this.modelContainer);
+    this.boundingBox.getSize(this.size);
+    this.add(this.modelContainer);
   }
 }

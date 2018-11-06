@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, Vector3} from 'three';
+import {Vector3} from 'three';
 
 export const deserializeUrl = (url) => url != null ? toFullUrl(url) : url;
 
@@ -55,62 +55,6 @@ export const getiOSSource = (element) => {
       toFullUrl(element.getAttribute('ios-src')) :
       null;
 };
-
-/**
- * Takes a Box3, and an object, and scales the object such that it
- * is as large as it can be within these constraints.
- * Optionally sets the object size on `target`.
- *
- * @param {THREE.Box3} roomBox 
- * @param {THREE.Object3d} object
- * @param {THREE.Object3D} object
- */
-export const fitWithinBox = (function() {
-  const objBox = new Box3();
-  const objSize = new Vector3();
-  const objCenter = new Vector3();
-  const roomSize = new Vector3();
-  const roomCenter = new Vector3();
-  return (roomBox, object, target) => {
-    if (target) {
-      target.set(0, 0, 0);
-    }
-
-    objBox.setFromObject(object);
-    objBox.getSize(objSize);
-    objBox.getCenter(objCenter);
-    roomBox.getSize(roomSize);
-    roomBox.getCenter(roomCenter);
-
-    // Abort if box takes up no volume
-    if (roomSize.length() === 0) {
-      throw new Error('Room has no volume and cannot be scaled.');
-    }
-    // Abort if model takes up no volume
-    if (objSize.length() === 0) {
-      throw new Error('Object has no volume and cannot be scaled.');
-    }
-
-    const scale = Math.min(roomSize.x / objSize.x,
-                           roomSize.y / objSize.y,
-                           roomSize.z / objSize.z);
-
-    // Cannot scale
-    if (scale === 0 || Number.isNaN(scale) || !Number.isFinite(scale)) {
-      throw new Error('Cannot scale');
-    }
-
-    // Apply scale to object, its center and size
-    object.scale.multiplyScalar(scale, scale, scale);
-    objCenter.multiplyScalar(scale);
-    object.position.subVectors(roomCenter, objCenter);
-
-    if (target) {
-      objSize.multiplyScalar(scale);
-      target.copy(objSize);
-    }
-  };
-})();
 
 export const isMobile = function() {
   let check = false;
