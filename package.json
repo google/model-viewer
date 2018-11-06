@@ -56,6 +56,7 @@
     "@magicleap/prismatic": "^0.17.5",
     "@polymer/lit-element": "^0.6.2",
     "screenfull": "^3.3.2",
-    "three": "^0.94.0"
+    "three": "^0.94.0",
+    "three.equirectangular-to-cubemap": "^1.1.0"
   }
 }

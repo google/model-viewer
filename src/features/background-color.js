@@ -14,10 +14,15 @@
  */
 
 import {Color} from 'three';
-import {$scene} from '../xr-model-element-base.js';
+import {$needsRender, $scene} from '../xr-model-element-base.js';
 
-const DEFAULT_BACKGROUND_COLOR = new Color(0xffffff);
+const $setEnvironmentColor = Symbol('setEnvironmentColor');
 
+/**
+ * background-color is dependent of its parent mixin,
+ * background-image, and applies a fallback color if background-image
+ * is removed since they both share access to the skysphere.
+ */
 export const BackgroundColorMixin = (XRModelElement) => {
   return class extends XRModelElement {
     static get properties() {
@@ -27,19 +32,30 @@ export const BackgroundColorMixin = (XRModelElement) => {
       };
     }
 
-    connectedCallback() {
-      super.connectedCallback();
-      this[$scene].background = new Color(DEFAULT_BACKGROUND_COLOR);
-    }
-
     update(changedProperties) {
       super.update(changedProperties);
 
-      if (!changedProperties.has('backgroundColor')) {
+      if (!changedProperties.has('backgroundImage') &&
+          !changedProperties.has('backgroundColor')) {
         return;
       }
 
-      this[$scene].background.set(this.backgroundColor);
+      // @TODO #76
+      if (!this.backgroundImage || this.backgroundImage == 'null') {
+        this[$setEnvironmentColor](new Color(this.backgroundColor));
+      }
+    }
+
+    /**
+     * @param {string} color
+     */
+    [$setEnvironmentColor](color) {
+      this[$scene].skysphere.material.color = new Color(color || 0xffffff);
+      this[$scene].skysphere.material.map = null;
+      this[$scene].skysphere.material.needsUpdate = true;
+      this[$scene].model.applyEnvironmentMap(null);
+
+      this[$needsRender]();
     }
   };
 };

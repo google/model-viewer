@@ -16,6 +16,7 @@
 import {ARMixin} from './features/ar.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
 import {BackgroundColorMixin} from './features/background-color.js';
+import {BackgroundImageMixin} from './features/background-image.js';
 import {ControlsMixin} from './features/controls.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {PosterMixin} from './features/poster.js';
@@ -25,6 +26,7 @@ const XRModelElement = [
   PosterMixin,
   ARMixin,
   AutoRotateMixin,
+  BackgroundImageMixin,
   BackgroundColorMixin,
   ControlsMixin,
   MagicLeapMixin

@@ -27,3 +27,27 @@ export const pickShadowDescendant = (element, x = 0, y = 0) => {
 
 export const timePasses = (ms = 0) =>
     new Promise(resolve => setTimeout(resolve, ms));
+
+export const until =
+    async function(predicate) {
+  while (!predicate()) {
+    await timePasses();
+  }
+}
+
+/**
+ * @param {EventTarget} target
+ * @param {string} eventName
+ * @param {?Function} predicate
+ */
+export const waitForEvent = (target, eventName, predicate) =>
+    new Promise(resolve => {
+      function handler(e) {
+        if (!predicate || predicate(e)) {
+          resolve(e);
+          target.removeEventListener(eventName, handler);
+        }
+      }
+      target.addEventListener(eventName, handler);
+    });
+

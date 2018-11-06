@@ -25,6 +25,7 @@ const renderer = new Renderer();
 
 const $updateSize = Symbol('updateSize');
 
+export const $renderer = Symbol('renderer');
 export const $container = Symbol('container');
 export const $canvas = Symbol('canvas');
 export const $scene = Symbol('scene');
@@ -65,7 +66,9 @@ export default class XRModelElementBase extends UpdatingElement {
       element: this,
       width,
       height,
+      renderer,
     });
+    this[$renderer] = renderer;
 
     // Tracks whether or not the user has interacted with this element;
     // used to determine whether or not to display a poster image or
@@ -127,12 +130,12 @@ export default class XRModelElementBase extends UpdatingElement {
   }
 
   connectedCallback() {
-    renderer.registerScene(this[$scene]);
+    this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
   }
 
   disconnectedCallback() {
-    renderer.unregisterScene(this[$scene]);
+    this[$renderer].unregisterScene(this[$scene]);
   }
 
   update(changedProperties) {
