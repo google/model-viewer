@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -r ./lib ./dist",
+    "clean": "rm -rf ./lib ./dist",
     "build": "tsc && rollup -c",
     "prepare": "npm run build",
     "test": "npm run clean && npm run build && wct",

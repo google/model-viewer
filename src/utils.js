@@ -50,8 +50,11 @@ export const assertIsArCandidate = () => {
 
   throw new Error(
       `The following APIs are required for AR, but are missing in this browser: ${
-          missingApis.join(',')}`);
+          missingApis.join(', ')}`);
 };
+
+export const IS_IOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 /**
  * Converts a partial URL string to a fully qualified URL string.
@@ -77,19 +80,6 @@ export const openIOSARQuickLook = url => {
   anchor.setAttribute('href', url);
   anchor.appendChild(document.createElement('img'));
   anchor.click();
-};
-
-/**
- * Return a URL and type of the best source from
- * an XRModelElement for use within iOS's AR Quick Look.
- *
- * @param {HTMLElement} element
- * @return {?Object}
- */
-export const getiOSSource = (element) => {
-  return element.hasAttribute('ios-src') ?
-      toFullUrl(element.getAttribute('ios-src')) :
-      null;
 };
 
 export const isMobile = function() {

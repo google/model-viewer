@@ -17,6 +17,8 @@ import './utils-spec.js';
 import './xr-model-element-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
+import './three-components/ARRenderer-spec.js';
 import './features/environment-spec.js';
 import './features/poster-spec.js';
 import './features/magic-leap-spec.js';
+import './features/ar-spec.js';
