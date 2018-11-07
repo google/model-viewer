@@ -66,22 +66,15 @@ an HTML document might look like this:
 ```
 
 Alternatively, using the _npm package_ in a JavaScript module might look like
-this (note that this example also uses
-[`LitElement`](https://github.com/Polymer/lit-element) for brevity:
+this:
 
 ```javascript
-import {LitElement, html} from '@polymer/lit-element';
 import '@mcnultron/xr-model';
 
-class MyApp extends LitElement {
-  render() {
-    return html`
-<xr-model src="path/to/model.gltf"></xr-model>
-`;
-  }
-}
+const model = document.createElement('xr-model');
+model.src = 'path/to/model.gltf';
 
-customElements.define('my-app', MyApp);
+document.body.appendChild(model);
 ```
 
 You can think of `<xr-model>` sort of like an `<img>` or `<video>` tag, but for

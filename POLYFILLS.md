@@ -64,8 +64,8 @@ the rest of your application code:
     <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
     <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-	  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
-    <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+    <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+    <script src="./node_modules/intersection-observer/intersection-observer.js"></script>
 
     <!-- Fullscreen polyfill is required to support all stable browsers: -->
     <script src="./node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
