@@ -27,7 +27,7 @@ const USE_POST_PROCESSING = false;  //! isMobile();
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
 
-const $arRenderer = Symbol('arRenderer');
+export const $arRenderer = Symbol('arRenderer');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them

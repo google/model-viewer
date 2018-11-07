@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-import {IS_AR_CANDIDATE, openIOSARQuickLook} from '../utils.js';
+import {IS_AR_CANDIDATE, IS_IOS, openIOSARQuickLook} from '../utils.js';
 import {$renderer, $scene} from '../xr-model-element-base.js';
 
-const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 const $enterARElement = Symbol('enterARElement');
 
@@ -24,6 +23,10 @@ export const ARMixin = (XRModelElement) => {
   return class extends XRModelElement {
     static get properties() {
       return {...super.properties, ar: {type: Boolean}};
+    }
+
+    get canActivateAR() {
+      return this[$enterARElement].style.display !== 'none';
     }
 
     constructor() {
@@ -100,7 +103,7 @@ export const ARMixin = (XRModelElement) => {
     async update(changedProperties) {
       super.update(changedProperties);
 
-      if (!changedProperties.has('ar')) {
+      if (!changedProperties.has('ar') && !changedProperties.has('iosSrc')) {
         return;
       }
 
@@ -111,9 +114,8 @@ export const ARMixin = (XRModelElement) => {
       // On iOS, always enable the AR button. On non-iOS,
       // see if AR is supported, and if so, display the button after
       // an XRDevice has been initialized
-      if (canShowButton &&
-          (iosCandidate || await renderer.supportsPresentation())) {
-        console.log('SHOWING BUTTON');
+      if (iosCandidate ||
+          (canShowButton && await renderer.supportsPresentation())) {
         this[$enterARElement].style.display = 'block';
       } else {
         this[$enterARElement].style.display = 'none';

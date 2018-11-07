@@ -189,6 +189,7 @@ export class ARRenderer {
     }
 
     this[$dolly].remove(this[$presentedScene]);
+    this[$presentedScene].skysphere.visible = true;
 
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
@@ -260,11 +261,10 @@ height: 100%;`);
       dolly.position.setFromMatrixPosition(hitMatrix);
 
       const targetPos = vector3.setFromMatrixPosition(camera.matrixWorld);
-      const angle = Math.atan2(
-          targetPos.x - presentedScene.position.x,
-          targetPos.z - presentedScene.position.z);
 
       dolly.rotation.set(0, -presentedScene.pivot.rotation.y, 0);
+
+      presentedScene.skysphere.visible = false;
       dolly.add(presentedScene);
     }
   }
