@@ -90,7 +90,7 @@ However, not all browsers support all of these features today. Below is the
 latest state of browser support for the relevant emerging features.
 
 **📢 Check out
-[POLYFILLS.md](https://github.com/PolymerLabs/xr-model/blob/master/README.md) to
+[POLYFILLS.md](https://github.com/PolymerLabs/xr-model/blob/master/POLYFILLS.md) to
 learn how to polyfill for maximum browser compatibility!**
 
 ---
