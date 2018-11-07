@@ -67,7 +67,7 @@ the rest of your application code:
     <!-- Intersection Observer polyfill is required for Safari and IE11 -->
     <script src="./node_modules/intersection-observer/intersection-observer.js"></script>
 
-    <!-- Fullscreen polyfill is required to support all stable browsers: -->
+    <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
     <script src="./node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
   </head>
   <body>
