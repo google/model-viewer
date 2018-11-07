@@ -78,8 +78,8 @@ document.body.appendChild(model);
 ```
 
 You can think of `<xr-model>` sort of like an `<img>` or `<video>` tag, but for
-3D content. Just set its `src` attribute to the URL of a valid [glTF](glTF) (or
-[glB](glB)) file and voila!
+3D content. Just set its `src` attribute to the URL of a valid [glTF][glTF] (or
+[glB][glB]) file and voila!
 
 ## Browser Support
 
@@ -114,8 +114,8 @@ Web XR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |  
 
 ### Attributes
 
-* *`src`*: The URL to the 3D model. **Note:** only [glTF](glTF)/[glB](glB) files are supported. For more information, see the Supported Formats section.
-* *`ios-src`*: The url to a [USDZ](USDZ) model will be used in iOS Safari to launch Quick Look for AR.
+* *`src`*: The URL to the 3D model. **Note:** only [glTF][glTF]/[glB][glB] files are supported. For more information, see the Supported Formats section.
+* *`ios-src`*: The url to a [USDZ][USDZ] model will be used in iOS Safari to launch Quick Look for AR.
 * *`preload`*: Whether or not the user must select the element first before the model begins to download. Keep in mind models can be heavy on bandwidth and use preloading with caution.
 * *`poster`*: Displays an image instead of the model until the model is loaded or a user action.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
@@ -135,17 +135,17 @@ the `background-color` attribute can also be configured using the
 
 An `<xr-model>`'s attributes allows developers to specify multiple file types to
 work across different platforms. For WebGL and Web XR purposes, both
-[glTF](glTF) and [glB](glB) are supported out of the box. Additionally,
-developers can specify a [USDZ](USDZ) file (using the `ios-src` attribute) that
+[glTF][glTF] and [glB][glB] are supported out of the box. Additionally,
+developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
 will be used to launch Quick Look on iOS Safari as an interim solution until
 Safari has support for something like the Web XR Device and Hit Test APIs.
 
 ### Important note on data usage
 
-iOS Quick Look only supports model files that use the [USDZ](USDZ) format. This
+iOS Quick Look only supports model files that use the [USDZ][USDZ] format. This
 means that iOS users who see a live-rendered model in the browser (loaded as
-[glTF](glTF)/[glB](glB) will have to download the same model
-a _second time_ in [USDZ](USDZ) format when they launch Quick Look.
+[glTF][glTF]/[glB][glB] will have to download the same model
+a _second time_ in [USDZ][USDZ] format when they launch Quick Look.
 
 ## Development
 
