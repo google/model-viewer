@@ -102,11 +102,11 @@ learn how to polyfill for maximum browser compatibility!**
 
 Feature                   | Chrome | Canary | Safari 12 | Firefox 63 | Firefox 62 | Edge  | IE 11
 --------------------------|--------|--------|-----------|------------|------------|-------|------
-Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 Resize Observer           |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
 Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
 Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
+Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 Web XR Device API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 Web XR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 
