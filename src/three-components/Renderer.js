@@ -19,7 +19,6 @@ import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
-// import {IS_MOBILE} from '../constants.js';
 import {$tick} from '../xr-model-element-base.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -49,8 +48,7 @@ export default class Renderer extends EventDispatcher {
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_AR_CANDIDATE) {
-      Object.assign(
-          webGlOptions, {antialias: true, preserveDrawingBuffer: true});
+      Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
     this.canvas = document.createElement('canvas');

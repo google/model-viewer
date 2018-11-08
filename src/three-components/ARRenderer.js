@@ -20,6 +20,7 @@ const $outputContext = Symbol('outputContext');
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $onOutputCanvasClick = Symbol('onOutputCanvasClick');
 const $onFullscreenchange = Symbol('onFullscreenchange');
+const $postSessionCleanup = Symbol('postSessionCleanup');
 
 const matrix4 = new Matrix4();
 const vector3 = new Vector3();
@@ -100,9 +101,7 @@ export class ARRenderer {
         {environmentIntegration: true, outputContext: this.outputContext});
 
     session.addEventListener('end', () => {
-      if (this[$currentSession] === session) {
-        this.stopPresenting();
-      }
+      this[$postSessionCleanup]();
     }, {once: true});
 
     const gl = this.renderer.getContext();
@@ -178,10 +177,16 @@ export class ARRenderer {
     } catch (error) {
       console.warn('Error while trying to end AR session');
       console.error(error);
-    }
 
-    this.dolly.remove(this[$presentedScene]);
-    this[$presentedScene].skysphere.visible = true;
+      this[$postSessionCleanup]();
+    }
+  }
+
+  [$postSessionCleanup]() {
+    if (this[$presentedScene] != null) {
+      this.dolly.remove(this[$presentedScene]);
+      this[$presentedScene].skysphere.visible = true;
+    }
 
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
@@ -239,9 +244,9 @@ height: 100%;`);
 
     const presentedScene = this[$presentedScene];
 
-    const x = 0;
-    const y = 0;
-    this.raycaster.setFromCamera({x, y}, this.camera);
+    // NOTE: Currently rays will be cast from the middle of the screen.
+    // Eventually we might use input coordinates for this.
+    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
 
     const ray = this.raycaster.ray;
     originArray.set(ray.origin.toArray());
@@ -291,7 +296,7 @@ height: 100%;`);
       this.camera.updateMatrixWorld(true);
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-      this.renderer.clearDepth();
+      // this.renderer.clearDepth();
       this.renderer.render(this.scene, this.camera);
     }
   }
