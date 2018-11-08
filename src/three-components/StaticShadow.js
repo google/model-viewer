@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, Mesh, RGBAFormat, MeshBasicMaterial, MultiplyBlending, OrthographicCamera, PlaneGeometry, ShaderMaterial, UniformsUtils, Vector3, WebGLRenderTarget} from 'three';
+import {Color, Mesh, MeshBasicMaterial, MultiplyBlending, OrthographicCamera, PlaneGeometry, RGBAFormat, ShaderMaterial, UniformsUtils, Vector3, WebGLRenderTarget} from 'three';
 
 const $camera = Symbol('camera');
 const $renderTarget = Symbol('renderTarget');
@@ -82,6 +82,7 @@ export default class StaticShadow extends Mesh {
     const userSceneOverrideMaterial = scene.overrideMaterial;
     const userClearAlpha = renderer.getClearAlpha();
     const userRenderTarget = renderer.getRenderTarget();
+    const shadowParent = this.parent;
 
     config = Object.assign({}, config, DEFAULT_CONFIG);
 
@@ -115,7 +116,18 @@ export default class StaticShadow extends Mesh {
     this[$camera].far = config.far;
     this[$camera].updateProjectionMatrix();
 
+    // There's a chance the shadow will be in the scene that's being rerendered;
+    // temporarily remove it incase.
+    if (shadowParent) {
+      shadowParent.remove(this);
+    }
+
     renderer.render(scene, this[$camera], this[$renderTarget], true);
+
+    if (shadowParent) {
+      shadowParent.add(this);
+    }
+
     this.material.needsUpdate = true;
 
     // Reset the values on the renderer and scene
