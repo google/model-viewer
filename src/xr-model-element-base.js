@@ -57,6 +57,11 @@ export default class XRModelElementBase extends UpdatingElement {
    */
   constructor() {
     super();
+
+    if (window.ShadyCSS) {
+      window.ShadyCSS.styleElement(this);
+    }
+
     const {shadowRoot} = this;
     shadowRoot.appendChild(template.content.cloneNode(true));
 
