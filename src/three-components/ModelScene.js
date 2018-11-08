@@ -16,7 +16,7 @@
 import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import Model from './Model.js';
-import Shadow from './Shadow.js';
+import StaticShadow from './StaticShadow.js';
 
 // Valid types for `setScaleType` -- 'framed' scales the model
 // so that it fits within its 2D plane nicely. 'lifesize' is
@@ -67,11 +67,13 @@ export default class ModelScene extends Scene {
     this.scaleType = ScaleTypes.Framed;
 
     this.model = new Model();
-    this.shadow = new Shadow();
-    this.light = new AmbientLight(0xffffff, 0.3);
-    this.directionalLight = new DirectionalLight(0xffffff, 1.4);
-    this.directionalLight.position.set(0, 10, 10);
-    this.directionalLight.castShadow = true;
+    this.shadow = new StaticShadow();
+    this.light = new AmbientLight(0xffffff, 1.5);
+    // This light is only for generating (fake) shadows
+    // and does not needed to be added to the scene.
+    // @see StaticShadow.js
+    this.shadowLight = new DirectionalLight(0xffffff, 0);
+    this.shadowLight.position.set(0, 10, 0);
 
     this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
     this.camera.position.y = 5;
@@ -86,15 +88,12 @@ export default class ModelScene extends Scene {
     this.skysphere = new Mesh(skysphereGeo, skysphereMat);
 
     this.add(this.pivot);
-    this.add(this.shadow);
     this.add(this.light);
     this.add(this.skysphere);
-    this.add(this.directionalLight);
     this.pivot.add(this.model);
 
     this.isVisible = false;
     this.isDirty = false;
-    this.hasLoaded = false;
 
     this.roomBox = new Box3();
     this.roomSize = new Vector3();
@@ -194,6 +193,8 @@ export default class ModelScene extends Scene {
     // `x * sqrt(3)` is the length of the longest diagonal through a cube
     // with longest side of `x`.
     this.skysphere.scale.setScalar(longestWall * Math.sqrt(3));
+
+    this.updateStaticShadow();
   }
 
   /**
@@ -208,7 +209,7 @@ export default class ModelScene extends Scene {
    * Scales the model to fit the enclosed room.
    */
   scaleModelToFitRoom() {
-    if (!this.hasLoaded || this.model.size.length() === 0) {
+    if (!this.model.hasModel() || this.model.size.length() === 0) {
       return;
     }
 
@@ -255,8 +256,25 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad() {
-    this.hasLoaded = true;
     this.applyRoomSize();
     this.dispatchEvent({type: 'model-load'});
+  }
+
+  /**
+   * Called to update the shadow rendering when the room or model changes.
+   */
+  updateStaticShadow() {
+    if (!this.model.hasModel() || this.model.size.length() === 0) {
+      this.pivot.remove(this.shadow);
+      return;
+    }
+
+    this.shadow.scale.x = this.roomSize.x;
+    this.shadow.scale.z = this.roomSize.z;
+    this.shadow.render(this.renderer.renderer, this, this.shadowLight);
+
+    // Lazily add the shadow so we're only displaying it once it has
+    // a generated texture.
+    this.pivot.add(this.shadow);
   }
 }
