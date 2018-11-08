@@ -19,6 +19,7 @@ import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
 import './three-components/ARRenderer-spec.js';
 import './three-components/TextureUtils-spec.js';
+import './features/controls-spec.js';
 import './features/environment-spec.js';
 import './features/poster-spec.js';
 import './features/magic-leap-spec.js';
