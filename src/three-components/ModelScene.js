@@ -84,6 +84,8 @@ export default class ModelScene extends Scene {
     const skysphereMat = new MeshBasicMaterial({
       side: BackSide,
       color: 0xffffff,
+      depthTest: false,
+      depthWrite: false
     });
     this.skysphere = new Mesh(skysphereGeo, skysphereMat);
 

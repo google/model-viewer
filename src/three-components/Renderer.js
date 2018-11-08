@@ -55,6 +55,7 @@ export default class Renderer extends EventDispatcher {
     this.context = this.canvas.getContext('webgl', webGlOptions);
     this.renderer =
         new WebGLRenderer({canvas: this.canvas, context: this.context});
+    this.renderer.autoClear = false;
     this.renderer.setPixelRatio(DPR);
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -143,7 +144,7 @@ export default class Renderer extends EventDispatcher {
 
       const camera = scene.getCamera();
 
-      this.renderer.clear();
+      this.renderer.clearDepth();
       if (width > this.width || height > this.height) {
         const maxWidth = Math.max(width, this.width);
         const maxHeight = Math.max(height, this.height);
