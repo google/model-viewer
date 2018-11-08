@@ -33,8 +33,6 @@
     "resize-observer-polyfill": "^1.5.0",
     "rollup": "^0.66.0",
     "rollup-plugin-cleanup": "^3.0.0-beta.1",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "typescript": "^3.1.3",
     "wct-browser-legacy": "^1.0.1",
@@ -57,7 +55,6 @@
     "@jsantell/wagner": "0.0.3",
     "@magicleap/prismatic": "^0.17.5",
     "@polymer/lit-element": "^0.6.2",
-    "three": "^0.94.0",
-    "three.equirectangular-to-cubemap": "^1.1.0"
+    "three": "^0.94.0"
   }
 }

@@ -1,0 +1,16 @@
+name: "three.equirectangular-to-cubemap"
+description:
+  "JavaScript 3D Library Helper"
+
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://github.com/spite/THREE.EquirectangularToCubemap"
+  }
+  url {
+    type: GIT
+    value: "https://github.com/spite/THREE.EquirectangularToCubemap.git"
+  }
+  version: "1.1.0"
+  last_upgrade_date { year: 2018 month: 11 day: 7 }
+}

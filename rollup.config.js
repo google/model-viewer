@@ -17,7 +17,6 @@ const fs = require('fs');
 const path = require('path');
 const rollup = require('rollup');
 const resolve = require('rollup-plugin-node-resolve');
-const commonjs = require('rollup-plugin-commonjs');
 const cleanup = require('rollup-plugin-cleanup');
 const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
@@ -28,7 +27,6 @@ const plugins = [
     include: ['lib/**'],
     comments: 'none',
   }),
-  commonjs(),
   resolve(),
 ];
 
