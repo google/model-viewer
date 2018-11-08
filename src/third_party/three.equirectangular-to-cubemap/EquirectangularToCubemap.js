@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 export default function EquirectangularToCubemap(renderer) {
   this.renderer = renderer;
-  this.scene = new THREEScene();
+  this.scene = new THREE.Scene();
 
   var gl = this.renderer.getContext();
   this.maxSize = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE)
