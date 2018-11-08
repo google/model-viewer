@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {IS_AR_CANDIDATE, IS_IOS, openIOSARQuickLook} from '../utils.js';
+import {IS_AR_CANDIDATE, IS_IOS} from '../constants.js';
+import {openIOSARQuickLook} from '../utils.js';
 import {$renderer, $scene} from '../xr-model-element-base.js';
 
 

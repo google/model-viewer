@@ -18,12 +18,13 @@ import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
 import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {EventDispatcher, WebGLRenderer} from 'three';
 
-import {IS_AR_CANDIDATE, isMobile} from '../utils.js';
+import {IS_AR_CANDIDATE} from '../constants.js';
+// import {IS_MOBILE} from '../constants.js';
 import {$tick} from '../xr-model-element-base.js';
 
 import {ARRenderer} from './ARRenderer.js';
 
-const USE_POST_PROCESSING = false;  //! isMobile();
+const USE_POST_PROCESSING = false;  //! IS_MOBILE;
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
 
@@ -43,9 +44,17 @@ export const $arRenderer = Symbol('arRenderer');
 export default class Renderer extends EventDispatcher {
   constructor() {
     super();
+
+    const webGlOptions = {antialias: true};
+
+    // Only enable certain options when Web XR capabilities are detected:
+    if (IS_AR_CANDIDATE) {
+      Object.assign(
+          webGlOptions, {antialias: true, preserveDrawingBuffer: true});
+    }
+
     this.canvas = document.createElement('canvas');
-    this.context = this.canvas.getContext(
-        'webgl', {antialias: true, alpha: true, preserveDrawingBuffer: true});
+    this.context = this.canvas.getContext('webgl', webGlOptions);
     this.renderer =
         new WebGLRenderer({canvas: this.canvas, context: this.context});
     this.renderer.setPixelRatio(DPR);

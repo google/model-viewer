@@ -5,26 +5,14 @@ import {assertIsArCandidate} from '../utils.js';
 import Reticle from './Reticle.js';
 import Shadow from './Shadow.js';
 
-const $initializeRenderer = Symbol('initializeRenderer');
-const $resolveARSession = Symbol('resolveARSession');
-const $resolveDevice = Symbol('resolveDevice');
-
 const $presentedScene = Symbol('presentedScene');
-const $dolly = Symbol('dolly');
-const $scene = Symbol('scene');
-const $renderer = Symbol('renderer');
+
 const $device = Symbol('device');
 const $devicePromise = Symbol('devicePromise');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $frameOfReference = Symbol('frameOfReference');
-const $reticle = Symbol('reticle');
-const $camera = Symbol('camera');
-const $raycaster = Symbol('raycaster');
-
-const $inputCanvas = Symbol('inputCanvas');
-const $inputContext = Symbol('inputContext');
 
 const $outputCanvas = Symbol('outputCanvas');
 const $outputContext = Symbol('outputContext');
@@ -47,33 +35,33 @@ export class ARRenderer {
   }
 
   constructor(inputCanvas, inputContext) {
-    this[$renderer] = null;
+    this.renderer = null;
 
-    this[$inputCanvas] = inputCanvas;
-    this[$inputContext] = inputContext;
+    this.inputCanvas = inputCanvas;
+    this.inputContext = inputContext;
 
-    this[$camera] = new PerspectiveCamera();
-    this[$camera].matrixAutoUpdate = false;
+    this.camera = new PerspectiveCamera();
+    this.camera.matrixAutoUpdate = false;
 
-    this[$scene] = new Scene();
-    this[$dolly] = new Object3D();
-    this[$reticle] = new Reticle(this[$camera]);
+    this.scene = new Scene();
+    this.dolly = new Object3D();
+    this.reticle = new Reticle(this.camera);
 
-    this[$scene].add(this[$reticle]);
-    this[$scene].add(this[$dolly]);
+    this.scene.add(this.reticle);
+    this.scene.add(this.dolly);
 
+    this[$outputCanvas] = null;
+    this[$outputContext] = null;
     this[$rafId] = null;
     this[$currentSession] = null;
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
-    this[$outputCanvas] = null;
-    this[$outputContext] = null;
 
     this[$device] = null;
 
-    // TODO(cdata): can we actually cache this? What if I plug a device in after
-    // this value has been cached?
-    this[$devicePromise] = this[$resolveDevice]()
+    // NOTE: XRDevice is being removed
+    // @see https://github.com/immersive-web/webxr/pull/405
+    this[$devicePromise] = this.resolveDevice()
                                .then((device) => {
                                  return this[$device] = device;
                                })
@@ -83,41 +71,45 @@ export class ARRenderer {
                                });
   }
 
-  [$initializeRenderer]() {
-    if (this[$renderer] != null) {
+  initializeRenderer() {
+    if (this.renderer != null) {
       return;
     }
 
-    this[$renderer] = new WebGLRenderer(
-        {canvas: this[$inputCanvas], context: this[$inputContext]});
-    this[$renderer].setSize(window.innerWidth, window.innerHeight);
-    this[$renderer].setPixelRatio(1);
-    this[$renderer].autoClear = false;
-    this[$renderer].gammaInput = true;
-    this[$renderer].gammaOutput = true;
-    this[$renderer].gammaFactor = 2.2;
+    this.renderer = new WebGLRenderer(
+        {canvas: this.inputCanvas, context: this.inputContext});
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(1);
+    this.renderer.autoClear = false;
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
   }
 
-  async[$resolveDevice]() {
+  async resolveDevice() {
     assertIsArCandidate();
 
     return await navigator.xr.requestDevice();
   }
 
-  async[$resolveARSession]() {
+  async resolveARSession() {
     assertIsArCandidate();
 
-    const renderer = this[$renderer];
     const device = this[$device];
 
     const session = await device.requestSession(
         {environmentIntegration: true, outputContext: this.outputContext});
 
-    const gl = renderer.getContext();
+    session.addEventListener('end', () => {
+      if (this[$currentSession] === session) {
+        this.stopPresenting();
+      }
+    }, {once: true});
+
+    const gl = this.renderer.getContext();
 
     await gl.setCompatibleXRDevice(device);
     session.baseLayer = new XRWebGLLayer(session, gl, {alpha: true});
-    renderer.setFramebuffer(session.baseLayer.framebuffer);
+    this.renderer.setFramebuffer(session.baseLayer.framebuffer);
 
     return session;
   }
@@ -158,9 +150,9 @@ export class ARRenderer {
 
     this[$presentedScene] = scene;
 
-    this[$initializeRenderer]();
+    this.initializeRenderer();
 
-    this[$currentSession] = await this[$resolveARSession]();
+    this[$currentSession] = await this.resolveARSession();
     this[$frameOfReference] =
         await this[$currentSession].requestFrameOfReference('eye-level');
 
@@ -188,7 +180,7 @@ export class ARRenderer {
       console.error(error);
     }
 
-    this[$dolly].remove(this[$presentedScene]);
+    this.dolly.remove(this[$presentedScene]);
     this[$presentedScene].skysphere.visible = true;
 
     this[$frameOfReference] = null;
@@ -214,6 +206,12 @@ top: 0px;
 left: 0px;
 width: 100%;
 height: 100%;`);
+      // NOTE: Only Chrome supports Web XR right now, but eventually platforms
+      // that do not directly support any kind of pointer event (such as
+      // Hololens) might have Web XR (or its successor). In this case, we would
+      // want to rely on XRInputSource and "select" XRInputSourceEvent (or their
+      // successors) to abstract these input details for us.
+      // @see https://immersive-web.github.io/webxr/#xrinputsource-interface
       this[$outputCanvas].addEventListener(
           'click', () => this[$onOutputCanvasClick]());
     }
@@ -235,21 +233,17 @@ height: 100%;`);
       return;
     }
 
-    if (this[$raycaster] == null) {
-      this[$raycaster] = new Raycaster();
+    if (this.raycaster == null) {
+      this.raycaster = new Raycaster();
     }
 
-    const raycaster = this[$raycaster];
-    const camera = this[$camera];
-    const scene = this[$scene];
-    const dolly = this[$dolly];
     const presentedScene = this[$presentedScene];
 
     const x = 0;
     const y = 0;
-    raycaster.setFromCamera({x, y}, camera);
+    this.raycaster.setFromCamera({x, y}, this.camera);
 
-    const ray = raycaster.ray;
+    const ray = this.raycaster.ray;
     originArray.set(ray.origin.toArray());
     directionArray.set(ray.direction.toArray());
     const hits = await this[$currentSession].requestHitTest(
@@ -258,14 +252,11 @@ height: 100%;`);
       const hit = hits[0];
       const hitMatrix = matrix4.fromArray(hit.hitMatrix);
 
-      dolly.position.setFromMatrixPosition(hitMatrix);
-
-      const targetPos = vector3.setFromMatrixPosition(camera.matrixWorld);
-
-      dolly.rotation.set(0, -presentedScene.pivot.rotation.y, 0);
+      this.dolly.position.setFromMatrixPosition(hitMatrix);
+      this.dolly.rotation.set(0, -presentedScene.pivot.rotation.y, 0);
 
       presentedScene.skysphere.visible = false;
-      dolly.add(presentedScene);
+      this.dolly.add(presentedScene);
     }
   }
 
@@ -278,7 +269,7 @@ height: 100%;`);
     const {session} = frame;
     const pose = frame.getDevicePose(this[$frameOfReference]);
 
-    this[$reticle].update(this[$currentSession], this[$frameOfReference]);
+    this.reticle.update(this[$currentSession], this[$frameOfReference]);
 
     // TODO: Notify external observers of tick
     // TODO: Note that reticle may be "stabilized"
@@ -289,21 +280,19 @@ height: 100%;`);
       return;
     }
 
-    const renderer = this[$renderer];
-    const camera = this[$camera];
-    const scene = this[$scene];
-
     for (const view of frame.views) {
       const viewport = session.baseLayer.getViewport(view);
-      renderer.setViewport(0, 0, viewport.width, viewport.height);
-      renderer.setSize(viewport.width, viewport.height);
-      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      this.renderer.setViewport(0, 0, viewport.width, viewport.height);
+      this.renderer.setSize(viewport.width, viewport.height, false);
+      this.camera.projectionMatrix.fromArray(view.projectionMatrix);
       const viewMatrix = matrix4.fromArray(pose.getViewMatrix(view));
 
-      camera.matrix.getInverse(viewMatrix);
-      camera.updateMatrixWorld(true);
-      renderer.clearDepth();
-      renderer.render(scene, camera);
+      this.camera.matrix.getInverse(viewMatrix);
+      this.camera.updateMatrixWorld(true);
+      // NOTE: Clearing depth caused issues on Samsung devices
+      // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
+      this.renderer.clearDepth();
+      this.renderer.render(this.scene, this.camera);
     }
   }
 }
