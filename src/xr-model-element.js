@@ -20,6 +20,11 @@ import {ControlsMixin} from './features/controls.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {PosterMixin} from './features/poster.js';
 import XRModelElementBase from './xr-model-element-base.js';
+import template from './template.js';
+
+if (window.ShadyCSS) {
+  window.ShadyCSS.prepareTemplate(template, 'xr-model');
+}
 
 const XRModelElement = [
   PosterMixin,
