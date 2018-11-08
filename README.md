@@ -79,7 +79,7 @@ document.body.appendChild(model);
 
 You can think of `<model-viewer>` sort of like an `<img>` or `<video>` tag, but for
 3D content. Just set its `src` attribute to the URL of a valid [glTF][glTF] (or
-[glB][glB]) file and voila!
+[GLB][GLB]) file and voila!
 
 ## Browser Support
 
@@ -114,7 +114,7 @@ Web XR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |  
 
 ### Attributes
 
-* *`src`*: The URL to the 3D model. **Note:** only [glTF][glTF]/[glB][glB] files are supported. For more information, see the Supported Formats section.
+* *`src`*: The URL to the 3D model. **Note:** only [glTF][glTF]/[GLB][GLB] files are supported. For more information, see the Supported Formats section.
 * *`ios-src`*: The url to a [USDZ][USDZ] model will be used in iOS Safari to launch Quick Look for AR.
 * *`preload`*: Whether or not the user must select the element first before the model begins to download. Keep in mind models can be heavy on bandwidth and use preloading with caution.
 * *`poster`*: Displays an image instead of the model until the model is loaded or a user action.
@@ -135,7 +135,7 @@ the `background-color` attribute can also be configured using the
 
 A `<model-viewer>`'s attributes allows developers to specify multiple file types to
 work across different platforms. For WebGL and Web XR purposes, both
-[glTF][glTF] and [glB][glB] are supported out of the box. Additionally,
+[glTF][glTF] and [GLB][GLB] are supported out of the box. Additionally,
 developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
 will be used to launch Quick Look on iOS Safari as an interim solution until
 Safari has support for something like the Web XR Device and Hit Test APIs.
@@ -144,7 +144,7 @@ Safari has support for something like the Web XR Device and Hit Test APIs.
 
 iOS Quick Look only supports model files that use the [USDZ][USDZ] format. This
 means that iOS users who see a live-rendered model in the browser (loaded as
-[glTF][glTF]/[glB][glB] will have to download the same model
+[glTF][glTF]/[GLB][GLB] will have to download the same model
 a _second time_ in [USDZ][USDZ] format when they launch Quick Look.
 
 ## Development
@@ -173,4 +173,4 @@ Apache License Version 2.0, Copyright © 2018 Google
 
 [USDZ]: https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html
 [glTF]: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
-[glb]: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification
+[GLB]: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification
