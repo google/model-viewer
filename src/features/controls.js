@@ -16,12 +16,13 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import OrbitControls from '../third_party/three/OrbitControls.js';
-import {$onResize, $onModelLoad, $scene, $needsRender} from '../xr-model-element-base.js';
+import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
+import {$needsRender, $onModelLoad, $onResize, $scene} from '../xr-model-element-base.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
 
+export const $controls = Symbol('controls');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
-const $controls = Symbol('controls');
 const $onControlsChange = Symbol('onControlsChange');
 const $orbitCamera = Symbol('orbitCamera');
 const $defaultCamera = Symbol('defaultCamera');
@@ -36,40 +37,45 @@ export const ControlsMixin = (XRModelElement) => {
       super();
       this[$onControlsChange] = this[$onControlsChange].bind(this);
 
-      const {width, height} = this.getBoundingClientRect();
+      this[$defaultCamera] = this[$scene].getCamera();
 
-      const scene = this[$scene];
-      this[$defaultCamera] = scene.getCamera();
-
-      this[$orbitCamera] = scene.camera.clone();
+      this[$orbitCamera] = this[$scene].camera.clone();
       this[$orbitCamera].near = ORBIT_NEAR_PLANE;
       this[$orbitCamera].updateProjectionMatrix();
-
-      this[$controls] = new OrbitControls(this[$orbitCamera], scene.canvas);
-      this[$controls].enabled = false;
-    }
-
-    connectedCallback() {
-      super.connectedCallback();
-      this[$controls].addEventListener('change', this[$onControlsChange]);
-    }
-
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      this[$controls].removeEventListener('change', this[$onControlsChange]);
+      this[$controls] = null;
     }
 
     update(changedProperties) {
       super.update(changedProperties);
 
-      const enabled = this.controls;
+      if (!changedProperties.has('controls')) {
+        return;
+      }
 
-      this[$controls].enabled = enabled;
-
-      if (enabled) {
+      if (this.controls) {
         this[$scene].setCamera(this[$orbitCamera]);
+
+        this[$controls] =
+            new OrbitControls(this[$orbitCamera], this[$scene].canvas);
+        this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
+        this[$controls].enabled = true;
+        // Panning performed via right click, two finger move
+        this[$controls].enablePan = false;
+        // Panning performed via arrow keys; possibly redundant with `enablePan`
+        this[$controls].enableKeys = false;
+        this[$controls].addEventListener('change', this[$onControlsChange]);
+
+        this[$updateOrbitCamera]();
+
       } else {
         this[$scene].setCamera(this[$defaultCamera]);
+
+        if (this[$controls]) {
+          this[$controls].dispose();
+          this[$controls].removeEventListener(
+              'change', this[$onControlsChange]);
+          this[$controls] = null;
+        }
       }
     }
 
@@ -80,11 +86,16 @@ export const ControlsMixin = (XRModelElement) => {
     [$updateOrbitCamera]() {
       // The default camera already has positioned itself correctly
       // to frame the canvas. Copy its values.
-      this[$controls].target.set(0, 5, 0);
       this[$orbitCamera].position.copy(this[$defaultCamera].position);
       this[$orbitCamera].aspect = this[$defaultCamera].aspect;
       this[$orbitCamera].rotation.set(0, 0, 0);
       this[$orbitCamera].updateProjectionMatrix();
+
+      if (this[$controls]) {
+        // Zooming out beyond the 'frame' doesn't serve much purpose
+        // and will only end up showing the skysphere if zoomed out enough
+        this[$controls].maxDistance = this[$orbitCamera].position.z;
+      }
     }
 
     [$onResize](e) {
