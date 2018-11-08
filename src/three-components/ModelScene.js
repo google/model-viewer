@@ -269,6 +269,13 @@ export default class ModelScene extends Scene {
       return;
     }
 
+    // Remove and cache the current pivot rotation so that the shadow's
+    // capture is unrotated so it can be freely rotated when applied
+    // as a texture.
+    const currentRotation = this.pivot.rotation.y;
+    this.pivot.rotation.y = 0;
+
+    this.shadow.position.set(0, 0, 0);
     this.shadow.scale.x = this.roomSize.x;
     this.shadow.scale.z = this.roomSize.z;
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
@@ -276,5 +283,15 @@ export default class ModelScene extends Scene {
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
     this.pivot.add(this.shadow);
+    this.pivot.rotation.y = currentRotation;
+
+    // If model has vertical room, it'll be positioned at (0, 5, 0)
+    // and appear to be floating. This should be ultimately user-configurable,
+    // but for now, move the shadow to the bottom of the model if the
+    // element and model are width-bound.
+    const modelHeight = this.model.size.y * this.model.scale.y;
+    if (modelHeight < FRAMED_HEIGHT) {
+      this.shadow.position.y  = (FRAMED_HEIGHT / 2) - modelHeight / 2
+    }
   }
 }
