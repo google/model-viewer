@@ -67,8 +67,6 @@ export default class Reticle extends Object3D {
       hits =
           await session.requestHitTest(originArray, directionArray, frameOfRef);
     } catch (error) {
-      console.warn('Error requesting WebXR hit test');
-      console.error(error);
       hits = [];
     }
 

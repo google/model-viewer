@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import {IS_IOS} from '../../constants.js';
 import {$enterARElement, ARMixin} from '../../features/ar.js';
-import {IS_IOS} from '../../utils.js';
 import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
 import {pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
