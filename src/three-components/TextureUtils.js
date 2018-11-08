@@ -14,7 +14,7 @@
  */
 
 import {TextureLoader} from 'three';
-import EquirectangularToCubemap from 'three.equirectangular-to-cubemap';
+import EquirectangularToCubemap from '../third_party/three.equirectangular-to-cubemap/EquirectangularToCubemap.js';
 
 const CUBE_MAP_SIZE = 1024;
 const loader = new TextureLoader();
@@ -32,7 +32,8 @@ export const loadTexture = (url) =>
  * @param {THREE.Texture} texture
  * @return {THREE.Texture}
  */
-export const equirectangularToCubemap = async function(renderer, texture) {
+export const equirectangularToCubemap =
+    async function(renderer, texture) {
   const equiToCube = new EquirectangularToCubemap(renderer);
   const cubemap = equiToCube.convert(texture, CUBE_MAP_SIZE);
   return cubemap;
@@ -52,7 +53,7 @@ export const toCubemapAndEquirect = async (renderer, url) => {
   try {
     const equirect = await loadTexture(url);
     const cubemap = await equirectangularToCubemap(renderer, equirect);
-    return { equirect, cubemap };
+    return {equirect, cubemap};
   } catch (e) {
     return null;
   }
