@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ARKitSVG from './assets/arkit-glyph.js';
+import ARGlyph from './assets/view-in-ar-material-svg.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -59,18 +59,18 @@ template.innerHTML = `
     }
 
     a.enter-ar {
-      width: 75px;
-      height: 75px;
+      width: 40px;
+      height: 40px;
       position: absolute;
       display: block;
-      right: 20px;
-      top: 20px;
+      right: 10px;
+      top: 10px;
       display: none;
     }
     a.enter-ar svg {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: calc(50% - 12px);
+      left: calc(50% - 12px);
     }
     a.enter-ar .disc {
       width: 100%;
@@ -79,9 +79,6 @@ template.innerHTML = `
       opacity: 0.6;
       background-color: #fff;
       box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.2);
-      position: absolute;
-      top: 0;
-      left: 0;
     }
     canvas {
       width: 100%;
@@ -95,7 +92,7 @@ template.innerHTML = `
   <div class="container">
     <a class="enter-ar" href="#">
       <div class="disc"></div>
-      ${ARKitSVG}
+      ${ARGlyph}
     </a>
     <div class="poster"></div>
     <canvas></canvas>
