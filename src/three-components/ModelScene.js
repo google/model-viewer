@@ -75,18 +75,14 @@ export default class ModelScene extends Scene {
     this.shadowLight = new DirectionalLight(0xffffff, 0);
     this.shadowLight.position.set(0, 10, 0);
 
-    this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
+    this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 1000);
     this.camera.position.y = 5;
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
 
     const skysphereGeo = new SphereBufferGeometry(1, 32, 32);
-    const skysphereMat = new MeshBasicMaterial({
-      side: BackSide,
-      color: 0xffffff,
-      depthTest: false,
-      depthWrite: false
-    });
+    const skysphereMat = new MeshBasicMaterial(
+        {side: BackSide, color: 0xffffff, depthTest: false, depthWrite: false});
     this.skysphere = new Mesh(skysphereGeo, skysphereMat);
 
     this.add(this.pivot);
@@ -181,20 +177,13 @@ export default class ModelScene extends Scene {
     // Position the camera such that the element is perfectly framed
     this.camera.near =
         (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
+    this.camera.position.z = this.roomBox.max.z + this.camera.near;
     this.camera.aspect = this.aspect;
-    this.camera.position.z = (this.roomBox.max.z) + this.camera.near;
     this.camera.updateProjectionMatrix();
 
-    // We want to scale our skysphere such that it's larger than the room.
-    // Take the largest side of the room, assume it's as large as possible
-    // on all sides (cube), find the diagonal of the cube, and set the
-    // skysphere's diameter to that.
-    // width == depth, so check the aspect ratio to find largest side.
-    const longestWall = this.aspect > 1 ? halfWidth * 2 : FRAMED_HEIGHT;
-
-    // `x * sqrt(3)` is the length of the longest diagonal through a cube
-    // with longest side of `x`.
-    this.skysphere.scale.setScalar(longestWall * Math.sqrt(3));
+    const skysphereSize =
+        Math.max(this.roomSize.x, this.roomSize.y, this.roomSize.z) * 2;
+    this.skysphere.scale.setScalar(skysphereSize);
 
     this.updateStaticShadow();
   }
@@ -277,6 +266,9 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
+    // Don't want the skysphere in the shadow shot
+    this.remove(this.skysphere);
+
     this.shadow.position.set(0, 0, 0);
     this.shadow.scale.x = this.roomSize.x;
     this.shadow.scale.z = this.roomSize.z;
@@ -293,7 +285,9 @@ export default class ModelScene extends Scene {
     // element and model are width-bound.
     const modelHeight = this.model.size.y * this.model.scale.y;
     if (modelHeight < FRAMED_HEIGHT) {
-      this.shadow.position.y  = (FRAMED_HEIGHT / 2) - modelHeight / 2
+      this.shadow.position.y = (FRAMED_HEIGHT / 2) - modelHeight / 2
     }
+
+    this.add(this.skysphere);
   }
 }

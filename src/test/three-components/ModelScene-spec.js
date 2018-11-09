@@ -21,6 +21,13 @@ import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
 
 const expect = chai.expect;
 
+// Checks that the skysphere is within the camera's far plane
+function ensureSkysphereVisible(scene) {
+  expect(scene.skysphere.scale.x).to.be.equal(scene.skysphere.scale.y);
+  expect(scene.skysphere.scale.y).to.be.equal(scene.skysphere.scale.z);
+  expect(scene.skysphere.scale.x).to.be.lessThan(scene.camera.far);
+}
+
 function ensureRoomFitsAspect(roomBox, aspect) {
   expect(roomBox.max.x).to.be.equal(aspect * FRAMED_HEIGHT / 2);
   expect(roomBox.min.x).to.be.equal(aspect * FRAMED_HEIGHT / -2);
@@ -85,6 +92,7 @@ suite('ModelScene', () => {
 
       ensureRoomFitsAspect(scene.roomBox, aspect);
       ensureWidthAndDepthEqual(scene.roomBox);
+      ensureSkysphereVisible(scene);
     });
 
     test('increases depth of room for Y-rotation', () => {
@@ -98,6 +106,7 @@ suite('ModelScene', () => {
 
       ensureRoomFitsAspect(scene.roomBox, aspect);
       ensureWidthAndDepthEqual(scene.roomBox);
+      ensureSkysphereVisible(scene);
     });
 
     test('increases width of room for Y-rotation', () => {
@@ -111,6 +120,7 @@ suite('ModelScene', () => {
 
       ensureRoomFitsAspect(scene.roomBox, aspect);
       ensureWidthAndDepthEqual(scene.roomBox);
+      ensureSkysphereVisible(scene);
     });
 
     test('reduce depth of room if Y-axis-bound', () => {
@@ -128,6 +138,7 @@ suite('ModelScene', () => {
       // width of the model
       expect(scene.roomBox.max.z).to.be.equal(1.5);
       expect(scene.roomBox.min.z).to.be.equal(-1.5);
+      ensureSkysphereVisible(scene);
     });
 
     test('updates skysphere size to fully enclose room', () => {
@@ -144,6 +155,18 @@ suite('ModelScene', () => {
       expect(scene.skysphere.scale.x).to.be.greaterThan(size.x);
       expect(scene.skysphere.scale.y).to.be.greaterThan(size.y);
       expect(scene.skysphere.scale.z).to.be.greaterThan(size.z);
+      ensureSkysphereVisible(scene);
+    });
+
+    test('the skysphere is still within far plane for extreme aspects', () => {
+      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(200, 100, 300));
+      scene.model.setObject(dummyMesh);
+
+      const width = 1000;
+      const height = 50;
+      const aspect = width / height;
+      scene.setSize(width, height);
+      ensureSkysphereVisible(scene);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

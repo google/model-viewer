@@ -17,7 +17,7 @@ import {Color} from 'three';
 
 import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
 import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
-import {$needsRender, $onModelLoad, $renderer, $scene} from '../xr-model-element-base.js';
+import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../xr-model-element-base.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_ENVMAP_SIZE = 512;
@@ -81,6 +81,12 @@ export const EnvironmentMixin = (XRModelElement) => {
       }
 
       this[$setEnvironmentColor](this.backgroundColor);
+    }
+
+    [$tick](time, delta) {
+      super[$tick](time, delta);
+      const camera = this[$scene].getCamera();
+      this[$scene].skysphere.position.copy(camera.position);
     }
 
     [$onModelLoad](e) {
