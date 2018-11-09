@@ -12,29 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-body {
-  font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif
-}
-#container {
-  text-align: center;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-.desc code {
-  padding: 0px 5px;
-  height: auto;
-}
-h1, h2 {
-  font-weight: 200;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: flex;
-}
-xr-model {
-  height: 400px;
-  width: 100%;
-}
+
+import '@polymer/iron-demo-helpers/demo-snippet.js';
+import '@polymer/paper-button/paper-button.js';

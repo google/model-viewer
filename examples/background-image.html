@@ -21,11 +21,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
-  <link href="./third_party/prism/prism.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
-  <link type="text/css" href="style.css" rel="stylesheet" />
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
   <!-- Include prismatic.js for Magic Leap support: -->
@@ -46,20 +43,70 @@
 <body>
     <div id="container">
         <h1>&lt;model-viewer&gt; - background-image</h1>
-        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using <code>background-image</code>.</p>
+        <div class="desc">
+        <p>This page showcases the <code>background-image</code> attribute, which links to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection</a> image, responsible for changing the environment, and environment map applied to the model.</p>
+        </div>
 
-        <h2>With Equirectangular background-image</h2>
-        <model-viewer controls background-image="assets/equirectangular.png" src="assets/DamagedHelmet/DamagedHelmet.gltf">
-        </model-viewer>
+        <demo-snippet>
+            <h2>With Equirectangular background-image</h2>
+            <template>
+                <model-viewer
+                    controls
+                    background-image="assets/equirectangular.png"
+                    src="assets/DamagedHelmet/DamagedHelmet.gltf">
+                </model-viewer>
+            </template>
+        </demo-snippet>
 
-        <h2>With very reflective model</h2>
-        <model-viewer controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/reflective-sphere.gltf">
-        </model-viewer>
+        <demo-snippet>
+            <h2>With very reflective model</h2>
+            <template>
+                <model-viewer
+                    controls
+                    background-image="assets/equirectangular.png"
+                    src="assets/reflective-sphere.gltf">
+                </model-viewer>
+            </template>
+        </demo-snippet>
 
-        <h2>With unlit model</h2>
-        <model-viewer controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/Astronaut.glb">
-        </model-viewer>
+        <demo-snippet>
+            <h2>With unlit model</h2>
+            <template>
+                <model-viewer
+                    controls
+                    background-image="assets/equirectangular.png"
+                    src="assets/Astronaut.glb">
+                </model-viewer>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>With (unused) background-color</h2>
+            <template>
+                <model-viewer
+                    controls
+                    background-color="#ff0077"
+                    background-image="assets/equirectangular.png"
+                    src="assets/reflective-sphere.gltf">
+                </model-viewer>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Cycling background image</h2>
+            <template>
+                <model-viewer id="toggle-image" backgroud-color="#ff0077" src="assets/DamagedHelmet/DamagedHelmet.gltf" controls auto-rotate></model-viewer>
+                <script>
+                    const images = ['assets/equirectangular.png', 'does-not-exist.png', ''];
+                    let i = 0;
+                    setInterval(() =>
+                        $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 1000);
+                </script>
+            </template>
+        </demo-snippet>
+    </div>
+    <script src="./scripts/helpers.js"></script>
+    <script src="./built/dependencies.js"></script>
     <script src="../dist/model-viewer-element.js"></script>
-    <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

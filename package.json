@@ -19,6 +19,8 @@
   "author": "Jordan Santell <jsantell@google.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@polymer/iron-demo-helpers": "^3.0.2",
+    "@polymer/paper-button": "^3.0.1",
     "@webcomponents/webcomponentsjs": "^2.1.3",
     "babel-eslint": "^8.2.3",
     "chai": "^4.1.2",

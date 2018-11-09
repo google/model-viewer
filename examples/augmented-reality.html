@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; - Examples</title>
+  <title>&lt;model-viewer&gt; - Augmented Reality</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -25,7 +25,7 @@
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
   <!-- Include prismatic.js for Magic Leap support: -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+  <script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>
 
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
@@ -41,31 +41,24 @@
 </head>
 <body>
     <div id="container">
-        <h1>&lt;model-viewer&gt; - Examples</h1>
+        <h1>&lt;model-viewer&gt; - Augmented Reality</h1>
         <div class="desc">
-            <p>There are several HTML pages containing usages of the <code>&lt;model-viewer&gt;</code> element with different configurations for demonstrative purposes and testing specific scenarios.</p>
+        <p>This page tests several augmented reality features, including <code>unstable-webxr</code>, <code>magic-leap</code> and <code>ios-src</code>.</p>
+        <ul>
+            <li><code>ios-src</code> provides augmented reality on <a href="https://www.apple.com/ios/augmented-reality/">supported iOS 12+ devices</a> via <a href="https://developer.apple.com/videos/play/wwdc2018/603/">AR Quick Look</a> and requires a <a href="https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html">USDZ</a> model.</li>
+            <li><code>magic-leap</code> provides augmented reality on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a> browser, and requires a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</li>
+            <li><code>unstable-webxr</code> provides augmented reality via the experimental <a href="https://github.com/immersive-web/webxr">WebXR Device API</a>, implemented in Chrome Canary only <a href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">behind flags</a>.</li>
+        </ul>
         </div>
 
-        <h2>Demos &amp; Scenarios</h2>
-        <ul class="desc">
-            <li><a href="default.html">default.html</a>: The barebones default case.</li>
-            <li><a href="background-color.html">background-color.html</a>: Using the <code>background-color</code> attribute to style the background color.</li>
-            <li><a href="background-image.html">background-image.html</a>: Using the <code>background-image</code> attribute to specify an equirectangular projection image.</li>
-            <li><a href="augmented-reality.html">augmented-reality.html</a>: Tests using configurations that enable viewing the model in augmented reality.</li>
-            <li><a href="loading.html">loading.html</a>: Examples using the different configurations of displaying an image while loading, and lazy loading models.</li>
-            <li><a href="sources.html">sources.html</a>: Tests different configurations of loading model formats.</li>
-            <li><a href="multiple-elements.html">multiple-elements.html</a>: Stress test of rendering 16 elements that require rendering on every frame, all in the view at once.</li>
-            <li><a href="list.html">list.html</a>: Test of many elements on a page, and lazily rendering only when in view.</li>
-            <li><a href="pbr.html">pbr.html</a>: Showcase of high-resolution models with multiple textures and environment maps. <b>WARNING</b>: this page uses 50+MB of assets.</li>
-        </ul>
-
         <demo-snippet>
+            <h2>iOS, Magic Leap, WebXR</h2>
             <template>
-                <model-viewer
-                  src="assets/Astronaut.glb"
-                  controls
-                  auto-rotate
-                  background-color="#4885ed">
+                <model-viewer src="assets/Astronaut.glb"
+                    background-color="#3cba54"
+                    ios-src="assets/Astronaut.usdz"
+                    magic-leap
+                    unstable-webxr>
                 </model-viewer>
             </template>
         </demo-snippet>

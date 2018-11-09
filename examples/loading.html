@@ -1,0 +1,120 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; - Poster</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
+
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+  <!-- Include prismatic.js for Magic Leap support: -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
+  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+</head>
+<body>
+    <div id="container">
+        <h1>&lt;model-viewer&gt; - Poster</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using the <code>poster</code> attribute.</p>
+
+        <demo-snippet>
+            <h2>Display poster until loaded</h2>
+            <template>
+                <model-viewer id="reveal" reveal-when-loaded preload poster="assets/poster.png" src="assets/shishkebab.glb"></model-viewer>
+                <script>
+                    $('#reveal').addEventListener('load', e => {
+                        // Display a red border to illustrate load timing
+                        e.target.style.border = '2px solid red';
+                    }, { once: true });
+                </script>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Preload with poster and show model on interaction</h2>
+            <template>
+                <!-- use unique asset to ensure preloading -->
+                <model-viewer id="interaction" preload poster="assets/poster.png" src="assets/reflective-sphere.gltf"></model-viewer>
+                <script>
+                    $('#interaction').addEventListener('load', e => {
+                        // Display a red border to illustrate load timing
+                        e.target.style.border = '2px solid red';
+                    }, { once: true });
+                </script>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Lazy load with poster until interaction</h2>
+            <template>
+                <!-- use unique asset to ensure lazy loading -->
+                <model-viewer id="lazy-load" poster="assets/poster.png" src="assets/DamagedHelmet/DamagedHelmet.gltf"></model-viewer>
+                <script>
+                    $('#lazy-load').addEventListener('load', e => {
+                        // Display a red border to illustrate load timing
+                        e.target.style.border = '2px solid red';
+                    }, { once: true });
+                </script>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Model with poster and preload</h2>
+            <template>
+                <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb"></model-viewer>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Poster with invalid model</h2>
+            <template>
+                <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb"></model-viewer>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Cycling between posters</h2>
+            <template>
+                <model-viewer id="toggle-poster" poster="assets/poster2.png" src="assets/Astronaut.glb"></model-viewer>
+                <script>
+                    const posters = ['poster.png', 'poster2.png'];
+                    let i = 0;
+                    setInterval(() =>
+                        $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
+                </script>
+            </template>
+        </demo-snippet>
+    </div>
+    <script src="scripts/helpers.js"></script>
+    <script src="./built/dependencies.js"></script>
+    <script src="../dist/model-viewer-element.js"></script>
+</body>
+</html>

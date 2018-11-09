@@ -1,6 +1,7 @@
 node_modules/*
 dist/*
 lib/*
+examples/built/*
 **/*.sw*
 .DS_Store
 .idea
