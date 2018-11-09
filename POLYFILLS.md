@@ -34,9 +34,10 @@ fine. The following is a selection of recommended polyfill implementations:
 Please keep in mind that your mileage may vary depending on the browsers you
 need to support and the fidelity of the polyfills used.
 
-**NOTE:** The Fullscreen API is only necessary for the experimental Web XR-based
-AR mode. Since this is only available behind a flag in Chrome Dev today, it is
-not necessary to load a Fullscreen API polyfill in production scenarios.
+**NOTE:** The Fullscreen API is only necessary for the experimental Web XR
+Device API-based AR mode. Since this is only available behind a flag in Chrome
+Dev today, it is not necessary to load a Fullscreen API polyfill in production
+scenarios.
 
 ## Usage Example
 
