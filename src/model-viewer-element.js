@@ -17,8 +17,8 @@ import {ARMixin} from './features/ar.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
 import {ControlsMixin} from './features/controls.js';
 import {EnvironmentMixin} from './features/environment.js';
+import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
-import {PosterMixin} from './features/poster.js';
 import ModelViewerElementBase from './model-viewer-element-base.js';
 
 import template from './template.js';
@@ -28,7 +28,7 @@ if (window.ShadyCSS) {
 }
 
 const ModelViewerElement = [
-  PosterMixin,
+  LoadingMixin,
   ARMixin,
   AutoRotateMixin,
   EnvironmentMixin,

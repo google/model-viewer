@@ -24,7 +24,10 @@ import {deserializeUrl} from './utils.js';
 const renderer = new Renderer();
 
 const $updateSize = Symbol('updateSize');
+const $loaded = Symbol('loaded');
 
+export const $updateSource = Symbol('updateSource');
+export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $canvas = Symbol('canvas');
 export const $scene = Symbol('scene');
@@ -40,12 +43,11 @@ export const $renderer = Symbol('renderer');
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   static get properties() {
-    return {
-      src: {type: deserializeUrl},
-      iosSrc: {type: deserializeUrl, attribute: 'ios-src'},
-      vignette: {type: Boolean},
-      preload: {type: Boolean}
-    };
+    return {src: {type: deserializeUrl}};
+  }
+
+  get loaded() {
+    return this[$loaded];
   }
 
   get[$renderer]() {
@@ -70,48 +72,17 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     // Create the underlying ModelScene.
     const {width, height} = this.getBoundingClientRect();
-    this[$scene] = new ModelScene({
-      canvas: this[$canvas],
-      element: this,
-      width,
-      height,
-      renderer,
-    });
+    this[$scene] = new ModelScene(
+        {canvas: this[$canvas], element: this, width, height, renderer});
 
-    // Tracks whether or not the user has interacted with this element;
-    // used to determine whether or not to display a poster image or
-    // to load the model if not preloaded.
-    this.__userInput = false;
-
-    // Fired when a user first clicks the model element. Used to
-    // change the visibility of a poster image, or start loading
-    // a model.
-    this.addEventListener('click', () => {
-      // Hide the poster always whether it exists or not
-      this.__userInput = true;
-
-      // Update the source so it can start loading if
-      // not preloaded
-      this.__updateSource();
-    }, {once: true});
-
-    this.__mode = 'dom';
-
-    // Keeps track whether the model is loaded or not; refreshes
-    // when updating `src`.
-    this.__loaded = false;
+    this[$loaded] = false;
 
     this[$scene].addEventListener('model-load', () => {
-      // Hide the poster always whether it exists or not
-      this.__loaded = true;
-
+      this[$markLoaded]();
       this[$onModelLoad]();
 
-      this.dispatchEvent(new Event('load'));
+      this.dispatchEvent(new CustomEvent('load'));
     });
-
-    // Update the sources on construction
-    this.__updateSource();
 
     // Update initial size on microtask timing so that subclasses have a chance
     // to initialize
@@ -125,7 +96,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
       // Don't resize anything if in AR mode; otherwise the canvas
       // scaling to fullscreen on entering AR will clobber the flat/2d
       // dimensions of the element.
-      if (this.__mode === 'ar') {
+      if (renderer.isPresenting) {
         return;
       }
       for (let entry of entries) {
@@ -160,14 +131,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   update(changedProperties) {
-    if (changedProperties.has('vignette')) {
-      // @TODO renable as a feature to access the renderer, or remove?
-      // this[$scene].setVignette(this.vignette);
-    }
-
-    if (changedProperties.has('preload') || changedProperties.has('src')) {
-      this.__updateSource();
-    }
+    this[$updateSource]();
   }
 
   /**
@@ -189,6 +153,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$tick](time, delta) {
   }
 
+  [$markLoaded]() {
+    this[$loaded] = true;
+    // Asynchronously invoke `update`:
+    this.requestUpdate();
+  }
+
   [$needsRender]() {
     this[$scene].isDirty = true;
   }
@@ -207,19 +177,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * sets the views to use the new model based off of the `preload`
    * attribute.
    */
-  __updateSource() {
-    const preload = this.preload;
+  [$updateSource]() {
     const source = this.src;
 
-    if (source == null) {
+    if (!source) {
       return;
     }
 
-    if (preload !== null || this.__userInput) {
-      this[$canvas].classList.add('show');
-      this[$scene].setModelSource(source);
-      // NOTE(cdata): We previously hid the click to view element
-      // What is this condition? How do we cover it?
-    }
+    this[$canvas].classList.add('show');
+    this[$scene].setModelSource(source);
   }
 }

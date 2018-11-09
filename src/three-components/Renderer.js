@@ -125,8 +125,12 @@ export default class Renderer extends EventDispatcher {
     return this[$arRenderer].stopPresenting();
   }
 
+  get isPresenting() {
+    return this[$arRenderer] != null && this[$arRenderer].isPresenting;
+  }
+
   render(t) {
-    if (this[$arRenderer] != null && this[$arRenderer].isPresenting) {
+    if (this.isPresenting) {
       return;
     }
 
