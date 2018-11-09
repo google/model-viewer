@@ -20,6 +20,7 @@ import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
 import {$needsRender, $onModelLoad, $onResize, $scene} from '../xr-model-element-base.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
+const ORBIT_FAR_PLANE = 1000;
 
 export const $controls = Symbol('controls');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
@@ -41,6 +42,7 @@ export const ControlsMixin = (XRModelElement) => {
 
       this[$orbitCamera] = this[$scene].camera.clone();
       this[$orbitCamera].near = ORBIT_NEAR_PLANE;
+      this[$orbitCamera].far = ORBIT_FAR_PLANE;
       this[$orbitCamera].updateProjectionMatrix();
       this[$controls] = null;
     }
