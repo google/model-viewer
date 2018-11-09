@@ -15,10 +15,7 @@
 
 import {Box3, Object3D, Vector3} from 'three';
 
-import GLTFLoader from '../third_party/three/GLTFLoader.js';
-
-const loadGLTF = (loader, url) => new Promise(
-    (resolve, reject) => loader.load(url, resolve, () => {}, reject));
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 
 /**
  * An Object3D that can swap out its underlying
@@ -32,7 +29,7 @@ export default class Model extends Object3D {
    */
   constructor() {
     super();
-    this.loader = new GLTFLoader();
+    this.loader = new CachingGLTFLoader();
     this.modelContainer = new Object3D();
     this.boundingBox = new Box3();
     this.size = new Vector3();
@@ -80,13 +77,13 @@ export default class Model extends Object3D {
       return;
     }
 
-    const data = await loadGLTF(this.loader, url);
+    const scene = await this.loader.load(url);
 
     this.clear();
     this.url = url;
 
-    while (data.scene && data.scene.children.length) {
-      this.modelContainer.add(data.scene.children.shift());
+    while (scene && scene.children.length) {
+      this.modelContainer.add(scene.children.shift());
     }
 
     this.modelContainer.traverse(obj => {

@@ -13,15 +13,30 @@
  * limitations under the License.
  */
 
-import './utils-spec.js';
-import './model-viewer-element-base-spec.js';
-import './three-components/ModelScene-spec.js';
-import './three-components/Renderer-spec.js';
-import './three-components/ARRenderer-spec.js';
-import './three-components/TextureUtils-spec.js';
-import './three-components/CachingGLTFLoader-spec.js';
-import './features/controls-spec.js';
-import './features/environment-spec.js';
-import './features/loading-spec.js';
-import './features/magic-leap-spec.js';
-import './features/ar-spec.js';
+import GLTFLoader from '../third_party/three/GLTFLoader.js';
+
+const loadWithLoader = (url, loader) => new Promise((resolve, reject) => {
+  loader.load(url, resolve, () => {}, reject);
+});
+
+const cache = new Map();
+
+export class CachingGLTFLoader {
+  static has(url) {
+    return cache.has(url);
+  }
+
+  constructor() {
+    this.loader = new GLTFLoader();
+  }
+
+  async load(url) {
+    if (!cache.has(url)) {
+      cache.set(url, loadWithLoader(url, this.loader));
+    }
+
+    const gltf = await cache.get(url);
+
+    return gltf.scene ? gltf.scene.clone(true) : null;
+  }
+}

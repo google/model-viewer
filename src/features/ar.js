@@ -16,6 +16,7 @@
 import {IS_AR_CANDIDATE, IS_IOS} from '../constants.js';
 import {$renderer, $scene} from '../model-viewer-element-base.js';
 import {openIOSARQuickLook} from '../utils.js';
+import {deserializeUrl} from '../utils.js';
 
 
 const $enterARElement = Symbol('enterARElement');
@@ -23,7 +24,11 @@ const $enterARElement = Symbol('enterARElement');
 export const ARMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
     static get properties() {
-      return {...super.properties, ar: {type: Boolean}};
+      return {
+        ...super.properties,
+        ar: {type: Boolean},
+        iosSrc: {type: deserializeUrl, attribute: 'ios-src'}
+      };
     }
 
     get canActivateAR() {
