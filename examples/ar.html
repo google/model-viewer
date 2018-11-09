@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - AR</title>
+  <title>ModelViewerElement - AR</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -38,48 +38,48 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - AR</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>ar</code> attribute.</p>
+        <h1>ModelViewerElement - AR</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using the <code>ar</code> attribute.</p>
 
         <h2>AR with model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer ar src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model ar src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer ar src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>AR with poster and preload</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer ar preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model ar preload poster="assets/poster.png" src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer ar preload poster="assets/poster.png" src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>AR with poster</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer ar poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model ar poster="assets/poster.png" src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer ar poster="assets/poster.png" src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>AR with preload</h2>
         <pre class="language-markup">
-<code>&lt;xr-model ar preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer ar preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model ar preload src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer ar preload src="assets/Astronaut.glb">
+        </model-viewer>
 
     </div>
-    <script src="../dist/xr-model-element.js"></script>
+    <script src="../dist/model-viewer-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

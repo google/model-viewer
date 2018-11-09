@@ -15,25 +15,25 @@
 
 import {IS_IOS} from '../../constants.js';
 import {$enterARElement, ARMixin} from '../../features/ar.js';
-import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
 import {pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
-suite('XRModelElementBase with ARMixin', () => {
+suite('ModelViewerElementBase with ARMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName;
-    let XRModelElement;
+    let ModelViewerElement;
 
     setup(() => {
-      tagName = `xr-model-ar-${nextId++}`;
-      XRModelElement = ARMixin(XRModelElementBase);
-      customElements.define(tagName, XRModelElement);
+      tagName = `model-viewer-ar-${nextId++}`;
+      ModelViewerElement = ARMixin(ModelViewerElementBase);
+      customElements.define(tagName, ModelViewerElement);
     });
 
     test('can be directly instantiated', () => {
-      const element = new XRModelElement();
+      const element = new ModelViewerElement();
       expect(element).to.be.ok;
     });
 
@@ -46,7 +46,7 @@ suite('XRModelElementBase with ARMixin', () => {
       let element;
 
       setup(async () => {
-        element = new XRModelElement();
+        element = new ModelViewerElement();
         document.body.appendChild(element);
 
         element.ar = true;

@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - Poster</title>
+  <title>ModelViewerElement - Poster</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -39,61 +39,61 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - Poster</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using the <code>poster</code> attribute.</p>
+        <h1>ModelViewerElement - Poster</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using the <code>poster</code> attribute.</p>
 
         <h2>Poster with model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model poster="assets/poster.png" src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>Poster with preload</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/poster.png&quot; preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/poster.png&quot; preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model poster="assets/poster.png" preload src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer poster="assets/poster.png" preload src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>Invalid poster with model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/i-do-not-exist.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/i-do-not-exist.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model poster="assets/i-do-not-exist.png" src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer poster="assets/i-do-not-exist.png" src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>Poster with no model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/poster.png&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/poster.png&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model poster="assets/poster.png">
-        </xr-model>
+        <model-viewer poster="assets/poster.png">
+        </model-viewer>
 
         <h2>Poster with invalid model</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/i-do-not-exist.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/poster.png&quot; src=&quot;assets/i-do-not-exist.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model poster="assets/poster.png">
-        </xr-model>
+        <model-viewer poster="assets/poster.png">
+        </model-viewer>
 
         <h2>Poster toggling between two different posters (2s timer)</h2>
         <pre class="language-markup">
-<code>&lt;xr-model poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model id="toggle-model" poster="assets/poster.png" src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer id="toggle-model" poster="assets/poster.png" src="assets/Astronaut.glb">
+        </model-viewer>
 
     </div>
     <script>
@@ -105,7 +105,7 @@
                                                'assets/poster.png');
         }, 2000);
     </script>
-    <script src="../dist/xr-model-element.js"></script>
+    <script src="../dist/model-viewer-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

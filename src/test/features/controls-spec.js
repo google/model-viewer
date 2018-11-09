@@ -14,25 +14,25 @@
  */
 
 import {$controls, ControlsMixin} from '../../features/controls.js';
-import XRModelElementBase, {$scene} from '../../xr-model-element-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-element-base.js';
 import {timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
-suite('XRModelElementBase with ControlsMixin', () => {
+suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName;
-    let XRModelElement;
+    let ModelViewerElement;
 
     setup(() => {
-      tagName = `xr-model-controls-${nextId++}`;
-      XRModelElement = ControlsMixin(XRModelElementBase);
-      customElements.define(tagName, XRModelElement);
+      tagName = `model-viewer-controls-${nextId++}`;
+      ModelViewerElement = ControlsMixin(ModelViewerElementBase);
+      customElements.define(tagName, ModelViewerElement);
     });
 
     test('can be directly instantiated', () => {
-      const element = new XRModelElement();
+      const element = new ModelViewerElement();
       expect(element).to.be.ok;
     });
 
@@ -45,7 +45,7 @@ suite('XRModelElementBase with ControlsMixin', () => {
       let element;
 
       setup(async () => {
-        element = new XRModelElement();
+        element = new ModelViewerElement();
         document.body.appendChild(element);
         element.src = './examples/assets/cube.gltf';
         element.controls = true;

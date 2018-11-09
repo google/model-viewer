@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - Core</title>
+  <title>ModelViewerElement - Core</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -39,7 +39,7 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
   <style>
     .grid {
@@ -50,7 +50,7 @@
         grid-template-rows: 1fr 2fr 3fr 4fr;
         grid-template-columns: 1fr 2fr 3fr 4fr;
     }
-    .grid xr-model {
+    .grid model-viewer {
         width: 100%;
         height: 100%;
     }
@@ -58,45 +58,45 @@
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - Multiple Canvases</h1>
+        <h1>ModelViewerElement - Multiple Canvases</h1>
         <p class="desc">This page tests many models on the same page.</p>
 
         <div class="grid">
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#4885ed"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#3cba54"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#f4c20d"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#db3236"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#4885ed"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#3cba54"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#f4c20d"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#db3236"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#4885ed"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#3cba54"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#f4c20d"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#db3236"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#4885ed"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#3cba54"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#f4c20d"></xr-model>
-            <xr-model src="assets/Astronaut.glb"
-                preload  auto-rotate background-color="#db3236"></xr-model>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#4885ed"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#3cba54"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#f4c20d"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#db3236"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#4885ed"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#3cba54"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#f4c20d"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#db3236"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#4885ed"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#3cba54"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#f4c20d"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#db3236"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#4885ed"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#3cba54"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#f4c20d"></model-viewer>
+            <model-viewer src="assets/Astronaut.glb"
+                preload  auto-rotate background-color="#db3236"></model-viewer>
         </div>
     </div>
 
-        <script src="../../dist/xr-model-element.js"></script>
+        <script src="../../dist/model-viewer-element.js"></script>
 </body>
 </html>

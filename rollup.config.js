@@ -32,11 +32,11 @@ const plugins = [
 
 export default [
   {
-    input: './lib/xr-model-element.js',
+    input: './lib/model-viewer-element.js',
     output: {
-      file: './dist/xr-model-element.js',
+      file: './dist/model-viewer-element.js',
       format: 'umd',
-      name: 'XRModelElement',
+      name: 'ModelViewerElement',
       banner
     },
     watch: {
@@ -49,7 +49,7 @@ export default [
     output: {
       file: './dist/unit-tests.js',
       format: 'umd',
-      name: 'XRModelElementUnitTests',
+      name: 'ModelViewerElementUnitTests',
       banner
     },
     watch: {

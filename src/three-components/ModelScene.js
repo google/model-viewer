@@ -48,7 +48,7 @@ const $paused = Symbol('paused');
  */
 export default class ModelScene extends Scene {
   /**
-   * @param {XRModelElement} options.element
+   * @param {ModelViewerElementBase} options.element
    * @param {CanvasHTMLElement} options.canvas
    * @param {number} options.width
    * @param {number} options.height

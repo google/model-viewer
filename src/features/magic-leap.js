@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$container, $scene} from '../xr-model-element-base.js';
+import {$container, $scene} from '../model-viewer-element-base.js';
 
 const $showMlModel = Symbol('showMlModel');
 const $hideMlModel = Symbol('hideMlModel');
@@ -37,8 +37,8 @@ const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
  *
  * @see https://www.npmjs.com/package/@magicleap/prismatic
  */
-export const MagicLeapMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const MagicLeapMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {
         ...super.properties,

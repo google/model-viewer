@@ -19,7 +19,7 @@ import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
-import {$tick} from '../xr-model-element-base.js';
+import {$tick} from '../model-viewer-element-base.js';
 
 import {ARRenderer} from './ARRenderer.js';
 

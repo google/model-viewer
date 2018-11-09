@@ -14,7 +14,7 @@
  */
 
 import {EnvironmentMixin} from '../../features/environment.js';
-import XRModelElementBase, {$scene} from '../../xr-model-element-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-element-base.js';
 import {waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
@@ -51,18 +51,18 @@ const waitForEnvmap = (model, mapName) => waitForEvent(
 const waitForLoadAndEnvmap = (scene, element, mapName) => Promise.all(
     [waitForEvent(element, 'load'), waitForEnvmap(scene.model, mapName)]);
 
-suite('XRModelElementBase with EnvironmentMixin', () => {
+suite('ModelViewerElementBase with EnvironmentMixin', () => {
   let nextId = 0;
   let tagName;
-  let XRModelElement;
+  let ModelViewerElement;
   let element;
   let scene;
 
   setup(() => {
-    tagName = `xr-model-environment-${nextId++}`;
-    XRModelElement = EnvironmentMixin(XRModelElementBase);
-    customElements.define(tagName, XRModelElement);
-    element = new XRModelElement();
+    tagName = `model-viewer-environment-${nextId++}`;
+    ModelViewerElement = EnvironmentMixin(ModelViewerElementBase);
+    customElements.define(tagName, ModelViewerElement);
+    element = new ModelViewerElement();
     scene = element[$scene];
   });
 

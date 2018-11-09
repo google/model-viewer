@@ -15,9 +15,9 @@
 
 import {PerspectiveCamera, Vector3} from 'three';
 
+import {$needsRender, $onModelLoad, $onResize, $scene} from '../model-viewer-element-base.js';
 import OrbitControls from '../third_party/three/OrbitControls.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
-import {$needsRender, $onModelLoad, $onResize, $scene} from '../xr-model-element-base.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
@@ -28,8 +28,8 @@ const $onControlsChange = Symbol('onControlsChange');
 const $orbitCamera = Symbol('orbitCamera');
 const $defaultCamera = Symbol('defaultCamera');
 
-export const ControlsMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const ControlsMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {...super.properties, controls: {type: Boolean}};
     }

@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - Core</title>
+  <title>ModelViewerElement - Core</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -39,32 +39,32 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - Core</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using defaults and features not covered in other tests.</p>
+        <h1>ModelViewerElement - Core</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using defaults and features not covered in other tests.</p>
 
         <h2>Defaults</h2>
         <pre class="language-markup">
-<code>&lt;xr-model src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;model-viewer src=&quot;assets/Astronaut.glb&quot;&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model src="assets/Astronaut.glb">
-        </xr-model>
+        <model-viewer src="assets/Astronaut.glb">
+        </model-viewer>
 
         <h2>A handful of attributes</h2>
         <pre class="language-markup">
-<code>&lt;xr-model
+<code>&lt;model-viewer
     src=&quot;assets/Astronaut.glb&quot;
     ios-src=&quot;assets/Astronaut.usdz&quot;
     ar preload controls auto-rotate vignette
     background-color=&quot;#4885ed&quot;&gt;</code>
-<code>&lt;/xr-model&gt;</code>
+<code>&lt;/model-viewer&gt;</code>
         </pre>
-        <xr-model class="model"
+        <model-viewer class="model"
           src="assets/Astronaut.glb"
           ios-src="assets/Astronaut.usdz"
           ar
@@ -73,9 +73,9 @@
           auto-rotate
           vignette
           background-color="#4885ed">
-        </xr-model>
+        </model-viewer>
 
-    <script src="../dist/xr-model-element.js"></script>
+    <script src="../dist/model-viewer-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

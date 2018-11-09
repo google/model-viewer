@@ -15,6 +15,7 @@
 
 import {Color} from 'three';
 
+import {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-element-base.js';
 import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
 import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../xr-model-element-base.js';
@@ -28,8 +29,8 @@ const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $envMapGenerator = Symbol('envMapGenerator');
 
-export const EnvironmentMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const EnvironmentMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {
         ...super.properties,

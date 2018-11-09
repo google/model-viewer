@@ -1,8 +1,8 @@
 *🚨 **PROJECT STATUS: EXPERIMENTAL** 🚨 This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.*
 
-# XRModelElement
+# `<model-viewer>`
 
-`<xr-model>` is a web component that makes rendering interactive 3D models -
+`<model-viewer>` is a web component that makes rendering interactive 3D models -
 optionally in AR - easy to do on as many browsers as possible.
 
 ## Installing
@@ -11,16 +11,16 @@ optionally in AR - easy to do on as many browsers as possible.
 not actually work.
 
 You can load a _bundled build_ via
-[unpkg.com](https://unpkg.com/@mcnultron/xr-model/dist/xr-model-element.js):
+[unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js):
 
 ```html
-<script src="https://unpkg.com/@mcnultron/xr-model/dist/xr-model-element.js"></script>
+<script src="https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js"></script>
 ```
 
 Alternatively, you can install the _npm package_:
 
 ```
-npm install ---save @mcnultron/xr-model
+npm install ---save @google/model-viewer
 ```
 
 ### Important note on bundling
@@ -38,14 +38,14 @@ dependencies.
 If you are using a _bundled build_, first add a script tag to your page to load it
 
 ```html
-<script src="path/to/bundled/xr-model-element.js"></script>
+<script src="path/to/bundled/model-viewer-element.js"></script>
 ```
 
 Alternatively, if you are using the _npm package_ and a bundler (see
 "Important note on bundling" above), you can import the module:
 
 ```javascript
-import '@mcnultron/xr-model';
+import '@google/model-viewer';
 ```
 
 After the library has been loaded, a new custom element will be defined. You can
@@ -57,10 +57,10 @@ an HTML document might look like this:
 <html>
   <head>
     <title>3D Test</title>
-    <script src="path/to/bundled/xr-model-element.js"></script>
+    <script src="path/to/bundled/model-viewer-element.js"></script>
   </head>
   <body>
-    <xr-model src="path/to/model.gltf"></xr-model>
+    <model-viewer src="path/to/model.gltf"></model-viewer>
   </body>
 </html>
 ```
@@ -69,28 +69,28 @@ Alternatively, using the _npm package_ in a JavaScript module might look like
 this:
 
 ```javascript
-import '@mcnultron/xr-model';
+import '@google/model-viewer';
 
-const model = document.createElement('xr-model');
+const model = document.createElement('model-viewer');
 model.src = 'path/to/model.gltf';
 
 document.body.appendChild(model);
 ```
 
-You can think of `<xr-model>` sort of like an `<img>` or `<video>` tag, but for
+You can think of `<model-viewer>` sort of like an `<img>` or `<video>` tag, but for
 3D content. Just set its `src` attribute to the URL of a valid [glTF][glTF] (or
 [glB][glB]) file and voila!
 
 ## Browser Support
 
-`<xr-model>` builds upon standard web platform APIs so that the performance,
+`<model-viewer>` builds upon standard web platform APIs so that the performance,
 capabilities and compatibility of the library get better as the web evolves.
 
 However, not all browsers support all of these features today. Below is the
 latest state of browser support for the relevant emerging features.
 
 **📢 Check out
-[POLYFILLS.md](https://github.com/PolymerLabs/xr-model/blob/master/POLYFILLS.md) to
+[POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md) to
 learn how to polyfill for maximum browser compatibility!**
 
 ---
@@ -129,11 +129,11 @@ the `background-color` attribute can also be configured using the
 
 ### Events
 
-* *`'load'`*: Fired when a model is loaded. Can fire multiple times per XRModelElement if changing the `src` attribute.
+* *`'load'`*: Fired when a model is loaded. Can fire multiple times per `<model-viewer>` if changing the `src` attribute.
 
 ## Supported Formats
 
-An `<xr-model>`'s attributes allows developers to specify multiple file types to
+A `<model-viewer>`'s attributes allows developers to specify multiple file types to
 work across different platforms. For WebGL and Web XR purposes, both
 [glTF][glTF] and [glB][glB] are supported out of the box. Additionally,
 developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
