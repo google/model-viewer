@@ -155,6 +155,8 @@ the `background-color` attribute can also be configured using the
 
 * *`'load'`*: Fired when a model is loaded. Can fire multiple times per
   `<model-viewer>` if the `src` attribute is changed.
+* *`'preload'`*: When *`preload`* is enabled this event is fired when
+  preloading is done.
 
 ## Supported Formats
 
