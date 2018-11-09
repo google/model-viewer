@@ -62,10 +62,7 @@ suite('ARRenderer', () => {
 
   teardown(async () => {
     renderer.scenes.clear();
-    try {
-      await arRenderer.stopPresenting();
-    } catch (e) {
-    }
+    await arRenderer.stopPresenting().catch(() => {});
   });
 
   // NOTE(cdata): It will be a notable day when this test fails
