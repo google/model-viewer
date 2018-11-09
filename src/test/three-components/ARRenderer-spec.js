@@ -13,14 +13,40 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$renderer} from '../../model-viewer-element-base.js';
-import ARRenderer from '../../three-components/ARRenderer.js';
+import {IS_AR_CANDIDATE} from '../../constants.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-element-base.js';
+import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {$arRenderer} from '../../three-components/Renderer.js';
+import {waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
 customElements.define('model-viewer-element', ModelViewerElementBase);
+
+
+const stubWebXrInterface = (arRenderer) => {
+  arRenderer.resolveARSession = () => {
+    class FakeSession extends EventTarget {
+      requestFrameOfReference() {
+        return {};
+      }
+
+      requestAnimationFrame() {
+        return 1;
+      }
+
+      cancelAnimationFrame() {
+      }
+
+      end() {
+        this.dispatchEvent(new CustomEvent('end'));
+      }
+    }
+
+    return new FakeSession();
+  };
+};
 
 suite('ARRenderer', () => {
   let element;
@@ -31,11 +57,15 @@ suite('ARRenderer', () => {
   setup(() => {
     element = new ModelViewerElementBase();
     renderer = element[$renderer];
-    arRenderer = renderer[$arRenderer];
+    arRenderer = ARRenderer.fromInlineRenderer(renderer);
   });
 
-  teardown(() => {
+  teardown(async () => {
     renderer.scenes.clear();
+    try {
+      await arRenderer.stopPresenting();
+    } catch (e) {
+    }
   });
 
   // NOTE(cdata): It will be a notable day when this test fails
@@ -45,5 +75,44 @@ suite('ARRenderer', () => {
 
   test('is not presenting if present has not been invoked', () => {
     expect(arRenderer.isPresenting).to.be.equal(false);
+  });
+
+  suite('when presenting a scene', () => {
+    let modelScene;
+
+    if (!IS_AR_CANDIDATE) {
+      return;
+    }
+
+    setup(async () => {
+      element.src = './examples/assets/Astronaut.glb';
+      await waitForEvent(element, 'load');
+      modelScene = element[$scene];
+      stubWebXrInterface(arRenderer);
+    });
+
+    test('presents the model at its natural scale', async () => {
+      const model = modelScene.model;
+
+      await arRenderer.present(modelScene);
+
+      expect(model.scale.x).to.be.equal(1);
+      expect(model.scale.y).to.be.equal(1);
+      expect(model.scale.z).to.be.equal(1);
+    });
+
+    suite('presentation ends', () => {
+      test('restores the original model scale', async () => {
+        const model = modelScene.model;
+        const originalModelScale = model.scale.clone();
+
+        await arRenderer.present(modelScene);
+        await arRenderer.stopPresenting();
+
+        expect(originalModelScale.x).to.be.equal(model.scale.x);
+        expect(originalModelScale.y).to.be.equal(model.scale.y);
+        expect(originalModelScale.z).to.be.equal(model.scale.z);
+      });
+    });
   });
 });

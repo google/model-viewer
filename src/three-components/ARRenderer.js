@@ -5,6 +5,7 @@ import {assertIsArCandidate} from '../utils.js';
 import Reticle from './Reticle.js';
 import Shadow from './Shadow.js';
 
+const $originalModelScale = Symbol('originalModelScale');
 const $presentedScene = Symbol('presentedScene');
 
 const $device = Symbol('device');
@@ -13,6 +14,7 @@ const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $frameOfReference = Symbol('frameOfReference');
+const $resolveCleanup = Symbol('resolveCleanup');
 
 const $outputCanvas = Symbol('outputCanvas');
 const $outputContext = Symbol('outputContext');
@@ -57,6 +59,8 @@ export class ARRenderer {
     this[$currentSession] = null;
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
+    this[$resolveCleanup] = null;
+    this[$originalModelScale] = new Vector3();
 
     this[$device] = null;
 
@@ -67,7 +71,7 @@ export class ARRenderer {
                                  return this[$device] = device;
                                })
                                .catch((error) => {
-                                 console.error(error);
+                                 console.warn(error);
                                  console.warn('Browser AR will be disabled');
                                });
   }
@@ -99,10 +103,6 @@ export class ARRenderer {
 
     const session = await device.requestSession(
         {environmentIntegration: true, outputContext: this.outputContext});
-
-    session.addEventListener('end', () => {
-      this[$postSessionCleanup]();
-    }, {once: true});
 
     const gl = this.renderer.getContext();
 
@@ -147,11 +147,16 @@ export class ARRenderer {
       return;
     }
 
+    this[$originalModelScale].copy(scene.model.scale);
+    scene.model.scale.set(1, 1, 1);
     this[$presentedScene] = scene;
 
     this.initializeRenderer();
 
     this[$currentSession] = await this.resolveARSession();
+    this[$currentSession].addEventListener('end', () => {
+      this[$postSessionCleanup]();
+    }, {once: true});
     this[$frameOfReference] =
         await this[$currentSession].requestFrameOfReference('eye-level');
 
@@ -168,15 +173,20 @@ export class ARRenderer {
       return;
     }
 
+    const cleanupPromise = new Promise((resolve) => {
+      this[$resolveCleanup] = resolve;
+    });
+
     try {
       const session = this[$currentSession];
       this[$currentSession] = null;
       session.cancelAnimationFrame(this[$rafId]);
 
       await session.end();
+      await cleanupPromise;
     } catch (error) {
       console.warn('Error while trying to end AR session');
-      console.error(error);
+      console.warn(error);
 
       this[$postSessionCleanup]();
     }
@@ -186,12 +196,17 @@ export class ARRenderer {
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]);
       this[$presentedScene].skysphere.visible = true;
+      this[$presentedScene].model.scale.copy(this[$originalModelScale]);
     }
 
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
 
     this.outputCanvas.remove();
+
+    if (this[$resolveCleanup] != null) {
+      this[$resolveCleanup]();
+    }
   }
 
   /**
