@@ -21,9 +21,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
-  <link href="../../third_party/prism/prism.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
-  <link type="text/css" href="style.css" rel="stylesheet" />
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
 
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
@@ -41,40 +39,66 @@
 
   <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-<style>
-    .grid {
-        width: 100%;
-        height: 600px;
-        display: grid;
-        grid-gap: 10px;
-        grid-template-rows: 1fr 1fr;
-        grid-template-columns: 1fr 1fr;
-    }
-    .grid model-viewer {
-        width: 100%;
-        height: 100%;
-    }
-</style>
 </head>
 <body>
     <div id="container">
         <h1>&lt;model-viewer&gt; - background-color</h1>
-        <p class="desc">This page tests many models on the same page.</p>
-
-        <model-viewer src="assets/Astronaut.glb"
-            preload controls auto-rotate background-color="#666666"></model-viewer>
-        <div class="grid">
-            <model-viewer src="assets/Astronaut.glb"
-                preload controls auto-rotate background-color="#4885ed"></model-viewer>
-            <model-viewer src="assets/Astronaut.glb"
-                preload controls auto-rotate background-color="#3cba54"></model-viewer>
-            <model-viewer src="assets/Astronaut.glb"
-                preload controls auto-rotate background-color="#f4c20d"></model-viewer>
-            <model-viewer src="assets/Astronaut.glb"
-                preload controls auto-rotate background-color="#db3236"></model-viewer>
+        <div class="desc">
+        <p>This page showcases the <code>background-color</code> attribute, responsible for changing the environment color.</p>
         </div>
+
+        <demo-snippet>
+            <h2>With background-color</h2>
+            <template>
+                <model-viewer src="assets/shishkebab.glb"
+                    controls auto-rotate background-color="#4885ed"></model-viewer>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Multiple elements with background-color</h2>
+            <template>
+                <style>
+                    .grid {
+                        width: 100%;
+                        height: 600px;
+                        display: grid;
+                        grid-template: 1fr 1fr / 1fr 1fr;
+                    }
+                    .grid model-viewer {
+                        width: 100%;
+                        height: 100%;
+                    }
+                </style>
+                <div class="grid">
+                    <model-viewer src="assets/Astronaut.glb"
+                        controls auto-rotate background-color="#4885ed"></model-viewer>
+                    <model-viewer src="assets/Astronaut.glb"
+                        controls auto-rotate background-color="#3cba54"></model-viewer>
+                    <model-viewer src="assets/Astronaut.glb"
+                        controls auto-rotate background-color="#f4c20d"></model-viewer>
+                    <model-viewer src="assets/Astronaut.glb"
+                        controls auto-rotate background-color="#db3236"></model-viewer>
+                </div>
+            </template>
+        </demo-snippet>
+
+        <demo-snippet>
+            <h2>Changing background color</h2>
+            <template>
+                <model-viewer id="toggle-color" src="assets/shishkebab.glb" controls auto-rotate></model-viewer>
+                <script>
+                    const colors = ['#4885ed', '#3cba54', '#f4c20d', '#db3236'];
+                    let i = 0;
+                    setInterval(() =>
+                        $('#toggle-color').setAttribute('background-color', colors[i++ % 4]), 2000);
+                </script>
+            </template>
+        </demo-snippet>
     </div>
 
-        <script src="../../dist/model-viewer-element.js"></script>
+    <script src="./scripts/helpers.js"></script>
+    <script src="./built/dependencies.js"></script>
+    <script src="../../dist/model-viewer-element.js"></script>
 </body>
 </html>

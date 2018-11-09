@@ -17,13 +17,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; - AR</title>
+  <title>&lt;model-viewer&gt; - Default</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
-  <link href="./third_party/prism/prism.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css?family=Fira+Sans:200" rel="stylesheet">
-  <link type="text/css" href="style.css" rel="stylesheet" />
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
   <!-- Include prismatic.js for Magic Leap support: -->
@@ -43,43 +41,18 @@
 </head>
 <body>
     <div id="container">
-        <h1>&lt;model-viewer&gt; - AR</h1>
-        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using the <code>ar</code> attribute.</p>
+        <h1>&lt;model-viewer&gt; - Default</h1>
+        <div class="desc">
+            <p>This page tests the minimally-configured element.</p>
+        </div>
 
-        <h2>AR with model</h2>
-        <pre class="language-markup">
-<code>&lt;model-viewer ar src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/model-viewer&gt;</code>
-        </pre>
-        <model-viewer ar src="assets/Astronaut.glb">
-        </model-viewer>
-
-        <h2>AR with poster and preload</h2>
-        <pre class="language-markup">
-<code>&lt;model-viewer ar preload poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/model-viewer&gt;</code>
-        </pre>
-        <model-viewer ar preload poster="assets/poster.png" src="assets/Astronaut.glb">
-        </model-viewer>
-
-        <h2>AR with poster</h2>
-        <pre class="language-markup">
-<code>&lt;model-viewer ar poster=&quot;assets/poster.png&quot; src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/model-viewer&gt;</code>
-        </pre>
-        <model-viewer ar poster="assets/poster.png" src="assets/Astronaut.glb">
-        </model-viewer>
-
-        <h2>AR with preload</h2>
-        <pre class="language-markup">
-<code>&lt;model-viewer ar preload src=&quot;assets/Astronaut.glb&quot;&gt;</code>
-<code>&lt;/model-viewer&gt;</code>
-        </pre>
-        <model-viewer ar preload src="assets/Astronaut.glb">
-        </model-viewer>
-
+        <demo-snippet>
+            <template>
+                <model-viewer src="assets/Astronaut.glb"></model-viewer>
+            </template>
+        </demo-snippet>
     </div>
+    <script src="./built/dependencies.js"></script>
     <script src="../dist/model-viewer-element.js"></script>
-    <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

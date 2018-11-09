@@ -53,5 +53,13 @@ export default [
       include: 'lib/**',
     },
     plugins
+  },
+  {
+    input: './examples/dependencies/index.js',
+    output: {
+      file: './examples/built/dependencies.js',
+      format: 'umd'
+    },
+    plugins
   }
 ];
