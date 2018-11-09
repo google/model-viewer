@@ -16,9 +16,9 @@
 import {Color} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-element-base.js';
+import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-element-base.js';
 import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
 import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
-import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../xr-model-element-base.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_ENVMAP_SIZE = 512;

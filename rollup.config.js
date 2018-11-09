@@ -18,7 +18,6 @@ const path = require('path');
 const rollup = require('rollup');
 const resolve = require('rollup-plugin-node-resolve');
 const cleanup = require('rollup-plugin-cleanup');
-const banner = fs.readFileSync(path.join(__dirname, 'licenses.txt'));
 
 const plugins = [
   cleanup({
@@ -36,8 +35,7 @@ export default [
     output: {
       file: './dist/model-viewer-element.js',
       format: 'umd',
-      name: 'ModelViewerElement',
-      banner
+      name: 'ModelViewerElement'
     },
     watch: {
       include: 'lib/**',
@@ -49,8 +47,7 @@ export default [
     output: {
       file: './dist/unit-tests.js',
       format: 'umd',
-      name: 'ModelViewerElementUnitTests',
-      banner
+      name: 'ModelViewerElementUnitTests'
     },
     watch: {
       include: 'lib/**',
