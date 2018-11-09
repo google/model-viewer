@@ -5,7 +5,6 @@ import {assertIsArCandidate} from '../utils.js';
 import Reticle from './Reticle.js';
 import Shadow from './Shadow.js';
 
-const $originalModelScale = Symbol('originalModelScale');
 const $presentedScene = Symbol('presentedScene');
 
 const $device = Symbol('device');
@@ -60,7 +59,6 @@ export class ARRenderer {
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
     this[$resolveCleanup] = null;
-    this[$originalModelScale] = new Vector3();
 
     this[$device] = null;
 
@@ -147,7 +145,6 @@ export class ARRenderer {
       return;
     }
 
-    this[$originalModelScale].copy(scene.model.scale);
     scene.model.scale.set(1, 1, 1);
     this[$presentedScene] = scene;
 
@@ -196,7 +193,7 @@ export class ARRenderer {
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]);
       this[$presentedScene].skysphere.visible = true;
-      this[$presentedScene].model.scale.copy(this[$originalModelScale]);
+      this[$presentedScene].scaleModelToFitRoom();
     }
 
     this[$frameOfReference] = null;
