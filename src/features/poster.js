@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import {$scene} from '../xr-model-element-base.js';
+import {$scene} from '../model-viewer-element-base.js';
 import {deserializeUrl} from '../utils.js';
 
 const $posterElement = Symbol('posterElement');
 const $clickToViewElement = Symbol('clickToViewElement');
 
-export const PosterMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const PosterMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {...super.properties, poster: {type: deserializeUrl}};
     }

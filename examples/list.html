@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - List of Models</title>
+  <title>ModelViewerElement - List of Models</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -38,10 +38,10 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 <style>
-xr-model {
+model-viewer {
   width: 50%;
   margin: 0 auto;
 }
@@ -49,24 +49,24 @@ xr-model {
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - List of Models</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using defaults and features not covered in other tests.</p>
+        <h1>ModelViewerElement - List of Models</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using defaults and features not covered in other tests.</p>
 
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
-        <xr-model auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></xr-model>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
+        <model-viewer auto-rotate vignette background-color="#4885ed" src="assets/Astronaut.glb"></model-viewer>
 
-    <script src="../dist/xr-model-element.js"></script>
+    <script src="../dist/model-viewer-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

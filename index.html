@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement</title>
+  <title>ModelViewerElement</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -56,7 +56,7 @@
       list-style-type: none;
       padding: 0;
     }
-    xr-model {
+    model-viewer {
       height: 500px;
       width: 100%;
     }
@@ -64,21 +64,21 @@
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement</h1>
+        <h1>ModelViewerElement</h1>
         <ul>
             <li class="model">
                 <pre class="language-markup">
-                    <code>&lt;xr-model ar controls auto-rotate vignette background-color=&quot;#4885ed&quot;
+                    <code>&lt;model-viewer ar controls auto-rotate vignette background-color=&quot;#4885ed&quot;
                       src=&quot;examples/assets/Astronaut.glb&quot;
                       ios-src=&quot;examples/assets/Astronaut.usdz&quot;&gt;</code>
-                    <code>&lt;/xr-model&gt;</code>
+                    <code>&lt;/model-viewer&gt;</code>
                 </pre>
-                <xr-model controls ar auto-rotate vignette background-color="#4885ed" src="examples/assets/Astronaut.glb" ios-src="examples/assets/Astronaut.usdz" magic-leap>
-                </xr-model>
+                <model-viewer controls ar auto-rotate vignette background-color="#4885ed" src="examples/assets/Astronaut.glb" ios-src="examples/assets/Astronaut.usdz" magic-leap>
+                </model-viewer>
             </li>
         </ul>
     </div>
-    <script src="./dist/xr-model-element.js"></script>
+    <script src="./dist/model-viewer-element.js"></script>
     <script src="./examples/third_party/prism/prism.js"></script>
 </body>
 </html>

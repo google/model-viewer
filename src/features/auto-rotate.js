@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import {$needsRender, $scene, $tick} from '../xr-model-element-base.js';
+import {$needsRender, $scene, $tick} from '../model-viewer-element-base.js';
 
 // How much the model should rotate per
 // second in radians.
 const ROTATION_SPEED = Math.PI / 32;
 
-export const AutoRotateMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const AutoRotateMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {
         ...super.properties,

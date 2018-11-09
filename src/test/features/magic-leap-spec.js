@@ -14,25 +14,25 @@
  */
 
 import {MagicLeapMixin} from '../../features/magic-leap.js';
-import XRModelElementBase from '../../xr-model-element-base.js';
+import ModelViewerElementBase from '../../model-viewer-element-base.js';
 import {pickShadowDescendant, timePasses} from '../helpers.js';
 
 const expect = chai.expect;
 
-suite('XRModelElementBase with MagicLeapMixin', () => {
+suite('ModelViewerElementBase with MagicLeapMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName;
-    let XRModelElement;
+    let ModelViewerElement;
 
     setup(() => {
-      tagName = `xr-model-magic-leap-${nextId++}`;
-      XRModelElement = MagicLeapMixin(XRModelElementBase);
-      customElements.define(tagName, XRModelElement);
+      tagName = `model-viewer-magic-leap-${nextId++}`;
+      ModelViewerElement = MagicLeapMixin(ModelViewerElementBase);
+      customElements.define(tagName, ModelViewerElement);
     });
 
     test('can be directly instantiated', () => {
-      const element = new XRModelElement();
+      const element = new ModelViewerElement();
       expect(element).to.be.ok;
     });
 
@@ -46,7 +46,7 @@ suite('XRModelElementBase with MagicLeapMixin', () => {
         let element;
 
         setup(async () => {
-          element = new XRModelElement();
+          element = new ModelViewerElement();
           document.body.appendChild(element);
           element.magicLeap = true;
 
@@ -71,7 +71,7 @@ suite('XRModelElementBase with MagicLeapMixin', () => {
         setup(async () => {
           self.mlWorld = {};
 
-          element = new XRModelElement();
+          element = new ModelViewerElement();
           document.body.appendChild(element);
           element.magicLeap = true;
 

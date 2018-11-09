@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 
@@ -23,15 +23,15 @@ suite('Renderer', () => {
   let element;
   let scene;
   let renderer = new Renderer();
-  let XRModelElement = class extends XRModelElementBase {};
-  customElements.define('xr-model-renderer', XRModelElement);
+  let ModelViewerElement = class extends ModelViewerElementBase {};
+  customElements.define('model-viewer-renderer', ModelViewerElement);
 
   teardown(() => {
     renderer.scenes.clear();
   });
 
-  function createScene () {
-    const element = new XRModelElement();
+  function createScene() {
+    const element = new ModelViewerElement();
     const scene = new ModelScene({
       element: element,
       canvas: element[$canvas],
@@ -52,7 +52,7 @@ suite('Renderer', () => {
   }
 
   suite('render', () => {
-    test('renders only dirty scenes', async function () {
+    test('renders only dirty scenes', async function() {
       let scene1 = createScene();
       let scene2 = createScene();
       renderer.registerScene(scene1);
@@ -70,7 +70,7 @@ suite('Renderer', () => {
       expect(renderer.scenesRendered).to.be.equal(1);
     });
 
-    test('marks scenes no longer dirty after rendering', async function () {
+    test('marks scenes no longer dirty after rendering', async function() {
       let scene = createScene();
       renderer.registerScene(scene);
 
@@ -85,7 +85,7 @@ suite('Renderer', () => {
       expect(!scene.isDirty).to.be.ok;
     });
 
-    test('does not render scenes marked as !isVisible', async function () {
+    test('does not render scenes marked as !isVisible', async function() {
       let scene = createScene();
       let renderer = new Renderer();
       renderer.registerScene(scene);

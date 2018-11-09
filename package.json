@@ -1,8 +1,8 @@
 {
-  "name": "xr-model-element",
+  "name": "@google/model-viewer",
   "version": "0.0.1",
   "description": "",
-  "main": "./lib/xr-model-element.js",
+  "main": "./lib/model-viewer-element.js",
   "files": [
     "lib",
     "dist"
@@ -50,7 +50,7 @@
     "xr-model",
     "3d"
   ],
-  "repository": "https://github.com/jsantell/XRModelElement",
+  "repository": "https://github.com/GoogleWebComponents/model-viewer",
   "dependencies": {
     "@jsantell/wagner": "0.0.3",
     "@magicleap/prismatic": "^0.17.5",

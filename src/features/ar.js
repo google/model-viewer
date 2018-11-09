@@ -14,14 +14,14 @@
  */
 
 import {IS_AR_CANDIDATE, IS_IOS} from '../constants.js';
+import {$renderer, $scene} from '../model-viewer-element-base.js';
 import {openIOSARQuickLook} from '../utils.js';
-import {$renderer, $scene} from '../xr-model-element-base.js';
 
 
 const $enterARElement = Symbol('enterARElement');
 
-export const ARMixin = (XRModelElement) => {
-  return class extends XRModelElement {
+export const ARMixin = (ModelViewerElement) => {
+  return class extends ModelViewerElement {
     static get properties() {
       return {...super.properties, ar: {type: Boolean}};
     }

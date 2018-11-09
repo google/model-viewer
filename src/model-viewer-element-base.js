@@ -35,10 +35,10 @@ export const $onResize = Symbol('onResize');
 export const $renderer = Symbol('renderer');
 
 /**
- * Definition for a basic <xr-model> element.
+ * Definition for a basic <model-viewer> element.
  *
  */
-export default class XRModelElementBase extends UpdatingElement {
+export default class ModelViewerElementBase extends UpdatingElement {
   static get properties() {
     return {
       src: {type: deserializeUrl},
@@ -53,7 +53,7 @@ export default class XRModelElementBase extends UpdatingElement {
   }
 
   /**
-   * Creates a new XRModelElement.
+   * Creates a new ModelViewerElement.
    */
   constructor() {
     super();
@@ -120,7 +120,7 @@ export default class XRModelElementBase extends UpdatingElement {
     });
 
     // Set a resize observer so we can scale our canvas
-    // if our <xr-model> changes
+    // if our <model-viewer> changes
     this.resizeObserver = new ResizeObserver(entries => {
       // Don't resize anything if in AR mode; otherwise the canvas
       // scaling to fullscreen on entering AR will clobber the flat/2d

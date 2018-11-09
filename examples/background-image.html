@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>XRModelElement - background-image</title>
+  <title>ModelViewerElement - background-image</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -40,26 +40,26 @@
   <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support all stable browsers: -->
+  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>XRModelElement - background-image</h1>
-        <p class="desc">This page tests usages of the <code>&lt;xr-model&gt;</code> element using <code>background-image</code>.</p>
+        <h1>ModelViewerElement - background-image</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using <code>background-image</code>.</p>
 
         <h2>With Equirectangular background-image</h2>
-        <xr-model controls background-image="assets/equirectangular.png" src="assets/DamagedHelmet/DamagedHelmet.gltf">
-        </xr-model>
+        <model-viewer controls background-image="assets/equirectangular.png" src="assets/DamagedHelmet/DamagedHelmet.gltf">
+        </model-viewer>
 
         <h2>With very reflective model</h2>
-        <xr-model controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/reflective-sphere.gltf">
-        </xr-model>
+        <model-viewer controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/reflective-sphere.gltf">
+        </model-viewer>
 
         <h2>With unlit model</h2>
-        <xr-model controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/Astronaut.glb">
-        </xr-model>
-    <script src="../dist/xr-model-element.js"></script>
+        <model-viewer controls background-color="#ff0077" background-image="assets/equirectangular.png" src="assets/Astronaut.glb">
+        </model-viewer>
+    <script src="../dist/model-viewer-element.js"></script>
     <script src="./third_party/prism/prism.js"></script>
 </body>
 </html>

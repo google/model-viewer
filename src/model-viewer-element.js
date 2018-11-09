@@ -15,24 +15,25 @@
 
 import {ARMixin} from './features/ar.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
-import {EnvironmentMixin} from './features/environment.js';
 import {ControlsMixin} from './features/controls.js';
+import {EnvironmentMixin} from './features/environment.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {PosterMixin} from './features/poster.js';
-import XRModelElementBase from './xr-model-element-base.js';
+import ModelViewerElementBase from './model-viewer-element-base.js';
+
 import template from './template.js';
 
 if (window.ShadyCSS) {
-  window.ShadyCSS.prepareTemplate(template, 'xr-model');
+  window.ShadyCSS.prepareTemplate(template, 'model-viewer');
 }
 
-const XRModelElement = [
+const ModelViewerElement = [
   PosterMixin,
   ARMixin,
   AutoRotateMixin,
   EnvironmentMixin,
   ControlsMixin,
   MagicLeapMixin
-].reduce((Base, Mixin) => Mixin(Base), XRModelElementBase);
+].reduce((Base, Mixin) => Mixin(Base), ModelViewerElementBase);
 
-customElements.define('xr-model', XRModelElement);
+customElements.define('model-viewer', ModelViewerElement);

@@ -13,30 +13,31 @@
  * limitations under the License.
  */
 
-import XRModelElementBase, {$renderer, $scene} from '../xr-model-element-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-element-base.js';
 
 import {until, waitForEvent} from './helpers.js';
 
 const expect = chai.expect;
 
-suite('XRModelElementBase', () => {
+suite('ModelViewerElementBase', () => {
   test('is not registered as a custom element by default', () => {
-    expect(customElements.get('xr-model-element-base')).to.be.equal(undefined);
+    expect(customElements.get('model-viewer-element-base'))
+        .to.be.equal(undefined);
   });
 
   suite('when registered', () => {
     let nextId = 0;
     let tagName;
-    let XRModelElement;
+    let ModelViewerElement;
 
     setup(() => {
-      tagName = `xr-model-${nextId++}`;
-      XRModelElement = class extends XRModelElementBase {};
-      customElements.define(tagName, XRModelElement);
+      tagName = `model-viewer-${nextId++}`;
+      ModelViewerElement = class extends ModelViewerElementBase {};
+      customElements.define(tagName, ModelViewerElement);
     });
 
     test('can be directly instantiated', () => {
-      const element = new XRModelElement();
+      const element = new ModelViewerElement();
       expect(element).to.be.ok;
     });
 
@@ -48,7 +49,7 @@ suite('XRModelElementBase', () => {
     suite('with a valid src', () => {
       let element;
       setup(() => {
-        element = new XRModelElement();
+        element = new ModelViewerElement();
         document.body.appendChild(element);
       });
 
@@ -71,9 +72,9 @@ suite('XRModelElementBase', () => {
       let elements = [];
 
       setup(async () => {
-        elements.push(new XRModelElement());
-        elements.push(new XRModelElement());
-        elements.push(new XRModelElement());
+        elements.push(new ModelViewerElement());
+        elements.push(new ModelViewerElement());
+        elements.push(new ModelViewerElement());
 
         const loaded = elements.map(e => waitForEvent(e, 'load'));
 

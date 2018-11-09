@@ -15,9 +15,9 @@
 
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
 import ModelScene, {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
-import XRModelElementBase, {$canvas} from '../../xr-model-element-base.js';
 
 const expect = chai.expect;
 
@@ -45,15 +45,15 @@ suite('ModelScene', () => {
   let element;
   let scene;
   let dummyMesh;
-  let XRModelElement = class extends XRModelElementBase {};
+  let ModelViewerElement = class extends ModelViewerElementBase {};
   let renderer = new Renderer();
-  customElements.define('xr-model-modelscene', XRModelElement);
+  customElements.define('model-viewer-modelscene', ModelViewerElement);
 
   setup(() => {
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyMesh = new Mesh(new SphereBufferGeometry(0.5, 32, 32));
-    element = new XRModelElement();
+    element = new ModelViewerElement();
     scene = new ModelScene({
       element: element,
       canvas: element[$canvas],
