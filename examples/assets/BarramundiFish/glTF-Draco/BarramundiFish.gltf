@@ -1,0 +1,151 @@
+{
+  "accessors": [
+    {
+      "componentType": 5123,
+      "count": 11592,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 2188,
+      "max": [
+        0.0690619648,
+        0.2866283,
+        0.3253729
+      ],
+      "min": [
+        -0.073841624,
+        -0.000878453255,
+        -0.317738324
+      ],
+      "type": "VEC3"
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 22339
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 22339,
+      "uri": "0.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "BarramundiFish_baseColor.png"
+    },
+    {
+      "uri": "BarramundiFish_occlusionRoughnessMetallic.png"
+    },
+    {
+      "uri": "BarramundiFish_normal.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "POSITION": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 0,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "barramundi_fish_Hero"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      },
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "name": "7288_barramundi fish_col"
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "name": "BarramundiFish"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    }
+  ],
+  "extensionsRequired": [
+    "KHR_draco_mesh_compression"
+  ],
+  "extensionsUsed": [
+    "KHR_draco_mesh_compression"
+  ]
+}

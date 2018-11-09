@@ -1,0 +1,158 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 2188,
+      "type": "VEC3",
+      "max": [
+        0.0690619648,
+        0.2866283,
+        0.3253729
+      ],
+      "min": [
+        -0.073841624,
+        -0.000878453255,
+        -0.317738324
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5123,
+      "count": 11592,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 17504
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17504,
+      "byteLength": 26256
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 43760,
+      "byteLength": 35008
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 78768,
+      "byteLength": 26256
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 105024,
+      "byteLength": 23184
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "BarramundiFish.bin",
+      "byteLength": 128208
+    }
+  ],
+  "images": [
+    {
+      "uri": "BarramundiFish_baseColor.png"
+    },
+    {
+      "uri": "BarramundiFish_occlusionRoughnessMetallic.png"
+    },
+    {
+      "uri": "BarramundiFish_normal.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "POSITION": 3
+          },
+          "indices": 4,
+          "material": 0
+        }
+      ],
+      "name": "barramundi_fish_Hero"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      },
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "name": "7288_barramundi fish_col"
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "name": "BarramundiFish"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    }
+  ]
+}
