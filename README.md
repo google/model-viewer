@@ -1,14 +1,21 @@
-*🚨 **PROJECT STATUS: EXPERIMENTAL** 🚨 This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.*
+🚨 **PROJECT STATUS: EXPERIMENTAL** 🚨
+
+_This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk._
 
 # `<model-viewer>`
 
-`<model-viewer>` is a web component that makes rendering interactive 3D models -
-optionally in AR - easy to do on as many browsers as possible.
+`<model-viewer>` is a web component that makes rendering interactive 3D models
+- optionally in AR - easy to do, without writing any code, on as many browsers
+and devices as possible.
+
+As new standards and APIs become available `<model-viewer>` will be improved
+to take advantage of them. If possible, fallbacks and polyfills will be
+supported to provide a seamless development experience.
 
 ## Installing
 
 **TODO:** Project has not been published to npm so most of these examples do
-not actually work.
+not yet actually work.
 
 You can load a _bundled build_ via
 [unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js):
