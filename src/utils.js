@@ -17,7 +17,8 @@ import {Vector3} from 'three';
 
 import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_AR_CANDIDATE} from './constants.js';
 
-export const deserializeUrl = (url) => url != null ? toFullUrl(url) : url;
+export const deserializeUrl = (url) =>
+    (url != null && url !== 'null') ? toFullUrl(url) : null;
 
 export const assertIsArCandidate = () => {
   if (IS_AR_CANDIDATE) {

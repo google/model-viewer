@@ -94,6 +94,20 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         });
       });
 
+      suite('configuring poster via attribute', () => {
+        suite('removing the attribute', () => {
+          test('sets poster to null', async () => {
+            // NOTE(cdata): This is less important after we resolve
+            // https://github.com/PolymerLabs/model-viewer/issues/76
+            element.setAttribute('poster', './examples/assets/Astronaut.glb');
+            await timePasses();
+            element.removeAttribute('poster');
+            await timePasses();
+            expect(element.poster).to.be.equal(null);
+          });
+        });
+      });
+
       suite('with loaded model src', () => {
         setup(() => {
           element.src = './examples/assets/Astronaut.glb';
