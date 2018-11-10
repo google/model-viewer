@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-import {Composer} from '@jsantell/wagner';
-import FXAAPass from '@jsantell/wagner/src/passes/FXAAPass.js';
-import VignettePass from '@jsantell/wagner/src/passes/VignettePass.js';
 import {EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
@@ -23,7 +20,6 @@ import {$tick} from '../model-viewer-element-base.js';
 
 import {ARRenderer} from './ARRenderer.js';
 
-const USE_POST_PROCESSING = false;  //! IS_MOBILE;
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
 
@@ -60,17 +56,6 @@ export default class Renderer extends EventDispatcher {
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = GAMMA_FACTOR;
-
-    this.composer = new Composer(this.renderer);
-    // Not sure why onBeforeRender doesn't exist, probably
-    // a dependency mismatch?
-    this.composer.scene.onBeforeRender = () => {};
-    this.vignettePass = new VignettePass({boost: 1.1, reduction: 0.7});
-    this.fxaaPass = new FXAAPass();
-    this.passes = [
-      this.vignettePass,
-      this.fxaaPass,
-    ];
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
 
@@ -156,17 +141,7 @@ export default class Renderer extends EventDispatcher {
       }
 
       this.renderer.setViewport(0, 0, width, height);
-
-      if (USE_POST_PROCESSING) {
-        this.composer.reset();
-        this.composer.render(scene, camera);
-        for (let pass of this.passes) {
-          this.composer.pass(pass);
-        }
-        this.composer.toScreen();
-      } else {
-        this.renderer.render(scene, camera);
-      }
+      this.renderer.render(scene, camera);
 
       const widthDPR = width * DPR;
       const heightDPR = height * DPR;
