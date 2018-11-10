@@ -35,6 +35,13 @@ const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 // would be 20m x 10m if FRAMED_HEIGHT === 10.
 export const FRAMED_HEIGHT = 10;
 
+// The model is sized to the room, and if too perfect of a fit,
+// the front of the model becomes clipped by the near plane. Rather than
+// change the near plane or camera's position (if we wanted to implement a
+// visible "room" in the future where framing needs to be precise), we shrink
+// the model by a little bit so it's always slightly smaller than the room.
+export const ROOM_PADDING_SCALE = 1.01;
+
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
 const DPR = window.devicePixelRatio;
@@ -168,7 +175,10 @@ export default class ModelScene extends Scene {
     const modelSize = this.model.size;
     if (modelSize.length() !== 0 && modelSize.y >= modelSize.x &&
         modelSize.y >= modelSize.z) {
-      const depth = Math.max(modelSize.x, modelSize.z) * this.model.scale.z;
+      // Calculate the depth from before applying the padding
+      // @see ROOM_PADDING_SCALE
+      const depth = Math.max(modelSize.x, modelSize.z) * this.model.scale.z *
+          ROOM_PADDING_SCALE;
       this.roomBox.max.z = depth / 2;
       this.roomBox.min.z = depth / -2;
       this.roomSize.z = depth;
@@ -211,10 +221,13 @@ export default class ModelScene extends Scene {
     const roomCenter = this.roomBox.getCenter(new Vector3());
     const modelCenter = this.model.boundingBox.getCenter(new Vector3());
 
-    const scale = Math.min(
+    let scale = Math.min(
         roomSize.x / modelSize.x,
         roomSize.y / modelSize.y,
         roomSize.z / modelSize.z);
+
+    // @see ROOM_PADDING_SCALE
+    scale /= ROOM_PADDING_SCALE;
 
     modelCenter.multiplyScalar(scale);
     this.model.scale.multiplyScalar(scale);

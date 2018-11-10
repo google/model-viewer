@@ -16,10 +16,14 @@
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
-import ModelScene, {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
+import ModelScene, {FRAMED_HEIGHT, ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 
 const expect = chai.expect;
+
+function invertPad(vec3) {
+  return vec3.clone().multiplyScalar(ROOM_PADDING_SCALE);
+}
 
 // Checks that the skysphere is within the camera's far plane
 function ensureSkysphereVisible(scene) {
@@ -194,7 +198,7 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(scene.model.scale).to.be.eql(new Vector3(10, 10, 10));
+      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(10, 10, 10));
     });
 
     test('scales when Z-bound', () => {
@@ -203,7 +207,7 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(scene.model.scale).to.be.eql(new Vector3(2, 2, 2));
+      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(2, 2, 2));
     });
 
     test('scales when X-bound', () => {
@@ -212,7 +216,7 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(scene.model.scale).to.be.eql(new Vector3(0.5, 0.5, 0.5));
+      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(0.5, 0.5, 0.5));
     });
 
     test('scales when Y-bound', () => {
@@ -221,7 +225,7 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(scene.model.scale).to.be.eql(new Vector3(0.5, 0.5, 0.5));
+      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(0.5, 0.5, 0.5));
     });
 
     test('updates object position to center its volume within box', () => {
@@ -230,8 +234,16 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(scene.model.scale).to.be.eql(new Vector3(10, 10, 10));
-      expect(scene.model.position).to.be.eql(new Vector3(-100, -95, -100));
+      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(10, 10, 10));
+
+      // Roundabout way of specifying the expected position
+      // without the scale :(
+      const expectedPosition = new Vector3(-100, -95, -100);
+      expectedPosition.sub(new Vector3(0, FRAMED_HEIGHT / 2, 0));
+      expectedPosition.divideScalar(ROOM_PADDING_SCALE);
+      expectedPosition.add(new Vector3(0, FRAMED_HEIGHT / 2, 0));
+
+      expect(scene.model.position).to.be.eql(expectedPosition);
     });
   });
 });
