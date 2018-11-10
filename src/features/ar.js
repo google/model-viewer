@@ -32,7 +32,7 @@ export const ARMixin = (ModelViewerElement) => {
     }
 
     get canActivateAR() {
-      return this[$enterARElement].style.display !== 'none';
+      return window.getComputedStyle(this[$enterARElement]).display !== 'none';
     }
 
     constructor() {
