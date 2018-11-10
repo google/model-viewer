@@ -42,14 +42,37 @@ suite('ModelViewerElementBase with ARMixin', () => {
       expect(element).to.be.ok;
     });
 
-    suite('ar', () => {
+    suite('with unstable-webxr', () => {
       let element;
 
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
 
-        element.ar = true;
+        element.unstableWebXR = true;
+        element.src = './examples/assets/Astronaut.glb';
+
+        await waitForEvent(element, 'load');
+      });
+
+      teardown(() => {
+        element.remove();
+      });
+
+      test('hides the AR button if not on AR platform', () => {
+        expect(element.canActivateAR).to.be.equal(false);
+      });
+
+      test('shows the AR button if on AR platform');
+    });
+
+    suite('ios-src', () => {
+      let element;
+
+      setup(async () => {
+        element = new ModelViewerElement();
+        document.body.appendChild(element);
+
         element.src = './examples/assets/Astronaut.glb';
 
         await waitForEvent(element, 'load');
@@ -61,7 +84,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       if (IS_IOS) {
         suite('on iOS Safari', () => {
-          test('does not show the AR button', () => {
+          test('hides the AR button', () => {
             expect(element.canActivateAR).to.be.equal(false);
           });
 
@@ -80,6 +103,17 @@ suite('ModelViewerElementBase with ARMixin', () => {
         suite('on browsers that are not iOS Safari', () => {
           test('hides the AR button', () => {
             expect(element.canActivateAR).to.be.equal(false);
+          });
+
+          suite('with an ios-src', () => {
+            setup(async () => {
+              element.iosSrc = './examples/assets/Astronaut.usdz';
+              await timePasses();
+            });
+
+            test('still hides the AR button', () => {
+              expect(element.canActivateAR).to.be.equal(false);
+            });
           });
         });
       }
