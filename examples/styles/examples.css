@@ -61,3 +61,10 @@ model-viewer {
   color: white;
   background-color: #4885ed;
 }
+
+.attribution {
+  padding-bottom: 20px;
+}
+.attribution:last-child {
+  padding-bottom: 100px;
+}
