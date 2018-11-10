@@ -26,7 +26,7 @@ export const ARMixin = (ModelViewerElement) => {
     static get properties() {
       return {
         ...super.properties,
-        ar: {type: Boolean},
+        unstableWebXR: {type: Boolean, attribute: 'unstable-webxr' },
         iosSrc: {type: deserializeUrl, attribute: 'ios-src'}
       };
     }
@@ -109,11 +109,11 @@ export const ARMixin = (ModelViewerElement) => {
     async update(changedProperties) {
       super.update(changedProperties);
 
-      if (!changedProperties.has('ar') && !changedProperties.has('iosSrc')) {
+      if (!changedProperties.has('unstableWebXR') && !changedProperties.has('iosSrc')) {
         return;
       }
 
-      const canShowButton = this.ar && IS_AR_CANDIDATE;
+      const canShowButton = this.unstableWebXR && IS_AR_CANDIDATE;
       const iosCandidate = IS_IOS && this.iosSrc != null;
       const renderer = this[$renderer];
 
