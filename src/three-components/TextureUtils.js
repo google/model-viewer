@@ -13,14 +13,33 @@
  * limitations under the License.
  */
 
-import {TextureLoader} from 'three';
+import {NearestFilter, RGBEEncoding, TextureLoader} from 'three';
+
+import PMREMGenerator from '../third_party/three/PMREMGenerator.js';
+import PMREMCubeUVPacker from '../third_party/three/PMREMCubeUVPacker.js';
 import EquirectangularToCubemap from '../third_party/three.equirectangular-to-cubemap/EquirectangularToCubemap.js';
+import RGBELoader from '../third_party/three/RGBELoader.js';
 
 const CUBE_MAP_SIZE = 1024;
-const loader = new TextureLoader();
+const ldrLoader = new TextureLoader();
+const hdrLoader = new RGBELoader();
 
-export const loadTexture = (url) =>
-    new Promise((res, rej) => loader.load(url, res, undefined, rej));
+const loadHDR =
+    async (url) => {
+  const texture =
+      await new Promise((res, rej) => hdrLoader.load(url, res, undefined, rej));
+  texture.encoding = RGBEEncoding;
+  texture.minFilter = NearestFilter;
+  texture.magFilter = NearestFilter;
+  texture.flipY = true;
+  return texture;
+}
+
+const loadLDR = (url) =>
+    new Promise((res, rej) => ldrLoader.load(url, res, undefined, rej));
+
+export const loadTexture = url =>
+    /\.hdr$/.test(url) ? loadHDR(url) : loadLDR(url);
 
 /**
  * The texture returned here is from a WebGLRenderCubeTarget,
@@ -57,4 +76,19 @@ export const toCubemapAndEquirect = async (renderer, url) => {
   } catch (e) {
     return null;
   }
+}
+
+export const pmremPass = (renderer, texture) => {
+  const generator = new PMREMGenerator(texture);
+  generator.update(renderer);
+
+  const packer = new PMREMCubeUVPacker(generator.cubeLods);
+  packer.update(renderer);
+
+  const renderTarget = packer.CubeUVRenderTarget;
+
+  generator.dispose();
+  packer.dispose();
+
+  return renderTarget.texture;
 }

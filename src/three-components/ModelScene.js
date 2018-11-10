@@ -39,7 +39,7 @@ export const FRAMED_HEIGHT = 10;
 // the front of the model becomes clipped by the near plane. Rather than
 // change the near plane or camera's position (if we wanted to implement a
 // visible "room" in the future where framing needs to be precise), we shrink
-// the model by a little bit so it's always slightly smaller than the room.
+// the room by a little bit so it's always slightly bigger than the model.
 export const ROOM_PADDING_SCALE = 1.01;
 
 // Vertical field of view of camera, in degrees.

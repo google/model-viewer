@@ -52,42 +52,31 @@
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/equirectangular.png"
-                    src="assets/DamagedHelmet/DamagedHelmet.gltf">
+                    background-image="assets/ldr-room.jpg"
+                    src="assets/radiance.glb">
                 </model-viewer>
             </template>
         </demo-snippet>
 
         <demo-snippet>
-            <h2>With very reflective model</h2>
+            <h2>With HDR background-image</h2>
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/equirectangular.png"
-                    src="assets/reflective-sphere.gltf">
+                    background-image="assets/spruit_sunrise_2k.hdr"
+                    src="assets/radiance.glb">
                 </model-viewer>
             </template>
         </demo-snippet>
 
         <demo-snippet>
-            <h2>With unlit model</h2>
-            <template>
-                <model-viewer
-                    controls
-                    background-image="assets/equirectangular.png"
-                    src="assets/Astronaut.glb">
-                </model-viewer>
-            </template>
-        </demo-snippet>
-
-        <demo-snippet>
-            <h2>With (unused) background-color</h2>
+            <h2>With unlit model and (unused) background-color</h2>
             <template>
                 <model-viewer
                     controls
                     background-color="#ff0077"
                     background-image="assets/equirectangular.png"
-                    src="assets/reflective-sphere.gltf">
+                    src="assets/Astronaut.glb">
                 </model-viewer>
             </template>
         </demo-snippet>
@@ -99,10 +88,10 @@
             <template>
                 <model-viewer id="toggle-image" backgroud-color="#ff0077" src="assets/DamagedHelmet/DamagedHelmet.gltf" controls auto-rotate></model-viewer>
                 <script>
-                    const images = ['assets/equirectangular.png', 'does-not-exist.png', ''];
+                    const images = ['assets/equirectangular.png', 'assets/ldr-room.jpg', 'assets/spruit_sunrise_2k.hdr', 'does-not-exist.png', ''];
                     let i = 0;
                     setInterval(() =>
-                        $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 1000);
+                        $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2500);
                 </script>
             </template>
         </demo-snippet>
@@ -124,6 +113,18 @@
           equirectangular.png by <a href="https://github.com/WestLangley">WestLangley</a>
           licensed under <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE">MIT</a>
           (<a href="https://github.com/mrdoob/three.js/blob/dev/examples/textures/equirectangular.png">source</a>)
+        </div>
+
+        <div class="attribution">
+          FV_hanhikiven_niemi_070818 by <a href="https://www.flickr.com/photos/fennovoima/">Fennovoima</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/2.0/">CC-BY-NC-ND 2.0</a>
+          (<a href="https://www.flickr.com/photos/131588393@N08/43347377184">source</a>)
+        </div>
+
+        <div class="attribution">
+          Spruit Sunrise by <a href="https://hdrihaven.com">HDRI Haven</a>,
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+          (<a href="https://hdrihaven.com/hdri/?c=outdoor&h=spruit_sunrise">source</a>)
         </div>
     </div>
     <script src="./scripts/helpers.js"></script>

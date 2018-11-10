@@ -17,7 +17,7 @@ import {Color} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-element-base.js';
 import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
-import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
+import {pmremPass, toCubemapAndEquirect} from '../three-components/TextureUtils.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_ENVMAP_SIZE = 512;
@@ -73,9 +73,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         }
 
         if (textures) {
-          textures.cubemap.name = backgroundImage;
+          const cubemap = pmremPass(this[$renderer].renderer, textures.cubemap);
+          textures.cubemap.dispose();
+          cubemap.name = backgroundImage;
+
           textures.equirect.name = backgroundImage;
-          this[$setEnvironmentImage](textures.equirect, textures.cubemap);
+          this[$setEnvironmentImage](textures.equirect, cubemap);
           return;
         }
       }
@@ -127,7 +130,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       // TODO can cache this per renderer and color
       const cubemap = this[$envMapGenerator].generate(DEFAULT_ENVMAP_SIZE);
-      this[$currentCubemap] = cubemap;
+      const pmremCubemap = pmremPass(this[$renderer].renderer, cubemap);
+      pmremCubemap.name = cubemap.name;
+      cubemap.dispose();
+      this[$currentCubemap] = pmremCubemap;
       this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
 
       this[$needsRender]();

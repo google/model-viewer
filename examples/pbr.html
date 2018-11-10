@@ -43,7 +43,7 @@
     <div id="container">
         <h1>&lt;model-viewer&gt; - Physically Based Rendering Materials</h1>
         <div class="desc">
-            <p>This page includes several sample usages of the <code>&lt;model-viewer&gt;</code> element using higher-resolution models with multiple (normal, ambient occlusion, bump) maps with physically-based materials, and environment maps.</p>
+            <p>This page includes several sample usages of the <code>&lt;model-viewer&gt;</code> element using higher-resolution models with multiple (normal, ambient occlusion, bump) maps with physically-based materials, and HDR environment maps.</p>
         </div>
 
         <lazy-inject>
@@ -52,12 +52,13 @@
                 <paper-button raised id="load-examples">Load examples</paper-button>
             </div>
             <template slot="lazy">
+
                 <demo-snippet>
                     <template>
                         <model-viewer
-                          src="assets/DamagedHelmet/DamagedHelmet.gltf"
+                          src="assets/FlightHelmet/glTF/FlightHelmet.gltf"
                           controls auto-rotate
-                          background-image="assets/equirectangular.png">
+                          background-image="assets/spruit_sunrise_2k.hdr">
                         </model-viewer>
                     </template>
                 </demo-snippet>
@@ -65,9 +66,9 @@
                 <demo-snippet>
                     <template>
                         <model-viewer
-                          src="assets/FlightHelmet/glTF/FlightHelmet.gltf"
+                          src="assets/DamagedHelmet/DamagedHelmet.gltf"
                           controls auto-rotate
-                          background-image="assets/equirectangular.png">
+                          background-image="assets/shanghai_bund_2k.hdr">
                         </model-viewer>
                     </template>
                 </demo-snippet>
@@ -78,7 +79,7 @@
                         <model-viewer
                           src="assets/BarramundiFish/glTF/BarramundiFish.gltf"
                           controls auto-rotate
-                          background-image="assets/equirectangular.png">
+                          background-image="assets/spruit_sunrise_2k.hdr">
                         </model-viewer>
                     </template>
                 </demo-snippet>
@@ -100,6 +101,18 @@
           licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC-0</a>
           (<a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BarramundiFish">source</a>)
         </div>
+        <div class="attribution">
+          Spruit Sunrise by <a href="https://hdrihaven.com">HDRI Haven</a>,
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+          (<a href="https://hdrihaven.com/hdri/?c=outdoor&h=spruit_sunrise">source</a>)
+        </div>
+        <div class="attribution">
+          Shanghai Bund by <a href="https://hdrihaven.com">HDRI Haven</a>,
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+          (<a href="https://hdrihaven.com/hdri/?c=partly%20cloudy&h=shanghai_bund">source</a>)
+        </div>
+    </div>
+    </div>
     <script src="./scripts/helpers.js"></script>
     <script src="./scripts/lazy-inject.js"></script>
     <script src="./built/dependencies.js"></script>
