@@ -1,7 +1,7 @@
 {
   "name": "@google/model-viewer",
   "version": "0.0.1",
-  "description": "",
+  "description": "Easily display interactive 3D models on the web and in AR!",
   "main": "./lib/model-viewer-element.js",
   "files": [
     "lib",
