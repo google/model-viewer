@@ -21,12 +21,6 @@ import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import ModelViewerElementBase from './model-viewer-element-base.js';
 
-import template from './template.js';
-
-if (window.ShadyCSS) {
-  window.ShadyCSS.prepareTemplate(template, 'model-viewer');
-}
-
 const ModelViewerElement = [
   LoadingMixin,
   ARMixin,

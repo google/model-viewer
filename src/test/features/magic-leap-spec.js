@@ -27,7 +27,12 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
     setup(() => {
       tagName = `model-viewer-magic-leap-${nextId++}`;
-      ModelViewerElement = MagicLeapMixin(ModelViewerElementBase);
+      ModelViewerElement = class extends MagicLeapMixin
+      (ModelViewerElementBase) {
+        static get is() {
+          return tagName;
+        }
+      };
       customElements.define(tagName, ModelViewerElement);
     });
 

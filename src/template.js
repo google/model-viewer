@@ -101,3 +101,12 @@ template.innerHTML = `
 `;
 
 export default template;
+
+export const makeTemplate = (tagName) => {
+  const clone = document.createElement('template');
+  clone.innerHTML = template.innerHTML;
+  if (window.ShadyCSS) {
+    window.ShadyCSS.prepareTemplate(clone, tagName);
+  }
+  return clone;
+};

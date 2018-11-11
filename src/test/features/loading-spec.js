@@ -27,7 +27,12 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
     setup(() => {
       tagName = `model-viewer-loading-${nextId++}`;
-      ModelViewerElement = LoadingMixin(ModelViewerElementBase);
+      ModelViewerElement = class extends LoadingMixin
+      (ModelViewerElementBase) {
+        static get is() {
+          return tagName;
+        }
+      };
       customElements.define(tagName, ModelViewerElement);
     });
 

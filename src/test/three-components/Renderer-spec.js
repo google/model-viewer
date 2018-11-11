@@ -23,7 +23,11 @@ suite('Renderer', () => {
   let element;
   let scene;
   let renderer = new Renderer();
-  let ModelViewerElement = class extends ModelViewerElementBase {};
+  let ModelViewerElement = class extends ModelViewerElementBase {
+    static get is() {
+      return 'model-viewer-renderer';
+    }
+  };
   customElements.define('model-viewer-renderer', ModelViewerElement);
 
   teardown(() => {

@@ -15,10 +15,12 @@
 
 export const elementFromLocalPoint = (document, x, y) => {
   const host =
-      document === window.document ? window.document.body : document.host;
+      (document === window.document) ? window.document.body : document.host;
+  const actualDocument = window.ShadyCSS ? window.document : document;
   const boundingRect = host.getBoundingClientRect();
 
-  return document.elementFromPoint(boundingRect.left + x, boundingRect.top + y);
+  return actualDocument.elementFromPoint(
+      boundingRect.left + x, boundingRect.top + y);
 };
 
 export const pickShadowDescendant = (element, x = 0, y = 0) => {
