@@ -37,6 +37,23 @@ export class CachingGLTFLoader {
 
     const gltf = await cache.get(url);
 
-    return gltf.scene ? gltf.scene.clone(true) : null;
+    const model = gltf.scene ? gltf.scene.clone(true) : null;
+
+    // Materials aren't cloned when cloning meshes; geometry
+    // and materials are copied by reference. This is necessary
+    // for the same model to be used twice with different
+    // environment maps.
+    if (model) {
+      model.traverse(object => {
+        // Set a high renderOrder while we're here to ensure the model
+        // always renders on top of the skysphere
+        object.renderOrder = 1000;
+        if (object.material) {
+          object.material = object.material.clone();
+        }
+      });
+    }
+
+    return model;
   }
 }

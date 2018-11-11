@@ -15,7 +15,6 @@
 
 import {Color} from 'three';
 
-import {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-element-base.js';
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-element-base.js';
 import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
 import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
@@ -74,8 +73,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         }
 
         if (textures) {
-          textures.equirect.name = backgroundImage;
           textures.cubemap.name = backgroundImage;
+          textures.equirect.name = backgroundImage;
           this[$setEnvironmentImage](textures.equirect, textures.cubemap);
           return;
         }
@@ -127,8 +126,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].skysphere.material.needsUpdate = true;
 
       // TODO can cache this per renderer and color
-      this[$currentCubemap] =
-          this[$envMapGenerator].generate(DEFAULT_ENVMAP_SIZE);
+      const cubemap = this[$envMapGenerator].generate(DEFAULT_ENVMAP_SIZE);
+      this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
 
       this[$needsRender]();
