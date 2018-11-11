@@ -60,7 +60,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   setup(() => {
     tagName = `model-viewer-environment-${nextId++}`;
-    ModelViewerElement = EnvironmentMixin(ModelViewerElementBase);
+    ModelViewerElement = class extends EnvironmentMixin
+    (ModelViewerElementBase) {
+      static get is() {
+        return tagName;
+      }
+    };
     customElements.define(tagName, ModelViewerElement);
     element = new ModelViewerElement();
     scene = element[$scene];

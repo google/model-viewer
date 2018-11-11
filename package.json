@@ -29,7 +29,7 @@
     "clean": "rm -rf ./lib ./dist",
     "build": "tsc && rollup -c",
     "prepublishOnly": "npm run build",
-    "test": "npm run clean && npm run build && wct",
+    "test": "npm run clean && npm run build && wct --skip-plugin sauce",
     "serve": "ws",
     "watch": "chokidar --initial src/*.js src/**/*.js -c \"npm run build\"",
     "dev": "concurrently \"npm run watch\" \"npm run serve\""

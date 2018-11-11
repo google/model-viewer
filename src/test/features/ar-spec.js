@@ -28,7 +28,12 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
     setup(() => {
       tagName = `model-viewer-ar-${nextId++}`;
-      ModelViewerElement = ARMixin(ModelViewerElementBase);
+      ModelViewerElement = class extends ARMixin
+      (ModelViewerElementBase) {
+        static get is() {
+          return tagName;
+        }
+      };
       customElements.define(tagName, ModelViewerElement);
     });
 

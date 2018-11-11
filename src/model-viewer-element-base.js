@@ -15,16 +15,16 @@
 
 import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
 
+import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
-
-import template from './template.js';
 import {deserializeUrl} from './utils.js';
 
 const renderer = new Renderer();
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
+const $template = Symbol('template');
 
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
@@ -46,6 +46,18 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return {src: {type: deserializeUrl}};
   }
 
+  static get is() {
+    return 'model-viewer';
+  }
+
+  static get template() {
+    if (!this.hasOwnProperty($template)) {
+      this[$template] = makeTemplate(this.is);
+    }
+
+    return this[$template];
+  }
+
   get loaded() {
     return this[$loaded];
   }
@@ -65,6 +77,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     const {shadowRoot} = this;
+    const template = this.constructor.template;
+
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this[$container] = shadowRoot.querySelector('.container');
@@ -116,7 +130,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }, {
       root: null,
       rootMargin: '10px',
-      threshold: 0.1,
+      threshold: 0,
     });
     this.intersectionObserver.observe(this);
   }

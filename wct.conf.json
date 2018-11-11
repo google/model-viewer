@@ -3,5 +3,48 @@
   "moduleResolution": "node",
   "suites": [
     "./test.html"
-  ]
+  ],
+  "plugins": {
+    "sauce": {
+      "browsers": [
+        {
+          "browserName": "chrome",
+          "platform": "Linux",
+          "version": "41.0"
+        },
+        {
+          "browserName": "firefox",
+          "platform": "Windows 10",
+          "version": "62.0"
+        },
+        {
+          "browserName": "safari",
+          "platform": "macOS 10.13",
+          "version": "12.0"
+        },
+        {
+          "browserName": "MicrosoftEdge",
+          "platform": "Windows 10",
+          "version": "17.17134",
+          "screenResolution": "1280x1024"
+        },
+        {
+          "browserName": "safari",
+          "appiumVersion": "1.9.1",
+          "platformName": "iOS",
+          "platformVersion": "12.0",
+          "deviceName": "iPhone XR Simulator",
+          "deviceOrientation": "portrait"
+        },
+        {
+          "browserName": "Chrome",
+          "appiumVersion": "1.9.1",
+          "platformName": "Android",
+          "platformVersion": "7.1",
+          "deviceName": "Android GoogleAPI Emulator",
+          "deviceOrientation": "portrait"
+        }
+      ]
+    }
+  }
 }

@@ -27,7 +27,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
     setup(() => {
       tagName = `model-viewer-controls-${nextId++}`;
-      ModelViewerElement = ControlsMixin(ModelViewerElementBase);
+      ModelViewerElement = class extends ControlsMixin
+      (ModelViewerElementBase) {
+        static get is() {
+          return tagName;
+        }
+      };
       customElements.define(tagName, ModelViewerElement);
     });
 

@@ -15,7 +15,7 @@
 
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-element-base.js';
 
-import {until, waitForEvent} from './helpers.js';
+import {timePasses, until, waitForEvent} from './helpers.js';
 
 const expect = chai.expect;
 
@@ -32,7 +32,11 @@ suite('ModelViewerElementBase', () => {
 
     setup(() => {
       tagName = `model-viewer-${nextId++}`;
-      ModelViewerElement = class extends ModelViewerElementBase {};
+      ModelViewerElement = class extends ModelViewerElementBase {
+        static get is() {
+          return tagName;
+        }
+      };
       customElements.define(tagName, ModelViewerElement);
     });
 
@@ -79,7 +83,7 @@ suite('ModelViewerElementBase', () => {
         const loaded = elements.map(e => waitForEvent(e, 'load'));
 
         for (let element of elements) {
-          element.style.height = '100vh';
+          element.style.height = '200vh';
           element.style.width = '100vw';
           element.autoRotate = true;
           element.src = './examples/assets/cube.gltf';
@@ -93,7 +97,7 @@ suite('ModelViewerElementBase', () => {
         elements.forEach(e => e.remove());
       });
 
-      test('only models visible in the viewport', async () => {
+      test.skip('only models visible in the viewport', async () => {
         const renderer = elements[0][$renderer];
 
         // IntersectionObserver needs to set appropriate
