@@ -104,7 +104,7 @@ learn how to polyfill for maximum browser compatibility!**
  - ✅ No polyfill needed
  - 🚧 Requires a polyfill
  - 🚫 Not available
- - 🎌 Available but unstable
+ - 🎌 Behind a flag, unstable
 
 Feature                   | Chrome | Canary | Safari 12 | Firefox 63 | Firefox 62 | Edge  | IE 11
 --------------------------|--------|--------|-----------|------------|------------|-------|------
