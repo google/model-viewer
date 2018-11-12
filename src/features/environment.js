@@ -27,6 +27,8 @@ const $currentCubemap = Symbol('currentCubemap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $envMapGenerator = Symbol('envMapGenerator');
+const $hasBackgroundImage = Symbol('hasBackgroundImage');
+const $hasBackgroundColor = Symbol('hasBackgroundColor');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -43,13 +45,29 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$envMapGenerator] = new EnvMapGenerator(this[$renderer].renderer);
     }
 
+    get [$hasBackgroundImage]() {
+      // @TODO #76
+      return this.backgroundImage && this.backgroundImage !== 'null';
+    }
+
+    get [$hasBackgroundColor]() {
+      // @TODO #76
+      return this.backgroundColor && this.backgroundColor !== 'null';
+    }
+
     connectedCallback() {
       super.connectedCallback();
-      this[$setEnvironmentColor]();
     }
 
     async update(changedProperties) {
       super.update(changedProperties);
+
+      // If no background-image/background-color set, use the default
+      // color.
+      if (!this[$hasBackgroundImage] && !this[$hasBackgroundColor]) {
+        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
+        return;
+      }
 
       if (!changedProperties.has('backgroundImage') &&
           !changedProperties.has('backgroundColor')) {
@@ -58,10 +76,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       let backgroundImage = this.backgroundImage;
 
-      // @TODO #76
-      let hasBackgroundImage = backgroundImage && backgroundImage !== 'null';
-
-      if (hasBackgroundImage) {
+      if (this[$hasBackgroundImage]) {
         let textures = await toCubemapAndEquirect(
             this[$renderer].renderer, backgroundImage);
 
@@ -78,9 +93,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
           this[$setEnvironmentImage](textures.equirect, textures.cubemap);
           return;
         }
+      } else if (this[$hasBackgroundColor]) {
+        this[$setEnvironmentColor](this.backgroundColor);
       }
-
-      this[$setEnvironmentColor](this.backgroundColor);
     }
 
     [$tick](time, delta) {
@@ -116,9 +131,6 @@ export const EnvironmentMixin = (ModelViewerElement) => {
      * @param {string} color
      */
     [$setEnvironmentColor](color) {
-      // @TODO #76
-      color = color === 'null' || !color ? DEFAULT_BACKGROUND_COLOR : color;
-
       this[$scene].skysphere.material.color = new Color(color);
       this[$scene].skysphere.material.color.convertGammaToLinear(
           GAMMA_TO_LINEAR);

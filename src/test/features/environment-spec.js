@@ -15,7 +15,7 @@
 
 import {EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-element-base.js';
-import {waitForEvent} from '../helpers.js';
+import {timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 const BG_IMAGE_URL = './examples/assets/equirectangular.png';
@@ -66,9 +66,19 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     scene = element[$scene];
   });
 
+  teardown(() => element.remove());
+
   test(
       'has default skysphere if no background-image or background-color',
       () => {
+        expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
+      });
+
+  test(
+      'has default skysphere if no background-image or background-color when in DOM',
+      async () => {
+        document.body.appendChild(element);
+        await timePasses();
         expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
       });
 
@@ -107,6 +117,14 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       test('applies a generated environment map on model', async function() {
         expect(modelUsingEnvmap(scene, 'Generated')).to.be.ok;
       });
+
+      test(
+          'displays skysphere with correct color after attaching to DOM',
+          async function() {
+            document.body.appendChild(element);
+            await timePasses();
+            expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+          });
     });
   });
 
