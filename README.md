@@ -4,8 +4,9 @@
 
 # `<model-viewer>`
 
-`<model-viewer>` is a web component that makes rendering interactive 3D models - optionally in AR - easy to do, without writing any code, on as many browsers
-and devices as possible.
+`<model-viewer>` is a web component that makes rendering interactive 3D
+models - optionally in AR - easy to do, without writing any code, on as many
+browsers and devices as possible.
 
 As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
@@ -120,14 +121,31 @@ Web XR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |  
 
 ### Attributes
 
-* *`src`*: The URL to the 3D model. **Note:** only [glTF][glTF]/[GLB][GLB] files are supported. For more information, see the Supported Formats section.
-* *`ios-src`*: The url to a [USDZ][USDZ] model will be used in iOS Safari to launch Quick Look for AR.
-* *`preload`*: Whether or not the user must select the element first before the model begins to download. Keep in mind models can be heavy on bandwidth and use preloading with caution.
-* *`poster`*: Displays an image instead of the model until the model is loaded or a user action.
-* *`controls`*: Enables controls via mouse/touch when in flat view.
-* *`ar`*: Enables the option to enter AR and place the 3D model in the real world if the platform supports it. On iOS, this requires that `ios-src` has also been configured.
-* *`background-color`*: Sets the background color of the flat view. Takes any valid CSS color string.
+Parameters that are required for display:
+
+* *`src`*: The URL to the 3D model. This parameter is required for
+  `<model-viewer`> to display. **Note:** only [glTF][glTF]/[GLB][GLB] files
+  are supported. For more information, see the Supported Formats section.
+
+Optional parameters (not required for display):
+
+* *`ar`*: Enables the option to enter AR and place the 3D model in the real
+  world if the platform supports it. On iOS, this requires that `ios-src` has
+  also been configured.
 * *`auto-rotate`*: Enables the auto rotation of the model.
+* *`background-color`*: Sets the background color of the flat view. Takes any
+  valid CSS color string.
+* *`controls`*: Enables controls via mouse/touch when in flat view.
+* *`ios-src`*: The url to a [USDZ][USDZ] model which will be used in iOS
+  Safari to launch Quick Look for AR.
+* *`poster`*: Displays an image instead of the model.  See [On
+  Loading](#on-loading) for more information.
+* *`preload`*: When *`poster`* is also enabled, the model will be downloaded
+  before user action.
+  See [On Loading](#on-loading) for more information.
+* *`reveal-when-loaded`*: When *`poster`* and *`preload`* are specified, hide
+  the poster and show the model once the model has been loaded.  See [On
+  Loading](#on-loading) for more information.
 
 All attributes have a corresponding property in camel-case format. For example,
 the `background-color` attribute can also be configured using the
@@ -135,7 +153,10 @@ the `background-color` attribute can also be configured using the
 
 ### Events
 
-* *`'load'`*: Fired when a model is loaded. Can fire multiple times per `<model-viewer>` if changing the `src` attribute.
+* *`'load'`*: Fired when a model is loaded. Can fire multiple times per
+  `<model-viewer>` if the `src` attribute is changed.
+* *`'preload'`*: When *`preload`* is enabled this event is fired when
+  preloading is done.
 
 ## Supported Formats
 
@@ -145,6 +166,25 @@ work across different platforms. For WebGL and Web XR purposes, both
 developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
 will be used to launch Quick Look on iOS Safari as an interim solution until
 Safari has support for something like the Web XR Device and Hit Test APIs.
+
+### On Loading
+
+Models are often large, so especially on pages with large numbers of them it
+may be desirable to load them after user action. Three parameters -
+*`poster`*, *`preload`*, and *`reveal-when-loaded`* - control the loading
+behavior.
+
+Four configuration options are available:
+
+* By default, the model will load with the page and will be displayed once
+  it's loaded.
+* With a *`poster`* specified, the model will not load or display until the
+  user takes action (for instance, by clicking on the model element).
+* With both *`poster`* and *`preload`* set, the model will load with the page, but
+  the poster image will be displayed until the user takes action.
+* With all of *`poster`*, *`preload`*, and *`reveal-when-loaded`* set, the poster
+  will be displayed until the model is loaded, at which time the poster will
+  be hidden and the model displayed.
 
 ### Important note on data usage
 
