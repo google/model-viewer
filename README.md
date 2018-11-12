@@ -14,9 +14,6 @@ supported to provide a seamless development experience.
 
 ## Installing
 
-**TODO:** Project has not been published to npm so most of these examples do
-not yet actually work.
-
 You can load a _bundled build_ via
 [unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js):
 
