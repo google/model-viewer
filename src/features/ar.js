@@ -26,7 +26,7 @@ export const ARMixin = (ModelViewerElement) => {
     static get properties() {
       return {
         ...super.properties,
-        unstableWebXR: {type: Boolean, attribute: 'unstable-webxr' },
+        unstableWebxr: {type: Boolean, attribute: 'unstable-webxr' },
         iosSrc: {type: deserializeUrl, attribute: 'ios-src'}
       };
     }
