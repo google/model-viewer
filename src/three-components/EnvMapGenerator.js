@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-import {BackSide, CubeCamera, Mesh, MeshBasicMaterial, PlaneBufferGeometry, PointLight, Scene, Vector3} from 'three';
+import {BackSide, CubeCamera, EventDispatcher, Mesh, MeshBasicMaterial, PlaneBufferGeometry, PointLight, Scene, Vector3} from 'three';
 
 import Sky from '../third_party/three/Sky.js';
 
 const SKYSPHERE_SIZE = 10000;
 
-export default class EnvMapGenerator {
+export default class EnvMapGenerator extends EventDispatcher {
   constructor(renderer) {
+    super();
     this.renderer = renderer;
     this.scene = new Scene();
 
@@ -46,6 +47,8 @@ export default class EnvMapGenerator {
     this.sky.material.uniforms.mieDirectionalG.value = 0.8;
     this.sky.material.uniforms.sunPosition.value = sunPosition;
     this.scene.add(this.sky);
+
+    this.camera = new CubeCamera(1, SKYSPHERE_SIZE * 3, this.maxMapSize);
   }
 
   /**
@@ -55,7 +58,7 @@ export default class EnvMapGenerator {
    */
   generate(mapSize) {
     mapSize = Math.min(mapSize, this.maxMapSize);
-    this.camera = new CubeCamera(1, SKYSPHERE_SIZE * 3, mapSize);
+    this.camera.renderTarget.setSize(mapSize, mapSize);
     this.camera.clear(this.renderer);
     this.camera.update(this.renderer, this.scene);
 

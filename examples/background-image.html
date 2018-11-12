@@ -92,8 +92,6 @@
             </template>
         </demo-snippet>
 
-        <!-- Disable demo due to memory leak @TODO #138 -->
-        <!--
         <demo-snippet>
             <h2>Cycling background image</h2>
             <template>
@@ -102,11 +100,10 @@
                     const images = ['assets/equirectangular.png', 'does-not-exist.png', ''];
                     let i = 0;
                     setInterval(() =>
-                        $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 1000);
+                        $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2000);
                 </script>
             </template>
         </demo-snippet>
-        -->
 
         <div class="attribution">
           Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,

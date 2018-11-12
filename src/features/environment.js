@@ -16,19 +16,15 @@
 import {Color} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-element-base.js';
-import EnvMapGenerator from '../three-components/EnvMapGenerator.js';
-import {toCubemapAndEquirect} from '../three-components/TextureUtils.js';
-
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
-const DEFAULT_ENVMAP_SIZE = 512;
 const GAMMA_TO_LINEAR = 2.2;
 
 const $currentCubemap = Symbol('currentCubemap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
-const $envMapGenerator = Symbol('envMapGenerator');
 const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
+const $deallocateTextures = Symbol('deallocateTextures');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -38,11 +34,6 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         backgroundImage: {type: String, attribute: 'background-image'},
         backgroundColor: {type: String, attribute: 'background-color'}
       };
-    }
-
-    constructor() {
-      super();
-      this[$envMapGenerator] = new EnvMapGenerator(this[$renderer].renderer);
     }
 
     get [$hasBackgroundImage]() {
@@ -74,25 +65,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      let backgroundImage = this.backgroundImage;
-
       if (this[$hasBackgroundImage]) {
-        let textures = await toCubemapAndEquirect(
-            this[$renderer].renderer, backgroundImage);
-
-        // If the background image has changed
-        // while fetching textures, abort and defer to that
-        // invocation of this function.
-        if (backgroundImage !== this.backgroundImage) {
-          return;
-        }
-
-        if (textures) {
-          textures.cubemap.name = backgroundImage;
-          textures.equirect.name = backgroundImage;
-          this[$setEnvironmentImage](textures.equirect, textures.cubemap);
-          return;
-        }
+        this[$setEnvironmentImage](this.backgroundImage);
       } else if (this[$hasBackgroundColor]) {
         this[$setEnvironmentColor](this.backgroundColor);
       }
@@ -114,10 +88,32 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     }
 
     /**
-     * @param {THREE.Texture} equirect
-     * @param {THREE.Texture} cubemap
+     * @param {string} url
      */
-    [$setEnvironmentImage](equirect, cubemap) {
+    async [$setEnvironmentImage](url) {
+      const textureUtils = this[$renderer].textureUtils;
+      const textures = await textureUtils.toCubemapAndEquirect(url);
+
+      // If the background image has changed
+      // while fetching textures, abort and defer to that
+      // invocation of this function.
+      if (url !== this.backgroundImage) {
+        return;
+      }
+
+      this[$deallocateTextures]();
+
+      // If could not load textures (probably an invalid URL), then abort
+      // after deallocating textures.
+      if (!textures) {
+        this[$scene].model.applyEnvironmentMap(null);
+        return;
+      }
+
+      const { cubemap, equirect } = textures;
+      cubemap.name = this.backgroundImage;
+      equirect.name = this.backgroundImage;
+
       this[$scene].skysphere.material.color = new Color(0xffffff);
       this[$scene].skysphere.material.map = equirect;
       this[$scene].skysphere.material.needsUpdate = true;
@@ -131,6 +127,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
      * @param {string} color
      */
     [$setEnvironmentColor](color) {
+      const textureUtils = this[$renderer].textureUtils;
+
+      this[$deallocateTextures]();
+
       this[$scene].skysphere.material.color = new Color(color);
       this[$scene].skysphere.material.color.convertGammaToLinear(
           GAMMA_TO_LINEAR);
@@ -138,11 +138,22 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].skysphere.material.needsUpdate = true;
 
       // TODO can cache this per renderer and color
-      const cubemap = this[$envMapGenerator].generate(DEFAULT_ENVMAP_SIZE);
+      const cubemap = textureUtils.generateDefaultEnvMap();
       this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
 
       this[$needsRender]();
+    }
+
+    [$deallocateTextures]() {
+      if (this[$scene].skysphere.material.map) {
+        this[$scene].skysphere.material.map.dispose();
+        this[$scene].skysphere.material.map = null;
+      }
+      if (this[$currentCubemap]) {
+        this[$currentCubemap].dispose();
+        this[$currentCubemap] = null;
+      }
     }
   }
 };
