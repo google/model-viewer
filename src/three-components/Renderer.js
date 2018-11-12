@@ -18,6 +18,7 @@ import {EventDispatcher, WebGLRenderer} from 'three';
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-element-base.js';
 
+import TextureUtils from './TextureUtils.js';
 import {ARRenderer} from './ARRenderer.js';
 
 const GAMMA_FACTOR = 2.2;
@@ -58,6 +59,7 @@ export default class Renderer extends EventDispatcher {
     this.renderer.gammaFactor = GAMMA_FACTOR;
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
+    this.textureUtils = new TextureUtils(this.renderer);
 
     this.scenes = new Set();
     this.scenesRendered = 0;
@@ -160,5 +162,11 @@ export default class Renderer extends EventDispatcher {
       this.scenesRendered++;
     }
     this.lastTick = t;
+  }
+
+  dispose() {
+    super.dispose();
+    this.textureUtils.dispose();
+    this.textureUtils = null;
   }
 }

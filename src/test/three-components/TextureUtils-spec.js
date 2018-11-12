@@ -13,31 +13,83 @@
  * limitations under the License.
  */
 
-import {TextureLoader} from 'three';
+import {TextureLoader, WebGLRenderer} from 'three';
 
-import Renderer from '../../three-components/Renderer.js';
-import {equirectangularToCubemap} from '../../three-components/TextureUtils.js';
-import {waitForEvent} from '../helpers.js';
+import TextureUtils from '../../three-components/TextureUtils.js';
 
 const expect = chai.expect;
 
+// Reuse the same canvas as to not stress the WebGL
+// context limit
+const canvas = document.createElement('canvas');
+const EQUI_URL = './examples/assets/equirectangular.png';
+
 suite('TextureUtils', () => {
+  let textureUtils;
+  setup(() => {
+    const renderer = new WebGLRenderer({canvas});
+    textureUtils = new TextureUtils(renderer);
+  });
+  teardown(() => textureUtils.dispose());
+
+  suite('load', () => {
+    test('loads a valid texture from URL', async () => {
+      let texture = await textureUtils.load(EQUI_URL);
+      texture.dispose();
+      expect(texture.isTexture).to.be.ok;
+    });
+    test('throws on invalid URL', async () => {
+      try {
+        await textureUtils.load(null);
+        expect(false).to.be.ok;
+      } catch(e) {
+        expect(true).to.be.ok;
+      }
+    });
+    test('throws if texture not found', async () => {
+      try {
+        await textureUtils.load('./nope.png');
+        expect(false).to.be.ok;
+      } catch(e) {
+        expect(true).to.be.ok;
+      }
+    });
+  });
+
   suite('equirectangularToCubemap', () => {
-    suite('with a valid renderer and texture', () => {
-      let texture;
-      let webGlRenderer;
+    test('creates a cubemap from texture', async () => {
+      const texture = await textureUtils.load(EQUI_URL);
+      const cubemap = textureUtils.equirectangularToCubemap(texture);
+      texture.dispose();
+      cubemap.dispose();
+      expect(cubemap.isTexture).to.be.ok;
+    });
+    test('throws on invalid texture', async () => {
+      try {
+        await textureUtils.equirectangularToCubemap({});
+        expect(false).to.be.ok;
+      } catch(e) {
+        expect(true).to.be.ok;
+      }
+    });
+  });
 
-      setup((done) => {
-        const renderer = new Renderer();
-        texture = new TextureLoader().load(
-            './examples/assets/equirectangular.png', () => done());
-        webGlRenderer = renderer.renderer;
-      });
+  suite('toCubemapAndEquirect', () => {
+    test('returns a cubemap and texture from url', async () => {
+      const textures = await textureUtils.toCubemapAndEquirect(EQUI_URL);
+      textures.equirect.dispose();
+      textures.cubemap.dispose();
+      expect(textures.equirect.isTexture).to.be.ok;
+      expect(textures.cubemap.isTexture).to.be.ok;
+    });
 
-      test('creates a cubemap', () => {
-        const cubemap = equirectangularToCubemap(webGlRenderer, texture);
-        expect(cubemap).to.be.ok;
-      });
+    test('throws if given an invalid url', async () => {
+      try {
+        await textureUtils.toCubemapAndEquirect({});
+        expect(false).to.be.ok;
+      } catch(e) {
+        expect(true).to.be.ok;
+      }
     });
   });
 });
