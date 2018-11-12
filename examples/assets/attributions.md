@@ -24,13 +24,6 @@ equirectangular.png by <a href="https://github.com/WestLangley">WestLangley</a>
 licensed under <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE">MIT</a>
 (<a href="https://github.com/mrdoob/three.js/blob/dev/examples/textures/equirectangular.png">source</a>)
 
-## FlightHelmet
-
-Flight Helmet by <a href="https://www.microsoft.com/">Microsoft</a>,
-licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC-0</a>
-(<a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BarramundiFish">source</a>)
-
-
 ## Shishkebab.*
 
 Shishkebab by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
