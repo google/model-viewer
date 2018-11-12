@@ -12,6 +12,9 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
+See: [API](#api), [Demo](https://model-viewer.glitch.me), [Examples](https://github.com/GoogleWebComponents/model-viewer/tree/master/examples)
+
+
 ## Installing
 
 You can load a _bundled build_ via
@@ -111,30 +114,40 @@ Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |     
 Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
 Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
 Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
-Web XR Device API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
-Web XR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+WebXR Device API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+WebXR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 
 ## API
+
+### Styles
+
+Currently no custom CSS variables are supported, but the model viewer's containing box
+can be sized via traditional `width` and `height` properties, and positioned with
+the typical properties (`display`, `position`, etc.).
 
 ### Attributes
 
 Parameters that are required for display:
 
 * *`src`*: The URL to the 3D model. This parameter is required for
-  `<model-viewer`> to display. **Note:** only [glTF][glTF]/[GLB][GLB] files
-  are supported. For more information, see the Supported Formats section.
+  `<model-viewer`> to display. Only [glTF][glTF]/[GLB][GLB] models
+  are supported, see [Supported Formats](#supported-formats).
 
 Optional parameters (not required for display):
 
-* *`ar`*: Enables the option to enter AR and place the 3D model in the real
-  world if the platform supports it. On iOS, this requires that `ios-src` has
-  also been configured.
 * *`auto-rotate`*: Enables the auto rotation of the model.
-* *`background-color`*: Sets the background color of the flat view. Takes any
+* *`background-color`*: Sets the background color of the scene when viewed inline. Takes any
   valid CSS color string.
+* *`background-image`*: Sets the background image of the scene when viewed inline. Takes a
+  URL to an [equirectangular projection image](https://en.wikipedia.org/wiki/Equirectangular_projection) that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting `background-image` supercedes `background-color`.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
-* *`ios-src`*: The url to a [USDZ][USDZ] model which will be used in iOS
-  Safari to launch Quick Look for AR.
+* *`ios-src`*: The url to a [USDZ][USDZ] model which will be used on
+  [supported iOS 12+ devices](https://www.apple.com/ios/augmented-reality/) via 
+  [AR Quick Look](https://developer.apple.com/videos/play/wwdc2018/603/) on Safari.
+  See [Augmented Reality](#augmented-reality).
+* *`magic-leap`*: Enables the ability to view models in AR when viewing content on
+  [Magic Leap's Helio](https://magicleaphelio.com/) browser, requires that `src` is
+  a GLB model, and requires the inclusion of the [@magicleap/prismatic](https://www.npmjs.com/package/@magicleap/prismatic) library.
 * *`poster`*: Displays an image instead of the model.  See [On
   Loading](#on-loading) for more information.
 * *`preload`*: When *`poster`* is also enabled, the model will be downloaded
@@ -143,6 +156,9 @@ Optional parameters (not required for display):
 * *`reveal-when-loaded`*: When *`poster`* and *`preload`* are specified, hide
   the poster and show the model once the model has been loaded.  See [On
   Loading](#on-loading) for more information.
+* *`unstable-webxr`*: Enables the ability to view the model in AR via the experimental
+  [WebXR Device API], currently [implemented only in Chrome Canary](https://developers.google.com/web/updates/2018/06/ar-for-the-web).
+  See [Augmented Reality](#augmented-reality).
 
 All attributes have a corresponding property in camel-case format. For example,
 the `background-color` attribute can also be configured using the
@@ -155,14 +171,14 @@ the `background-color` attribute can also be configured using the
 * *`'preload'`*: When *`preload`* is enabled this event is fired when
   preloading is done.
 
-## Supported Formats
+### Supported Formats
 
 A `<model-viewer>`'s attributes allows developers to specify multiple file types to
-work across different platforms. For WebGL and Web XR purposes, both
+work across different platforms. For WebGL and WebXR purposes, both
 [glTF][glTF] and [GLB][GLB] are supported out of the box. Additionally,
 developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
 will be used to launch Quick Look on iOS Safari as an interim solution until
-Safari has support for something like the Web XR Device and Hit Test APIs.
+Safari has support for something like the WebXR Device and Hit Test APIs.
 
 ### On Loading
 
@@ -183,12 +199,30 @@ Four configuration options are available:
   will be displayed until the model is loaded, at which time the poster will
   be hidden and the model displayed.
 
+See the [loading examples](https://github.com/googlewebcomponents/model-viewer/blob/master/examples/loading.html).
+
 ### Important note on data usage
 
 iOS Quick Look only supports model files that use the [USDZ][USDZ] format. This
 means that iOS users who see a live-rendered model in the browser (loaded as
 [glTF][glTF]/[GLB][GLB] will have to download the same model
 a _second time_ in [USDZ][USDZ] format when they launch Quick Look.
+
+### Augmented Reality
+
+There are currently multiple options for viewing content in augmented reality.
+Different platforms enable slightly different experiences, but generally finds
+a real-world surface and allows the user to place the model, to be viewed through
+a camera.
+
+The attributes `ios-src`, `magic-leap` and `unstable-webxr` enable AR features
+on certain platforms -- read the [API attributes](#attributes) for each to
+understand the support and caveats.
+
+When in augmented reality, all current platforms assume that the models unit size
+be in meters, such that a 1.5 unit tall model will be 1.5 meters when in AR.
+
+See the [augmented reality examples](https://github.com/googlewebcomponents/model-viewer/blob/master/examples/augmented-reality.html).
 
 ## Development
 
@@ -217,3 +251,4 @@ Apache License Version 2.0, Copyright © 2018 Google
 [USDZ]: https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html
 [glTF]: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
 [GLB]: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification
+[WebXR Device API]: https://github.com/immersive-web/webxr

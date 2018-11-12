@@ -54,7 +54,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
 
-        element.unstableWebXR = true;
+        element.unstableWebxr = true;
         element.src = './examples/assets/Astronaut.glb';
 
         await waitForEvent(element, 'load');
