@@ -17,12 +17,13 @@ dist: trusty
 cache:
   directories:
   - node_modules
-
+before_deploy:
+- git add ./dist
+- git commit -m "Add artifacts to tree"
 deploy:
   provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN
-  keep-history: true
   verbose: true
   on:
     branch: master
