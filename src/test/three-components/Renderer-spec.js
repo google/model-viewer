@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 

@@ -14,7 +14,7 @@
  */
 
 import {IS_AR_CANDIDATE, IS_IOS} from '../constants.js';
-import {$renderer, $scene} from '../model-viewer-element-base.js';
+import {$renderer, $scene} from '../model-viewer-base.js';
 import {openIOSARQuickLook} from '../utils.js';
 import {deserializeUrl} from '../utils.js';
 

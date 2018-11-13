@@ -19,7 +19,7 @@ import {ControlsMixin} from './features/controls.js';
 import {EnvironmentMixin} from './features/environment.js';
 import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
-import ModelViewerElementBase from './model-viewer-element-base.js';
+import ModelViewerElementBase from './model-viewer-base.js';
 
 const ModelViewerElement = [
   LoadingMixin,

@@ -14,7 +14,7 @@
  */
 
 import {IS_AR_CANDIDATE} from '../../constants.js';
-import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-element-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {$arRenderer} from '../../three-components/Renderer.js';

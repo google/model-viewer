@@ -14,7 +14,7 @@
  */
 
 import {MagicLeapMixin} from '../../features/magic-leap.js';
-import ModelViewerElementBase from '../../model-viewer-element-base.js';
+import ModelViewerElementBase from '../../model-viewer-base.js';
 import {pickShadowDescendant, timePasses} from '../helpers.js';
 
 const expect = chai.expect;

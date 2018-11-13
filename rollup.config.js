@@ -31,9 +31,9 @@ const plugins = [
 
 export default [
   {
-    input: './lib/model-viewer-element.js',
+    input: './lib/model-viewer.js',
     output: {
-      file: './dist/model-viewer-element.js',
+      file: './dist/model-viewer.js',
       format: 'umd',
       name: 'ModelViewerElement'
     },

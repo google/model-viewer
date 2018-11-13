@@ -22,10 +22,10 @@ See: [API](#api), [Demo](https://model-viewer.glitch.me), [Examples](https://git
 ## Installing
 
 You can load a _bundled build_ via
-[unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js):
+[unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer.js):
 
 ```html
-<script src="https://unpkg.com/@google/model-viewer/dist/model-viewer-element.js"></script>
+<script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
 ```
 
 Alternatively, you can install the _npm package_:
@@ -49,7 +49,7 @@ dependencies.
 If you are using a _bundled build_, first add a script tag to your page to load it
 
 ```html
-<script src="path/to/bundled/model-viewer-element.js"></script>
+<script src="path/to/bundled/model-viewer.js"></script>
 ```
 
 Alternatively, if you are using the _npm package_ and a bundler (see
@@ -68,7 +68,7 @@ an HTML document might look like this:
 <html>
   <head>
     <title>3D Test</title>
-    <script src="path/to/bundled/model-viewer-element.js"></script>
+    <script src="path/to/bundled/model-viewer.js"></script>
   </head>
   <body>
     <model-viewer src="path/to/model.gltf"></model-viewer>

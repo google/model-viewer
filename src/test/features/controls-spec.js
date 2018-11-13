@@ -14,7 +14,7 @@
  */
 
 import {$controls, ControlsMixin} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-element-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
