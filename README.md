@@ -16,7 +16,7 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-See: [API](#api), [Demo](https://model-viewer.glitch.me), [Examples](https://github.com/GoogleWebComponents/model-viewer/tree/master/examples)
+See: [API](#api), [Demo](https://model-viewer.glitch.me), [Examples](https://googlewebcomponents.github.io/model-viewer/examples/index.html)
 
 
 
@@ -204,7 +204,7 @@ Four configuration options are available:
   will be displayed until the model is loaded, at which time the poster will
   be hidden and the model displayed.
 
-See the [loading examples](https://github.com/googlewebcomponents/model-viewer/blob/master/examples/loading.html).
+See the [loading examples](https://googlewebcomponents.github.io/model-viewer/examples/loading.html)
 
 ### Important note on data usage
 
@@ -227,7 +227,7 @@ understand the support and caveats.
 When in augmented reality, all current platforms assume that the models unit size
 be in meters, such that a 1.5 unit tall model will be 1.5 meters when in AR.
 
-See the [augmented reality examples](https://github.com/googlewebcomponents/model-viewer/blob/master/examples/augmented-reality.html).
+See the [augmented reality examples](https://googlewebcomponents.github.io/model-viewer/examples/augmented-reality.html).
 
 ## Development
 
