@@ -2,7 +2,10 @@
 > `<model-viewer>` is currently in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.
 
 
-# `<model-viewer>`
+# `<model-viewer>` 
+
+ [![Build Status](https://api.travis-ci.org/GoogleWebComponents/model-viewer.svg?branch=master)](https://travis-ci.org/GoogleWebComponents/model-viewer)
+ [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
 models - optionally in AR - easy to do, without writing any code, on as many
@@ -13,6 +16,7 @@ to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
 See: [API](#api), [Demo](https://model-viewer.glitch.me), [Examples](https://github.com/GoogleWebComponents/model-viewer/tree/master/examples)
+
 
 
 ## Installing
