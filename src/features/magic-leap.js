@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$container, $scene} from '../model-viewer-element-base.js';
+import {$container, $scene} from '../model-viewer-base.js';
 
 const $showMlModel = Symbol('showMlModel');
 const $hideMlModel = Symbol('hideMlModel');

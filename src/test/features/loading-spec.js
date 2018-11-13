@@ -14,7 +14,7 @@
  */
 
 import {LoadingMixin} from '../../features/loading.js';
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;

@@ -16,7 +16,7 @@
 import {EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
-import {$tick} from '../model-viewer-element-base.js';
+import {$tick} from '../model-viewer-base.js';
 
 import TextureUtils from './TextureUtils.js';
 import {ARRenderer} from './ARRenderer.js';

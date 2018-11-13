@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-element-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 
 import {timePasses, until, waitForEvent} from './helpers.js';
 
@@ -21,7 +21,7 @@ const expect = chai.expect;
 
 suite('ModelViewerElementBase', () => {
   test('is not registered as a custom element by default', () => {
-    expect(customElements.get('model-viewer-element-base'))
+    expect(customElements.get('model-viewer-base'))
         .to.be.equal(undefined);
   });
 

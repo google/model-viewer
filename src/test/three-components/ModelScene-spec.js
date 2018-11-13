@@ -15,7 +15,7 @@
 
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-element-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import ModelScene, {FRAMED_HEIGHT, ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 

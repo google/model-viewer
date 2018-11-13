@@ -15,7 +15,7 @@
 
 import {PerspectiveCamera, Vector3} from 'three';
 
-import {$needsRender, $onModelLoad, $onResize, $scene} from '../model-viewer-element-base.js';
+import {$needsRender, $onModelLoad, $onResize, $scene} from '../model-viewer-base.js';
 import OrbitControls from '../third_party/three/OrbitControls.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
 

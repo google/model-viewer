@@ -14,12 +14,12 @@
     "Ricardo Cabello <ricardocabello@google.com>",
     "Matt Small <mbsmall@google.com>"
   ],
-  "main": "./lib/model-viewer-element.js",
-  "module": "./lib/model-viewer-element.js",
+  "main": "./lib/model-viewer.js",
+  "module": "./lib/model-viewer.js",
   "files": [
     "src",
     "lib",
-    "dist/model-viewer-element.js",
+    "dist/model-viewer.js",
     "dist/unit-tests.js",
     "test.html",
     "POLYFILLS.md",

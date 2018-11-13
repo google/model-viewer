@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$needsRender, $scene, $tick} from '../model-viewer-element-base.js';
+import {$needsRender, $scene, $tick} from '../model-viewer-base.js';
 
 // How much the model should rotate per
 // second in radians.

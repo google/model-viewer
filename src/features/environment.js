@@ -15,7 +15,7 @@
 
 import {Color} from 'three';
 
-import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-element-base.js';
+import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const GAMMA_TO_LINEAR = 2.2;
 

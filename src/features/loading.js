@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$updateSource} from '../model-viewer-element-base.js';
+import {$updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {deserializeUrl} from '../utils.js';
 
