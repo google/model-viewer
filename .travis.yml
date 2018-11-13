@@ -18,7 +18,7 @@ cache:
   directories:
   - node_modules
 before_deploy:
-- cd ${TRAVIS_BUILD_DIR} && echo 'node_modules' > .gitignore
+- cd ${TRAVIS_BUILD_DIR} && rm ./.gitignore
 deploy:
   provider: pages
   skip-cleanup: true
