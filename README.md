@@ -9,7 +9,8 @@
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
 models - optionally in AR - easy to do, without writing any code, on as many
-browsers and devices as possible.
+browsers and devices as possible. This component will strive to have great
+defaults for rendering quality and performance.
 
 As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
