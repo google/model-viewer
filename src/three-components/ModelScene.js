@@ -198,6 +198,7 @@ export default class ModelScene extends Scene {
         Math.max(this.roomSize.x, this.roomSize.y, this.roomSize.z) * 2;
     this.skysphere.scale.setScalar(skysphereSize);
     this.skysphere.scale.x *= -1;
+    this.skysphere.scale.z *= -1;
 
     this.updateStaticShadow();
   }

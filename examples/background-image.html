@@ -52,7 +52,7 @@
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/equirectangular.png"
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     src="assets/DamagedHelmet/DamagedHelmet.gltf">
                 </model-viewer>
             </template>
@@ -63,7 +63,7 @@
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/equirectangular.png"
+                    background-image="assets/small_hangar_01_1k.jpg"
                     src="assets/reflective-sphere.gltf">
                 </model-viewer>
             </template>
@@ -74,7 +74,7 @@
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/equirectangular.png"
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     src="assets/Astronaut.glb">
                 </model-viewer>
             </template>
@@ -86,7 +86,7 @@
                 <model-viewer
                     controls
                     background-color="#ff0077"
-                    background-image="assets/equirectangular.png"
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     src="assets/reflective-sphere.gltf">
                 </model-viewer>
             </template>
@@ -97,7 +97,7 @@
             <template>
                 <model-viewer id="toggle-image" backgroud-color="#ff0077" src="assets/DamagedHelmet/DamagedHelmet.gltf" controls auto-rotate></model-viewer>
                 <script>
-                    const images = ['assets/equirectangular.png', 'does-not-exist.png', ''];
+                    const images = ['assets/whipple_creek_regional_park_04_1k.jpg', 'does-not-exist.png', ''];
                     let i = 0;
                     setInterval(() =>
                         $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2000);
@@ -118,9 +118,15 @@
         </div>
 
         <div class="attribution">
-          equirectangular.png by <a href="https://github.com/WestLangley">WestLangley</a>
-          licensed under <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE">MIT</a>
-          (<a href="https://github.com/mrdoob/three.js/blob/dev/examples/textures/equirectangular.png">source</a>)
+          small_hangar_01_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+          (<a href="https://hdrihaven.com/hdri/?h=small_hangar_01">source</a>)
+        </div>
+
+        <div class="attribution">
+          whipple_creek_regional_park_04_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+          (<a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">source</a>)
         </div>
     </div>
     <script src="./scripts/helpers.js"></script>
