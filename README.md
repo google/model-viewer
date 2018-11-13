@@ -8,8 +8,9 @@
  [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
-models - optionally in AR - easy to do, without writing any code, on as many
-browsers and devices as possible.
+models - optionally in AR - easy to do, on as many browsers and devices as possible.
+`<model-viewer>` strives to give you great defaults for rendering quality and
+performance.
 
 As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
