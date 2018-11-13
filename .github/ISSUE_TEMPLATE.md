@@ -11,19 +11,27 @@ problem.
 https://glitch.com/edit/#!/model-viewer
 <!-- ...or provide your own repro URL -->
 
-### Browsers Affected
+### Browser Affected
 <!-- Check all that apply and please include the version tested -->
 - [ ] Chrome
-- [ ] Firefox
 - [ ] Edge
-- [ ] Safari 11
-- [ ] Safari 10
-- [ ] IE 11
+- [ ] Firefox
+- [ ] Helios
+- [ ] IE
+- [ ] Safari
+
+### OS
+<!-- Check all that apply and please include the version tested -->
+- [ ] Android
+- [ ] iOS
+- [ ] Linux
+- [ ] MacOS
+- [ ] Windows
 
 ### Versions
 <!--
 Include the version of `<model-viewer>`, three.js, along with any polyfills that you're
-using. The output of `npm ls` may be helpful (if you're using npm).
+using. The output of `npm ls` should include this information (if you're using npm).
 -->
 - model-viewer: vX.X.X
 - three.js: rXX
