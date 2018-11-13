@@ -28,7 +28,7 @@ function invertPad(vec3) {
 // Checks that the skysphere is within the camera's far plane
 function ensureSkysphereVisible(scene) {
   expect(-1 * scene.skysphere.scale.x).to.be.equal(scene.skysphere.scale.y);
-  expect(scene.skysphere.scale.y).to.be.equal(scene.skysphere.scale.z);
+  expect(scene.skysphere.scale.y).to.be.equal(-1 * scene.skysphere.scale.z);
   expect(-1 * scene.skysphere.scale.x).to.be.lessThan(scene.camera.far);
 }
 
@@ -158,7 +158,7 @@ suite('ModelScene', () => {
 
       expect(-1 * scene.skysphere.scale.x).to.be.greaterThan(size.x);
       expect(scene.skysphere.scale.y).to.be.greaterThan(size.y);
-      expect(scene.skysphere.scale.z).to.be.greaterThan(size.z);
+      expect(-1 * scene.skysphere.scale.z).to.be.greaterThan(size.z);
       ensureSkysphereVisible(scene);
     });
 
