@@ -4,6 +4,9 @@
   "suites": [
     "./test.html"
   ],
+  "mochaOptions": {
+    "timeout": 20000
+  },
   "plugins": {
     "sauce": {
       "browsers": [
