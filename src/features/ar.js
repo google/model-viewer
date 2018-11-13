@@ -18,8 +18,9 @@ import {$renderer, $scene} from '../model-viewer-element-base.js';
 import {openIOSARQuickLook} from '../utils.js';
 import {deserializeUrl} from '../utils.js';
 
-
 const $enterARElement = Symbol('enterARElement');
+const $enterARWithQuickLook = Symbol('enterARWithQuickLook');
+const $enterARWithWebXR = Symbol('enterARWithWebXR');
 
 export const ARMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -69,17 +70,17 @@ export const ARMixin = (ModelViewerElement) => {
      */
     enterAR() {
       if (IS_IOS) {
-        this.enterARWithQuickLook();
+        this[$enterARWithQuickLook]();
       } else if (IS_AR_CANDIDATE) {
-        this.enterARWithWebXR();
+        this[$enterARWithWebXR]();
       }
     }
 
-    async enterARWithQuickLook() {
+    async [$enterARWithQuickLook]() {
       openIOSARQuickLook(this.iosSrc);
     }
 
-    async enterARWithWebXR() {
+    async [$enterARWithWebXR]() {
       const renderer = this[$renderer];
 
       console.log('Attempting to enter fullscreen and present in AR...');
@@ -109,11 +110,11 @@ export const ARMixin = (ModelViewerElement) => {
     async update(changedProperties) {
       super.update(changedProperties);
 
-      if (!changedProperties.has('unstableWebXR') && !changedProperties.has('iosSrc')) {
+      if (!changedProperties.has('unstableWebxr') && !changedProperties.has('iosSrc')) {
         return;
       }
 
-      const canShowButton = this.unstableWebXR && IS_AR_CANDIDATE;
+      const canShowButton = this.unstableWebxr && IS_AR_CANDIDATE;
       const iosCandidate = IS_IOS && this.iosSrc != null;
       const renderer = this[$renderer];
 
