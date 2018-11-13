@@ -54,7 +54,6 @@ export default class Renderer extends EventDispatcher {
         new WebGLRenderer({canvas: this.canvas, context: this.context});
     this.renderer.autoClear = false;
     this.renderer.setPixelRatio(DPR);
-    this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = GAMMA_FACTOR;
 

@@ -75,7 +75,7 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-    this.light = new AmbientLight(0xffffff, 1.5);
+    this.light = new AmbientLight(0xffffff, 1);
     // This light is only for generating (fake) shadows
     // and does not needed to be added to the scene.
     // @see StaticShadow.js
