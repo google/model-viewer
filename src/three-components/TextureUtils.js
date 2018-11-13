@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, TextureLoader} from 'three';
+import {EventDispatcher, GammaEncoding, TextureLoader} from 'three';
 
 import EquirectangularToCubemap from '../third_party/three.equirectangular-to-cubemap/EquirectangularToCubemap.js';
 
@@ -43,9 +43,11 @@ export default class TextureManager extends EventDispatcher {
    * @param {string} url
    * @return {Promise<THREE.Texture>}
    */
-  load(url) {
-    return new Promise(
+  async load(url) {
+    const texture = await new Promise(
         (resolve, reject) => loader.load(url, resolve, undefined, reject));
+    texture.encoding = GammaEncoding;
+    return texture;
   }
 
   /**
