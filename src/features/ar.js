@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_AR_CANDIDATE, IS_IOS} from '../constants.js';
+import {IS_AR_CANDIDATE, IS_IOS, IS_AR_QUICKLOOK_CANDIDATE} from '../constants.js';
 import {$renderer, $scene} from '../model-viewer-base.js';
 import {openIOSARQuickLook} from '../utils.js';
 import {deserializeUrl} from '../utils.js';
@@ -115,7 +115,7 @@ export const ARMixin = (ModelViewerElement) => {
       }
 
       const canShowButton = this.unstableWebxr && IS_AR_CANDIDATE;
-      const iosCandidate = IS_IOS && this.iosSrc != null;
+      const iosCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE && this.iosSrc != null;
       const renderer = this[$renderer];
 
       // On iOS, always enable the AR button. On non-iOS,
