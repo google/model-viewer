@@ -64,6 +64,8 @@ export default class ModelScene extends Scene {
   constructor({canvas, element, width, height, renderer}) {
     super();
 
+    this.name = 'ModelScene';
+
     this.onModelLoad = this.onModelLoad.bind(this);
     this[$paused] = false;
 
@@ -76,21 +78,28 @@ export default class ModelScene extends Scene {
     this.model = new Model();
     this.shadow = new StaticShadow();
     this.light = new AmbientLight(0xffffff, 1);
+    this.light.name = 'AmbientLight';
+
     // This light is only for generating (fake) shadows
     // and does not needed to be added to the scene.
     // @see StaticShadow.js
     this.shadowLight = new DirectionalLight(0xffffff, 0);
     this.shadowLight.position.set(0, 10, 0);
+    this.shadowLight.name = 'ShadowLight';
 
     this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 1000);
+    this.camera.name = 'MainCamera';
     this.camera.position.y = 5;
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
+    this.pivot.name = 'Pivot';
 
     const skysphereGeo = new SphereBufferGeometry(1, 32, 32);
     const skysphereMat = new MeshBasicMaterial(
         {side: BackSide, color: 0xffffff, depthTest: false, depthWrite: false});
     this.skysphere = new Mesh(skysphereGeo, skysphereMat);
+    this.skysphere.name = 'Skysphere';
+
     // Ensure the skysphere is rendered before anything else due to
     // depthTest=false
     this.skysphere.renderOrder = 1;
@@ -290,6 +299,7 @@ export default class ModelScene extends Scene {
     this.shadow.position.set(0, 0, 0);
     this.shadow.scale.x = this.roomSize.x;
     this.shadow.scale.z = this.roomSize.z;
+
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
     // Lazily add the shadow so we're only displaying it once it has
