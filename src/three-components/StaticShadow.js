@@ -52,6 +52,7 @@ export default class StaticShadow extends Mesh {
     geometry.rotateX(-Math.PI / 2);
 
     super(geometry, shadowTextureMaterial.clone());
+    this.name = 'StaticShadow';
 
     this[$renderTarget] = new WebGLRenderTarget(
         DEFAULT_CONFIG.textureWidth, DEFAULT_CONFIG.textureHeight, {
@@ -61,7 +62,6 @@ export default class StaticShadow extends Mesh {
     this.material.needsUpdate = true;
 
     this[$camera] = new OrthographicCamera();
-    this[$camera].matrixAutoUpdate = false;
   }
 
   /**
@@ -99,15 +99,16 @@ export default class StaticShadow extends Mesh {
     // and facing its target.
     light.updateMatrixWorld(true);
     light.target.updateMatrixWorld(true);
+
     this[$camera].position.setFromMatrixPosition(light.matrixWorld);
+    this[$camera].updateMatrixWorld(true);
     this[$camera].lookAt(light.target.position);
-    this[$camera].updateMatrix();
-    this[$camera].updateMatrixWorld();
 
     // Update the camera's frustum to fully engulf the StaticShadow
     // mesh that will be rendering the generated texture.
     this.updateMatrixWorld(true);
     scale.setFromMatrixScale(this.matrixWorld);
+
     this[$camera].top = scale.z / 2;
     this[$camera].bottom = scale.z / -2;
     this[$camera].left = scale.x / -2;
