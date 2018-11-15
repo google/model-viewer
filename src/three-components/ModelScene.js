@@ -131,7 +131,7 @@ export default class ModelScene extends Scene {
     try {
       await this.model.setSource(source);
     } catch (e) {
-      console.error(`Could not set model source: ${source}`);
+      console.error(`Could not set model source: ${source}: ${e.message}`);
     }
   }
 
