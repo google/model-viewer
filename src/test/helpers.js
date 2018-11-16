@@ -38,6 +38,20 @@ export const until =
 }
 
 /**
+ * Takes a texture and an object and returns a boolean indicating
+ * if whether or not the texture's userData matches the fields
+ * defined on the `meta` object.
+ *
+ * @param {THREE.Texture}
+ * @param {Object}
+ * @return {boolean}
+ */
+export const textureMatchesMeta = (texture, meta) => !!(
+    texture && texture.userData && Object.keys(meta).reduce((matches, key) => {
+      return matches && meta[key] === texture.userData[key];
+    }, true));
+
+/**
  * @param {EventTarget} target
  * @param {string} eventName
  * @param {?Function} predicate
