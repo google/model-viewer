@@ -29,8 +29,10 @@ export default class Model extends Object3D {
    */
   constructor() {
     super();
+    this.name = 'Model';
     this.loader = new CachingGLTFLoader();
     this.modelContainer = new Object3D();
+    this.modelContainer.name = 'ModelContainer';
     this.boundingBox = new Box3();
     this.size = new Vector3();
     this.add(this.modelContainer);

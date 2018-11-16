@@ -25,6 +25,16 @@ const defaultConfig = {
   synthesizedEnvmapSize: 512,
 };
 
+// Attach a `userData` object for arbitrary data on textures that
+// originate from TextureUtils, similar to Object3D's userData,
+// for help debugging, providing metadata for tests, and semantically
+// describe the type of texture within the context of this application.
+const userData = {
+  url: null,
+  // 'Equirectangular', 'EnvironmentMap'
+  type: null,
+};
+
 export default class TextureManager extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
@@ -46,6 +56,11 @@ export default class TextureManager extends EventDispatcher {
   async load(url) {
     const texture = await new Promise(
         (resolve, reject) => loader.load(url, resolve, undefined, reject));
+    texture.userData = { ...userData, ...({
+      url: url,
+      type: 'Equirectangular',
+    })};
+
     texture.encoding = GammaEncoding;
     return texture;
   }
@@ -56,7 +71,12 @@ export default class TextureManager extends EventDispatcher {
    */
   generateDefaultEnvMap(size) {
     const mapSize = size || this.config.synthesizedEnvmapSize;
-    return this.envMapGenerator.generate(mapSize);
+    const texture = this.envMapGenerator.generate(mapSize);
+    texture.userData = { ...userData, ...({
+      type: 'EnvironmentMap',
+    })};
+
+    return texture;
   }
 
   /**
@@ -72,6 +92,12 @@ export default class TextureManager extends EventDispatcher {
   equirectangularToCubemap(texture, size) {
     const mapSize = size || this.config.cubemapSize;
     const cubemap = this.cubemapGenerator.convert(texture, mapSize);
+
+    cubemap.userData = { ...userData, ...({
+      url: texture.userData ? texture.userData.url : null,
+      type: 'EnvironmentMap',
+    })};
+
     return cubemap;
   }
 

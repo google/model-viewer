@@ -16,6 +16,7 @@
 import {TextureLoader, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
+import {textureMatchesMeta} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -37,12 +38,15 @@ suite('TextureUtils', () => {
       let texture = await textureUtils.load(EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
+      expect(
+          textureMatchesMeta(texture, {type: 'Equirectangular', url: EQUI_URL}))
+          .to.be.ok;
     });
     test('throws on invalid URL', async () => {
       try {
         await textureUtils.load(null);
         expect(false).to.be.ok;
-      } catch(e) {
+      } catch (e) {
         expect(true).to.be.ok;
       }
     });
@@ -50,7 +54,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.load('./nope.png');
         expect(false).to.be.ok;
-      } catch(e) {
+      } catch (e) {
         expect(true).to.be.ok;
       }
     });
@@ -63,12 +67,15 @@ suite('TextureUtils', () => {
       texture.dispose();
       cubemap.dispose();
       expect(cubemap.isTexture).to.be.ok;
+      expect(
+          textureMatchesMeta(cubemap, {type: 'EnvironmentMap', url: EQUI_URL}))
+          .to.be.ok;
     });
     test('throws on invalid texture', async () => {
       try {
         await textureUtils.equirectangularToCubemap({});
         expect(false).to.be.ok;
-      } catch(e) {
+      } catch (e) {
         expect(true).to.be.ok;
       }
     });
@@ -81,13 +88,20 @@ suite('TextureUtils', () => {
       textures.cubemap.dispose();
       expect(textures.equirect.isTexture).to.be.ok;
       expect(textures.cubemap.isTexture).to.be.ok;
+
+      expect(textureMatchesMeta(
+                 textures.equirect, {type: 'Equirectangular', url: EQUI_URL}))
+          .to.be.ok;
+      expect(textureMatchesMeta(
+                 textures.cubemap, {type: 'EnvironmentMap', url: EQUI_URL}))
+          .to.be.ok;
     });
 
     test('throws if given an invalid url', async () => {
       try {
         await textureUtils.toCubemapAndEquirect({});
         expect(false).to.be.ok;
-      } catch(e) {
+      } catch (e) {
         expect(true).to.be.ok;
       }
     });

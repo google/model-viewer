@@ -111,8 +111,6 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       }
 
       const { cubemap, equirect } = textures;
-      cubemap.name = this.backgroundImage;
-      equirect.name = this.backgroundImage;
 
       this[$scene].skysphere.material.color = new Color(0xffffff);
       this[$scene].skysphere.material.map = equirect;

@@ -33,6 +33,8 @@ export default class Reticle extends Object3D {
   constructor(camera) {
     super();
 
+    this.name = 'Reticle';
+
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
     let material = new MeshBasicMaterial({color: 0xffffff});
     // Orient the geometry so its position is flat on a horizontal surface

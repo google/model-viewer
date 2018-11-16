@@ -62,8 +62,6 @@ export default class EnvMapGenerator extends EventDispatcher {
     this.camera.clear(this.renderer);
     this.camera.update(this.renderer, this.scene);
 
-    const texture = this.camera.renderTarget.texture;
-    texture.name = 'Generated';
-    return texture;
+    return this.camera.renderTarget.texture;
   }
 }

@@ -33,5 +33,6 @@ export default class Shadow extends Mesh {
 
     super(geometry, material);
     this.receiveShadow = true;
+    this.name = 'ShadowMesh';
   }
 }
