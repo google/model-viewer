@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, GammaEncoding, TextureLoader} from 'three';
+import {Cache, EventDispatcher, GammaEncoding, TextureLoader} from 'three';
 
-import EquirectangularToCubemap from '../third_party/three.equirectangular-to-cubemap/EquirectangularToCubemap.js';
+import PatchedEquirectangularToCubeGenerator from './PatchedEquirectangularToCubeGenerator.js';
 
 import EnvMapGenerator from './EnvMapGenerator.js';
 
+// Enable three's loader cache so we don't create redundant
+// Image objects to decode images fetched over the network.
+Cache.enabled = true;
+
 const loader = new TextureLoader();
+const $cubeGenerator = Symbol('cubeGenerator');
 const defaultConfig = {
   cubemapSize: 1024,
   synthesizedEnvmapSize: 512,
@@ -45,8 +50,46 @@ export default class TextureManager extends EventDispatcher {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
-    this.cubemapGenerator = new EquirectangularToCubemap(this.renderer);
     this.envMapGenerator = new EnvMapGenerator(this.renderer);
+    this[$cubeGenerator] = null;
+  }
+
+  /**
+   * The texture returned here is from a WebGLRenderCubeTarget,
+   * which is not the same as a THREE.CubeTexture, and just what
+   * the current THREE.CubeCamera uses, and has the same effect
+   * when being used as an environment map.
+   *
+   * @param {THREE.Texture} texture
+   * @return {THREE.Texture}
+   */
+  equirectangularToCubemap(texture) {
+    // Use our "patched" generator due to three memory leak
+    // @see https://github.com/mrdoob/three.js/issues/15288
+    const generator = new PatchedEquirectangularToCubeGenerator(texture, {
+      resolution: this.config.cubemapSize,
+    });
+
+    generator.update(this.renderer);
+
+    const cubemap = generator.renderTarget.texture;
+    cubemap.dispose = () => {
+      generator.renderTarget.dispose();
+    };
+
+    cubemap.userData = {
+      ...userData,
+      ...({
+        url: texture.userData ? texture.userData.url : null,
+        type: 'EnvironmentMap',
+      })
+    };
+
+    // It's up to the previously served texture to dispose itself,
+    // and therefore the generator's render target.
+    this[$cubeGenerator] = generator;
+
+    return cubemap;
   }
 
   /**
@@ -56,10 +99,13 @@ export default class TextureManager extends EventDispatcher {
   async load(url) {
     const texture = await new Promise(
         (resolve, reject) => loader.load(url, resolve, undefined, reject));
-    texture.userData = { ...userData, ...({
-      url: url,
-      type: 'Equirectangular',
-    })};
+    texture.userData = {
+      ...userData,
+      ...({
+        url: url,
+        type: 'Equirectangular',
+      })
+    };
 
     texture.encoding = GammaEncoding;
     return texture;
@@ -72,33 +118,14 @@ export default class TextureManager extends EventDispatcher {
   generateDefaultEnvMap(size) {
     const mapSize = size || this.config.synthesizedEnvmapSize;
     const texture = this.envMapGenerator.generate(mapSize);
-    texture.userData = { ...userData, ...({
-      type: 'EnvironmentMap',
-    })};
+    texture.userData = {
+      ...userData,
+      ...({
+        type: 'EnvironmentMap',
+      })
+    };
 
     return texture;
-  }
-
-  /**
-   * The texture returned here is from a WebGLRenderCubeTarget,
-   * which is not the same as a THREE.CubeTexture, and just what
-   * the current THREE.CubeCamera uses, and has the same effect
-   * when being used as an environment map.
-   *
-   * @param {THREE.Texture} texture
-   * @param {?number} size
-   * @return {THREE.Texture}
-   */
-  equirectangularToCubemap(texture, size) {
-    const mapSize = size || this.config.cubemapSize;
-    const cubemap = this.cubemapGenerator.convert(texture, mapSize);
-
-    cubemap.userData = { ...userData, ...({
-      url: texture.userData ? texture.userData.url : null,
-      type: 'EnvironmentMap',
-    })};
-
-    return cubemap;
   }
 
   /**
@@ -128,9 +155,11 @@ export default class TextureManager extends EventDispatcher {
   }
 
   dispose() {
-    this.cubemapGenerator.camera.renderTarget.dispose();
     this.envMapGenerator.camera.renderTarget.dispose();
-    this.cubemapGenerator = null;
     this.envMapGenerator = null;
+    if (this[$cubeGenerator]) {
+      this[$cubeGenerator].dispose();
+      this[$cubeGenerator] = null;
+    }
   }
 }
