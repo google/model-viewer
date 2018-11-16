@@ -42,7 +42,7 @@ npm install ---save @google/model-viewer
 Bundled builds are useful for demos or for kicking the tires. However,
 the _bundled build_ includes some third party dependencies. Some of these
 dependencies (like [three](https://threejs.org/)) are quite large. For
-production use cases it is we recommend that you use the _npm package_ and your
+production use cases we recommend that you use the _npm package_ and your
 own bundler (such as [Rollup](http://rollupjs.org) or
 [Webpack](https://webpack.js.org/)) to eliminate potential duplicate
 dependencies.
@@ -212,7 +212,7 @@ See the [loading examples](https://googlewebcomponents.github.io/model-viewer/ex
 
 iOS Quick Look only supports model files that use the [USDZ][USDZ] format. This
 means that iOS users who see a live-rendered model in the browser (loaded as
-[glTF][glTF]/[GLB][GLB] will have to download the same model
+[glTF][glTF]/[GLB][GLB]) will have to download the same model
 a _second time_ in [USDZ][USDZ] format when they launch Quick Look.
 
 ### Augmented Reality
