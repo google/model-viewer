@@ -27,9 +27,9 @@ function invertPad(vec3) {
 
 // Checks that the skysphere is within the camera's far plane
 function ensureSkysphereVisible(scene) {
-  expect(-1 * scene.skysphere.scale.x).to.be.equal(scene.skysphere.scale.y);
+  expect(scene.skysphere.scale.x).to.be.equal(scene.skysphere.scale.y);
   expect(scene.skysphere.scale.y).to.be.equal(-1 * scene.skysphere.scale.z);
-  expect(-1 * scene.skysphere.scale.x).to.be.lessThan(scene.camera.far);
+  expect(scene.skysphere.scale.x).to.be.lessThan(scene.camera.far);
 }
 
 function ensureRoomFitsAspect(roomBox, aspect) {
@@ -156,7 +156,7 @@ suite('ModelScene', () => {
       const size = new Vector3();
       scene.roomBox.getSize(size);
 
-      expect(-1 * scene.skysphere.scale.x).to.be.greaterThan(size.x);
+      expect(scene.skysphere.scale.x).to.be.greaterThan(size.x);
       expect(scene.skysphere.scale.y).to.be.greaterThan(size.y);
       expect(-1 * scene.skysphere.scale.z).to.be.greaterThan(size.z);
       ensureSkysphereVisible(scene);

@@ -15,3 +15,5 @@
 
 import '@polymer/iron-demo-helpers/demo-snippet.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-slider/paper-slider.js';
+import '@polymer/paper-radio-group/paper-radio-group.js';

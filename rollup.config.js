@@ -54,6 +54,7 @@ export default [
     input: './lib/model-viewer.js',
     output: {
       file: './dist/model-viewer.js',
+      sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement'
     },
