@@ -30,12 +30,12 @@ export const IS_MOBILE = (() => {
 export const IS_IOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-let tempAnchor = document.createElement('a');
+export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
+    const tempAnchor = document.createElement('a');
 
-export const IS_AR_QUICKLOOK_CANDIDATE = Boolean(
-    tempAnchor.relList &&
-    tempAnchor.relList.supports &&
-    tempAnchor.relList.supports('ar')
-);
-
-tempAnchor = undefined;
+    return Boolean(
+        tempAnchor.relList &&
+        tempAnchor.relList.supports &&
+        tempAnchor.relList.supports('ar')
+    );
+})();
