@@ -21,8 +21,7 @@ const expect = chai.expect;
 
 suite('ModelViewerElementBase', () => {
   test('is not registered as a custom element by default', () => {
-    expect(customElements.get('model-viewer-base'))
-        .to.be.equal(undefined);
+    expect(customElements.get('model-viewer-base')).to.be.equal(undefined);
   });
 
   suite('when registered', () => {
@@ -61,14 +60,28 @@ suite('ModelViewerElementBase', () => {
         element.remove();
       });
 
-      test('eventually dispatches a load event', (done) => {
-        const onLoad = () => {
-          element.removeEventListener('load', onLoad);
-          done();
-        };
-
-        element.addEventListener('load', onLoad);
+      test('eventually dispatches a load event', async () => {
+        const sourceLoads = waitForEvent(element, 'load');
         element.src = './examples/assets/Astronaut.glb';
+        await sourceLoads;
+      });
+    });
+
+    suite('with an invalid src', () => {
+      let element;
+      setup(() => {
+        element = new ModelViewerElement();
+        document.body.appendChild(element);
+      });
+
+      teardown(() => {
+        element.remove();
+      });
+
+      test('eventually dispatches an error event', async () => {
+        const sourceErrors = waitForEvent(element, 'error');
+        element.src = './does-not-exist.glb';
+        await sourceErrors;
       });
     });
 

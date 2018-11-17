@@ -191,14 +191,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * sets the views to use the new model based off of the `preload`
    * attribute.
    */
-  [$updateSource]() {
+  async[$updateSource]() {
     const source = this.src;
 
     if (!source) {
       return;
     }
 
-    this[$canvas].classList.add('show');
-    this[$scene].setModelSource(source);
+    try {
+      this[$canvas].classList.add('show');
+      await this[$scene].setModelSource(source);
+    } catch (error) {
+      console.warn(error.message);
+      this[$canvas].classList.remove('show');
+      this.dispatchEvent(new CustomEvent('error', {detail: error}));
+    }
   }
 }
