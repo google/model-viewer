@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-import {Cache, EventDispatcher, GammaEncoding, TextureLoader} from 'three';
+import {EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
 
+
+import PMREMCubeUVPacker from '../third_party/three/PMREMCubeUVPacker.js';
+import PMREMGenerator from '../third_party/three/PMREMGenerator.js';
+import RGBELoader from '../third_party/three/RGBELoader.js';
 import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
 
 import EnvMapGenerator from './EnvMapGenerator.js';
@@ -23,11 +27,18 @@ import EnvMapGenerator from './EnvMapGenerator.js';
 // Image objects to decode images fetched over the network.
 Cache.enabled = true;
 
-const loader = new TextureLoader();
+const ldrLoader = new TextureLoader();
+const hdrLoader = new RGBELoader();
+
 const $cubeGenerator = Symbol('cubeGenerator');
+
 const defaultConfig = {
   cubemapSize: 1024,
   synthesizedEnvmapSize: 512,
+  pmremSamples: 32,
+  pmremSize: 256,
+  defaultEnvPmremSamples: 8,
+  defaultEnvPmremSize: 256,
 };
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -36,15 +47,17 @@ const defaultConfig = {
 // describe the type of texture within the context of this application.
 const userData = {
   url: null,
-  // 'Equirectangular', 'EnvironmentMap'
+  // 'Equirectangular', 'CubeMap', 'EnvironmentMap'
   type: null,
 };
 
-export default class TextureManager extends EventDispatcher {
+export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize [1024]
    * @param {?number} config.synthesizedEnvmapSize [512]
+   * @param {?number} config.pmremSamples [24]
+   * @param {?number} config.pmremSize [256]
    */
   constructor(renderer, config = {}) {
     super();
@@ -55,13 +68,8 @@ export default class TextureManager extends EventDispatcher {
   }
 
   /**
-   * The texture returned here is from a WebGLRenderCubeTarget,
-   * which is not the same as a THREE.CubeTexture, and just what
-   * the current THREE.CubeCamera uses, and has the same effect
-   * when being used as an environment map.
-   *
    * @param {THREE.Texture} texture
-   * @return {THREE.Texture}
+   * @return {THREE.WebGLRenderCubeTarget}
    */
   equirectangularToCubemap(texture) {
     const generator = new EquirectangularToCubeGenerator(texture, {
@@ -70,16 +78,11 @@ export default class TextureManager extends EventDispatcher {
 
     generator.update(this.renderer);
 
-    const cubemap = generator.renderTarget.texture;
-    cubemap.dispose = () => {
-      generator.renderTarget.dispose();
-    };
-
-    cubemap.userData = {
+    generator.renderTarget.texture.userData = {
       ...userData,
       ...({
         url: texture.userData ? texture.userData.url : null,
-        type: 'EnvironmentMap',
+        type: 'CubeMap',
       })
     };
 
@@ -87,7 +90,7 @@ export default class TextureManager extends EventDispatcher {
     // and therefore the generator's render target.
     this[$cubeGenerator] = generator;
 
-    return cubemap;
+    return generator.renderTarget;
   }
 
   /**
@@ -95,6 +98,8 @@ export default class TextureManager extends EventDispatcher {
    * @return {Promise<THREE.Texture>}
    */
   async load(url) {
+    const isHDR = /\.hdr$/.test(url);
+    const loader = isHDR ? hdrLoader : ldrLoader;
     const texture = await new Promise(
         (resolve, reject) => loader.load(url, resolve, undefined, reject));
     texture.userData = {
@@ -105,7 +110,15 @@ export default class TextureManager extends EventDispatcher {
       })
     };
 
-    texture.encoding = GammaEncoding;
+    if (isHDR) {
+      texture.encoding = RGBEEncoding;
+      texture.minFilter = NearestFilter;
+      texture.magFilter = NearestFilter;
+      texture.flipY = true;
+    } else {
+      texture.encoding = GammaEncoding;
+    }
+
     return texture;
   }
 
@@ -115,39 +128,83 @@ export default class TextureManager extends EventDispatcher {
    */
   generateDefaultEnvMap(size) {
     const mapSize = size || this.config.synthesizedEnvmapSize;
-    const texture = this.envMapGenerator.generate(mapSize);
-    texture.userData = {
+    const cubemap = this.envMapGenerator.generate(mapSize);
+    const pmremCubemap = this.pmremPass(
+        cubemap,
+        this.config.defaultEnvPmremSamples,
+        this.config.defaultEnvPmremResolution);
+    cubemap.dispose();
+
+    return pmremCubemap;
+  }
+
+  /**
+   * Takes a cube-ish (@see equirectangularToCubemap) texture and
+   * returns a texture of the prefiltered mipmapped radiance environment map
+   * to be used as environment maps in models.
+   *
+   * @param {THREE.Texture} texture
+   * @param {number} samples [16]
+   * @param {number} resolution [256]
+   * @return {THREE.Texture}
+   */
+  pmremPass(texture, samples = 16, size = 256) {
+    const generator = new PMREMGenerator(texture, samples, size);
+    generator.update(this.renderer);
+
+    const packer = new PMREMCubeUVPacker(generator.cubeLods);
+    packer.update(this.renderer);
+
+    const renderTarget = packer.CubeUVRenderTarget;
+
+    generator.dispose();
+    packer.dispose();
+
+    renderTarget.texture.userData = {
       ...userData,
       ...({
+        url: texture.userData ? texture.userData.url : null,
         type: 'EnvironmentMap',
       })
     };
 
-    return texture;
+    return renderTarget.texture;
   }
 
   /**
-   * Returns a { equirect, cubemap } object with the textures
+   * Returns a { skybox, envmap } object with the targets/textures
    * accordingly, or null if cannot generate a texture from
-   * the URL.
+   * the URL. `skybox` is a WebGLRenderCubeTarget, and `envmap`
+   * is a Texture from a WebGLRenderCubeTarget.
    *
    * @see equirectangularToCubemap with regard to the THREE types.
    * @param {string} url
    * @return {Promise<Object|null>}
    */
-  async toCubemapAndEquirect(url) {
-    let equirect, cubemap;
+  async generateEnvironmentTextures(url) {
+    let equirect, skybox, envmap;
     try {
       equirect = await this.load(url);
-      cubemap = await this.equirectangularToCubemap(equirect);
-      return {equirect, cubemap};
+      skybox = await this.equirectangularToCubemap(equirect);
+      envmap = this.pmremPass(
+          skybox.texture, this.config.pmremSamples, this.config.pmremSize);
+
+      equirect.dispose();
+
+      return {envmap, skybox};
     } catch (e) {
       if (equirect) {
         equirect.dispose();
       }
-      if (cubemap) {
-        cubemap.dispose();
+      if (skybox) {
+        skybox.dispose();
       }
+      if (envmap) {
+        envmap.dispose();
+      }
+
+      console.error(e);
+
       return null;
     }
   }

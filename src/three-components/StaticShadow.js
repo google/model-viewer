@@ -80,6 +80,7 @@ export default class StaticShadow extends Mesh {
    */
   render(renderer, scene, light, config = {}) {
     const userSceneOverrideMaterial = scene.overrideMaterial;
+    const userSceneBackground = scene.background;
     const userClearAlpha = renderer.getClearAlpha();
     const userRenderTarget = renderer.getRenderTarget();
     const shadowParent = this.parent;
@@ -88,6 +89,7 @@ export default class StaticShadow extends Mesh {
 
     renderer.setClearAlpha(0);
     scene.overrideMaterial = shadowGeneratorMaterial;
+    scene.background = null;
 
     // Update render target size if necessary
     if (this[$renderTarget].width !== config.textureWidth ||
@@ -133,6 +135,7 @@ export default class StaticShadow extends Mesh {
 
     // Reset the values on the renderer and scene
     scene.overrideMaterial = userSceneOverrideMaterial;
+    scene.background = userSceneBackground;
     renderer.setClearAlpha(userClearAlpha);
     renderer.setRenderTarget(userRenderTarget);
   }
