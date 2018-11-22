@@ -16,14 +16,14 @@
 import {TextureLoader, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
-import {textureMatchesMeta} from '../helpers.js';
+import {assetPath, textureMatchesMeta} from '../helpers.js';
 
 const expect = chai.expect;
 
 // Reuse the same canvas as to not stress the WebGL
 // context limit
 const canvas = document.createElement('canvas');
-const EQUI_URL = './examples/assets/equirectangular.png';
+const EQUI_URL = assetPath('equirectangular.png');
 
 suite('TextureUtils', () => {
   let textureUtils;

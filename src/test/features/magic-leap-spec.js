@@ -15,7 +15,7 @@
 
 import {MagicLeapMixin} from '../../features/magic-leap.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {pickShadowDescendant, timePasses} from '../helpers.js';
+import {assetPath, pickShadowDescendant, timePasses} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -60,7 +60,9 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
         });
 
         teardown(() => {
-          element.remove();
+          if (element.parentNode != null) {
+            element.parentNode.removeChild(element);
+          }
         });
 
         test('does not change model presentation', () => {
@@ -85,7 +87,9 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
         });
 
         teardown(() => {
-          element.remove();
+          if (element.parentNode != null) {
+            element.parentNode.removeChild(element);
+          }
           delete self.mlWorld;
         });
 
@@ -96,7 +100,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
         suite('with a src property', () => {
           setup(async () => {
-            element.src = './examples/assets/Astronaut.glb';
+            element.src = assetPath('Astronaut.glb');
             // Wait til microtask so that property changes can propagate
             await timePasses();
           });

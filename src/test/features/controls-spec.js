@@ -15,7 +15,7 @@
 
 import {$controls, ControlsMixin} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -52,14 +52,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
-        element.src = './examples/assets/cube.gltf';
+        element.src = assetPath('cube.gltf');
         element.controls = true;
 
         await waitForEvent(element, 'load');
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       test('creates OrbitControls if enabled', () => {

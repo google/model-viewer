@@ -1,0 +1,14 @@
+{
+  "npm": true,
+  "moduleResolution": "node",
+  "root": "./",
+  "suites": [
+    "./test/index.html"
+  ],
+  "clientOptions": {
+    "mochaOptions": {
+      "timeout": 30000
+    }
+  },
+  "plugins": ["local"]
+}
