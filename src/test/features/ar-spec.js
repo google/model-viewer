@@ -16,7 +16,7 @@
 import {IS_IOS} from '../../constants.js';
 import {$enterARElement, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -55,13 +55,15 @@ suite('ModelViewerElementBase with ARMixin', () => {
         document.body.appendChild(element);
 
         element.unstableWebxr = true;
-        element.src = './examples/assets/Astronaut.glb';
+        element.src = assetPath('Astronaut.glb');
 
         await waitForEvent(element, 'load');
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       test('hides the AR button if not on AR platform', () => {
@@ -78,13 +80,15 @@ suite('ModelViewerElementBase with ARMixin', () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
 
-        element.src = './examples/assets/Astronaut.glb';
+        element.src = assetPath('Astronaut.glb');
 
         await waitForEvent(element, 'load');
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       if (IS_IOS) {
@@ -95,7 +99,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           suite('with an ios-src', () => {
             setup(async () => {
-              element.iosSrc = './examples/assets/Astronaut.usdz';
+              element.iosSrc = assetPath('Astronaut.usdz');
               await timePasses();
             });
 
@@ -112,7 +116,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           suite('with an ios-src', () => {
             setup(async () => {
-              element.iosSrc = './examples/assets/Astronaut.usdz';
+              element.iosSrc = assetPath('Astronaut.usdz');
               await timePasses();
             });
 

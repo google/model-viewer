@@ -199,7 +199,9 @@ export class ARRenderer {
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
 
-    this.outputCanvas.remove();
+    if (this.outputCanvas.parentNode != null) {
+      this.outputCanvas.parentNode.removeChild(this.outputCanvas);
+    }
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]();

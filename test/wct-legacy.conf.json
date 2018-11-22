@@ -1,0 +1,29 @@
+{
+  "npm": true,
+  "moduleResolution": "node",
+  "root": "./",
+  "suites": [
+    "./test/legacy.html"
+  ],
+  "clientOptions": {
+    "mochaOptions": {
+      "timeout": 30000
+    }
+  },
+  "plugins": {
+    "sauce": {
+      "browsers": [
+        {
+          "browserName": "internet explorer",
+          "platform": "Windows 10",
+          "version": "11.285"
+        },
+        {
+          "browserName": "chrome",
+          "platform": "Windows 10",
+          "version": "70.0"
+        }
+      ]
+    }
+  }
+}

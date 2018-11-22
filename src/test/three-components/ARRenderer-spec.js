@@ -18,7 +18,7 @@ import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {$arRenderer} from '../../three-components/Renderer.js';
-import {waitForEvent} from '../helpers.js';
+import {assetPath, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -82,7 +82,7 @@ suite('ARRenderer', () => {
     }
 
     setup(async () => {
-      element.src = './examples/assets/Astronaut.glb';
+      element.src = assetPath('Astronaut.glb');
       await waitForEvent(element, 'load');
       modelScene = element[$scene];
       stubWebXrInterface(arRenderer);

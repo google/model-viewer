@@ -81,3 +81,16 @@ the rest of your application code:
 </html>
 ```
 
+## Legacy Browser Support
+
+If you are using the "legacy" browser bundle, or otherwise targeting old
+browsers such as Internet Explorer 11 with your build, you **MUST** also include
+the Custom Elements ES5 Adapter in your document before loading `<model-viewer>`.
+
+The Adapter is included as part of the Web Components Polyfill, and can be
+included with a script tag:
+
+```html
+<!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->
+<script src="./node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+```

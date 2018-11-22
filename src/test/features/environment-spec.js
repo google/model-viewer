@@ -15,11 +15,11 @@
 
 import {EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
-const BG_IMAGE_URL = './examples/assets/equirectangular.png';
-const MODEL_URL = './examples/assets/reflective-sphere.gltf';
+const BG_IMAGE_URL = assetPath('equirectangular.png');
+const MODEL_URL = assetPath('reflective-sphere.gltf');
 
 const skysphereUsingMap =
     (scene, url) => {
@@ -103,7 +103,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     scene = element[$scene];
   });
 
-  teardown(() => element.remove());
+  teardown(() => element.parentNode && element.parentNode.removeChild(element));
 
   test(
       'has default skysphere if no background-image or background-color',

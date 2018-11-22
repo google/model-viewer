@@ -2,7 +2,7 @@
 > `<model-viewer>` is currently in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.
 
 
-# `<model-viewer>` 
+# `<model-viewer>`
 
  [![Build Status](https://api.travis-ci.org/GoogleWebComponents/model-viewer.svg?branch=master)](https://travis-ci.org/GoogleWebComponents/model-viewer)
  [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
@@ -121,8 +121,22 @@ Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |     
 Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
 Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
 Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
-WebXR Device API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
-WebXR HitTest API        |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+
+### IE 11 Support
+
+We currently test and support Internet Explorer 11. We also distribute a special
+["legacy" bundle](https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js)
+that is compatible with IE 11 but comes with the following important caveats:
+
+ - In order to use the "legacy" bundle in Chrome, you must also use the [Custom
+   Elements ES5 Adapter](https://github.com/webcomponents/webcomponentsjs#custom-elements-es5-adapterjs)
+   (see [POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#legacy-browser-support)
+   for more detail on this).
+ - The "legacy" bundle includes JavaScript language feature polyfills and code
+   transformations that will incur a byte size and execution time penalty
+   compared to the non-legacy versions of the code.
 
 ## API
 
@@ -149,7 +163,7 @@ Optional parameters (not required for display):
   URL to an [equirectangular projection image](https://en.wikipedia.org/wiki/Equirectangular_projection) that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting `background-image` supercedes `background-color`.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
 * *`ios-src`*: The url to a [USDZ][USDZ] model which will be used on
-  [supported iOS 12+ devices](https://www.apple.com/ios/augmented-reality/) via 
+  [supported iOS 12+ devices](https://www.apple.com/ios/augmented-reality/) via
   [AR Quick Look](https://developer.apple.com/videos/play/wwdc2018/603/) on Safari.
   See [Augmented Reality](#augmented-reality).
 * *`magic-leap`*: Enables the ability to view models in AR when viewing content on

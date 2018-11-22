@@ -9,10 +9,8 @@ env:
 node_js: node
 addons:
   chrome: stable
-  firefox: latest
 script:
-- xvfb-run npm run test
-- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then wct --plugin sauce; fi
+- xvfb-run npm run test && if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./scripts/run-sauce-tests.sh; fi
 dist: trusty
 cache:
   directories:

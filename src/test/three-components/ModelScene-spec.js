@@ -18,6 +18,7 @@ import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import ModelScene, {FRAMED_HEIGHT, ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
+import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -71,7 +72,7 @@ suite('ModelScene', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource('./examples/assets/Astronaut.glb');
+      await scene.setModelSource(assetPath('Astronaut.glb'));
       expect(fired).to.be.ok;
     });
   });
@@ -216,7 +217,8 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(0.5, 0.5, 0.5));
+      expect(invertPad(scene.model.scale))
+          .to.be.eql(new Vector3(0.5, 0.5, 0.5));
     });
 
     test('scales when Y-bound', () => {
@@ -225,7 +227,8 @@ suite('ModelScene', () => {
       scene.model.setObject(dummyMesh);
 
       scene.scaleModelToFitRoom();
-      expect(invertPad(scene.model.scale)).to.be.eql(new Vector3(0.5, 0.5, 0.5));
+      expect(invertPad(scene.model.scale))
+          .to.be.eql(new Vector3(0.5, 0.5, 0.5));
     });
 
     test('updates object position to center its volume within box', () => {

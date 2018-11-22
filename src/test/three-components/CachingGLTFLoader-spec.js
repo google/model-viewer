@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
+import {assetPath} from '../helpers.js';
+
+const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
   suite('when loading a gltf', () => {
@@ -23,13 +26,12 @@ suite('CachingGLTFLoader', () => {
     });
 
     test('synchronously populates the cache', () => {
-      loader.load('./examples/assets/Astronaut.glb');
-      expect(CachingGLTFLoader.has('./examples/assets/Astronaut.glb'))
-          .to.be.equal(true);
+      loader.load(ASTRONAUT_GLB_PATH);
+      expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.equal(true);
     });
 
     test('yields a promise that resolves a scene', async () => {
-      const scene = await loader.load('./examples/assets/Astronaut.glb');
+      const scene = await loader.load(ASTRONAUT_GLB_PATH);
       expect(scene).to.be.ok;
       expect(scene.type).to.be.equal('Scene');
     });

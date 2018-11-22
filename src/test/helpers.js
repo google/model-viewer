@@ -66,3 +66,7 @@ export const waitForEvent = (target, eventName, predicate) =>
       }
       target.addEventListener(eventName, handler);
     });
+
+export const ASSETS_DIRECTORY = '../examples/assets/';
+
+export const assetPath = (name) => `${ASSETS_DIRECTORY}${name}`;

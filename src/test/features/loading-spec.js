@@ -15,9 +15,10 @@
 
 import {LoadingMixin} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
+const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
@@ -53,14 +54,16 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
-        element.poster = './examples/assets/poster.png';
+        element.poster = assetPath('poster.png');
 
         // Wait at least a microtask for size calculations
         await timePasses();
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       test('creates a poster element that captures interactions', () => {
@@ -72,7 +75,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       suite('preload', () => {
         test('retains poster after preloading', async () => {
           element.preload = true;
-          element.src = './examples/assets/Astronaut.glb';
+          element.src = ASTRONAUT_GLB_PATH;
 
           await waitForEvent(element, 'preload');
 
@@ -87,7 +90,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           test('hides poster when element loads', async () => {
             element.preload = true;
             element.revealWhenLoaded = true;
-            element.src = './examples/assets/Astronaut.glb';
+            element.src = ASTRONAUT_GLB_PATH;
 
             await waitForEvent(element, 'load');
 
@@ -104,7 +107,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           test('sets poster to null', async () => {
             // NOTE(cdata): This is less important after we resolve
             // https://github.com/PolymerLabs/model-viewer/issues/76
-            element.setAttribute('poster', './examples/assets/Astronaut.glb');
+            element.setAttribute('poster', ASTRONAUT_GLB_PATH);
             await timePasses();
             element.removeAttribute('poster');
             await timePasses();
@@ -115,7 +118,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
       suite('with loaded model src', () => {
         setup(() => {
-          element.src = './examples/assets/Astronaut.glb';
+          element.src = ASTRONAUT_GLB_PATH;
         });
 
         test('can be hidden imperatively', async () => {

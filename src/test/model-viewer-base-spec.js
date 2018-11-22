@@ -15,7 +15,7 @@
 
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 
-import {timePasses, until, waitForEvent} from './helpers.js';
+import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
 
 const expect = chai.expect;
 
@@ -57,12 +57,14 @@ suite('ModelViewerElementBase', () => {
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       test('eventually dispatches a load event', async () => {
         const sourceLoads = waitForEvent(element, 'load');
-        element.src = './examples/assets/Astronaut.glb';
+        element.src = assetPath('Astronaut.glb');
         await sourceLoads;
       });
     });
@@ -75,7 +77,9 @@ suite('ModelViewerElementBase', () => {
       });
 
       teardown(() => {
-        element.remove();
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       });
 
       test('eventually dispatches an error event', async () => {
@@ -99,7 +103,7 @@ suite('ModelViewerElementBase', () => {
           element.style.height = '200vh';
           element.style.width = '100vw';
           element.autoRotate = true;
-          element.src = './examples/assets/cube.gltf';
+          element.src = assetPath('cube.gltf');
           document.body.appendChild(element);
         }
 
@@ -107,7 +111,8 @@ suite('ModelViewerElementBase', () => {
       });
 
       teardown(() => {
-        elements.forEach(e => e.remove());
+        elements.forEach(
+            e => e.parentNode != null && e.parentNode.removeChild(element));
       });
 
       test.skip('only models visible in the viewport', async () => {
