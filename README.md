@@ -246,11 +246,14 @@ are placed in the `lib` and `dist` folders.
 The following npm scripts are available:
 
 * `npm run clean` - Deletes all build artifacts
-* `npm run build` - Builds the distributable from the `src/` directory.
 * `npm run watch` - Watches the `src/` directory, rebuilding when a file changes.
+* `npm run build` - Builds all build targets in the project. See `build:*` scripts for specific targets.
+* `npm run build:main` - Creates `model-viewer.js` in `dist/` from `src/*`.
+* `npm run build:test` - Compiles the testing code.
+* `npm run build:examples` - Compiles dependencies (`examples/dependencies/index.js`) used in examples and creates an artifact at `examples/built/index.js`. Only needs to be rebuilt if new dependencies.
 * `npm run serve` - Serves a static server on port `8000` from the project root.
 * `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
-* `npm test` - Runs tests.
+* `npm test` - Builds all targets (`npm run build`) and run tests.
 
 ## License
 
