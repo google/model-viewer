@@ -27,6 +27,8 @@ to enable in-browser AR (currently available in Chrome Canary only):
  - [Web XR Device API](https://immersive-web.github.io/webxr/) ([Platform Status](https://www.chromestatus.com/features/5680169905815552))
  - [Web XR Hit Test API](https://github.com/immersive-web/hit-test/blob/master/explainer.md) ([Platform Status](https://www.chromestatus.com/features/4755348300759040))
 
+### Recommended Polyfills
+
 Some browser support for these features can be enabled with polyfills. Any
 polyfills that faithfully implement the required platform features should be
 fine. The following is a selection of recommended polyfill implementations:
@@ -89,6 +91,7 @@ the rest of your application code:
 
     <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
     <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
     <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
     <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
