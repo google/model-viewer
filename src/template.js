@@ -91,7 +91,7 @@ template.innerHTML = `
     }
   </style>
   <div class="container">
-    <a class="enter-ar" href="#">
+    <a class="enter-ar" href="#" aria-label="View this 3D model in augmented reality">
       <div class="disc"></div>
       ${ARGlyph}
     </a>
