@@ -2,20 +2,22 @@
 // the appropriate flags. However, just because we have the API does not
 // guarantee that AR will work.
 export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
-    window.XRSession != null && window.XRDevice != null &&
-    window.XRDevice.prototype.supportsSession != null;
+    self.XRSession != null && self.XRDevice != null &&
+    self.XRDevice.prototype.supportsSession != null;
 
 export const HAS_WEBXR_HIT_TEST_API =
-    HAS_WEBXR_DEVICE_API && window.XRSession!.prototype.requestHitTest;
+    HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTest;
 
 export const HAS_FULLSCREEN_API = document.documentElement != null &&
     document.documentElement.requestFullscreen != null;
+
+export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
 export const IS_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
 
 export const IS_MOBILE = (() => {
   const userAgent =
-      navigator.userAgent || navigator.vendor || (window as any).opera;
+      navigator.userAgent || navigator.vendor || (self as any).opera;
   let check = false;
   // eslint-disable-next-line
   if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
@@ -28,7 +30,7 @@ export const IS_MOBILE = (() => {
 })();
 
 export const IS_IOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream;
 
 export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
   const tempAnchor = document.createElement('a');

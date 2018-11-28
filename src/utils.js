@@ -55,6 +55,23 @@ export const toFullUrl = (partialUrl) => {
   return url.toString();
 };
 
+
+export const debounce = (fn, ms) => {
+  let timer = null;
+
+  return (...args) => {
+    if (timer != null) {
+      self.clearTimeout(timer);
+    }
+
+    timer = self.setTimeout(() => {
+      timer = null;
+      fn(...args);
+    }, ms);
+  };
+};
+
+
 /**
  * Takes a URL to a USDZ file and sets the appropriate
  * fields so that Safari iOS can intent to their

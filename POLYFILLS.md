@@ -1,20 +1,25 @@
 # Polyfills
 
-`<model-viewer>` relies on standardized features of the Web Platform to do a lot of
-what it does. Some of these features are very new and don't exist in all
+`<model-viewer>` relies on standardized features of the Web Platform to do a lot
+of what it does. Some of these features are very new and don't exist in all
 browsers yet. In order to maximize browser compatibility, you should install
 [polyfills](https://en.wikipedia.org/wiki/Polyfill_(programming)) to fill in the
 gaps for some of the newest features.
 
 ## Browser Support
 
-The following emerging standard web platform APIs are needed by this library:
+The following emerging standard web platform APIs are required by
+`<model-viewer>`:
 
  - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements) ([CanIUse](https://caniuse.com/#feat=custom-elementsv1), [Platform Status](https://www.chromestatus.com/features/4696261944934400))
  - [Shadow DOM](https://dom.spec.whatwg.org/#shadow-trees) ([CanIUse](https://caniuse.com/#feat=shadowdomv1), [Platform Status](https://www.chromestatus.com/features/4667415417847808))
- - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Platform Status](https://www.chromestatus.com/features/5705346022637568))
  - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Platform Status](https://www.chromestatus.com/features/5695342691483648))
  - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Platform Status](https://www.chromestatus.com/features/6596356319739904))
+
+The following emerging web platform API is optional, and will be used by
+`<model-viewer>` if it is detected on the page:
+
+ - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Platform Status](https://www.chromestatus.com/features/5705346022637568))
 
 Additionally, the following _highly experimental and volatile_ APIs are needed
 to enable in-browser AR (currently available in Chrome Canary only):
@@ -65,8 +70,7 @@ the rest of your application code:
 
     <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
     <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-    <!-- Resize Observer polyfill is required for non-Chrome browsers: -->
+    <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
     <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
     <!-- Intersection Observer polyfill is required for Safari and IE11 -->

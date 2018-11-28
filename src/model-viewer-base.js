@@ -15,16 +15,20 @@
 
 import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
 
+import {HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
-import {deserializeUrl} from './utils.js';
+import {debounce, deserializeUrl} from './utils.js';
 
 const renderer = new Renderer();
+
+const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
+const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
@@ -104,9 +108,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
 
+    this[$fallbackResizeHandler] = debounce(() => {
+      const boundingRect = this.getBoundingClientRect();
+      this[$updateSize](boundingRect);
+    }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+
     // Set a resize observer so we can scale our canvas
     // if our <model-viewer> changes
-    this.resizeObserver = new ResizeObserver(entries => {
+    this.resizeObserver = HAS_RESIZE_OBSERVER ? new ResizeObserver(entries => {
       // Don't resize anything if in AR mode; otherwise the canvas
       // scaling to fullscreen on entering AR will clobber the flat/2d
       // dimensions of the element.
@@ -118,8 +127,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
           this[$updateSize](entry.contentRect);
         }
       }
-    });
-    this.resizeObserver.observe(this);
+    }) :
+                                                null;
 
     this.intersectionObserver = new IntersectionObserver(entries => {
       for (let entry of entries) {
@@ -136,11 +145,23 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   connectedCallback() {
+    if (HAS_RESIZE_OBSERVER) {
+      this.resizeObserver.observe(this);
+    } else {
+      self.addEventListener('resize', this[$fallbackResizeHandler]);
+    }
+
     this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
   }
 
   disconnectedCallback() {
+    if (HAS_RESIZE_OBSERVER) {
+      this.resizeObserver.unobserve(this);
+    } else {
+      self.removeEventListener('resize', this[$fallbackResizeHandler]);
+    }
+
     this[$renderer].unregisterScene(this[$scene]);
   }
 
