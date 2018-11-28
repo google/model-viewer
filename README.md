@@ -161,6 +161,9 @@ Parameters that are required for display:
 
 Optional parameters (not required for display):
 
+* *`alt`*: Configures the model with custom text that will be used to describe
+  the model to viewers who use a screen reader or otherwise depend on additional
+  semantic context to understand what they are viewing.
 * *`auto-rotate`*: Enables the auto rotation of the model.
 * *`background-color`*: Sets the background color of the scene when viewed inline. Takes any
   valid CSS color string.
