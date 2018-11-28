@@ -39,10 +39,29 @@ fine. The following is a selection of recommended polyfill implementations:
 Please keep in mind that your mileage may vary depending on the browsers you
 need to support and the fidelity of the polyfills used.
 
-**NOTE:** The Fullscreen API is only necessary for the experimental Web XR
+### Regarding Fullscreen API
+
+The Fullscreen API is only necessary for the experimental Web XR
 Device API-based AR mode. Since this is only available behind a flag in Chrome
 Dev today, it is not necessary to load a Fullscreen API polyfill in production
 scenarios.
+
+### Regarding Resize Observer
+
+If Resize Observer is available in the page, the `<model-element>` will be able
+to automatically recompute the scale and framing of its 3D content in many types
+of scenarios where layout is changing (for example, when its parent container
+changes size due to an animation or transition).
+
+However, it is important to note that Resize Observer is optional because the
+polyfill is known to have performance consequences that might be considered
+unacceptable for some use cases (it uses a Mutation Observer that observes the
+whole document tree).
+
+If Resize Observer is _not_ available, the `<model-element>` will fall back to
+observing global `resize` events. In this condition, you can force the element
+to recompute its internal layout by dispatching a synthetic global `resize`
+event.
 
 ## Usage Example
 

@@ -115,20 +115,21 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     // Set a resize observer so we can scale our canvas
     // if our <model-viewer> changes
-    this.resizeObserver = HAS_RESIZE_OBSERVER ? new ResizeObserver(entries => {
-      // Don't resize anything if in AR mode; otherwise the canvas
-      // scaling to fullscreen on entering AR will clobber the flat/2d
-      // dimensions of the element.
-      if (renderer.isPresenting) {
-        return;
-      }
-      for (let entry of entries) {
-        if (entry.target === this) {
-          this[$updateSize](entry.contentRect);
-        }
-      }
-    }) :
-                                                null;
+    this.resizeObserver = HAS_RESIZE_OBSERVER ?
+        new ResizeObserver((entries) => {
+          // Don't resize anything if in AR mode; otherwise the canvas
+          // scaling to fullscreen on entering AR will clobber the flat/2d
+          // dimensions of the element.
+          if (renderer.isPresenting) {
+            return;
+          }
+          for (let entry of entries) {
+            if (entry.target === this) {
+              this[$updateSize](entry.contentRect);
+            }
+          }
+        }) :
+        null;
 
     this.intersectionObserver = new IntersectionObserver(entries => {
       for (let entry of entries) {

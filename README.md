@@ -117,13 +117,17 @@ learn how to polyfill for maximum browser compatibility!**
 
 Feature                   | Chrome | Canary | Safari 12 | Firefox 63 | Firefox 62 | Edge  | IE 11
 --------------------------|--------|--------|-----------|------------|------------|-------|------
-Resize Observer           |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
+Resize Observer¹          |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
 Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
 Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
 Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+
+_1: Resize Observer is optional, and will be used if available. For more details
+please refer to
+[POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer)_
 
 ### IE 11 Support
 
