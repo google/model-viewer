@@ -29,6 +29,7 @@ const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
+const $defaultAriaLabel = Symbol('defaultAriaLabel');
 
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
@@ -47,7 +48,7 @@ export const $renderer = Symbol('renderer');
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   static get properties() {
-    return {src: {type: deserializeUrl}};
+    return {alt: {type: String}, src: {type: deserializeUrl}};
   }
 
   static get is() {
@@ -87,6 +88,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$container] = shadowRoot.querySelector('.container');
     this[$canvas] = shadowRoot.querySelector('canvas');
+    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label');
 
     // Create the underlying ModelScene.
     const {width, height} = this.getBoundingClientRect();
@@ -168,6 +170,23 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   update(changedProperties) {
     this[$updateSource]();
+
+    if (changedProperties.has('alt')) {
+      // @TODO #76
+      const ariaLabel = (this.alt == null || this.alt === 'null') ?
+          this[$defaultAriaLabel] :
+          this.alt;
+
+      this[$canvas].setAttribute('aria-label', ariaLabel);
+    }
+  }
+
+  /**
+   * NOTE(cdata): This is a protected method of UpdatingElement
+   * @see https://github.com/Polymer/lit-element/blob/master/src/lib/updating-element.ts#L375-L384
+   */
+  createRenderRoot() {
+    return this.attachShadow({mode: 'open', delegatesFocus: true});
   }
 
   /**

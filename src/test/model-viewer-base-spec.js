@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
 
 import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
 
@@ -47,6 +47,46 @@ suite('ModelViewerElementBase', () => {
     test('can be instantiated with document.createElement', () => {
       const element = document.createElement(tagName);
       expect(element).to.be.ok;
+    });
+
+    suite('with alt text', () => {
+      let element;
+      let canvas;
+
+      setup(() => {
+        element = new ModelViewerElement();
+        canvas = element[$canvas];
+        document.body.appendChild(element);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test('gives the canvas a related aria-label', async () => {
+        const altText = 'foo';
+        const canvas = element[$canvas];
+        element.alt = altText;
+        await timePasses();
+        expect(canvas.getAttribute('aria-label')).to.be.equal(altText);
+      });
+
+      suite('that is removed', () => {
+        test('reverts canvas to default aria-label', async () => {
+          const defaultAriaLabel = canvas.getAttribute('aria-label');
+          const altText = 'foo';
+
+          element.alt = altText;
+          await timePasses();
+          element.alt = null;
+          await timePasses();
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal(defaultAriaLabel);
+        });
+      });
     });
 
     suite('with a valid src', () => {
