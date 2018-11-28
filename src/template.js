@@ -20,6 +20,7 @@ template.innerHTML = `
   <style>
     :host {
       display: block;
+      contain: strict;
       width: 300px;
       height: 150px;
     }
