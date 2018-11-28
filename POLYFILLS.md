@@ -59,8 +59,8 @@ unacceptable for some use cases (it uses a Mutation Observer that observes the
 whole document tree).
 
 If Resize Observer is _not_ available, the `<model-element>` will fall back to
-observing global `resize` events. In this condition, you can force the element
-to recompute its internal layout by dispatching a synthetic global `resize`
+observing window `resize` events. In this condition, you can force the element
+to recompute its internal layout by dispatching a synthetic window `resize`
 event.
 
 ## Usage Example
