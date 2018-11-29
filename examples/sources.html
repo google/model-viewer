@@ -55,6 +55,7 @@
             <template>
                 <model-viewer
                     background-color="#db3236"
+                    alt="A 3D model of a cube"
                     src="assets/cube.gltf">
                 </model-viewer>
             </template>
@@ -65,6 +66,7 @@
             <template>
                 <model-viewer
                     background-color="#f4c20d"
+                    alt="A 3D model of an astronaut"
                     src="assets/Astronaut.glb">
                 </model-viewer>
             </template>
@@ -75,6 +77,7 @@
             <template>
                 <model-viewer
                     background-color="#3cba54"
+                    alt="A 3D model of an astronaut"
                     ios-src="assets/Astronaut.usdz">
                 </model-viewer>
             </template>
@@ -85,6 +88,7 @@
             <template>
                 <model-viewer
                     background-color="#4885ed"
+                    alt="An invalid model"
                     src="i-do-not-exist.glb">
                 </model-viewer>
             </template>
@@ -93,7 +97,7 @@
         <demo-snippet>
             <h2>Cycling different models</h2>
             <template>
-                <model-viewer id="toggle-model" src="assets/shishkebab.glb" background-color="#db3236" controls auto-rotate></model-viewer>
+                <model-viewer id="toggle-model" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab" background-color="#db3236" controls auto-rotate></model-viewer>
                 <script>
                     const models = ['shishkebab.glb', 'Astronaut.glb'];
                     let i = 0;

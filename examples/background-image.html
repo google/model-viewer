@@ -56,6 +56,7 @@
                 <model-viewer
                     controls
                     background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a damaged helmet with a forest in the background"
                     src="assets/DamagedHelmet/DamagedHelmet.gltf">
                 </model-viewer>
             </template>
@@ -67,6 +68,7 @@
                 <model-viewer
                     controls
                     background-image="assets/small_hangar_01_1k.jpg"
+                    alt="A 3D model of a reflective sphere depicted within a hangar"
                     src="assets/reflective-sphere.gltf">
                 </model-viewer>
             </template>
@@ -78,6 +80,7 @@
                 <model-viewer
                     controls
                     background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a reflective sphere depicted within a forest"
                     src="assets/Astronaut.glb">
                 </model-viewer>
             </template>
@@ -90,6 +93,7 @@
                     controls
                     background-color="#ff0077"
                     background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a reflective sphere depicted within a forest"
                     src="assets/reflective-sphere.gltf">
                 </model-viewer>
             </template>
@@ -98,7 +102,13 @@
         <demo-snippet>
             <h2>Cycling background image</h2>
             <template>
-                <model-viewer id="toggle-image" backgroud-color="#ff0077" src="assets/DamagedHelmet/DamagedHelmet.gltf" controls auto-rotate></model-viewer>
+                <model-viewer
+                    id="toggle-image"
+                    backgroud-color="#ff0077"
+                    src="assets/DamagedHelmet/DamagedHelmet.gltf"
+                    alt="A 3D model of a damaged helmet depicted within changing environments"
+                    controls auto-rotate>
+                </model-viewer>
                 <script>
                     const images = ['assets/whipple_creek_regional_park_04_1k.jpg', 'does-not-exist.png', ''];
                     let i = 0;
