@@ -51,7 +51,7 @@
         <demo-snippet>
             <h2>Display poster until loaded</h2>
             <template>
-                <model-viewer id="reveal" reveal-when-loaded preload poster="assets/poster.png" src="assets/shishkebab.glb"></model-viewer>
+                <model-viewer id="reveal" reveal-when-loaded preload poster="assets/poster.png" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
                 <script>
                     $('#reveal').addEventListener('load', e => {
                         // Display a red border to illustrate load timing
@@ -65,7 +65,7 @@
             <h2>Preload with poster and show model on interaction</h2>
             <template>
                 <!-- use unique asset to ensure preloading -->
-                <model-viewer id="interaction" preload poster="assets/poster.png" src="assets/reflective-sphere.gltf"></model-viewer>
+                <model-viewer id="interaction" preload poster="assets/poster.png" src="assets/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
                 <script>
                     $('#interaction').addEventListener('load', e => {
                         // Display a red border to illustrate load timing
@@ -79,7 +79,7 @@
             <h2>Lazy load with poster until interaction</h2>
             <template>
                 <!-- use unique asset to ensure lazy loading -->
-                <model-viewer id="lazy-load" poster="assets/poster.png" src="assets/DamagedHelmet/DamagedHelmet.gltf"></model-viewer>
+                <model-viewer id="lazy-load" poster="assets/poster.png" src="assets/DamagedHelmet/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet"></model-viewer>
                 <script>
                     $('#lazy-load').addEventListener('load', e => {
                         // Display a red border to illustrate load timing
@@ -92,21 +92,21 @@
         <demo-snippet>
             <h2>Model with poster and preload</h2>
             <template>
-                <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb"></model-viewer>
+                <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
         </demo-snippet>
 
         <demo-snippet>
             <h2>Poster with invalid model</h2>
             <template>
-                <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb"></model-viewer>
+                <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
             </template>
         </demo-snippet>
 
         <demo-snippet>
             <h2>Cycling between posters</h2>
             <template>
-                <model-viewer id="toggle-poster" poster="assets/poster2.png" src="assets/Astronaut.glb"></model-viewer>
+                <model-viewer id="toggle-poster" poster="assets/poster2.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
                 <script>
                     const posters = ['poster.png', 'poster2.png'];
                     let i = 0;

@@ -96,7 +96,7 @@ template.innerHTML = `
       ${ARGlyph}
     </a>
     <div class="poster"></div>
-    <canvas tabindex="1" aria-label="A canvas that displays a 3D model"></canvas>
+    <canvas tabindex="1" aria-label="A depiction of a 3D model"></canvas>
   </div>
   <slot></slot>
 `;

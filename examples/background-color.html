@@ -54,6 +54,7 @@
             <h2>With background-color</h2>
             <template>
                 <model-viewer src="assets/shishkebab.glb"
+                    alt="A 3D model of a shishkebab"
                     controls auto-rotate background-color="#4885ed"></model-viewer>
             </template>
         </demo-snippet>
@@ -75,12 +76,16 @@
                 </style>
                 <div class="grid">
                     <model-viewer src="assets/Astronaut.glb"
+                        alt="A 3D model of an astronaut (1 of 4)"
                         auto-rotate background-color="#FF5252"></model-viewer>
                     <model-viewer src="assets/Astronaut.glb"
+                        alt="A 3D model of an astronaut (2 of 4)"
                         auto-rotate background-color="#455A64"></model-viewer>
                     <model-viewer src="assets/Astronaut.glb"
+                        alt="A 3D model of an astronaut (3 of 4)"
                         auto-rotate background-color="#EEFF41"></model-viewer>
                     <model-viewer src="assets/Astronaut.glb"
+                        alt="A 3D model of an astronaut (4 of 4)"
                         auto-rotate background-color="#40C4FF"></model-viewer>
                 </div>
             </template>
@@ -89,7 +94,13 @@
         <demo-snippet>
             <h2>Changing background color</h2>
             <template>
-                <model-viewer id="toggle-color" src="assets/shishkebab.glb" controls auto-rotate></model-viewer>
+                <model-viewer
+                    id="toggle-color"
+                    alt="A 3D model of a shishkebab"
+                    src="assets/shishkebab.glb"
+                    controls
+                    auto-rotate>
+                </model-viewer>
                 <script>
                     const colors = ['#4885ed', '#3cba54', '#f4c20d', '#db3236'];
                     let i = 0;
