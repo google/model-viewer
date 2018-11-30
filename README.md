@@ -278,7 +278,7 @@ The following npm scripts are available:
 This repo contains examples to demonstrate how &lt;model-viewer&gt; may be used. Before running them do the following:
 
 ```
-cd path/to/coned/repo
+cd path/to/cloned/repo
 npm install
 npm run build
 ```
