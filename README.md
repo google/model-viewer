@@ -273,6 +273,23 @@ The following npm scripts are available:
 * `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
 * `npm test` - Runs tests.
 
+## Examples
+
+This repo contains examples to demonstrate how &lt;model-viewer&gt; may be used. Before running them do the following:
+
+```
+cd path/to/coned/repo
+npm install
+npm run build
+```
+
+To run the examples:
+
+```
+npm run serve
+```
+
+
 ## License
 
 Apache License Version 2.0, Copyright © 2018 Google
