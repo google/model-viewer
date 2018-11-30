@@ -30,6 +30,8 @@ export class PatchedOrbitControls extends OrbitControls {
 
     this[$onKeyDown] = (event) => this.onKeyDown(event);
     this.domElement.addEventListener('keydown', this[$onKeyDown]);
+
+    Object.assign(this.keys, {PAGE_UP: 33, PAGE_DOWN: 34});
   }
 
   dispose() {
@@ -41,6 +43,14 @@ export class PatchedOrbitControls extends OrbitControls {
     let handled = false;
 
     switch (event.keyCode) {
+      case this.keys.PAGE_UP:
+        this.zoomIn();
+        handled = true;
+        break;
+      case this.keys.PAGE_DOWN:
+        this.zoomOut();
+        handled = true;
+        break;
       case this.keys.UP:
         this.orbitUp(KEYBOARD_ORBIT_INCREMENT);
         handled = true;
@@ -63,6 +73,18 @@ export class PatchedOrbitControls extends OrbitControls {
       event.preventDefault();
       this.update();
     }
+  }
+
+  zoomIn() {
+    const event = new CustomEvent('wheel');
+    event.deltaY = -1;
+    this.domElement.dispatchEvent(event);
+  }
+
+  zoomOut() {
+    const event = new CustomEvent('wheel');
+    event.deltaY = 1;
+    this.domElement.dispatchEvent(event);
   }
 
   orbitUp(increment) {
