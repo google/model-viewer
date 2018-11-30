@@ -16,8 +16,8 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import {$needsRender, $onModelLoad, $onResize, $scene} from '../model-viewer-base.js';
-import OrbitControls from '../third_party/three/OrbitControls.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
+import {PatchedOrbitControls} from '../three-components/PatchedOrbitControls.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
@@ -58,7 +58,7 @@ export const ControlsMixin = (ModelViewerElement) => {
         this[$scene].setCamera(this[$orbitCamera]);
 
         this[$controls] =
-            new OrbitControls(this[$orbitCamera], this[$scene].canvas);
+            new PatchedOrbitControls(this[$orbitCamera], this[$scene].canvas);
         this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
         this[$controls].enabled = true;
         // Panning performed via right click, two finger move

@@ -123,6 +123,15 @@ const OrbitControls = function ( object, domElement ) {
 
 	};
 
+  /**
+   * NOTE(cdata): This method is added to enable further patching in a
+   * subclass.
+   * @see src/three-components/PatchedOrbitControls.js
+   */
+  this.getSphericalDelta = function () {
+    return sphericalDelta;
+  };
+
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function () {
 
