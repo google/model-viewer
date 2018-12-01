@@ -116,8 +116,8 @@
   "materials": [
     {
       "pbrMetallicRoughness": {
-        "metallicFactor": 0.76,
-        "roughnessFactor": 0.12
+        "metallicFactor": 1.0,
+        "roughnessFactor": 0.0
       }
     }
   ],
