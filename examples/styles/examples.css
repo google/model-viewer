@@ -68,3 +68,18 @@ model-viewer {
 .attribution:last-child {
   padding-bottom: 100px;
 }
+
+.viewSource {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 8px;
+  color: #fff;
+  background-color: #555;
+  opacity: 0.7;
+}
+
+.viewSource:hover {
+  cursor: pointer;
+  opacity: 1;
+}
