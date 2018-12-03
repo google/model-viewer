@@ -13,37 +13,40 @@
  * limitations under the License.
  */
 
-const testShaders = {
-  // In some Firefox builds (mobile Android on Pixel at least),
-  // EXT_shader_texture_lod is reported as being supported, but
-  // fails in practice.
-  // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1451287
-  'EXT_shader_texture_lod': `
-#extension GL_EXT_shader_texture_lod : enable
-precision mediump float;
-uniform sampler2D tex;
-void main() {
-    gl_FragColor = texture2DLodEXT(tex, vec2(0.0, 0.0), 0.0);
-}
-`,
-};
-
-const confirmExtension = (gl, name) => {
-  const shader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(shader, testShaders[name]);
-  gl.compileShader(shader);
-
-  const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-
-  gl.deleteShader(shader);
-  return status;
-};
+export const getContext = (canvas, options) =>
+  canvas.getContext('webgl', options) ||
+  canvas.getContext('experimental-webgl', options);
 
 /**
  * Patch the values reported by WebGLRenderingContext's
  * extension store to fix compatibility issues.
  */
 export const applyExtensionCompatibility = gl => {
+  const testShaders = {
+    // In some Firefox builds (mobile Android on Pixel at least),
+    // EXT_shader_texture_lod is reported as being supported, but
+    // fails in practice.
+    // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1451287
+    'EXT_shader_texture_lod': `
+      #extension GL_EXT_shader_texture_lod : enable
+      precision mediump float;
+      uniform sampler2D tex;
+      void main() {
+        gl_FragColor = texture2DLodEXT(tex, vec2(0.0, 0.0), 0.0);
+      }`,
+  };
+
+  function confirmExtension (gl, name) {
+    const shader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(shader, testShaders[name]);
+    gl.compileShader(shader);
+
+    const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+
+    gl.deleteShader(shader);
+    return status;
+  }
+
   const getExtension = gl.getExtension;
   gl.getExtension = name => {
     let extension;

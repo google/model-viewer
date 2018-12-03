@@ -18,9 +18,9 @@ import {EventDispatcher, WebGLRenderer} from 'three';
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 
-import TextureUtils from './TextureUtils.js';
 import {ARRenderer} from './ARRenderer.js';
-import * as WebGLExtensionUtils from './WebGLExtensionUtils.js';
+import TextureUtils from './TextureUtils.js';
+import * as WebGLUtils from './WebGLUtils.js';
 
 const GAMMA_FACTOR = 2.2;
 const DPR = window.devicePixelRatio;
@@ -50,11 +50,16 @@ export default class Renderer extends EventDispatcher {
     }
 
     this.canvas = document.createElement('canvas');
-    this.context = this.canvas.getContext('webgl', webGlOptions);
-    WebGLExtensionUtils.applyExtensionCompatibility(this.context);
+    // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+    this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
+    // Patch the gl context's extension functions before passing
+    // it to three.
+    WebGLUtils.applyExtensionCompatibility(this.context);
 
-    this.renderer =
-        new WebGLRenderer({canvas: this.canvas, context: this.context});
+    this.renderer = new WebGLRenderer({
+      canvas: this.canvas,
+      context: this.context,
+    });
     this.renderer.autoClear = false;
     this.renderer.setPixelRatio(DPR);
     this.renderer.gammaOutput = true;
