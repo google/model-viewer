@@ -32,7 +32,7 @@
     "clean": "rm -rf ./lib ./dist",
     "build": "tsc && rollup -c",
     "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npm run create-legacy-bundles",
     "test": "npm run clean && npm run build && npm run wct-local-chrome",
     "wct-local-chrome": "wct --config-file test/wct-local.conf.json -l chrome",
     "wct-sauce-modern": "wct --config-file test/wct-sauce.conf.json --plugin sauce",
