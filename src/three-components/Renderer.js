@@ -17,15 +17,17 @@ import {EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
+import {debounce, resolveDpr} from '../utils.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
 
 const GAMMA_FACTOR = 2.2;
-const DPR = window.devicePixelRatio;
+const UPDATE_DPR_DEBOUNCE_MS = 50;
 
 export const $arRenderer = Symbol('arRenderer');
+const $updateDpr = Symbol('updateDpr');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -61,9 +63,17 @@ export default class Renderer extends EventDispatcher {
       context: this.context,
     });
     this.renderer.autoClear = false;
-    this.renderer.setPixelRatio(DPR);
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = GAMMA_FACTOR;
+
+    this[$updateDpr] = debounce(() => {
+      this.dpr = resolveDpr();
+      this.renderer.setPixelRatio(this.dpr);
+    }, UPDATE_DPR_DEBOUNCE_MS);
+
+    this.dpr = resolveDpr();
+    this.renderer.setPixelRatio(this.dpr);
+    window.addEventListener('resize', this[$updateDpr]);
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
     this.textureUtils = new TextureUtils(this.renderer);
@@ -152,8 +162,8 @@ export default class Renderer extends EventDispatcher {
       this.renderer.setViewport(0, 0, width, height);
       this.renderer.render(scene, camera);
 
-      const widthDPR = width * DPR;
-      const heightDPR = height * DPR;
+      const widthDPR = width * this.dpr;
+      const heightDPR = height * this.dpr;
       context.drawImage(
           this.renderer.domElement,
           0,
@@ -175,5 +185,6 @@ export default class Renderer extends EventDispatcher {
     super.dispose();
     this.textureUtils.dispose();
     this.textureUtils = null;
+    window.removeEventListener('resize', this[$updateDpr]);
   }
 }

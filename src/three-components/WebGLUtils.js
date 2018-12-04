@@ -14,8 +14,8 @@
  */
 
 export const getContext = (canvas, options) =>
-  canvas.getContext('webgl', options) ||
-  canvas.getContext('experimental-webgl', options);
+    canvas.getContext('webgl', options) ||
+    canvas.getContext('experimental-webgl', options);
 
 /**
  * Patch the values reported by WebGLRenderingContext's
@@ -36,7 +36,7 @@ export const applyExtensionCompatibility = gl => {
       }`,
   };
 
-  function confirmExtension (gl, name) {
+  function confirmExtension(gl, name) {
     const shader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(shader, testShaders[name]);
     gl.compileShader(shader);

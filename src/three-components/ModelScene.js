@@ -15,6 +15,8 @@
 
 import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
+import {resolveDpr} from '../utils.js';
+
 import Model from './Model.js';
 import StaticShadow from './StaticShadow.js';
 
@@ -44,7 +46,6 @@ export const ROOM_PADDING_SCALE = 1.01;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
-const DPR = window.devicePixelRatio;
 
 const $paused = Symbol('paused');
 
@@ -114,6 +115,7 @@ export default class ModelScene extends Scene {
 
     this.roomBox = new Box3();
     this.roomSize = new Vector3();
+    this.dpr = 1;
     this.setSize(width, height);
 
     this.model.addEventListener('model-load', this.onModelLoad);
@@ -157,6 +159,9 @@ export default class ModelScene extends Scene {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
       this.aspect = this.width / this.height;
+      // In practice, invocations of setSize are throttled at the element level,
+      // so no need to throttle here:
+      this.dpr = resolveDpr();
       this.applyRoomSize();
     }
   }
@@ -166,8 +171,8 @@ export default class ModelScene extends Scene {
    * dimensions for the encapsulating element.
    */
   applyRoomSize() {
-    this.canvas.width = this.width * DPR;
-    this.canvas.height = this.height * DPR;
+    this.canvas.width = this.width * this.dpr;
+    this.canvas.height = this.height * this.dpr;
     this.canvas.style.width = `${this.width}px`;
     this.canvas.style.height = `${this.height}px`;
 
