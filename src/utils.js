@@ -94,13 +94,13 @@ export const openIOSARQuickLook = url => {
  *
  * We cap DPR if there is no meta viewport (suggesting that user is not
  * consciously specifying how to scale the viewport relative to the device
- * screen size) and also the window dimensions are a multiple of the effective
- * screen dimensions (in CSS pixels).
+ * screen size).
  *
- * The rationale for this is that these conditions typically lead to a
- * pathological outcome on mobile devices. When the window dimensions are
- * scaled up on a device with a high DPR, we create a canvas that is much
- * larger than appropriate to accomodate for the pixel density.
+ * The rationale is that this condition typically leads to a pathological
+ * outcome on mobile devices. When the window dimensions are scaled up on a
+ * device with a high DPR, we create a canvas that is much larger than
+ * appropriate to accomodate for the pixel density if we naively use the
+ * reported DPR.
  *
  * This value needs to be measured in real time, as device pixel ratio can
  * change over time (e.g., when a user zooms the page). Also, in some cases
@@ -131,34 +131,11 @@ export const resolveDpr = (() => {
     return false;
   })();
 
-  // NOTE(cdata): f true, this suggests that the window contents have been
-  // scaled such that the inner width is a multiple of the effective CSS pixel
-  // dimensions of the actual screen. This is assumed to imply one of the
-  // following conditions:
-  //
-  //  1. The window has been manually sized to extent beyond the bounds of
-  // the user's display (probably only possible in desktop scenarios).
-  //  2. There is no meta viewport on a high-DPR device, or else the meta
-  // viewport has scaled the defuault width higher than the screen width of
-  // the device.
-  //
-  // Condition #1 is not very common, but certainly possible. As long as there
-  // is a meta viewport, we won't cap the DPR.
-  // Condition #2 is usually not intentional but very easy to arrive at (a
-  // user need only omit the meta viewport tag and view their site on a
-  // contemporary mobile device).
-  //
-  // @see https://www.quirksmode.org/dom/w3c_cssom.html#screenview
-  const hasRiskyWindowToScreenRatio = () =>
-      Math.max(
-          window.innerWidth / window.screen.availWidth,
-          window.innerHeight / window.screen.availHeight) > 1;
+  if (!HAS_META_VIEWPORT_TAG) {
+    console.warn(
+        'No <meta name="viewport"> detected; <model-viewer> will cap pixel density at 1.');
+  }
 
-  return () => {
-    const shouldCapDevicePixelRatio =
-        !HAS_META_VIEWPORT_TAG && hasRiskyWindowToScreenRatio();
-
-    return shouldCapDevicePixelRatio ? CAPPED_DEVICE_PIXEL_RATIO :
-                                       window.devicePixelRatio;
-  };
+  return () => HAS_META_VIEWPORT_TAG ? window.devicePixelRatio :
+                                       CAPPED_DEVICE_PIXEL_RATIO;
 })();
