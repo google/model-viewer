@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, Mesh, Box3, Vector3} from 'three';
+import {Box3, BoxBufferGeometry, Mesh, Vector3} from 'three';
 
-import {deserializeUrl} from '../utils.js';
+import {CAPPED_DEVICE_PIXEL_RATIO, deserializeUrl, resolveDpr} from '../utils.js';
 
 const expect = chai.expect;
 
@@ -35,6 +35,31 @@ suite('utils', () => {
       const {origin} = window.location;
 
       expect(deserializeUrl('foo').indexOf(origin)).to.be.equal(0);
+    });
+  });
+
+  suite('resolveDpr', () => {
+    suite('when <meta name="viewport"> is present', () => {
+      test('resolves the device pixel ratio', () => {
+        const resolvedDpr = resolveDpr();
+        // NOTE(cdata): The main test frame is assumed to have a
+        // <meta name="viewport">. If this changes, it is probably by
+        // accident.
+        const actualDpr = self.devicePixelRatio;
+
+        expect(resolvedDpr).to.be.equal(actualDpr);
+      });
+    });
+
+    suite('when <meta name="viewport"> is not present', () => {
+      test.skip(
+          'caps the device pixel ratio to 1',
+          () => {
+              // There is not a good way to test this given the current
+              // factoring and bundling constraints
+              // TODO:
+              // https://github.com/GoogleWebComponents/model-viewer/issues/262
+          });
     });
   });
 });

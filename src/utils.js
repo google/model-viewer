@@ -88,6 +88,10 @@ export const openIOSARQuickLook = url => {
 };
 
 
+// The DPR we use for a "capped" scenario (see resolveDpr below):
+export const CAPPED_DEVICE_PIXEL_RATIO = 1;
+
+
 /**
  * This helper analyzes the layout of the current page to decide if we should
  * use the natural device pixel ratio, or a capped value.
@@ -112,9 +116,6 @@ export const openIOSARQuickLook = url => {
  * best life.
  */
 export const resolveDpr = (() => {
-  // The ratio we use for a "capped" scenario:
-  const CAPPED_DEVICE_PIXEL_RATIO = 1;
-
   // If true, implies that the user is conscious of the viewport scaling
   // relative to the device screen size.
   const HAS_META_VIEWPORT_TAG = (() => {
