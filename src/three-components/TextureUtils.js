@@ -15,7 +15,7 @@
 
 import {Cache, EventDispatcher, GammaEncoding, TextureLoader} from 'three';
 
-import PatchedEquirectangularToCubeGenerator from './PatchedEquirectangularToCubeGenerator.js';
+import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
 
 import EnvMapGenerator from './EnvMapGenerator.js';
 
@@ -64,9 +64,7 @@ export default class TextureManager extends EventDispatcher {
    * @return {THREE.Texture}
    */
   equirectangularToCubemap(texture) {
-    // Use our "patched" generator due to three memory leak
-    // @see https://github.com/mrdoob/three.js/issues/15288
-    const generator = new PatchedEquirectangularToCubeGenerator(texture, {
+    const generator = new EquirectangularToCubeGenerator(texture, {
       resolution: this.config.cubemapSize,
     });
 
