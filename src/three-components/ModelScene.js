@@ -115,7 +115,6 @@ export default class ModelScene extends Scene {
 
     this.roomBox = new Box3();
     this.roomSize = new Vector3();
-    this.dpr = 1;
     this.setSize(width, height);
 
     this.model.addEventListener('model-load', this.onModelLoad);
@@ -161,7 +160,6 @@ export default class ModelScene extends Scene {
       this.aspect = this.width / this.height;
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
-      this.dpr = resolveDpr();
       this.applyRoomSize();
     }
   }
@@ -171,8 +169,9 @@ export default class ModelScene extends Scene {
    * dimensions for the encapsulating element.
    */
   applyRoomSize() {
-    this.canvas.width = this.width * this.dpr;
-    this.canvas.height = this.height * this.dpr;
+    const dpr = resolveDpr();
+    this.canvas.width = this.width * dpr;
+    this.canvas.height = this.height * dpr;
     this.canvas.style.width = `${this.width}px`;
     this.canvas.style.height = `${this.height}px`;
 
