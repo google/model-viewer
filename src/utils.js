@@ -71,6 +71,24 @@ export const debounce = (fn, ms) => {
   };
 };
 
+/**
+ * @param {Number} edge
+ * @param {Number} value
+ * @return {Number} 0 if value is less than edge, otherwise 1
+ */
+export const step = (edge, value) => {
+  return value < edge ? 0 : 1;
+};
+
+/**
+ * @param {Number} value
+ * @param {Number} lowerLimit
+ * @param {Number} upperLimit
+ * @return {Number} value clamped within lowerLimit..upperLimit
+ */
+export const clamp = (value, lowerLimit, upperLimit) => Math.max(
+    lowerLimit === -Infinity ? value : lowerLimit,
+    Math.min(upperLimit === Infinity ? value : upperLimit, value));
 
 /**
  * Takes a URL to a USDZ file and sets the appropriate
