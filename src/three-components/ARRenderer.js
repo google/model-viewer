@@ -198,6 +198,7 @@ export class ARRenderer {
 
     this[$frameOfReference] = null;
     this[$presentedScene] = null;
+    this.renderer.setFramebuffer(null);
 
     if (this.outputCanvas.parentNode != null) {
       this.outputCanvas.parentNode.removeChild(this.outputCanvas);

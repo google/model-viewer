@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 
-import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Matrix4, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import Model from './Model.js';
 import StaticShadow from './StaticShadow.js';
-
-// Valid types for `setScaleType` -- 'framed' scales the model
-// so that it fits within its 2D plane nicely. 'lifesize' is
-// unaltered scaling and uses whatever size the model provides,
-// such that 1 unit === 1 meter, used in AR.
-export const ScaleTypes = {
-  Framed: 'framed',
-  Lifesize: 'lifesize',
-};
-const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 
 // This (arbitrary) value represents the height of the scene in
 // meters. With a fixed dimension, we can scale everything accordingly
@@ -47,6 +37,7 @@ const FOV = 45;
 const DPR = window.devicePixelRatio;
 
 const $paused = Symbol('paused');
+const tempMat4 = new Matrix4();
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -73,7 +64,6 @@ export default class ModelScene extends Scene {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
     this.renderer = renderer;
-    this.scaleType = ScaleTypes.Framed;
 
     this.model = new Model();
     this.shadow = new StaticShadow();
@@ -246,6 +236,7 @@ export default class ModelScene extends Scene {
     modelCenter.multiplyScalar(scale);
     this.model.scale.multiplyScalar(scale);
     this.model.position.subVectors(roomCenter, modelCenter);
+    this.model.updateMatrixWorld();
   }
 
   resetModelPose() {
@@ -282,8 +273,9 @@ export default class ModelScene extends Scene {
    * Called to update the shadow rendering when the room or model changes.
    */
   updateStaticShadow() {
+    this.model.remove(this.shadow);
+
     if (!this.model.hasModel() || this.model.size.length() === 0) {
-      this.pivot.remove(this.shadow);
       return;
     }
 
@@ -299,23 +291,26 @@ export default class ModelScene extends Scene {
     this.shadow.position.set(0, 0, 0);
     this.shadow.scale.x = this.roomSize.x;
     this.shadow.scale.z = this.roomSize.z;
+    this.shadow.updateMatrix();
 
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
+    // When adding shadow back to the model, preserve it's scale in global
+    // units (size of the room)
+    this.shadow.applyMatrix(tempMat4.getInverse(this.model.matrixWorld));
+    this.shadow.scale.y = 1;
+
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
-    this.pivot.add(this.shadow);
-    this.pivot.rotation.y = currentRotation;
+    this.model.add(this.shadow);
 
     // If model has vertical room, it'll be positioned at (0, 5, 0)
     // and appear to be floating. This should be ultimately user-configurable,
     // but for now, move the shadow to the bottom of the model if the
     // element and model are width-bound.
-    const modelHeight = this.model.size.y * this.model.scale.y;
-    if (modelHeight < FRAMED_HEIGHT) {
-      this.shadow.position.y = (FRAMED_HEIGHT / 2) - modelHeight / 2
-    }
+    this.shadow.position.y = this.model.boundingBox.min.y;
 
+    this.pivot.rotation.y = currentRotation;
     this.add(this.skysphere);
   }
 }
