@@ -84,7 +84,7 @@ export default class ModelScene extends Scene {
     // This light is only for generating (fake) shadows
     // and does not needed to be added to the scene.
     // @see StaticShadow.js
-    this.shadowLight = new DirectionalLight(0xffffff, 0);
+    this.shadowLight = new DirectionalLight(0xffffff, 1);
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
@@ -107,6 +107,7 @@ export default class ModelScene extends Scene {
 
     this.add(this.pivot);
     this.add(this.light);
+    this.add(this.shadowLight);
     this.add(this.skysphere);
     this.pivot.add(this.model);
 

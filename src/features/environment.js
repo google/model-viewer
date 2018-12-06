@@ -19,6 +19,8 @@ import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-vie
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const GAMMA_TO_LINEAR = 2.2;
 
+const WHITE = new Color('#ffffff');
+
 const $currentCubemap = Symbol('currentCubemap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
@@ -36,12 +38,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       };
     }
 
-    get [$hasBackgroundImage]() {
+    get[$hasBackgroundImage]() {
       // @TODO #76
       return this.backgroundImage && this.backgroundImage !== 'null';
     }
 
-    get [$hasBackgroundColor]() {
+    get[$hasBackgroundColor]() {
       // @TODO #76
       return this.backgroundColor && this.backgroundColor !== 'null';
     }
@@ -90,7 +92,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     /**
      * @param {string} url
      */
-    async [$setEnvironmentImage](url) {
+    async[$setEnvironmentImage](url) {
       const textureUtils = this[$renderer].textureUtils;
       const textures = await textureUtils.toCubemapAndEquirect(url);
 
@@ -110,7 +112,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const { cubemap, equirect } = textures;
+      const {cubemap, equirect} = textures;
 
       this[$scene].skysphere.material.color = new Color(0xffffff);
       this[$scene].skysphere.material.map = equirect;
@@ -132,6 +134,11 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].skysphere.material.color = new Color(color);
       this[$scene].skysphere.material.color.convertGammaToLinear(
           GAMMA_TO_LINEAR);
+
+      this[$scene].shadowLight.color.copy(
+          this[$scene].skysphere.material.color);
+      this[$scene].shadowLight.color.lerpHSL(WHITE, 0.5);
+
       this[$scene].skysphere.material.map = null;
       this[$scene].skysphere.material.needsUpdate = true;
 
