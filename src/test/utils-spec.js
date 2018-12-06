@@ -15,7 +15,7 @@
 
 import {Box3, BoxBufferGeometry, Mesh, Vector3} from 'three';
 
-import {CAPPED_DEVICE_PIXEL_RATIO, deserializeUrl, resolveDpr} from '../utils.js';
+import {CAPPED_DEVICE_PIXEL_RATIO, clamp, deserializeUrl, resolveDpr, step} from '../utils.js';
 
 const expect = chai.expect;
 
@@ -60,6 +60,30 @@ suite('utils', () => {
               // TODO:
               // https://github.com/GoogleWebComponents/model-viewer/issues/262
           });
+    });
+  });
+
+  suite('step', () => {
+    test('returns 0 for values below edge', () => {
+      expect(step(0.5, 0.1)).to.be.equal(0);
+    });
+
+    test('returns 1 for values above edge', () => {
+      expect(step(0.5, 0.9)).to.be.equal(1);
+    });
+  });
+
+  suite('clamp', () => {
+    test('numbers below lower limit adjusted to lower limit', () => {
+      expect(clamp(1.0, 2.0, 3.0)).to.be.equal(2.0);
+    });
+
+    test('numbers above upper limit adjusted to upper limit', () => {
+      expect(clamp(4.0, 2.0, 3.0)).to.be.equal(3.0);
+    });
+
+    test('numbers within lower and upper limits unchanged', () => {
+      expect(clamp(2.5, 2.0, 3.0)).to.be.equal(2.5);
     });
   });
 });

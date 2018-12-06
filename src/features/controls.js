@@ -15,9 +15,9 @@
 
 import {PerspectiveCamera, Vector3} from 'three';
 
-import {$needsRender, $onModelLoad, $onResize, $scene} from '../model-viewer-base.js';
+import {$needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
-import {PatchedOrbitControls} from '../three-components/PatchedOrbitControls.js';
+import {SmoothControls} from '../three-components/SmoothControls.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
@@ -58,17 +58,11 @@ export const ControlsMixin = (ModelViewerElement) => {
         this[$scene].setCamera(this[$orbitCamera]);
 
         this[$controls] =
-            new PatchedOrbitControls(this[$orbitCamera], this[$scene].canvas);
-        this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
-        this[$controls].enabled = true;
-        // Panning performed via right click, two finger move
-        this[$controls].enablePan = false;
-        // Panning performed via arrow keys; possibly redundant with `enablePan`
-        this[$controls].enableKeys = false;
+            new SmoothControls(this[$orbitCamera], this[$scene].canvas);
+        this[$controls].sceneOrigin.set(0, FRAMED_HEIGHT / 2, 0);
         this[$controls].addEventListener('change', this[$onControlsChange]);
 
         this[$updateOrbitCamera]();
-
       } else {
         this[$scene].setCamera(this[$defaultCamera]);
 
@@ -78,6 +72,14 @@ export const ControlsMixin = (ModelViewerElement) => {
               'change', this[$onControlsChange]);
           this[$controls] = null;
         }
+      }
+    }
+
+    [$tick](time, delta) {
+      super[$tick](time, delta);
+
+      if (this[$controls]) {
+        this[$controls].update(time, delta);
       }
     }
 
@@ -96,7 +98,8 @@ export const ControlsMixin = (ModelViewerElement) => {
       if (this[$controls]) {
         // Zooming out beyond the 'frame' doesn't serve much purpose
         // and will only end up showing the skysphere if zoomed out enough
-        this[$controls].maxDistance = this[$orbitCamera].position.z;
+        this[$controls].applyConstraints(
+            {farOrbitRadius: this[$orbitCamera].position.z});
       }
     }
 
