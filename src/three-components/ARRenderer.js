@@ -145,7 +145,8 @@ export class ARRenderer {
       return;
     }
 
-    scene.model.scale.set(1, 1, 1);
+    scene.resetModelPose();
+
     this[$presentedScene] = scene;
 
     this.initializeRenderer();
@@ -272,7 +273,12 @@ height: 100%;`);
       const hitMatrix = matrix4.fromArray(hit.hitMatrix);
 
       this.dolly.position.setFromMatrixPosition(hitMatrix);
-      this.dolly.rotation.set(0, -presentedScene.pivot.rotation.y, 0);
+
+      // Orient the dolly/model to face the camera
+      const angle = Math.atan2(
+          this.camera.matrix.elements[12] - this.dolly.position.x,
+          this.camera.matrix.elements[14] - this.dolly.position.z);
+      this.dolly.rotation.y = angle - presentedScene.pivot.rotation.y;
 
       presentedScene.skysphere.visible = false;
       this.dolly.add(presentedScene);

@@ -39,6 +39,22 @@ export default class Model extends Object3D {
   }
 
   /**
+   * Centers the model on the X and Z axis from its
+   * (0, 0, 0) point, and raises the model such that its
+   * lowest point is at y=0. Useful for AR.
+   */
+  centerAndGroundPosition() {
+    if (this.size.length() === 0) {
+      return;
+    }
+
+    const position = this.modelContainer.position;
+    position.x = -(this.boundingBox.min.x + (this.size.x / 2));
+    position.y = -this.boundingBox.min.y;
+    position.z = -(this.boundingBox.min.z + (this.size.z / 2));
+  }
+
+  /**
    * Returns a boolean indicating whether or not there is a
    * loaded model attached.
    *
@@ -108,9 +124,13 @@ export default class Model extends Object3D {
   }
 
   updateBoundingBox() {
+    this.modelContainer.position.set(0, 0, 0);
+
     this.remove(this.modelContainer);
     this.boundingBox.setFromObject(this.modelContainer);
     this.boundingBox.getSize(this.size);
     this.add(this.modelContainer);
+
+    this.centerAndGroundPosition();
   }
 }
