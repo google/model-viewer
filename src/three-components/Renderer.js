@@ -44,11 +44,13 @@ export default class Renderer extends EventDispatcher {
 
     const webGlOptions = {antialias: true};
 
-    // Only enable certain options when Web XR capabilities are detected:
     // TODO: hook to transparent attribute
-    // if (IS_AR_CANDIDATE) {
+    cosnt isTransparent = true;
+
+    // Only enable certain options when Web XR capabilities are detected:
+    if (IS_AR_CANDIDATE || isTransparent) {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
-    // }
+    }
 
     this.canvas = document.createElement('canvas');
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
@@ -62,7 +64,7 @@ export default class Renderer extends EventDispatcher {
       context: this.context,
     });
     // TODO: hook to transparent attribute
-    this.renderer.autoClear = true;
+    this.renderer.autoClear = isTransparent;
     this.renderer.gammaOutput = true;
     this.renderer.gammaFactor = GAMMA_FACTOR;
     this.renderer.setPixelRatio(resolveDpr());
