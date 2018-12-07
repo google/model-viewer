@@ -24,6 +24,7 @@ const WHITE = new Color('#ffffff');
 const $currentCubemap = Symbol('currentCubemap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
+const $setShadowLightColor = Symbol('setShadowLightColor');
 const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
@@ -120,6 +121,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(cubemap);
 
+      this[$setShadowLightColor](WHITE);
+
       this[$needsRender]();
     }
 
@@ -131,13 +134,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       this[$deallocateTextures]();
 
-      this[$scene].skysphere.material.color = new Color(color);
-      this[$scene].skysphere.material.color.convertGammaToLinear(
-          GAMMA_TO_LINEAR);
-
-      this[$scene].shadowLight.color.copy(
-          this[$scene].skysphere.material.color);
-      this[$scene].shadowLight.color.lerpHSL(WHITE, 0.5);
+      const skysphereColor = this[$scene].skysphere.material.color =
+          new Color(color);
+      skysphereColor.convertGammaToLinear(GAMMA_TO_LINEAR);
+      this[$setShadowLightColor](skysphereColor);
 
       this[$scene].skysphere.material.map = null;
       this[$scene].skysphere.material.needsUpdate = true;
@@ -148,6 +148,11 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
 
       this[$needsRender]();
+    }
+
+    [$setShadowLightColor](color) {
+      this[$scene].shadowLight.color.copy(color);
+      this[$scene].shadowLight.color.lerpHSL(WHITE, 0.5);
     }
 
     [$deallocateTextures]() {
