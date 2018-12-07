@@ -140,6 +140,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
 
+      if (color === 'transparent') {
+        this[$scene].skysphere.visible = false;
+      }
+
       this[$needsRender]();
     }
 

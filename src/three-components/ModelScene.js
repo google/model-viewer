@@ -105,9 +105,6 @@ export default class ModelScene extends Scene {
     // depthTest=false
     this.skysphere.renderOrder = 1;
 
-    // TODO: hook to transparent attribute
-    this.skysphere.visible = false;
-
     this.add(this.pivot);
     this.add(this.light);
     this.add(this.skysphere);
