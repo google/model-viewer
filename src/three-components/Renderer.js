@@ -45,7 +45,7 @@ export default class Renderer extends EventDispatcher {
     const webGlOptions = {antialias: true};
 
     // TODO: hook to transparent attribute
-    cosnt isTransparent = true;
+    const isTransparent = true;
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_AR_CANDIDATE || isTransparent) {
