@@ -17,6 +17,7 @@ import {Color, Mesh, MeshBasicMaterial, MultiplyBlending, OrthographicCamera, Pl
 
 const $camera = Symbol('camera');
 const $renderTarget = Symbol('renderTarget');
+const $preservedRenderTarget = Symbol('preservedRenderTarget');
 
 const scale = new Vector3();
 
@@ -62,6 +63,25 @@ export default class StaticShadow extends Mesh {
     this.material.needsUpdate = true;
 
     this[$camera] = new OrthographicCamera();
+  }
+
+  /**
+   * In WebXR AR, the default framebuffer used by three is one provided by
+   * the WebXR Device API -- `renderer.setFramebuffer()` handles that
+   * for three's shadows, but for our own render targets, we have to
+   * manually handle.
+   *
+   * @see https://github.com/mrdoob/three.js/pull/14132
+   */
+  onBeforeRender(renderer) {
+    this[$preservedRenderTarget] = renderer.getRenderTarget();
+    renderer.setRenderTarget(this[$renderTarget]);
+  }
+
+  onAfterRender(renderer) {
+    if (this[$preservedRenderTarget]) {
+      renderer.setRenderTarget(this[$preservedRenderTarget]);
+    }
   }
 
   /**
