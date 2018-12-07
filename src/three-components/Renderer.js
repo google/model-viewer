@@ -159,6 +159,8 @@ export default class Renderer extends EventDispatcher {
       const dpr = resolveDpr();
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
+      // TODO: hook to transparent attribute?
+      context.clearRect(0, 0, widthDPR, heightDPR);
       context.drawImage(
           this.renderer.domElement,
           0,
