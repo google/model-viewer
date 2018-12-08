@@ -137,6 +137,19 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
           url: element.backgroundImage
         })).to.be.ok;
       });
+
+      suite('and a background-color property', () => {
+        setup(async () => {
+          element.backgroundColor = '#ff0077';
+          await timePasses();
+        });
+
+        test('the directional light is white', () => {
+          const lightColor =
+              scene.shadowLight.color.getHexString().toLowerCase();
+          expect(lightColor).to.be.equal('ffffff');
+        });
+      });
     });
   });
 
@@ -164,6 +177,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
             await timePasses();
             expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
           });
+      test('the directional light is tinted', () => {
+        const lightColor = scene.shadowLight.color.getHexString().toLowerCase();
+        expect(lightColor).to.not.be.equal('ffffff');
+      });
     });
   });
 
