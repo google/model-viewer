@@ -19,7 +19,6 @@ const $outputCanvas = Symbol('outputCanvas');
 const $outputContext = Symbol('outputContext');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
-const $onOutputCanvasClick = Symbol('onOutputCanvasClick');
 const $onFullscreenchange = Symbol('onFullscreenchange');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 
@@ -231,8 +230,7 @@ height: 100%;`);
       // want to rely on XRInputSource and "select" XRInputSourceEvent (or their
       // successors) to abstract these input details for us.
       // @see https://immersive-web.github.io/webxr/#xrinputsource-interface
-      this[$outputCanvas].addEventListener(
-          'click', () => this[$onOutputCanvasClick]());
+      this[$outputCanvas].addEventListener('click', () => this.placeModel());
     }
 
     return this[$outputCanvas];
@@ -246,8 +244,7 @@ height: 100%;`);
     return this[$outputContext];
   }
 
-
-  async[$onOutputCanvasClick]() {
+  async placeModel() {
     if (this[$currentSession] == null) {
       return;
     }
@@ -272,7 +269,11 @@ height: 100%;`);
       const hitMatrix = matrix4.fromArray(hit.hitMatrix);
 
       this.dolly.position.setFromMatrixPosition(hitMatrix);
-      this.dolly.rotation.set(0, -presentedScene.pivot.rotation.y, 0);
+
+      // Orient the dolly/model to face the camera
+      const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
+      this.dolly.lookAt(camPosition.x, this.dolly.position.y, camPosition.z);
+      this.dolly.rotateY(-presentedScene.pivot.rotation.y);
 
       presentedScene.skysphere.visible = false;
       this.dolly.add(presentedScene);

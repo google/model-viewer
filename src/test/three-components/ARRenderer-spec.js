@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {Matrix4, Plane, Ray, Vector3} from 'three';
+
 import {IS_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
@@ -24,35 +26,55 @@ const expect = chai.expect;
 
 customElements.define('model-viewer-element', ModelViewerElementBase);
 
-
-const stubWebXrInterface = (arRenderer) => {
-  arRenderer.resolveARSession = () => {
-    class FakeSession extends EventTarget {
-      requestFrameOfReference() {
-        return {};
-      }
-
-      requestAnimationFrame() {
-        return 1;
-      }
-
-      cancelAnimationFrame() {
-      }
-
-      end() {
-        this.dispatchEvent(new CustomEvent('end'));
-      }
-    }
-
-    return new FakeSession();
-  };
-};
-
 suite('ARRenderer', () => {
   let element;
   let scene;
   let renderer;
   let arRenderer;
+
+  const stubWebXrInterface = (arRenderer) => {
+    const xzPlane = new Plane(new Vector3(0, 1, 0));
+    const mat4 = new Matrix4();
+    const vec3 = new Vector3();
+
+    arRenderer.resolveARSession = () => {
+      class FakeSession extends EventTarget {
+        requestFrameOfReference() {
+          return {};
+        }
+
+        /**
+         * Returns a hit if ray collides with the XZ plane
+         */
+        requestHitTest(origin, dir, frameOfRef) {
+          const hits = [];
+          const ray = new Ray(new Vector3(...origin), new Vector3(...dir));
+          const success = ray.intersectPlane(xzPlane, vec3);
+
+          if (success) {
+            const hitMatrix = new Float32Array(16);
+            mat4.identity().setPosition(vec3).toArray(hitMatrix);
+            hits.push({hitMatrix});
+          }
+
+          return hits;
+        }
+
+        requestAnimationFrame() {
+          return 1;
+        }
+
+        cancelAnimationFrame() {
+        }
+
+        end() {
+          this.dispatchEvent(new CustomEvent('end'));
+        }
+      }
+
+      return new FakeSession();
+    };
+  };
 
   setup(() => {
     element = new ModelViewerElementBase();
@@ -109,6 +131,36 @@ suite('ARRenderer', () => {
         expect(originalModelScale.x).to.be.equal(model.scale.x);
         expect(originalModelScale.y).to.be.equal(model.scale.y);
         expect(originalModelScale.z).to.be.equal(model.scale.z);
+      });
+    });
+
+    suite('placing a model', () => {
+      test('places the model oriented to the camera', async () => {
+        const epsilon = 0.0001;
+        const pivotRotation = 0.123;
+        modelScene.pivot.rotation.y = pivotRotation;
+
+        // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
+        // our dolly will need to rotate to face camera) and angled 45
+        // degrees towards the ground, like someone holding a phone.
+        arRenderer.camera.matrix.identity()
+            .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
+            .multiply(new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4))
+            .setPosition(new Vector3(10, 2, 0));
+        arRenderer.camera.updateMatrixWorld(true);
+
+        await arRenderer.present(modelScene);
+        await arRenderer.placeModel();
+
+        expect(arRenderer.dolly.position.x).to.be.equal(10);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        // Quaternion rotation results in the rotation towards the viewer
+        // with -X and -Z, and the offset applied to Y to invert pivotRotation,
+        // but it's inverted again here due to the -X/-Z rotation encoding
+        expect(arRenderer.dolly.rotation.x).to.be.equal(-Math.PI);
+        expect(arRenderer.dolly.rotation.y).to.be.closeTo(pivotRotation, epsilon);
+        expect(arRenderer.dolly.rotation.z).to.be.equal(-Math.PI);
       });
     });
   });
