@@ -115,13 +115,13 @@ learn how to polyfill for maximum browser compatibility!**
  - 🚫 Not available
  - 🎌 Behind a flag, unstable
 
-Feature                   | Chrome | Canary | Safari 12 | Firefox 63 | Firefox 62 | Edge  | IE 11
+Feature                   | Chrome | Canary | Safari 12 | Firefox 64 | Firefox 62 | Edge  | IE 11
 --------------------------|--------|--------|-----------|------------|------------|-------|------
 Resize Observer¹          |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
 Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
 Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
 Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
-Fullscreen API            |     🚧 |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
+Fullscreen API            |     ✅ |     ✅ |        🚧 |         ✅ |         🚧 |    🚧 |   🚧
 WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
 
