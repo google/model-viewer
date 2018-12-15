@@ -27,7 +27,7 @@ const vector3 = new Vector3();
 const originArray = new Float32Array(3);
 const directionArray = new Float32Array(3);
 
-export class ARRenderer {
+export class ARRenderer extends EventTarget {
   /**
    * Given an inline Renderer, construct an ARRenderer and return it
    */
@@ -36,6 +36,8 @@ export class ARRenderer {
   }
 
   constructor(inputCanvas, inputContext) {
+    super();
+
     this.renderer = null;
 
     this.inputCanvas = inputCanvas;
@@ -145,6 +147,7 @@ export class ARRenderer {
     }
 
     scene.model.scale.set(1, 1, 1);
+
     this[$presentedScene] = scene;
 
     this.initializeRenderer();
@@ -224,13 +227,6 @@ top: 0px;
 left: 0px;
 width: 100%;
 height: 100%;`);
-      // NOTE: Only Chrome supports Web XR right now, but eventually platforms
-      // that do not directly support any kind of pointer event (such as
-      // Hololens) might have Web XR (or its successor). In this case, we would
-      // want to rely on XRInputSource and "select" XRInputSourceEvent (or their
-      // successors) to abstract these input details for us.
-      // @see https://immersive-web.github.io/webxr/#xrinputsource-interface
-      this[$outputCanvas].addEventListener('click', () => this.placeModel());
     }
 
     return this[$outputCanvas];
@@ -253,18 +249,26 @@ height: 100%;`);
       this.raycaster = new Raycaster();
     }
 
-    const presentedScene = this[$presentedScene];
-
     // NOTE: Currently rays will be cast from the middle of the screen.
     // Eventually we might use input coordinates for this.
     this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
-
     const ray = this.raycaster.ray;
     originArray.set(ray.origin.toArray());
     directionArray.set(ray.direction.toArray());
-    const hits = await this[$currentSession].requestHitTest(
-        originArray, directionArray, this[$frameOfReference]);
-    if (hits.length) {
+
+    let hits;
+    try {
+      hits = await this[$currentSession].requestHitTest(
+          originArray, directionArray, this[$frameOfReference]);
+    } catch (e) {
+      // Spec says this should no longer throw on invalid requests:
+      // https://github.com/immersive-web/hit-test/issues/24
+      // But in practice, it will still happen, so just ignore:
+      // https://github.com/immersive-web/hit-test/issues/37
+    }
+
+    if (hits && hits.length) {
+      const presentedScene = this[$presentedScene];
       const hit = hits[0];
       const hitMatrix = matrix4.fromArray(hit.hitMatrix);
 
@@ -277,6 +281,37 @@ height: 100%;`);
 
       presentedScene.skysphere.visible = false;
       this.dolly.add(presentedScene);
+
+      this.dispatchEvent(new CustomEvent('modelmove'));
+    }
+  }
+
+  /**
+   * It appears that XRSession's `inputsourceschange` event is not implemented
+   * in Chrome Canary as of m72 for 'screen' inputs, which would be preferable
+   * since we only need an "select" event, rather than track a pose on every
+   * frame (like a 6DOF controller). Due to this bug, on every frame, check to
+   * see if an input exists.
+   * @see https://bugs.chromium.org/p/chromium/issues/detail?id=913703
+   * @see https://immersive-web.github.io/webxr/#xrinputsource-interface
+   */
+  processXRInput(frame) {
+    const {session} = frame;
+
+    // Get current input sources. For now, only 'screen' input is supported,
+    // which is only added to the session's active input sources immediately
+    // before `selectstart` and removed immediately after `selectend` event.
+    // If we have a 'screen' source here, it means the output canvas was tapped.
+    const sources = session.getInputSources().filter(
+        input => input.targetRayMode === 'screen');
+
+    if (sources.length === 0) {
+      return;
+    }
+
+    const pose = frame.getInputPose(sources[0], this[$frameOfReference])
+    if (pose) {
+      this.placeModel();
     }
   }
 
@@ -288,8 +323,6 @@ height: 100%;`);
   [$onWebXRFrame](time, frame) {
     const {session} = frame;
     const pose = frame.getDevicePose(this[$frameOfReference]);
-
-    this.reticle.update(this[$currentSession], this[$frameOfReference]);
 
     // TODO: Notify external observers of tick
     // TODO: Note that reticle may be "stabilized"
@@ -309,6 +342,13 @@ height: 100%;`);
 
       this.camera.matrix.getInverse(viewMatrix);
       this.camera.updateMatrixWorld(true);
+
+      // NOTE: Updating input or the reticle is dependent on the camera's
+      // pose, hence updating these elements after camera update but
+      // before render.
+      this.reticle.update(this[$currentSession], this[$frameOfReference]);
+      this.processXRInput(frame);
+
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
       // this.renderer.clearDepth();

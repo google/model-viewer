@@ -20,9 +20,29 @@ import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {$arRenderer} from '../../three-components/Renderer.js';
-import {assetPath, waitForEvent} from '../helpers.js';
+import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
+
+const applyPhoneRotation = camera => {
+  // Rotate 180 degrees on Y (so it's not the default)
+  // and angle 45 degrees towards the ground, like a phone.
+  camera.matrix.identity()
+    .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
+    .multiply(new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4));
+}
+
+class MockXRFrame {
+  constructor(session) {
+    this.session = session;
+  }
+
+  // We don't use nor test the returned XRInputPose
+  // other than its existence.
+  getInputPose(xrInputSource, frameOfRef) {
+    return xrInputSource ? {} : null;
+  }
+}
 
 customElements.define('model-viewer-element', ModelViewerElementBase);
 
@@ -31,6 +51,12 @@ suite('ARRenderer', () => {
   let scene;
   let renderer;
   let arRenderer;
+  let xrSession;
+
+  let inputSources = [];
+  const setInputSources = sources => {
+    inputSources = sources;
+  };
 
   const stubWebXrInterface = (arRenderer) => {
     const xzPlane = new Plane(new Vector3(0, 1, 0));
@@ -41,6 +67,10 @@ suite('ARRenderer', () => {
       class FakeSession extends EventTarget {
         requestFrameOfReference() {
           return {};
+        }
+
+        getInputSources() {
+          return inputSources;
         }
 
         /**
@@ -72,7 +102,8 @@ suite('ARRenderer', () => {
         }
       }
 
-      return new FakeSession();
+      xrSession = new FakeSession();
+      return xrSession;
     };
   };
 
@@ -108,6 +139,7 @@ suite('ARRenderer', () => {
       await waitForEvent(element, 'load');
       modelScene = element[$scene];
       stubWebXrInterface(arRenderer);
+      setInputSources([]);
     });
 
     test('presents the model at its natural scale', async () => {
@@ -143,10 +175,8 @@ suite('ARRenderer', () => {
         // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
         // our dolly will need to rotate to face camera) and angled 45
         // degrees towards the ground, like someone holding a phone.
-        arRenderer.camera.matrix.identity()
-            .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
-            .multiply(new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4))
-            .setPosition(new Vector3(10, 2, 0));
+        applyPhoneRotation(arRenderer.camera);
+        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
         arRenderer.camera.updateMatrixWorld(true);
 
         await arRenderer.present(modelScene);
@@ -159,8 +189,80 @@ suite('ARRenderer', () => {
         // with -X and -Z, and the offset applied to Y to invert pivotRotation,
         // but it's inverted again here due to the -X/-Z rotation encoding
         expect(arRenderer.dolly.rotation.x).to.be.equal(-Math.PI);
-        expect(arRenderer.dolly.rotation.y).to.be.closeTo(pivotRotation, epsilon);
+        expect(arRenderer.dolly.rotation.y)
+            .to.be.closeTo(pivotRotation, epsilon);
         expect(arRenderer.dolly.rotation.z).to.be.equal(-Math.PI);
+      });
+
+      test('when a screen-type XRInputSource exists', async () => {
+        await arRenderer.present(modelScene);
+
+        expect(arRenderer.dolly.position.x).to.be.equal(0);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(0);
+
+        // Set camera to (10, 2, 0), rotated 180 degrees on Y,
+        // and angled 45 degrees towards the ground, like a phone.
+        applyPhoneRotation(arRenderer.camera);
+        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
+        arRenderer.camera.updateMatrixWorld(true);
+
+        setInputSources([{targetRayMode: 'screen'}]);
+        arRenderer.processXRInput(new MockXRFrame(xrSession));
+        await waitForEvent(arRenderer, 'modelmove');
+
+        expect(arRenderer.dolly.position.x).to.be.equal(10);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(2);
+
+
+        // Move the camera, ensure model hasn't changed
+        arRenderer.camera.matrix.setPosition(new Vector3(0, 1, 0));
+        arRenderer.camera.updateMatrixWorld(true);
+        setInputSources([]);
+        arRenderer.processXRInput(new MockXRFrame(xrSession));
+        await timePasses();
+
+        expect(arRenderer.dolly.position.x).to.be.equal(10);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(2);
+      });
+
+      test('ignores non-screen-type XRInputSources', async () => {
+        applyPhoneRotation(arRenderer.camera);
+        arRenderer.camera.updateMatrixWorld(true);
+        await arRenderer.present(modelScene);
+
+        setInputSources([{targetRayMode: 'gaze'}]);
+        arRenderer.processXRInput(new MockXRFrame(xrSession));
+        await timePasses();
+
+        expect(arRenderer.dolly.position.x).to.be.equal(0);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(0);
+      });
+
+      test('ignores when ray fails', async () => {
+        applyPhoneRotation(arRenderer.camera);
+        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
+        arRenderer.camera.updateMatrixWorld(true);
+        await arRenderer.present(modelScene);
+        await arRenderer.placeModel();
+
+        expect(arRenderer.dolly.position.x).to.be.equal(10);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(2);
+
+        // Now point phone upwards
+        arRenderer.camera.matrix.identity()
+          .makeRotationAxis(new Vector3(1, 0, 0), Math.PI / 2);
+        arRenderer.camera.matrix.setPosition(new Vector3(0, 2, 0));
+        arRenderer.camera.updateMatrixWorld(true);
+        await arRenderer.placeModel();
+
+        expect(arRenderer.dolly.position.x).to.be.equal(10);
+        expect(arRenderer.dolly.position.y).to.be.equal(0);
+        expect(arRenderer.dolly.position.z).to.be.equal(2);
       });
     });
   });
