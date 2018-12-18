@@ -1,0 +1,16 @@
+name: "pixelmatch"
+description:
+  "JavaScript image comparison library"
+
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://github.com/mapbox/pixelmatch"
+  }
+  url {
+    type: GIT
+    value: "https://github.com/mapbox/pixelmatch.git"
+  }
+  version: "4.0.2"
+  last_upgrade_date { year: 2018 month: 12 day: 18 }
+}

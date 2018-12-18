@@ -1,0 +1,35 @@
+{
+  "scenarioDirectory": "./test/fidelity",
+  "outputDirectory": "./test/fidelity/results",
+  "analysisThresholds": [0.0, 1.0, 10.0],
+  "scenarios": [
+    {
+      "slug": "pbr-spheres",
+      "goldens": [{
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }, {
+        "name": "iOS 12 Quick Look",
+        "file": "quicklook-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "alpha-blend-litmus",
+      "goldens": [{
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }, {
+        "name": "iOS 12 Quick Look",
+        "file": "quicklook-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    }
+  ]
+}
