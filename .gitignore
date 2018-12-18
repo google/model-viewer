@@ -1,6 +1,8 @@
 node_modules/*
 dist/*
 lib/*
+fidelity/*
+test/fidelity/results/*
 examples/built/*
 **/*.sw*
 .DS_Store

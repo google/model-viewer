@@ -15,6 +15,9 @@ dist: trusty
 cache:
   directories:
   - node_modules
+after_success:
+- npm run check-fidelity
+- ./scripts/compare-fidelity-to-last-recorded.sh
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
 - touch .nojekyll
@@ -25,9 +28,14 @@ before_deploy:
 - echo '!node_modules/fullscreen-polyfill' >> .gitignore
 - echo '!node_modules/resize-observer-polyfill' >> .gitignore
 deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  verbose: true
-  on:
-    branch: master
+  - provider: script
+    script: ./scripts/record-fidelity-results.sh
+    on:
+      tags: true
+  - provider: pages
+    skip-cleanup: true
+    preserve-history: true
+    github-token: $GITHUB_TOKEN
+    verbose: true
+    on:
+      branch: master

@@ -78,6 +78,34 @@ export default [
     onwarn,
   },
   {
+    input: './lib/test/fidelity/components/image-comparison-app.js',
+    output: {
+      file: './dist/image-comparison-app.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ImageComparisonApp'
+    },
+    watch: {
+      include: '{lib/test/fidelity/**,lib/third_party/**}',
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/test/fidelity/image-comparison-worker.js',
+    output: {
+      file: './dist/image-comparison-worker.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ImageComparisonWorker'
+    },
+    watch: {
+      include: '{lib/test/fidelity/**,lib/third_party/**}',
+    },
+    plugins,
+    onwarn,
+  },
+  {
     input: './examples/dependencies/index.js',
     output: {file: './examples/built/dependencies.js', format: 'umd'},
     plugins,
