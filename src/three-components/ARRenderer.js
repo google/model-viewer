@@ -1,4 +1,4 @@
-import {Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
 
 import {assertIsArCandidate} from '../utils.js';
 
@@ -27,7 +27,7 @@ const vector3 = new Vector3();
 const originArray = new Float32Array(3);
 const directionArray = new Float32Array(3);
 
-export class ARRenderer extends EventTarget {
+export class ARRenderer extends EventDispatcher {
   /**
    * Given an inline Renderer, construct an ARRenderer and return it
    */
@@ -282,7 +282,7 @@ height: 100%;`);
       presentedScene.skysphere.visible = false;
       this.dolly.add(presentedScene);
 
-      this.dispatchEvent(new CustomEvent('modelmove'));
+      this.dispatchEvent({type: 'modelmove'});
     }
   }
 
