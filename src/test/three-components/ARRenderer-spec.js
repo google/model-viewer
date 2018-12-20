@@ -24,13 +24,15 @@ import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
-const applyPhoneRotation = camera => {
-  // Rotate 180 degrees on Y (so it's not the default)
-  // and angle 45 degrees towards the ground, like a phone.
-  camera.matrix.identity()
-    .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
-    .multiply(new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4));
-}
+const applyPhoneRotation =
+    camera => {
+      // Rotate 180 degrees on Y (so it's not the default)
+      // and angle 45 degrees towards the ground, like a phone.
+      camera.matrix.identity()
+          .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
+          .multiply(new Matrix4().makeRotationAxis(
+              new Vector3(1, 0, 0), -Math.PI / 4));
+    }
 
 class MockXRFrame {
   constructor(session) {
@@ -254,8 +256,8 @@ suite('ARRenderer', () => {
         expect(arRenderer.dolly.position.z).to.be.equal(2);
 
         // Now point phone upwards
-        arRenderer.camera.matrix.identity()
-          .makeRotationAxis(new Vector3(1, 0, 0), Math.PI / 2);
+        arRenderer.camera.matrix.identity().makeRotationAxis(
+            new Vector3(1, 0, 0), Math.PI / 2);
         arRenderer.camera.matrix.setPosition(new Vector3(0, 2, 0));
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.placeModel();
