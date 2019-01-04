@@ -322,7 +322,7 @@ height: 100%;`);
 
   [$onWebXRFrame](time, frame) {
     const {session} = frame;
-    const pose = frame.getDevicePose(this[$frameOfReference]);
+    const pose = frame.getViewerPose(this[$frameOfReference]);
 
     // TODO: Notify external observers of tick
     // TODO: Note that reticle may be "stabilized"
