@@ -25,8 +25,8 @@ const ModelViewerElement = [
   LoadingMixin,
   ARMixin,
   AutoRotateMixin,
-  EnvironmentMixin,
   ControlsMixin,
+  EnvironmentMixin,
   MagicLeapMixin
 ].reduce((Base, Mixin) => Mixin(Base), ModelViewerElementBase);
 

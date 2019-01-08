@@ -59,7 +59,7 @@ export const ControlsMixin = (ModelViewerElement) => {
 
         this[$controls] =
             new SmoothControls(this[$orbitCamera], this[$scene].canvas);
-        this[$controls].sceneOrigin.set(0, FRAMED_HEIGHT / 2, 0);
+        this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
         this[$controls].addEventListener('change', this[$onControlsChange]);
 
         this[$updateOrbitCamera]();
@@ -98,8 +98,8 @@ export const ControlsMixin = (ModelViewerElement) => {
       if (this[$controls]) {
         // Zooming out beyond the 'frame' doesn't serve much purpose
         // and will only end up showing the skysphere if zoomed out enough
-        this[$controls].applyConstraints(
-            {farOrbitRadius: this[$orbitCamera].position.z});
+        this[$controls].applyOptions(
+            {maximumRadius: this[$orbitCamera].position.z});
       }
     }
 
