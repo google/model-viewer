@@ -68,10 +68,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element[$controls]).to.be.ok;
       });
 
-      test('sets far orbit to the camera framed distance', () => {
+      test('sets max radius to the camera framed distance', () => {
         const cameraZ = element[$scene].camera.position.z;
-        expect(element[$controls].constraints.farOrbitRadius)
-            .to.be.equal(cameraZ);
+        expect(element[$controls].options.maximumRadius).to.be.equal(cameraZ);
       });
 
       test('removes SmoothControls if disabled after enabled', async () => {

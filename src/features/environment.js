@@ -78,6 +78,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     [$tick](time, delta) {
       super[$tick](time, delta);
       const camera = this[$scene].getCamera();
+      this[$scene].skysphere.position.copy(camera.position);
     }
 
     [$onModelLoad](e) {

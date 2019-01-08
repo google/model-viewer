@@ -15,7 +15,7 @@
 
 import {PerspectiveCamera, Spherical, Vector3} from 'three';
 
-import {DEFAULT_CONSTRAINTS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utils.js';
 
 const expect = chai.expect;
@@ -91,40 +91,36 @@ suite('SmoothControls', () => {
   });
 
   suite('when updated', () => {
-    test(
-        'repositions the camera within the configured radius constraints',
-        () => {
-          settleControls(controls);
-
-          const radius = camera.position.length();
-
-          expect(radius).to.be.within(
-              DEFAULT_CONSTRAINTS.nearOrbitRadius,
-              DEFAULT_CONSTRAINTS.farOrbitRadius);
-        });
-
-    test('causes the camera to look at the origin', () => {
+    test('repositions the camera within the configured radius optionss', () => {
       settleControls(controls);
-      expect(cameraIsLookingAt(camera, controls.sceneOrigin)).to.be.equal(true);
+
+      const radius = camera.position.length();
+
+      expect(radius).to.be.within(
+          DEFAULT_OPTIONS.minimumRadius, DEFAULT_OPTIONS.maximumRadius);
     });
 
-    suite('when scene origin is modified', () => {
-      test('camera looks at the configured origin', () => {
-        controls.sceneOrigin.set(3, 2, 1);
+    test('causes the camera to look at the target', () => {
+      settleControls(controls);
+      expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
+    });
+
+    suite('when target is modified', () => {
+      test('camera looks at the configured target', () => {
+        controls.target.set(3, 2, 1);
         settleControls(controls);
 
-        expect(cameraIsLookingAt(camera, controls.sceneOrigin))
-            .to.be.equal(true);
+        expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
       });
     });
 
     suite('when orbit is changed', () => {
       suite('radius', () => {
-        test('changes the absolute distance to the scene origin', () => {
+        test('changes the absolute distance to the target', () => {
           settleControls(controls);
 
           expect(camera.position.length())
-              .to.be.equal(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+              .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
           controls.setOrbit(0, 0, 10);
           settleControls(controls);
           expect(camera.position.length()).to.be.equal(10);
@@ -163,71 +159,72 @@ suite('SmoothControls', () => {
       });
     });
 
-    suite('customizing constraints', () => {
+    suite('customizing optionss', () => {
       suite('azimuth', () => {
         setup(() => {
-          controls.applyConstraints({
+          controls.applyOptions({
             minimumAzimuthalAngle: -1 * HALF_PI,
             maximumAzimuthalAngle: HALF_PI
           });
         });
 
-        test('prevents camera azimuth from exceeding constraints', () => {
+        test('prevents camera azimuth from exceeding optionss', () => {
           controls.setOrbit(-Math.PI, 0, 0);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.theta).to.be.equal(-1 * HALF_PI);
+          expect(controls.getCameraSpherical().theta).to.be.equal(-1 * HALF_PI);
 
           controls.setOrbit(Math.PI, 0, 0);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.theta).to.be.equal(HALF_PI);
+          expect(controls.getCameraSpherical().theta).to.be.equal(HALF_PI);
         });
       });
 
       suite('pole', () => {
         setup(() => {
-          controls.applyConstraints({
+          controls.applyOptions({
             minimumPolarAngle: QUARTER_PI,
             maximumPolarAngle: THREE_QUARTERS_PI
           });
         });
 
-        test('prevents camera polar angle from exceeding constraints', () => {
+        test('prevents camera polar angle from exceeding optionss', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.phi).to.be.equal(QUARTER_PI);
+          expect(controls.getCameraSpherical().phi).to.be.equal(QUARTER_PI);
 
           controls.setOrbit(0, Math.PI, 0);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.phi).to.be.equal(THREE_QUARTERS_PI);
+          expect(controls.getCameraSpherical().phi)
+              .to.be.equal(THREE_QUARTERS_PI);
         });
       });
 
       suite('radius', () => {
         setup(() => {
-          controls.applyConstraints({nearOrbitRadius: 10, farOrbitRadius: 20});
+          controls.applyOptions({minimumRadius: 10, maximumRadius: 20});
         });
 
-        test('prevents camera distance from exceeding constraints', () => {
+        test('prevents camera distance from exceeding optionss', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.radius).to.be.equal(10);
+          expect(controls.getCameraSpherical().radius).to.be.equal(10);
 
           controls.setOrbit(0, 0, 100);
           settleControls(controls);
 
-          expect(controls.cameraSpherical.radius).to.be.equal(20);
+          expect(controls.getCameraSpherical().radius).to.be.equal(20);
         });
       });
 
       suite('event handling', () => {
         suite('prevent-all', () => {
           setup(() => {
-            controls.applyConstraints({eventHandlingBehavior: 'prevent-all'});
+            controls.applyOptions({eventHandlingBehavior: 'prevent-all'});
           });
 
           test('always preventDefaults cancellable UI events', () => {
@@ -241,8 +238,7 @@ suite('SmoothControls', () => {
 
         suite('prevent-handled', () => {
           setup(() => {
-            controls.applyConstraints(
-                {eventHandlingBehavior: 'prevent-handled'});
+            controls.applyOptions({eventHandlingBehavior: 'prevent-handled'});
           });
 
           test('does not cancel unhandled UI events', () => {
@@ -257,25 +253,25 @@ suite('SmoothControls', () => {
       suite('zooming', () => {
         suite('allow-when-focused', () => {
           setup(() => {
-            controls.applyConstraints({zoomPolicy: 'allow-when-focused'});
+            controls.applyOptions({zoomPolicy: 'allow-when-focused'});
             settleControls(controls);
           });
 
           test('does not zoom when scrolling while blurred', () => {
-            expect(controls.cameraSpherical.radius)
-                .to.be.equal(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
 
             dispatchSyntheticEvent(element, 'wheel');
 
             settleControls(controls);
 
-            expect(controls.cameraSpherical.radius)
-                .to.be.equal(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
           });
 
           test('does zoom when scrolling while focused', () => {
-            expect(controls.cameraSpherical.radius)
-                .to.be.equal(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
 
             element.focus();
 
@@ -283,27 +279,27 @@ suite('SmoothControls', () => {
 
             settleControls(controls);
 
-            expect(controls.cameraSpherical.radius)
-                .to.be.greaterThan(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius);
           });
         });
 
         suite('always-allow', () => {
           setup(() => {
-            controls.applyConstraints({zoomPolicy: 'always-allow'});
+            controls.applyOptions({zoomPolicy: 'always-allow'});
             settleControls(controls);
           });
 
           test('zooms when scrolling, even while blurred', () => {
-            expect(controls.cameraSpherical.radius)
-                .to.be.equal(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
 
             dispatchSyntheticEvent(element, 'wheel');
 
             settleControls(controls);
 
-            expect(controls.cameraSpherical.radius)
-                .to.be.greaterThan(DEFAULT_CONSTRAINTS.nearOrbitRadius);
+            expect(controls.getCameraSpherical().radius)
+                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius);
           });
         });
       });
