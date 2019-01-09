@@ -17,6 +17,7 @@ cache:
   - node_modules
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
+- touch .nojekyll
 - echo 'node_modules/*' > .gitignore
 - echo '!node_modules/@webcomponents' >> .gitignore
 - echo '!node_modules/intersection-observer' >> .gitignore
