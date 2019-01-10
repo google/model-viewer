@@ -12,7 +12,7 @@ const $devicePromise = Symbol('devicePromise');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
-const $frameOfReference = Symbol('frameOfReference');
+const $refSpace = Symbol('refSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $outputCanvas = Symbol('outputCanvas');
@@ -57,7 +57,7 @@ export class ARRenderer extends EventDispatcher {
     this[$outputContext] = null;
     this[$rafId] = null;
     this[$currentSession] = null;
-    this[$frameOfReference] = null;
+    this[$refSpace] = null;
     this[$presentedScene] = null;
     this[$resolveCleanup] = null;
 
@@ -105,7 +105,14 @@ export class ARRenderer extends EventDispatcher {
 
     const gl = this.renderer.getContext();
 
-    await gl.setCompatibleXRDevice(device);
+    // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73
+    // @TODO #293, handle WebXR API changes
+    if ('setCompatibleXRDevice' in gl) {
+      await gl.setCompatibleXRDevice(device);
+    } else {
+      await gl.makeXRCompatible();
+    }
+
     session.baseLayer = new XRWebGLLayer(session, gl, {alpha: true});
     this.renderer.setFramebuffer(session.baseLayer.framebuffer);
 
@@ -156,8 +163,16 @@ export class ARRenderer extends EventDispatcher {
     this[$currentSession].addEventListener('end', () => {
       this[$postSessionCleanup]();
     }, {once: true});
-    this[$frameOfReference] =
-        await this[$currentSession].requestFrameOfReference('eye-level');
+
+    // `requestReferenceSpace` replaced `requestFrameOfReference` in Chrome M73
+    // @TODO #293, handle WebXR API changes
+    this[$refSpace] = await (
+        'requestFrameOfReference' in this[$currentSession] ?
+            this[$currentSession].requestFrameOfReference('eye-level') :
+            this[$currentSession].requestReferenceSpace({
+              type: 'stationary',
+              subtype: 'eye-level',
+            }));
 
     this[$tick]();
 
@@ -198,7 +213,7 @@ export class ARRenderer extends EventDispatcher {
       this[$presentedScene].scaleModelToFitRoom();
     }
 
-    this[$frameOfReference] = null;
+    this[$refSpace] = null;
     this[$presentedScene] = null;
 
     if (this.outputCanvas.parentNode != null) {
@@ -259,7 +274,7 @@ height: 100%;`);
     let hits;
     try {
       hits = await this[$currentSession].requestHitTest(
-          originArray, directionArray, this[$frameOfReference]);
+          originArray, directionArray, this[$refSpace]);
     } catch (e) {
       // Spec says this should no longer throw on invalid requests:
       // https://github.com/immersive-web/hit-test/issues/24
@@ -309,7 +324,7 @@ height: 100%;`);
       return;
     }
 
-    const pose = frame.getInputPose(sources[0], this[$frameOfReference])
+    const pose = frame.getInputPose(sources[0], this[$refSpace])
     if (pose) {
       this.placeModel();
     }
@@ -322,7 +337,12 @@ height: 100%;`);
 
   [$onWebXRFrame](time, frame) {
     const {session} = frame;
-    const pose = frame.getViewerPose(this[$frameOfReference]);
+
+    // `getViewerPose` replaced `getDevicePose` in Chrome M73
+    // @TODO #293, handle WebXR API changes
+    const pose = 'getDevicePose' in frame ?
+        frame.getDevicePose(this[$refSpace]) :
+        frame.getViewerPose(this[$refSpace]);
 
     // TODO: Notify external observers of tick
     // TODO: Note that reticle may be "stabilized"
@@ -346,7 +366,7 @@ height: 100%;`);
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
       // before render.
-      this.reticle.update(this[$currentSession], this[$frameOfReference]);
+      this.reticle.update(this[$currentSession], this[$refSpace]);
       this.processXRInput(frame);
 
       // NOTE: Clearing depth caused issues on Samsung devices
