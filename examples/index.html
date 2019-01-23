@@ -17,11 +17,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; - Examples</title>
+  <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
   <!-- Include prismatic.js for Magic Leap support: -->
@@ -43,44 +44,174 @@
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
-    <div id="container">
-        <h1>&lt;model-viewer&gt; - Examples</h1>
-        <div class="desc">
-            <p>There are several HTML pages containing usages of the <code>&lt;model-viewer&gt;</code> element with different configurations for demonstrative purposes and testing specific scenarios.</p>
-        </div>
 
-        <h2>Demos &amp; Scenarios</h2>
-        <ul class="desc">
-            <li><a href="default.html">default.html</a>: The barebones default case.</li>
-            <li><a href="background-color.html">background-color.html</a>: Using the <code>background-color</code> attribute to style the background color.</li>
-            <li><a href="background-image.html">background-image.html</a>: Using the <code>background-image</code> attribute to specify an equirectangular projection image.</li>
-            <li><a href="augmented-reality.html">augmented-reality.html</a>: Tests using configurations that enable viewing the model in augmented reality.</li>
-            <li><a href="loading.html">loading.html</a>: Examples using the different configurations of displaying an image while loading, and lazy loading models.</li>
-            <li><a href="sources.html">sources.html</a>: Tests different configurations of loading model formats.</li>
-            <li><a href="multiple-elements.html">multiple-elements.html</a>: Stress test of rendering 16 elements that require rendering on every frame, all in the view at once.</li>
-            <li><a href="list.html">list.html</a>: Test of many elements on a page, and lazily rendering only when in view.</li>
-            <li><a href="pbr.html">pbr.html</a>: Showcase of high-resolution models with multiple textures and environment maps.</li>
-            <li><a href="accessibility.html">accessibility.html</a>: A suite of tests exercising different accessibility features and scenarios.</li>
+  <div id="header">
+    <h4></h4>
+    <!-- <h4><span>&lt;</span>model-viewer<span>&gt;</span></h4> -->
+    <a class="icon-github" href="https://github.com/GoogleWebComponents/model-viewer">
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+         width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#ff5252">
+      <g id="XMLID_399_">
+        <path id="XMLID_290_" fill-rule="evenodd" clip-rule="evenodd" d="M12,2C6.48,2,2,6.59,2,12.25c0,4.53,2.87,8.37,6.84,9.73
+          c0.5,0.09,0.68-0.22,0.68-0.49c0-0.24-0.01-0.89-0.01-1.74c-2.78,0.62-3.37-1.37-3.37-1.37c-0.45-1.18-1.11-1.5-1.11-1.5
+          c-0.91-0.64,0.07-0.62,0.07-0.62c1,0.07,1.53,1.06,1.53,1.06c0.89,1.57,2.34,1.11,2.91,0.85c0.09-0.66,0.35-1.11,0.63-1.37
+          c-2.22-0.26-4.56-1.14-4.56-5.07c0-1.12,0.39-2.03,1.03-2.75c-0.1-0.26-0.45-1.3,0.1-2.71c0,0,0.84-0.28,2.75,1.05
+          c0.8-0.23,1.65-0.34,2.5-0.34c0.85,0,1.7,0.12,2.5,0.34c1.91-1.33,2.75-1.05,2.75-1.05c0.55,1.41,0.2,2.45,0.1,2.71
+          c0.64,0.72,1.03,1.63,1.03,2.75c0,3.94-2.34,4.81-4.57,5.06c0.36,0.32,0.68,0.94,0.68,1.9c0,1.37-0.01,2.48-0.01,2.81
+          c0,0.27,0.18,0.59,0.69,0.49c3.97-1.36,6.83-5.2,6.83-9.73C22,6.59,17.52,2,12,2"/>
+        <rect id="XMLID_289_" fill-rule="evenodd" clip-rule="evenodd" fill="none" width="24" height="24"/>
+      </g>
+      </svg>
+    </a>
+  </div>
+
+  <div class="sample">
+    <div class="demo" style="background: #222;">
+      <!-- <demo-snippet>
+          <template>
+              <model-viewer
+                src="assets/Astronaut.glb"
+                alt="A 3D model of an astronaut"
+                controls
+                auto-rotate
+                background-color="#455A64">
+              </model-viewer>
+          </template>
+      </demo-snippet> -->
+    </div>
+
+    <div class="content">
+      <div class="wrapper">
+        <div class="center heading underline">
+          <h1 style="white-space:nowrap;"><span>&lt;</span>model-viewer<span>&gt;</span></h1>
+          <h3>Easily display interactive 3D models on the web & in AR</h3>
+        </div>
+        <h3 class="grouping-title">EXAMPLES</h3>
+        <ul id="list-example">
+          <li>
+            <a href="default.html"><h4>default.html</h4></a>
+            <p>The most basic configuration of model-viewer.</p>
+          </li>
+          <li>
+            <a href="background-color.html"><h4>background-color.html</h4></a>
+            <p>Using the background-color attribute to style the background color.</p>
+          </li>
+          <li>
+            <a href="background-image.html"><h4>background-image.html</h4></a>
+            <p>Using the background-image attribute to specify an equirectangular projection image.</p>
+          </li>
+          <li>
+            <a href="augmented-reality.html"><h4>augmented-reality.html</h4></a>
+            <p>Tests using configurations that enable viewing the model in augmented reality.</p>
+          </li>
+          <li>
+            <a href="loading.html"><h4>loading.html</h4></a>
+            <p>Examples using the different configurations of displaying an image while loading, and lazy loading models.</p>
+          </li>
+          <li>
+            <a href="sources.html"><h4>sources.html</h4></a>
+            <p>Tests different configurations of loading model formats.</p>
+          </li>
+          <li>
+            <a href="multiple-elements.html"><h4>multiple-elements.html</h4></a>
+            <p>Stress test of rendering 16 elements that require rendering on every frame, all in the view at once.</p>
+          </li>
+          <li>
+            <a href="list.html"><h4>list.html</h4></a>
+            <p>Test of many elements on a page, and lazily rendering only when in view.</p>
+          </li>
+          <li>
+            <a href="pbr.html"><h4>pbr.html</h4></a>
+            <p>Showcase of high-resolution models with multiple textures and environment maps.</p>
+          </li>
         </ul>
 
-        <demo-snippet>
-            <template>
-                <model-viewer
-                  src="assets/Astronaut.glb"
-                  alt="A 3D model of an astronaut"
-                  controls
-                  auto-rotate
-                  background-color="#455A64">
-                </model-viewer>
-            </template>
-        </demo-snippet>
+        <h3 class="grouping-title">ATTRIBUTES</h3>
 
-        <div class="attribution">
-          Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-          (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
-        </div>
+        <ul class="list-attribute">
+          <li>
+            <h4>src*</h4>
+            <p>The URL to the 3D model. This parameter is required for <span class="attribute">&lt;model-viewer&gt;</span> to display. Only <a href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a> models are supported, see <a href="https://github.com/GoogleWebComponents/model-viewer#supported-formats">Supported Formats</a>.</p>
+          </li>
+          <li>
+            <h4>alt</h4>
+            <p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>
+          </li>
+          <li>
+            <h4>auto-rotate</h4>
+            <p>Enables the auto rotation of the model.</p>
+          </li>
+          <li>
+            <h4>background-color</h4>
+            <p>Sets the background color of the scene when viewed inline. Takes any valid CSS color string.</p>
+          </li>
+          <li>
+            <h4>background-image</h4>
+            <p>Sets the background image of the scene when viewed inline. Takes a URL to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting background-image supercedes background-color.</p>
+          </li>
+          <li>
+            <h4>controls</h4>
+            <P>Enables controls via mouse/touch when in flat view.</P>
+          </li>
+          <li>
+            <h4>controls</h4>
+            <P>Enables controls via mouse/touch when in flat view.</P>
+          </li>
+          <li>
+            <h4>ios-src</h4>
+            <P>The url to a <a href="https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html">USDZ</a> model which will be used on <a href="https://www.apple.com/ios/augmented-reality/">supported iOS 12+ devices</a> via <a href="https://developer.apple.com/videos/play/wwdc2018/603/">AR Quick Look</a> on Safari. See <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented Reality</a>.</P>
+          </li>
+          <li>
+            <h4>magic-leap</h4>
+            <P>Enables the ability to view models in AR when viewing content on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a> browser, requires that src is a GLB model, and requires the inclusion of the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</P>
+          </li>
+          <li>
+            <h4>poster</h4>
+            <P>Displays an image instead of the model. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</P>
+          </li>
+          <li>
+            <h4>preload</h4>
+            <P>When poster is also enabled, the model will be downloaded before user action. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</P>
+          </li>
+          <li>
+            <h4>reveal-when-loaded</h4>
+            <P>When poster and preload are specified, hide the poster and show the model once the model has been loaded. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</P>
+          </li>
+          <li>
+            <h4>unstable-webxr</h4>
+            <P>Enables the ability to view the model in AR via the experimental <a href="https://github.com/immersive-web/webxr">WebXR Device API</a>, currently <a href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented only in Chrome Canary</a>. See <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented Reality</a>.</P>
+          </li>
+
+        </ul>
+        <p style="color:rgba(0,0,0,.54);">* Parameters that are required for display.</p>
+        <p style="color:rgba(0,0,0,.54);">Note: All attributes have a corresponding property in camel-case format. For example, the background-color attribute can also be configured using the backgroundColor property.</p>
+
+
+        <h3 class="grouping-title" style="margin-top: 40px;">EVENTS</h3>
+
+        <ul class="list-attribute">
+          <li>
+            <h4>load</h4>
+            <p>Fired when a model is loaded. Can fire multiple times per <span class="attribute">&lt;model-viewer&gt;</span> if the src attribute is changed.</p>
+          </li>
+          <li>
+            <h4>preload</h4>
+            <p>When preload is enabled this event is fired when preloading is done.</p>
+          </li>
+
+      </div>
     </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="attribution">
+      Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+    </div>
+
+  </div>
+
     <script src="./built/dependencies.js"></script>
     <script src="../dist/model-viewer.js"></script>
 </body>
