@@ -1,0 +1,74 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; - Accessibility - Reveal When Loaded</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+    minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+  <!-- Include prismatic.js for Magic Leap support: -->
+  <!--<script src="../../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
+  <!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->
+  <!--<script src="../../node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>-->
+
+  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
+  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
+  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+</head>
+<body>
+    <div id="container">
+        <h1>&lt;model-viewer&gt; - Accessibility - Reveal When Loaded</h1>
+        <p class="desc">This page tests usages of the <code>&lt;model-viewer&gt;</code> element using the <code>poster</code> attribute.</p>
+
+        <demo-snippet>
+            <h2>Display poster until loaded</h2>
+            <template>
+                <model-viewer id="reveal" reveal-when-loaded preload
+                    poster="../assets/poster.png"
+                    src="../assets/Astronaut.glb"
+                    alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+        </demo-snippet>
+
+        <div class="attribution">
+          Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
+          (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
+        </div>
+    </div>
+
+    <a href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/accessibility/reveal.html"
+      class="viewSource">View source<a/>
+
+    <script src="../scripts/helpers.js"></script>
+    <script src="../built/dependencies.js"></script>
+    <script src="../../dist/model-viewer.js"></script>
+</body>
+</html>
+
+

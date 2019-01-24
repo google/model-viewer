@@ -44,43 +44,22 @@
 </head>
 <body>
     <div id="container">
-        <h1>&lt;model-viewer&gt; - Examples</h1>
+        <h1>&lt;model-viewer&gt; - Accessibility Tests</h1>
         <div class="desc">
-            <p>There are several HTML pages containing usages of the <code>&lt;model-viewer&gt;</code> element with different configurations for demonstrative purposes and testing specific scenarios.</p>
+            <p>There are several different tests in order to investigate different aspects of accessibility and <code>&lt;model-viewer&gt;</code>. This page enumerates the test cases, and provides links to the individual scenarios.</p>
+            <p>Note that all these examples include <code>alt</code>.</p>
         </div>
-
-        <h2>Demos &amp; Scenarios</h2>
         <ul class="desc">
             <li><a href="default.html">default.html</a>: The barebones default case.</li>
-            <li><a href="background-color.html">background-color.html</a>: Using the <code>background-color</code> attribute to style the background color.</li>
-            <li><a href="background-image.html">background-image.html</a>: Using the <code>background-image</code> attribute to specify an equirectangular projection image.</li>
-            <li><a href="augmented-reality.html">augmented-reality.html</a>: Tests using configurations that enable viewing the model in augmented reality.</li>
-            <li><a href="loading.html">loading.html</a>: Examples using the different configurations of displaying an image while loading, and lazy loading models.</li>
-            <li><a href="sources.html">sources.html</a>: Tests different configurations of loading model formats.</li>
-            <li><a href="multiple-elements.html">multiple-elements.html</a>: Stress test of rendering 16 elements that require rendering on every frame, all in the view at once.</li>
-            <li><a href="list.html">list.html</a>: Test of many elements on a page, and lazily rendering only when in view.</li>
-            <li><a href="pbr.html">pbr.html</a>: Showcase of high-resolution models with multiple textures and environment maps.</li>
-            <li><a href="accessibility.html">accessibility.html</a>: A suite of tests exercising different accessibility features and scenarios.</li>
+            <li><a href="accessibility/poster.html">accessibility/poster.html</a>: A single sample exercising <code>poster</code>.</li>
+	          <li><a href="accessibility/reveal.html">accessibility/reveal.html</a>: A single sample exercising <code>poster</code>, <code>preload</code>, and <code>reveal-when-loaded</code>.</li>
+	          <li><a href="accessibility/controls.html">accessibility/controls.html</a>: A single sample exercising <code>controls</code>.</li>
+	          <li><a href="accessibility/auto-rotate.html">accessibility/auto-rotate.html</a>: A single sample exercising <code>auto-rotate</code>.</li>
+	          <li><a href="accessibility/multiple.html">accessibility/multiple.html</a>: Multiple models on the same page with a variety of attributes.</li>
+            <li><a href="augmented-reality.html">augmented-reality.html</a>: Test using configurations that enable viewing the model in augmented reality.</li>
         </ul>
-
-        <demo-snippet>
-            <template>
-                <model-viewer
-                  src="assets/Astronaut.glb"
-                  alt="A 3D model of an astronaut"
-                  controls
-                  auto-rotate
-                  background-color="#455A64">
-                </model-viewer>
-            </template>
-        </demo-snippet>
-
-        <div class="attribution">
-          Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-          (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
-        </div>
     </div>
+
     <script src="./built/dependencies.js"></script>
     <script src="../dist/model-viewer.js"></script>
 </body>
