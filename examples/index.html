@@ -66,18 +66,22 @@
   </div>
 
   <div class="sample">
-    <div class="demo" style="background: #222;">
-      <!-- <demo-snippet>
+    <div id="demo-container" class="demo">
+      <example-snippet stamp-to="demo-container" highlight-as="html">
           <template>
               <model-viewer
                 src="assets/Astronaut.glb"
                 alt="A 3D model of an astronaut"
                 controls
                 auto-rotate
-                background-color="#455A64">
-              </model-viewer>
+                background-color="#455A64"></model-viewer>
           </template>
-      </demo-snippet> -->
+
+          <script>
+  console.log('This is how you log things to the console!');
+</script>
+
+      </example-snippet>
     </div>
 
     <div class="content">
@@ -89,39 +93,39 @@
         <h3 class="grouping-title">EXAMPLES</h3>
         <ul id="list-example">
           <li>
-            <a href="default.html"><h4>default.html</h4></a>
+            <a href="default.html"><h4>Default</h4></a>
             <p>The most basic configuration of model-viewer.</p>
           </li>
           <li>
-            <a href="background-color.html"><h4>background-color.html</h4></a>
+            <a href="background-color.html"><h4>Background Color</h4></a>
             <p>Using the background-color attribute to style the background color.</p>
           </li>
           <li>
-            <a href="background-image.html"><h4>background-image.html</h4></a>
+            <a href="background-image.html"><h4>Background Image</h4></a>
             <p>Using the background-image attribute to specify an equirectangular projection image.</p>
           </li>
           <li>
-            <a href="augmented-reality.html"><h4>augmented-reality.html</h4></a>
+            <a href="augmented-reality.html"><h4>Augmented Reality</h4></a>
             <p>Tests using configurations that enable viewing the model in augmented reality.</p>
           </li>
           <li>
-            <a href="loading.html"><h4>loading.html</h4></a>
+            <a href="loading.html"><h4>Lazy Loading</h4></a>
             <p>Examples using the different configurations of displaying an image while loading, and lazy loading models.</p>
           </li>
           <li>
-            <a href="sources.html"><h4>sources.html</h4></a>
+            <a href="sources.html"><h4>Model Formats</h4></a>
             <p>Tests different configurations of loading model formats.</p>
           </li>
           <li>
-            <a href="multiple-elements.html"><h4>multiple-elements.html</h4></a>
-            <p>Stress test of rendering 16 elements that require rendering on every frame, all in the view at once.</p>
+            <a href="multiple-elements.html"><h4>Multiple Elements</h4></a>
+            <p>Stress test of rendering 16 elements that require rendering on every frame, all in the view at the same time.</p>
           </li>
           <li>
-            <a href="list.html"><h4>list.html</h4></a>
+            <a href="list.html"><h4>Rendering Test</h4></a>
             <p>Test of many elements on a page, and lazily rendering only when in view.</p>
           </li>
           <li>
-            <a href="pbr.html"><h4>pbr.html</h4></a>
+            <a href="pbr.html"><h4>Physically Based Rendering </h4></a>
             <p>Showcase of high-resolution models with multiple textures and environment maps.</p>
           </li>
         </ul>
