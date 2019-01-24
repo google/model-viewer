@@ -46,7 +46,7 @@
 </head>
 <body class="multiple-samples">
 
-  <div id="header" class="wide">
+  <div id="header">
     <h4><a href="/"><span class="bracket-offset">&lt;</span>model-viewer<span class="bracket-offset">&gt;</span></a></h4>
     <a class="icon-github" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/background-image.html">
       <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -66,119 +66,109 @@
   </div>
 
   <div class="center heading">
-    <h3>background-image</h3>
+    <h2>Background Image</h2>
     <h4>This page showcases the <span class="attribute">background-image</span> attribute, which links to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection</a> image, responsible for changing the environment, and environment map applied to the model.</h4>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <template>
-              <model-viewer
-                  controls
-                  background-image="assets/whipple_creek_regional_park_04_1k.jpg"
-                  alt="A 3D model of a damaged helmet with a forest in the background"
-                  src="assets/DamagedHelmet/DamagedHelmet.gltf">
-              </model-viewer>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-1"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">1</div>
         <h2 class="center">With Equirectangular background-image</h2>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+            <template>
+                <model-viewer
+                    controls
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a damaged helmet with a forest in the background"
+                    src="assets/DamagedHelmet/DamagedHelmet.gltf"></model-viewer>
+            </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-        <template>
-            <model-viewer
-                controls
-                background-image="assets/small_hangar_01_1k.jpg"
-                alt="A 3D model of a reflective sphere depicted within a hangar"
-                src="assets/reflective-sphere.gltf">
-            </model-viewer>
-        </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">2</div>
         <h2 class="center">With very reflective model</h2>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+              <model-viewer
+                  controls
+                  background-image="assets/small_hangar_01_1k.jpg"
+                  alt="A 3D model of a reflective sphere depicted within a hangar"
+                  src="assets/reflective-sphere.gltf"></model-viewer>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <template>
-              <model-viewer
-                  controls
-                  background-image="assets/whipple_creek_regional_park_04_1k.jpg"
-                  alt="A 3D model of a reflective sphere depicted within a forest"
-                  src="assets/Astronaut.glb">
-              </model-viewer>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-3"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">3</div>
         <h2 class="center">With unlit model</h2>
+        <example-snippet stamp-to="demo-container-3" highlight-as="html">
+            <template>
+                <model-viewer
+                    controls
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a reflective sphere depicted within a forest"
+                    src="assets/Astronaut.glb"></model-viewer>
+            </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <template>
-              <model-viewer
-                  controls
-                  background-color="#ff0077"
-                  background-image="assets/whipple_creek_regional_park_04_1k.jpg"
-                  alt="A 3D model of a reflective sphere depicted within a forest"
-                  src="assets/reflective-sphere.gltf">
-              </model-viewer>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-4"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">4</div>
         <h2 class="center">With (unused) background-color</h2>
+        <example-snippet stamp-to="demo-container-4" highlight-as="html">
+            <template>
+                <model-viewer
+                    controls
+                    background-color="#ff0077"
+                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
+                    alt="A 3D model of a reflective sphere depicted within a forest"
+                    src="assets/reflective-sphere.gltf"></model-viewer>
+            </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <template>
-              <model-viewer
-                  id="toggle-image"
-                  backgroud-color="#ff0077"
-                  src="assets/DamagedHelmet/DamagedHelmet.gltf"
-                  alt="A 3D model of a damaged helmet depicted within changing environments"
-                  controls auto-rotate>
-              </model-viewer>
-              <script>
-                  const images = ['assets/whipple_creek_regional_park_04_1k.jpg', 'does-not-exist.png', ''];
-                  let i = 0;
-                  setInterval(() =>
-                      $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2000);
-              </script>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-5"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">5</div>
         <h2 class="center">Cycling background image</h2>
+        <example-snippet stamp-to="demo-container-5" highlight-as="html">
+            <template>
+                <model-viewer
+                    id="toggle-image"
+                    backgroud-color="#ff0077"
+                    src="assets/DamagedHelmet/DamagedHelmet.gltf"
+                    alt="A 3D model of a damaged helmet depicted within changing environments"
+                    controls auto-rotate></model-viewer>
+<script>
+  const images = ['assets/whipple_creek_regional_park_04_1k.jpg', 'does-not-exist.png', ''];
+  let i = 0;
+  setInterval(() =>
+    $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2000);
+</script>
+            </template>
+        </example-snippet>
       </div>
     </div>
   </div>
