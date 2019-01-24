@@ -64,13 +64,7 @@
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-        <template>
-          <model-viewer src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
-        </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container"></div>
 
     <div class="content">
       <div class="wrapper">
@@ -78,7 +72,11 @@
           <h2>Default</h2>
           <h4>This page tests the minimally-configured element.</h4>
         </div>
-
+        <example-snippet stamp-to="demo-container">
+          <template>
+            <model-viewer src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>

@@ -44,7 +44,7 @@
 </head>
 <body class="multiple-samples">
 
-  <div id="header" class="wide">
+  <div id="header">
     <h4><a href="/"><span class="bracket-offset">&lt;</span>model-viewer<span class="bracket-offset">&gt;</span></a></h4>
     <a class="icon-github" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/background-color.html">
       <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -69,91 +69,84 @@
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <h2>With background-color</h2>
-          <template>
-              <model-viewer src="assets/shishkebab.glb"
-                  alt="A 3D model of a shishkebab"
-                  controls auto-rotate background-color="#4885ed"></model-viewer>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div id="demo-container-1" class="demo"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">1</div>
         <h2 class="center">With background-color</h2>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+            <template>
+                <model-viewer src="assets/shishkebab.glb"
+                    alt="A 3D model of a shishkebab"
+                    controls auto-rotate background-color="#4885ed"></model-viewer>
+            </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-
-        <template>
-            <style>
-                .grid {
-                    width: 100%;
-                    height: 600px;
-                    display: grid;
-                    grid-template: 1fr 1fr / 1fr 1fr;
-                }
-                .grid model-viewer {
-                    width: 100%;
-                    height: 100%;
-                }
-            </style>
-            <div class="grid">
-                <model-viewer src="assets/Astronaut.glb"
-                    alt="A 3D model of an astronaut (1 of 4)"
-                    auto-rotate background-color="#FF5252"></model-viewer>
-                <model-viewer src="assets/Astronaut.glb"
-                    alt="A 3D model of an astronaut (2 of 4)"
-                    auto-rotate background-color="#455A64"></model-viewer>
-                <model-viewer src="assets/Astronaut.glb"
-                    alt="A 3D model of an astronaut (3 of 4)"
-                    auto-rotate background-color="#EEFF41"></model-viewer>
-                <model-viewer src="assets/Astronaut.glb"
-                    alt="A 3D model of an astronaut (4 of 4)"
-                    auto-rotate background-color="#40C4FF"></model-viewer>
-            </div>
-        </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">2</div>
         <h2 class="center">Multiple elements with background-color</h2>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<style>
+.grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template: 1fr 1fr / 1fr 1fr;
+}
+.grid model-viewer {
+    width: 100%;
+    height: 100%;
+}
+</style>
+<div class="grid">
+    <model-viewer src="assets/Astronaut.glb"
+      alt="A 3D model of an astronaut (1 of 4)"
+      auto-rotate background-color="#FF5252"></model-viewer>
+    <model-viewer src="assets/Astronaut.glb"
+      alt="A 3D model of an astronaut (2 of 4)"
+      auto-rotate background-color="#455A64"></model-viewer>
+    <model-viewer src="assets/Astronaut.glb"
+      alt="A 3D model of an astronaut (3 of 4)"
+      auto-rotate background-color="#EEFF41"></model-viewer>
+    <model-viewer src="assets/Astronaut.glb"
+      alt="A 3D model of an astronaut (4 of 4)"
+      auto-rotate background-color="#40C4FF"></model-viewer>
+</div>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" style="background:#222;">
-      <!-- <demo-snippet>
-          <template>
-              <model-viewer
-                  id="toggle-color"
-                  alt="A 3D model of a shishkebab"
-                  src="assets/shishkebab.glb"
-                  controls
-                  auto-rotate>
-              </model-viewer>
-              <script>
-                  const colors = ['#4885ed', '#3cba54', '#f4c20d', '#db3236'];
-                  let i = 0;
-                  setInterval(() =>
-                      $('#toggle-color').setAttribute('background-color', colors[i++ % 4]), 2000);
-              </script>
-          </template>
-      </demo-snippet> -->
-    </div>
+    <div class="demo" id="demo-container-3"></div>
     <div class="content">
       <div class="wrapper">
         <div class="index">3</div>
         <h2 class="center">Changing background color</h2>
-      
+        <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <template>
+            <model-viewer
+                id="toggle-color"
+                alt="A 3D model of a shishkebab"
+                src="assets/shishkebab.glb"
+                controls
+                auto-rotate></model-viewer>
+<script>
+const colors = ['#4885ed', '#3cba54', '#f4c20d', '#db3236'];
+let i = 0;
+setInterval(() =>
+  $('#toggle-color').setAttribute('background-color', colors[i++ % 4]), 2000);
+</script>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>
