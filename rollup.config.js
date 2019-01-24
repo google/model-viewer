@@ -106,8 +106,12 @@ export default [
     onwarn,
   },
   {
-    input: './examples/dependencies/index.js',
-    output: {file: './examples/built/dependencies.js', format: 'umd'},
+    input: './lib/documentation/components/example-snippet.js',
+    output: {
+      file: './examples/built/dependencies.js',
+      format: 'umd',
+      name: 'DocumentationDependencies'
+    },
     plugins,
     onwarn,
   }
