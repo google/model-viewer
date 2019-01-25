@@ -82,7 +82,7 @@ export default [
     output: {
       file: './dist/image-comparison-app.js',
       sourcemap: true,
-      format: 'umd',
+      format: 'iife',
       name: 'ImageComparisonApp'
     },
     watch: {
@@ -96,7 +96,7 @@ export default [
     output: {
       file: './dist/image-comparison-worker.js',
       sourcemap: true,
-      format: 'umd',
+      format: 'iife',
       name: 'ImageComparisonWorker'
     },
     watch: {

@@ -33,7 +33,7 @@ export class AnalysisView extends LitElement {
   @property({type: Object})
   protected rightImageAccessor: ImageAccessor|null = null;
   @property({type: Object})
-  protected booleanImageAccessor: ImageAccessor|null = null;
+  protected blackWhiteImageAccessor: ImageAccessor|null = null;
   @property({type: Object})
   protected deltaImageAccessor: ImageAccessor|null = null;
 
@@ -96,7 +96,7 @@ export class AnalysisView extends LitElement {
     const goldenCanvas =
         (this.shadowRoot!.querySelector('canvas[slot="top-right"]')! as any)
             .transferControlToOffscreen();
-    const booleanCanvas =
+    const blackWhiteCanvas =
         (this.shadowRoot!.querySelector('canvas[slot="bottom-left"]')! as any)
             .transferControlToOffscreen();
 
@@ -109,10 +109,10 @@ export class AnalysisView extends LitElement {
           type: 'canvases-ready',
           candidateCanvas,
           goldenCanvas,
-          booleanCanvas,
+          blackWhiteCanvas,
           deltaCanvas
         },
-        [candidateCanvas, goldenCanvas, booleanCanvas, deltaCanvas]);
+        [candidateCanvas, goldenCanvas, blackWhiteCanvas, deltaCanvas]);
   }
 
   get canCompareImages(): boolean {
@@ -178,17 +178,13 @@ export class AnalysisView extends LitElement {
   async updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
-    console.log(this.analysisResult, changedProperties);
-
     if (changedProperties.has('analysisResult') &&
         this.analysisResult != null && this.canCompareImages) {
       const {imageBuffers} = this.analysisResult;
       const {width, height} = this.comparisonDimensions;
 
-      console.log('Creating accessors');
-
-      this.booleanImageAccessor =
-          ImageAccessor.fromArrayBuffer(imageBuffers.boolean!, width, height);
+      this.blackWhiteImageAccessor = ImageAccessor.fromArrayBuffer(
+          imageBuffers.blackWhite!, width, height);
 
       this.deltaImageAccessor =
           ImageAccessor.fromArrayBuffer(imageBuffers.delta!, width, height);
@@ -378,7 +374,7 @@ canvas {
   <images-4-up .dimensions="${this.comparisonDimensions}"
       .topLeftImageAccessor="${this.leftImageAccessor}"
       .topRightImageAccessor="${this.rightImageAccessor}"
-      .bottomLeftImageAccessor="${this.booleanImageAccessor}"
+      .bottomLeftImageAccessor="${this.blackWhiteImageAccessor}"
       .bottomRightImageAccessor="${this.deltaImageAccessor}">
     <canvas slot="top-left"></canvas>
     <canvas slot="top-right"></canvas>

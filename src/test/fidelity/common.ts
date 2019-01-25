@@ -32,7 +32,7 @@ export interface ImageComparisonAnalysis {
 
 export interface ImageComparisonResults {
   analysis: ImageComparisonAnalysis;
-  imageBuffers: {delta: ArrayBuffer|null; boolean: ArrayBuffer | null;};
+  imageBuffers: {delta: ArrayBuffer|null; blackWhite: ArrayBuffer | null;};
 }
 
 export interface ImageComparisonMessage {
@@ -43,7 +43,7 @@ export interface ImageComparisonMessage {
 export interface CanvasesReadyMessage extends ImageComparisonMessage {
   candidateCanvas: OffscreenCanvas;
   goldenCanvas: OffscreenCanvas;
-  booleanCanvas: OffscreenCanvas;
+  blackWhiteCanvas: OffscreenCanvas;
   deltaCanvas: OffscreenCanvas;
 }
 
@@ -130,7 +130,7 @@ export class ImageComparator {
     const {width, height} = this.dimensions;
     const {generateVisuals} = options;
 
-    const booleanImage = generateVisuals ?
+    const blackWhiteImage = generateVisuals ?
         new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
         null;
     const deltaImage = generateVisuals ?
@@ -152,12 +152,12 @@ export class ImageComparator {
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
-        const position = index * 4;
+        const position = index * COMPONENTS_PER_PIXEL;
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
-        const bool = (delta < thresholdSquared ? 1 : 0) * 255;
+        const exactlyMatched = (delta < thresholdSquared ? 1 : 0) * 255;
 
-        if (bool > 0) {
+        if (exactlyMatched) {
           matched++;
         } else {
           mismatchingSum += delta;
@@ -174,7 +174,12 @@ export class ImageComparator {
           maximumDeltaIntensity =
               Math.max(deltaIntensity, maximumDeltaIntensity);
 
-          this.drawPixel(booleanImage!, position, bool, bool, bool);
+          this.drawPixel(
+              blackWhiteImage!,
+              position,
+              exactlyMatched,
+              exactlyMatched,
+              exactlyMatched);
           this.drawPixel(
               deltaImage!,
               position,
@@ -189,7 +194,7 @@ export class ImageComparator {
       for (let y = 0; y < height; ++y) {
         for (let x = 0; x < width; ++x) {
           const index = y * width + x;
-          const position = index * 4;
+          const position = index * COMPONENTS_PER_PIXEL;
           const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
           const relativeDeltaIntensity = Math.round(
               255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
@@ -216,7 +221,8 @@ export class ImageComparator {
       },
       imageBuffers: {
         delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
-        boolean: booleanImage ? booleanImage.buffer as ArrayBuffer : null
+        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
+                                      null
       }
     };
   }
