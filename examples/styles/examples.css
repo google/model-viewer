@@ -311,7 +311,7 @@ paper-button {
   color: #ff5252;
   flex: 1;
   margin-bottom: 16px;
-  padding-top: 2px;
+  padding-top: 1px;
 }
 .list-attribute li > p:last-child {
   flex: 3;
