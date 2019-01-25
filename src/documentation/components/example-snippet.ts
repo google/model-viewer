@@ -6,6 +6,8 @@ import {UpdatingElement} from '@polymer/lit-element/lib/updating-element.js';
 // Silence tsc since prismjs isn't a proper module
 declare var Prism: any;
 
+const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
+
 export type RootNode = Document|ShadowRoot;
 
 /**
@@ -80,8 +82,16 @@ export class ExampleSnippet extends UpdatingElement {
 
       pre.appendChild(code);
 
-      const snippet = this.preserveWhitespace ? template.innerHTML :
-                                                template.innerHTML.trim();
+      let snippet = template.innerHTML;
+
+      if (!this.preserveWhitespace) {
+        snippet = snippet.trim();
+      }
+
+      if (highlightAs === 'html') {
+        snippet = snippet.replace(EMPTY_ATTRIBUTE_RE, '$1');
+      }
+
       const highlighted =
           Prism.highlight(snippet, Prism.languages[highlightAs], highlightAs);
 
