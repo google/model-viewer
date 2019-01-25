@@ -139,7 +139,7 @@ model-viewer:focus {
   line-height: 1.6em;
   border-radius: 8px;
   padding: 16px 20px;
-  max-width: 720px;
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
   overflow-x: scroll;
@@ -372,6 +372,12 @@ paper-button {
 .content code[class*="language-"],
 .content pre[class*="language-"] {
   color: #999;
+}
+
+@media only screen and (min-width: 1664px) {
+  .demo pre {
+    margin: 16px auto;
+  }
 }
 
 @media only screen and (max-width: 1280px) {
