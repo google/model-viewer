@@ -126,11 +126,10 @@ for (const candidateScenario of candidateScenarios) {
           warn(`${comparisonDescription} ${
               comparisonConstraints} decreased by ${percentage}!`);
         } else if (Math.abs(delta) > 0) {
-          const changed =
-              delta > 0 ? 'decreased' : delta < 0 ? 'increased' : 'changed';
+          const changeDescription = delta > 0 ? 'decreased' : 'increased';
 
           console.log(`🔍 ${comparisonDescription} ${comparisonConstraints} ${
-              changed} by ${percentage}`);
+              changeDescription} by ${percentage}`);
         }
       }
     }

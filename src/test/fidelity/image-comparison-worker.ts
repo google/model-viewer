@@ -22,8 +22,8 @@ class ImageComparisonWorker {
   protected candidateContext: CanvasRenderingContext2D|null = null;
   protected goldenCanvas: OffscreenCanvas|null = null;
   protected goldenContext: CanvasRenderingContext2D|null = null;
-  protected booleanCanvas: OffscreenCanvas|null = null;
-  protected booleanContext: CanvasRenderingContext2D|null = null;
+  protected blackWhiteCanvas: OffscreenCanvas|null = null;
+  protected blackWhiteContext: CanvasRenderingContext2D|null = null;
   protected deltaCanvas: OffscreenCanvas|null = null;
   protected deltaContext: CanvasRenderingContext2D|null = null;
 
@@ -36,15 +36,15 @@ class ImageComparisonWorker {
 
     switch (data.type) {
       case 'canvases-ready': {
-        const {candidateCanvas, goldenCanvas, booleanCanvas, deltaCanvas} =
+        const {candidateCanvas, goldenCanvas, blackWhiteCanvas, deltaCanvas} =
             data as CanvasesReadyMessage;
 
         this.candidateCanvas = candidateCanvas;
         this.candidateContext = candidateCanvas.getContext('2d');
         this.goldenCanvas = goldenCanvas;
         this.goldenContext = goldenCanvas.getContext('2d');
-        this.booleanCanvas = booleanCanvas;
-        this.booleanContext = booleanCanvas.getContext('2d');
+        this.blackWhiteCanvas = blackWhiteCanvas;
+        this.blackWhiteContext = blackWhiteCanvas.getContext('2d');
         this.deltaCanvas = deltaCanvas;
         this.deltaContext = deltaCanvas.getContext('2d');
 
@@ -56,15 +56,15 @@ class ImageComparisonWorker {
             data as ImagesAssignedMessage;
 
         if (this.candidateCanvas == null || this.goldenCanvas == null ||
-            this.booleanCanvas == null || this.deltaCanvas == null) {
+            this.blackWhiteCanvas == null || this.deltaCanvas == null) {
           console.warn('Images assigned before canvases are available!');
         }
 
         this.candidateCanvas!.width = this.goldenCanvas!.width =
-            this.booleanCanvas!.width = this.deltaCanvas!.width =
+            this.blackWhiteCanvas!.width = this.deltaCanvas!.width =
                 dimensions.width;
         this.candidateCanvas!.height = this.goldenCanvas!.height =
-            this.booleanCanvas!.height = this.deltaCanvas!.height =
+            this.blackWhiteCanvas!.height = this.deltaCanvas!.height =
                 dimensions.height;
 
 
@@ -96,9 +96,9 @@ class ImageComparisonWorker {
         const {width, height} = this.analyzer!.dimensions;
         const result = analyzer.analyze(threshold, {generateVisuals: true});
 
-        this.booleanContext!.putImageData(
+        this.blackWhiteContext!.putImageData(
             new ImageData(
-                new Uint8ClampedArray(result.imageBuffers.boolean!),
+                new Uint8ClampedArray(result.imageBuffers.blackWhite!),
                 width,
                 height),
             0,
