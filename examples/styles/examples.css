@@ -192,7 +192,7 @@ code {
   height: 100%;
 }
 .content {
-  flex: 1;
+  max-width: 50%;
   position: relative;
 }
 .content:after {
@@ -398,6 +398,11 @@ paper-button {
   .sample {
     display: block;
   }
+
+  .content {
+    max-width: unset;
+  }
+
   .content:after {
     height: 1px;
     width: 100%;
