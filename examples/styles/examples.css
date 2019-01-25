@@ -91,6 +91,10 @@ h1 span {
   padding: 8px 40px 24px 40px;
   color: rgba(0,0,0,.54);
 }
+.footer ul {
+  margin-top: 0;
+  padding-left: 20px;
+}
 
 p {
   margin-top: .25em;
@@ -335,6 +339,10 @@ paper-button {
   white-space:nowrap;
 }
 
+.copyright {
+  margin-top: 4px;
+}
+
 /* prism */
 .token.tag,
 .token.keyword,
@@ -373,9 +381,6 @@ paper-button {
 }
 
 @media only screen and (max-width: 800px) {
-  /* body {
-    font-size: 14px;
-  } */
   .demo {
     position: relative;
     height: 360px;
