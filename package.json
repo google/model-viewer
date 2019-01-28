@@ -100,7 +100,7 @@
   },
   "dependencies": {
     "@polymer/lit-element": "^0.6.2",
-    "three": "^0.99.0"
+    "three": "^0.100.0"
   },
   "publishConfig": {
     "access": "public"
