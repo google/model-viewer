@@ -117,13 +117,17 @@ model-viewer:focus {
 }
 
 .sample {
-  display: flex;
+  /* display: flex; */
+  display: grid;
   margin-bottom: 16px;
   position: relative;
   background: white;
+  grid-template-columns: 50% 50%;
+  grid-template-areas: "content demo";
 }
 
 .demo {
+  grid-area: demo;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -192,7 +196,7 @@ code {
   height: 100%;
 }
 .content {
-  max-width: 50%;
+  grid-area: content;
   position: relative;
 }
 .content:after {
@@ -224,13 +228,16 @@ code {
   position: absolute;
   z-index: 10000;
   top: 0;
-  right: 0;
-  left: 0%;
+  right: 50%;
+  left: 0;
   height: 60px;
   padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+body.multiple-samples #header {
+  right: 0;
 }
 
 .center {
