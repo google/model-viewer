@@ -17,6 +17,7 @@ import {PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utils.js';
+import {dispatchSyntheticEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -48,20 +49,6 @@ const cameraIsLookingAt = (camera, position) => {
       step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
 };
 
-/**
- * Dispatch a synthetic event on a given element with a given type, and
- * optionally with custom event properties. Returns the dispatched event.
- */
-const dispatchSyntheticEvent = (element, type, properties = {
-  clientX: 0,
-  clientY: 0,
-  deltaY: 1.0
-}) => {
-  const event = new CustomEvent(type, {cancelable: true});
-  Object.assign(event, properties);
-  element.dispatchEvent(event);
-  return event;
-};
 
 /**
  * Settle controls by performing 50 frames worth of updates

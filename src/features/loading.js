@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$updateSource} from '../model-viewer-base.js';
+import {$ariaLabel, $canvas, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {deserializeUrl} from '../utils.js';
 
@@ -25,8 +25,17 @@ const $dismissPoster = Symbol('dismissPoster');
 const $shouldHidePoster = Symbol('shouldHidePoster');
 const $preloaded = Symbol('preloaded');
 const $preloadPromise = Symbol('preloadPromise');
+const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
+
+const $clickHandler = Symbol('clickHandler');
+const $keydownHandler = Symbol('keydownHandler');
+const $onClick = Symbol('onClick');
+const $onKeydown = Symbol('onKeydown');
 
 const loader = new CachingGLTFLoader();
+
+const SPACE_KEY = 32;
+const ENTER_KEY = 13;
 
 export const LoadingMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -57,20 +66,64 @@ export const LoadingMixin = (ModelViewerElement) => {
       // implementation:
       this[$posterElement] = this.shadowRoot.querySelector('.poster');
 
+      this[$ariaLabelCallToAction] =
+          this[$posterElement].getAttribute('aria-label');
+
+      this[$clickHandler] = () => this[$onClick]();
+      this[$keydownHandler] = () => this[$onKeydown]();
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
-      this.addEventListener('click', () => {this.dismissPoster()});
+      this[$posterElement].addEventListener('click', () => this[$onClick]());
+      this[$posterElement].addEventListener(
+          'keydown', (event) => this[$onKeydown](event));
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+
+      this[$posterElement].removeEventListener('click', () => this[$onClick]());
+      this[$posterElement].removeEventListener(
+          'keydown', (event) => this[$onKeydown](event));
     }
 
     dismissPoster() {
       this[$dismissPoster] = true;
+
+      // NOTE(cdata): The canvas cannot receive focus until the poster has
+      // been completely hidden:
+      this[$posterElement].addEventListener('transitionend', () => {
+        this[$canvas].focus();
+      }, {once: true});
+
       this.requestUpdate();
     }
 
     showPoster() {
       this[$dismissPoster] = false;
       this.requestUpdate();
+    }
+
+    [$onClick]() {
+      this.dismissPoster();
+    }
+
+    [$onKeydown](event) {
+      switch (event.keyCode) {
+        // NOTE(cdata): Links and buttons can typically be activated with both
+        // spacebar and enter to produce a synthetic click action
+        case SPACE_KEY:
+        case ENTER_KEY:
+          this.dismissPoster();
+          break;
+        default:
+          break;
+      }
     }
 
     get[$shouldHidePoster]() {
@@ -87,6 +140,12 @@ export const LoadingMixin = (ModelViewerElement) => {
       }
 
       super.update(changedProperties);
+
+      if (changedProperties.has('alt')) {
+        this[$posterElement].setAttribute(
+            'aria-label',
+            `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
+      }
 
       if (this[$shouldHidePoster]) {
         this[$posterElement].classList.remove('show');

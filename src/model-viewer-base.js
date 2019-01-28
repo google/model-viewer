@@ -31,6 +31,7 @@ const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 
+export const $ariaLabel = Symbol('ariaLabel');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
@@ -187,6 +188,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
    */
   createRenderRoot() {
     return this.attachShadow({mode: 'open', delegatesFocus: true});
+  }
+
+  get[$ariaLabel]() {
+    return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
+                                                       this.alt;
   }
 
   /**

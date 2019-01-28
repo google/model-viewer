@@ -95,7 +95,7 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARGlyph}
     </a>
-    <div class="poster"></div>
+    <div class="poster" tabindex="1" aria-label="Activate to view in 3D!"></div>
     <canvas tabindex="1" aria-label="A depiction of a 3D model"></canvas>
   </div>
   <slot></slot>
