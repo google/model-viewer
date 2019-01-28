@@ -224,10 +224,13 @@ suite('SmoothControls', () => {
       suite('event handling', () => {
         suite('prevent-all', () => {
           setup(() => {
-            controls.applyOptions({eventHandlingBehavior: 'prevent-all'});
+            controls.applyOptions({
+              eventHandlingBehavior: 'prevent-all',
+              interactionPolicy: 'always-allow'
+            });
           });
 
-          test('always preventDefaults cancellable UI events', () => {
+          test('always preventDefaults handled, cancellable UI events', () => {
             const mousedown = dispatchSyntheticEvent(element, 'mousedown');
 
             const mousemove = dispatchSyntheticEvent(element, 'mousemove');
@@ -250,10 +253,10 @@ suite('SmoothControls', () => {
         });
       });
 
-      suite('zooming', () => {
+      suite('interaction policy', () => {
         suite('allow-when-focused', () => {
           setup(() => {
-            controls.applyOptions({zoomPolicy: 'allow-when-focused'});
+            controls.applyOptions({interactionPolicy: 'allow-when-focused'});
             settleControls(controls);
           });
 
@@ -267,6 +270,17 @@ suite('SmoothControls', () => {
 
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+          });
+
+          test('does not orbit when pointing while blurred', () => {
+            const originalPhi = controls.getCameraSpherical().phi;
+
+            dispatchSyntheticEvent(
+                element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(
+                element, 'mousemove', {clientX: 0, clientY: 0});
+
+            expect(controls.getCameraSpherical().phi).to.be.equal(originalPhi);
           });
 
           test('does zoom when scrolling while focused', () => {
@@ -286,8 +300,22 @@ suite('SmoothControls', () => {
 
         suite('always-allow', () => {
           setup(() => {
-            controls.applyOptions({zoomPolicy: 'always-allow'});
+            controls.applyOptions({interactionPolicy: 'always-allow'});
             settleControls(controls);
+          });
+
+          test('orbits when pointing, even while blurred', () => {
+            const originalPhi = controls.getCameraSpherical().phi;
+
+            dispatchSyntheticEvent(
+                element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(
+                element, 'mousemove', {clientX: 0, clientY: 0});
+
+            settleControls(controls);
+
+            expect(controls.getCameraSpherical().phi)
+                .to.be.greaterThan(originalPhi);
           });
 
           test('zooms when scrolling, even while blurred', () => {

@@ -18,7 +18,7 @@ import {Camera, EventDispatcher, Quaternion, Spherical, Vector2, Vector3} from '
 import {clamp, step} from '../utils.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
-export type ZoomPolicy = 'always-allow'|'allow-when-focused';
+export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'zoom';
 
 export interface SmoothControlsOptions {
@@ -44,8 +44,8 @@ export interface SmoothControlsOptions {
   dampeningScale?: number;
   // Controls when events will be cancelled (always, or only when handled)
   eventHandlingBehavior?: EventHandlingBehavior;
-  // Controls when zooming is allowed (always, or only when focused)
-  zoomPolicy?: ZoomPolicy;
+  // Controls when interaction is allowed (always, or only when focused)
+  interactionPolicy?: InteractionPolicy;
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
@@ -59,7 +59,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   acceleration: 0.15,
   dampeningScale: 0.5,
   eventHandlingBehavior: 'prevent-all',
-  zoomPolicy: 'allow-when-focused'
+  interactionPolicy: 'allow-when-focused'
 });
 
 
@@ -88,6 +88,7 @@ const $velocity = Symbol('velocity');
 const $dampeningFactor = Symbol('dampeningFactor');
 const $touchMode = Symbol('touchMode');
 const $previousPosition = Symbol('previousPosition');
+const $canInteract = Symbol('canInteract');
 
 // Pointer state
 const $pointerIsDown = Symbol('pointerIsDown');
@@ -400,6 +401,15 @@ export class SmoothControls extends EventDispatcher {
     }
   }
 
+  private get[$canInteract](): boolean {
+    if (this[$options].interactionPolicy == 'allow-when-focused') {
+      const rootNode = this.element.getRootNode() as Document | ShadowRoot;
+      return rootNode.activeElement === this.element;
+    }
+
+    return this[$options].interactionPolicy === 'always-allow';
+  }
+
   private get[$dampeningFactor](): number {
     return MINIMUM_DAMPENING_FACTOR -
         this[$options].dampeningScale! *
@@ -434,7 +444,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private[$handlePointerMove](event: MouseEvent|TouchEvent) {
-    if (!this[$pointerIsDown]) {
+    if (!this[$pointerIsDown] || !this[$canInteract]) {
       return;
     }
 
@@ -520,10 +530,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private[$handleWheel](event: Event) {
-    const rootNode = this.element.getRootNode() as Document | ShadowRoot;
-
-    if (this[$options].zoomPolicy === 'allow-when-focused' &&
-        rootNode.activeElement !== this.element) {
+    if (!this[$canInteract]) {
       return;
     }
 
