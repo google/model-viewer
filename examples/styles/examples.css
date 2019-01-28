@@ -203,7 +203,7 @@ code {
   height: 100%;
   width: 1px;
   position: absolute;
-  left: 0
+  right: 0;
   top: 0;
   bottom: 0;
   background: rgba(0,0,0,.05);
@@ -394,6 +394,9 @@ paper-button {
 }
 
 @media only screen and (max-width: 800px) {
+  #header {
+    right: 0;
+  }
   .demo {
     position: relative;
     height: 360px;
