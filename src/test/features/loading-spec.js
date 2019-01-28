@@ -15,7 +15,7 @@
 
 import {LoadingMixin} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {assetPath, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
@@ -85,6 +85,30 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           expect(picked).to.not.be.equal(canvas);
         });
 
+        suite('when focused', () => {
+          test('can hide the poster with keyboard interaction', async () => {
+            element.preload = true;
+            element.src = ASTRONAUT_GLB_PATH;
+
+            await waitForEvent(element, 'preload');
+
+            element.focus();
+
+            const ostensiblyThePoster = element.shadowRoot.activeElement;
+            const posterHides =
+                waitForEvent(ostensiblyThePoster, 'transitionend');
+
+            dispatchSyntheticEvent(
+                ostensiblyThePoster, 'keydown', {keyCode: 13});
+
+            await posterHides;
+            await timePasses();
+
+            const ostensiblyNotThePoster = element.shadowRoot.activeElement;
+
+            expect(ostensiblyThePoster).to.not.be.equal(ostensiblyNotThePoster);
+          });
+        });
 
         suite('reveal-when-loaded', () => {
           test('hides poster when element loads', async () => {

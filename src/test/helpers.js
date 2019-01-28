@@ -67,6 +67,27 @@ export const waitForEvent = (target, eventName, predicate) =>
       target.addEventListener(eventName, handler);
     });
 
+
+/**
+ * Dispatch a synthetic event on a given element with a given type, and
+ * optionally with custom event properties. Returns the dispatched event.
+ *
+ * @param {HTMLElement} element
+ * @param {type} string
+ * @param {*} properties
+ */
+export const dispatchSyntheticEvent = (element, type, properties = {
+  clientX: 0,
+  clientY: 0,
+  deltaY: 1.0
+}) => {
+  const event = new CustomEvent(type, {cancelable: true});
+  Object.assign(event, properties);
+  element.dispatchEvent(event);
+  return event;
+};
+
+
 export const ASSETS_DIRECTORY = '../examples/assets/';
 
 export const assetPath = (name) => `${ASSETS_DIRECTORY}${name}`;
