@@ -17,7 +17,7 @@ import {$ariaLabel, $canvas, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {deserializeUrl} from '../utils.js';
 
-const $posterElement = Symbol('posterElement');
+export const $posterElement = Symbol('posterElement');
 const $applyPreloadStrategy = Symbol('applyPreloadStrategy');
 
 const $revealDeferred = Symbol('revealDeferred');
@@ -34,6 +34,7 @@ const $onKeydown = Symbol('onKeydown');
 
 const loader = new CachingGLTFLoader();
 
+export const POSTER_TRANSITION_TIME = 300;
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
 
@@ -95,11 +96,22 @@ export const LoadingMixin = (ModelViewerElement) => {
     dismissPoster() {
       this[$dismissPoster] = true;
 
-      // NOTE(cdata): The canvas cannot receive focus until the poster has
-      // been completely hidden:
-      this[$posterElement].addEventListener('transitionend', () => {
-        this[$canvas].focus();
-      }, {once: true});
+      const posterOpacity = self.getComputedStyle(this[$posterElement]).opacity;
+
+      if (posterOpacity > 0) {
+        // NOTE(cdata): The canvas cannot receive focus until the poster has
+        // been completely hidden:
+        this[$posterElement].addEventListener('transitionend', () => {
+          this[$canvas].focus();
+        }, {once: true});
+      } else {
+        // NOTE(cdata): Depending on timing, the opacity may already be 0, in
+        // which case we will never receive a transitionend event. So, just
+        // focus on the next animation frame:
+        requestAnimationFrame(() => {
+          this[$canvas].focus();
+        });
+      }
 
       this.requestUpdate();
     }
