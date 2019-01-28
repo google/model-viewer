@@ -37,6 +37,9 @@ export const until =
   }
 }
 
+export const rafPasses = () =>
+    new Promise(resolve => requestAnimationFrame(resolve));
+
 /**
  * Takes a texture and an object and returns a boolean indicating
  * if whether or not the texture's userData matches the fields

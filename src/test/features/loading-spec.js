@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {LoadingMixin} from '../../features/loading.js';
+import {$posterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
@@ -90,23 +90,22 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             element.preload = true;
             element.src = ASTRONAUT_GLB_PATH;
 
+            const posterElement = element[$posterElement];
+            const canvasElement = element[$canvas];
+
             await waitForEvent(element, 'preload');
 
-            element.focus();
+            // NOTE(cdata): Currently, Firefox does not forward focus when
+            // delegatesFocus is true but focus is triggered manually (e.g.,
+            // with the .focus() method).
+            posterElement.focus();
 
-            const ostensiblyThePoster = element.shadowRoot.activeElement;
-            const posterHides =
-                waitForEvent(ostensiblyThePoster, 'transitionend');
+            expect(element.shadowRoot.activeElement).to.be.equal(posterElement);
 
-            dispatchSyntheticEvent(
-                ostensiblyThePoster, 'keydown', {keyCode: 13});
+            dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
 
-            await posterHides;
-            await timePasses();
-
-            const ostensiblyNotThePoster = element.shadowRoot.activeElement;
-
-            expect(ostensiblyThePoster).to.not.be.equal(ostensiblyNotThePoster);
+            await until(
+                () => element.shadowRoot.activeElement === canvasElement);
           });
         });
 
