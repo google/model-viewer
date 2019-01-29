@@ -53,7 +53,7 @@
 
   <div class="center intro">
     <h2>Background Image</h2>
-    <h4>This page showcases the <span class="attribute">background-image</span> attribute, which links to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection</a> image, responsible for changing the environment, and environment map applied to the model.</h4>
+    <h4>This page showcases the <span class="attribute">background-image</span> attribute, which links to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection</a> image which is used as the <a href="https://en.wikipedia.org/wiki/Skybox_(video_games)">skybox</a>, and applied as an environment map to the model.</h4>
   </div>
 
   <div class="sample">
@@ -61,7 +61,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">1</div>
-        <h2>With Equirectangular <span class="attribute">background-image</span></h2>
+        <h2>An equirectangular <span class="attribute">background-image</span></h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
                 <model-viewer
@@ -80,7 +80,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">2</div>
-        <h2>With very reflective model</h2>
+        <h2>An equirectangular <span class="attribute">background-image</span> with a very reflective model</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
               <model-viewer
@@ -99,7 +99,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">3</div>
-        <h2>With unlit model</h2>
+        <h2>An equirectangular <span class="attribute">background-image</span> with an unlit model</h2>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
                 <model-viewer
@@ -118,7 +118,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">4</div>
-        <h2>With (unused) <span class="attribute">background-color</span></h2>
+        <h2>When both <span class="attribute">background-image</span> and <span class="attribute">background-color</span> are specified, the former takes precedence</h2>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
                 <model-viewer
@@ -138,7 +138,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">5</div>
-        <h2>Cycling background image</h2>
+        <h2>Cycling between <span class="attribute">background-image</span> and <span class="attribute">background-color</span></h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
                 <model-viewer

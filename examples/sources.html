@@ -60,13 +60,13 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">1</div>
-        <h2>With glTF model</h2>
+        <h2>With a glTF model</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
 <model-viewer
     background-color="#222"
-    alt="A 3D model of a cube"
-    src="assets/cube.gltf">
+    alt="A 3D model of a sphere"
+    src="assets/reflective-sphere.gltf">
 </model-viewer>
             </template>
         </example-snippet>
@@ -79,7 +79,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">2</div>
-        <h2>With glb model</h2>
+        <h2>With a GLB model</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
 <model-viewer
@@ -99,6 +99,7 @@
       <div class="wrapper">
         <div class="index">3</div>
         <h2>With only a USDZ model</h2>
+        <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with <span class="attribute">poster</span> to show a static image and the icon to enter augmented reality mode</h4>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
 <model-viewer
@@ -118,6 +119,7 @@
       <div class="wrapper">
         <div class="index">4</div>
         <h2>With no model</h2>
+        <h4>There's nothing to show, but also no error</h4>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
 <model-viewer
@@ -136,7 +138,7 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">5</div>
-        <h2>Cycling different models</h2>
+        <h2>Cycling between different models</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
 <model-viewer id="toggle-model" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab" background-color="#222" controls auto-rotate></model-viewer>
