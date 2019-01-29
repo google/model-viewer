@@ -153,22 +153,28 @@ export const LoadingMixin = (ModelViewerElement) => {
 
       super.update(changedProperties);
 
+      const posterElement = this[$posterElement];
+
       if (changedProperties.has('alt')) {
-        this[$posterElement].setAttribute(
+        posterElement.setAttribute(
             'aria-label',
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
       if (this[$shouldHidePoster]) {
-        this[$posterElement].classList.remove('show');
+        posterElement.classList.remove('show');
+        posterElement.setAttribute('aria-hidden', 'true');
+        posterElement.removeAttribute('tabindex');
       } else {
         if ((this.preload || this[$dismissPoster]) && this.src) {
           this[$applyPreloadStrategy]();
         }
 
         if (this.poster) {
-          this[$posterElement].style.backgroundImage = `url("${this.poster}")`;
-          this[$posterElement].classList.add('show');
+          posterElement.style.backgroundImage = `url("${this.poster}")`;
+          posterElement.classList.add('show');
+          posterElement.removeAttribute('aria-hidden');
+          posterElement.tabIndex = 1;
         }
       }
     }
