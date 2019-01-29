@@ -71,7 +71,7 @@ h1 span {
 }
 .content example-snippet {
   display: block;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 .index {
   display: flex;
@@ -146,7 +146,7 @@ model-viewer:focus {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  /* overflow-x: scroll; */
+  overflow-x: auto;
 }
 .demo pre {
   position: absolute;
@@ -223,6 +223,7 @@ code {
   max-width: 460px;
   margin: 0 auto;
 }
+
 
 #header {
   position: absolute;

@@ -32,16 +32,16 @@
   <!--<script src="../node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>-->
 
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
-  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
   <!-- Intersection Observer polyfill is required for Safari and IE11 -->
-  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+  <script src="node_modules/intersection-observer/intersection-observer.js"></script>
 
   <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
-  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+  <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+  <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 </head>
 <body>
 
@@ -55,7 +55,7 @@
       <example-snippet stamp-to="demo-container" highlight-as="html">
           <template>
               <model-viewer
-                src="assets/Astronaut.glb"
+                src="examples/assets/Astronaut.glb"
                 alt="A 3D model of an astronaut"
                 controls
                 auto-rotate
@@ -201,7 +201,7 @@
     <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
-    <script src="./built/dependencies.js"></script>
-    <script src="../dist/model-viewer.js"></script>
+    <script src="examples/built/dependencies.js"></script>
+    <script src="dist/model-viewer.js"></script>
 </body>
 </html>
