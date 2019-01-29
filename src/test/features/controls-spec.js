@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
-import {$controls, ControlsMixin, IDLE_PROMPT} from '../../features/controls.js';
+import {$controls, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, dispatchSyntheticEvent, timePasses, until, waitForEvent} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
+
+const interactWith = (element) => {
+  dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
+  dispatchSyntheticEvent(element, 'mousemove', {clientX: 0, clientY: 0});
+};
 
 suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
@@ -84,22 +89,29 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const {canvas} = element[$scene];
           const originalLabel = canvas.getAttribute('aria-label');
 
+          // NOTE(cdata): This wait time was added in order to deflake tests on
+          // iOS Simulator and Android Emulator on Sauce Labs. These same test
+          // targets were tested manually locally and manually on Sauce, and do
+          // not fail. Only automated Sauce tests seem to fail consistently
+          // without this additional wait time:
+          await rafPasses();
+
           canvas.focus();
 
           await until(() => canvas.getAttribute('aria-label') === IDLE_PROMPT);
+        });
 
-          dispatchSyntheticEvent(
-              element, 'mousedown', {clientX: 0, clientY: 10});
-          dispatchSyntheticEvent(
-              element, 'mousemove', {clientX: 0, clientY: 0});
-
-          canvas.blur();
-
-          await timePasses();
+        test('does not prompt if user already interacted', async () => {
+          const {canvas} = element[$scene];
+          const originalLabel = canvas.getAttribute('aria-label');
 
           canvas.focus();
 
           await timePasses();
+
+          interactWith(canvas);
+
+          await timePasses(IDLE_PROMPT_THRESHOLD_MS + 100);
 
           expect(canvas.getAttribute('aria-label')).to.be.equal(originalLabel);
         });
