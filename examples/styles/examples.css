@@ -146,7 +146,7 @@ model-viewer:focus {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  overflow-x: scroll;
+  /* overflow-x: scroll; */
 }
 .demo pre {
   position: absolute;
@@ -396,6 +396,9 @@ paper-button {
 @media only screen and (max-width: 800px) {
   #header {
     right: 0;
+  }
+  .heading {
+    padding: 0px;
   }
   .demo {
     position: relative;
