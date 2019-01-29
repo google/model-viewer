@@ -22,7 +22,7 @@ import {SmoothControls} from '../three-components/SmoothControls.js';
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
 
-const IDLE_PROMPT_THRESHOLD_MS = 3000;
+export const IDLE_PROMPT_THRESHOLD_MS = 3000;
 export const IDLE_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
 
@@ -176,11 +176,14 @@ export const ControlsMixin = (ModelViewerElement) => {
     [$onChange](e) {
       this[$needsRender]();
 
+      // Effectively cancel the timer waiting for user interaction:
+      this[$waitingToPromptUser] = false;
+
       // NOTE(cdata): On change (in other words, the camera has adjusted its
       // orbit), if the user has been prompted at least once already, we no
       // longer need to prompt the user in the future.
-      if (this[$shouldPromptUserToInteract] && this[$userPromptedOnce]) {
-        this[$waitingToPromptUser] = this[$shouldPromptUserToInteract] = false;
+      if (this[$userPromptedOnce]) {
+        this[$shouldPromptUserToInteract] = false;
       }
     }
   };
