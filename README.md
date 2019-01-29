@@ -168,7 +168,7 @@ Optional parameters (not required for display):
 * *`background-color`*: Sets the background color of the scene when viewed inline. Takes any
   valid CSS color string.
 * *`background-image`*: Sets the background image of the scene when viewed inline. Takes a
-  URL to an [equirectangular projection image](https://en.wikipedia.org/wiki/Equirectangular_projection) that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting `background-image` supercedes `background-color`.
+  URL to an [equirectangular projection image](https://en.wikipedia.org/wiki/Equirectangular_projection) that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR ([#65](https://github.com/GoogleWebComponents/model-viewer/issues/65)). Setting `background-image` supercedes `background-color`.
 * *`controls`*: Enables controls via mouse/touch when in flat view.
 * *`ios-src`*: The url to a [USDZ][USDZ] model which will be used on
   [supported iOS 12+ devices](https://www.apple.com/ios/augmented-reality/) via
