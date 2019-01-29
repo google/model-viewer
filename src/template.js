@@ -91,12 +91,18 @@ template.innerHTML = `
     }
   </style>
   <div class="container">
-    <a tabindex="2" class="enter-ar" href="#" aria-label="View this 3D model in augmented reality">
+    <a tabindex="2"
+        class="enter-ar"
+        href="#"
+        aria-label="View this 3D model in augmented reality">
       <div class="disc"></div>
       ${ARGlyph}
     </a>
     <div class="poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
-    <canvas tabindex="1" aria-label="A depiction of a 3D model"></canvas>
+    <canvas tabindex="1"
+        aria-label="A depiction of a 3D model"
+        aria-live="polite">
+    </canvas>
   </div>
   <slot></slot>
 `;

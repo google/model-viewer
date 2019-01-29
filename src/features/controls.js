@@ -15,18 +15,31 @@
 
 import {PerspectiveCamera, Vector3} from 'three';
 
-import {$needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
 import {SmoothControls} from '../three-components/SmoothControls.js';
 
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
 
+const IDLE_PROMPT_THRESHOLD_MS = 3000;
+export const IDLE_PROMPT =
+    'Use mouse, touch or arrow keys to control the camera!';
+
 export const $controls = Symbol('controls');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
-const $onControlsChange = Symbol('onControlsChange');
 const $orbitCamera = Symbol('orbitCamera');
 const $defaultCamera = Symbol('defaultCamera');
+
+const $focusHandler = Symbol('focusHandler');
+const $changeHandler = Symbol('changeHandler');
+const $onFocus = Symbol('onFocus');
+const $onChange = Symbol('onChange');
+
+const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
+const $waitingToPromptUser = Symbol('waitingToPromptUser');
+const $userPromptedOnce = Symbol('userPromptedOnce');
+const $idleTime = Symbol('idleTime');
 
 export const ControlsMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -36,15 +49,22 @@ export const ControlsMixin = (ModelViewerElement) => {
 
     constructor() {
       super();
-      this[$onControlsChange] = this[$onControlsChange].bind(this);
 
       this[$defaultCamera] = this[$scene].getCamera();
+
+      this[$idleTime] = 0;
+      this[$userPromptedOnce] = false;
+      this[$waitingToPromptUser] = false;
+      this[$shouldPromptUserToInteract] = true;
 
       this[$orbitCamera] = this[$scene].camera.clone();
       this[$orbitCamera].near = ORBIT_NEAR_PLANE;
       this[$orbitCamera].far = ORBIT_FAR_PLANE;
       this[$orbitCamera].updateProjectionMatrix();
       this[$controls] = null;
+
+      this[$changeHandler] = () => this[$onChange]();
+      this[$focusHandler] = () => this[$onFocus]();
     }
 
     update(changedProperties) {
@@ -60,16 +80,19 @@ export const ControlsMixin = (ModelViewerElement) => {
         this[$controls] =
             new SmoothControls(this[$orbitCamera], this[$scene].canvas);
         this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
-        this[$controls].addEventListener('change', this[$onControlsChange]);
+
+        this[$controls].addEventListener('change', this[$changeHandler]);
+        this[$scene].canvas.addEventListener('focus', this[$focusHandler]);
 
         this[$updateOrbitCamera]();
       } else {
         this[$scene].setCamera(this[$defaultCamera]);
 
         if (this[$controls]) {
+          this[$controls].removeEventListener('change', this[$changeHandler]);
+          this[$scene].canvas.removeEventListener('focus', this[$focusHandler]);
+
           this[$controls].dispose();
-          this[$controls].removeEventListener(
-              'change', this[$onControlsChange]);
           this[$controls] = null;
         }
       }
@@ -77,6 +100,22 @@ export const ControlsMixin = (ModelViewerElement) => {
 
     [$tick](time, delta) {
       super[$tick](time, delta);
+
+      if (this[$waitingToPromptUser]) {
+        this[$idleTime] += delta;
+
+        if (this[$idleTime] > IDLE_PROMPT_THRESHOLD_MS) {
+          this[$scene].canvas.setAttribute('aria-label', IDLE_PROMPT);
+
+          // NOTE(cdata): After notifying users that the controls are available,
+          // we flag that the user has been prompted at least once, and then
+          // effectively stop the idle timer. If the camera orbit changes after
+          // this point, the user will never be prompted again for this
+          // particular <model-element> instance:
+          this[$userPromptedOnce] = true;
+          this[$waitingToPromptUser] = false;
+        }
+      }
 
       if (this[$controls]) {
         this[$controls].update(time, delta);
@@ -113,8 +152,36 @@ export const ControlsMixin = (ModelViewerElement) => {
       this[$updateOrbitCamera]();
     }
 
-    [$onControlsChange](e) {
+    [$onFocus]() {
+      const {canvas} = this[$scene];
+
+      // NOTE(cdata): On every re-focus, we switch the aria-label back to the
+      // original, non-prompt label if appropriate. If the user has already
+      // interacted, they no longer need to hear the prompt. Otherwise, they
+      // will hear it again after the idle prompt threshold has been crossed.
+      if (canvas.getAttribute('aria-label') === IDLE_PROMPT) {
+        canvas.setAttribute('aria-label', this[$ariaLabel]);
+      }
+
+      // NOTE(cdata): When focused, if the user has yet to interact with the
+      // camera controls (that is, we "should" prompt the user), we begin the
+      // idle timer and indicate that we are waiting for it to cross the
+      // prompt threshold:
+      if (this[$shouldPromptUserToInteract]) {
+        this[$waitingToPromptUser] = true;
+        this[$idleTime] = 0;
+      }
+    }
+
+    [$onChange](e) {
       this[$needsRender]();
+
+      // NOTE(cdata): On change (in other words, the camera has adjusted its
+      // orbit), if the user has been prompted at least once already, we no
+      // longer need to prompt the user in the future.
+      if (this[$shouldPromptUserToInteract] && this[$userPromptedOnce]) {
+        this[$waitingToPromptUser] = this[$shouldPromptUserToInteract] = false;
+      }
     }
   };
 };

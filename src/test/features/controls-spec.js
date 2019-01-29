@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {$controls, ControlsMixin} from '../../features/controls.js';
+import {$controls, ControlsMixin, IDLE_PROMPT} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, timePasses, until, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -77,6 +77,32 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.controls = false;
         await timePasses();
         expect(element[$controls]).to.be.not.ok;
+      });
+
+      suite('a11y', () => {
+        test('prompts user to interact when focused', async () => {
+          const {canvas} = element[$scene];
+          const originalLabel = canvas.getAttribute('aria-label');
+
+          canvas.focus();
+
+          await until(() => canvas.getAttribute('aria-label') === IDLE_PROMPT);
+
+          dispatchSyntheticEvent(
+              element, 'mousedown', {clientX: 0, clientY: 10});
+          dispatchSyntheticEvent(
+              element, 'mousemove', {clientX: 0, clientY: 0});
+
+          canvas.blur();
+
+          await timePasses();
+
+          canvas.focus();
+
+          await timePasses();
+
+          expect(canvas.getAttribute('aria-label')).to.be.equal(originalLabel);
+        });
       });
     });
   });
