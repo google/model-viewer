@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 
@@ -108,6 +108,36 @@ suite('Renderer', () => {
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
       expect(renderer.scenesRendered).to.be.equal(1);
+    });
+
+    suite('when resizing', () => {
+      let originalDpr;
+
+      setup(() => {
+        originalDpr = self.devicePixelRatio;
+      });
+
+      teardown(() => {
+        Object.defineProperty(self, 'devicePixelRatio', {value: originalDpr});
+      });
+
+      test('updates effective DPR', async () => {
+        const scene = createScene();
+        const {element} = scene;
+        const initialDpr = renderer.renderer.getPixelRatio();
+        const {width, height} = scene.getSize();
+
+        element[$onResize]({width, height});
+
+        Object.defineProperty(
+            self, 'devicePixelRatio', {value: initialDpr + 1});
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        const newDpr = renderer.renderer.getPixelRatio();
+
+        expect(newDpr).to.be.equal(initialDpr + 1);
+      });
     });
   });
 });

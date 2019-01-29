@@ -125,6 +125,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           if (renderer.isPresenting) {
             return;
           }
+
           for (let entry of entries) {
             if (entry.target === this) {
               this[$updateSize](entry.contentRect);

@@ -131,6 +131,11 @@ export default class Renderer extends EventDispatcher {
     this.scenesRendered = 0;
 
     const delta = t - this.lastTick;
+    const dpr = resolveDpr();
+
+    if (dpr !== this.renderer.getPixelRatio()) {
+      this.renderer.setPixelRatio(dpr);
+    }
 
     for (let scene of this.scenes) {
       const {element, width, height, context} = scene;
@@ -152,7 +157,6 @@ export default class Renderer extends EventDispatcher {
       this.renderer.setViewport(0, 0, width, height);
       this.renderer.render(scene, camera);
 
-      const dpr = resolveDpr();
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
       context.drawImage(
