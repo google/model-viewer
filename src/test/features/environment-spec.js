@@ -19,23 +19,20 @@ import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helper
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const BG_IMAGE_URL = assetPath('equirectangular.png');
+const BG_IMAGE_URL = assetPath('spruit_sunrise_2k.jpg');
 const MODEL_URL = assetPath('reflective-sphere.gltf');
 
-const skysphereUsingMap =
+const backgroundHasMap =
     (scene, url) => {
-      const material = scene.skysphere.material;
-      const color = material.color.getHexString();
-      return textureMatchesMeta(material.map, {url: url}) && color === 'ffffff';
+      return textureMatchesMeta(scene.background.texture, {url: url});
     }
 
-const skysphereUsingColor =
+const backgroundHasColor =
     (scene, hex) => {
-      const {color, map} = scene.skysphere.material;
-      // Invert gamma correct to match passed in hex
-      const gammaCorrectedColor = color.clone().convertLinearToGamma(2.2);
-
-      return map == null && gammaCorrectedColor.getHexString() === hex;
+      if (!scene.background || !scene.background.isColor) {
+        return false;
+      }
+      return scene.background.getHexString() === hex;
     }
 
 /**
@@ -47,7 +44,7 @@ const skysphereUsingColor =
  * @param {THREE.Scene} scene
  * @param {Object} meta
  */
-const modelUsingEnvmap = (scene, meta) => {
+const modelUsingEnvMap = (scene, meta) => {
   let found = false;
   scene.model.traverse(object => {
     if (!object.material || !object.material.envMap) {
@@ -71,18 +68,22 @@ const modelUsingEnvmap = (scene, meta) => {
  * @param {Model} model
  * @param {Object} meta
  */
-const waitForEnvmap = (model, meta) => waitForEvent(
-    model,
-    'envmap-change',
-    e => textureMatchesMeta(e.value, {...meta, type: 'EnvironmentMap'}));
+const waitForEnvMap = (model, meta) =>
+    waitForEvent(model, 'envmap-change', event => {
+      return textureMatchesMeta(event.value, {...meta});
+    });
 
 /**
  * Returns a promise that resolves when a given element is loaded
  * and has an environment map set that matches the passed in meta.
  * @see textureMatchesMeta
  */
-const waitForLoadAndEnvmap = (scene, element, meta) => Promise.all(
-    [waitForEvent(element, 'load'), waitForEnvmap(scene.model, meta)]);
+const waitForLoadAndEnvMap =
+    (scene, element, meta) => {
+      const load = waitForEvent(element, 'load');
+      const envMap = waitForEnvMap(scene.model, meta);
+      return Promise.all([load, envMap]);
+    }
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
   let nextId = 0;
@@ -109,34 +110,34 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   test(
-      'has default skysphere if no background-image or background-color',
+      'has default background if no background-image or background-color',
       () => {
-        expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
+        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
 
   test(
-      'has default skysphere if no background-image or background-color when in DOM',
+      'has default background if no background-image or background-color when in DOM',
       async () => {
         document.body.appendChild(element);
         await timePasses();
-        expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
+        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
 
   suite('with a background-image property', () => {
     suite('and a src property', () => {
       setup(async () => {
-        let onLoad = waitForLoadAndEnvmap(scene, element, {url: BG_IMAGE_URL});
+        let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
         element.src = MODEL_URL;
         element.backgroundImage = BG_IMAGE_URL;
         await onLoad;
       });
 
-      test('displays skysphere with the correct map', async function() {
-        expect(skysphereUsingMap(scene, element.backgroundImage)).to.be.ok;
+      test('displays background with the correct map', async function() {
+        expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
       });
 
       test('applies the image as an environment map', async function() {
-        expect(modelUsingEnvmap(scene, {
+        expect(modelUsingEnvMap(scene, {
           url: element.backgroundImage
         })).to.be.ok;
       });
@@ -159,26 +160,30 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('with a background-color property', () => {
     suite('and a src property', () => {
       setup(async () => {
-        let onLoad = waitForLoadAndEnvmap(scene, element, {url: null});
+        let onLoad = waitForLoadAndEnvMap(scene, element, {
+          url: null,
+        });
         element.src = MODEL_URL;
         element.backgroundColor = '#ff0077';
         await onLoad;
       });
 
-      test('displays skysphere with the correct color', async function() {
-        expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+      test('displays background with the correct color', async function() {
+        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
       });
 
       test('applies a generated environment map on model', async function() {
-        expect(modelUsingEnvmap(scene, {url: null})).to.be.ok;
+        expect(modelUsingEnvMap(scene, {
+          url: null,
+        })).to.be.ok;
       });
 
       test(
-          'displays skysphere with correct color after attaching to DOM',
+          'displays background with correct color after attaching to DOM',
           async function() {
             document.body.appendChild(element);
             await timePasses();
-            expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+            expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
           });
       test('the directional light is tinted', () => {
         const lightColor = scene.shadowLight.color.getHexString().toLowerCase();
@@ -189,34 +194,34 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   suite('with background-color and background-image properties', () => {
     setup(async () => {
-      let onLoad = waitForLoadAndEnvmap(scene, element, {url: BG_IMAGE_URL});
+      let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('background-color', '#ff0077');
       element.setAttribute('background-image', BG_IMAGE_URL);
       await onLoad;
     });
 
-    test('displays skysphere with background-image', async function() {
-      expect(skysphereUsingMap(scene, element.backgroundImage)).to.be.ok;
+    test('displays background with background-image', async function() {
+      expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
     });
 
-    test('applies background-image envmap on model', async function() {
-      expect(modelUsingEnvmap(scene, {url: element.backgroundImage})).to.be.ok;
+    test('applies background-image environment map on model', async function() {
+      expect(modelUsingEnvMap(scene, {url: element.backgroundImage})).to.be.ok;
     });
 
     suite('and background-image subsequently removed', () => {
       setup(async () => {
-        let envmapChanged = waitForEnvmap(scene.model, {url: null});
+        let envMapChanged = waitForEnvMap(scene.model, {url: null});
         element.removeAttribute('background-image');
-        await envmapChanged;
+        await envMapChanged;
       });
 
-      test('displays skysphere with background-color', async function() {
-        expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+      test('displays background with background-color', async function() {
+        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
       });
 
-      test('reapplies generated envmap on model', async function() {
-        expect(modelUsingEnvmap(scene, {url: null})).to.be.ok;
+      test('reapplies generated environment map on model', async function() {
+        expect(modelUsingEnvMap(scene, {url: null})).to.be.ok;
       });
     });
   });

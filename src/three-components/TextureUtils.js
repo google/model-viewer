@@ -13,18 +13,23 @@
  * limitations under the License.
  */
 
-import {Cache, EventDispatcher, GammaEncoding, TextureLoader} from 'three';
+import {Cache, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
 
 import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
+import RGBELoader from '../third_party/three/RGBELoader.js';
 
-import EnvMapGenerator from './EnvMapGenerator.js';
+import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
 // Enable three's loader cache so we don't create redundant
 // Image objects to decode images fetched over the network.
 Cache.enabled = true;
 
-const loader = new TextureLoader();
+const HDR_FILE_RE = /\.hdr$/;
+const ldrLoader = new TextureLoader();
+const hdrLoader = new RGBELoader();
+
 const $cubeGenerator = Symbol('cubeGenerator');
+
 const defaultConfig = {
   cubemapSize: 1024,
   synthesizedEnvmapSize: 512,
@@ -36,32 +41,29 @@ const defaultConfig = {
 // describe the type of texture within the context of this application.
 const userData = {
   url: null,
-  // 'Equirectangular', 'EnvironmentMap'
-  type: null,
+  // 'Equirectangular', 'Cube'
+  mapping: null,
 };
 
-export default class TextureManager extends EventDispatcher {
+export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize [1024]
    * @param {?number} config.synthesizedEnvmapSize [512]
+   * @param {?number} config.pmremSamples [24]
+   * @param {?number} config.pmremSize [256]
    */
   constructor(renderer, config = {}) {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
-    this.envMapGenerator = new EnvMapGenerator(this.renderer);
+    this.environmentMapGenerator = new EnvironmentMapGenerator(this.renderer);
     this[$cubeGenerator] = null;
   }
 
   /**
-   * The texture returned here is from a WebGLRenderCubeTarget,
-   * which is not the same as a THREE.CubeTexture, and just what
-   * the current THREE.CubeCamera uses, and has the same effect
-   * when being used as an environment map.
-   *
    * @param {THREE.Texture} texture
-   * @return {THREE.Texture}
+   * @return {THREE.WebGLRenderCubeTarget}
    */
   equirectangularToCubemap(texture) {
     const generator = new EquirectangularToCubeGenerator(texture, {
@@ -70,16 +72,11 @@ export default class TextureManager extends EventDispatcher {
 
     generator.update(this.renderer);
 
-    const cubemap = generator.renderTarget.texture;
-    cubemap.dispose = () => {
-      generator.renderTarget.dispose();
-    };
-
-    cubemap.userData = {
+    generator.renderTarget.texture.userData = {
       ...userData,
       ...({
         url: texture.userData ? texture.userData.url : null,
-        type: 'EnvironmentMap',
+        mapping: 'Cube',
       })
     };
 
@@ -87,7 +84,7 @@ export default class TextureManager extends EventDispatcher {
     // and therefore the generator's render target.
     this[$cubeGenerator] = generator;
 
-    return cubemap;
+    return generator.renderTarget;
   }
 
   /**
@@ -95,17 +92,27 @@ export default class TextureManager extends EventDispatcher {
    * @return {Promise<THREE.Texture>}
    */
   async load(url) {
+    const isHDR = HDR_FILE_RE.test(url);
+    const loader = isHDR ? hdrLoader : ldrLoader;
     const texture = await new Promise(
         (resolve, reject) => loader.load(url, resolve, undefined, reject));
     texture.userData = {
       ...userData,
       ...({
         url: url,
-        type: 'Equirectangular',
+        mapping: 'Equirectangular',
       })
     };
 
-    texture.encoding = GammaEncoding;
+    if (isHDR) {
+      texture.encoding = RGBEEncoding;
+      texture.minFilter = NearestFilter;
+      texture.magFilter = NearestFilter;
+      texture.flipY = true;
+    } else {
+      texture.encoding = GammaEncoding;
+    }
+
     return texture;
   }
 
@@ -113,48 +120,62 @@ export default class TextureManager extends EventDispatcher {
    * @param {?number} size
    * @return {THREE.Texture}
    */
-  generateDefaultEnvMap(size) {
+  generateDefaultEnvironmentMap(size) {
     const mapSize = size || this.config.synthesizedEnvmapSize;
-    const texture = this.envMapGenerator.generate(mapSize);
-    texture.userData = {
+    const cubemap = this.environmentMapGenerator.generate(mapSize);
+
+    cubemap.userData = {
       ...userData,
       ...({
-        type: 'EnvironmentMap',
+        url: null,
+        mapping: 'Equirectangular',
       })
     };
 
-    return texture;
+    return cubemap;
   }
 
   /**
-   * Returns a { equirect, cubemap } object with the textures
+   * Returns a { skybox, environmentMap } object with the targets/textures
    * accordingly, or null if cannot generate a texture from
-   * the URL.
+   * the URL. `skybox` is a WebGLRenderCubeTarget, and `environmentMap`
+   * is a Texture from a WebGLRenderCubeTarget.
    *
    * @see equirectangularToCubemap with regard to the THREE types.
    * @param {string} url
    * @return {Promise<Object|null>}
    */
-  async toCubemapAndEquirect(url) {
-    let equirect, cubemap;
+  async generateEnvironmentTextures(url) {
+    let equirect, skybox, environmentMap;
     try {
       equirect = await this.load(url);
-      cubemap = await this.equirectangularToCubemap(equirect);
-      return {equirect, cubemap};
-    } catch (e) {
+      skybox = await this.equirectangularToCubemap(equirect);
+
+      // Use the same texture (directly instead of WebGLRenderTargetCube)
+      // for the environment map until #215
+      environmentMap = skybox.texture;
+
+      equirect.dispose();
+
+      return {environmentMap, skybox};
+    } catch (error) {
       if (equirect) {
         equirect.dispose();
       }
-      if (cubemap) {
-        cubemap.dispose();
+      if (skybox) {
+        skybox.dispose();
       }
+      if (environmentMap) {
+        environmentMap.dispose();
+      }
+
       return null;
     }
   }
 
   dispose() {
-    this.envMapGenerator.camera.renderTarget.dispose();
-    this.envMapGenerator = null;
+    this.environmentMapGenerator.dispose();
+    this.environmentMapGenerator = null;
     if (this[$cubeGenerator]) {
       this[$cubeGenerator].dispose();
       this[$cubeGenerator] = null;

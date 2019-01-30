@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AmbientLight, BackSide, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {AmbientLight, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import {resolveDpr} from '../utils.js';
 
@@ -41,7 +41,7 @@ export const FRAMED_HEIGHT = 10;
 // the front of the model becomes clipped by the near plane. Rather than
 // change the near plane or camera's position (if we wanted to implement a
 // visible "room" in the future where framing needs to be precise), we shrink
-// the model by a little bit so it's always slightly smaller than the room.
+// the room by a little bit so it's always slightly bigger than the model.
 export const ROOM_PADDING_SCALE = 1.01;
 
 // Vertical field of view of camera, in degrees.
@@ -95,20 +95,9 @@ export default class ModelScene extends Scene {
     this.pivot = new Object3D();
     this.pivot.name = 'Pivot';
 
-    const skysphereGeo = new SphereBufferGeometry(1, 32, 32);
-    const skysphereMat = new MeshBasicMaterial(
-        {side: BackSide, color: 0xffffff, depthTest: false, depthWrite: false});
-    this.skysphere = new Mesh(skysphereGeo, skysphereMat);
-    this.skysphere.name = 'Skysphere';
-
-    // Ensure the skysphere is rendered before anything else due to
-    // depthTest=false
-    this.skysphere.renderOrder = 1;
-
     this.add(this.pivot);
     this.add(this.light);
     this.add(this.shadowLight);
-    this.add(this.skysphere);
     this.pivot.add(this.model);
 
     this.isVisible = false;
@@ -117,6 +106,8 @@ export default class ModelScene extends Scene {
     this.roomBox = new Box3();
     this.roomSize = new Vector3();
     this.setSize(width, height);
+
+    this.background = new Color(0xffffff);
 
     this.model.addEventListener('model-load', this.onModelLoad);
   }
@@ -209,11 +200,6 @@ export default class ModelScene extends Scene {
     this.camera.aspect = this.aspect;
     this.camera.updateProjectionMatrix();
 
-    const skysphereSize =
-        Math.max(this.roomSize.x, this.roomSize.y, this.roomSize.z) * 2;
-    this.skysphere.scale.setScalar(skysphereSize);
-    this.skysphere.scale.z *= -1;
-
     this.updateStaticShadow();
   }
 
@@ -298,9 +284,6 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    // Don't want the skysphere in the shadow shot
-    this.remove(this.skysphere);
-
     this.shadow.position.set(0, 0, 0);
     this.shadow.scale.x = this.roomSize.x;
     this.shadow.scale.z = this.roomSize.z;
@@ -320,7 +303,5 @@ export default class ModelScene extends Scene {
     if (modelHeight < FRAMED_HEIGHT) {
       this.shadow.position.y = (FRAMED_HEIGHT / 2) - modelHeight / 2
     }
-
-    this.add(this.skysphere);
   }
 }

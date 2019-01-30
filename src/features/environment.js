@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import {Color} from 'three';
+import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, UniformsUtils} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
+
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
-const GAMMA_TO_LINEAR = 2.2;
 
 const WHITE = new Color('#ffffff');
 
-const $currentCubemap = Symbol('currentCubemap');
+const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $setShadowLightColor = Symbol('setShadowLightColor');
@@ -75,17 +75,11 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       }
     }
 
-    [$tick](time, delta) {
-      super[$tick](time, delta);
-      const camera = this[$scene].getCamera();
-      this[$scene].skysphere.position.copy(camera.position);
-    }
-
     [$onModelLoad](e) {
       super[$onModelLoad](e);
 
-      if (this[$currentCubemap]) {
-        this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
+      if (this[$currentEnvironmentMap]) {
+        this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
         this[$needsRender]();
       }
     }
@@ -100,7 +94,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const textures = await textureUtils.toCubemapAndEquirect(url);
+      const textures = await textureUtils.generateEnvironmentTextures(url);
 
       // If the background image has changed
       // while fetching textures, abort and defer to that
@@ -118,13 +112,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const {cubemap, equirect} = textures;
+      const {skybox, environmentMap} = textures;
 
-      this[$scene].skysphere.material.color = new Color(0xffffff);
-      this[$scene].skysphere.material.map = equirect;
-      this[$scene].skysphere.material.needsUpdate = true;
-      this[$currentCubemap] = cubemap;
-      this[$scene].model.applyEnvironmentMap(cubemap);
+      this[$scene].background = skybox;
+
+      this[$currentEnvironmentMap] = environmentMap;
+      this[$scene].model.applyEnvironmentMap(environmentMap);
 
       this[$setShadowLightColor](WHITE);
 
@@ -143,18 +136,16 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       this[$deallocateTextures]();
 
-      const skysphereColor = this[$scene].skysphere.material.color =
-          new Color(color);
-      skysphereColor.convertGammaToLinear(GAMMA_TO_LINEAR);
-      this[$setShadowLightColor](skysphereColor);
+      const parsedColor = new Color(color);
 
-      this[$scene].skysphere.material.map = null;
-      this[$scene].skysphere.material.needsUpdate = true;
+      this[$scene].background = parsedColor;
 
-      // TODO can cache this per renderer and color
-      const cubemap = textureUtils.generateDefaultEnvMap();
-      this[$currentCubemap] = cubemap;
-      this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
+      this[$setShadowLightColor](parsedColor);
+
+      // TODO(#336): can cache this per renderer and color
+      const environmentMap = textureUtils.generateDefaultEnvironmentMap();
+      this[$currentEnvironmentMap] = environmentMap;
+      this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
 
       this[$needsRender]();
     }
@@ -165,13 +156,13 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     }
 
     [$deallocateTextures]() {
-      if (this[$scene].skysphere.material.map) {
-        this[$scene].skysphere.material.map.dispose();
-        this[$scene].skysphere.material.map = null;
+      const background = this[$scene].background;
+      if (background && background.dispose) {
+        background.dispose();
       }
-      if (this[$currentCubemap]) {
-        this[$currentCubemap].dispose();
-        this[$currentCubemap] = null;
+      if (this[$currentEnvironmentMap]) {
+        this[$currentEnvironmentMap].dispose();
+        this[$currentEnvironmentMap] = null;
       }
     }
   }
