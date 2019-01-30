@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
+import {$controls, $promptElement, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 
@@ -87,6 +87,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       suite('a11y', () => {
         test('prompts user to interact when focused', async () => {
           const {canvas} = element[$scene];
+          const promptElement = element[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
 
           // NOTE(cdata): This wait time was added in order to deflake tests on
@@ -99,10 +100,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           canvas.focus();
 
           await until(() => canvas.getAttribute('aria-label') === IDLE_PROMPT);
+
+          expect(promptElement.classList.contains('visible')).to.be.equal(true);
         });
 
         test('does not prompt if user already interacted', async () => {
           const {canvas} = element[$scene];
+          const promptElement = element[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
 
           canvas.focus();
@@ -114,6 +118,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await timePasses(IDLE_PROMPT_THRESHOLD_MS + 100);
 
           expect(canvas.getAttribute('aria-label')).to.be.equal(originalLabel);
+
+          expect(promptElement.classList.contains('visible'))
+              .to.be.equal(false);
         });
       });
     });
