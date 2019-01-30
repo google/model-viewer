@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import ControlsPrompt from './assets/controls-svg.js';
 import ARGlyph from './assets/view-in-ar-material-svg.js';
 
 const template = document.createElement('template');
@@ -89,6 +90,31 @@ template.innerHTML = `
     canvas.show {
       display: block;
     }
+
+    .slot.controls-prompt {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform-origin: center center;
+      transform: scale(0.9);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .slot.controls-prompt svg {
+      transform: scale(0.5);
+    }
+
+    .slot.controls-prompt.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
   </style>
   <div class="container">
     <a tabindex="2"
@@ -103,6 +129,13 @@ template.innerHTML = `
         aria-label="A depiction of a 3D model"
         aria-live="polite">
     </canvas>
+    <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
+         will have their <slot> elements removed by ShadyCSS -->
+    <div class="slot controls-prompt">
+      <slot name="controls-prompt" aria-hidden="true">
+        ${ControlsPrompt}
+      </slot>
+    </div>
   </div>
   <slot></slot>
 `;

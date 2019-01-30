@@ -31,8 +31,10 @@ const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $orbitCamera = Symbol('orbitCamera');
 const $defaultCamera = Symbol('defaultCamera');
 
+const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
 const $changeHandler = Symbol('changeHandler');
+const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 
@@ -40,6 +42,8 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
+
+export const $promptElement = Symbol('promptElement');
 
 export const ControlsMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -57,6 +61,8 @@ export const ControlsMixin = (ModelViewerElement) => {
       this[$waitingToPromptUser] = false;
       this[$shouldPromptUserToInteract] = true;
 
+      this[$promptElement] = this.shadowRoot.querySelector('.controls-prompt');
+
       this[$orbitCamera] = this[$scene].camera.clone();
       this[$orbitCamera].near = ORBIT_NEAR_PLANE;
       this[$orbitCamera].far = ORBIT_FAR_PLANE;
@@ -65,6 +71,7 @@ export const ControlsMixin = (ModelViewerElement) => {
 
       this[$changeHandler] = () => this[$onChange]();
       this[$focusHandler] = () => this[$onFocus]();
+      this[$blurHandler] = () => this[$onBlur]();
     }
 
     update(changedProperties) {
@@ -83,6 +90,7 @@ export const ControlsMixin = (ModelViewerElement) => {
 
         this[$controls].addEventListener('change', this[$changeHandler]);
         this[$scene].canvas.addEventListener('focus', this[$focusHandler]);
+        this[$scene].canvas.addEventListener('blur', this[$blurHandler]);
 
         this[$updateOrbitCamera]();
       } else {
@@ -91,6 +99,7 @@ export const ControlsMixin = (ModelViewerElement) => {
         if (this[$controls]) {
           this[$controls].removeEventListener('change', this[$changeHandler]);
           this[$scene].canvas.removeEventListener('focus', this[$focusHandler]);
+          this[$scene].canvas.removeEventListener('blur', this[$blurHandler]);
 
           this[$controls].dispose();
           this[$controls] = null;
@@ -114,6 +123,8 @@ export const ControlsMixin = (ModelViewerElement) => {
           // particular <model-element> instance:
           this[$userPromptedOnce] = true;
           this[$waitingToPromptUser] = false;
+
+          this[$promptElement].classList.add('visible');
         }
       }
 
@@ -173,11 +184,17 @@ export const ControlsMixin = (ModelViewerElement) => {
       }
     }
 
+    [$onBlur]() {
+      this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.remove('visible');
+    }
+
     [$onChange](e) {
       this[$needsRender]();
 
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.remove('visible');
 
       // NOTE(cdata): On change (in other words, the camera has adjusted its
       // orbit), if the user has been prompted at least once already, we no
