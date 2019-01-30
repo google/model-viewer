@@ -160,13 +160,17 @@ export default class Renderer extends EventDispatcher {
 
       const camera = scene.getCamera();
 
-      this.renderer.clearDepth();
       if (width > this.width || height > this.height) {
         const maxWidth = Math.max(width, this.width);
         const maxHeight = Math.max(height, this.height);
         this.setRendererSize(maxWidth, maxHeight, false);
       }
 
+      // Need to set the render target in order to prevent
+      // clearing the depth from a different buffer -- possibly
+      // from something in
+      this.renderer.setRenderTarget(null);
+      this.renderer.clearDepth();
       this.renderer.setViewport(0, 0, width, height);
       this.renderer.render(scene, camera);
 

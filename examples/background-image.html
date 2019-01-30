@@ -66,10 +66,9 @@
             <template>
                 <model-viewer
                     controls
-                    background-image="assets/whipple_creek_regional_park_04_1k.jpg"
-                    alt="A 3D model of a damaged helmet with a forest in the background"
-                    src="assets/DamagedHelmet/DamagedHelmet.gltf">
-                </model-viewer>
+                    background-image="assets/spruit_sunrise_2k.jpg"
+                    alt="A 3D model of metal spheres at varying degrees of roughness"
+                    src="assets/radiance.glb"></model-viewer>
             </template>
         </example-snippet>
       </div>
@@ -81,14 +80,14 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">2</div>
-        <h2>An equirectangular <span class="attribute">background-image</span> with a very reflective model</h2>
+        <h2>An equirectangular HDR <span class="attribute">background-image</span></h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
               <model-viewer
-                  controls
-                  background-image="assets/small_hangar_01_1k.jpg"
-                  alt="A 3D model of a reflective sphere depicted within a hangar"
-                  src="assets/reflective-sphere.gltf"></model-viewer>
+                    controls
+                    background-image="assets/spruit_sunrise_2k.hdr"
+                    alt="A 3D model of metal spheres at varying degrees of roughness"
+                    src="assets/radiance.glb"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -144,7 +143,7 @@
             <template>
                 <model-viewer
                     id="toggle-image"
-                    backgroud-color="#ff0077"
+                    background-color="#ff0077"
                     src="assets/DamagedHelmet/DamagedHelmet.gltf"
                     alt="A 3D model of a damaged helmet depicted within changing environments"
                     controls auto-rotate></model-viewer>
