@@ -17,6 +17,8 @@ import {$controls, $promptElement, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRES
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 
+import {settleControls} from '../three-components/SmoothControls-spec.js';
+
 const expect = chai.expect;
 
 const interactWith = (element) => {
@@ -85,6 +87,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       suite('a11y', () => {
+        setup(async () => {
+          await rafPasses();
+        });
+
         test('prompts user to interact when focused', async () => {
           const {canvas} = element[$scene];
           const promptElement = element[$promptElement];
@@ -109,6 +115,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const promptElement = element[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
 
+          expect(originalLabel).to.not.be.equal(IDLE_PROMPT);
+
           canvas.focus();
 
           await timePasses();
@@ -117,10 +125,62 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           await timePasses(IDLE_PROMPT_THRESHOLD_MS + 100);
 
-          expect(canvas.getAttribute('aria-label')).to.be.equal(originalLabel);
-
+          expect(canvas.getAttribute('aria-label'))
+              .to.not.be.equal(IDLE_PROMPT);
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
+        });
+
+        test('announces camera orientation when orbiting horizontally', () => {
+          const {canvas} = element[$scene];
+          const controls = element[$controls];
+
+          controls.setOrbit(-Math.PI / 2.0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage left');
+
+          controls.setOrbit(Math.PI / 2.0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage right');
+
+          controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage back');
+
+          controls.adjustOrbit(Math.PI, 0, 0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage front');
+        });
+
+        test('announces camera orientation when orbiting vertically', () => {
+          const {canvas} = element[$scene];
+          const controls = element[$controls];
+
+          controls.setOrbit(0, 0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage upper-front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          settleControls(controls);
+
+          expect(canvas.getAttribute('aria-label'))
+              .to.be.equal('View from stage lower-front');
         });
       });
     });

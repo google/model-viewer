@@ -53,7 +53,7 @@ const cameraIsLookingAt = (camera, position) => {
 /**
  * Settle controls by performing 50 frames worth of updates
  */
-const settleControls = controls =>
+export const settleControls = controls =>
     controls.update(performance.now, FIFTY_FRAME_DELTA);
 
 suite('SmoothControls', () => {

@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
-import {PerspectiveCamera, Vector3} from 'three';
+import {PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
 import {SmoothControls} from '../three-components/SmoothControls.js';
+
+const HALF_PI = Math.PI / 2.0;
+const THIRD_PI = Math.PI / 3.0;
+const QUARTER_PI = HALF_PI / 2.0;
+const PHI = 2.0 * Math.PI;
+
+const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
+const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
 const ORBIT_NEAR_PLANE = 0.01;
 const ORBIT_FAR_PLANE = 1000;
@@ -42,6 +50,8 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
+
+const $lastSpherical = Symbol('lastSpherical');
 
 export const $promptElement = Symbol('promptElement');
 
@@ -68,6 +78,8 @@ export const ControlsMixin = (ModelViewerElement) => {
       this[$orbitCamera].far = ORBIT_FAR_PLANE;
       this[$orbitCamera].updateProjectionMatrix();
       this[$controls] = null;
+
+      this[$lastSpherical] = new Spherical();
 
       this[$changeHandler] = () => this[$onChange]();
       this[$focusHandler] = () => this[$onFocus]();
@@ -170,8 +182,10 @@ export const ControlsMixin = (ModelViewerElement) => {
       // original, non-prompt label if appropriate. If the user has already
       // interacted, they no longer need to hear the prompt. Otherwise, they
       // will hear it again after the idle prompt threshold has been crossed.
-      if (canvas.getAttribute('aria-label') === IDLE_PROMPT) {
-        canvas.setAttribute('aria-label', this[$ariaLabel]);
+      const ariaLabel = this[$ariaLabel];
+
+      if (canvas.getAttribute('aria-label') !== ariaLabel) {
+        canvas.setAttribute('aria-label', ariaLabel);
       }
 
       // NOTE(cdata): When focused, if the user has yet to interact with the
@@ -201,6 +215,31 @@ export const ControlsMixin = (ModelViewerElement) => {
       // longer need to prompt the user in the future.
       if (this[$userPromptedOnce]) {
         this[$shouldPromptUserToInteract] = false;
+      }
+
+      const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
+      const {theta, phi} =
+          this[$controls].getCameraSpherical(this[$lastSpherical]);
+
+      const lastAzimuthalQuadrant =
+          (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+      const azimuthalQuadrant =
+          (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+
+      const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
+      const polarTrient = Math.floor(phi / THIRD_PI);
+
+      if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
+          polarTrient !== lastPolarTrient) {
+        const {canvas} = this[$scene];
+        const azimuthalQuadrantLabel =
+            AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
+        const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
+
+        const ariaLabel =
+            `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
+
+        canvas.setAttribute('aria-label', ariaLabel);
       }
     }
   };
