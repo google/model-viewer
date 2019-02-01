@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-export const getContext = (canvas, options) =>
+export const assertContext = (context) => {
+  if (context == null) {
+    throw new Error('WebGL is not available!');
+  }
+  return context;
+};
+
+export const getContext = (canvas, options) => assertContext(
     canvas.getContext('webgl', options) ||
-    canvas.getContext('experimental-webgl', options);
+    canvas.getContext('experimental-webgl', options));
 
 /**
  * Patch the values reported by WebGLRenderingContext's

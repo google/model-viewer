@@ -49,6 +49,35 @@ suite('ModelViewerElementBase', () => {
       expect(element).to.be.ok;
     });
 
+    suite('compatibility', () => {
+      suite('when WebGL is not supported', () => {
+        let nativeGetContext;
+
+        setup(() => {
+          nativeGetContext = HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+            if (/webgl/.test(type)) {
+              return null;
+            }
+            return nativeGetContext.call(this, type, ...args);
+          };
+        });
+
+        teardown(() => {
+          HTMLCanvasElement.prototype.getContext = nativeGetContext;
+        });
+
+        test(
+            'does not explode when created and appended to the document',
+            async () => {
+              const element = new ModelViewerElement();
+              document.body.appendChild(element);
+              await timePasses();
+              document.body.removeChild(element);
+            });
+      });
+    });
+
     suite('with alt text', () => {
       let element;
       let canvas;

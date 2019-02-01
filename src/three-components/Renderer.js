@@ -39,6 +39,10 @@ export const $arRenderer = Symbol('arRenderer');
  * the texture.
  */
 export default class Renderer extends EventDispatcher {
+  get canRender() {
+    return this.renderer != null && this.context != null;
+  }
+
   constructor() {
     super();
 
@@ -51,22 +55,28 @@ export default class Renderer extends EventDispatcher {
 
     this.canvas = document.createElement('canvas');
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
-    this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
-    // Patch the gl context's extension functions before passing
-    // it to three.
-    WebGLUtils.applyExtensionCompatibility(this.context);
+    try {
+      this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
 
-    this.renderer = new WebGLRenderer({
-      canvas: this.canvas,
-      context: this.context,
-    });
-    this.renderer.autoClear = false;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = GAMMA_FACTOR;
-    this.renderer.setPixelRatio(resolveDpr());
+      // Patch the gl context's extension functions before passing
+      // it to three.
+      WebGLUtils.applyExtensionCompatibility(this.context);
+
+      this.renderer = new WebGLRenderer({
+        canvas: this.canvas,
+        context: this.context,
+      });
+      this.renderer.autoClear = false;
+      this.renderer.gammaOutput = true;
+      this.renderer.gammaFactor = GAMMA_FACTOR;
+      this.renderer.setPixelRatio(resolveDpr());
+    } catch (error) {
+      this.context = null;
+      console.warn(error);
+    }
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
-    this.textureUtils = new TextureUtils(this.renderer);
+    this.textureUtils = this.canRender ? new TextureUtils(this.renderer) : null;
 
     this.scenes = new Set();
     this.scenesRendered = 0;
@@ -75,27 +85,30 @@ export default class Renderer extends EventDispatcher {
   }
 
   setRendererSize(width, height) {
-    this.renderer.setSize(width, height, false);
+    if (this.canRender) {
+      this.renderer.setSize(width, height, false);
+    }
+
     this.width = width;
     this.height = height;
   }
 
   registerScene(scene) {
     this.scenes.add(scene);
-    if (this.scenes.size > 0) {
+    if (this.canRender && this.scenes.size > 0) {
       this.renderer.setAnimationLoop((time) => this.render(time));
     }
   }
 
   unregisterScene(scene) {
     this.scenes.delete(scene);
-    if (this.scenes.size === 0) {
+    if (this.canRender && this.scenes.size === 0) {
       this.renderer.setAnimationLoop(null);
     }
   }
 
   async supportsPresentation() {
-    return this[$arRenderer].supportsPresentation();
+    return this.canRender && this[$arRenderer].supportsPresentation();
   }
 
   get presentedScene() {
@@ -124,7 +137,7 @@ export default class Renderer extends EventDispatcher {
   }
 
   render(t) {
-    if (this.isPresenting) {
+    if (!this.canRender || this.isPresenting) {
       return;
     }
 
@@ -178,7 +191,11 @@ export default class Renderer extends EventDispatcher {
 
   dispose() {
     super.dispose();
-    this.textureUtils.dispose();
+
+    if (this.textureUtils != null) {
+      this.textureUtils.dispose();
+    }
+
     this.textureUtils = null;
   }
 }
