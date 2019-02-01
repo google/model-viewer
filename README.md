@@ -21,6 +21,7 @@ See: [API](#api), [Demo](https://model-viewer.glitch.me),
 [Examples](https://googlewebcomponents.github.io/model-viewer/index.html),
 [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) (for work prioritization and progress)
 
+![sample-render](examples/sample-render.png)
 
 
 ## Installing
