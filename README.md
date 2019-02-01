@@ -18,7 +18,7 @@ to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
 See: [API](#api), [Demo](https://model-viewer.glitch.me),
-[Examples](https://googlewebcomponents.github.io/model-viewer/examples/index.html),
+[Examples](https://googlewebcomponents.github.io/model-viewer/index.html),
 [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) (for work prioritization and progress)
 
 
