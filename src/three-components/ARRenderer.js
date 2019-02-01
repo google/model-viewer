@@ -4,6 +4,7 @@ import {assertIsArCandidate} from '../utils.js';
 
 import Reticle from './Reticle.js';
 import Shadow from './Shadow.js';
+import {assertContext} from './WebGLUtils.js';
 
 const $presentedScene = Symbol('presentedScene');
 
@@ -103,7 +104,7 @@ export class ARRenderer extends EventDispatcher {
     const session = await device.requestSession(
         {environmentIntegration: true, outputContext: this.outputContext});
 
-    const gl = this.renderer.getContext();
+    const gl = assertContext(this.renderer.getContext());
 
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73
     // @TODO #293, handle WebXR API changes

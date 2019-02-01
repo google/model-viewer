@@ -17,6 +17,8 @@ import {BackSide, CubeCamera, EventDispatcher, Mesh, MeshBasicMaterial, PlaneBuf
 
 import Sky from '../third_party/three/Sky.js';
 
+import {assertContext} from './WebGLUtils.js';
+
 const SKYSPHERE_SIZE = 10000;
 
 export default class EnvMapGenerator extends EventDispatcher {
@@ -25,7 +27,8 @@ export default class EnvMapGenerator extends EventDispatcher {
     this.renderer = renderer;
     this.scene = new Scene();
 
-    const gl = this.renderer.getContext();
+    const gl = assertContext(this.renderer.getContext());
+
     this.maxMapSize = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
 
     // Values generated from sky demo

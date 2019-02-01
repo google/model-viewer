@@ -95,6 +95,11 @@ export const EnvironmentMixin = (ModelViewerElement) => {
      */
     async[$setEnvironmentImage](url) {
       const textureUtils = this[$renderer].textureUtils;
+
+      if (textureUtils == null) {
+        return;
+      }
+
       const textures = await textureUtils.toCubemapAndEquirect(url);
 
       // If the background image has changed
@@ -131,6 +136,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
      */
     [$setEnvironmentColor](color) {
       const textureUtils = this[$renderer].textureUtils;
+
+      if (textureUtils == null) {
+        return;
+      }
 
       this[$deallocateTextures]();
 
