@@ -17,6 +17,7 @@ import {IS_IOS} from '../../constants.js';
 import {$enterARElement, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {assetPath, pickShadowDescendant, timePasses, waitForEvent} from '../helpers.js';
+import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
@@ -37,15 +38,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
       customElements.define(tagName, ModelViewerElement);
     });
 
-    test('can be directly instantiated', () => {
-      const element = new ModelViewerElement();
-      expect(element).to.be.ok;
-    });
-
-    test('can be instantiated with document.createElement', () => {
-      const element = document.createElement(tagName);
-      expect(element).to.be.ok;
-    });
+    BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('with unstable-webxr', () => {
       let element;

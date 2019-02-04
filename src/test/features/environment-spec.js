@@ -16,6 +16,7 @@
 import {EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const BG_IMAGE_URL = assetPath('equirectangular.png');
@@ -104,6 +105,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   });
 
   teardown(() => element.parentNode && element.parentNode.removeChild(element));
+
+  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   test(
       'has default skysphere if no background-image or background-color',

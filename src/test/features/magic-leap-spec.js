@@ -16,6 +16,7 @@
 import {MagicLeapMixin} from '../../features/magic-leap.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {assetPath, pickShadowDescendant, timePasses} from '../helpers.js';
+import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
@@ -36,15 +37,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
       customElements.define(tagName, ModelViewerElement);
     });
 
-    test('can be directly instantiated', () => {
-      const element = new ModelViewerElement();
-      expect(element).to.be.ok;
-    });
-
-    test('can be instantiated with document.createElement', () => {
-      const element = document.createElement(tagName);
-      expect(element).to.be.ok;
-    });
+    BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('magic-leap', () => {
       suite('in standard browser environments', () => {
