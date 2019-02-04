@@ -16,6 +16,7 @@
 import {$posterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
+import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
@@ -37,15 +38,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       customElements.define(tagName, ModelViewerElement);
     });
 
-    test('can be directly instantiated', () => {
-      const element = new ModelViewerElement();
-      expect(element).to.be.ok;
-    });
+    BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-    test('can be instantiated with document.createElement', () => {
-      const element = document.createElement(tagName);
-      expect(element).to.be.ok;
-    });
     // TODO: Elements must have loaded to hide poster...
 
     suite('loading', () => {

@@ -16,7 +16,7 @@
 import {$controls, $promptElement, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
-
+import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
@@ -43,15 +43,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       customElements.define(tagName, ModelViewerElement);
     });
 
-    test('can be directly instantiated', () => {
-      const element = new ModelViewerElement();
-      expect(element).to.be.ok;
-    });
-
-    test('can be instantiated with document.createElement', () => {
-      const element = document.createElement(tagName);
-      expect(element).to.be.ok;
-    });
+    BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('controls', () => {
       let element;
