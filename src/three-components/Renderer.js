@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -70,6 +70,12 @@ export default class Renderer extends EventDispatcher {
       this.renderer.gammaOutput = true;
       this.renderer.gammaFactor = GAMMA_FACTOR;
       this.renderer.setPixelRatio(resolveDpr());
+
+      // ACESFilmicToneMapping appears to be the most "saturated",
+      // and similar to Filament's gltf-viewer.
+      this.renderer.toneMapping = ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 0.9;
+
     } catch (error) {
       this.context = null;
       console.warn(error);

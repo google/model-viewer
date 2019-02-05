@@ -16,6 +16,8 @@
 import {Cache, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
 
 import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
+import PMREMCubeUVPacker from '../third_party/three/PMREMCubeUVPacker.js';
+import PMREMGenerator from '../third_party/three/PMREMGenerator.js';
 import RGBELoader from '../third_party/three/RGBELoader.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
@@ -32,7 +34,11 @@ const $cubeGenerator = Symbol('cubeGenerator');
 
 const defaultConfig = {
   cubemapSize: 1024,
-  synthesizedEnvmapSize: 512,
+  synthesizedEnvmapSize: 256,
+  pmremSamples: 32,
+  pmremSize: 256,
+  defaultEnvironmentPmremSamples: 8,
+  defaultEnvironmentPmremSize: 256,
 };
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -41,17 +47,17 @@ const defaultConfig = {
 // describe the type of texture within the context of this application.
 const userData = {
   url: null,
-  // 'Equirectangular', 'Cube'
+  // 'Equirectangular', 'Cube', 'PMREM'
   mapping: null,
 };
 
 export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
-   * @param {?number} config.cubemapSize [1024]
-   * @param {?number} config.synthesizedEnvmapSize [512]
-   * @param {?number} config.pmremSamples [24]
-   * @param {?number} config.pmremSize [256]
+   * @param {?number} config.cubemapSize
+   * @param {?number} config.synthesizedEnvmapSize
+   * @param {?number} config.pmremSamples
+   * @param {?number} config.pmremSize
    */
   constructor(renderer, config = {}) {
     super();
@@ -117,22 +123,66 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   /**
-   * @param {?number} size
+   * @param {?boolean} config.pmrem
    * @return {THREE.Texture}
    */
-  generateDefaultEnvironmentMap(size) {
-    const mapSize = size || this.config.synthesizedEnvmapSize;
+  generateDefaultEnvironmentMap(config={}) {
+    const mapSize = this.config.synthesizedEnvmapSize;
     const cubemap = this.environmentMapGenerator.generate(mapSize);
 
-    cubemap.userData = {
+    let environmentMap;
+
+    if (config.pmrem) {
+      environmentMap = this.pmremPass(
+        cubemap,
+        this.config.defaultEnvironmentPmremSamples,
+        this.config.defaultEnvironmentPmremSize);
+
+      cubemap.dispose();
+    } else {
+      environmentMap = cubemap;
+      environmentMap.userData = {
+        ...userData,
+        ...({
+          mapping: 'Cube',
+        })
+      };
+    }
+
+    return environmentMap;
+  }
+
+  /**
+   * Takes a cube-ish (@see equirectangularToCubemap) texture and
+   * returns a texture of the prefiltered mipmapped radiance environment map
+   * to be used as environment maps in models.
+   *
+   * @param {THREE.Texture} texture
+   * @param {number} samples
+   * @param {number} resolution
+   * @return {THREE.Texture}
+   */
+  pmremPass(texture, samples, size) {
+    const generator = new PMREMGenerator(texture, samples, size);
+    generator.update(this.renderer);
+
+    const packer = new PMREMCubeUVPacker(generator.cubeLods);
+    packer.update(this.renderer);
+
+    const renderTarget = packer.CubeUVRenderTarget;
+
+    generator.dispose();
+    packer.dispose();
+
+    renderTarget.texture.userData = {
       ...userData,
       ...({
-        url: null,
-        mapping: 'Equirectangular',
+        url: texture.userData ? texture.userData.url : null,
+        mapping: 'PMREM',
       })
     };
 
-    return cubemap;
+    return renderTarget.texture;
   }
 
   /**
@@ -143,25 +193,25 @@ export default class TextureUtils extends EventDispatcher {
    *
    * @see equirectangularToCubemap with regard to the THREE types.
    * @param {string} url
+   * @param {boolean} config.pmrem
    * @return {Promise<Object|null>}
    */
-  async generateEnvironmentTextures(url) {
+  async generateEnvironmentTextures(url, config={}) {
     let equirect, skybox, environmentMap;
     try {
       equirect = await this.load(url);
       skybox = await this.equirectangularToCubemap(equirect);
 
-      // Use the same texture (directly instead of WebGLRenderTargetCube)
-      // for the environment map until #215
-      environmentMap = skybox.texture;
-
-      equirect.dispose();
+      if (config.pmrem) {
+        environmentMap = this.pmremPass(
+            skybox.texture, this.config.pmremSamples, this.config.pmremSize);
+      } else {
+        environmentMap = skybox.texture;
+      }
 
       return {environmentMap, skybox};
-    } catch (error) {
-      if (equirect) {
-        equirect.dispose();
-      }
+    }
+    catch (error) {
       if (skybox) {
         skybox.dispose();
       }
@@ -170,6 +220,11 @@ export default class TextureUtils extends EventDispatcher {
       }
 
       return null;
+    }
+    finally {
+      if (equirect) {
+        equirect.dispose();
+      }
     }
   }
 
