@@ -22,6 +22,7 @@ const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const WHITE = new Color('#ffffff');
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
+const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $setShadowLightColor = Symbol('setShadowLightColor');
@@ -35,7 +36,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       return {
         ...super.properties,
         backgroundImage: {type: String, attribute: 'background-image'},
-        backgroundColor: {type: String, attribute: 'background-color'}
+        backgroundColor: {type: String, attribute: 'background-color'},
+        experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'}
       };
     }
 
@@ -53,18 +55,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       super.connectedCallback();
     }
 
-    async update(changedProperties) {
+    update(changedProperties) {
       super.update(changedProperties);
 
-      // If no background-image/background-color set, use the default
-      // color.
-      if (!this[$hasBackgroundImage] && !this[$hasBackgroundColor]) {
-        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
-        return;
-      }
-
       if (!changedProperties.has('backgroundImage') &&
-          !changedProperties.has('backgroundColor')) {
+          !changedProperties.has('backgroundColor') &&
+          !changedProperties.has('experimentalPmrem')) {
         return;
       }
 
@@ -72,6 +68,15 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         this[$setEnvironmentImage](this.backgroundImage);
       } else if (this[$hasBackgroundColor]) {
         this[$setEnvironmentColor](this.backgroundColor);
+      } else {
+        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
+      }
+    }
+
+    firstUpdated(changedProperties) {
+      if (!changedProperties.has('backgroundImage') &&
+          !changedProperties.has('backgroundColor')) {
+        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
       }
     }
 
@@ -79,8 +84,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       super[$onModelLoad](e);
 
       if (this[$currentEnvironmentMap]) {
-        this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
-        this[$needsRender]();
+        this[$applyEnvironmentMap](this[$currentEnvironmentMap]);
       }
     }
 
@@ -94,7 +98,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const textures = await textureUtils.generateEnvironmentTextures(url);
+      const textures = await textureUtils.generateEnvironmentTextures(url, {
+        pmrem: this.experimentalPmrem
+      });
 
       // If the background image has changed
       // while fetching textures, abort and defer to that
@@ -108,7 +114,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       // If could not load textures (probably an invalid URL), then abort
       // after deallocating textures.
       if (!textures) {
-        this[$scene].model.applyEnvironmentMap(null);
+        this[$applyEnvironmentMap](null);
         return;
       }
 
@@ -116,12 +122,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       this[$scene].background = skybox;
 
-      this[$currentEnvironmentMap] = environmentMap;
-      this[$scene].model.applyEnvironmentMap(environmentMap);
-
       this[$setShadowLightColor](WHITE);
 
-      this[$needsRender]();
+      this[$applyEnvironmentMap](environmentMap);
     }
 
     /**
@@ -143,7 +146,20 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$setShadowLightColor](parsedColor);
 
       // TODO(#336): can cache this per renderer and color
-      const environmentMap = textureUtils.generateDefaultEnvironmentMap();
+      const environmentMap = textureUtils.generateDefaultEnvironmentMap({
+        pmrem: this.experimentalPmrem
+      });
+
+      this[$applyEnvironmentMap](environmentMap);
+    }
+
+    /**
+     * Sets the Model to use the provided environment map,
+     * or `null` if the Model should remove its' environment map.
+     *
+     * @param {THREE.Texture} environmentMap
+     */
+    [$applyEnvironmentMap](environmentMap) {
       this[$currentEnvironmentMap] = environmentMap;
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
 
