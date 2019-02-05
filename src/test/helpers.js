@@ -59,7 +59,7 @@ export const textureMatchesMeta = (texture, meta) => !!(
  * @param {string} eventName
  * @param {?Function} predicate
  */
-export const waitForEvent = (target, eventName, predicate) =>
+export const waitForEvent = (target, eventName, predicate = null) =>
     new Promise(resolve => {
       function handler(e) {
         if (!predicate || predicate(e)) {
@@ -93,4 +93,34 @@ export const dispatchSyntheticEvent = (element, type, properties = {
 
 export const ASSETS_DIRECTORY = '../examples/assets/';
 
+/**
+ * Returns the full path for an asset by name. This is a convenience helper so
+ * that we don't need to change paths throughout all test suites if we ever
+ * decide to move files around.
+ *
+ * @param {string} name
+ * @return {string}
+ */
 export const assetPath = (name) => `${ASSETS_DIRECTORY}${name}`;
+
+
+/**
+ * Returns truu if the given element is in the tree of the document of the
+ * current frame.
+ *
+ * @param {HTMLElement} element
+ * @return {boolean}
+ */
+export const isInDocumentTree = (element) => {
+  let root = element.getRootNode();
+
+  while (root !== element && root != null) {
+    if (root.nodeType === Node.DOCUMENT_NODE) {
+      return root === document;
+    }
+
+    root = root.host && root.host.getRootNode();
+  }
+
+  return false;
+};

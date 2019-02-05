@@ -24,5 +24,6 @@ import './three-components/CachingGLTFLoader-spec.js';
 import './features/controls-spec.js';
 import './features/environment-spec.js';
 import './features/loading-spec.js';
+import './features/loading/status-announcer-spec.js';
 import './features/magic-leap-spec.js';
 import './features/ar-spec.js';

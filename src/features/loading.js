@@ -15,7 +15,8 @@
 
 import {$ariaLabel, $canvas, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {deserializeUrl} from '../utils.js';
+import {debounce, deserializeUrl} from '../utils.js';
+import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
 export const $posterElement = Symbol('posterElement');
 const $applyPreloadStrategy = Symbol('applyPreloadStrategy');
@@ -33,10 +34,12 @@ const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 
 const loader = new CachingGLTFLoader();
+const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const POSTER_TRANSITION_TIME = 300;
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
+
 
 export const LoadingMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -83,6 +86,8 @@ export const LoadingMixin = (ModelViewerElement) => {
       this[$posterElement].addEventListener('click', () => this[$onClick]());
       this[$posterElement].addEventListener(
           'keydown', (event) => this[$onKeydown](event));
+
+      loadingStatusAnnouncer.registerInstance(this);
     }
 
     disconnectedCallback() {
@@ -91,6 +96,8 @@ export const LoadingMixin = (ModelViewerElement) => {
       this[$posterElement].removeEventListener('click', () => this[$onClick]());
       this[$posterElement].removeEventListener(
           'keydown', (event) => this[$onKeydown](event));
+
+      loadingStatusAnnouncer.unregisterInstance(this);
     }
 
     dismissPoster() {
@@ -167,7 +174,9 @@ export const LoadingMixin = (ModelViewerElement) => {
         posterElement.removeAttribute('tabindex');
       } else {
         if ((this.preload || this[$dismissPoster]) && this.src) {
-          this[$applyPreloadStrategy]();
+          this[$applyPreloadStrategy]().catch((error) => {
+            this.dispatchEvent(new CustomEvent('error', {detail: error}));
+          });
         }
 
         if (this.poster) {
@@ -185,6 +194,7 @@ export const LoadingMixin = (ModelViewerElement) => {
       }
 
       if (!this.src) {
+        console.warn('No src to preload!');
         return;
       }
 
