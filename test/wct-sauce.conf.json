@@ -21,7 +21,7 @@
         {
           "browserName": "firefox",
           "platform": "Windows 10",
-          "version": "64.0"
+          "version": "65.0"
         },
         {
           "browserName": "safari",
@@ -54,19 +54,6 @@
           "platformVersion": "7.1",
           "deviceName": "Android GoogleAPI Emulator",
           "deviceOrientation": "portrait"
-        },
-        {
-          "browserName": "chrome",
-          "platform": "Windows 10",
-          "version": "dev",
-          "chromeOptions": {
-            "args": [
-              "start-maximized",
-              "disable-infobars",
-              "test-type",
-              "enable-experimental-web-platform-features"
-            ]
-          }
         }
       ]
     }
