@@ -14,13 +14,14 @@
  */
 
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {debounce} from '../../utils.js';
+import {debounce, getFirstMapKey} from '../../utils.js';
 
 export const INITIAL_STATUS_ANNOUNCEMENT =
     'This page includes one or more 3D models that are loading';
 export const FINISHED_LOADING_ANNOUNCEMENT =
     'All 3D models in the page have loaded';
 export const UPDATE_STATUS_DEBOUNCE_MS = 100;
+
 
 const $modelViewerStatusInstance = Symbol('modelViewerStatusInstance');
 const $updateStatus = Symbol('updateStatus');
@@ -131,8 +132,10 @@ export class LoadingStatusAnnouncer {
     instanceStatus.instanceWasUnregistered();
 
     if (this.modelViewerStatusInstance === modelViewer) {
-      this.modelViewerStatusInstance =
-          statuses.size > 0 ? statuses.keys().next().value : null;
+      this.modelViewerStatusInstance = statuses.size > 0 ?
+          getFirstMapKey<ModelViewerElementBase, InstanceLoadingStatus>(
+              statuses) :
+          null;
     }
   }
 
@@ -163,7 +166,6 @@ export class LoadingStatusAnnouncer {
       return;
     }
 
-    console.log('Initial status');
     this.statusElement.textContent = INITIAL_STATUS_ANNOUNCEMENT;
     this.statusUpdateInProgress = true;
 
@@ -173,7 +175,6 @@ export class LoadingStatusAnnouncer {
       await Promise.all(loadingPromises);
     }
 
-    console.log('Finished status');
     this.statusElement.textContent = FINISHED_LOADING_ANNOUNCEMENT;
     this.statusUpdateInProgress = false;
   }
