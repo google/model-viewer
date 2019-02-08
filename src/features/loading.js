@@ -194,7 +194,6 @@ export const LoadingMixin = (ModelViewerElement) => {
       }
 
       if (!this.src) {
-        console.warn('No src to preload!');
         return;
       }
 

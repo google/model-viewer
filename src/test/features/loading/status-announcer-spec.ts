@@ -18,6 +18,7 @@ import ModelViewerElementBase from '../../../model-viewer-base.js';
 import {assetPath, isInDocumentTree, timePasses, until, waitForEvent} from '../../helpers.js';
 
 const expect = chai.expect;
+const TIME_TO_UPDATE_MS = UPDATE_STATUS_DEBOUNCE_MS + 50;
 
 suite('LoadingStatusAnnouncer', () => {
   let nextId = 0;
@@ -46,7 +47,7 @@ suite('LoadingStatusAnnouncer', () => {
 
         loadingStatusAnnouncer.registerInstance(element);
 
-        await timePasses(UPDATE_STATUS_DEBOUNCE_MS);
+        await timePasses(TIME_TO_UPDATE_MS);
 
         const {statusElement} = loadingStatusAnnouncer;
 
@@ -62,7 +63,7 @@ suite('LoadingStatusAnnouncer', () => {
           loadingStatusAnnouncer.registerInstance(element);
 
           await until(() => element.loaded);
-          await timePasses(UPDATE_STATUS_DEBOUNCE_MS);
+          await timePasses(TIME_TO_UPDATE_MS);
 
           const {statusElement} = loadingStatusAnnouncer;
 
@@ -83,7 +84,7 @@ suite('LoadingStatusAnnouncer', () => {
 
           await Promise.all(
               [until(() => elementOne.loaded), until(() => elementTwo.loaded)]);
-          await timePasses(UPDATE_STATUS_DEBOUNCE_MS);
+          await timePasses(TIME_TO_UPDATE_MS);
 
           const {statusElement} = loadingStatusAnnouncer;
 
@@ -106,7 +107,7 @@ suite('LoadingStatusAnnouncer', () => {
             loadingStatusAnnouncer.registerInstance(elementTwo);
 
             await until(() => elementTwo.loaded);
-            await timePasses(UPDATE_STATUS_DEBOUNCE_MS);
+            await timePasses(TIME_TO_UPDATE_MS);
 
             const {statusElement} = loadingStatusAnnouncer;
 
@@ -129,7 +130,7 @@ suite('LoadingStatusAnnouncer', () => {
             loadingStatusAnnouncer.registerInstance(elementTwo);
 
             await Promise.all([errorOccurs, until(() => elementTwo.loaded)]);
-            await timePasses(UPDATE_STATUS_DEBOUNCE_MS);
+            await timePasses(TIME_TO_UPDATE_MS);
 
             const {statusElement} = loadingStatusAnnouncer;
 

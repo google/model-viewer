@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
-
 import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_AR_CANDIDATE} from './constants.js';
 
-export const deserializeUrl = (url) =>
+
+export const deserializeUrl = (url: string): string|null =>
     (url != null && url !== 'null') ? toFullUrl(url) : null;
+
 
 export const assertIsArCandidate = () => {
   if (IS_AR_CANDIDATE) {
@@ -44,22 +44,23 @@ export const assertIsArCandidate = () => {
           missingApis.join(', ')}`);
 };
 
+
 /**
  * Converts a partial URL string to a fully qualified URL string.
  *
  * @param {String} url
  * @return {String}
  */
-export const toFullUrl = (partialUrl) => {
+export const toFullUrl = (partialUrl: string): string => {
   const url = new URL(partialUrl, window.location.toString());
   return url.toString();
 };
 
 
-export const debounce = (fn, ms) => {
-  let timer = null;
+export const debounce = (fn: (...args: Array<any>) => any, ms: number) => {
+  let timer: number|null = null;
 
-  return (...args) => {
+  return (...args: Array<any>) => {
     if (timer != null) {
       self.clearTimeout(timer);
     }
@@ -71,14 +72,16 @@ export const debounce = (fn, ms) => {
   };
 };
 
+
 /**
  * @param {Number} edge
  * @param {Number} value
  * @return {Number} 0 if value is less than edge, otherwise 1
  */
-export const step = (edge, value) => {
+export const step = (edge: number, value: number): number => {
   return value < edge ? 0 : 1;
 };
+
 
 /**
  * @param {Number} value
@@ -86,9 +89,11 @@ export const step = (edge, value) => {
  * @param {Number} upperLimit
  * @return {Number} value clamped within lowerLimit..upperLimit
  */
-export const clamp = (value, lowerLimit, upperLimit) => Math.max(
-    lowerLimit === -Infinity ? value : lowerLimit,
-    Math.min(upperLimit === Infinity ? value : upperLimit, value));
+export const clamp =
+    (value: number, lowerLimit: number, upperLimit: number): number => Math.max(
+        lowerLimit === -Infinity ? value : lowerLimit,
+        Math.min(upperLimit === Infinity ? value : upperLimit, value));
+
 
 /**
  * Takes a URL to a USDZ file and sets the appropriate
@@ -97,7 +102,7 @@ export const clamp = (value, lowerLimit, upperLimit) => Math.max(
  *
  * @param {String} url
  */
-export const openIOSARQuickLook = url => {
+export const openIOSARQuickLook = (url: string) => {
   const anchor = document.createElement('a');
   anchor.setAttribute('rel', 'ar');
   anchor.setAttribute('href', url);
@@ -133,7 +138,7 @@ export const CAPPED_DEVICE_PIXEL_RATIO = 1;
  * conditions where <model-viewer> is slow, will be encouraged to live their
  * best life.
  */
-export const resolveDpr = (() => {
+export const resolveDpr: () => number = (() => {
   // If true, implies that the user is conscious of the viewport scaling
   // relative to the device screen size.
   const HAS_META_VIEWPORT_TAG = (() => {
@@ -158,3 +163,32 @@ export const resolveDpr = (() => {
   return () => HAS_META_VIEWPORT_TAG ? window.devicePixelRatio :
                                        CAPPED_DEVICE_PIXEL_RATIO;
 })();
+
+
+/**
+ * Returns the first key in a Map in iteration order.
+ *
+ * NOTE(cdata): This is necessary because IE11 does not implement iterator
+ * methods of Map, and polymer-build does not polyfill these methods for
+ * compatibility and performance reasons. This helper proposes that it is
+ * a reasonable compromise to sacrifice a very small amount of runtime
+ * performance in IE11 for the sake of code clarity.
+ */
+export const getFirstMapKey = <T = any, U = any>(map: Map<T, U>): T|null => {
+  if (map.keys != null) {
+    return map.keys().next().value || null;
+  }
+
+  let firstKey: T|null = null;
+
+  try {
+    map.forEach((_value: U, key: T, _map: Map<T, U>) => {
+      firstKey = key;
+      // Stop iterating the Map with forEach:
+      throw new Error();
+    });
+  } catch (_error) {
+  }
+
+  return firstKey;
+};
