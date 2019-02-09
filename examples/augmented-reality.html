@@ -23,6 +23,18 @@
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+
+  <style>
+    @media only screen and (max-width: 800px) {
+      #demo-container {
+        height: 450px;
+      }
+      model-viewer {
+        padding-top: 60px;
+        background-color: #222;
+      }
+    }
+  </style>
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
   <!-- Include prismatic.js for Magic Leap support: -->
   <script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>
@@ -41,6 +53,7 @@
 
   <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
 </head>
 <body>
 
