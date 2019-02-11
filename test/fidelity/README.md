@@ -70,26 +70,13 @@ edges.
 
 ### Filament glTF Viewer
 
-Filament glTF Viewer is relatively easy to stage. As of this writing, the
-default configuration of Filament's viewer is very similar to the defaults used
-in `<model-viewer>`.
+Screenshots of a Filament-based glTF viewer are automatically collected daily,
+and PRs are automatically created if there are any changes.
 
-The steps to create a reference screenshot are:
-
- 1. Clone the [Filament project repository](https://github.com/google/filament)
- 2. Apply [this patch](https://github.com/cdata/filament/commits/model-viewer-adaptation)
-    to the repository
- 3. Follow the documented steps in the README to produce a build
-      - At the time of this writing, this is as easy as invoking
-        `./build.sh release` from the repository root
- 4. Run the glTF viewer with the appropriate IBL and model as arguments
-      - IBLs that we use in tests are included in the patch: [quick_4k](https://github.com/cdata/filament/tree/model-viewer-adaptation/ibl/quick_4k)
-      - An example invokation of the glTF viewer from the Filament project root
-        looks like: `./out/cmake-release/samples/gltf_viewer -i ./ibl/quick_4k/ $PATH_TO_MODEL`
- 5. Take a screenshot of the window that appears (which should be rendering
-    the appropriate model)
- 6. Crop the screenshot in Photoshop or equivalent to remove window chrome or
-    other undesired trim
+Use `npm run update-screenshots` to run the script the produces the screenshots
+yourself. This script builds Filament the first time you run it, so please
+refer to [Filament's README](https://github.com/google/filament) to learn how
+to bootstrap the appropriate dev environment for building it.
 
 ## Crafting new test scenarios
 

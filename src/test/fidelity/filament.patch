@@ -1,0 +1,85 @@
+diff --git a/filament/src/materials/skybox.mat b/filament/src/materials/skybox.mat
+index 1c027826..8f16d6e4 100644
+--- a/filament/src/materials/skybox.mat
++++ b/filament/src/materials/skybox.mat
+@@ -42,5 +42,14 @@ vertex {
+         float3 p = getPosition().xyz;
+         float3 unprojected = mulMat4x4Float3(getViewFromClipMatrix(), p).xyz;
+         material.eyeDirection.xyz = mulMat3x3Float3(getWorldFromViewMatrix(), unprojected);
++
++        float angle = 1.5707963268f;
++        float cosAngle = cos(angle);
++        float sinAngle = sin(angle);
++        float x = material.eyeDirection.x;
++        float z = material.eyeDirection.z;
++
++        material.eyeDirection.x = cosAngle * x - sinAngle * z;
++        material.eyeDirection.z = sinAngle * x + cosAngle * z;
+     }
+ }
+diff --git a/filament/src/materials/skyboxRGBM.mat b/filament/src/materials/skyboxRGBM.mat
+index 252a86bd..7589e7cc 100644
+--- a/filament/src/materials/skyboxRGBM.mat
++++ b/filament/src/materials/skyboxRGBM.mat
+@@ -42,5 +42,14 @@ vertex {
+         float3 p = getPosition().xyz;
+         float3 unprojected = mulMat4x4Float3(getViewFromClipMatrix(), p).xyz;
+         material.eyeDirection.xyz = mulMat3x3Float3(getWorldFromViewMatrix(), unprojected);
++
++        float angle = 1.5707963268f;
++        float cosAngle = cos(angle);
++        float sinAngle = sin(angle);
++        float x = material.eyeDirection.x;
++        float z = material.eyeDirection.z;
++
++        material.eyeDirection.x = cosAngle * x - sinAngle * z;
++        material.eyeDirection.z = sinAngle * x + cosAngle * z;
+     }
+ }
+diff --git a/samples/CMakeLists.txt b/samples/CMakeLists.txt
+index 073dccfe..d5896912 100644
+--- a/samples/CMakeLists.txt
++++ b/samples/CMakeLists.txt
+@@ -226,6 +226,7 @@ endfunction()
+ if (NOT ANDROID)
+     add_assimp_demo(frame_generator)
+     add_assimp_demo(gltf_viewer)
++    add_assimp_demo(gltf_renderer)
+     add_assimp_demo(lightbulb)
+     add_assimp_demo(material_sandbox)
+     add_assimp_demo(sample_full_pbr)
+@@ -236,6 +237,7 @@ if (NOT ANDROID)
+ 
+     # Sample app specific
+     target_link_libraries(frame_generator PRIVATE imageio)
++    target_link_libraries(gltf_renderer PRIVATE imageio)
+     target_link_libraries(suzanne PRIVATE suzanne-resources)
+ endif()
+ 
+diff --git a/samples/app/Config.h b/samples/app/Config.h
+index 8efe32d3..a57cfdaa 100644
+--- a/samples/app/Config.h
++++ b/samples/app/Config.h
+@@ -26,6 +26,9 @@ struct Config {
+     std::string iblDirectory;
+     float scale = 1.0f;
+     bool splitView = false;
++    int width = 768;
++    int height = 768;
++    std::string outputPath;
+     filament::Engine::Backend backend = filament::Engine::Backend::OPENGL;
+ };
+ 
+diff --git a/samples/app/FilamentApp.cpp b/samples/app/FilamentApp.cpp
+index 37f55b03..1a4c2fb4 100644
+--- a/samples/app/FilamentApp.cpp
++++ b/samples/app/FilamentApp.cpp
+@@ -415,7 +415,7 @@ FilamentApp::Window::Window(FilamentApp* filamentApp,
+         : mFilamentApp(filamentApp) {
+     const int x = SDL_WINDOWPOS_CENTERED;
+     const int y = SDL_WINDOWPOS_CENTERED;
+-    const uint32_t windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
++    const uint32_t windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
+     mWindow = SDL_CreateWindow(title.c_str(), x, y, (int) w, (int) h, windowFlags);
+ 
+     // Create the Engine after the window in case this happens to be a single-threaded platform.
