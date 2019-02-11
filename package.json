@@ -39,6 +39,7 @@
     "wct-sauce-legacy": "wct --config-file test/wct-legacy.conf.json --plugin sauce",
     "check-fidelity": "node ./test/fidelity/index.js",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
+    "update-screenshots": "node ./scripts/update-screenshots.js",
     "serve": "ws",
     "dev": "concurrently \"npm run watch\" \"npm run serve\"",
     "watch": "cross-os x-watch",
