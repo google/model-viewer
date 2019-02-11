@@ -1,5 +1,6 @@
 language: node_js
-sudo: 'false'
+sudo: false
+dist: trusty
 before_script:
 - git checkout package-lock.json
 env:
@@ -15,8 +16,7 @@ addons:
     access_key:
       secure: X0YszDekxheiWAATTA74tQda4N9Kgmu8yHZB/OnJ295E2n+bklTLYaVNB4aJxYp2q1d2cidOz5LOPJsetP9dWxeh4tarXjHFN4nYy9QiLqPaRdk75yLqc19MERu9elsMUc4KrJ6mhemF4pBgdNzNv1ioaHjl/3QFXIvo8nD610W7qnTDn/bHM6u2NNvDPUS9IpqYyK2Xj0DRLPm7fJS/cWbFuRr/NSKmKxSPUEaXKvlDJNEHnu0BOjSs0AZArrtekgN4YDq7BoEeCqYVf6cVUW4YclNLGa8mdXB419Czy1GDOl81ZETUYQS/6i3SNCzxwNZWpt8fB7q4BEWn0ljBoKZ6qRJRP0jHWOtZ/qeLovgaawGJIgd83bTcgPyLd2TUQeP8sFQgIw+TP1EUkNoAFR8wGxAw0chCdvzxNJvvlf28oaZ9vJdhj0jkJKrts/59Vd+dNkkoHSqj7RVfSu72kqxVblVI2kpr9oTVS2cPzDw2DXaDMmnM0ClVIjOta1QuXxaW1AUGZNOnlDbqmBTlfFThH0bRkPSinv/Laa5vvWG85k7pJ8jtCi1acOliNYFNb+hpDINqakDgTxYO6y4b+haAHycHsg3lIMsZ5Xc/8Y/dx328ymRQ6jROeyAyYmy9wt4SThfkKuHcSYqmUMLrIA1ixUcJxTaUCeUxEUx+tn0=
 script:
-- xvfb-run npm run test && if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./scripts/run-sauce-tests.sh; fi
-dist: trusty
+- ./scripts/ci-run-tests.sh
 cache:
   directories:
   - node_modules
