@@ -105,7 +105,7 @@ export const assetPath = (name) => `${ASSETS_DIRECTORY}${name}`;
 
 
 /**
- * Returns truu if the given element is in the tree of the document of the
+ * Returns true if the given element is in the tree of the document of the
  * current frame.
  *
  * @param {HTMLElement} element
