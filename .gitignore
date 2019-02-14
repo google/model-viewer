@@ -5,6 +5,7 @@ lib/*
 fidelity/*
 test/fidelity/results/*
 examples/built/*
+examples/assets/glTF-Sample-Models
 **/*.sw*
 .DS_Store
 .idea

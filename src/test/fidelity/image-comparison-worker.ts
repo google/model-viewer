@@ -69,6 +69,7 @@ class ImageComparisonWorker {
 
 
         const candidateArray = new Uint8ClampedArray(candidateImageBuffer);
+
         const goldenArray = new Uint8ClampedArray(goldenImageBuffer);
         const {width, height} = dimensions;
 

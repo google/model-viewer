@@ -19,6 +19,7 @@ script:
 - ./scripts/ci-run-tests.sh
 cache:
   directories:
+  - examples/assets/glTF-Sample-Models
   - node_modules
 after_success:
 - npm run check-fidelity

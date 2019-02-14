@@ -167,7 +167,7 @@ export class AnalysisView extends LitElement {
       const width =
           Math.max(this.leftImage!.naturalWidth, this.rightImage!.naturalWidth);
       const height = Math.max(
-          this.rightImage!.naturalWidth, this.rightImage!.naturalHeight);
+          this.leftImage!.naturalHeight, this.rightImage!.naturalHeight);
 
       return {width, height};
     }

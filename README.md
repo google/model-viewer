@@ -275,6 +275,7 @@ The following npm scripts are available:
 * `npm test` - Runs tests.
 * `npm run check-fidelity` - Compare rendering to third-party renderers
 * `npm run install-renderers` - Install or update third-party renderers
+* `npm run checkout-samples` - Create or update a local copy of sample models. This is needed for running fidelity checks and updating screenshots.
 * `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers
 
 ## Examples

@@ -116,7 +116,10 @@ export class ArtifactCreator {
   }
 
 
-  protected async captureScreenshot(slug: string, dimensions: Dimensions) {
+  async captureScreenshot(
+      slug: string, dimensions: Dimensions,
+      outputPath: string =
+          path.join(this.config.outputDirectory, slug, 'model-viewer.png')) {
     const scaledWidth = dimensions.width / DEVICE_PIXEL_RATIO;
     const scaledHeight = dimensions.height / DEVICE_PIXEL_RATIO;
 
@@ -169,7 +172,7 @@ export class ArtifactCreator {
     console.log(`🖼  Capturing screenshot`);
 
     const screenshot = await page.screenshot({
-      path: path.join(this.config.outputDirectory, slug, 'model-viewer.png'),
+      path: outputPath,
       clip: {x: 0, y: 0, width: scaledWidth, height: scaledHeight}
     });
 
