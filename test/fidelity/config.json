@@ -4,6 +4,398 @@
   "analysisThresholds": [0.0, 1.0, 10.0],
   "scenarios": [
     {
+      "slug": "damaged-helmet-hdr-pmrem",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-2CylinderEngine",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 2048,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-AlphaBlendModeTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 2048,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-AntiqueCamera",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1024,
+        "height": 2048
+      }
+    },
+    {
+      "slug": "khronos-Avocado",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-BoomBox",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-BoxVertexColors",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Buggy",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-CesiumMilkTruck",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Corset",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Cube",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Duck",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-EnvironmentTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 2048,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-GearboxAssy",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Lantern",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-MetalRoughSpheres",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-MultiUVTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-NormalTangentMirrorTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-NormalTangentTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-OrientationTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-SciFiHelmet",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-SpecGlossVsMetalRough",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-Suzanne",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-TextureCoordinateTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-TextureSettingsTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-TextureTransformTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-UnlitTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-VertexColorTest",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
       "slug": "pbr-spheres",
       "goldens": [{
         "name": "Filament",
@@ -25,20 +417,6 @@
       }, {
         "name": "iOS 12 Quick Look",
         "file": "quicklook-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "damaged-helmet-hdr-pmrem",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
       }],
       "dimensions": {
         "width": 1536,

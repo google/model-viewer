@@ -29,14 +29,30 @@ const filamentScreenshotScript =
 const backgroundImageRe = /background-image\="([^"]+)"/;
 const modelSourceRe = /src\="([^"]+)"/
 
+const run = async (command, args) => new Promise((resolve, reject) => {
+  const childProcess = spawn(command, args, {
+    cwd: process.cwd(),
+    env: process.env,
+    stdio: ['ignore', 'inherit', 'inherit']
+  });
+
+  childProcess.once('error', (error) => {
+    warn(error);
+  });
+
+  childProcess.once('exit', (code) => {
+    if (code === 0) {
+      resolve();
+    } else {
+      reject(new Error('Command failed'));
+    }
+  });
+});
+
 const updateScreenshots = async (config) => {
   const {scenarios} = config;
 
-  console.log(`💡 Updating screenshots
-
-⏳ NOTE: The first time running this script can take a long time (5 - 10 minutes)
-because we have to build Filament from scratch. If you hear your CPU fan spin
-up, take a break and go make yourself a nice cup of tea!`);
+  console.log(`🆙 Updating screenshots`);
 
   for (const scenario of scenarios) {
     const {goldens, slug} = scenario;
@@ -78,22 +94,32 @@ up, take a break and go make yourself a nice cup of tea!`);
           console.log(
               `✋ Cannot automatically update ${name} screenshots (yet)`);
           break;
+        case '<model-viewer> (master)':
+          console.log(`💡 Rendering ${name} screenshot for ${slug}...`);
+
+          try {
+            await run(
+                'node',
+                ['./scripts/model-viewer-screenshot.js', slug, filePath]);
+          } catch (error) {
+            throw new Error(`Failed to capture <model-viewer> screenshot: ${
+                error.message}`);
+          }
+
+          break;
         case 'Filament':
           const {width, height} = scenario.dimensions;
-          // TODO(cdata): Figure out how to detect high-dpi here:
-          const scaledWidth = width;
-          const scaledHeight = height;
 
           await new Promise((resolve, reject) => {
-            console.log(`🖼 Rendering ${name} screenshot for ${slug}...`);
+            console.log(` Rendering ${name} screenshot for ${slug}...`);
 
             const childProcess = spawn(
                 filamentScreenshotScript,
                 [
                   '-w',
-                  `${scaledWidth}`,
+                  `${width}`,
                   '-h',
-                  `${scaledHeight}`,
+                  `${height}`,
                   '-i',
                   backgroundImagePath,
                   '-m',

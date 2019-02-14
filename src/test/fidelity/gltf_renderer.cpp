@@ -45,6 +45,7 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include <math.h>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -157,6 +158,12 @@ static void cleanup(Engine* engine, View* view, Scene* scene) {
   em.destroy(g_light);
 }
 
+const float FRAMED_HEIGHT = 10.0f;
+const float ROOM_PADDING_SCALE = 1.01f;
+const float FOV = 45.0f;
+
+static float roomDepth = 0.0f;
+
 static void setup(Engine* engine, View* view, Scene* scene) {
   g_meshSet = std::make_unique<MeshAssimp>(*engine);
   for (auto& filename : g_filenames) {
@@ -166,21 +173,65 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   auto& rcm = engine->getRenderableManager();
   auto& tcm = engine->getTransformManager();
 
-  // Compute the scale required to fit the model's bounding box into [-1, 1]
-  float maxExtent = 0;
-  maxExtent = std::max(
-      g_meshSet->maxBound.x - g_meshSet->minBound.x,
-      g_meshSet->maxBound.y - g_meshSet->minBound.y);
-  maxExtent =
-      std::max(maxExtent, g_meshSet->maxBound.z - g_meshSet->minBound.z);
-  float scaleFactor = 2.325f / maxExtent;
+  // Scale and translate the model in a way that matches how ModelScene frames
+  // a model.
+  // @see src/three-components/ModelScene.js
+  float aspect = float(g_config.width) / float(g_config.height);
+  float halfWidth = aspect * FRAMED_HEIGHT / 2.0f;
 
-  float3 center = -1 * (g_meshSet->maxBound + g_meshSet->minBound) / 2.0f;
-  center.z -= 4.0f / scaleFactor;
+  float3 roomMin(-1.0f * halfWidth, 0.0f, -1.0f * halfWidth);
+  float3 roomMax(halfWidth, FRAMED_HEIGHT, halfWidth);
+  float3 roomSize(
+      roomMax.x - roomMin.x, roomMax.y - roomMin.y, roomMax.z - roomMin.z);
+  float3 modelMin = g_meshSet->minBound;
+  float3 modelMax = g_meshSet->maxBound;
+
+  float3 modelSize = modelMax - modelMin;
+
+  float3 roomCenter(
+      roomMin.x + roomSize.x / 2.0f,
+      roomMin.y + roomSize.y / 2.0f,
+      roomMin.z + roomSize.z / 2.0f);
+
+  float3 modelCenter(
+      modelMin.x + modelSize.x / 2.0f,
+      modelMin.y + modelSize.y / 2.0f,
+      modelMin.z + modelSize.z / 2.0f);
+
+  float scale = std::min(roomSize.x / modelSize.x, roomSize.y / modelSize.y);
+  scale = std::min(scale, roomSize.z / modelSize.z);
+
+  scale /= ROOM_PADDING_SCALE;
+
+  modelCenter *= scale;
+
+  float3 center = (roomCenter - modelCenter);
 
   auto rooti = tcm.getInstance(g_meshSet->rootEntity);
+
   tcm.setTransform(
-      rooti, mat4f::scale(float3(scaleFactor)) * mat4f::translate(center));
+      rooti, mat4f::translate(center) * mat4f::scale(float3(scale)));
+
+  if (modelSize.y >= modelSize.x && modelSize.y >= modelSize.z) {
+    roomDepth = std::max(modelSize.x, modelSize.z) * scale * ROOM_PADDING_SCALE;
+  } else {
+    roomDepth = std::abs(roomSize.z);
+  }
+
+  // NOTE(cdata): Leaving these in here for future debugging purposes
+  /*
+  std::cout << "Half width: " << halfWidth << std::endl;
+  std::cout << "Aspect ratio: " << aspect << std::endl;
+  std::cout << "Room size: " << roomSize << std::endl;
+  std::cout << "Model size (natural): " << modelSize << std::endl;
+  std::cout << "Model size (scaled): " << modelSize * scale << std::endl;
+  std::cout << "Room center: " << roomCenter << std::endl;
+  std::cout << "Model center: " << modelCenter << std::endl;
+  std::cout << "Center: " << center << std::endl;
+  std::cout << "Scale: " << scale << std::endl;
+  std::cout << "Model translation: " << tcm.getTransform(rooti)[3].xyz
+            << std::endl;
+  */
 
   for (auto renderable : g_meshSet->getRenderables()) {
     if (rcm.hasComponent(renderable)) {
@@ -206,6 +257,27 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   FilamentApp& filamentApp = FilamentApp::get();
   IBL* ibl = filamentApp.getIBL();
   ibl->getIndirectLight()->setRotation(mat3f::rotate(M_PI_2, float3{0, 1, 0}));
+}
+
+static void preRender(Engine*, View* view, Scene*, Renderer*) {
+  // Adjust the camera projection and translation in a way that is similar to
+  // what ModelScene does.
+  // NOTE(cdata): This might be inefficient to do every prerender, but since we
+  // only wait for one frame before exiting it shouldn't matter in practice.
+  // Also: while spelunking it appeared that the camera has its projection
+  // and position updated multiple times per frame by other implementation
+  // outside of our control. This is why we must make these adjustments during
+  // preRender.
+  // @see src/three-components/ModelScene.js
+  float aspect = float(g_config.width) / float(g_config.height);
+  float halfWidth = aspect * FRAMED_HEIGHT / 2.0f;
+  float near = (FRAMED_HEIGHT / 2.0f) / std::tan((FOV / 2.0f) * M_PI / 180.0f);
+
+  Camera& camera = view->getCamera();
+
+  camera.setProjection(FOV, aspect, near, 100.0f);
+  camera.setModelMatrix(mat4f::translate(
+      float3(0.0f, FRAMED_HEIGHT / 2.0f, (roomDepth / 2.0f) + near)));
 }
 
 static void postRender(Engine*, View* view, Scene*, Renderer* renderer) {
@@ -316,7 +388,7 @@ int main(int argc, char* argv[]) {
       setup,
       cleanup,
       nullptr,
-      nullptr,
+      preRender,
       postRender,
       g_config.width,
       g_config.height);
