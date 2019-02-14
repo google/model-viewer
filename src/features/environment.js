@@ -98,9 +98,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const textures = await textureUtils.generateEnvironmentTextures(url, {
-        pmrem: this.experimentalPmrem
-      });
+      const textures = await textureUtils.generateEnvironmentTextures(
+          url, {pmrem: this.experimentalPmrem});
 
       // If the background image has changed
       // while fetching textures, abort and defer to that
@@ -146,9 +145,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$setShadowLightColor](parsedColor);
 
       // TODO(#336): can cache this per renderer and color
-      const environmentMap = textureUtils.generateDefaultEnvironmentMap({
-        pmrem: this.experimentalPmrem
-      });
+      const environmentMap = textureUtils.generateDefaultEnvironmentMap(
+          {pmrem: this.experimentalPmrem});
 
       this[$applyEnvironmentMap](environmentMap);
     }
@@ -162,6 +160,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     [$applyEnvironmentMap](environmentMap) {
       this[$currentEnvironmentMap] = environmentMap;
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
+      this.dispatchEvent(new CustomEvent('environment-changed'));
 
       this[$needsRender]();
     }

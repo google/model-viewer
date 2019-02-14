@@ -144,13 +144,25 @@ export class ArtifactCreator {
           document.querySelector('model-viewer') as ModelViewerElementBase;
 
       if (!modelViewer.loaded!) {
-        await new Promise((resolve, reject) => {
+        const modelLoads = new Promise((resolve, reject) => {
           const timeout = setTimeout(reject, 10000);
+
           modelViewer.addEventListener('load', () => {
             clearTimeout(timeout);
             resolve();
           });
         });
+
+        const environmentChanges = new Promise((resolve, reject) => {
+          const timeout = setTimeout(reject, 10000);
+
+          modelViewer.addEventListener('environment-changed', () => {
+            clearTimeout(timeout);
+            resolve();
+          });
+        });
+
+        await Promise.all([modelLoads, environmentChanges]);
       }
     });
 

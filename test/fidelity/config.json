@@ -30,6 +30,20 @@
         "width": 1536,
         "height": 1536
       }
+    },
+    {
+      "slug": "damaged-helmet-hdr-pmrem",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
     }
   ]
 }
