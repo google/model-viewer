@@ -55,7 +55,7 @@ export const textureMatchesMeta = (texture, meta) => !!(
     }, true));
 
 /**
- * @param {EventTarget} target
+ * @param {EventTarget|EventDispatcher} target
  * @param {string} eventName
  * @param {?Function} predicate
  */

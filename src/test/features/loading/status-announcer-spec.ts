@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 import {LoadingMixin} from '../../../features/loading.js';
-import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer, UPDATE_STATUS_DEBOUNCE_MS} from '../../../features/loading/status-announcer.js';
+import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer} from '../../../features/loading/status-announcer.js';
 import ModelViewerElementBase from '../../../model-viewer-base.js';
-import {assetPath, isInDocumentTree, timePasses, until, waitForEvent} from '../../helpers.js';
+import {assetPath, isInDocumentTree, until, waitForEvent} from '../../helpers.js';
 
 const expect = chai.expect;
-const TIME_TO_UPDATE_MS = UPDATE_STATUS_DEBOUNCE_MS + 50;
 
 suite('LoadingStatusAnnouncer', () => {
   let nextId = 0;
@@ -47,7 +46,7 @@ suite('LoadingStatusAnnouncer', () => {
 
         loadingStatusAnnouncer.registerInstance(element);
 
-        await timePasses(TIME_TO_UPDATE_MS);
+        await waitForEvent(loadingStatusAnnouncer, 'initial-status-announced');
 
         const {statusElement} = loadingStatusAnnouncer;
 
@@ -62,8 +61,10 @@ suite('LoadingStatusAnnouncer', () => {
 
           loadingStatusAnnouncer.registerInstance(element);
 
-          await until(() => element.loaded);
-          await timePasses(TIME_TO_UPDATE_MS);
+          await Promise.all([
+            until(() => element.loaded),
+            waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
+          ]);
 
           const {statusElement} = loadingStatusAnnouncer;
 
@@ -82,9 +83,10 @@ suite('LoadingStatusAnnouncer', () => {
           loadingStatusAnnouncer.registerInstance(elementOne);
           loadingStatusAnnouncer.registerInstance(elementTwo);
 
-          await Promise.all(
-              [until(() => elementOne.loaded), until(() => elementTwo.loaded)]);
-          await timePasses(TIME_TO_UPDATE_MS);
+          await Promise.all([
+            until(() => elementOne.loaded && elementTwo.loaded),
+            waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
+          ]);
 
           const {statusElement} = loadingStatusAnnouncer;
 
@@ -106,8 +108,10 @@ suite('LoadingStatusAnnouncer', () => {
             loadingStatusAnnouncer.registerInstance(elementOne);
             loadingStatusAnnouncer.registerInstance(elementTwo);
 
-            await until(() => elementTwo.loaded);
-            await timePasses(TIME_TO_UPDATE_MS);
+            await Promise.all([
+              until(() => elementTwo.loaded),
+              waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
+            ]);
 
             const {statusElement} = loadingStatusAnnouncer;
 
@@ -129,8 +133,11 @@ suite('LoadingStatusAnnouncer', () => {
             loadingStatusAnnouncer.registerInstance(elementOne);
             loadingStatusAnnouncer.registerInstance(elementTwo);
 
-            await Promise.all([errorOccurs, until(() => elementTwo.loaded)]);
-            await timePasses(TIME_TO_UPDATE_MS);
+            await Promise.all([
+              errorOccurs,
+              until(() => elementTwo.loaded),
+              waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
+            ]);
 
             const {statusElement} = loadingStatusAnnouncer;
 

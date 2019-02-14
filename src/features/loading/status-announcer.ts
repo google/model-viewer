@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {EventDispatcher} from 'three';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {debounce, getFirstMapKey} from '../../utils.js';
 
@@ -20,15 +21,14 @@ export const INITIAL_STATUS_ANNOUNCEMENT =
     'This page includes one or more 3D models that are loading';
 export const FINISHED_LOADING_ANNOUNCEMENT =
     'All 3D models in the page have loaded';
-export const UPDATE_STATUS_DEBOUNCE_MS = 100;
+const UPDATE_STATUS_DEBOUNCE_MS = 100;
 
 
 const $modelViewerStatusInstance = Symbol('modelViewerStatusInstance');
 const $updateStatus = Symbol('updateStatus');
 
 interface InstanceLoadingStatus {
-  instanceWasUnregistered: () => void;
-  loadAttemptCompletes: Promise<any>;
+  onUnregistered: () => void;
 }
 
 /**
@@ -42,7 +42,7 @@ interface InstanceLoadingStatus {
  *  1. There are <model-viewer> elements that have yet to finish loading
  *  2. All <model-viewer> elements in the page have finished attempting to load
  */
-export class LoadingStatusAnnouncer {
+export class LoadingStatusAnnouncer extends EventDispatcher {
   /**
    * The "status" instance is the <model-viewer> instance currently designated
    * to announce the loading status of all <model-viewer> elements in the
@@ -73,6 +73,7 @@ export class LoadingStatusAnnouncer {
       debounce(() => this.updateStatus(), UPDATE_STATUS_DEBOUNCE_MS);
 
   constructor() {
+    super();
     this.statusElement.setAttribute('role', 'status');
     this.statusElement.style.position = 'absolute';
     this.statusElement.style.color = 'transparent';
@@ -88,28 +89,29 @@ export class LoadingStatusAnnouncer {
       return;
     }
 
-    let instanceWasUnregistered = () => {};
+    let onUnregistered = () => {};
     const loadShouldBeMeasured =
         modelViewer.loaded === false && !!(modelViewer as any).src;
-    const loadAttemptCompletes = loadShouldBeMeasured ?
-        new Promise((resolve) => {
-          const resolveHandler = () => {
-            resolve();
+    const loadAttemptCompletes = new Promise((resolve) => {
+      if (!loadShouldBeMeasured) {
+        resolve();
+        return;
+      }
 
-            modelViewer.removeEventListener('load', resolveHandler);
-            modelViewer.removeEventListener('error', resolveHandler);
-          };
+      const resolveHandler = () => {
+        resolve();
 
-          modelViewer.addEventListener('load', resolveHandler);
-          modelViewer.addEventListener('error', resolveHandler);
+        modelViewer.removeEventListener('load', resolveHandler);
+        modelViewer.removeEventListener('error', resolveHandler);
+      };
 
-          instanceWasUnregistered = resolveHandler;
-        }) :
-        Promise.resolve();
+      modelViewer.addEventListener('load', resolveHandler);
+      modelViewer.addEventListener('error', resolveHandler);
 
-    this.registeredInstanceStatuses.set(
-        modelViewer, {instanceWasUnregistered, loadAttemptCompletes});
+      onUnregistered = resolveHandler;
+    });
 
+    this.registeredInstanceStatuses.set(modelViewer, {onUnregistered});
     this.loadingPromises.push(loadAttemptCompletes);
 
     if (this.modelViewerStatusInstance == null) {
@@ -129,7 +131,7 @@ export class LoadingStatusAnnouncer {
     const statuses = this.registeredInstanceStatuses;
     const instanceStatus = statuses.get(modelViewer)!;
     statuses.delete(modelViewer);
-    instanceStatus.instanceWasUnregistered();
+    instanceStatus.onUnregistered();
 
     if (this.modelViewerStatusInstance === modelViewer) {
       this.modelViewerStatusInstance = statuses.size > 0 ?
@@ -168,6 +170,7 @@ export class LoadingStatusAnnouncer {
 
     this.statusElement.textContent = INITIAL_STATUS_ANNOUNCEMENT;
     this.statusUpdateInProgress = true;
+    this.dispatchEvent({type: 'initial-status-announced'});
 
     while (this.loadingPromises.length) {
       const {loadingPromises} = this;
@@ -177,5 +180,6 @@ export class LoadingStatusAnnouncer {
 
     this.statusElement.textContent = FINISHED_LOADING_ANNOUNCEMENT;
     this.statusUpdateInProgress = false;
+    this.dispatchEvent({type: 'finished-loading-announced'});
   }
 }
