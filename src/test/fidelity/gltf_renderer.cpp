@@ -262,9 +262,38 @@ static void postRender(Engine*, View* view, Scene*, Renderer* renderer) {
   g_currentFrame++;
 }
 
+// Reconfigures the window dimensions as necessary so that we take consistently
+// sized screenshots across all display densities. Note that the render scale is
+// not directly related to the display DPI. For example, a MacBook Pro with a
+// reported DPI of 129 might use a scaling factor of 2.0.
+static void configureWindow(SDL_Window* window) {
+  int windowWidth, windowHeight;
+  int displayWidth, displayHeight;
+  SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+  SDL_GL_GetDrawableSize(window, &displayWidth, &displayHeight);
+
+  float renderScale = displayWidth / windowWidth;
+
+  std::cout << "Initial window dimensions: " << windowWidth << " x "
+            << windowHeight << std::endl;
+  std::cout << "Initial display dimensions: " << displayWidth << " x "
+            << displayHeight << std::endl;
+
+  std::cout << "Detected backing scale: " << renderScale << std::endl;
+
+  if (renderScale > 1.0f) {
+    int newWidth = windowWidth / renderScale;
+    int newHeight = windowHeight / renderScale;
+    std::cout << "Resizing window to: " << newWidth << " x " << newHeight
+              << std::endl;
+    SDL_SetWindowSize(window, newWidth, newHeight);
+  }
+}
+
 int main(int argc, char* argv[]) {
   int option_index = handleCommandLineArgments(argc, argv, &g_config);
   int num_args = argc - option_index;
+
   if (num_args < 1) {
     printUsage(argv[0]);
     return 1;
@@ -282,6 +311,7 @@ int main(int argc, char* argv[]) {
   FilamentApp& filamentApp = FilamentApp::get();
   filamentApp.run(
       g_config,
+      configureWindow,
       setup,
       cleanup,
       nullptr,
