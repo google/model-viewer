@@ -18,7 +18,7 @@
 ##
 # Render VM Startup Script
 #
-# This script is intended to be used in an Ubuntu 18.04 cloud VM with NVIDIA
+# This script is intended to be used in an Ubuntu 18.04 cloud VM with an NVIDIA
 # Tesla GPU. It is designed to run on startup, provision the VM if necessary,
 # build 3D renderers (currently only Filament), collect screenshots and create
 # a PR on Github if there are any changes.
