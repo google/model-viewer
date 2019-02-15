@@ -73,7 +73,7 @@ edges.
 Screenshots of a Filament-based glTF viewer are automatically collected daily,
 and PRs are automatically created if there are any changes.
 
-Use `npm run update-screenshots` to run the script the produces the screenshots
+Use `npm run update-screenshots` to run the script that produces the screenshots
 yourself. This script builds Filament the first time you run it, so please
 refer to [Filament's README](https://github.com/google/filament) to learn how
 to bootstrap the appropriate dev environment for building it.
