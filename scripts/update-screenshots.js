@@ -13,22 +13,19 @@
  * limitations under the License.
  */
 
-// const {promisify} = require('util');
-// const exec = promisify(require('child_process').exec);
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
 const path = require('path');
 
 const warn = (message) => console.warn(`🚨 ${message}`);
-const exit = () => {
+const exit = (code = 0) => {
   console.log(`📋 Screenshot updates concluded`);
-  process.exit(0);
+  process.exit(code);
 };
 
 const fidelityTestDirectory = path.resolve('./test/fidelity');
 const filamentScreenshotScript =
     path.resolve('./scripts/filament-screenshot.sh');
-const config = require(path.join(fidelityTestDirectory, 'config.json'));
 const backgroundImageRe = /background-image\="([^"]+)"/;
 const modelSourceRe = /src\="([^"]+)"/
 
@@ -77,6 +74,10 @@ up, take a break and go make yourself a nice cup of tea!`);
       const filePath = path.resolve(scenarioDirectory, file);
 
       switch (name) {
+        default:
+          console.log(
+              `✋ Cannot automatically update ${name} screenshots (yet)`);
+          break;
         case 'Filament':
           const {width, height} = scenario.dimensions;
           // TODO(cdata): Figure out how to detect high-dpi here:
@@ -84,7 +85,7 @@ up, take a break and go make yourself a nice cup of tea!`);
           const scaledHeight = height;
 
           await new Promise((resolve, reject) => {
-            console.log(`🖼  Rendering ${name} screenshot for ${slug}...`);
+            console.log(`🖼 Rendering ${name} screenshot for ${slug}...`);
 
             const childProcess = spawn(
                 filamentScreenshotScript,
@@ -121,12 +122,15 @@ up, take a break and go make yourself a nice cup of tea!`);
             });
           });
 
-          // await exec(command);
-
           break;
       }
     }
   }
 };
 
-updateScreenshots(config).then(() => exit());
+updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
+    .then(() => exit(0))
+    .catch((error) => {
+      console.error(error);
+      exit(1);
+    });
