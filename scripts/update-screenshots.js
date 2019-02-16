@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-// const {promisify} = require('util');
-// const exec = promisify(require('child_process').exec);
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
 const path = require('path');
@@ -77,6 +75,10 @@ up, take a break and go make yourself a nice cup of tea!`);
       const filePath = path.resolve(scenarioDirectory, file);
 
       switch (name) {
+        default:
+          console.log(
+              `✋ Cannot automatically update ${name} screenshots (yet)`);
+          break;
         case 'Filament':
           const {width, height} = scenario.dimensions;
           // TODO(cdata): Figure out how to detect high-dpi here:
@@ -84,7 +86,7 @@ up, take a break and go make yourself a nice cup of tea!`);
           const scaledHeight = height;
 
           await new Promise((resolve, reject) => {
-            console.log(`🖼  Rendering ${name} screenshot for ${slug}...`);
+            console.log(`🖼 Rendering ${name} screenshot for ${slug}...`);
 
             const childProcess = spawn(
                 filamentScreenshotScript,

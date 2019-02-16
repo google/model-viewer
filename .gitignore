@@ -1,3 +1,4 @@
+renderers/*
 node_modules/*
 dist/*
 lib/*
