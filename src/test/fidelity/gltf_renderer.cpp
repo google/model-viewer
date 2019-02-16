@@ -73,7 +73,8 @@ static Config g_config;
 
 static void printUsage(char* name) {
   std::string usage(
-      "gltf_viewer displays gltf models using the filament renderer\n"
+      "gltf_renderer generates PNGs of gltf models using the filament "
+      "renderer\n"
       "Usage:\n"
       "    gltf_viewer [options] <gltf/glb>\n"
       "Options:\n"

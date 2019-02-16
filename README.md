@@ -273,6 +273,9 @@ The following npm scripts are available:
 * `npm run serve` - Serves a static server on port `8000` from the project root.
 * `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
 * `npm test` - Runs tests.
+* `npm run check-fidelity` - Compare rendering to third-party renderers
+* `npm run install-renderers` - Install or update third-party renderers
+* `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers
 
 ## Examples
 
