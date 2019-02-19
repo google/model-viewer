@@ -53,3 +53,7 @@ licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 ## cube.gltf, offcenter-cube.gltf, pbr-spheres.glb, radiance.glb, reflective-sphere.gltf
 
 Contributed by <a href="https://github.com/jsantell">jsantell</a>
+
+## Triangle.gltf
+
+Contributed by <a href="https://github.com/donmccurdy">donmccurdy</a>

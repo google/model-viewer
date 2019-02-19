@@ -48,7 +48,9 @@ export class CachingGLTFLoader {
         // Set a high renderOrder while we're here to ensure the model
         // always renders on top of the skysphere
         object.renderOrder = 1000;
-        if (object.material) {
+        if (Array.isArray(object.material)) {
+          object.material = object.material.map(m => m.clone());
+        } else if (object.material) {
           object.material = object.material.clone();
         }
       });
