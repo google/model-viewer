@@ -274,8 +274,10 @@ The following npm scripts are available:
 * `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
 * `npm test` - Runs tests.
 * `npm run check-fidelity` - Compare rendering to third-party renderers
-* `npm run install-renderers` - Install or update third-party renderers
-* `npm run checkout-samples` - Create or update a local copy of sample models. This is needed for running fidelity checks and updating screenshots.
+* `npm run bootstrap-fidelity-dev` - Bootstrap the project for developing
+fidelity testing infrastructure or updating screenshots. NOTE: This will
+download hundreds of megabytes of data and spend a significant amount of
+time compiling renderers the first time you run it.
 * `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers
 
 ## Examples
