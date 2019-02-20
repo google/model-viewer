@@ -96,6 +96,7 @@ cp $GLTF_RENDERER_CPP_PATH $FILAMENT_DIR/samples
 # Export critical environment variables for bulding Filament
 export CC=clang-7
 export CXX=clang++-7
+export CXXFLAGS="-stdlib=libc++"
 export FILAMENT_REQUIRES_CXXABI=true
 
 ./build.sh -j release
