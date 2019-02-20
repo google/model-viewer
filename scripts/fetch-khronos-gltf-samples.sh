@@ -28,6 +28,9 @@ fi
 pushd $CLONE_PATH
 ORIGIN_URL=`git config remote.origin.url`;
 
+echo '🐶 Fetching Khronos glTF sample models.
+🐕 WARNING: This might result in hundreds of megabytes of data usage!'
+
 if [ -z "$ORIGIN_URL" ]; then
   git remote add origin $REPO_URL
 else
@@ -39,5 +42,7 @@ fi
 
 git fetch origin
 git reset --hard origin/master
+
+echo '🎾 Sample models are now available'
 
 popd

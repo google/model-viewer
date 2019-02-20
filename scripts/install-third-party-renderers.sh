@@ -87,7 +87,7 @@ fi
 
 pushd $FILAMENT_DIR
 
-#git fetch --depth=1 origin
+git fetch --depth=1 origin
 git reset --hard origin/master
 
 git apply $FILAMENT_PATCH_PATH

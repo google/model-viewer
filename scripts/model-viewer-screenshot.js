@@ -41,16 +41,14 @@ if (outputFile == null) {
   process.exit(1);
 }
 
-screenshotCreator
-    .captureScreenshot(slug, configReader.dimensionsForSlug(slug), outputFile)
-    .then(() => {
-      return 0;
-    })
-    .catch(error => {
-      console.error(error)
-      return 1;
-    })
-    .then(code => {
-      server.close();
-      process.exit(code);
-    });
+(async () => {
+  try {
+    await screenshotCreator.captureScreenshot(
+        slug, configReader.dimensionsForSlug(slug), outputFile);
+  } catch (error) {
+    console.error(error);
+    code = 1;
+  } finally {
+    server.close();
+  }
+})();
