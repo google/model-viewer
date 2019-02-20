@@ -93,7 +93,7 @@ git reset --hard origin/master
 git apply $FILAMENT_PATCH_PATH
 cp $GLTF_RENDERER_CPP_PATH $FILAMENT_DIR/samples
 
-# Export critical environment variables for bulding Filament
+# Export critical environment variables for building Filament
 export CC=clang-7
 export CXX=clang++-7
 export CXXFLAGS=-stdlib=libc++
