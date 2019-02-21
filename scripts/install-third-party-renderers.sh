@@ -94,10 +94,18 @@ git apply $FILAMENT_PATCH_PATH
 cp $GLTF_RENDERER_CPP_PATH $FILAMENT_DIR/samples
 
 # Export critical environment variables for building Filament
-export CC=clang-7
-export CXX=clang++-7
 export CXXFLAGS=-stdlib=libc++
-export FILAMENT_REQUIRES_CXXABI=true
+if [ "Linux" = $(uname -s) ]; then
+  export CC=clang-7
+  export CXX=clang++-7
+  export FILAMENT_REQUIRES_CXXABI=true
+elif [ "Darwin" = $(uname -s) ]; then
+  # no customizations needed
+  :
+else
+  echo "unknown platform: $(uname -s)"
+  exit 1
+fi
 
 ./build.sh -j release
 
