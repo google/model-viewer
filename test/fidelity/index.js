@@ -35,7 +35,17 @@ try {
   console.warn(error);
 }
 
-screenshotCreator.captureAndAnalyzeScreenshots()
+let scenarioWhitelist = null;
+
+if (process.argv.length > 2) {
+  scenarioWhitelist = new Set();
+
+  for (let i = 2; i < process.argv.length; i++) {
+    scenarioWhitelist.add(process.argv[i]);
+  }
+}
+
+screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
