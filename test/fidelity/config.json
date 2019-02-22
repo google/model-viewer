@@ -398,6 +398,9 @@
     {
       "slug": "pbr-spheres",
       "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
         "name": "Filament",
         "file": "filament-golden.png"
       }, {
@@ -412,6 +415,9 @@
     {
       "slug": "alpha-blend-litmus",
       "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
         "name": "Filament",
         "file": "filament-golden.png"
       }, {

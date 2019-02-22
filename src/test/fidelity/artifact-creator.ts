@@ -36,11 +36,17 @@ export class ArtifactCreator {
     console.log('🌈 Preparing to capture screenshots for fidelity comparison');
   }
 
-  async captureAndAnalyzeScreenshots() {
+  async captureAndAnalyzeScreenshots(
+      scenarioWhitelist: Set<string>|null = null) {
     const {outputDirectory, scenarios, analysisThresholds} = this.config
+    const analyzedScenarios: Array<ScenarioConfig> = [];
 
     for (const scenario of scenarios) {
       const {slug, goldens, dimensions} = scenario;
+
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(slug)) {
+        continue;
+      }
 
       console.log(`\n🎨 Scenario: ${slug}`);
 
@@ -57,12 +63,17 @@ export class ArtifactCreator {
       await fs.writeFile(
           path.join(outputDirectory, slug, 'analysis.json'),
           JSON.stringify(scenarioRecord));
+
+      analyzedScenarios.push(scenario);
     }
 
     console.log('💾 Recording configuration');
 
+    const finalConfig: ImageComparisonConfig =
+        Object.assign({}, this.config, {scenarios: analyzedScenarios});
+
     await fs.writeFile(
-        path.join(outputDirectory, 'config.json'), JSON.stringify(this.config));
+        path.join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
 
     return scenarios;
   }
