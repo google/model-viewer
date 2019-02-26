@@ -396,6 +396,39 @@
       }
     },
     {
+      "slug": "basic-astronaut",
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      },
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }]
+    },
+    {
+      "slug": "damaged-helmet-hdr-pmrem",
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      },
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }]
+    },
+    {
+      "slug": "damaged-helmet-solid-color-pmrem",
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      },
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }]
+    },
+    {
       "slug": "pbr-spheres",
       "goldens": [{
         "name": "<model-viewer> (master)",

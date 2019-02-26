@@ -29,6 +29,16 @@ const filamentScreenshotScript =
 const backgroundImageRe = /background-image\="([^"]+)"/;
 const modelSourceRe = /src\="([^"]+)"/
 
+let rendererWhitelist = null;
+
+if (process.argv.length > 2) {
+  rendererWhitelist = new Set();
+
+  for (let i = 2; i < process.argv.length; i++) {
+    rendererWhitelist.add(process.argv[i]);
+  }
+}
+
 const run = async (command, args) => new Promise((resolve, reject) => {
   const childProcess = spawn(command, args, {
     cwd: process.cwd(),
@@ -65,29 +75,17 @@ const updateScreenshots = async (config) => {
     const backgroundImage =
         backgroundImageMatch != null ? backgroundImageMatch[1] : null;
 
-    if (backgroundImage == null) {
-      warn(`Could not determine IBL for ${scenario.slug}; skipping...`);
-      continue;
-    }
-
     const modelSourceMatch = html.match(modelSourceRe);
     const modelSource = modelSourceMatch != null ? modelSourceMatch[1] : null;
-
-    if (modelSource == null) {
-      warn(
-          `Could not determine model source for ${scenario.slug}; skipping...`);
-      continue;
-    }
-
-    const backgroundImagePath =
-        path.resolve(path.dirname(testHtmlPath), backgroundImage);
-
-    const modelSourcePath =
-        path.resolve(path.dirname(testHtmlPath), modelSource);
 
     for (const golden of goldens) {
       const {name, file} = golden;
       const filePath = path.resolve(scenarioDirectory, file);
+
+      if (rendererWhitelist != null && !rendererWhitelist.has(name)) {
+        console.log(`⏭  Skipping ${name}...`);
+        continue;
+      }
 
       switch (name) {
         default:
@@ -110,8 +108,25 @@ const updateScreenshots = async (config) => {
         case 'Filament':
           const {width, height} = scenario.dimensions;
 
+          if (modelSource == null) {
+            warn(`Could not determine model source for ${
+                scenario.slug}; skipping...`);
+            continue;
+          }
+
+          if (backgroundImage == null) {
+            warn(`Could not determine IBL for ${scenario.slug}; skipping...`);
+            continue;
+          }
+
+          const backgroundImagePath =
+              path.resolve(path.dirname(testHtmlPath), backgroundImage);
+
+          const modelSourcePath =
+              path.resolve(path.dirname(testHtmlPath), modelSource);
+
           await new Promise((resolve, reject) => {
-            console.log(` Rendering ${name} screenshot for ${slug}...`);
+            console.log(`🖌️  Rendering ${name} screenshot for ${slug}...`);
 
             const childProcess = spawn(
                 filamentScreenshotScript,

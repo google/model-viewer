@@ -147,6 +147,19 @@ export class ArtifactCreator {
     const page = await browser.newPage();
     const url = `${this.baseUrl}${slug}/`;
 
+    page.on('error', (error: any) => {
+      console.log(`🚨 ${error}`);
+    });
+
+    page.on('console', async (message: any) => {
+      const args =
+          await Promise.all(message.args().map((arg: any) => arg.jsonValue()));
+
+      if (args.length) {
+        console.log(`➡️`, ...args);
+      }
+    });
+
     console.log(`🗺  Navigating to ${url}`);
 
     await page.goto(url);
