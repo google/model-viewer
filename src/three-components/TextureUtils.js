@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
+import {Cache, CubeTexture, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
 
 import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
 import PMREMCubeUVPacker from '../third_party/three/PMREMCubeUVPacker.js';
@@ -126,7 +126,7 @@ export default class TextureUtils extends EventDispatcher {
    * @param {?boolean} config.pmrem
    * @return {THREE.Texture}
    */
-  generateDefaultEnvironmentMap(config={}) {
+  generateDefaultEnvironmentMap(config = {}) {
     const mapSize = this.config.synthesizedEnvmapSize;
     const cubemap = this.environmentMapGenerator.generate(mapSize);
 
@@ -134,9 +134,9 @@ export default class TextureUtils extends EventDispatcher {
 
     if (config.pmrem) {
       environmentMap = this.pmremPass(
-        cubemap,
-        this.config.defaultEnvironmentPmremSamples,
-        this.config.defaultEnvironmentPmremSize);
+          cubemap,
+          this.config.defaultEnvironmentPmremSamples,
+          this.config.defaultEnvironmentPmremSize);
 
       cubemap.dispose();
     } else {
@@ -196,7 +196,7 @@ export default class TextureUtils extends EventDispatcher {
    * @param {boolean} config.pmrem
    * @return {Promise<Object|null>}
    */
-  async generateEnvironmentTextures(url, config={}) {
+  async generateEnvironmentTextures(url, config = {}) {
     let equirect, skybox, environmentMap;
     try {
       equirect = await this.load(url);
@@ -210,8 +210,7 @@ export default class TextureUtils extends EventDispatcher {
       }
 
       return {environmentMap, skybox};
-    }
-    catch (error) {
+    } catch (error) {
       if (skybox) {
         skybox.dispose();
       }
@@ -220,8 +219,7 @@ export default class TextureUtils extends EventDispatcher {
       }
 
       return null;
-    }
-    finally {
+    } finally {
       if (equirect) {
         equirect.dispose();
       }

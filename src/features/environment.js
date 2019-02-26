@@ -29,6 +29,7 @@ const $setShadowLightColor = Symbol('setShadowLightColor');
 const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
+const $updateSceneLighting = Symbol('updateSceneLighting');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -162,7 +163,20 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-changed'));
 
+      this[$updateSceneLighting]();
       this[$needsRender]();
+    }
+
+    [$updateSceneLighting]() {
+      const scene = this[$scene];
+
+      if (this.experimentalPmrem) {
+        scene.light.visible = false;
+        scene.shadowLight.intensity = 0.5;
+      } else {
+        scene.light.visible = true;
+        scene.shadowLight.intensity = 0.75;
+      }
     }
 
     [$setShadowLightColor](color) {

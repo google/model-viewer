@@ -245,9 +245,9 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   g_light = EntityManager::get().create();
   LightManager::Builder(LightManager::Type::SUN)
       .color(Color::toLinear<ACCURATE>(sRGBColor(1.0f, 1.0f, 1.0f)))
-      .intensity(110000)
+      .intensity(15000)
       .direction({0.0, -1, 0.0})
-      .sunAngularRadius(1.9f)
+      .sunAngularRadius(0.85f)
       .build(*engine, g_light);
 
   scene->addEntity(g_light);

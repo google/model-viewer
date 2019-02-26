@@ -52,6 +52,7 @@ export default class Model extends Object3D {
     this.modelContainer.traverse(obj => {
       if (obj && obj.isMesh && obj.material) {
         obj.material.envMap = map;
+        obj.material.envMapIntensity = 0.85;
         obj.material.needsUpdate = true;
       }
     });

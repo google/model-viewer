@@ -69,6 +69,7 @@ export default class Renderer extends EventDispatcher {
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
       this.renderer.gammaFactor = GAMMA_FACTOR;
+      this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
       // ACESFilmicToneMapping appears to be the most "saturated",
@@ -82,7 +83,9 @@ export default class Renderer extends EventDispatcher {
     }
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
-    this.textureUtils = this.canRender ? new TextureUtils(this.renderer) : null;
+    this.textureUtils = this.canRender ?
+        new TextureUtils(this.renderer, {pmremSamples: 128}) :
+        null;
 
     this.scenes = new Set();
     this.scenesRendered = 0;
