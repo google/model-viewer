@@ -16,7 +16,6 @@
 import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, UniformsUtils} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
-import {BASE_SHADOW_OPACITY} from '../three-components/StaticShadow.js'
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
@@ -42,13 +41,13 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         backgroundImage: {type: String, attribute: 'background-image'},
         backgroundColor: {type: String, attribute: 'background-color'},
         experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'},
-        shadowStrength: {type: Number, attribute: 'shadow-strength'}
+        shadowIntensity: {type: Number, attribute: 'shadow-intensity'}
       };
     }
 
     constructor(...args) {
       super(...args);
-      this.shadowStrength = DEFAULT_SHADOW_STRENGTH;
+      this.shadowIntensity = DEFAULT_SHADOW_STRENGTH;
     }
 
     get[$hasBackgroundImage]() {
@@ -64,7 +63,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     update(changedProperties) {
       super.update(changedProperties);
 
-      if (changedProperties.has('shadowStrength')) {
+      if (changedProperties.has('shadowIntensity')) {
         this[$updateShadow]();
       }
 
@@ -177,12 +176,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     }
 
     [$updateShadow]() {
-      const {shadowStrength} = this;
-      const shadowStrengthIsNumber =
-          typeof shadowStrength === 'number' && !Number.isNaN(shadowStrength);
-
-      this[$scene].shadow.material.opacity = BASE_SHADOW_OPACITY *
-          (shadowStrengthIsNumber ? shadowStrength : DEFAULT_SHADOW_STRENGTH);
+      this[$scene].shadow.intensity = this.shadowIntensity;
       this[$needsRender]();
     }
 

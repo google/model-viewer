@@ -20,7 +20,7 @@ const $renderTarget = Symbol('renderTarget');
 
 const scale = new Vector3();
 
-export const BASE_SHADOW_OPACITY = 0.1;
+const BASE_SHADOW_OPACITY = 0.1;
 
 const DEFAULT_CONFIG = {
   near: 0.01,
@@ -64,6 +64,18 @@ export default class StaticShadow extends Mesh {
     this.material.needsUpdate = true;
 
     this[$camera] = new OrthographicCamera();
+  }
+
+  get intensity() {
+    return this.material.opacity / BASE_SHADOW_OPACITY;
+  }
+
+  set intensity(intensity) {
+    const intensityIsNumber =
+        typeof intensity === 'number' && !Number.isNaN(intensity);
+
+    this.material.opacity =
+        BASE_SHADOW_OPACITY * (intensityIsNumber ? intensity : 0.0);
   }
 
   /**
