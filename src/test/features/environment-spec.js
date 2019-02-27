@@ -192,6 +192,21 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
+  suite('shadow-strength', () => {
+    setup(async () => {
+      element.src = MODEL_URL;
+      await waitForEvent(element, 'load');
+    });
+
+    test('changes the opacity of the static shadow', async () => {
+      const originalOpacity = scene.shadow.material.opacity;
+      element.shadowStrength = 1.0;
+      await timePasses();
+      const newOpacity = scene.shadow.material.opacity;
+      expect(newOpacity).to.be.greaterThan(originalOpacity);
+    });
+  });
+
   suite('with background-color and background-image properties', () => {
     setup(async () => {
       let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});

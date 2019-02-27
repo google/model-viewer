@@ -20,6 +20,8 @@ const $renderTarget = Symbol('renderTarget');
 
 const scale = new Vector3();
 
+export const BASE_SHADOW_OPACITY = 0.1;
+
 const DEFAULT_CONFIG = {
   near: 0.01,
   far: 100,
@@ -33,7 +35,7 @@ const shadowGeneratorMaterial = new MeshBasicMaterial({
 
 const shadowTextureMaterial = new MeshBasicMaterial({
   transparent: true,
-  opacity: 0.1,
+  opacity: BASE_SHADOW_OPACITY,
 });
 
 /**

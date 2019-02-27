@@ -16,8 +16,10 @@
 import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, UniformsUtils} from 'three';
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import {BASE_SHADOW_OPACITY} from '../three-components/StaticShadow.js'
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
+const DEFAULT_SHADOW_STRENGTH = 0.0;
 
 const WHITE = new Color('#ffffff');
 
@@ -30,6 +32,7 @@ const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
 const $updateSceneLighting = Symbol('updateSceneLighting');
+const $updateShadow = Symbol('updateShadow');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
@@ -38,8 +41,14 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         ...super.properties,
         backgroundImage: {type: String, attribute: 'background-image'},
         backgroundColor: {type: String, attribute: 'background-color'},
-        experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'}
+        experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'},
+        shadowStrength: {type: Number, attribute: 'shadow-strength'}
       };
+    }
+
+    constructor(...args) {
+      super(...args);
+      this.shadowStrength = DEFAULT_SHADOW_STRENGTH;
     }
 
     get[$hasBackgroundImage]() {
@@ -52,12 +61,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       return this.backgroundColor && this.backgroundColor !== 'null';
     }
 
-    connectedCallback() {
-      super.connectedCallback();
-    }
-
     update(changedProperties) {
       super.update(changedProperties);
+
+      if (changedProperties.has('shadowStrength')) {
+        this[$updateShadow]();
+      }
 
       if (!changedProperties.has('backgroundImage') &&
           !changedProperties.has('backgroundColor') &&
@@ -164,6 +173,16 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this.dispatchEvent(new CustomEvent('environment-changed'));
 
       this[$updateSceneLighting]();
+      this[$needsRender]();
+    }
+
+    [$updateShadow]() {
+      const {shadowStrength} = this;
+      const shadowStrengthIsNumber =
+          typeof shadowStrength === 'number' && !Number.isNaN(shadowStrength);
+
+      this[$scene].shadow.material.opacity = BASE_SHADOW_OPACITY *
+          (shadowStrengthIsNumber ? shadowStrength : DEFAULT_SHADOW_STRENGTH);
       this[$needsRender]();
     }
 
