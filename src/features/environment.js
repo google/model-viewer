@@ -17,9 +17,11 @@ import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, Uni
 
 import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
 
+import {IlluminationRole} from '../three-components/ModelScene.js';
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
+const DEFAULT_STAGE_LIGHT_INTENSITY = 1.0;
 
 const WHITE = new Color('#ffffff');
 
@@ -31,7 +33,7 @@ const $setShadowLightColor = Symbol('setShadowLightColor');
 const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
-const $updateSceneLighting = Symbol('updateSceneLighting');
+const $updateStageLighting = Symbol('updateStageLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 
@@ -44,6 +46,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         backgroundColor: {type: String, attribute: 'background-color'},
         experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'},
         shadowIntensity: {type: Number, attribute: 'shadow-intensity'},
+        stageLightIntensity: {type: Number, attribute: 'stage-light-intensity'},
         exposure: {type: Number, attribute: 'exposure'}
       };
     }
@@ -51,6 +54,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     constructor(...args) {
       super(...args);
       this.shadowIntensity = DEFAULT_SHADOW_STRENGTH;
+      this.stageLightIntensity = DEFAULT_STAGE_LIGHT_INTENSITY;
       this.exposure = DEFAULT_EXPOSURE;
     }
 
@@ -73,6 +77,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       if (changedProperties.has('exposure')) {
         this[$updateToneMapping]();
+      }
+
+      if (changedProperties.has('stageLightIntensity')) {
+        this[$updateStageLighting]();
       }
 
       if (!changedProperties.has('backgroundImage') &&
@@ -179,7 +187,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-changed'));
 
-      this[$updateSceneLighting]();
+      this[$updateStageLighting]();
       this[$needsRender]();
     }
 
@@ -193,16 +201,13 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$needsRender]();
     }
 
-    [$updateSceneLighting]() {
+    [$updateStageLighting]() {
       const scene = this[$scene];
+      const illuminationRole = this.experimentalPmrem ?
+          IlluminationRole.Secondary :
+          IlluminationRole.Primary;
 
-      if (this.experimentalPmrem) {
-        scene.light.visible = false;
-        scene.shadowLight.intensity = 0.5;
-      } else {
-        scene.light.visible = true;
-        scene.shadowLight.intensity = 0.75;
-      }
+      scene.configureStageLighting(this.stageLightIntensity, illuminationRole);
     }
 
     [$setShadowLightColor](color) {

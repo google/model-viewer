@@ -28,6 +28,12 @@ export const ScaleTypes = {
   Framed: 'framed',
   Lifesize: 'lifesize',
 };
+
+export const IlluminationRole = {
+  Primary: 'primary',
+  Secondary: 'secondary'
+};
+
 const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 
 // This (arbitrary) value represents the height of the scene in
@@ -43,6 +49,12 @@ export const FRAMED_HEIGHT = 10;
 // visible "room" in the future where framing needs to be precise), we shrink
 // the room by a little bit so it's always slightly bigger than the model.
 export const ROOM_PADDING_SCALE = 1.01;
+
+const AMBIENT_LIGHT_LOW_INTENSITY = 0.05;
+const DIRECTIONAL_LIGHT_LOW_INTENSITY = 0.5;
+
+const AMBIENT_LIGHT_HIGH_INTENSITY = 3.0;
+const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 0.75;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
@@ -78,13 +90,14 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-    this.light = new AmbientLight(0xffffff, 3.0);
+    this.light = new AmbientLight(0xffffff, AMBIENT_LIGHT_HIGH_INTENSITY);
     this.light.name = 'AmbientLight';
 
     // This light is only for generating (fake) shadows
     // and does not needed to be added to the scene.
     // @see StaticShadow.js
-    this.shadowLight = new DirectionalLight(0xffffff, 0.75);
+    this.shadowLight =
+        new DirectionalLight(0xffffff, DIRECTIONAL_LIGHT_HIGH_INTENSITY);
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
@@ -201,6 +214,18 @@ export default class ModelScene extends Scene {
     this.camera.updateProjectionMatrix();
 
     this.updateStaticShadow();
+  }
+
+  configureStageLighting(intensityScale, illuminationRole) {
+    this.light.intensity = intensityScale *
+        (illuminationRole === IlluminationRole.Primary ?
+             AMBIENT_LIGHT_HIGH_INTENSITY :
+             AMBIENT_LIGHT_LOW_INTENSITY);
+    this.shadowLight.intensity = intensityScale *
+        (illuminationRole === IlluminationRole.Primary ?
+             DIRECTIONAL_LIGHT_HIGH_INTENSITY :
+             DIRECTIONAL_LIGHT_LOW_INTENSITY);
+    this.isDirty = true;
   }
 
   /**
