@@ -192,7 +192,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
-  suite('shadow-strength', () => {
+  suite('shadow-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
       await waitForEvent(element, 'load');
@@ -200,7 +200,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     test('changes the opacity of the static shadow', async () => {
       const originalOpacity = scene.shadow.material.opacity;
-      element.shadowStrength = 1.0;
+      element.shadowIntensity = 1.0;
       await timePasses();
       const newOpacity = scene.shadow.material.opacity;
       expect(newOpacity).to.be.greaterThan(originalOpacity);
