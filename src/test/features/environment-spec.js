@@ -210,6 +210,33 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
+  suite('stage-light-intensity', () => {
+    setup(async () => {
+      element.src = MODEL_URL;
+      await waitForEvent(element, 'load');
+    });
+
+    test('changes model scene light intensity', async () => {
+      const originalLightIntensity = scene.light.intensity;
+      element.stageLightIntensity = 0.5;
+      await timePasses();
+      const newLightIntensity = scene.light.intensity;
+      expect(newLightIntensity).to.be.lessThan(originalLightIntensity);
+    });
+
+    suite('with experimental-pmrem', () => {
+      test('further lowers scene light intensity', async () => {
+        element.stageLightIntensity = 0.5;
+        await timePasses();
+        const lightIntensity = scene.light.intensity;
+        element.experimentalPmrem = true;
+        await waitForEvent(element, 'environment-changed');
+        const newLightIntensity = scene.light.intensity;
+        expect(newLightIntensity).to.be.lessThan(lightIntensity);
+      });
+    });
+  });
+
   suite('shadow-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
