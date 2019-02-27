@@ -72,7 +72,7 @@ export default class StaticShadow extends Mesh {
 
   set intensity(intensity) {
     const intensityIsNumber =
-        typeof intensity === 'number' && !Number.isNaN(intensity);
+        typeof intensity === 'number' && !self.isNaN(intensity);
 
     this.material.opacity =
         BASE_SHADOW_OPACITY * (intensityIsNumber ? intensity : 0.0);
