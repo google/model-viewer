@@ -75,8 +75,6 @@ export default class Renderer extends EventDispatcher {
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
       this.renderer.toneMapping = ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 0.9;
-
     } catch (error) {
       this.context = null;
       console.warn(error);
@@ -96,7 +94,7 @@ export default class Renderer extends EventDispatcher {
   set exposure(exposure) {
     const exposureIsNumber =
         typeof exposure === 'number' && !self.isNaN(exposure);
-    this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 0.9;
+    this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
   }
 
   get exposure() {
