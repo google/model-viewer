@@ -93,6 +93,16 @@ export default class Renderer extends EventDispatcher {
     this.lastTick = performance.now();
   }
 
+  set exposure(exposure) {
+    const exposureIsNumber =
+        typeof exposure === 'number' && !self.isNaN(exposure);
+    this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 0.9;
+  }
+
+  get exposure() {
+    return this.renderer.toneMappingExposure;
+  }
+
   setRendererSize(width, height) {
     if (this.canRender) {
       this.renderer.setSize(width, height, false);

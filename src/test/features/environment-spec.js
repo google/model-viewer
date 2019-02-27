@@ -192,6 +192,24 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
+  suite('exposure', () => {
+    setup(async () => {
+      element.src = MODEL_URL;
+      await waitForEvent(element, 'load');
+    });
+
+    test('changes the tone mapping exposure of the renderer', async () => {
+      const originalToneMappingExposure =
+          scene.renderer.renderer.toneMappingExposure;
+      element.exposure = 2.0;
+      await timePasses();
+      const newToneMappingExposure =
+          scene.renderer.renderer.toneMappingExposure;
+      expect(newToneMappingExposure)
+          .to.be.greaterThan(originalToneMappingExposure);
+    });
+  });
+
   suite('shadow-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
