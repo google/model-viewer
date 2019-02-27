@@ -19,6 +19,7 @@ import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-vie
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
+const DEFAULT_EXPOSURE = 0.9;
 
 const WHITE = new Color('#ffffff');
 
@@ -31,6 +32,7 @@ const $hasBackgroundImage = Symbol('hasBackgroundImage');
 const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
 const $updateSceneLighting = Symbol('updateSceneLighting');
+const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
@@ -41,13 +43,15 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         backgroundImage: {type: String, attribute: 'background-image'},
         backgroundColor: {type: String, attribute: 'background-color'},
         experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'},
-        shadowIntensity: {type: Number, attribute: 'shadow-intensity'}
+        shadowIntensity: {type: Number, attribute: 'shadow-intensity'},
+        exposure: {type: Number, attribute: 'exposure'}
       };
     }
 
     constructor(...args) {
       super(...args);
       this.shadowIntensity = DEFAULT_SHADOW_STRENGTH;
+      this.exposure = DEFAULT_EXPOSURE;
     }
 
     get[$hasBackgroundImage]() {
@@ -65,6 +69,10 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       if (changedProperties.has('shadowIntensity')) {
         this[$updateShadow]();
+      }
+
+      if (changedProperties.has('exposure')) {
+        this[$updateToneMapping]();
       }
 
       if (!changedProperties.has('backgroundImage') &&
@@ -177,6 +185,11 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
     [$updateShadow]() {
       this[$scene].shadow.intensity = this.shadowIntensity;
+      this[$needsRender]();
+    }
+
+    [$updateToneMapping]() {
+      this[$renderer].exposure = this.exposure;
       this[$needsRender]();
     }
 
