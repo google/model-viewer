@@ -19,7 +19,7 @@ import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-vie
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
-const DEFAULT_EXPOSURE = 0.9;
+const DEFAULT_EXPOSURE = 1.0;
 
 const WHITE = new Color('#ffffff');
 
