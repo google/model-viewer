@@ -38,9 +38,18 @@ suite('LoadingStatusAnnouncer', () => {
   });
 
   suite('when a model is registered', () => {
+    let element: any;
+    setup(() => {
+      element = new ModelViewerElement();
+      document.body.appendChild(element);
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
     suite('that has a src', () => {
       test('sets initial status', async () => {
-        const element = new ModelViewerElement();
         element.poster = assetPath('Astronaut.png');
         element.src = assetPath('Astronaut.glb');
 
@@ -56,7 +65,6 @@ suite('LoadingStatusAnnouncer', () => {
 
       suite('after the model loads', () => {
         test('sets the finished status', async () => {
-          const element = new ModelViewerElement();
           element.src = assetPath('Astronaut.glb');
 
           loadingStatusAnnouncer.registerInstance(element);
@@ -74,17 +82,25 @@ suite('LoadingStatusAnnouncer', () => {
       });
 
       suite('there are other registered models', () => {
+        let otherElement: any;
+
+        setup(() => {
+          otherElement = new ModelViewerElement();
+          document.body.appendChild(otherElement);
+        });
+
+        teardown(() => {
+          document.body.removeChild(otherElement);
+        });
+
         test('sets finished status when all models are loaded', async () => {
-          const elementOne = new ModelViewerElement();
-          const elementTwo = new ModelViewerElement();
+          element.src = otherElement.src = assetPath('Astronaut.glb');
 
-          elementOne.src = elementTwo.src = assetPath('Astronaut.glb');
-
-          loadingStatusAnnouncer.registerInstance(elementOne);
-          loadingStatusAnnouncer.registerInstance(elementTwo);
+          loadingStatusAnnouncer.registerInstance(element);
+          loadingStatusAnnouncer.registerInstance(otherElement);
 
           await Promise.all([
-            until(() => elementOne.loaded && elementTwo.loaded),
+            until(() => element.loaded && otherElement.loaded),
             waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
           ]);
 
@@ -96,20 +112,17 @@ suite('LoadingStatusAnnouncer', () => {
 
         suite('one model is already loaded', () => {
           test('eventually sets finished status', async () => {
-            const elementOne = new ModelViewerElement();
-            const elementTwo = new ModelViewerElement();
+            element.src = assetPath('Astronaut.glb');
 
-            elementOne.src = assetPath('Astronaut.glb');
+            await until(() => element.loaded);
 
-            await until(() => elementOne.loaded);
+            otherElement.src = assetPath('Astronaut.glb');
 
-            elementTwo.src = assetPath('Astronaut.glb');
-
-            loadingStatusAnnouncer.registerInstance(elementOne);
-            loadingStatusAnnouncer.registerInstance(elementTwo);
+            loadingStatusAnnouncer.registerInstance(element);
+            loadingStatusAnnouncer.registerInstance(otherElement);
 
             await Promise.all([
-              until(() => elementTwo.loaded),
+              until(() => otherElement.loaded),
               waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
             ]);
 
@@ -122,20 +135,17 @@ suite('LoadingStatusAnnouncer', () => {
 
         suite('one model fails', () => {
           test('eventually sets finished status', async () => {
-            const elementOne = new ModelViewerElement();
-            const elementTwo = new ModelViewerElement();
+            const errorOccurs = waitForEvent(element, 'error');
 
-            const errorOccurs = waitForEvent(elementOne, 'error');
+            element.src = assetPath('DOES_NOT_EXIST.glb');
+            otherElement.src = assetPath('Astronaut.glb');
 
-            elementOne.src = assetPath('DOES_NOT_EXIST.glb');
-            elementTwo.src = assetPath('Astronaut.glb');
-
-            loadingStatusAnnouncer.registerInstance(elementOne);
-            loadingStatusAnnouncer.registerInstance(elementTwo);
+            loadingStatusAnnouncer.registerInstance(element);
+            loadingStatusAnnouncer.registerInstance(otherElement);
 
             await Promise.all([
               errorOccurs,
-              until(() => elementTwo.loaded),
+              until(() => otherElement.loaded),
               waitForEvent(loadingStatusAnnouncer, 'finished-loading-announced')
             ]);
 
@@ -145,34 +155,49 @@ suite('LoadingStatusAnnouncer', () => {
                 .to.be.equal(FINISHED_LOADING_ANNOUNCEMENT);
           });
         });
-
-        suite('first element is removed', () => {
-          test('status element remains in the document tree', async () => {
-            // NOTE(cdata): We use ModelViewerElementBase here because we are
-            // testing behavior that is affected by connected/disconnected
-            // side-effects in LoadingMixin.
-            const elementOne = new ModelViewerElementBase();
-            const elementTwo = new ModelViewerElementBase();
-
-            document.body.appendChild(elementOne);
-            document.body.appendChild(elementTwo);
-
-            const {statusElement} = loadingStatusAnnouncer;
-
-            loadingStatusAnnouncer.registerInstance(elementOne);
-
-            expect(isInDocumentTree(statusElement)).to.be.equal(true);
-
-            loadingStatusAnnouncer.registerInstance(elementTwo);
-
-            loadingStatusAnnouncer.unregisterInstance(elementOne);
-            document.body.removeChild(elementOne);
-
-            expect(isInDocumentTree(statusElement)).to.be.equal(true);
-            document.body.removeChild(elementTwo);
-          });
-        });
       });
+    });
+  });
+
+  suite('many elements and first one is removed', () => {
+    let element: ModelViewerElementBase;
+    let otherElement: ModelViewerElementBase;
+
+    setup(() => {
+      // NOTE(cdata): We use ModelViewerElementBase here because we are
+      // testing behavior that is affected by connected/disconnected
+      // side-effects in LoadingMixin.
+      element = new ModelViewerElementBase();
+      otherElement = new ModelViewerElementBase();
+
+      document.body.appendChild(element);
+      document.body.appendChild(otherElement);
+    });
+
+    teardown(() => {
+      if (element.parentNode != null) {
+        document.body.removeChild(element);
+      }
+
+      if (otherElement.parentNode != null) {
+        document.body.removeChild(otherElement);
+      }
+    });
+
+    test('status element remains in the document tree', async () => {
+      const {statusElement} = loadingStatusAnnouncer;
+
+      loadingStatusAnnouncer.registerInstance(element);
+
+      expect(isInDocumentTree(statusElement)).to.be.equal(true);
+
+      loadingStatusAnnouncer.registerInstance(otherElement);
+
+      loadingStatusAnnouncer.unregisterInstance(element);
+      document.body.removeChild(element);
+
+      expect(isInDocumentTree(statusElement)).to.be.equal(true);
+      document.body.removeChild(otherElement);
     });
   });
 });

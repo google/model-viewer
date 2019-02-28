@@ -123,33 +123,112 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   /**
-   * @param {?boolean} config.pmrem
-   * @return {THREE.Texture}
+   * @param {string} url
+   * @return {Promise<THREE.WebGLRenderCubeTarget>}
    */
-  generateDefaultEnvironmentMap(config = {}) {
-    const mapSize = this.config.synthesizedEnvmapSize;
-    const cubemap = this.environmentMapGenerator.generate(mapSize);
+  async loadEquirectAsCubeMap(url) {
+    let equirect = null;
 
-    let environmentMap;
-
-    if (config.pmrem) {
-      environmentMap = this.pmremPass(
-          cubemap,
-          this.config.defaultEnvironmentPmremSamples,
-          this.config.defaultEnvironmentPmremSize);
-
-      cubemap.dispose();
-    } else {
-      environmentMap = cubemap;
-      environmentMap.userData = {
-        ...userData,
-        ...({
-          mapping: 'Cube',
-        })
-      };
+    try {
+      equirect = await this.load(url);
+      return await this.equirectangularToCubemap(equirect);
+    } finally {
+      if (equirect != null) {
+        equirect.dispose();
+      }
     }
+  }
 
-    return environmentMap;
+  /**
+   * Returns a { skybox, environmentMap } object with the targets/textures
+   * accordingly. `skybox` is a WebGLRenderCubeTarget, and `environmentMap`
+   * is a Texture from a WebGLRenderCubeTarget.
+   *
+   * @see equirectangularToCubemap with regard to the THREE types.
+   * @param {string} url
+   * @param {boolean} config.pmrem
+   * @return {Promise<Object|null>}
+   */
+  async generateEnvironmentMapAndSkybox(
+      skyboxUrl = null, environmentMapUrl = null, options = {}) {
+    let skyboxLoads = Promise.resolve(null);
+    let environmentMapLoads = Promise.resolve(null);
+
+    let skybox = null;
+    let environmentMap = null;
+
+    try {
+      let environmentMapWasGenerated = false;
+
+      // If we have a skybox URL, attempt to load it as a cubemap
+      if (!!skyboxUrl) {
+        skyboxLoads = this.loadEquirectAsCubeMap(skyboxUrl);
+      }
+
+      // If we have a specific environment URL, attempt to load it as a cubemap
+      // The case for this is that the user intends for the IBL to be different
+      // from the scene background (which may be a skybox or solid color).
+      if (!!environmentMapUrl) {
+        environmentMapLoads = this.loadEquirectAsCubeMap(environmentMapUrl);
+      }
+
+      // In practice, this should be nearly as parallel as Promise.all (which
+      // we don't use since we can't easily destructure here):
+      skybox = await skyboxLoads;
+      environmentMap = await environmentMapLoads;
+
+      // If environment is still null, then no specific environment URL was
+      // specified
+      if (environmentMap != null) {
+        environmentMap = environmentMap.texture
+      } else {
+        if (skybox != null) {
+          // Infer the environment from the skybox if we have one:
+          environmentMap = skybox.texture;
+        } else {
+          // Otherwise, no skybox URL was specified, so fall back to generating
+          // the environment:
+          // TODO(#336): can cache this per renderer and color
+          environmentMap = this.environmentMapGenerator.generate(
+              this.config.synthesizedEnvmapSize);
+          environmentMapWasGenerated = true;
+        }
+      }
+
+      if (options.pmrem) {
+        // Apply the PMREM pass to the environment, which produces a distinct
+        // texture from the source:
+        const nonPmremEnvironmentMap = environmentMap;
+        environmentMap = this.pmremPass(
+            nonPmremEnvironmentMap,
+            this.config.defaultEnvironmentPmremSamples,
+            this.config.defaultEnvironmentPmremSize)
+
+        // If the source was generated, then we should dispose of it right away
+        if (environmentMapWasGenerated) {
+          nonPmremEnvironmentMap.dispose();
+        }
+      } else if (environmentMapWasGenerated) {
+        environmentMap.userData = {
+          ...userData,
+          ...({
+            mapping: 'Cube',
+          })
+        };
+      }
+
+      return {environmentMap, skybox};
+    } catch (error) {
+      if (skybox != null) {
+        skybox.dispose();
+      }
+
+      if (environmentMap != null) {
+        environmentMap.dispose();
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -183,47 +262,6 @@ export default class TextureUtils extends EventDispatcher {
     };
 
     return renderTarget.texture;
-  }
-
-  /**
-   * Returns a { skybox, environmentMap } object with the targets/textures
-   * accordingly, or null if cannot generate a texture from
-   * the URL. `skybox` is a WebGLRenderCubeTarget, and `environmentMap`
-   * is a Texture from a WebGLRenderCubeTarget.
-   *
-   * @see equirectangularToCubemap with regard to the THREE types.
-   * @param {string} url
-   * @param {boolean} config.pmrem
-   * @return {Promise<Object|null>}
-   */
-  async generateEnvironmentTextures(url, config = {}) {
-    let equirect, skybox, environmentMap;
-    try {
-      equirect = await this.load(url);
-      skybox = await this.equirectangularToCubemap(equirect);
-
-      if (config.pmrem) {
-        environmentMap = this.pmremPass(
-            skybox.texture, this.config.pmremSamples, this.config.pmremSize);
-      } else {
-        environmentMap = skybox.texture;
-      }
-
-      return {environmentMap, skybox};
-    } catch (error) {
-      if (skybox) {
-        skybox.dispose();
-      }
-      if (environmentMap) {
-        environmentMap.dispose();
-      }
-
-      return null;
-    } finally {
-      if (equirect) {
-        equirect.dispose();
-      }
-    }
   }
 
   dispose() {
