@@ -30,7 +30,9 @@ suite('TextureUtils', () => {
   let textureUtils;
   setup(() => {
     const renderer = new WebGLRenderer({canvas});
-    textureUtils = new TextureUtils(renderer);
+    // NOTE(cdata): We need to lower the samples here or else tests that use
+    // PMREM have a tendency to time out on iOS Simulator
+    textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
   });
   teardown(() => textureUtils.dispose());
 
@@ -114,51 +116,64 @@ suite('TextureUtils', () => {
           .to.be.ok;
     });
 
-    test('returns an environmentMap and skybox texture from an HDR url', async () => {
-      textures = await textureUtils.generateEnvironmentTextures(HDR_EQUI_URL);
-      expect(textures.skybox.texture.isTexture).to.be.ok;
-      expect(textures.environmentMap.isTexture).to.be.ok;
+    test(
+        'returns an environmentMap and skybox texture from an HDR url',
+        async () => {
+          textures =
+              await textureUtils.generateEnvironmentTextures(HDR_EQUI_URL);
+          expect(textures.skybox.texture.isTexture).to.be.ok;
+          expect(textures.environmentMap.isTexture).to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.skybox.texture, {mapping: 'Cube', url: HDR_EQUI_URL}))
-          .to.be.ok;
+          expect(textureMatchesMeta(textures.skybox.texture, {
+            mapping: 'Cube',
+            url: HDR_EQUI_URL
+          })).to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.environmentMap, {mapping: 'Cube', url: HDR_EQUI_URL}))
-          .to.be.ok;
-    });
+          expect(textureMatchesMeta(textures.environmentMap, {
+            mapping: 'Cube',
+            url: HDR_EQUI_URL
+          })).to.be.ok;
+        });
 
-    test('returns an environmentMap and skybox texture from url with PMREM', async () => {
-      textures = await textureUtils.generateEnvironmentTextures(EQUI_URL, {
-        pmrem: true,
-      });
-      expect(textures.skybox.texture.isTexture).to.be.ok;
-      expect(textures.environmentMap.isTexture).to.be.ok;
+    test(
+        'returns an environmentMap and skybox texture from url with PMREM',
+        async () => {
+          textures = await textureUtils.generateEnvironmentTextures(EQUI_URL, {
+            pmrem: true,
+          });
+          expect(textures.skybox.texture.isTexture).to.be.ok;
+          expect(textures.environmentMap.isTexture).to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.skybox.texture, {mapping: 'Cube', url: EQUI_URL}))
-          .to.be.ok;
+          expect(textureMatchesMeta(
+                     textures.skybox.texture, {mapping: 'Cube', url: EQUI_URL}))
+              .to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.environmentMap, {mapping: 'PMREM', url: EQUI_URL}))
-          .to.be.ok;
-    });
+          expect(textureMatchesMeta(textures.environmentMap, {
+            mapping: 'PMREM',
+            url: EQUI_URL
+          })).to.be.ok;
+        });
 
-    test('returns an environmentMap and skybox texture from an HDR url', async () => {
-      textures = await textureUtils.generateEnvironmentTextures(HDR_EQUI_URL, {
-        pmrem: true,
-      });
-      expect(textures.skybox.texture.isTexture).to.be.ok;
-      expect(textures.environmentMap.isTexture).to.be.ok;
+    test(
+        'returns an environmentMap and skybox texture from an HDR url',
+        async () => {
+          textures =
+              await textureUtils.generateEnvironmentTextures(HDR_EQUI_URL, {
+                pmrem: true,
+              });
+          expect(textures.skybox.texture.isTexture).to.be.ok;
+          expect(textures.environmentMap.isTexture).to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.skybox.texture, {mapping: 'Cube', url: HDR_EQUI_URL}))
-          .to.be.ok;
+          expect(textureMatchesMeta(textures.skybox.texture, {
+            mapping: 'Cube',
+            url: HDR_EQUI_URL
+          })).to.be.ok;
 
-      expect(textureMatchesMeta(
-                 textures.environmentMap, {mapping: 'PMREM', url: HDR_EQUI_URL}))
-          .to.be.ok;
-    });
+          expect(textureMatchesMeta(textures.environmentMap, {
+            mapping: 'PMREM',
+            url: HDR_EQUI_URL
+          })).to.be.ok;
+        });
 
     test('throws if given an invalid url', async () => {
       try {
@@ -173,8 +188,7 @@ suite('TextureUtils', () => {
   suite('generateDefaultEnvironmentMap', () => {
     test('creates a cubemap render target', async () => {
       const texture = await textureUtils.generateDefaultEnvironmentMap();
-      expect(
-          textureMatchesMeta(texture, {mapping: 'Cube', url: null }))
+      expect(textureMatchesMeta(texture, {mapping: 'Cube', url: null}))
           .to.be.ok;
     });
 
@@ -182,8 +196,7 @@ suite('TextureUtils', () => {
       const texture = await textureUtils.generateDefaultEnvironmentMap({
         pmrem: true,
       });
-      expect(
-          textureMatchesMeta(texture, {mapping: 'PMREM', url: null }))
+      expect(textureMatchesMeta(texture, {mapping: 'PMREM', url: null}))
           .to.be.ok;
     });
   });
