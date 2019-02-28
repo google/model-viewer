@@ -1,5 +1,5 @@
 diff --git a/samples/CMakeLists.txt b/samples/CMakeLists.txt
-index 073dccfe..d5896912 100644
+index 073dccf..d589691 100644
 --- a/samples/CMakeLists.txt
 +++ b/samples/CMakeLists.txt
 @@ -226,6 +226,7 @@ endfunction()
@@ -19,7 +19,7 @@ index 073dccfe..d5896912 100644
  endif()
  
 diff --git a/samples/app/Config.h b/samples/app/Config.h
-index 8efe32d3..a57cfdaa 100644
+index 8efe32d..a57cfda 100644
 --- a/samples/app/Config.h
 +++ b/samples/app/Config.h
 @@ -26,6 +26,9 @@ struct Config {
@@ -33,7 +33,7 @@ index 8efe32d3..a57cfdaa 100644
  };
  
 diff --git a/samples/app/FilamentApp.cpp b/samples/app/FilamentApp.cpp
-index 37f55b03..ed122caa 100644
+index 37f55b0..3b047d2 100644
 --- a/samples/app/FilamentApp.cpp
 +++ b/samples/app/FilamentApp.cpp
 @@ -68,9 +68,23 @@ void FilamentApp::run(const Config& config, SetupCallback setupCallback,
@@ -73,12 +73,12 @@ index 37f55b03..ed122caa 100644
      const int x = SDL_WINDOWPOS_CENTERED;
      const int y = SDL_WINDOWPOS_CENTERED;
 -    const uint32_t windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-+    const uint32_t windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
++    const uint32_t windowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
      mWindow = SDL_CreateWindow(title.c_str(), x, y, (int) w, (int) h, windowFlags);
  
      // Create the Engine after the window in case this happens to be a single-threaded platform.
 diff --git a/samples/app/FilamentApp.h b/samples/app/FilamentApp.h
-index 7f4ec2f0..0a3b8a2b 100644
+index 7f4ec2f..0a3b8a2 100644
 --- a/samples/app/FilamentApp.h
 +++ b/samples/app/FilamentApp.h
 @@ -48,6 +48,7 @@ class MeshAssimp;
