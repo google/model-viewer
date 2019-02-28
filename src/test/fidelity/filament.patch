@@ -33,7 +33,7 @@ index 8efe32d..a57cfda 100644
  };
  
 diff --git a/samples/app/FilamentApp.cpp b/samples/app/FilamentApp.cpp
-index 37f55b0..f1d431a 100644
+index 37f55b0..3b047d2 100644
 --- a/samples/app/FilamentApp.cpp
 +++ b/samples/app/FilamentApp.cpp
 @@ -68,9 +68,23 @@ void FilamentApp::run(const Config& config, SetupCallback setupCallback,
@@ -68,15 +68,12 @@ index 37f55b0..f1d431a 100644
                          case SDL_WINDOWEVENT_RESIZED:
                              window->resize();
                              break;
-@@ -415,7 +430,10 @@ FilamentApp::Window::Window(FilamentApp* filamentApp,
+@@ -415,7 +430,7 @@ FilamentApp::Window::Window(FilamentApp* filamentApp,
          : mFilamentApp(filamentApp) {
      const int x = SDL_WINDOWPOS_CENTERED;
      const int y = SDL_WINDOWPOS_CENTERED;
 -    const uint32_t windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-+    uint32_t windowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
-+#if !defined(__APPLE__)
-+	windowFlags |= SDL_WINDOW_SHOWN;
-+#endif
++    const uint32_t windowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
      mWindow = SDL_CreateWindow(title.c_str(), x, y, (int) w, (int) h, windowFlags);
  
      // Create the Engine after the window in case this happens to be a single-threaded platform.
