@@ -16,7 +16,7 @@
 import './analysis-view.js';
 import './rendering-scenario.js';
 
-import {html, LitElement, property} from '@polymer/lit-element';
+import {html, LitElement, property} from 'lit-element';
 
 import {ImageComparisonConfig} from '../common.js';
 

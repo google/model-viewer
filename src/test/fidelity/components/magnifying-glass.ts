@@ -14,7 +14,7 @@
  */
 
 
-import {html, LitElement, property} from '@polymer/lit-element';
+import {html, LitElement, property} from 'lit-element';
 
 import {Pixel} from '../common.js';
 import {ImageAccessor} from '../image-accessor.js';

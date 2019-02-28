@@ -16,7 +16,7 @@
 import './images-4-up.js';
 
 import '@polymer/paper-slider';
-import {html, LitElement, property} from '@polymer/lit-element';
+import {html, LitElement, property} from 'lit-element';
 
 import {AnalysisCompletedMessage, Dimensions, ImageComparisonMessage, ImageComparisonResults} from '../common.js';
 import {ImageAccessor} from '../image-accessor.js';

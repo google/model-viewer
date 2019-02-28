@@ -16,7 +16,7 @@
 import '../image-accessor.js';
 import './magnifying-glass.js';
 
-import {html, LitElement, property} from '@polymer/lit-element';
+import {html, LitElement, property} from 'lit-element';
 
 import {Dimensions, Pixel, Rect} from '../common.js';
 

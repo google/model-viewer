@@ -52,11 +52,31 @@ export default class Model extends Object3D {
     this.modelContainer.traverse(obj => {
       if (obj && obj.isMesh && obj.material) {
         obj.material.envMap = map;
-        obj.material.envMapIntensity = 0.85;
         obj.material.needsUpdate = true;
       }
     });
     this.dispatchEvent({type: 'envmap-change', value: map});
+  }
+
+  setEnvironmentMapIntensity(intensity) {
+    const intensityIsNumber =
+        typeof intensity === 'number' && !self.isNaN(intensity);
+
+    if (!intensityIsNumber) {
+      intensity = 1.0;
+    }
+
+    this.modelContainer.traverse(object => {
+      if (object && object.isMesh && object.material) {
+        const {material} = object;
+        if (Array.isArray(object.material)) {
+          object.material.forEach(
+              material => material.envMapIntensity = intensity);
+        } else {
+          object.material.envMapIntensity = intensity;
+        }
+      }
+    });
   }
 
   /**

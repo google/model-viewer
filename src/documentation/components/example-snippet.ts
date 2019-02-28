@@ -1,7 +1,7 @@
 import 'prismjs';
 
-import {property} from '@polymer/lit-element';
-import {UpdatingElement} from '@polymer/lit-element/lib/updating-element.js';
+import {property} from 'lit-element';
+import {UpdatingElement} from 'lit-element/lib/updating-element.js';
 
 // Silence tsc since prismjs isn't a proper module
 declare var Prism: any;

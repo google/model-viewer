@@ -129,7 +129,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
         element.src = MODEL_URL;
         element.backgroundImage = BG_IMAGE_URL;
+        document.body.appendChild(element);
         await onLoad;
+      });
+
+      teardown(() => {
+        document.body.removeChild(element);
       });
 
       test('displays background with the correct map', async function() {
@@ -165,7 +170,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         });
         element.src = MODEL_URL;
         element.backgroundColor = '#ff0077';
+        document.body.appendChild(element);
         await onLoad;
+      });
+
+      teardown(() => {
+        document.body.removeChild(element);
       });
 
       test('displays background with the correct color', async function() {
@@ -195,7 +205,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('exposure', () => {
     setup(async () => {
       element.src = MODEL_URL;
+      document.body.appendChild(element);
       await waitForEvent(element, 'load');
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
     });
 
     test('changes the tone mapping exposure of the renderer', async () => {
@@ -213,7 +228,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('stage-light-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
+      document.body.appendChild(element);
       await waitForEvent(element, 'load');
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
     });
 
     test('changes model scene light intensity', async () => {
@@ -240,7 +260,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('shadow-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
+      document.body.appendChild(element);
       await waitForEvent(element, 'load');
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
     });
 
     test('changes the opacity of the static shadow', async () => {
@@ -258,7 +283,12 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('background-color', '#ff0077');
       element.setAttribute('background-image', BG_IMAGE_URL);
+      document.body.appendChild(element);
       await onLoad;
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
     });
 
     test('displays background with background-image', async function() {

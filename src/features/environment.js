@@ -22,26 +22,28 @@ const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
 const DEFAULT_STAGE_LIGHT_INTENSITY = 1.0;
+const DEFAULT_ENVIRONMENT_INTENSITY = 1.0;
 
 const WHITE = new Color('#ffffff');
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $setEnvironmentImage = Symbol('setEnvironmentImage');
-const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $setShadowLightColor = Symbol('setShadowLightColor');
-const $hasBackgroundImage = Symbol('hasBackgroundImage');
-const $hasBackgroundColor = Symbol('hasBackgroundColor');
 const $deallocateTextures = Symbol('deallocateTextures');
-const $updateStageLighting = Symbol('updateStageLighting');
+const $updateLighting = Symbol('updateLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
+const $updateEnvironment = Symbol('updateEnvironment');
+const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
 export const EnvironmentMixin = (ModelViewerElement) => {
   return class extends ModelViewerElement {
     static get properties() {
       return {
         ...super.properties,
+        environmentImage: {type: String, attribute: 'environment-image'},
+        environmentIntensity:
+            {type: Number, attribute: 'environment-intensity'},
         backgroundImage: {type: String, attribute: 'background-image'},
         backgroundColor: {type: String, attribute: 'background-color'},
         experimentalPmrem: {type: Boolean, attribute: 'experimental-pmrem'},
@@ -55,17 +57,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       super(...args);
       this.shadowIntensity = DEFAULT_SHADOW_STRENGTH;
       this.stageLightIntensity = DEFAULT_STAGE_LIGHT_INTENSITY;
+      this.environmentIntensity = DEFAULT_ENVIRONMENT_INTENSITY;
       this.exposure = DEFAULT_EXPOSURE;
-    }
-
-    get[$hasBackgroundImage]() {
-      // @TODO #76
-      return this.backgroundImage && this.backgroundImage !== 'null';
-    }
-
-    get[$hasBackgroundColor]() {
-      // @TODO #76
-      return this.backgroundColor && this.backgroundColor !== 'null';
+      this[$cancelEnvironmentUpdate] = null;
     }
 
     update(changedProperties) {
@@ -79,29 +73,24 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         this[$updateToneMapping]();
       }
 
-      if (changedProperties.has('stageLightIntensity')) {
-        this[$updateStageLighting]();
+      if (changedProperties.has('environmentIntensity') ||
+          changedProperties.has('stageLightIntensity')) {
+        this[$updateLighting]();
       }
 
-      if (!changedProperties.has('backgroundImage') &&
-          !changedProperties.has('backgroundColor') &&
-          !changedProperties.has('experimentalPmrem')) {
-        return;
-      }
-
-      if (this[$hasBackgroundImage]) {
-        this[$setEnvironmentImage](this.backgroundImage);
-      } else if (this[$hasBackgroundColor]) {
-        this[$setEnvironmentColor](this.backgroundColor);
-      } else {
-        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
+      if (changedProperties.has('environmentImage') ||
+          changedProperties.has('backgroundImage') ||
+          changedProperties.has('backgroundColor') ||
+          changedProperties.has('experimentalPmrem')) {
+        this[$updateEnvironment]();
       }
     }
 
     firstUpdated(changedProperties) {
-      if (!changedProperties.has('backgroundImage') &&
-          !changedProperties.has('backgroundColor')) {
-        this[$setEnvironmentColor](DEFAULT_BACKGROUND_COLOR);
+      // In case no environment-related properties were confiured, we should
+      // make sure that the environment is updated at least once:
+      if (this[$cancelEnvironmentUpdate] == null) {
+        this[$updateEnvironment]();
       }
     }
 
@@ -113,67 +102,63 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       }
     }
 
-    /**
-     * @param {string} url
-     */
-    async[$setEnvironmentImage](url) {
-      const textureUtils = this[$renderer].textureUtils;
+    async[$updateEnvironment]() {
+      const {backgroundImage, environmentImage, experimentalPmrem: pmrem} =
+          this;
+      let {backgroundColor} = this;
+
+      if (this[$cancelEnvironmentUpdate] != null) {
+        this[$cancelEnvironmentUpdate]();
+        this[$cancelEnvironmentUpdate] = null;
+      }
+
+      const {textureUtils} = this[$renderer];
 
       if (textureUtils == null) {
         return;
       }
 
-      const textures = await textureUtils.generateEnvironmentTextures(
-          url, {pmrem: this.experimentalPmrem});
+      try {
+        const {environmentMap, skybox} =
+            await new Promise(async (resolve, reject) => {
+              const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
+                  backgroundImage, environmentImage, {pmrem});
+              this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
+              resolve(await texturesLoad);
+            });
 
-      // If the background image has changed
-      // while fetching textures, abort and defer to that
-      // invocation of this function.
-      if (url !== this.backgroundImage) {
-        return;
+        this[$deallocateTextures]();
+
+        if (skybox != null) {
+          this[$scene].background = skybox;
+          this[$setShadowLightColor](WHITE);
+        } else {
+          if (!backgroundColor) {
+            backgroundColor = DEFAULT_BACKGROUND_COLOR;
+          }
+
+          const parsedColor = new Color(backgroundColor);
+          this[$scene].background = parsedColor;
+          this[$setShadowLightColor](parsedColor);
+        }
+
+        this[$applyEnvironmentMap](environmentMap);
+      } catch (errorOrPromise) {
+        if (errorOrPromise instanceof Error) {
+          this[$applyEnvironmentMap](null);
+          throw errorOrPromise;
+        }
+
+        const {environmentMap, skybox} = await errorOrPromise;
+
+        if (environmentMap != null) {
+          environmentMap.dispose();
+        }
+
+        if (skybox != null) {
+          skybox.dispose();
+        }
       }
-
-      this[$deallocateTextures]();
-
-      // If could not load textures (probably an invalid URL), then abort
-      // after deallocating textures.
-      if (!textures) {
-        this[$applyEnvironmentMap](null);
-        return;
-      }
-
-      const {skybox, environmentMap} = textures;
-
-      this[$scene].background = skybox;
-
-      this[$setShadowLightColor](WHITE);
-
-      this[$applyEnvironmentMap](environmentMap);
-    }
-
-    /**
-     * @param {string} color
-     */
-    [$setEnvironmentColor](color) {
-      const textureUtils = this[$renderer].textureUtils;
-
-      if (textureUtils == null) {
-        return;
-      }
-
-      this[$deallocateTextures]();
-
-      const parsedColor = new Color(color);
-
-      this[$scene].background = parsedColor;
-
-      this[$setShadowLightColor](parsedColor);
-
-      // TODO(#336): can cache this per renderer and color
-      const environmentMap = textureUtils.generateDefaultEnvironmentMap(
-          {pmrem: this.experimentalPmrem});
-
-      this[$applyEnvironmentMap](environmentMap);
     }
 
     /**
@@ -187,7 +172,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-changed'));
 
-      this[$updateStageLighting]();
+      this[$updateLighting]();
       this[$needsRender]();
     }
 
@@ -201,13 +186,14 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$needsRender]();
     }
 
-    [$updateStageLighting]() {
+    [$updateLighting]() {
       const scene = this[$scene];
       const illuminationRole = this.experimentalPmrem ?
           IlluminationRole.Secondary :
           IlluminationRole.Primary;
 
       scene.configureStageLighting(this.stageLightIntensity, illuminationRole);
+      scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
     }
 
     [$setShadowLightColor](color) {

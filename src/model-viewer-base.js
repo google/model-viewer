@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {UpdatingElement} from '@polymer/lit-element/lib/updating-element';
+import {UpdatingElement} from 'lit-element/lib/updating-element';
 
 import {HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
@@ -49,7 +49,9 @@ export const $renderer = Symbol('renderer');
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   static get properties() {
-    return {alt: {type: String}, src: {type: deserializeUrl}};
+    return {
+      alt: {type: String}, src: {converter: {fromAttribute: deserializeUrl}}
+    }
   }
 
   static get is() {
@@ -78,10 +80,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
   constructor() {
     super();
 
+    this.attachShadow({mode: 'open', delegatesFocus: true});
+
     if (window.ShadyCSS) {
       window.ShadyCSS.styleElement(this);
     }
-
     const {shadowRoot} = this;
     const template = this.constructor.template;
 
@@ -105,8 +108,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this.dispatchEvent(new CustomEvent('load'));
     });
 
-    // Update initial size on microtask timing so that subclasses have a chance
-    // to initialize
+    // Update initial size on microtask timing so that subclasses have a
+    // chance to initialize
     Promise.resolve().then(() => {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
@@ -150,6 +153,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   connectedCallback() {
+    super.connectedCallback && super.connectedCallback();
     if (HAS_RESIZE_OBSERVER) {
       this.resizeObserver.observe(this);
     } else {
@@ -161,6 +165,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   disconnectedCallback() {
+    super.disconnectedCallback && super.disconnectedCallback();
     if (HAS_RESIZE_OBSERVER) {
       this.resizeObserver.unobserve(this);
     } else {
@@ -171,24 +176,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   update(changedProperties) {
+    super.update(changedProperties);
+
     this[$updateSource]();
 
     if (changedProperties.has('alt')) {
-      // @TODO #76
-      const ariaLabel = (this.alt == null || this.alt === 'null') ?
-          this[$defaultAriaLabel] :
-          this.alt;
-
+      const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
       this[$canvas].setAttribute('aria-label', ariaLabel);
     }
-  }
-
-  /**
-   * NOTE(cdata): This is a protected method of UpdatingElement
-   * @see https://github.com/Polymer/lit-element/blob/master/src/lib/updating-element.ts#L375-L384
-   */
-  createRenderRoot() {
-    return this.attachShadow({mode: 'open', delegatesFocus: true});
   }
 
   get[$ariaLabel]() {

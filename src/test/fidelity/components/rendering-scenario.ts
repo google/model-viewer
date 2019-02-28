@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {html, LitElement, property} from '@polymer/lit-element';
+import {html, LitElement, property} from 'lit-element';
 import {Dimensions, GoldenConfig} from '../common.js';
 
 
