@@ -183,6 +183,8 @@ export default class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight, false);
       }
 
+      scene.children[0].children[0].mixer.update(delta/1000);
+
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
       // from something in

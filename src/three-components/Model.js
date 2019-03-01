@@ -13,9 +13,21 @@
  * limitations under the License.
  */
 
-import {Box3, Object3D, Vector3} from 'three';
+import {AnimationMixer, Box3, Object3D, SkinnedMesh, Vector3} from 'three';
 
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+
+// TODO three.js doesn't clone SkinnedMesh properly
+SkinnedMesh.prototype.clone = function () {
+
+	var clone = new this.constructor( this.geometry, this.material ).copy( this );
+	clone.skeleton = this.skeleton;
+	clone.bindMatrix.copy( this.bindMatrix );
+	clone.bindMatrixInverse.getInverse( this.bindMatrix );
+
+	return clone;
+
+};
 
 /**
  * An Object3D that can swap out its underlying
@@ -31,6 +43,7 @@ export default class Model extends Object3D {
     super();
     this.name = 'Model';
     this.loader = new CachingGLTFLoader();
+    this.mixer = new AnimationMixer();
     this.modelContainer = new Object3D();
     this.modelContainer.name = 'ModelContainer';
     this.boundingBox = new Box3();
@@ -95,6 +108,12 @@ export default class Model extends Object3D {
       }
     });
 
+    const animations = scene.userData.animations;
+
+    if (animations && animations.length > 0) {
+      this.mixer.clipAction(animations[0], this).play();
+    }
+
     this.updateBoundingBox();
 
     this.dispatchEvent({type: 'model-load'});
@@ -106,6 +125,7 @@ export default class Model extends Object3D {
     while (this.modelContainer.children.length) {
       this.modelContainer.remove(this.modelContainer.children[0]);
     }
+    this.mixer.stopAllAction(); // TODO Cleanup memory
   }
 
   updateBoundingBox() {
