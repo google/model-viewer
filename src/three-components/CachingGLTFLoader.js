@@ -39,6 +39,8 @@ export class CachingGLTFLoader {
 
     const model = gltf.scene ? gltf.scene.clone(true) : null;
 
+    model.userData.animations = gltf.animations; // save animations
+
     // Materials aren't cloned when cloning meshes; geometry
     // and materials are copied by reference. This is necessary
     // for the same model to be used twice with different
