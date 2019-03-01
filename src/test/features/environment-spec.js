@@ -19,6 +19,7 @@ import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helper
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
+const ALT_BG_IMAGE_URL = assetPath('quick_4k.png');
 const BG_IMAGE_URL = assetPath('spruit_sunrise_2k.jpg');
 const MODEL_URL = assetPath('reflective-sphere.gltf');
 
@@ -277,6 +278,37 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
+  suite('environment-image', () => {
+    setup(async () => {
+      let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
+      element.setAttribute('src', MODEL_URL);
+      element.setAttribute('background-color', '#ff0077');
+      element.setAttribute('environment-image', BG_IMAGE_URL);
+      document.body.appendChild(element);
+      await onLoad;
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
+    test('applies environment-image environment map on model', () => {
+      expect(modelUsingEnvMap(scene, {url: element.environmentImage})).to.be.ok;
+    });
+
+    suite('and environment-image subsequently removed', () => {
+      setup(async () => {
+        let envMapChanged = waitForEnvMap(scene.model, {url: null});
+        element.removeAttribute('environment-image');
+        await envMapChanged;
+      });
+
+      test('reapplies generated environment map on model', () => {
+        expect(modelUsingEnvMap(scene, {url: null})).to.be.ok;
+      });
+    });
+  });
+
   suite('with background-color and background-image properties', () => {
     setup(async () => {
       let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
@@ -297,6 +329,48 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     test('applies background-image environment map on model', async function() {
       expect(modelUsingEnvMap(scene, {url: element.backgroundImage})).to.be.ok;
+    });
+
+    suite('with an environment-image', () => {
+      setup(async () => {
+        const environmentChanged = waitForEvent(element, 'environment-changed');
+        element.setAttribute('environment-image', ALT_BG_IMAGE_URL);
+        await environmentChanged;
+      });
+
+      test('prefers environment-image as environment map', () => {
+        expect(modelUsingEnvMap(scene, {url: ALT_BG_IMAGE_URL})).to.be.ok;
+      });
+
+      suite('and environment-image subsequently removed', () => {
+        setup(async () => {
+          const environmentChanged =
+              waitForEvent(element, 'environment-changed');
+          element.removeAttribute('environment-image');
+          await environmentChanged;
+        });
+
+        test('uses background-image as environment map', () => {
+          expect(modelUsingEnvMap(scene, {url: BG_IMAGE_URL})).to.be.ok;
+        });
+      });
+
+      suite('and background-image subsequently removed', () => {
+        setup(async () => {
+          const environmentChanged =
+              waitForEvent(element, 'environment-changed');
+          element.removeAttribute('background-image');
+          await environmentChanged;
+        });
+
+        test('continues using environment-image as environment map', () => {
+          expect(modelUsingEnvMap(scene, {url: ALT_BG_IMAGE_URL})).to.be.ok;
+        });
+
+        test('displays background with background-color', async function() {
+          expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
+        });
+      });
     });
 
     suite('and background-image subsequently removed', () => {
