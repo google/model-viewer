@@ -133,9 +133,9 @@ suite('ModelViewerElementBase', () => {
         const loaded = elements.map(e => waitForEvent(e, 'load'));
 
         for (let element of elements) {
-          element.style.height = '200vh';
-          element.style.width = '100vw';
           element.autoRotate = true;
+          element.style.position = 'relative';
+          element.style.marginBottom = '100vh';
           element.src = assetPath('cube.gltf');
           document.body.appendChild(element);
         }
@@ -145,7 +145,16 @@ suite('ModelViewerElementBase', () => {
 
       teardown(() => {
         elements.forEach(
-            e => e.parentNode != null && e.parentNode.removeChild(element));
+            element => element.parentNode != null &&
+                element.parentNode.removeChild(element));
+      });
+
+      test('sets a model within viewport to be visible', async () => {
+        await until(() => {
+          return elements[0][$scene].isVisible;
+        });
+
+        expect(elements[0][$scene].isVisible).to.be.true;
       });
 
       test.skip('only models visible in the viewport', async () => {

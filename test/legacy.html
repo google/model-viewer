@@ -30,19 +30,6 @@
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
-  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <script>
-    // NOTE: This is needed in tests so that we don't have to manually trigger
-    // the IntersectionObserver polyfill in Safari. Ordinarily, it would be
-    // triggered by a resize or scroll event.
-    // @see https://github.com/w3c/IntersectionObserver/tree/master/polyfill#configuring-the-polyfill
-    if ('POLL_INTERVAL' in IntersectionObserver.prototype) {
-      IntersectionObserver.prototype.POLL_INTERVAL = 100;
-    }
-  </script>
-
   <!-- EventTarget polyfill is *only* needed for running the tests -->
   <script src="../node_modules/@jsantell/event-target/dist/event-target.js"></script>
 

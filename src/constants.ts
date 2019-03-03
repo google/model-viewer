@@ -13,6 +13,8 @@ export const HAS_FULLSCREEN_API = document.documentElement != null &&
 
 export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
+export const HAS_INTERSECTION_OBSERVER = self.IntersectionObserver != null;
+
 export const IS_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
 
 export const IS_MOBILE = (() => {
