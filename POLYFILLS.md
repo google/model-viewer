@@ -6,20 +6,50 @@ browsers yet. In order to maximize browser compatibility, you should install
 [polyfills](https://en.wikipedia.org/wiki/Polyfill_(programming)) to fill in the
 gaps for some of the newest features.
 
+---
+
+ - ✅ Natively supported
+ - 🚧 Available with polyfill
+ - 🚫 Not available
+ - 🎌 Behind a flag, unstable
+
+Feature                   | Chrome | Canary | Safari 12 | Firefox 64 | Firefox 62 | Edge  | IE 11
+--------------------------|--------|--------|-----------|------------|------------|-------|------
+Resize Observer¹          |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
+Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
+Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
+Intersection Observer²    |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
+Fullscreen API³           |     ✅ |     ✅ |        🚧 |         ✅ |         🚧 |    🚧 |   🚧
+WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+
+_1: Resize Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer) for more details_
+_2: Intersection Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-intersection-observer) for more details_
+_3: Fullscreen API is only needed when using unstable WebXR features. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-fullscreen-api) for more details_
+
+### Regarding IE 11
+
+We currently test and support Internet Explorer 11. We also distribute a special
+["legacy" bundle](https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js)
+that is compatible with IE 11 but comes with the following important caveat:
+the "legacy" bundle includes JavaScript language feature polyfills and code
+transformations that will incur a byte size and execution time penalty
+compared to the non-legacy versions of the code.
+
 ## Browser Support
 
-The following emerging standard web platform APIs are required by
+The following emerging standard web platform APIs are *required* by
 `<model-viewer>`:
 
  - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements) ([CanIUse](https://caniuse.com/#feat=custom-elementsv1), [Platform Status](https://www.chromestatus.com/features/4696261944934400))
  - [Shadow DOM](https://dom.spec.whatwg.org/#shadow-trees) ([CanIUse](https://caniuse.com/#feat=shadowdomv1), [Platform Status](https://www.chromestatus.com/features/4667415417847808))
- - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Platform Status](https://www.chromestatus.com/features/5695342691483648))
- - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Platform Status](https://www.chromestatus.com/features/6596356319739904))
 
-The following emerging web platform API is optional, and will be used by
-`<model-viewer>` if it is detected on the page:
+The following emerging web platform APIs are *optional*, and will be used by
+`<model-viewer>` if they are detected on the page:
 
  - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Platform Status](https://www.chromestatus.com/features/5705346022637568))
+ - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Platform Status](https://www.chromestatus.com/features/5695342691483648))
+ - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Platform Status](https://www.chromestatus.com/features/6596356319739904))
 
 Additionally, the following _highly experimental and volatile_ APIs are needed
 to enable in-browser AR (currently available in Chrome Canary only):
@@ -50,7 +80,7 @@ scenarios.
 
 ### Regarding Resize Observer
 
-If Resize Observer is available in the page, the `<model-element>` will be able
+If Resize Observer is available in the page, `<model-viewer>` will be able
 to automatically recompute the scale and framing of its 3D content in many types
 of scenarios where layout is changing (for example, when its parent container
 changes size due to an animation or transition).
@@ -60,10 +90,24 @@ polyfill is known to have performance consequences that might be considered
 unacceptable for some use cases (it uses a Mutation Observer that observes the
 whole document tree).
 
-If Resize Observer is _not_ available, the `<model-element>` will fall back to
+If Resize Observer is _not_ available, `<model-viewer>` will fall back to
 observing window `resize` events. In this condition, you can force the element
 to recompute its internal layout by dispatching a synthetic window `resize`
 event.
+
+### Regarding Intersection Observer
+
+If Intersection Observer is available in the page, `<model-viewer>` will be
+able to automatically detect if it is currently visible or not. This allows it
+to pause rendering or delay loading model files when `<model-viewer>` is not in
+the viewport.
+
+Intersection Observer is optional because it is not strictly required to make
+`<model-viewer>` work. However, if Intersection Observer is not available, the
+general performance characteristics of `<model-viewer>` will be worse overall.
+
+Unlike Resize Observer, there is not fallback for Intersection Observer unles
+you use a polyfill.
 
 ## Usage Example
 
@@ -87,36 +131,81 @@ the rest of your application code:
     <title>Polyfill Example</title>
 
     <!-- The following libraries and polyfills are recommended to maximize browser support -->
-    <!-- NOTE: you must adjust the paths as appropriate for your project -->
 
-    <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
+    <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
     <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-    <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
-    <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-    <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+    <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
     <script src="./node_modules/intersection-observer/intersection-observer.js"></script>
 
-    <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
+    <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+    <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+    <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
     <script src="./node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+    <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+    <!--<script src="./node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
   </head>
   <body>
     <!-- etc -->
+
+    <!-- Loads <model-viewer> only on modern browsers: -->
+    <script type="module"
+        src="./node_modules/@google/model-viewer/dist/model-viewer.js">
+    </script>
+
+    <!-- Loads <model-viewer> only on old browsers like IE11: -->
+    <script nomodule
+        src="./node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+    </script>
   </body>
 </html>
 ```
 
-## Legacy Browser Support
+### Using Unpkg.com CDN
 
-If you are using the "legacy" browser bundle, or otherwise targeting old
-browsers such as Internet Explorer 11 with your build, you **MUST** also include
-the Custom Elements ES5 Adapter in your document before loading `<model-viewer>`.
-
-The Adapter is included as part of the Web Components Polyfill, and can be
-included with a script tag:
+If do not use Node.js/NPM, one option is to use the Unpkg.com CDN to load the
+recommended polyfills and `<model-viewer>`:
 
 ```html
-<!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->
-<script src="./node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+<!doctype>
+<html>
+  <head>
+    <title>Polyfill Example</title>
+
+    <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+    <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2.1.3/webcomponents-loader.js"></script>
+
+    <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+
+    <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+    <script src="https://unpkg.com/resize-observer-polyfill@1.5.0/dist/ResizeObserver.js"></script>
+
+    <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+    <script src="https://unpkg.com/fullscreen-polyfill@1.0.2/dist/fullscreen.polyfill.js"></script>
+
+    <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+    <!--<script src="https://unpkg.com/@magicleap/prismatic@0.18.2/prismatic.min.js"></script>-->
+
+  </head>
+  <body>
+    <!-- etc -->
+
+    <!-- Loads <model-viewer> only on modern browsers: -->
+    <script type="module"
+        src="https://unpkg.com/@google/model-viewer@0.1.0/dist/model-viewer.js">
+    </script>
+
+    <!-- Loads <model-viewer> only on old browsers like IE11: -->
+    <script nomodule
+        src="https://unpkg.com/@google/model-viewer@0.1.0/dist/model-viewer-legacy.js">
+    </script>
+  </body>
+</html>
 ```
+

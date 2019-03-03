@@ -50,6 +50,12 @@ aircraft_workshop_01_4k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=aircraft_workshop_01">source</a>)
 
+## music_hall_01_4k.hdr
+
+music_hall_01_4k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
+licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
+(<a href="https://hdrihaven.com/hdri/?h=music_hall_01">source</a>)
+
 ## cube.gltf, offcenter-cube.gltf, pbr-spheres.glb, radiance.glb, reflective-sphere.gltf
 
 Contributed by <a href="https://github.com/jsantell">jsantell</a>

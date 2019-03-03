@@ -17,9 +17,7 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-See: [API](#api), [Demo](https://model-viewer.glitch.me),
-[Examples](https://googlewebcomponents.github.io/model-viewer/index.html),
-[Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) (for work prioritization and progress)
+[Remixable demo](https://model-viewer.glitch.me) • [Documentation](https://googlewebcomponents.github.io/model-viewer/index.html) • [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) • [Fidelity test results](https://googlewebcomponents.github.io/model-viewer/test/fidelity/results-viewer.html)
 
 ![sample-render](examples/sample-render.png)
 
@@ -30,12 +28,14 @@ You can load a _bundled build_ via
 unpkg.com by including the snippet below. This will automatically load the correct version for the user's browser.
 
 ```html
-<!-- Loads <model-viewer> only on modern browsers: -->
+<!-- 💁 Include both scripts below to support all browsers! -->
+
+<!-- Loads <model-viewer> for modern browsers: -->
 <script type="module"
     src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
 </script>
 
-<!-- Loads <model-viewer> only on old browsers like IE11: -->
+<!-- Loads <model-viewer> for old browsers like IE11: -->
 <script nomodule
     src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
 </script>
@@ -104,109 +104,34 @@ You can think of `<model-viewer>` sort of like an `<img>` or `<video>` tag, but 
 
 ## Browser Support
 
+`<model-viewer>` is supported on the last 2 major versions of all evergreen
+desktop and mobile browsers. `<model-viewer>` is also supported on IE11.
+
+|               | <img src="https://github.com/alrra/browser-logos/raw/master/src/chrome/chrome_32x32.png" width="16"> Chrome | <img src="https://github.com/alrra/browser-logos/raw/master/src/firefox/firefox_32x32.png" width="16"> Firefox | <img src="https://github.com/alrra/browser-logos/raw/master/src/safari/safari_32x32.png" width="16"> Safari | <img src="https://github.com/alrra/browser-logos/raw/master/src/edge/edge_32x32.png" width="16"> Edge | <img src="https://github.com/alrra/browser-logos/raw/master/src/archive/internet-explorer_9-11/internet-explorer_9-11_32x32.png" width="16"> IE11 |
+| -------- | --- | --- | --- | --- | --- |
+| Desktop  | ✅  | ✅  | ✅  | ✅  | ✅  |
+| Mobile   | ✅  | ✅  | ✅  | ✅  | N/A |
+
 `<model-viewer>` builds upon standard web platform APIs so that the performance,
 capabilities and compatibility of the library get better as the web evolves.
 
-However, not all browsers support all of these features today. Below is the
-latest state of browser support for the relevant emerging features.
-
-**📢 Check out
+However, not all browsers support all of these features today. **Check out
 [POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md) to
 learn how to polyfill for maximum browser compatibility!**
 
----
-
- - ✅ No polyfill needed
- - 🚧 Requires a polyfill
- - 🚫 Not available
- - 🎌 Behind a flag, unstable
-
-Feature                   | Chrome | Canary | Safari 12 | Firefox 64 | Firefox 62 | Edge  | IE 11
---------------------------|--------|--------|-----------|------------|------------|-------|------
-Resize Observer¹          |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
-Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
-Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
-Intersection Observer     |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
-Fullscreen API            |     ✅ |     ✅ |        🚧 |         ✅ |         🚧 |    🚧 |   🚧
-WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
-WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
-
-_1: Resize Observer is optional, and will be used if available. For more details
-please refer to
-[POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer)_
-
-### IE 11 Support
-
-We currently test and support Internet Explorer 11. We also distribute a special
-["legacy" bundle](https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js)
-that is compatible with IE 11 but comes with the following important caveats:
-
- - In order to use the "legacy" bundle in Chrome, you must also use the [Custom
-   Elements ES5 Adapter](https://github.com/webcomponents/webcomponentsjs#custom-elements-es5-adapterjs)
-   (see [POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#legacy-browser-support)
-   for more detail on this).
- - The "legacy" bundle includes JavaScript language feature polyfills and code
-   transformations that will incur a byte size and execution time penalty
-   compared to the non-legacy versions of the code.
-
 ## API
 
-### Styles
+For full details regarding the attributes, properties, events and more supported
+by `<model-viewer>`, please refer to our
+[online documentation](https://googlewebcomponents.github.io/model-viewer/).
+
+## Styling
 
 Currently no custom CSS variables are supported, but the model viewer's containing box
 can be sized via traditional `width` and `height` properties, and positioned with
 the typical properties (`display`, `position`, etc.).
 
-### Attributes
-
-Parameters that are required for display:
-
-* *`src`*: The URL to the 3D model. This parameter is required for
-  `<model-viewer`> to display. Only [glTF][glTF]/[GLB][GLB] models
-  are supported, see [Supported Formats](#supported-formats).
-
-Optional parameters (not required for display):
-
-* *`alt`*: Configures the model with custom text that will be used to describe
-  the model to viewers who use a screen reader or otherwise depend on additional
-  semantic context to understand what they are viewing.
-* *`auto-rotate`*: Enables the auto rotation of the model.
-* *`background-color`*: Sets the background color of the scene when viewed inline. Takes any
-  valid CSS color string.
-* *`background-image`*: Sets the background image of the scene when viewed inline. Takes a
-  URL to an [equirectangular projection image](https://en.wikipedia.org/wiki/Equirectangular_projection) that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR ([#65](https://github.com/GoogleWebComponents/model-viewer/issues/65)). Setting `background-image` supercedes `background-color`.
-* *`controls`*: Enables controls via mouse/touch when in flat view.
-* *`ios-src`*: The url to a [USDZ][USDZ] model which will be used on
-  [supported iOS 12+ devices](https://www.apple.com/ios/augmented-reality/) via
-  [AR Quick Look](https://developer.apple.com/videos/play/wwdc2018/603/) on Safari.
-  See [Augmented Reality](#augmented-reality).
-* *`magic-leap`*: Enables the ability to view models in AR when viewing content on
-  [Magic Leap's Helio](https://magicleaphelio.com/) browser, requires that `src` is
-  a GLB model, and requires the inclusion of the [@magicleap/prismatic](https://www.npmjs.com/package/@magicleap/prismatic) library.
-* *`poster`*: Displays an image instead of the model.  See [On
-  Loading](#on-loading) for more information.
-* *`preload`*: When *`poster`* is also enabled, the model will be downloaded
-  before user action.
-  See [On Loading](#on-loading) for more information.
-* *`reveal-when-loaded`*: When *`poster`* and *`preload`* are specified, hide
-  the poster and show the model once the model has been loaded.  See [On
-  Loading](#on-loading) for more information.
-* *`unstable-webxr`*: Enables the ability to view the model in AR via the experimental
-  [WebXR Device API], currently [implemented only in Chrome Canary](https://developers.google.com/web/updates/2018/06/ar-for-the-web).
-  See [Augmented Reality](#augmented-reality).
-
-All attributes have a corresponding property in camel-case format. For example,
-the `background-color` attribute can also be configured using the
-`backgroundColor` property.
-
-### Events
-
-* *`'load'`*: Fired when a model is loaded. Can fire multiple times per
-  `<model-viewer>` if the `src` attribute is changed.
-* *`'preload'`*: When *`preload`* is enabled this event is fired when
-  preloading is done.
-
-### Supported Formats
+## Format Support
 
 A `<model-viewer>`'s attributes allows developers to specify multiple file types to
 work across different platforms. For WebGL and WebXR purposes, both
@@ -215,7 +140,7 @@ developers can specify a [USDZ][USDZ] file (using the `ios-src` attribute) that
 will be used to launch Quick Look on iOS Safari as an interim solution until
 Safari has support for something like the WebXR Device and Hit Test APIs.
 
-### On Loading
+## Loading Performance
 
 Models are often large, so especially on pages with large numbers of them it
 may be desirable to load them after user action. Three parameters -
@@ -243,7 +168,7 @@ means that iOS users who see a live-rendered model in the browser (loaded as
 [glTF][glTF]/[GLB][GLB]) will have to download the same model
 a _second time_ in [USDZ][USDZ] format when they launch Quick Look.
 
-### Augmented Reality
+## Augmented Reality
 
 There are currently multiple options for viewing content in augmented reality.
 Different platforms enable slightly different experiences, but generally finds

@@ -14,3 +14,9 @@
  */
 
 window.$ = document.querySelector.bind(document);
+
+window.oscillate = function(min, max, period, time) {
+  const mag = max - min;
+  return Math.cos(Math.PI + 2 * Math.PI * time / period) * (min + mag / 2.0) +
+      mag / 2.0;
+};
