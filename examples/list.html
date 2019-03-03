@@ -23,21 +23,24 @@
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-  <!-- Include prismatic.js for Magic Leap support: -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
   <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
   <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
 
-  <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
   <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
 <style>
 model-viewer {
   width: 50%;
@@ -47,48 +50,21 @@ model-viewer {
 </head>
 <body>
 
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/list.html"></a>
+  <div class="demo" style="background-color: #222; flex-direction: column; height: 400vh;">
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (1 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (2 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (3 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (4 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (5 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (6 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (7 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (8 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (9 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (10 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (11 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (12 of 13)"></model-viewer>
+    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (13 of 13)"></model-viewer>
   </div>
-
-  <div class="sample">
-    <div class="demo" style="flex-direction: column; height: 400vh;">
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (1 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (2 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (3 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (4 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (5 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (6 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (7 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (8 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (9 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (10 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (11 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (12 of 13)"></model-viewer>
-      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (13 of 13)"></model-viewer>
-    </div>
-
-    <div class="content">
-      <div class="wrapper">
-        <div class="center heading">
-          <h2>Rendering Test</h2>
-          <h4>This page tests usages of the <span class="attribute">&lt;model-viewer&gt; </span>element's lazy rendering on a long page.</h4>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="attribution">
-      Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-      (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
-    </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-  </div>
-
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"

@@ -25,20 +25,65 @@
   <link rel="shortcut icon" type="image/png" href="examples/assets/favicon.png"/>
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
-  <!-- Include prismatic.js for Magic Leap support: -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-  <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
-  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+<style>
+@keyframes bounce {
+  20% {
+    transform: translateY(-2.5px) rotate(45deg);
+  }
+  35% {
+    transform: translateY(2.5px) rotate(45deg);
+  }
+  50% {
+    transform: translateY(-2.5px) rotate(45deg);
+  }
+  65% {
+    transform: translateY(2.5px) rotate(45deg);
+  }
+  80% {
+    transform: translateY(-2.5px) rotate(45deg);
+  }
+}
 
-  <!-- Intersection Observer polyfill is required for Safari and IE11 -->
-  <script src="node_modules/intersection-observer/intersection-observer.js"></script>
+@media only screen and (max-width: 800px) {
+  #demo-container {
+    height: 100vh;
+    flex-direction: column-reverse;
+    background-color: #455A64;
+  }
 
-  <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
-  <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+  .demo example-snippet > pre {
+    margin-bottom: 50px;
+  }
 
-  <!-- Fullscreen polyfill is required for using experimental AR features in Canary: -->
-  <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+  .demo example-snippet > i {
+    display: block;
+    width: 10px;
+    height: 10px;
+    margin: 20px;
+    border-style: solid;
+    border-color: #ff5252;
+    border-width: 0 4px 4px 0px;
+    transform: translateY(-2.5px) rotate(45deg);
+    animation: bounce 2s infinite;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -50,19 +95,15 @@
   <div class="sample">
     <div id="demo-container" class="demo">
       <example-snippet stamp-to="demo-container" highlight-as="html">
-          <template>
-              <model-viewer
-                src="examples/assets/Astronaut.glb"
-                alt="A 3D model of an astronaut"
-                controls
-                auto-rotate
-                background-color="#455A64"></model-viewer>
-          </template>
-
-          <script>
-  console.log('This is how you log things to the console!');
-</script>
-
+        <template>
+            <model-viewer
+              src="examples/assets/Astronaut.glb"
+              alt="A 3D model of an astronaut"
+              controls
+              auto-rotate
+              background-color="#455A64"></model-viewer>
+        </template>
+        <i></i>
       </example-snippet>
     </div>
 
@@ -72,43 +113,28 @@
           <h1 style="white-space:nowrap;"><span>&lt;</span>model-viewer<span>&gt;</span></h1>
           <h3>Easily display interactive 3D models on the web & in AR</h3>
         </div>
+
         <h3 class="grouping-title">EXAMPLES</h3>
         <ul id="list-example">
           <li>
-            <a href="examples/default.html"><h4>Default</h4></a>
-            <p>The most basic configuration of model-viewer.</p>
-          </li>
-          <li>
-            <a href="examples/background-color.html"><h4>Background Color</h4></a>
-            <p>Using the background-color attribute to style the background color.</p>
-          </li>
-          <li>
-            <a href="examples/background-image.html"><h4>Background Image</h4></a>
-            <p>Using the background-image attribute to specify an equirectangular projection image.</p>
+            <a href="examples/lighting-and-environment.html"><h4>Lighting &amp; Environment</h4></a>
+            <p>Control the lighting and the environment surrounding &lt;model-viewer&gt;</p>
           </li>
           <li>
             <a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a>
-            <p>Tests using configurations that enable viewing the model in augmented reality.</p>
+            <p>Configure &lt;model-viewer&gt; to present your model as a hologram</p>
           </li>
           <li>
-            <a href="examples/loading.html"><h4>Lazy Loading</h4></a>
-            <p>Examples using the different configurations of displaying an image while loading, and lazy loading models.</p>
+            <a href="examples/lazy-loading.html"><h4>Lazy Loading</h4></a>
+            <p>Improve UX with these cost-saving &lt;model-viewer&gt; configurations</p>
           </li>
           <li>
-            <a href="examples/sources.html"><h4>Model Formats</h4></a>
-            <p>Tests different configurations of loading model formats.</p>
+            <a href="examples/format-support.html"><h4>Format Support</h4></a>
+            <p>Learn how model formats work on different platforms</p>
           </li>
           <li>
-            <a href="examples/multiple-elements.html"><h4>Multiple Elements</h4></a>
-            <p>Stress test of rendering 16 elements that require rendering on every frame, all in the view at the same time.</p>
-          </li>
-          <li>
-            <a href="examples/list.html"><h4>Rendering Test</h4></a>
-            <p>Test of many elements on a page, and lazily rendering only when in view.</p>
-          </li>
-          <li>
-            <a href="examples/pbr.html"><h4>Physically Based Rendering </h4></a>
-            <p>Showcase of high-resolution models with multiple textures and environment maps.</p>
+            <a href="examples/rendering-showcase.html"><h4>Rendering Showcase</h4></a>
+            <p>Demos of &lt;model-viewer&gt; rendering quality and stress tests</p>
           </li>
         </ul>
 
@@ -137,11 +163,27 @@
           </li>
           <li>
             <h4>controls</h4>
-            <P>Enables controls via mouse/touch when in flat view.</P>
+            <p>Enables controls via mouse/touch when in flat view.</p>
           </li>
           <li>
-            <h4>controls</h4>
-            <P>Enables controls via mouse/touch when in flat view.</P>
+            <h4>environment-image</h4>
+            <p>Controls the environmental reflection of the model. Normally if
+            background-image is set, that image will also be used for the
+            environment-image. Use environment-image to only set the reflection
+            without affecting the background.</p>
+          </li>
+          <li>
+            <h4>environment-intensity</h4>
+            <p>Controls the intensity of the environmental reflection. There is
+            always a reflection from the environment, even when background-image
+            or environment-image are not set. Set this value to 0 to hide the
+            environment entirely. Defaults to 1.</p>
+          </li>
+          <li>
+            <h4>experimental-pmrem</h4>
+            <p>Enables an experimental lighting mode that is more physically
+            realistic, and emphasizes light from the environment over light from
+            the built-in scene lights.</p>
           </li>
           <li>
             <h4>ios-src</h4>
@@ -164,6 +206,18 @@
             <P>When poster and preload are specified, hide the poster and show the model once the model has been loaded. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</P>
           </li>
           <li>
+            <h4>shadow-intensity</h4>
+            <p>Controls the opacity of the shadow. Set to 0 to turn off the
+            shadow entirely. Defaults to 0.</p>
+          </li>
+          <li>
+            <h4>stage-light-intensity</h4>
+            <p>Controls the intensity of the built-in scene lighting. Set to 0
+            to turn off the scene lighting entirely. Note that the weight of the
+            scene lighting is effected by whether or not PMREM is enabled.
+            Defaults to 1.</p>
+          </li>
+          <li>
             <h4>unstable-webxr</h4>
             <P>Enables the ability to view the model in AR via the experimental <a href="https://github.com/immersive-web/webxr">WebXR Device API</a>, currently <a href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented only in Chrome Canary</a>. See <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented Reality</a>.</P>
           </li>
@@ -177,6 +231,12 @@
 
         <ul class="list-attribute">
           <li>
+            <h4>environment-changed</h4>
+            <p>Fired when the environment has changed. If the environment is
+            derived from background-image or environment-image, the image will
+            have loaded by the time this event fires.</p>
+          </li>
+          <li>
             <h4>load</h4>
             <p>Fired when a model is loaded. Can fire multiple times per <span class="attribute">&lt;model-viewer&gt;</span> if the src attribute is changed.</p>
           </li>
@@ -184,7 +244,6 @@
             <h4>preload</h4>
             <p>When preload is enabled this event is fired when preloading is done.</p>
           </li>
-
       </div>
     </div>
 
@@ -193,7 +252,8 @@
   <div class="footer">
     <div class="attribution">
       Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
+      (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
     </div>
     <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
