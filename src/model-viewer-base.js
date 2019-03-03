@@ -15,7 +15,7 @@
 
 import {UpdatingElement} from 'lit-element/lib/updating-element';
 
-import {HAS_RESIZE_OBSERVER} from './constants.js';
+import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
@@ -138,18 +138,24 @@ export default class ModelViewerElementBase extends UpdatingElement {
         }) :
         null;
 
-    this.intersectionObserver = new IntersectionObserver(entries => {
-      for (let entry of entries) {
-        if (entry.target === this) {
-          this[$scene].isVisible = entry.isIntersecting;
+    if (HAS_INTERSECTION_OBSERVER) {
+      this.intersectionObserver = new IntersectionObserver(entries => {
+        for (let entry of entries) {
+          if (entry.target === this) {
+            this[$scene].isVisible = entry.isIntersecting;
+          }
         }
-      }
-    }, {
-      root: null,
-      rootMargin: '10px',
-      threshold: 0,
-    });
-    this.intersectionObserver.observe(this);
+      }, {
+        root: null,
+        rootMargin: '10px',
+        threshold: 0,
+      });
+    } else {
+      // If there is no intersection obsever, then all models should be visible
+      // at all times:
+      this.intersectionObserver = null;
+      this[$scene].isVisible = true;
+    }
   }
 
   connectedCallback() {
@@ -158,6 +164,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this.resizeObserver.observe(this);
     } else {
       self.addEventListener('resize', this[$fallbackResizeHandler]);
+    }
+
+    if (HAS_INTERSECTION_OBSERVER) {
+      this.intersectionObserver.observe(this);
     }
 
     this[$renderer].registerScene(this[$scene]);
@@ -170,6 +180,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this.resizeObserver.unobserve(this);
     } else {
       self.removeEventListener('resize', this[$fallbackResizeHandler]);
+    }
+
+    if (HAS_INTERSECTION_OBSERVER) {
+      this.intersectionObserver.unobserve(this);
     }
 
     this[$renderer].unregisterScene(this[$scene]);
