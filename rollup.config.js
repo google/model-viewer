@@ -55,6 +55,20 @@ export default [
     output: {
       file: './dist/model-viewer.js',
       sourcemap: true,
+      format: 'esm',
+      name: 'ModelViewerElement'
+    },
+    watch: {
+      include: 'lib/**',
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/model-viewer.js',
+    output: {
+      file: './dist/model-viewer-umd.js',
+      sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement'
     },
@@ -68,6 +82,19 @@ export default [
     input: './lib/test/index.js',
     output: {
       file: './dist/unit-tests.js',
+      format: 'esm',
+      name: 'ModelViewerElementUnitTests'
+    },
+    watch: {
+      include: 'lib/**',
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/test/index.js',
+    output: {
+      file: './dist/unit-tests-umd.js',
       format: 'umd',
       name: 'ModelViewerElementUnitTests'
     },
@@ -109,6 +136,16 @@ export default [
     input: './lib/documentation/components/example-snippet.js',
     output: {
       file: './examples/built/dependencies.js',
+      format: 'esm',
+      name: 'DocumentationDependencies'
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/documentation/components/example-snippet.js',
+    output: {
+      file: './examples/built/dependencies-umd.js',
       format: 'umd',
       name: 'DocumentationDependencies'
     },

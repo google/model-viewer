@@ -162,8 +162,24 @@
     <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
-    <script src="./scripts/helpers.js"></script>
-    <script src="./built/dependencies.js"></script>
-    <script src="../dist/model-viewer.js"></script>
+  <script src="./scripts/helpers.js"></script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../dist/model-viewer-legacy.js">
+  </script>
 </body>
 </html>
