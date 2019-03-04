@@ -32,6 +32,10 @@ export type RootNode = Document|ShadowRoot;
  * indicated by the "stamp-to" attribute. The "stamp-to" attribute references
  * another node by its ID.
  *
+ * Add the "lazy" boolean attribute if you want to stamp the example manually
+ * by invoking its "stamp" method. Note that this will prevent the snippet from
+ * stamping itself automatically upon being connected to the DOM.
+ *
  * ExampleSnippet is a simplified alternative to Polymer Project's DemoSnippet.
  * The key differences are:
  *
@@ -47,11 +51,12 @@ export class ExampleSnippet extends UpdatingElement {
   @property({type: Object}) template: HTMLTemplateElement|null = null;
   @property({type: String, attribute: 'highlight-as'})
   highlightAs: string = 'markup';
+  @property({type: Boolean, attribute: 'lazy'}) lazy: boolean = false;
   @property({type: Boolean}) preserveWhitespace: boolean = false;
 
   readonly stamped: boolean = false;
 
-  protected stamp() {
+  public stamp() {
     if (this.stampTo == null || this.template == null) {
       return;
     }
@@ -113,7 +118,7 @@ export class ExampleSnippet extends UpdatingElement {
   updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
-    if (!this.stamped &&
+    if (!this.stamped && !this.lazy &&
         (changedProperties.has('stamp-to') ||
          changedProperties.has('template')) &&
         this.template != null && this.stampTo != null) {

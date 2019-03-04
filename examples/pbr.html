@@ -74,20 +74,16 @@
             <h2>Helmet</h2>
           </div>
 
-          <lazy-inject>
-            <template slot="lazy">
-              <example-snippet stamp-to="demo-container-1" highlight-as="html">
-                <template>
+          <example-snippet lazy stamp-to="demo-container-1" highlight-as="html">
+            <template>
 <model-viewer
   src="assets/DamagedHelmet/DamagedHelmet.gltf"
   alt="A 3D model of a damaged helmet depicted within a hangar"
   controls auto-rotate
   background-image="assets/small_hangar_01_1k.jpg">
 </model-viewer>
-                </template>
-              </example-snippet>
             </template>
-          </lazy-inject>
+          </example-snippet>
         </div>
       </div>
     </div>
@@ -100,20 +96,16 @@
             <div class="index">2</div>
             <h2>Barramundi Fish</h2>
           </div>
-          <lazy-inject>
-            <template slot="lazy">
-              <example-snippet stamp-to="demo-container-2" highlight-as="html">
-                <template>
+          <example-snippet lazy stamp-to="demo-container-2" highlight-as="html">
+            <template>
 <model-viewer
   src="assets/BarramundiFish/glTF-Binary/BarramundiFish.glb"
   alt="A 3D model of a fish depicted within a forest"
   controls auto-rotate
   background-image="assets/whipple_creek_regional_park_04_1k.jpg">
 </model-viewer>
-                </template>
-              </example-snippet>
             </template>
-          </lazy-inject>
+          </example-snippet>
         </div>
       </div>
     </div>
@@ -148,18 +140,34 @@
   </div>
 
     <script src="./scripts/helpers.js"></script>
-    <script src="./scripts/lazy-inject.js"></script>
-    <script src="./built/dependencies.js"></script>
-    <script src="../dist/model-viewer.js"></script>
+
+    <!-- Documentation-specific dependencies: -->
+    <script type="module"
+        src="./built/dependencies.js">
+    </script>
+    <script nomodule
+        src="./built/dependencies-legacy.js">
+    </script>
+
+    <!-- Loads <model-viewer> only on modern browsers: -->
+    <script type="module"
+        src="../dist/model-viewer.js">
+    </script>
+
+    <!-- Loads <model-viewer> only on old browsers like IE11: -->
+    <script nomodule
+        src="../dist/model-viewer-legacy.js">
+    </script>
+
     <script>
-        $('#load-examples').addEventListener('click', e => {
+        $('#load-examples').addEventListener('click', function() {
             // Let the button animation play for a moment before
             // replacing the content
 
-            setTimeout(() => {
+            setTimeout(function() {
 
-              const injects = document.querySelectorAll('lazy-inject');
-              injects.forEach(inject => inject.inject());
+              const snippets = document.querySelectorAll('example-snippet');
+              snippets.forEach(function(snippet) { snippet.stamp(); });
 
               $('#hide-before-load').classList.remove('no-show');
               $('.modal').classList.add('no-show');

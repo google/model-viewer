@@ -17,9 +17,9 @@ const fs = require('fs').promises;
 const {jsTransform} = require('polymer-build/lib/js-transform');
 
 const bundlesToTransform = [
-  './dist/model-viewer.js',
-  './dist/unit-tests.js',
-  './examples/built/dependencies.js'
+  './dist/model-viewer-umd.js',
+  './dist/unit-tests-umd.js',
+  './examples/built/dependencies-umd.js'
 ];
 
 console.log('Generating legacy bundles for IE11 compatibility...');
@@ -29,7 +29,8 @@ const transformation = (async () => {
     console.log(' 🚧', bundlePath);
     const file = await fs.readFile(bundlePath);
     const transformed = jsTransform(file.toString('utf8'), {compile: 'es5'});
-    await fs.writeFile(bundlePath.replace('.js', '-legacy.js'), transformed);
+    await fs.writeFile(
+        bundlePath.replace('-umd.js', '-legacy.js'), transformed);
   }
   console.log(' ✅ Legacy bundles finished building successfully!');
 })();

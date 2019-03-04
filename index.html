@@ -28,9 +28,6 @@
   <!-- Include prismatic.js for Magic Leap support: -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-  <!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->
-  <!--<script src="../node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>-->
-
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
@@ -201,7 +198,22 @@
     <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
-    <script src="examples/built/dependencies.js"></script>
-    <script src="dist/model-viewer.js"></script>
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="examples/built/dependencies.js">
+  </script>
+  <script nomodule
+      src="examples/built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="dist/model-viewer-legacy.js">
+  </script>
 </body>
 </html>

@@ -30,7 +30,15 @@ You can load a _bundled build_ via
 [unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer.js):
 
 ```html
-<script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+<!-- Loads <model-viewer> only on modern browsers: -->
+<script type="module"
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+</script>
+
+<!-- Loads <model-viewer> only on old browsers like IE11: -->
+<script nomodule
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+</script>
 ```
 
 Alternatively, you can install the _npm package_:
@@ -51,11 +59,8 @@ dependencies.
 
 ## Usage
 
-If you are using a _bundled build_, first add a script tag to your page to load it
-
-```html
-<script src="path/to/bundled/model-viewer.js"></script>
-```
+If you are using a _bundled build_, first add a script tag to your page to load
+`<model-viewer>` as described in the [Installing](#installing) section.
 
 Alternatively, if you are using the _npm package_ and a bundler (see
 "Important note on bundling" above), you can import the module:

@@ -92,12 +92,20 @@ export default class Renderer extends EventDispatcher {
   }
 
   set exposure(exposure) {
+    if (!this.canRender) {
+      return;
+    }
+
     const exposureIsNumber =
         typeof exposure === 'number' && !self.isNaN(exposure);
     this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
   }
 
   get exposure() {
+    if (!this.canRender) {
+      return null;
+    }
+
     return this.renderer.toneMappingExposure;
   }
 

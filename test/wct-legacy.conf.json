@@ -3,7 +3,7 @@
   "moduleResolution": "node",
   "root": "./",
   "suites": [
-    "./test/legacy.html"
+    "./test/index.html"
   ],
   "clientOptions": {
     "mochaOptions": {
