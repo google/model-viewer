@@ -13,30 +13,34 @@ gaps for some of the newest features.
  - 🚧 Behind a flag, unstable
  - 🚫 Not available
 
-Feature                   | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
---------------------------|--------|--------|-----------|------------|------|------
-Custom Elements           |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
-Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
-Resize Observer¹          |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋
-Intersection Observer²    |     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋
+These browser features are **required** for `<model-viewer>` to work correctly:
+
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
+---------------------------|--------|--------|-----------|------------|------|------
+Custom Elements            |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
+Shadow DOM                 |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
+
+These browser features are **optional** and are only used if available for
+performance optimization:
+
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
+---------------------------|--------|--------|-----------|------------|------|------
+Resize Observer[¹](1)      |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋
+Intersection Observer[²](2)|     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋
+
+These browser features are **optional** and are only needed if you wish to use
+the `unstable-webxr` feature:
+
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
+---------------------------|--------|--------|-----------|------------|------|------
+Fullscreen API[³](3)       |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋
+WebXR Device API           |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
+WebXR HitTest API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
 
 
-The following features are only required if you wish to use the unstable
-in-browser WebXR augmented reality mode via the `unstable-webxr` attribute:
-
-
-Feature                   | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
---------------------------|--------|--------|-----------|------------|------|------
-Fullscreen API³           |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋
-WebXR Device API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
-WebXR HitTest API         |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
-
-
-_1: Resize Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer) for more details_
-
-_2: Intersection Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-intersection-observer) for more details_
-
-_3: Fullscreen API is only needed when using unstable WebXR features. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-fullscreen-api) for more details_
+[1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer
+[2]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-intersection-observer
+[3]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-fullscreen-api
 
 ### Regarding IE 11
 
