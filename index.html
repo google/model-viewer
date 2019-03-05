@@ -174,16 +174,18 @@
           </li>
           <li>
             <h4>environment-intensity</h4>
-            <p>Controls the intensity of the environmental reflection. There is
-            always a reflection from the environment, even when background-image
-            or environment-image are not set. Set this value to 0 to hide the
+            <p>Controls the intensity of environmental lighting. There is
+            almost always light reflected from the environment, even when
+            background-image or environment-image are not set. The one exception
+            is for models with unlit materials. Set this value to 0 to hide the
             environment entirely. Defaults to 1.</p>
           </li>
           <li>
             <h4>experimental-pmrem</h4>
             <p>Enables an experimental lighting mode that is more physically
             realistic, and emphasizes light from the environment over light from
-            the built-in scene lights.</p>
+            the built-in scene lights. Refer to <a href="https://wiki.jmonkeyengine.org/jme3/advanced/pbr_part3.html" target="_blank">this article</a>
+            for in-depth details related to this lighting mode.</p>
           </li>
           <li>
             <h4>ios-src</h4>
@@ -231,7 +233,7 @@
 
         <ul class="list-attribute">
           <li>
-            <h4>environment-changed</h4>
+            <h4>environment-change</h4>
             <p>Fired when the environment has changed. If the environment is
             derived from background-image or environment-image, the image will
             have loaded by the time this event fires.</p>

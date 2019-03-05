@@ -9,22 +9,33 @@ gaps for some of the newest features.
 ---
 
  - ✅ Natively supported
- - 🚧 Available with polyfill
+ - ✋ Available with polyfill
+ - 🚧 Behind a flag, unstable
  - 🚫 Not available
- - 🎌 Behind a flag, unstable
 
-Feature                   | Chrome | Canary | Safari 12 | Firefox 64 | Firefox 62 | Edge  | IE 11
---------------------------|--------|--------|-----------|------------|------------|-------|------
-Resize Observer¹          |     ✅ |     ✅ |        🚧 |         🚧 |         🚧 |    🚧 |   🚧
-Custom Elements           |     ✅ |     ✅ |        ✅ |         🚧 |         🚧 |    🚧 |   🚧
-Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |         🚧 |    🚧 |   🚧
-Intersection Observer²    |     ✅ |     ✅ |        🚧 |         ✅ |         ✅ |    ✅ |   🚧
-Fullscreen API³           |     ✅ |     ✅ |        🚧 |         ✅ |         🚧 |    🚧 |   🚧
-WebXR Device API          |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
-WebXR HitTest API         |     🚫 |     🎌 |        🚫 |         🚫 |         🚫 |    🚫 |   🚫
+Feature                   | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
+--------------------------|--------|--------|-----------|------------|------|------
+Custom Elements           |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
+Shadow DOM                |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
+Resize Observer¹          |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋
+Intersection Observer²    |     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋
+
+
+The following features are only required if you wish to use the unstable
+in-browser WebXR augmented reality mode via the `unstable-webxr` attribute:
+
+
+Feature                   | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
+--------------------------|--------|--------|-----------|------------|------|------
+Fullscreen API³           |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋
+WebXR Device API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
+WebXR HitTest API         |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
+
 
 _1: Resize Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer) for more details_
+
 _2: Intersection Observer is optional. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-intersection-observer) for more details_
+
 _3: Fullscreen API is only needed when using unstable WebXR features. [See below](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-fullscreen-api) for more details_
 
 ### Regarding IE 11

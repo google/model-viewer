@@ -170,7 +170,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     [$applyEnvironmentMap](environmentMap) {
       this[$currentEnvironmentMap] = environmentMap;
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
-      this.dispatchEvent(new CustomEvent('environment-changed'));
+      this.dispatchEvent(new CustomEvent('environment-change'));
 
       this[$updateLighting]();
       this[$needsRender]();
