@@ -56,21 +56,21 @@ compared to the non-legacy versions of the code.
 The following emerging standard web platform APIs are *required* by
 `<model-viewer>`:
 
- - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements) ([CanIUse](https://caniuse.com/#feat=custom-elementsv1), [Platform Status](https://www.chromestatus.com/features/4696261944934400))
- - [Shadow DOM](https://dom.spec.whatwg.org/#shadow-trees) ([CanIUse](https://caniuse.com/#feat=shadowdomv1), [Platform Status](https://www.chromestatus.com/features/4667415417847808))
+ - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements) ([CanIUse](https://caniuse.com/#feat=custom-elementsv1), [Chrome Platform Status](https://www.chromestatus.com/features/4696261944934400))
+ - [Shadow DOM](https://dom.spec.whatwg.org/#shadow-trees) ([CanIUse](https://caniuse.com/#feat=shadowdomv1), [Chrome Platform Status](https://www.chromestatus.com/features/4667415417847808))
 
 The following emerging web platform APIs are *optional*, and will be used by
 `<model-viewer>` if they are detected on the page:
 
- - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Platform Status](https://www.chromestatus.com/features/5705346022637568))
- - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Platform Status](https://www.chromestatus.com/features/5695342691483648))
- - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Platform Status](https://www.chromestatus.com/features/6596356319739904))
+ - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Chrome Platform Status](https://www.chromestatus.com/features/5705346022637568))
+ - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Chrome Platform Status](https://www.chromestatus.com/features/5695342691483648))
+ - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Chrome Platform Status](https://www.chromestatus.com/features/6596356319739904))
 
 Additionally, the following _highly experimental and volatile_ APIs are needed
 to enable in-browser AR (currently available in Chrome Canary only):
 
- - [Web XR Device API](https://immersive-web.github.io/webxr/) ([Platform Status](https://www.chromestatus.com/features/5680169905815552))
- - [Web XR Hit Test API](https://github.com/immersive-web/hit-test/blob/master/explainer.md) ([Platform Status](https://www.chromestatus.com/features/4755348300759040))
+ - [Web XR Device API](https://immersive-web.github.io/webxr/) ([Chrome Platform Status](https://www.chromestatus.com/features/5680169905815552))
+ - [Web XR Hit Test API](https://github.com/immersive-web/hit-test/blob/master/explainer.md) ([Chrome Platform Status](https://www.chromestatus.com/features/4755348300759040))
 
 ### Recommended Polyfills
 
