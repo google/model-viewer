@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Easily display interactive 3D models on the web and in AR!",
   "repository": "https://github.com/GoogleWebComponents/model-viewer",
   "bugs": {
@@ -12,7 +12,8 @@
     "Jordan Santell <jsantell@google.com>",
     "Chris Joel <cdata@google.com>",
     "Ricardo Cabello <ricardocabello@google.com>",
-    "Matt Small <mbsmall@google.com>"
+    "Matt Small <mbsmall@google.com>",
+    "Yuin Chin <yuin@google.com>"
   ],
   "main": "./lib/model-viewer.js",
   "module": "./lib/model-viewer.js",
