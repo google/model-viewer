@@ -307,7 +307,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await timePasses();
         const lightIntensity = scene.light.intensity;
         element.experimentalPmrem = true;
-        await waitForEvent(element, 'environment-changed');
+        await waitForEvent(element, 'environment-change');
         const newLightIntensity = scene.light.intensity;
         expect(newLightIntensity).to.be.lessThan(lightIntensity);
       });
@@ -389,7 +389,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('with an environment-image', () => {
       setup(async () => {
-        const environmentChanged = waitForEvent(element, 'environment-changed');
+        const environmentChanged = waitForEvent(element, 'environment-change');
         element.setAttribute('environment-image', ALT_BG_IMAGE_URL);
         await environmentChanged;
       });
@@ -401,7 +401,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       suite('and environment-image subsequently removed', () => {
         setup(async () => {
           const environmentChanged =
-              waitForEvent(element, 'environment-changed');
+              waitForEvent(element, 'environment-change');
           element.removeAttribute('environment-image');
           await environmentChanged;
         });
@@ -414,7 +414,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       suite('and background-image subsequently removed', () => {
         setup(async () => {
           const environmentChanged =
-              waitForEvent(element, 'environment-changed');
+              waitForEvent(element, 'environment-change');
           element.removeAttribute('background-image');
           await environmentChanged;
         });

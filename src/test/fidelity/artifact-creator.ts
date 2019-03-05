@@ -183,7 +183,7 @@ export class ArtifactCreator {
         const environmentChanges = new Promise((resolve, reject) => {
           const timeout = setTimeout(reject, 10000);
 
-          modelViewer.addEventListener('environment-changed', () => {
+          modelViewer.addEventListener('environment-change', () => {
             clearTimeout(timeout);
             resolve();
           });

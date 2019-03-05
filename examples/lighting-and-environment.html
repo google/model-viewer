@@ -138,8 +138,8 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">5</div>
-        <h2>Use <span class="attribute">environment-image</span> to set an
-        environtal reflection without changing the background</h2>
+        <h2>Use <span class="attribute">environment-image</span> to set
+          environmental lighting without changing the background</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
                 <model-viewer controls
@@ -178,11 +178,12 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">7</div>
-        <h2>Control environment reflection intensity with <span class="attribute">environment-intensity</span></h2>
+        <h2>Control environment lighting intensity with <span class="attribute">environment-intensity</span></h2>
         <example-snippet stamp-to="demo-container-7" highlight-as="html">
             <template>
               <model-viewer controls
                     id="environment-intensity-demo"
+                    environment-intensity="1"
                     background-color="#ff0077"
                     environment-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     alt="A 3D model of a reflective sphere depicted within a forest"
@@ -218,9 +219,10 @@
                 <model-viewer
                     id="stage-light-demo"
                     controls
+                    stage-light-intensity="1"
                     background-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     alt="A 3D model of an astronaut depicted within a forest"
-                    src="assets/Astronaut.glb"></model-viewer>
+                    src="assets/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#stage-light-demo');
@@ -250,6 +252,7 @@
             <template>
               <model-viewer controls
                     id="shadow-intensity-demo"
+                    shadow-intensity="0"
                     background-color="#ff0077"
                     environment-image="assets/whipple_creek_regional_park_04_1k.jpg"
                     alt="A 3D model of a reflective sphere depicted within a forest"
@@ -272,34 +275,6 @@
       </div>
     </div>
   </div>
-
-  <!--
-  <div class="sample">
-    <div class="demo" id="demo-container-5"></div>
-    <div class="content">
-      <div class="wrapper">
-        <div class="index">5</div>
-        <h2>Cycling between <span class="attribute">background-image</span> and <span class="attribute">background-color</span></h2>
-        <example-snippet stamp-to="demo-container-5" highlight-as="html">
-            <template>
-                <model-viewer
-                    id="toggle-image"
-                    background-color="#ff0077"
-                    src="assets/DamagedHelmet/DamagedHelmet.gltf"
-                    alt="A 3D model of a damaged helmet depicted within changing environments"
-                    controls auto-rotate></model-viewer>
-<script>
-  const images = ['assets/whipple_creek_regional_park_04_1k.jpg', 'does-not-exist.png', ''];
-  let i = 0;
-  setInterval(() =>
-    $('#toggle-image').setAttribute('background-image', images[i++ % 3]), 2000);
-</script>
-            </template>
-        </example-snippet>
-      </div>
-    </div>
-  </div>
-  -->
 
   <div class="footer">
     <ul>
