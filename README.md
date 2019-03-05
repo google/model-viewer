@@ -27,7 +27,7 @@ See: [API](#api), [Demo](https://model-viewer.glitch.me),
 ## Installing
 
 You can load a _bundled build_ via
-[unpkg.com](https://unpkg.com/@google/model-viewer/dist/model-viewer.js):
+unpkg.com by including the snippet below. This will automatically load the correct version for the user's browser.
 
 ```html
 <!-- Loads <model-viewer> only on modern browsers: -->
