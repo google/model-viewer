@@ -199,10 +199,14 @@ export default class TextureUtils extends EventDispatcher {
         // Apply the PMREM pass to the environment, which produces a distinct
         // texture from the source:
         const nonPmremEnvironmentMap = environmentMap;
-        environmentMap = this.pmremPass(
-            nonPmremEnvironmentMap,
-            this.config.defaultEnvironmentPmremSamples,
-            this.config.defaultEnvironmentPmremSize)
+        const samples = environmentMapWasGenerated ?
+            this.config.defaultEnvironmentPmremSamples :
+            this.config.pmremSamples;
+        const size = environmentMapWasGenerated ?
+            this.config.defaultEnvironmentPmremSize :
+            this.config.pmremSize;
+
+        environmentMap = this.pmremPass(nonPmremEnvironmentMap, samples, size);
 
         // If the source was generated, then we should dispose of it right away
         if (environmentMapWasGenerated) {
