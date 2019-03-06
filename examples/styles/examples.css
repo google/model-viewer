@@ -36,6 +36,123 @@ a {
   text-decoration: none;
   color: #ff5252;
 }
+b {
+  font-weight: 500;
+}
+table {
+  text-align: left;
+  border-spacing: 0;
+  display: table;
+  border-collapse: collapse;
+  width: 100%;
+}
+table.browser-support {
+  margin-bottom: 32px;
+}
+table.browser-support td:first-child,
+table.browser-support th:first-child {
+  display: block;
+  line-height: 24px;
+  padding: 12px 2px 8px 0;
+  text-align:left;
+  flex:2;
+  min-width: 92px;
+}
+table.browser-support tr {
+  display: flex;
+  border-top: 1px solid rgba(0,0,0,.15);
+}
+table.browser-support tr:first-child {
+  border-top: none;
+}
+table.browser-support th,
+table.browser-support td {
+  flex: 1;
+  font-weight: 400;
+  line-height: 0;
+  padding: 10px 0 10px 0;
+  text-align: center;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+table.browser-support th {
+  color: rgba(0,0,0,.54);
+}
+table.browser-support td {
+  color: #ff5252;
+}
+table.browser-support img {
+  width: 24px;
+  height: 24px;
+}
+.browser-support-desc {
+  max-width: 420px;
+  position: relative;
+  margin-bottom: 16px;
+}
+.browser-support-desc:before {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: rgba(0,0,0,.15);
+  margin: 40px 0 20px 0;
+  content: "";
+}
+
+.icon-desc {
+  padding: 8px 0;
+  width: 50%;
+  min-width: 240px;
+  float: left;
+}
+.icon-desc > * {
+  margin-right: 16px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.size-24 {
+  width: 24px;
+  height: 24px;
+}
+.logo-chrome {
+  content: url("https://github.com/alrra/browser-logos/raw/master/src/chrome/chrome_48x48.png");
+}
+.logo-canary {
+  content: url("https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome-canary/chrome-canary_48x48.png");
+}
+.logo-safari {
+  content: url("https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png");
+}
+.logo-firefox {
+  content: url("https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png");
+}
+.logo-edge {
+  content: url("https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png");
+}
+.logo-ie {
+  content: url("https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/internet-explorer_9-11/internet-explorer_9-11_48x48.png");
+}
+.icon-check {
+  opacity: .6;
+  content: url("https://www.gstatic.com/images/icons/material/system/2x/done_black_24dp.png");
+}
+.icon-warning {
+  opacity: .6;
+  /* content: url("https://www.gstatic.com/images/icons/material/system/2x/check_circle_outline_black_24dp.png"); */
+  content: url("https://www.gstatic.com/images/icons/material/system/2x/assignment_turned_in_black_24dp.png");
+  /* content: url("https://www.gstatic.com/images/icons/material/system/2x/error_outline_black_20dp.png"); */
+  /* content: url("https://www.gstatic.com/images/icons/material/system/2x/warning_black_24dp.png"); */
+}
+.icon-na {
+  opacity: .6;
+  content: url("https://www.gstatic.com/images/icons/material/system/2x/not_interested_black_24dp.png");
+}
+.icon-flag {
+  opacity: .5;
+  content: url("https://www.gstatic.com/images/icons/material/system/2x/flag_black_24dp.png");
+}
+
 h1, h2, h3, h4 {
   font-weight: 400;
 }
@@ -392,6 +509,12 @@ paper-button {
   #list-example {
     grid-template-columns: 1fr;
   }
+  .content .wrapper {
+    margin: 0px 20px;
+    padding-top: 24px;
+    min-height: auto;
+    border-bottom: none;
+  }
 }
 
 @media only screen and (max-width: 800px) {
@@ -434,12 +557,7 @@ paper-button {
     display: block;
     content: "";
   }
-  .content .wrapper {
-    margin: 0px 20px;
-    padding-top: 24px;
-    min-height: auto;
-    border-bottom: none;
-  }
+
   .content h2 {
     padding-left: 8px;
     padding-right: 8px;

@@ -114,7 +114,7 @@
           <h3>Easily display interactive 3D models on the web & in AR</h3>
         </div>
 
-        <h3 class="grouping-title">EXAMPLES</h3>
+        <h3 class="grouping-title">Examples</h3>
         <ul id="list-example">
           <li>
             <a href="examples/lighting-and-environment.html"><h4>Lighting &amp; Environment</h4></a>
@@ -138,7 +138,7 @@
           </li>
         </ul>
 
-        <h3 class="grouping-title">ATTRIBUTES</h3>
+        <h3 class="grouping-title">Attributes</h3>
 
         <ul class="list-attribute">
           <li>
@@ -229,7 +229,7 @@
         <p style="color:rgba(0,0,0,.54);">Note: All attributes have a corresponding property in camel-case format. For example, the background-color attribute can also be configured using the backgroundColor property.</p>
 
 
-        <h3 class="grouping-title" style="margin-top: 40px;">EVENTS</h3>
+        <h3 class="grouping-title" style="margin-top: 40px;">Events</h3>
 
         <ul class="list-attribute">
           <li>
@@ -246,6 +246,119 @@
             <h4>preload</h4>
             <p>When preload is enabled this event is fired when preloading is done.</p>
           </li>
+        </ul>
+
+        <h3 class="grouping-title" style="margin-top: 40px;">Browser Support</h3>
+
+        <div class="icon-desc"><img class="size-24 icon-check"><div>Natively supported</div></div>
+        <div class="icon-desc"><img class="size-24 icon-warning"><div>Available with polyfill</div></div>
+        <div class="icon-desc"><img class="size-24 icon-flag"><div>Behind a flag, unstable</div></div>
+        <div class="icon-desc"><img class="size-24 icon-na"><div>Not available</div></div>
+
+        <div style="clear:both"></div>
+
+        <p class="browser-support-desc">These browser features are <b>required</b> for <span class="attribute">&lt;model-viewer&gt;</span> to work correctly:</p>
+        <table class="browser-support">
+          <tr>
+            <th>Feature</th>
+            <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+            <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+            <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+            <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+          </tr>
+          <tr>
+            <td>Custom Elements</td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+          </tr>
+          <tr>
+            <td>Shadow DOM</td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+          </tr>
+        </table>
+
+        <p class="browser-support-desc">These browser features are <b>optional</b> and are only used if available for performance optimization:</p>
+        <table class="browser-support">
+          <tr>
+            <th>Feature</th>
+            <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+            <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+            <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+            <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+          </tr>
+          <tr>
+            <td>Resize Observer</td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+          </tr>
+          <tr>
+            <td>Intersection Observer</td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+          </tr>
+        </table>
+
+        <p class="browser-support-desc">These browser features are <b>optional</b> and are only needed if you wish to use the unstable-webxr feature:</p>
+        <table class="browser-support">
+          <tr>
+            <th>Feature</th>
+            <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+            <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+            <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+            <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+          </tr>
+          <tr>
+            <td>Fullscreen API</td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-check"></td>
+            <td><img class="icon-warning"></td>
+            <td><img class="icon-warning"></td>
+          </tr>
+          <tr>
+            <td>WebXR Device API</td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-flag"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+          </tr>
+          <tr>
+            <td>WebXR HitTest API</td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-flag"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+            <td><img class="icon-na"></td>
+          </tr>
+        </table>
+
       </div>
     </div>
 
