@@ -74,10 +74,15 @@ export class LoadingStatusAnnouncer extends EventDispatcher {
 
   constructor() {
     super();
-    this.statusElement.setAttribute('role', 'status');
-    this.statusElement.style.position = 'absolute';
-    this.statusElement.style.color = 'transparent';
-    this.statusElement.style.pointerEvents = 'none';
+    const {statusElement} = this;
+    const {style} = statusElement;
+
+    statusElement.setAttribute('role', 'status');
+
+    style.position = 'absolute';
+    style.color = 'transparent';
+    style.top = style.left = style.margin = '0';
+    style.pointerEvents = 'none';
   }
 
   /**
