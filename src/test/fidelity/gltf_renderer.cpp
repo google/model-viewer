@@ -210,7 +210,7 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   auto rooti = tcm.getInstance(g_meshSet->rootEntity);
 
   tcm.setTransform(
-      rooti, mat4f::translate(center) * mat4f::scale(float3(scale)));
+      rooti, mat4f::translation(center) * mat4f::scaling(float3(scale)));
 
   if (modelSize.y >= modelSize.x && modelSize.y >= modelSize.z) {
     roomDepth = std::max(modelSize.x, modelSize.z) * scale * ROOM_PADDING_SCALE;
@@ -256,7 +256,7 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   // filament.patch
   FilamentApp& filamentApp = FilamentApp::get();
   IBL* ibl = filamentApp.getIBL();
-  ibl->getIndirectLight()->setRotation(mat3f::rotate(M_PI_2, float3{0, 1, 0}));
+  ibl->getIndirectLight()->setRotation(mat3f::rotation(M_PI_2, float3{0, 1, 0}));
 }
 
 static void preRender(Engine*, View* view, Scene*, Renderer*) {
@@ -276,7 +276,7 @@ static void preRender(Engine*, View* view, Scene*, Renderer*) {
   Camera& camera = view->getCamera();
 
   camera.setProjection(FOV, aspect, near, 100.0f);
-  camera.setModelMatrix(mat4f::translate(
+  camera.setModelMatrix(mat4f::translation(
       float3(0.0f, FRAMED_HEIGHT / 2.0f, (roomDepth / 2.0f) + near)));
 }
 
