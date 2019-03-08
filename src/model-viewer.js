@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {AnimationMixin} from './features/animation.js';
 import {ARMixin} from './features/ar.js';
 import {AutoRotateMixin} from './features/auto-rotate.js';
 import {ControlsMixin} from './features/controls.js';
@@ -22,6 +23,7 @@ import {MagicLeapMixin} from './features/magic-leap.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 
 const ModelViewerElement = [
+  AnimationMixin,
   LoadingMixin,
   ARMixin,
   AutoRotateMixin,

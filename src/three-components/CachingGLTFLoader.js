@@ -14,6 +14,7 @@
  */
 
 import GLTFLoader from '../third_party/three/GLTFLoader.js';
+import {cloneGltf} from './ModelUtils.js';
 
 const loadWithLoader = (url, loader) => new Promise((resolve, reject) => {
   loader.load(url, resolve, () => {}, reject);
@@ -35,9 +36,8 @@ export class CachingGLTFLoader {
       cache.set(url, loadWithLoader(url, this.loader));
     }
 
-    const gltf = await cache.get(url);
-
-    const model = gltf.scene ? gltf.scene.clone(true) : null;
+    const gltf = cloneGltf(await cache.get(url));
+    const model = gltf.scene ? gltf.scene : null;
 
     model.userData.animations = gltf.animations; // save animations
 

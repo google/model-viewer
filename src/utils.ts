@@ -15,6 +15,10 @@
 
 import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_AR_CANDIDATE} from './constants.js';
 
+export type Constructor<T = object> = {
+  new (...args: any[]): T,
+  prototype: T
+};
 
 export const deserializeUrl = (url: string): string|null =>
     (url != null && url !== 'null') ? toFullUrl(url) : null;
