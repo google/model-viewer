@@ -17,17 +17,7 @@ import {AnimationMixer, Box3, Object3D, SkinnedMesh, Vector3} from 'three';
 
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 
-// TODO three.js doesn't clone SkinnedMesh properly
-SkinnedMesh.prototype.clone = function () {
-
-	var clone = new this.constructor( this.geometry, this.material ).copy( this );
-	clone.skeleton = this.skeleton;
-	clone.bindMatrix.copy( this.bindMatrix );
-	clone.bindMatrixInverse.getInverse( this.bindMatrix );
-
-	return clone;
-
-};
+const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 
 /**
  * An Object3D that can swap out its underlying
@@ -43,11 +33,16 @@ export default class Model extends Object3D {
     super();
     this.name = 'Model';
     this.loader = new CachingGLTFLoader();
-    this.mixer = new AnimationMixer();
     this.modelContainer = new Object3D();
     this.modelContainer.name = 'ModelContainer';
     this.boundingBox = new Box3();
     this.size = new Vector3();
+
+    this.mixer = new AnimationMixer();
+    this.animations = null;
+    this.animationsByName = null;
+    this.currentAnimationAction = null;
+
     this.add(this.modelContainer);
   }
 
@@ -76,8 +71,7 @@ export default class Model extends Object3D {
           material.envMap = map;
           material.needsUpdate = true;
         }
-      }
-      else if (obj.material && !obj.material.isMeshBasicMaterial) {
+      } else if (obj.material && !obj.material.isMeshBasicMaterial) {
         obj.material.envMap = map;
         obj.material.needsUpdate = true;
       }
@@ -127,7 +121,30 @@ export default class Model extends Object3D {
       return;
     }
 
-    const scene = await this.loader.load(url);
+    // If we have pending work due to a previous source change in progress,
+    // cancel it so that we do not incur a race condition:
+    if (this[$cancelPendingSourceChange] != null) {
+      this[$cancelPendingSourceChange]();
+      this[$cancelPendingSourceChange] = null;
+    }
+
+    let scene = null;
+
+    try {
+      scene = await new Promise(async (resolve, reject) => {
+        this[$cancelPendingSourceChange] = () => reject();
+        resolve(await this.loader.load(url));
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      // If the error isn't an error, it is implied that the source change
+      // was cancelled by a subsequent source change before the first change
+      // finished loading:
+      return;
+    }
 
     this.clear();
     this.url = url;
@@ -142,15 +159,76 @@ export default class Model extends Object3D {
       }
     });
 
-    const animations = scene.userData.animations;
+    const {animations} = scene.userData;
+    const animationsByName = new Map();
 
-    if (animations && animations.length > 0) {
-      this.mixer.clipAction(animations[0], this).play();
+    if (animations != null) {
+      for (const animation of animations) {
+        animationsByName.set(animation.name, animation);
+      }
     }
+
+    this.animations = animations;
+    this.animationsByName = animationsByName;
 
     this.updateBoundingBox();
 
     this.dispatchEvent({type: 'model-load'});
+  }
+
+  /**
+   * Plays an animation if there are any associated with the current model.
+   * Accepts an optional string name of an animation to play. If no name is
+   * provided, or if no animation is found by the given name, always falls back
+   * to playing the first animation.
+   */
+  playAnimation(name = null, crossfadeTime = 0) {
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      console.warn(
+          `Cannot play animation (model does not have any animations)`);
+      return;
+    }
+
+    let animationClip = null;
+
+    if (name != null) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      animationClip = animations[0];
+    }
+
+    try {
+      const {currentAnimationAction: lastAnimationAction} = this;
+
+      this.currentAnimationAction =
+          this.mixer.clipAction(animationClip, this).play();
+      this.currentAnimationAction.enabled = true;
+
+      if (lastAnimationAction != null &&
+          this.currentAnimationAction !== lastAnimationAction) {
+        this.currentAnimationAction.crossFadeFrom(
+            lastAnimationAction, crossfadeTime);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  stopAnimation() {
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.stop();
+      this.currentAnimationAction.reset();
+      this.currentAnimationAction = null;
+    }
+
+    this.mixer.stopAllAction();
+  }
+
+  updateAnimation(step) {
+    this.mixer.update(step);
   }
 
   clear() {
@@ -159,7 +237,14 @@ export default class Model extends Object3D {
     while (this.modelContainer.children.length) {
       this.modelContainer.remove(this.modelContainer.children[0]);
     }
-    this.mixer.stopAllAction(); // TODO Cleanup memory
+
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.stop();
+      this.currentAnimationAction = null;
+    }
+
+    this.mixer.stopAllAction();
+    this.mixer.uncacheRoot(this);
   }
 
   updateBoundingBox() {

@@ -192,6 +192,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   update(changedProperties) {
     super.update(changedProperties);
 
+    if (changedProperties.has('src')) {
+      this[$loaded] = false;
+    }
+
     this[$updateSource]();
 
     if (changedProperties.has('alt')) {
