@@ -33,12 +33,14 @@ template.innerHTML = `
       height: 100%;
       position: absolute;
       background-size: cover;
+      background-position: center;
       opacity: 0;
       transition: opacity 0.3s;
     }
 
     .poster.show {
       opacity: 1;
+      transition: none;
     }
 
     .poster:not(.show) {

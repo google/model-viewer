@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Bone, Camera, Scene, Skeleton, SkinnedMesh} from 'three';
+import {Bone, Camera, Material, Scene, Skeleton, SkinnedMesh} from 'three';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
 // https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
@@ -66,12 +66,26 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
   const cloneSkinnedMeshes: SkinnedMeshMap = {};
 
   if (hasScene && hasSkinnedMeshes) {
-    clone.scene!.traverse(node => {
-      if ((node as any).isBone) {
+    clone.scene!.traverse((node: any) => {
+      // Materials aren't cloned when cloning meshes; geometry
+      // and materials are copied by reference. This is necessary
+      // for the same model to be used twice with different
+      // environment maps.
+      // Set a high renderOrder while we're here to ensure the model
+      // always renders on top of the skysphere
+      node.renderOrder = 1000;
+      if (Array.isArray(node.material)) {
+        node.material =
+            node.material.map((material: Material) => material.clone());
+      } else if (node.material != null) {
+        node.material = node.material.clone();
+      }
+
+      if (node.isBone) {
         cloneBones[node.name] = node as Bone;
       }
 
-      if ((node as any).isSkinnedMesh) {
+      if (node.isSkinnedMesh) {
         cloneSkinnedMeshes[node.name] = node as SkinnedMesh;
       }
     });

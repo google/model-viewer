@@ -1,5 +1,6 @@
 import {property} from 'lit-element';
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick} from '../model-viewer-base.js';
+
+import ModelViewerElementBase, {$needsRender, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utils.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
@@ -7,7 +8,6 @@ const MILLISECONDS_PER_SECOND = 1000.0
 const $updateAnimation = Symbol('updateAnimation');
 const $updateModelLoadsPromise = Symbol('updateModelLoadsPromise');
 const $modelLoads = Symbol('modelLoads');
-const $resolveModelLoads = Symbol('resolveModelLoads');
 const $rejectModelLoads = Symbol('rejectModelLoads');
 
 export const AnimationMixin =
@@ -22,7 +22,6 @@ export const AnimationMixin =
             @property({type: Number, attribute: 'animation-crossfade-duration'})
             animationCrossfadeDuration: number = 300;
 
-            protected[$resolveModelLoads]: (...args: Array<any>) => void;
             protected[$rejectModelLoads]: (...args: Array<any>) => void;
             protected[$modelLoads]: Promise<void>;
 
@@ -38,22 +37,46 @@ export const AnimationMixin =
              * changed to something new due to the src attribute changing.
              */
             [$updateModelLoadsPromise]() {
-              this[$modelLoads] = new Promise<void>((resolve, reject) => {
-                this[$resolveModelLoads] = resolve;
-                this[$rejectModelLoads] = reject;
+              if (this[$rejectModelLoads] != null) {
+                this[$rejectModelLoads]();
+              }
 
+              this[$modelLoads] = new Promise<void>((resolve, reject) => {
                 if (this.loaded) {
+                  // If the model is already loaded, we are g2g
                   resolve();
+                } else {
+                  // Rejecting this promise implies that the load is cancelled,
+                  // so we shouldn't listen for load events anymore:
+                  this[$rejectModelLoads] = () => {
+                    this.removeEventListener('load', onModelLoaded);
+                    reject();
+                  };
+
+                  // Register a listener that will resolve the promise when a
+                  // model with the appropriate URL has been loaded:
+                  const {src} = (this as any);
+                  const onModelLoaded = (event: any) => {
+                    if (event.detail.url !== src) {
+                      return;
+                    }
+                    resolve();
+                    this.removeEventListener('load', onModelLoaded);
+                  };
+                  this.addEventListener('load', onModelLoaded);
                 }
               });
-              // Suppress potentially uncaught exceptions for this particular
-              // promise:
-              this[$modelLoads].catch(() => {});
-            }
 
-            [$onModelLoad]() {
-              super[$onModelLoad]();
-              this[$resolveModelLoads]();
+              // Suppress potentially unhandled rejections for this particular
+              // promise. An undefined error conventionally implies that the
+              // promise was merely cancelled:
+              this[$modelLoads].catch((error) => {
+                if (error == null) {
+                  return;
+                }
+
+                throw error;
+              });
             }
 
             [$tick](_time: number, delta: number) {
@@ -70,35 +93,36 @@ export const AnimationMixin =
             updated(changedProperties: Map<string, any>) {
               super.updated(changedProperties);
 
-              if (changedProperties.has('src')) {
-                // Reject a pending model load promise, effectively cancelling
-                // any pending work to set the animation for a model that has
-                // not fully loaded:
-                this[$rejectModelLoads]();
-                (this[$scene] as any).model.stopAnimation();
-
-                if ((this as any).src != null) {
-                  this[$updateModelLoadsPromise]();
-                }
-              }
-
-              if (changedProperties.has('src') ||
-                  changedProperties.has('animated') ||
+              if (changedProperties.has('animated') ||
                   changedProperties.has('animationName')) {
                 this[$updateAnimation]();
               }
             }
 
+            async[$updateSource]() {
+              super[$updateSource]();
+
+              // Reject a pending model load promise, effectively cancelling
+              // any pending work to set the animation for a model that has
+              // not fully loaded:
+              (this as any)[$scene].model.stopAnimation();
+              this[$updateModelLoadsPromise]();
+              this[$updateAnimation]();
+            }
+
             async[$updateAnimation]() {
-              try {
-                // Don't attempt to play any animation until the model is
-                // fully loaded (we won't have animations to play anyway in
-                // the first-load case, and subsequent changes of src could
-                // lead to race conditions):
-                await this[$modelLoads];
-              } catch (_error) {
-                // The model load was "cancelled" by rejection
-                return;
+              const src = (this as any).src;
+              if (src != null) {
+                try {
+                  // Don't attempt to play any animation until the model is
+                  // fully loaded (we won't have animations to play anyway in
+                  // the first-load case, and subsequent changes of src could
+                  // lead to race conditions):
+                  await this[$modelLoads];
+                } catch (error) {
+                  // The model load was "cancelled" by rejection
+                  return;
+                }
               }
 
               const {model} = (this as any)[$scene];

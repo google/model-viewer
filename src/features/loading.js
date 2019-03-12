@@ -21,11 +21,14 @@ import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 export const $posterElement = Symbol('posterElement');
 const $applyPreloadStrategy = Symbol('applyPreloadStrategy');
 
-const $revealDeferred = Symbol('revealDeferred');
 const $dismissPoster = Symbol('dismissPoster');
-const $shouldHidePoster = Symbol('shouldHidePoster');
-const $preloaded = Symbol('preloaded');
-const $preloadPromise = Symbol('preloadPromise');
+const $showPoster = Symbol('showPoster');
+const $hidePoster = Symbol('hidePoster');
+const $posterHidden = Symbol('posterHidden');
+const $userDismissedPoster = Symbol('userDismissedPoster');
+const $shouldDismissPoster = Symbol('shouldDismissPoster');
+const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+const $preloadAnnounced = Symbol('preloadAnnounced');
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
 const $clickHandler = Symbol('clickHandler');
@@ -53,18 +56,18 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     get loaded() {
-      return super.loaded || this[$preloaded];
+      return super.loaded || (this.src && loader.hasFinishedLoading(this.src));
     }
 
     constructor() {
       super();
 
-      this[$preloaded] = false;
-      this[$preloadPromise] = null;
+      this[$posterHidden] = false;
+      this[$preloadAnnounced] = false;
 
       // Used to determine whether or not to display a poster image or
       // to load the model if not preloaded.
-      this[$dismissPoster] = false;
+      this[$userDismissedPoster] = false;
 
       // TODO: Add this to the shadow root as part of this mixin's
       // implementation:
@@ -101,14 +104,25 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     dismissPoster() {
-      this[$dismissPoster] = true;
+      this[$userDismissedPoster] = true;
+      this.requestUpdate();
+    }
 
-      const posterOpacity = self.getComputedStyle(this[$posterElement]).opacity;
+    showPoster() {
+      this[$userDismissedPoster] = false;
+      this.requestUpdate();
+    }
+
+    [$hidePoster]() {
+      const posterElement = this[$posterElement];
+      const posterOpacity = self.getComputedStyle(posterElement).opacity;
+
+      this[$posterHidden] = true;
 
       if (posterOpacity > 0) {
         // NOTE(cdata): The canvas cannot receive focus until the poster has
         // been completely hidden:
-        this[$posterElement].addEventListener('transitionend', () => {
+        posterElement.addEventListener('transitionend', () => {
           this[$canvas].focus();
         }, {once: true});
       } else {
@@ -120,12 +134,18 @@ export const LoadingMixin = (ModelViewerElement) => {
         });
       }
 
-      this.requestUpdate();
+      posterElement.classList.remove('show');
+      posterElement.setAttribute('aria-hidden', 'true');
+      posterElement.removeAttribute('tabindex');
     }
 
-    showPoster() {
-      this[$dismissPoster] = false;
-      this.requestUpdate();
+    [$showPoster]() {
+      const posterElement = this[$posterElement];
+      posterElement.classList.add('show');
+      posterElement.setAttribute('aria-hidden', 'false');
+      posterElement.tabIndex = 1;
+
+      this[$posterHidden] = false;
     }
 
     [$onClick]() {
@@ -145,20 +165,19 @@ export const LoadingMixin = (ModelViewerElement) => {
       }
     }
 
-    get[$shouldHidePoster]() {
-      return !this.poster || (this.loaded && this[$dismissPoster]);
+    get[$shouldDismissPoster]() {
+      return !this.poster ||
+          (loader.hasFinishedLoading(this.src) &&
+           (this.revealWhenLoaded || this[$userDismissedPoster]));
     }
 
-    get[$revealDeferred]() {
-      return !!this.preload && !this[$shouldHidePoster];
+    get[$shouldAttemptPreload]() {
+      return (this[$userDismissedPoster] || this.preload) && this.src &&
+          !this[$preloadAnnounced];
     }
 
-    update(changedProperties) {
-      if (this.loaded && this.revealWhenLoaded) {
-        this.dismissPoster();
-      }
-
-      super.update(changedProperties);
+    updated(changedProperties) {
+      super.updated(changedProperties);
 
       const posterElement = this[$posterElement];
 
@@ -168,51 +187,43 @@ export const LoadingMixin = (ModelViewerElement) => {
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      if (this[$shouldHidePoster]) {
-        posterElement.classList.remove('show');
-        posterElement.setAttribute('aria-hidden', 'true');
-        posterElement.removeAttribute('tabindex');
-      } else {
-        if ((this.preload || this[$dismissPoster]) && this.src) {
-          this[$applyPreloadStrategy]().catch((error) => {
-            this.dispatchEvent(new CustomEvent('error', {detail: error}));
+      if (changedProperties.has('poster') && this.poster) {
+        posterElement.style.backgroundImage = `url("${this.poster}")`;
+      }
+
+      if (changedProperties.has('src')) {
+        this[$preloadAnnounced] = false;
+      }
+
+      const preloaded = loader.hasFinishedLoading(this.src);
+
+      if (this[$shouldAttemptPreload]) {
+        if (preloaded) {
+          this.dispatchEvent(new CustomEvent('preload'));
+        } else {
+          loader.preload(this.src).then(() => {
+            this.dispatchEvent(new CustomEvent('preload'));
+            this.requestUpdate();
           });
         }
 
-        if (this.poster) {
-          posterElement.style.backgroundImage = `url("${this.poster}")`;
-          posterElement.classList.add('show');
-          posterElement.removeAttribute('aria-hidden');
-          posterElement.tabIndex = 1;
+        this[$preloadAnnounced] = true;
+      }
+
+      if (this[$shouldDismissPoster]) {
+        if (!this[$posterHidden]) {
+          this[$updateSource]();
+          this[$hidePoster]();
         }
+      } else {
+        this[$showPoster]();
       }
     }
 
-    async[$applyPreloadStrategy]() {
-      if (this[$preloadPromise] != null) {
-        return this[$preloadPromise];
+    async[$updateSource]() {
+      if (this[$shouldDismissPoster]) {
+        await super[$updateSource]();
       }
-
-      if (!this.src) {
-        return;
-      }
-
-      // Only one strategy for now. Load right away:
-      this[$preloadPromise] = loader.load(this.src);
-      await this[$preloadPromise];
-      this[$preloaded] = true;
-      this.dispatchEvent(new CustomEvent('preload'));
-
-      // Once preloaded, we want to re-evaluate the element's state:
-      this.requestUpdate();
-    }
-
-    [$updateSource]() {
-      if (!this[$shouldHidePoster]) {
-        return;
-      }
-
-      super[$updateSource]();
     }
   };
 }

@@ -37,6 +37,7 @@ export default class Model extends Object3D {
     this.modelContainer.name = 'ModelContainer';
     this.boundingBox = new Box3();
     this.size = new Vector3();
+    this.url = null;
 
     this.mixer = new AnimationMixer();
     this.animations = null;
@@ -128,26 +129,29 @@ export default class Model extends Object3D {
       this[$cancelPendingSourceChange] = null;
     }
 
+    this.url = url;
+
     let scene = null;
 
     try {
       scene = await new Promise(async (resolve, reject) => {
         this[$cancelPendingSourceChange] = () => reject();
-        resolve(await this.loader.load(url));
+        try {
+          const result = await this.loader.load(url);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
       });
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
+      if (error == null) {
+        return;
       }
 
-      // If the error isn't an error, it is implied that the source change
-      // was cancelled by a subsequent source change before the first change
-      // finished loading:
-      return;
+      throw error;
     }
 
     this.clear();
-    this.url = url;
 
     while (scene && scene.children.length) {
       this.modelContainer.add(scene.children.shift());
@@ -173,7 +177,7 @@ export default class Model extends Object3D {
 
     this.updateBoundingBox();
 
-    this.dispatchEvent({type: 'model-load'});
+    this.dispatchEvent({type: 'model-load', url});
   }
 
   /**
