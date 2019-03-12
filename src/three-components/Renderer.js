@@ -46,7 +46,7 @@ export default class Renderer extends EventDispatcher {
   constructor() {
     super();
 
-    const webGlOptions = {antialias: true};
+    const webGlOptions = {alpha: false, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_AR_CANDIDATE) {
