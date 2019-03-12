@@ -159,7 +159,7 @@ Four configuration options are available:
   will be displayed until the model is loaded, at which time the poster will
   be hidden and the model displayed.
 
-See the [loading examples](https://googlewebcomponents.github.io/model-viewer/examples/loading.html)
+See the [loading examples](https://googlewebcomponents.github.io/model-viewer/examples/lazy-loading.html)
 
 ### Important note on data usage
 
