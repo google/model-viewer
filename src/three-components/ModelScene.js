@@ -289,9 +289,9 @@ export default class ModelScene extends Scene {
   /**
    * Called when the model's contents have loaded, or changed.
    */
-  onModelLoad() {
+  onModelLoad(event) {
     this.applyRoomSize();
-    this.dispatchEvent({type: 'model-load'});
+    this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
   /**

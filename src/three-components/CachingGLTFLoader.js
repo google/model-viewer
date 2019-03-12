@@ -21,6 +21,7 @@ const loadWithLoader = (url, loader) => new Promise((resolve, reject) => {
 });
 
 const cache = new Map();
+const preloaded = new Map();
 
 export class CachingGLTFLoader {
   static has(url) {
@@ -31,32 +32,27 @@ export class CachingGLTFLoader {
     this.loader = new GLTFLoader();
   }
 
-  async load(url) {
+  hasFinishedLoading(url) {
+    return !!preloaded.get(url);
+  }
+
+  preload(url) {
     if (!cache.has(url)) {
-      cache.set(url, loadWithLoader(url, this.loader));
+      const loadAttempt = loadWithLoader(url, this.loader);
+      loadAttempt.then(() => {
+        preloaded.set(url, true);
+      });
+      cache.set(url, loadAttempt);
     }
 
-    const gltf = cloneGltf(await cache.get(url));
+    return cache.get(url);
+  }
+
+  async load(url) {
+    const gltf = cloneGltf(await this.preload(url));
     const model = gltf.scene ? gltf.scene : null;
 
-    model.userData.animations = gltf.animations; // save animations
-
-    // Materials aren't cloned when cloning meshes; geometry
-    // and materials are copied by reference. This is necessary
-    // for the same model to be used twice with different
-    // environment maps.
-    if (model) {
-      model.traverse(object => {
-        // Set a high renderOrder while we're here to ensure the model
-        // always renders on top of the skysphere
-        object.renderOrder = 1000;
-        if (Array.isArray(object.material)) {
-          object.material = object.material.map(m => m.clone());
-        } else if (object.material) {
-          object.material = object.material.clone();
-        }
-      });
-    }
+    model.userData.animations = gltf.animations;  // save animations
 
     return model;
   }

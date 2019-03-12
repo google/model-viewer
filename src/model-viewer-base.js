@@ -101,11 +101,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$loaded] = false;
 
-    this[$scene].addEventListener('model-load', () => {
+    this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
-      this[$onModelLoad]();
+      this[$onModelLoad](event);
 
-      this.dispatchEvent(new CustomEvent('load'));
+      this.dispatchEvent(new CustomEvent('load', {detail: {url: event.url}}));
     });
 
     // Update initial size on microtask timing so that subclasses have a
@@ -189,14 +189,23 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$renderer].unregisterScene(this[$scene]);
   }
 
-  update(changedProperties) {
-    super.update(changedProperties);
+  updated(changedProperties) {
+    super.updated(changedProperties);
 
-    if (changedProperties.has('src')) {
+    // NOTE(cdata): If a property changes from values A -> B -> A in the space
+    // of a microtask, LitElement/UpdatingElement will notify of a change even
+    // though the value has effectively not changed, so we need to check to make
+    // sure that the value has actually changed before changing the loaded flag.
+    if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
+      console.log(
+          'src changed',
+          changedProperties.get('src'),
+          '=>',
+          this[$scene].model.url);
+
       this[$loaded] = false;
+      this[$updateSource]();
     }
-
-    this[$updateSource]();
 
     if (changedProperties.has('alt')) {
       const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
@@ -229,6 +238,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$markLoaded]() {
+    if (this[$loaded]) {
+      return;
+    }
+
     this[$loaded] = true;
     // Asynchronously invoke `update`:
     this.requestUpdate();
@@ -255,15 +268,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async[$updateSource]() {
     const source = this.src;
 
-    if (!source) {
-      return;
-    }
-
     try {
       this[$canvas].classList.add('show');
       await this[$scene].setModelSource(source);
     } catch (error) {
-      console.warn(error.message);
       this[$canvas].classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     }
