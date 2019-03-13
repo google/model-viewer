@@ -101,7 +101,7 @@ export default class ModelScene extends Scene {
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
-    this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 1000);
+    this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
     this.camera.name = 'MainCamera';
     this.camera.position.y = 5;
     this.activeCamera = this.camera;
