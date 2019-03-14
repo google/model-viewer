@@ -38,11 +38,12 @@ export default class Model extends Object3D {
     this.boundingBox = new Box3();
     this.size = new Vector3();
     this.url = null;
-
     this.mixer = new AnimationMixer();
     this.animations = null;
     this.animationsByName = null;
+    this.animationNames = [];
     this.currentAnimationAction = null;
+    this.userData = {url: null};
 
     this.add(this.modelContainer);
   }
@@ -165,15 +166,20 @@ export default class Model extends Object3D {
 
     const {animations} = scene.userData;
     const animationsByName = new Map();
+    const animationNames = [];
 
     if (animations != null) {
       for (const animation of animations) {
         animationsByName.set(animation.name, animation);
+        animationNames.push(animation.name);
       }
     }
 
     this.animations = animations;
     this.animationsByName = animationsByName;
+    this.animationNames = animationNames;
+
+    this.userData.url = url;
 
     this.updateBoundingBox();
 
@@ -237,6 +243,7 @@ export default class Model extends Object3D {
 
   clear() {
     this.url = null;
+    this.userData = {url: null};
     // Remove all current children
     while (this.modelContainer.children.length) {
       this.modelContainer.remove(this.modelContainer.children[0]);

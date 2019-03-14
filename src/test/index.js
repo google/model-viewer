@@ -21,6 +21,7 @@ import './three-components/ARRenderer-spec.js';
 import './three-components/SmoothControls-spec.js';
 import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';
+import './features/animation-spec.js';
 import './features/controls-spec.js';
 import './features/environment-spec.js';
 import './features/loading-spec.js';

@@ -24,35 +24,62 @@ const cache = new Map();
 const preloaded = new Map();
 
 export class CachingGLTFLoader {
+  static clearCache() {
+    cache.clear();
+    preloaded.clear();
+  }
+
   static has(url) {
     return cache.has(url);
+  }
+
+  /**
+   * Returns true if the model that corresponds to the specified url is
+   * available in our local cache.
+   */
+  static hasFinishedLoading(url) {
+    return !!preloaded.get(url);
   }
 
   constructor() {
     this.loader = new GLTFLoader();
   }
 
-  hasFinishedLoading(url) {
-    return !!preloaded.get(url);
-  }
-
-  preload(url) {
+  /**
+   * Preloads a glTF, populating the cache. Returns a promise that resolves
+   * when the cache is populated.
+   */
+  async preload(url) {
     if (!cache.has(url)) {
       const loadAttempt = loadWithLoader(url, this.loader);
-      loadAttempt.then(() => {
-        preloaded.set(url, true);
-      });
+      loadAttempt
+          .then(() => {
+            preloaded.set(url, true);
+          })
+          .catch(() => {});  // Silently ignore exceptions here, they should be
+                             // caught by the invoking function
       cache.set(url, loadAttempt);
+      // window.loadAttempt = loadAttempt;
     }
 
-    return cache.get(url);
+    await cache.get(url);
+    return;  // Explicitly return so that we don't leak the source glTF
   }
 
+  /**
+   * Loads a glTF from the specified url and resolves a unique clone of the
+   * glTF. If the glTF has already been loaded, makes a clone of the cached
+   * copy.
+   */
   async load(url) {
-    const gltf = cloneGltf(await this.preload(url));
+    await this.preload(url);
+
+    const gltf = cloneGltf(await cache.get(url));
     const model = gltf.scene ? gltf.scene : null;
 
-    model.userData.animations = gltf.animations;  // save animations
+    if (model != null) {
+      model.userData.animations = gltf.animations;  // save animations
+    }
 
     return model;
   }

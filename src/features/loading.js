@@ -56,13 +56,14 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     get loaded() {
-      return super.loaded || (this.src && loader.hasFinishedLoading(this.src));
+      return super.loaded ||
+          (this.src && CachingGLTFLoader.hasFinishedLoading(this.src));
     }
 
     constructor() {
       super();
 
-      this[$posterHidden] = false;
+      this[$posterHidden] = true;
       this[$preloadAnnounced] = false;
 
       // Used to determine whether or not to display a poster image or
@@ -116,22 +117,28 @@ export const LoadingMixin = (ModelViewerElement) => {
     [$hidePoster]() {
       const posterElement = this[$posterElement];
       const posterOpacity = self.getComputedStyle(posterElement).opacity;
+      const onPosterHidden = () => {
+        requestAnimationFrame(() => {
+          console.warn('POSTER HIDDEN');
+          this.dispatchEvent(
+              new CustomEvent('poster-visibility', {detail: {visible: false}}));
+          this[$canvas].focus();
+        });
+      };
 
       this[$posterHidden] = true;
 
       if (posterOpacity > 0) {
         // NOTE(cdata): The canvas cannot receive focus until the poster has
         // been completely hidden:
-        posterElement.addEventListener('transitionend', () => {
-          this[$canvas].focus();
-        }, {once: true});
+        posterElement.addEventListener(
+            'transitionend', onPosterHidden, {once: true});
       } else {
         // NOTE(cdata): Depending on timing, the opacity may already be 0, in
         // which case we will never receive a transitionend event. So, just
         // focus on the next animation frame:
-        requestAnimationFrame(() => {
-          this[$canvas].focus();
-        });
+        onPosterHidden();
+        // requestAnimationFrame(onPosterHidden);
       }
 
       posterElement.classList.remove('show');
@@ -146,6 +153,9 @@ export const LoadingMixin = (ModelViewerElement) => {
       posterElement.tabIndex = 1;
 
       this[$posterHidden] = false;
+
+      this.dispatchEvent(
+          new CustomEvent('poster-visibility', {detail: {visible: true}}));
     }
 
     [$onClick]() {
@@ -167,7 +177,7 @@ export const LoadingMixin = (ModelViewerElement) => {
 
     get[$shouldDismissPoster]() {
       return !this.poster ||
-          (loader.hasFinishedLoading(this.src) &&
+          (CachingGLTFLoader.hasFinishedLoading(this.src) &&
            (this.revealWhenLoaded || this[$userDismissedPoster]));
     }
 
@@ -195,16 +205,23 @@ export const LoadingMixin = (ModelViewerElement) => {
         this[$preloadAnnounced] = false;
       }
 
-      const preloaded = loader.hasFinishedLoading(this.src);
+      const preloaded = CachingGLTFLoader.hasFinishedLoading(this.src);
 
       if (this[$shouldAttemptPreload]) {
+        const detail = {url: this.src};
+
         if (preloaded) {
-          this.dispatchEvent(new CustomEvent('preload'));
+          this.dispatchEvent(new CustomEvent('preload', {detail}));
         } else {
-          loader.preload(this.src).then(() => {
-            this.dispatchEvent(new CustomEvent('preload'));
-            this.requestUpdate();
-          });
+          loader.preload(this.src)
+              .then(() => {
+                this.dispatchEvent(new CustomEvent('preload', {detail}));
+                this.requestUpdate();
+              })
+              .catch((error) => {
+                this.dispatchEvent(new CustomEvent(
+                    'error', {detail: {type: 'preload', sourceError: error}}));
+              });
         }
 
         this[$preloadAnnounced] = true;
