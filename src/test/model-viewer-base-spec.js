@@ -100,6 +100,29 @@ suite('ModelViewerElementBase', () => {
         element.src = assetPath('Astronaut.glb');
         await sourceLoads;
       });
+
+
+      suite('that changes before the model loads', () => {
+        test('it loads the second value on microtask timing', async () => {
+          element.src = assetPath('Astronaut.glb');
+          await timePasses();
+          element.src = assetPath('Horse.glb');
+          await waitForEvent(element, 'load');
+
+          expect(element[$scene].model.userData.url)
+              .to.be.equal(assetPath('Horse.glb'));
+        });
+
+        test('it loads the second value on task timing', async () => {
+          element.src = assetPath('Astronaut.glb');
+          await timePasses(1);
+          element.src = assetPath('Horse.glb');
+          await waitForEvent(element, 'load');
+
+          expect(element[$scene].model.userData.url)
+              .to.be.equal(assetPath('Horse.glb'));
+        });
+      });
     });
 
     suite('with an invalid src', () => {

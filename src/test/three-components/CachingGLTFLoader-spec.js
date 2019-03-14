@@ -18,16 +18,36 @@ import {assetPath} from '../helpers.js';
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
-  suite('when loading a gltf', () => {
+  suite('when loading a glTF', () => {
     let loader;
 
     setup(() => {
       loader = new CachingGLTFLoader();
     });
 
+    teardown(() => {
+      CachingGLTFLoader.clearCache();
+    });
+
+    suite('before glTF is loaded', () => {
+      test('reports that it has not finished loading', () => {
+        loader.load(ASTRONAUT_GLB_PATH);
+        expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
+            .to.be.false;
+      });
+    });
+
+    suite('after glTF is loaded', () => {
+      test('reports that it has finished loading', async () => {
+        await loader.load(ASTRONAUT_GLB_PATH);
+        expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
+            .to.be.true;
+      });
+    });
+
     test('synchronously populates the cache', () => {
       loader.load(ASTRONAUT_GLB_PATH);
-      expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.equal(true);
+      expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
     });
 
     test('yields a promise that resolves a scene', async () => {

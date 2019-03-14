@@ -15,11 +15,13 @@
 
 import {$posterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
+const HORSE_GLB_PATH = assetPath('Horse.glb');
 
 suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
@@ -55,6 +57,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       });
 
       teardown(() => {
+        CachingGLTFLoader.clearCache();
+
         if (element.parentNode != null) {
           element.parentNode.removeChild(element);
         }
@@ -67,6 +71,32 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       });
 
       suite('preload', () => {
+        suite('src changes quickly', () => {
+          test(
+              'eventually notifies that current src is preloaded', async () => {
+                element.preload = true;
+                element.src = ASTRONAUT_GLB_PATH;
+
+                await timePasses();
+
+                element.src = HORSE_GLB_PATH;
+
+                let preloadEvent = null;
+                const onPreload = (event) => {
+                  if (event.detail.url === HORSE_GLB_PATH) {
+                    preloadEvent = event;
+                  }
+                };
+                element.addEventListener('preload', onPreload);
+
+                await until(() => element.loaded);
+
+                element.removeEventListener('preload', onPreload);
+
+                expect(preloadEvent).to.be.ok;
+              });
+        });
+
         test('retains poster after preloading', async () => {
           element.preload = true;
           element.src = ASTRONAUT_GLB_PATH;
@@ -140,9 +170,14 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
         test('can be hidden imperatively', async () => {
           const ostensiblyThePoster = pickShadowDescendant(element);
+
           element.dismissPoster();
-          // Wait for property changes to propagate
-          await timePasses();
+
+          await waitForEvent(
+              element,
+              'poster-visibility',
+              event => event.detail.visible === false);
+
           const ostensiblyNotThePoster = pickShadowDescendant(element);
 
           expect(ostensiblyThePoster).to.not.be.equal(ostensiblyNotThePoster);
@@ -151,8 +186,10 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         suite('when poster is hidden', () => {
           setup(async () => {
             element.dismissPoster();
-            // Wait for property changes to propagate
-            await timePasses();
+            await waitForEvent(
+                element,
+                'poster-visibility',
+                event => event.detail.visible === false);
           });
 
           test('allows the canvas to be interactive', async () => {

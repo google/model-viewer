@@ -31,6 +31,12 @@ licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">source</a>)
 Originally in HDR format
 
+## RobotExpressive
+
+RobotExpressive by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>
+(<a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">source</a>)
+
 ## small_hangar_01
 
 small_hangar_01_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>

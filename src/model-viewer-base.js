@@ -197,12 +197,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
-      console.log(
-          'src changed',
-          changedProperties.get('src'),
-          '=>',
-          this[$scene].model.url);
-
       this[$loaded] = false;
       this[$updateSource]();
     }

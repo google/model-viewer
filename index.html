@@ -97,7 +97,7 @@
       <example-snippet stamp-to="demo-container" highlight-as="html">
         <template>
             <model-viewer
-              src="examples/assets/Horse.glb"
+              src="examples/assets/Astronaut.glb"
               alt="A 3D model of an astronaut"
               controls
               auto-rotate
@@ -136,6 +136,10 @@
             <a href="examples/rendering-showcase.html"><h4>Rendering Showcase</h4></a>
             <p>Demos of &lt;model-viewer&gt; rendering quality and stress tests</p>
           </li>
+          <li>
+            <a href="examples/animation.html"><h4>Animation</h4></a>
+            <p>Use &lt;model-viewer&gt; to show off your animated models</p>
+          </li>
         </ul>
 
         <h3 class="grouping-title">Attributes</h3>
@@ -148,6 +152,27 @@
           <li>
             <h4>alt</h4>
             <p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>
+          </li>
+          <li>
+            <h4>animated</h4>
+            <p>Enables animations. If a model has animations, they will
+            automatically begin to play when this attribute is set (or when the
+            property is set to true). If no animation-name is specified, plays
+            the first animation.</p>
+          </li>
+          <li>
+            <h4>animation-name</h4>
+            <p>Selects an animation to play by name when the
+            &lt;model-viewer&gt; is configured to be animated. If no
+            animation-name is specified, &lt;model-viewer&gt; always picks the
+            first animation it finds in the model.</p>
+          </li>
+          <li>
+            <h4>animation-crossfade-duration</h4>
+            <p>When the current animation is changed, &lt;model-viewer&gt;
+            automatically crossfades between the previous and next animations.
+            This attribute controls how long the crossfade is in milliseconds.
+            Defaults to 300.</p>
           </li>
           <li>
             <h4>auto-rotate</h4>
@@ -241,6 +266,12 @@
           <li>
             <h4>load</h4>
             <p>Fired when a model is loaded. Can fire multiple times per <span class="attribute">&lt;model-viewer&gt;</span> if the src attribute is changed.</p>
+          </li>
+          <li>
+            <h4>poster-visibility</h4>
+            <p>This event is fired when the visiblity of the poster image
+            changes. The current visibility state can be read from the
+            <span class="attribute">event.detail.visible</span> property</p>
           </li>
           <li>
             <h4>preload</h4>
