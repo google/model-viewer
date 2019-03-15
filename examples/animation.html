@@ -60,13 +60,13 @@
     <div class="content">
       <div class="wrapper">
         <div class="index">1</div>
-        <h2>Activate animations with the
-          <span class="attribute">animated</span> attribute</h2>
+        <h2>Automatically play animations with the
+          <span class="attribute">autoplay</span> attribute</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
             <model-viewer
                 controls
-                animated
+                autoplay
                 src="assets/RobotExpressive.glb"
                 background-color="#622dcf"
                 exposure="2"
@@ -88,7 +88,7 @@
           <template>
             <model-viewer
                 controls
-                animated
+                autoplay
                 animation-name="Running"
                 src="assets/RobotExpressive.glb"
                 background-color="#25997c"
@@ -110,25 +110,59 @@
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
             <model-viewer
-                id="xfade-demo"
+                id="paused-change-demo"
                 controls
-                animated
+                autoplay
                 animation-name="Running"
                 src="assets/RobotExpressive.glb"
                 background-color="#622dcf"
                 exposure="2"
                 environment-intensity="0"
                 alt="An animated 3D model of a robot"></model-viewer>
-            <script>
+<script>
 (() => {
-  const modelViewer = document.querySelector('#xfade-demo');
+  const modelViewer = document.querySelector('#paused-change-demo');
 
   self.setInterval(() => {
     modelViewer.animationName = modelViewer.animationName === 'Running' ?
       'Wave' : 'Running';
   }, 1500.0);
 })();
-            </script>
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="sample">
+    <div class="demo" id="demo-container-4"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="index">4</div>
+        <h2>A paused model shows the first frame of the configured animation</h2>
+        <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <template>
+            <model-viewer
+                id="xfade-demo"
+                controls
+                animation-name="Running"
+                src="assets/RobotExpressive.glb"
+                background-color="#622dcf"
+                exposure="2"
+                environment-intensity="0"
+                alt="An animated 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#xfade-demo');
+
+  self.setInterval(() => {
+    modelViewer.animationName = modelViewer.animationName === 'Running' ?
+      'Idle' : 'Running';
+  }, 1500.0);
+})();
+</script>
           </template>
         </example-snippet>
       </div>
