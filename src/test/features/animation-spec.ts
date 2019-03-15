@@ -28,7 +28,8 @@ const animationIsPlaying = (element: any, animationName = null): boolean => {
   if (currentAnimationAction != null &&
       (animationName == null ||
        currentAnimationAction.getClip().name === animationName)) {
-    return currentAnimationAction.enabled === true &&
+    return element.paused === false &&
+        currentAnimationAction.enabled === true &&
         !currentAnimationAction.paused;
   }
 
@@ -39,6 +40,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement: any;
+  let element: any;
 
   setup(() => {
     tagName = `model-viewer-animation-${nextId++}`;
@@ -53,12 +55,47 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('when configured to animate', () => {
-    let element: any;
+  suite('a model with animations', () => {
+    setup(async () => {
+      element = new ModelViewerElement();
+      element.src = ANIMATED_GLB_PATH;
+      document.body.appendChild(element);
 
+      await waitForEvent(element, 'load');
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
+    test('remains in a paused state', () => {
+      expect(element.paused).to.be.true;
+    });
+
+    suite('when play is invoked', () => {
+      setup(async () => {
+        const animationsPlay = waitForEvent(element, 'play');
+        element.play();
+        await animationsPlay;
+      });
+
+      test('animations play', async () => {
+        expect(animationIsPlaying(element)).to.be.true;
+      });
+
+      test('animations can be paused', async () => {
+        const animationsPause = waitForEvent(element, 'pause');
+        element.pause();
+        await animationsPause;
+        expect(animationIsPlaying(element)).to.be.false;
+      });
+    });
+  });
+
+  suite('when configured to autoplay', () => {
     setup(() => {
       element = new ModelViewerElement();
-      element.animated = true;
+      element.autoplay = true;
       document.body.appendChild(element);
     });
 

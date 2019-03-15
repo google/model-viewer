@@ -154,18 +154,12 @@
             <p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>
           </li>
           <li>
-            <h4>animated</h4>
-            <p>Enables animations. If a model has animations, they will
-            automatically begin to play when this attribute is set (or when the
-            property is set to true). If no animation-name is specified, plays
-            the first animation.</p>
-          </li>
-          <li>
             <h4>animation-name</h4>
-            <p>Selects an animation to play by name when the
-            &lt;model-viewer&gt; is configured to be animated. If no
-            animation-name is specified, &lt;model-viewer&gt; always picks the
-            first animation it finds in the model.</p>
+            <p>Selects an animation to play by name. This animation will play
+            when the .play() method is invoked, or when the &lt;model-viewer&gt;
+            is configured to autoplay. If no animation-name is specified,
+            &lt;model-viewer&gt; always picks the first animation it finds in
+            the model.</p>
           </li>
           <li>
             <h4>animation-crossfade-duration</h4>
@@ -177,6 +171,13 @@
           <li>
             <h4>auto-rotate</h4>
             <p>Enables the auto rotation of the model.</p>
+          </li>
+          <li>
+            <h4>autoplay</h4>
+            <p>If this is true and a model has animations, an animation will
+            automatically begin to play when this attribute is set (or when the
+            property is set to true). If no animation-name is specified, plays
+            the first animation.</p>
           </li>
           <li>
             <h4>background-color</h4>
@@ -221,10 +222,6 @@
             <P>Enables the ability to view models in AR when viewing content on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a> browser, requires that src is a GLB model, and requires the inclusion of the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</P>
           </li>
           <li>
-            <h4>pause-animation</h4>
-            <p>When set to true, pauses the current animation. Default is false.</p>
-          </li>
-          <li>
             <h4>poster</h4>
             <p>Displays an image instead of the model. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
           </li>
@@ -257,6 +254,43 @@
         <p style="color:rgba(0,0,0,.54);" id="required-for-display">* Parameters that are required for display.</p>
         <p style="color:rgba(0,0,0,.54);">Note: All attributes have a corresponding property in camel-case format. For example, the background-color attribute can also be configured using the backgroundColor property.</p>
 
+        <h3 class="grouping-title" style="margin-top: 40px;">Properties</h3>
+
+        <ul class="list-attribute">
+          <li>
+            <h4>currentTime</h4>
+            <p>This property reports the current track time of the currently
+            selected animation. If no animations are available, the value is
+            always 0. This property can be set in order to seek along the
+            timeline of the currently playing animation. For example, if you
+            set it to 0, it will reset an animation to the beginning.</p>
+          </li>
+          <li>
+            <h4>paused</h4>
+            <p>This property is read-only. It returns true if animations are
+            paused. It returns false if animations are playing. Animations
+            always start paused, and remain so unless the autoplay attribute
+            is set or the .play() method is invoked.</p>
+          </li>
+        </ul>
+
+        <h3 class="grouping-title" style="margin-top: 40px;">Methods</h3>
+
+        <ul class="list-attribute">
+          <li>
+            <h4>play()</h4>
+            <p>Causes animations to be played. Use the autoplay attribute if
+            you want animations to be played automatically. If there are no
+            animations, nothing will happen, so make sure that the model is
+            loaded before invoking this method.</p>
+          </li>
+          <li>
+            <h4>pause()</h4>
+            <p>Causes animations to be paused. If you want to reset the
+            current animation to the beginning, you should also set the
+            currentTime property to 0.</p>
+          </li>
+        </ul>
 
         <h3 class="grouping-title" style="margin-top: 40px;">Events</h3>
 
@@ -276,6 +310,17 @@
             <p>This event is fired when the visiblity of the poster image
             changes. The current visibility state can be read from the
             <span class="attribute">event.detail.visible</span> property</p>
+          </li>
+          <li>
+            <h4>play</h4>
+            <p>Dispatched when animations begin to play.</p>
+          </li>
+          <li>
+            <h4>pause</h4>
+            <p>Dispatched when animations are paused. A model always begins in
+            the paused state, so it is worth mentioning that this event will not
+            be dispatched until the the pause() method is invoked after
+            animations have begun playing.</p>
           </li>
           <li>
             <h4>preload</h4>
@@ -299,7 +344,7 @@
             <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
             <th><img class="logo-canary" title="Canary" alt="Canary"></th>
             <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
             <th><img class="logo-edge" title="Edge" alt="Edge"></th>
             <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
           </tr>
@@ -330,7 +375,7 @@
             <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
             <th><img class="logo-canary" title="Canary" alt="Canary"></th>
             <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
             <th><img class="logo-edge" title="Edge" alt="Edge"></th>
             <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
           </tr>
@@ -361,7 +406,7 @@
             <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
             <th><img class="logo-canary" title="Canary" alt="Canary"></th>
             <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65" src="logo-firefox"></th>
+            <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
             <th><img class="logo-edge" title="Edge" alt="Edge"></th>
             <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
           </tr>

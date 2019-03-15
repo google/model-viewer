@@ -186,6 +186,24 @@ export default class Model extends Object3D {
     this.dispatchEvent({type: 'model-load', url});
   }
 
+  set animationTime(value = 0) {
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.time = value;
+    }
+  }
+
+  get animationTime() {
+    if (this.currentAnimationAction != null) {
+      return this.currentAnimationAction.time;
+    }
+
+    return 0;
+  }
+
+  get hasActiveAnimation() {
+    return this.currentAnimationAction != null;
+  }
+
   /**
    * Plays an animation if there are any associated with the current model.
    * Accepts an optional string name of an animation to play. If no name is
