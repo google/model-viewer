@@ -51,19 +51,20 @@ export class CachingGLTFLoader {
    */
   async preload(url) {
     if (!cache.has(url)) {
-      const loadAttempt = loadWithLoader(url, this.loader);
-      loadAttempt
-          .then(() => {
-            preloaded.set(url, true);
-          })
-          .catch(() => {});  // Silently ignore exceptions here, they should be
-                             // caught by the invoking function
-      cache.set(url, loadAttempt);
-      // window.loadAttempt = loadAttempt;
+      cache.set(url, loadWithLoader(url, this.loader));
+
+      // loadAttempt
+      //.then(() => {
+      // preloaded.set(url, true);
+      //})
+      //.catch(() => {});  // Silently ignore exceptions here, they should be
+      //// caught by the invoking function
     }
 
     await cache.get(url);
-    return;  // Explicitly return so that we don't leak the source glTF
+
+    preloaded.set(url, true);
+    // return;  // Explicitly return so that we don't leak the source glTF
   }
 
   /**
