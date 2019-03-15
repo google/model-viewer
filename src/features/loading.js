@@ -28,6 +28,7 @@ const $posterHidden = Symbol('posterHidden');
 const $userDismissedPoster = Symbol('userDismissedPoster');
 const $shouldDismissPoster = Symbol('shouldDismissPoster');
 const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+const $ensurePreloaded = Symbol('ensurePreloaded');
 const $preloadAnnounced = Symbol('preloadAnnounced');
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -119,7 +120,6 @@ export const LoadingMixin = (ModelViewerElement) => {
       const posterOpacity = self.getComputedStyle(posterElement).opacity;
       const onPosterHidden = () => {
         requestAnimationFrame(() => {
-          console.warn('POSTER HIDDEN');
           this.dispatchEvent(
               new CustomEvent('poster-visibility', {detail: {visible: false}}));
           this[$canvas].focus();
@@ -205,27 +205,7 @@ export const LoadingMixin = (ModelViewerElement) => {
         this[$preloadAnnounced] = false;
       }
 
-      const preloaded = CachingGLTFLoader.hasFinishedLoading(this.src);
-
-      if (this[$shouldAttemptPreload]) {
-        const detail = {url: this.src};
-
-        if (preloaded) {
-          this.dispatchEvent(new CustomEvent('preload', {detail}));
-        } else {
-          loader.preload(this.src)
-              .then(() => {
-                this.dispatchEvent(new CustomEvent('preload', {detail}));
-                this.requestUpdate();
-              })
-              .catch((error) => {
-                this.dispatchEvent(new CustomEvent(
-                    'error', {detail: {type: 'preload', sourceError: error}}));
-              });
-        }
-
-        this[$preloadAnnounced] = true;
-      }
+      this[$ensurePreloaded]();
 
       if (this[$shouldDismissPoster]) {
         if (!this[$posterHidden]) {
@@ -234,6 +214,30 @@ export const LoadingMixin = (ModelViewerElement) => {
         }
       } else {
         this[$showPoster]();
+      }
+    }
+
+    async[$ensurePreloaded]() {
+      const preloaded = CachingGLTFLoader.hasFinishedLoading(this.src);
+
+      if (this[$shouldAttemptPreload]) {
+        const detail = {url: this.src};
+
+        this[$preloadAnnounced] = true;
+
+        if (preloaded) {
+          this.dispatchEvent(new CustomEvent('preload', {detail}));
+        } else {
+          try {
+            await loader.preload(this.src);
+
+            this.dispatchEvent(new CustomEvent('preload', {detail}));
+            this.requestUpdate();
+          } catch (error) {
+            this.dispatchEvent(new CustomEvent(
+                'error', {detail: {type: 'preload', sourceError: error}}));
+          }
+        }
       }
     }
 

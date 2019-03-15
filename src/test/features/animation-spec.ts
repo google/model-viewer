@@ -53,7 +53,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('when configured as animated', () => {
+  suite('when configured to animate', () => {
     let element: any;
 
     setup(() => {

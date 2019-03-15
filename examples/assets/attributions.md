@@ -18,6 +18,11 @@ Damaged Helmet by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_<
 licensed under Creative Commons Attribution-NonCommercial
 (<a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">source</a>)
 
+## Horse
+
+Horse by <a href="http://mirada.com/">mirada</a> for <a href="http://www.ro.me/">ROME "3 Dreams of Black"</a>
+licensed under <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">CC-BY-NC-SA</a> (<a href="https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Horse.glb">source</a>)
+
 ## Shishkebab.*
 
 Shishkebab by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
