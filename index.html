@@ -121,6 +121,10 @@
             <p>Control the lighting and the environment surrounding &lt;model-viewer&gt;</p>
           </li>
           <li>
+            <a href="examples/staging-and-camera-control.html"><h4>Staging &amp; Camera Control</h4></a>
+            <p>Use these features to frame the perfect shot for your model</p>
+          </li>
+          <li>
             <a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a>
             <p>Configure &lt;model-viewer&gt; to present your model as a hologram</p>
           </li>
@@ -188,9 +192,22 @@
             <p>Sets the background image of the scene when viewed inline. Takes a URL to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting background-image supercedes background-color.</p>
           </li>
           <li>
-            <h4>controls</h4>
+            <h4>camera-controls</h4>
             <p>Enables controls via mouse/touch when in flat view.</p>
           </li>
+          <li>
+            <h4>camera-orbit</h4>
+            <p>Set the starting and/or subsequent orbital position of the camera.
+            You can control the azimuthal and polar angles, and the distance
+            from the model. Accepts values of the form "$angle $angle $distance",
+            like "10deg 75deg 1.5m". Also supports units in radians ("rad") for
+            angles and centimeters ("cm") or millimeters ("mm") for camera
+            distance. A special value "auto" can be used for the distance, which
+            sets the distance to the ideal framing distance based on the
+            responsive scaling applied to the model scene. Any time this value
+            changes from its initially configured value, the camera will
+            interpolate from its current position to the new value. Defaults to
+            "0deg 75deg auto".</p>
           <li>
             <h4>environment-image</h4>
             <p>Controls the environmental reflection of the model. Normally if
@@ -277,6 +294,14 @@
         <h3 class="grouping-title" style="margin-top: 40px;">Methods</h3>
 
         <ul class="list-attribute">
+          <li>
+            <h4>getCameraOrbit()</h4>
+            <p>Returns the realtime orbital position of the camera. Azimuthal
+            (theta) and polar (phi) angles are representred as radians, and the
+            distance (radius) is represented in meters. This value may differ
+            from the value configured with the camera-orbit attribute on account
+            of user interaction or camera interpolation.</p>
+          </li>
           <li>
             <h4>play()</h4>
             <p>Causes animations to be played. Use the autoplay attribute if

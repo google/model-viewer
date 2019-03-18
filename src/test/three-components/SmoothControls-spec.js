@@ -70,11 +70,14 @@ suite('SmoothControls', () => {
     element.tabIndex = 0;
 
     document.body.appendChild(element);
+
+    controls.enableInteraction();
   });
 
   teardown(() => {
     document.body.removeChild(element);
-    controls.dispose();
+
+    controls.disableInteraction();
   });
 
   suite('when updated', () => {

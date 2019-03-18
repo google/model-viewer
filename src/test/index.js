@@ -14,6 +14,8 @@
  */
 
 import './utils-spec.js';
+import './parsers-spec.js';
+import './conversions-spec.js';
 import './model-viewer-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';

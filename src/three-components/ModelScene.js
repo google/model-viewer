@@ -61,6 +61,7 @@ const FOV = 45;
 
 const $paused = Symbol('paused');
 const $modelAlignmentMask = Symbol('modelAlignmentMask');
+const $idealCameraDistance = Symbol('idealCameraDistance');
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -90,6 +91,8 @@ export default class ModelScene extends Scene {
     this.scaleType = ScaleTypes.Framed;
     this.exposure = 1;
     this[$modelAlignmentMask] = new Vector3(1, 1, 1);
+    this[$idealCameraDistance] = 1.0;
+
     this.unscaledModelOffset = new Vector3(0, 0, 0);
 
     this.model = new Model();
@@ -107,7 +110,8 @@ export default class ModelScene extends Scene {
 
     this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
     this.camera.name = 'MainCamera';
-    this.camera.position.y = 5;
+
+
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
     this.pivot.name = 'Pivot';
@@ -127,6 +131,10 @@ export default class ModelScene extends Scene {
     this.background = new Color(0xffffff);
 
     this.model.addEventListener('model-load', this.onModelLoad);
+  }
+
+  get idealCameraDistance() {
+    return this[$idealCameraDistance];
   }
 
   get paused() {
@@ -235,7 +243,11 @@ export default class ModelScene extends Scene {
     // Position the camera such that the element is perfectly framed
     this.camera.near =
         (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
-    this.camera.position.z = this.roomBox.max.z + this.camera.near;
+
+    this[$idealCameraDistance] = this.camera.near + this.roomBox.max.z;
+
+    this.camera.position.z = this[$idealCameraDistance];
+    this.camera.position.y = FRAMED_HEIGHT / 2.0;
     this.camera.aspect = this.aspect;
     this.camera.updateProjectionMatrix();
 
