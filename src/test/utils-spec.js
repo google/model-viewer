@@ -17,9 +17,9 @@ import {Box3, BoxBufferGeometry, Mesh, Vector3} from 'three';
 
 import {CAPPED_DEVICE_PIXEL_RATIO, clamp, deserializeUrl, resolveDpr, step} from '../utils.js';
 
-const expect = chai.expect;
+import {timePasses} from './helpers.js';
 
-const timePasses = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const expect = chai.expect;
 
 suite('utils', () => {
   suite('deserializeUrl', () => {

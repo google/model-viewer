@@ -15,6 +15,7 @@
 
 import {$controls, $promptElement, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
@@ -24,6 +25,24 @@ const expect = chai.expect;
 const interactWith = (element) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
   dispatchSyntheticEvent(element, 'mousemove', {clientX: 0, clientY: 0});
+};
+
+const expectSphericalsToBeEqual = (sphericalOne, sphericalTwo) => {
+  const precision = 5;
+
+  expect(sphericalOne.theta.toFixed(precision))
+      .to.be.equal(
+          sphericalTwo.theta.toFixed(precision),
+          'Spherical theta does not match');
+
+  expect(sphericalOne.phi.toFixed(precision))
+      .to.be.equal(
+          sphericalTwo.phi.toFixed(precision), 'Spherical phi does not match');
+
+  expect(sphericalOne.radius.toFixed(precision))
+      .to.be.equal(
+          sphericalTwo.radius.toFixed(precision),
+          'Spherical radius does not match');
 };
 
 suite('ModelViewerElementBase with ControlsMixin', () => {
@@ -45,19 +64,117 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-    suite('controls', () => {
+    suite('camera-orbit', () => {
       let element;
 
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
-        element.controls = true;
+
+        await waitForEvent(element, 'load');
+
+        settleControls(element[$controls]);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test('defaults radius to ideal camera distance', () => {
+        const scene = element[$scene];
+
+        expect(element.getCameraOrbit().radius * FRAMED_HEIGHT)
+            .to.be.equal(scene.idealCameraDistance);
+      });
+
+      test('can independently adjust azimuth', async () => {
+        const orbit = element.getCameraOrbit();
+        const nextTheta = orbit.theta + 1.0;
+
+        element.cameraOrbit =
+            `${nextTheta}rad ${orbit.phi}rad ${orbit.radius}m`;
+
+        await timePasses();
+
+        settleControls(element[$controls]);
+
+        expectSphericalsToBeEqual(
+            element.getCameraOrbit(), {...orbit, theta: nextTheta});
+      });
+
+      test('can independently adjust pole', async () => {
+        const orbit = element.getCameraOrbit();
+        const nextPhi = orbit.phi + 1.0;
+
+        element.cameraOrbit =
+            `${orbit.theta}rad ${nextPhi}rad ${orbit.radius}m`;
+
+        await timePasses();
+
+        settleControls(element[$controls]);
+
+        expectSphericalsToBeEqual(
+            element.getCameraOrbit(), {...orbit, phi: nextPhi});
+      });
+
+      test('can independently adjust radius', async () => {
+        const orbit = element.getCameraOrbit();
+        const nextRadius = orbit.radius - 1.0;
+
+        element.cameraOrbit =
+            `${orbit.theta}rad ${orbit.phi}rad ${nextRadius}m`;
+
+        await timePasses();
+
+        settleControls(element[$controls]);
+
+        expectSphericalsToBeEqual(
+            element.getCameraOrbit(), {...orbit, radius: nextRadius});
+      });
+
+      suite('getCameraOrbit', () => {
+        setup(async () => {
+          element.cameraOrbit = `1rad 1rad 1.5m`;
+          await timePasses();
+          settleControls(element[$controls]);
+        });
+
+        test('starts at the initially configured orbit', () => {
+          const orbit = element.getCameraOrbit();
+
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.be.equal(element.cameraOrbit);
+        });
+
+        test('updates with current orbit after interaction', async () => {
+          const controls = element[$controls];
+          controls.adjustOrbit(0, 0.5, 0);
+          settleControls(controls);
+
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(`1rad 0.5rad 1.5m`);
+        });
+      });
+    });
+
+    suite('camera-controls', () => {
+      let element;
+
+      setup(async () => {
+        element = new ModelViewerElement();
+        document.body.appendChild(element);
+        element.src = assetPath('cube.gltf');
+        element.cameraControls = true;
 
         await waitForEvent(element, 'load');
       });
 
       teardown(() => {
+        element.cameraControls = false;
         if (element.parentNode != null) {
           element.parentNode.removeChild(element);
         }
@@ -68,14 +185,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('sets max radius to the camera framed distance', () => {
-        const cameraZ = element[$scene].camera.position.z;
-        expect(element[$controls].options.maximumRadius).to.be.equal(cameraZ);
+        const cameraDistance = element[$scene].camera.position.distanceTo(
+            element[$scene].model.position);
+        expect(element[$controls].options.maximumRadius)
+            .to.be.equal(cameraDistance);
       });
 
-      test('removes SmoothControls if disabled after enabled', async () => {
-        element.controls = false;
+      test('disables interaction if disabled after enabled', async () => {
+        element.cameraControls = false;
         await timePasses();
-        expect(element[$controls]).to.be.not.ok;
+        expect(element[$controls].interactionEnabled).to.be.false;
       });
 
       suite('a11y', () => {

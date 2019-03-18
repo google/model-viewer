@@ -124,3 +124,4 @@ export const isInDocumentTree = (element) => {
 
   return false;
 };
+
