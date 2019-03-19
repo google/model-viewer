@@ -52,19 +52,11 @@ export class CachingGLTFLoader {
   async preload(url) {
     if (!cache.has(url)) {
       cache.set(url, loadWithLoader(url, this.loader));
-
-      // loadAttempt
-      //.then(() => {
-      // preloaded.set(url, true);
-      //})
-      //.catch(() => {});  // Silently ignore exceptions here, they should be
-      //// caught by the invoking function
     }
 
     await cache.get(url);
 
     preloaded.set(url, true);
-    // return;  // Explicitly return so that we don't leak the source glTF
   }
 
   /**
