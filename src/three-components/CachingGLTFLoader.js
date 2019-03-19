@@ -16,9 +16,10 @@
 import GLTFLoader from '../third_party/three/GLTFLoader.js';
 import {cloneGltf} from './ModelUtils.js';
 
-const loadWithLoader = (url, loader) => new Promise((resolve, reject) => {
-  loader.load(url, resolve, () => {}, reject);
-});
+export const loadWithLoader = (url, loader) =>
+    new Promise((resolve, reject) => {
+      loader.load(url, resolve, () => {}, reject);
+    });
 
 const cache = new Map();
 const preloaded = new Map();

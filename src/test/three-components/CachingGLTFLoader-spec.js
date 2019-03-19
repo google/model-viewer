@@ -15,6 +15,8 @@
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath} from '../helpers.js';
 
+const expect = chai.expect;
+
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {

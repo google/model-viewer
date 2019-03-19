@@ -269,11 +269,18 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   dispose() {
-    this.environmentMapGenerator.dispose();
-    this.environmentMapGenerator = null;
-    if (this[$cubeGenerator]) {
-      this[$cubeGenerator].dispose();
-      this[$cubeGenerator] = null;
+    // NOTE(cdata): In the case that the generators are invoked with
+    // an incorrect texture, the generators will throw when we attempt to
+    // dispose of them because the framebuffer has not been created yet but the
+    // implementation does not guard for this correctly:
+    try {
+      this.environmentMapGenerator.dispose();
+      this.environmentMapGenerator = null;
+      if (this[$cubeGenerator]) {
+        this[$cubeGenerator].dispose();
+        this[$cubeGenerator] = null;
+      }
+    } catch (_error) {
     }
   }
 }

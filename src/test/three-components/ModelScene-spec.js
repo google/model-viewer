@@ -43,9 +43,18 @@ suite('ModelScene', () => {
   let element;
   let scene;
   let dummyMesh;
+  let renderer;
   let ModelViewerElement = class extends ModelViewerElementBase {};
-  let renderer = new Renderer();
+
   customElements.define('model-viewer-modelscene', ModelViewerElement);
+
+  suiteSetup(() => {
+    renderer = new Renderer();
+  });
+
+  suiteTeardown(() => {
+    renderer.dispose();
+  });
 
   setup(() => {
     // Set the radius of the sphere to 0.5 so that it's size is 1

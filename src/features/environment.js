@@ -182,7 +182,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     }
 
     [$updateToneMapping]() {
-      this[$renderer].exposure = this.exposure;
+      this[$scene].exposure = this.exposure;
       this[$needsRender]();
     }
 
