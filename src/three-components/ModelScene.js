@@ -60,6 +60,7 @@ const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 0.75;
 const FOV = 45;
 
 const $paused = Symbol('paused');
+const $modelAlignmentMask = Symbol('modelAlignmentMask');
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -87,6 +88,9 @@ export default class ModelScene extends Scene {
     this.context = canvas.getContext('2d');
     this.renderer = renderer;
     this.scaleType = ScaleTypes.Framed;
+    this.exposure = 1;
+    this[$modelAlignmentMask] = new Vector3(1, 1, 1);
+    this.unscaledModelOffset = new Vector3(0, 0, 0);
 
     this.model = new Model();
     this.shadow = new StaticShadow();
@@ -149,6 +153,28 @@ export default class ModelScene extends Scene {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);
     }
+  }
+
+  /**
+   * Configures the alignment of the model within the frame based on value
+   * "masks". By default, the model will be aligned so that the center of its
+   * bounding box volume is in the center of the frame on all axes. In order to
+   * center the model this way, the model is translated by the delta between
+   * the world center of the bounding volume and world center of the frame.
+   *
+   * The alignment mask allows this translation to be scaled or eliminated
+   * completely for each of the three axes. So, setModelAlignment(1, 1, 1) will
+   * center the model in the frame. setModelAlignment(0, 0, 0) will align the
+   * model so that its root node origin is at [0, 0, 0] in the scene.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   */
+  setModelAlignmentMask(...alignmentMaskValues) {
+    this[$modelAlignmentMask].set(...alignmentMaskValues);
+    this.scaleModelToFitRoom();
+    this.isDirty = true;
   }
 
   /**
@@ -259,8 +285,12 @@ export default class ModelScene extends Scene {
     // @see ROOM_PADDING_SCALE
     scale /= ROOM_PADDING_SCALE;
 
+    modelCenter.multiply(this[$modelAlignmentMask]);
+    this.unscaledModelOffset.copy(modelCenter).multiplyScalar(-1);
     modelCenter.multiplyScalar(scale);
+
     this.model.scale.multiplyScalar(scale);
+    this.model.position.copy(roomCenter);
     this.model.position.subVectors(roomCenter, modelCenter);
   }
 

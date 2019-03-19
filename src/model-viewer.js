@@ -15,20 +15,21 @@
 
 import {AnimationMixin} from './features/animation.js';
 import {ARMixin} from './features/ar.js';
-import {AutoRotateMixin} from './features/auto-rotate.js';
 import {ControlsMixin} from './features/controls.js';
 import {EnvironmentMixin} from './features/environment.js';
 import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
+import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 
 const ModelViewerElement = [
   AnimationMixin,
   LoadingMixin,
   ARMixin,
-  AutoRotateMixin,
+  StagingMixin,
   ControlsMixin,
   EnvironmentMixin,
+  StagingMixin,
   MagicLeapMixin
 ].reduce((Base, Mixin) => Mixin(Base), ModelViewerElementBase);
 

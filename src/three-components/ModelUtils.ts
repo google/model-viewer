@@ -55,6 +55,21 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
 
   if (hasScene) {
     gltf.scene!.traverse((node: any) => {
+      // Set a high renderOrder while we're here to ensure the model
+      // always renders on top of the skysphere
+      node.renderOrder = 1000;
+
+      // Materials aren't cloned when cloning meshes; geometry
+      // and materials are copied by reference. This is necessary
+      // for the same model to be used twice with different
+      // environment maps.
+      if (Array.isArray(node.material)) {
+        node.material =
+            node.material.map((material: Material) => material.clone());
+      } else if (node.material != null) {
+        node.material = node.material.clone();
+      }
+
       if (node.isSkinnedMesh) {
         hasSkinnedMeshes = true;
         skinnedMeshes[node.name] = node as SkinnedMesh;
@@ -67,20 +82,6 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
 
   if (hasScene && hasSkinnedMeshes) {
     clone.scene!.traverse((node: any) => {
-      // Materials aren't cloned when cloning meshes; geometry
-      // and materials are copied by reference. This is necessary
-      // for the same model to be used twice with different
-      // environment maps.
-      // Set a high renderOrder while we're here to ensure the model
-      // always renders on top of the skysphere
-      node.renderOrder = 1000;
-      if (Array.isArray(node.material)) {
-        node.material =
-            node.material.map((material: Material) => material.clone());
-      } else if (node.material != null) {
-        node.material = node.material.clone();
-      }
-
       if (node.isBone) {
         cloneBones[node.name] = node as Bone;
       }

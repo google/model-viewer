@@ -22,7 +22,8 @@ const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('quick_4k.png');
 const BG_IMAGE_URL = assetPath('spruit_sunrise_2k.jpg');
 const MODEL_URL = assetPath('reflective-sphere.gltf');
-const UNLIT_MODEL_URL = assetPath('glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
+const UNLIT_MODEL_URL =
+    assetPath('glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
 const MULTI_MATERIAL_MODEL_URL = assetPath('Triangle.gltf');
 
 const backgroundHasMap =
@@ -61,18 +62,18 @@ const modelUsingEnvMap = (scene, meta) => {
   return found;
 };
 
-const modelHasEnvMap = (scene) => {
-  let found = false;
-  scene.model.traverse(object => {
-    if (Array.isArray(object.material)) {
-      found = found || object.material.some(m => m.envMap);
+const modelHasEnvMap =
+    (scene) => {
+      let found = false;
+      scene.model.traverse(object => {
+        if (Array.isArray(object.material)) {
+          found = found || object.material.some(m => m.envMap);
+        } else if (object.material && object.material.envMap) {
+          found = true;
+        }
+      });
+      return found;
     }
-    else if (object.material && object.material.envMap) {
-      found = true;
-    }
-  });
-  return found;
-}
 
 /**
  * Takes a model object and a meta object and returns
@@ -197,11 +198,13 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
           element.src = MULTI_MATERIAL_MODEL_URL;
           await onLoad;
         });
-        test('applies environment map on model with multi-material meshes', async function() {
-          expect(modelUsingEnvMap(scene, {
-            url: element.backgroundImage
-          })).to.be.ok;
-        });
+        test(
+            'applies environment map on model with multi-material meshes',
+            async function() {
+              expect(modelUsingEnvMap(scene, {
+                url: element.backgroundImage
+              })).to.be.ok;
+            });
       });
     });
   });
@@ -275,6 +278,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
           scene.renderer.renderer.toneMappingExposure;
       element.exposure = 2.0;
       await timePasses();
+      scene.renderer.render(performance.now());
       const newToneMappingExposure =
           scene.renderer.renderer.toneMappingExposure;
       expect(newToneMappingExposure)

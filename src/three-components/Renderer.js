@@ -91,24 +91,6 @@ export default class Renderer extends EventDispatcher {
     this.lastTick = performance.now();
   }
 
-  set exposure(exposure) {
-    if (!this.canRender) {
-      return;
-    }
-
-    const exposureIsNumber =
-        typeof exposure === 'number' && !self.isNaN(exposure);
-    this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
-  }
-
-  get exposure() {
-    if (!this.canRender) {
-      return null;
-    }
-
-    return this.renderer.toneMappingExposure;
-  }
-
   setRendererSize(width, height) {
     if (this.canRender) {
       this.renderer.setSize(width, height, false);
@@ -172,6 +154,7 @@ export default class Renderer extends EventDispatcher {
     const dpr = resolveDpr();
 
     if (dpr !== this.renderer.getPixelRatio()) {
+      console.warn('Updating pixel ratio', dpr);
       this.renderer.setPixelRatio(dpr);
     }
 
@@ -190,6 +173,11 @@ export default class Renderer extends EventDispatcher {
         const maxHeight = Math.max(height, this.height);
         this.setRendererSize(maxWidth, maxHeight, false);
       }
+
+      const {exposure} = scene;
+      const exposureIsNumber =
+          typeof exposure === 'number' && !self.isNaN(exposure);
+      this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
@@ -229,5 +217,7 @@ export default class Renderer extends EventDispatcher {
 
     this.textureUtils = null;
     this.renderer = null;
+
+    this.scenes.clear();
   }
 }

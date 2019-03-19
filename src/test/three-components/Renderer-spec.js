@@ -13,74 +13,84 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize, $renderer, $resetRenderer} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
+import {timePasses} from '../helpers.js';
 
 const expect = chai.expect;
 
-suite('Renderer', () => {
-  let element;
-  let scene;
-  let renderer = new Renderer();
-  let ModelViewerElement = class extends ModelViewerElementBase {
-    static get is() {
-      return 'model-viewer-renderer';
-    }
-  };
-  customElements.define('model-viewer-renderer', ModelViewerElement);
+const ModelViewerElement = class extends ModelViewerElementBase {
+  static get is() {
+    return 'model-viewer-renderer';
+  }
+};
 
-  teardown(() => {
-    renderer.scenes.clear();
+customElements.define('model-viewer-renderer', ModelViewerElement);
+
+function createScene() {
+  const element = new ModelViewerElement();
+  const renderer = element[$renderer];
+  const scene = new ModelScene({
+    element: element,
+    canvas: element[$canvas],
+    width: 200,
+    height: 100,
+    renderer,
+  });
+  scene.isVisible = true;
+
+  scene.renderCount = 0;
+  const drawImage = scene.context.drawImage;
+  scene.context.drawImage = (...args) => {
+    scene.renderCount++;
+    drawImage.call(scene.context, ...args);
+  };
+
+  renderer.registerScene(scene);
+
+  return scene;
+}
+
+suite('Renderer', () => {
+  let scene;
+  let renderer;
+
+
+  setup(() => {
+    scene = createScene();
+    renderer = scene.renderer;
   });
 
-  function createScene() {
-    const element = new ModelViewerElement();
-    const scene = new ModelScene({
-      element: element,
-      canvas: element[$canvas],
-      width: 200,
-      height: 100,
-      renderer,
-    });
-    scene.isVisible = true;
-
-    scene.renderCount = 0;
-    const drawImage = scene.context.drawImage;
-    scene.context.drawImage = (...args) => {
-      scene.renderCount++;
-      drawImage.call(scene.context, ...args);
-    };
-
-    return scene;
-  }
+  teardown(() => {
+    ModelViewerElementBase[$resetRenderer]();
+  });
 
   suite('render', () => {
-    test('renders only dirty scenes', async function() {
-      let scene1 = createScene();
-      let scene2 = createScene();
-      renderer.registerScene(scene1);
-      renderer.registerScene(scene2);
+    let otherScene;
 
+    setup(() => {
+      otherScene = createScene();
+    });
+
+    test('renders only dirty scenes', async function() {
       renderer.render(performance.now());
-      expect(scene1.renderCount).to.be.equal(0);
-      expect(scene2.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(0);
+      expect(otherScene.renderCount).to.be.equal(0);
       expect(renderer.scenesRendered).to.be.equal(0);
 
-      scene1.isDirty = true;
+      scene.isDirty = true;
       renderer.render(performance.now());
-      expect(scene1.renderCount).to.be.equal(1);
-      expect(scene2.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(1);
+      expect(otherScene.renderCount).to.be.equal(0);
       expect(renderer.scenesRendered).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function() {
-      let scene = createScene();
-      renderer.registerScene(scene);
-
       scene.isDirty = true;
 
       renderer.render(performance.now());
+
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
 
@@ -90,10 +100,6 @@ suite('Renderer', () => {
     });
 
     test('does not render scenes marked as !isVisible', async function() {
-      let scene = createScene();
-      let renderer = new Renderer();
-      renderer.registerScene(scene);
-
       scene.isVisible = false;
       scene.isDirty = true;
 
@@ -122,7 +128,6 @@ suite('Renderer', () => {
       });
 
       test('updates effective DPR', async () => {
-        const scene = createScene();
         const {element} = scene;
         const initialDpr = renderer.renderer.getPixelRatio();
         const {width, height} = scene.getSize();
