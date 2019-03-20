@@ -219,12 +219,15 @@ export default class Renderer extends EventDispatcher {
   }
 
   dispose() {
-    super.dispose();
-
     if (this.textureUtils != null) {
       this.textureUtils.dispose();
     }
 
+    if (this.renderer != null) {
+      this.renderer.dispose();
+    }
+
     this.textureUtils = null;
+    this.renderer = null;
   }
 }
