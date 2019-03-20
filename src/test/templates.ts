@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase from '../model-viewer-base.js';
+import ModelViewerElementBase, {$resetRenderer} from '../model-viewer-base.js';
 import {timePasses} from './helpers.js';
 
 export type Constructor<T = object> = {
@@ -25,6 +25,11 @@ const expect = chai.expect;
 export const BasicSpecTemplate =
     (ModelViewerElementAccessor: () => Constructor<ModelViewerElementBase>,
      tagNameAccessor: () => string) => {
+      teardown(() => {
+        // Ensure that the renderer is disposed across every test run:
+        ModelViewerElementBase[$resetRenderer]();
+      });
+
       test('can be directly instantiated', () => {
         const ModelViewerElement = ModelViewerElementAccessor();
         const element = new ModelViewerElement();

@@ -21,7 +21,7 @@ import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
 import {debounce, deserializeUrl} from './utils.js';
 
-const renderer = new Renderer();
+let renderer = new Renderer();
 
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 
@@ -42,6 +42,7 @@ export const $tick = Symbol('tick');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $renderer = Symbol('renderer');
+export const $resetRenderer = Symbol('resetRenderer');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -64,6 +65,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     return this[$template];
+  }
+
+  static[$resetRenderer]() {
+    renderer.dispose();
+    renderer = new Renderer();
   }
 
   get loaded() {
