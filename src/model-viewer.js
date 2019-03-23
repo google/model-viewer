@@ -26,7 +26,6 @@ const ModelViewerElement = [
   AnimationMixin,
   LoadingMixin,
   ARMixin,
-  StagingMixin,
   ControlsMixin,
   EnvironmentMixin,
   StagingMixin,
