@@ -290,7 +290,6 @@ export default class ModelScene extends Scene {
     modelCenter.multiplyScalar(scale);
 
     this.model.scale.multiplyScalar(scale);
-    this.model.position.copy(roomCenter);
     this.model.position.subVectors(roomCenter, modelCenter);
   }
 
