@@ -21,7 +21,7 @@
         {
           "browserName": "chrome",
           "platform": "Windows 10",
-          "version": "70.0"
+          "version": "73.0"
         }
       ]
     }

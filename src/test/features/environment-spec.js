@@ -15,7 +15,7 @@
 
 import {EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -267,6 +267,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.src = MODEL_URL;
       document.body.appendChild(element);
       await waitForEvent(element, 'load');
+      scene.isVisible = true;
     });
 
     teardown(() => {
@@ -279,8 +280,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.exposure = 2.0;
       await timePasses();
       scene.renderer.render(performance.now());
+
       const newToneMappingExposure =
           scene.renderer.renderer.toneMappingExposure;
+
       expect(newToneMappingExposure)
           .to.be.greaterThan(originalToneMappingExposure);
     });
