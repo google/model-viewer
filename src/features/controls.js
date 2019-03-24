@@ -27,8 +27,8 @@ const PHI = 2.0 * Math.PI;
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
-const ORBIT_NEAR_PLANE = 0.01;
-const ORBIT_FAR_PLANE = 100;
+const ORBIT_NEAR_PLANE = 1.0;
+const ORBIT_FAR_PLANE = 100.0;
 
 export const IDLE_PROMPT_THRESHOLD_MS = 3000;
 export const IDLE_PROMPT =
