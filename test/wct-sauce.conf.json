@@ -16,12 +16,17 @@
         {
           "browserName": "firefox",
           "platform": "Windows 10",
-          "version": "62.0"
+          "version": "64.0"
         },
         {
           "browserName": "firefox",
           "platform": "Windows 10",
           "version": "65.0"
+        },
+        {
+          "browserName": "safari",
+          "platform": "macOS 10.13",
+          "version": "11.1"
         },
         {
           "browserName": "safari",
@@ -35,17 +40,18 @@
           "screenResolution": "1280x1024"
         },
         {
+          "browserName": "MicrosoftEdge",
+          "platform": "Windows 10",
+          "version": "18.17763",
+          "screenResolution": "1280x1024"
+        },
+        {
           "browserName": "safari",
           "appiumVersion": "1.9.1",
           "platformName": "iOS",
           "platformVersion": "12.0",
           "deviceName": "iPhone XR Simulator",
           "deviceOrientation": "portrait"
-        },
-        {
-          "browserName": "safari",
-          "platform": "macOS 10.13",
-          "version": "11.1"
         },
         {
           "browserName": "Chrome",

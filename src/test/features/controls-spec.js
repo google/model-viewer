@@ -111,7 +111,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           canvas.focus();
 
-          await timePasses();
+          await timePasses(IDLE_PROMPT_THRESHOLD_MS / 2.0);
 
           interactWith(canvas);
 
