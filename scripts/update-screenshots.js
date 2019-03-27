@@ -67,16 +67,6 @@ const updateScreenshots = async (config) => {
   for (const scenario of scenarios) {
     const {goldens, slug} = scenario;
     const scenarioDirectory = path.join(fidelityTestDirectory, slug);
-    const testHtmlPath = path.join(scenarioDirectory, 'index.html');
-
-    const html = (await fs.readFile(testHtmlPath)).toString();
-
-    const backgroundImageMatch = html.match(backgroundImageRe);
-    const backgroundImage =
-        backgroundImageMatch != null ? backgroundImageMatch[1] : null;
-
-    const modelSourceMatch = html.match(modelSourceRe);
-    const modelSource = modelSourceMatch != null ? modelSourceMatch[1] : null;
 
     for (const golden of goldens) {
       const {name, file} = golden;
@@ -106,68 +96,84 @@ const updateScreenshots = async (config) => {
 
           break;
         case 'Filament':
-          const {width, height} = scenario.dimensions;
-
-          if (modelSource == null) {
-            warn(`Could not determine model source for ${
-                scenario.slug}; skipping...`);
-            continue;
-          }
-
-          if (backgroundImage == null) {
-            warn(`Could not determine IBL for ${scenario.slug}; skipping...`);
-            continue;
-          }
-
-          const backgroundImagePath =
-              path.resolve(path.dirname(testHtmlPath), backgroundImage);
-
-          const modelSourcePath =
-              path.resolve(path.dirname(testHtmlPath), modelSource);
-
-          await new Promise((resolve, reject) => {
-            console.log(`🖌️  Rendering ${name} screenshot for ${slug}...`);
-
-            const childProcess = spawn(
-                filamentScreenshotScript,
-                [
-                  '-w',
-                  `${width}`,
-                  '-h',
-                  `${height}`,
-                  '-i',
-                  backgroundImagePath,
-                  '-m',
-                  modelSourcePath,
-                  '-o',
-                  filePath
-                ],
-                {
-                  cwd: process.cwd(),
-                  env: process.env,
-                  stdio: ['ignore', 'inherit', 'inherit']
-                });
-
-            childProcess.once('error', (error) => {
-              warn(error);
-            });
-
-            childProcess.once('exit', (code) => {
-              if (code === 0) {
-                console.log(
-                    `✅ Successfully captured screenshot for ${name} ${slug}`);
-                resolve();
-              } else {
-                reject(new Error('Failed to capture Filament screenshot'));
-              }
-            });
-          });
-
+          await screenshotFromScript(scenario, scenarioDirectory, filePath, name, filamentScreenshotScript);
           break;
       }
     }
   }
 };
+
+const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name, script) => {
+  const testHtmlPath = path.join(scenarioDirectory, 'index.html');
+
+  const html = (await fs.readFile(testHtmlPath)).toString();
+
+  const backgroundImageMatch = html.match(backgroundImageRe);
+  const backgroundImage =
+      backgroundImageMatch != null ? backgroundImageMatch[1] : null;
+
+  const modelSourceMatch = html.match(modelSourceRe);
+  const modelSource = modelSourceMatch != null ? modelSourceMatch[1] : null;
+
+  const {width, height} = scenario.dimensions;
+
+  if (modelSource == null) {
+    warn(`Could not determine model source for ${
+        scenario.slug}; skipping...`);
+    return;
+  }
+
+  if (backgroundImage == null) {
+    warn(`Could not determine IBL for ${scenario.slug}; skipping...`);
+    return;
+  }
+
+  const backgroundImagePath =
+      path.resolve(path.dirname(testHtmlPath), backgroundImage);
+
+  const modelSourcePath =
+      path.resolve(path.dirname(testHtmlPath), modelSource);
+
+  await new Promise((resolve, reject) => {
+    console.log(`🖌️  Rendering ${name} screenshot for ${scenario.slug}...`);
+
+    const childProcess = spawn(
+        filamentScreenshotScript,
+        [
+          '-w',
+          `${width}`,
+          '-h',
+          `${height}`,
+          '-i',
+          backgroundImagePath,
+          '-m',
+          modelSourcePath,
+          '-o',
+          filePath
+        ],
+        {
+          cwd: process.cwd(),
+          env: process.env,
+          stdio: ['ignore', 'inherit', 'inherit']
+        });
+
+    childProcess.once('error', (error) => {
+      warn(error);
+    });
+
+    childProcess.once('exit', (code) => {
+      if (code === 0) {
+        console.log(
+            `✅ Successfully captured screenshot for ${name} ${scenario.slug}`);
+        resolve();
+      } else {
+        reject(new Error('Failed to capture Filament screenshot'));
+      }
+    });
+  });
+
+
+}
 
 updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
     .then(() => exit(0))
