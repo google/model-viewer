@@ -138,7 +138,7 @@ const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name,
     console.log(`🖌️  Rendering ${name} screenshot for ${scenario.slug}...`);
 
     const childProcess = spawn(
-        filamentScreenshotScript,
+        script,
         [
           '-w',
           `${width}`,
@@ -167,7 +167,7 @@ const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name,
             `✅ Successfully captured screenshot for ${name} ${scenario.slug}`);
         resolve();
       } else {
-        reject(new Error('Failed to capture Filament screenshot'));
+        reject(new Error(`Failed to capture ${name} screenshot`));
       }
     });
   });
