@@ -28,7 +28,8 @@
 #include <filament/Texture.h>
 #include <filament/TransformManager.h>
 #include <filament/View.h>
-#include <filament/driver/PixelBufferDescriptor.h>
+
+#include <backend/PixelBufferDescriptor.h>
 
 #include <utils/EntityManager.h>
 #include <utils/Path.h>
@@ -292,11 +293,11 @@ static void postRender(Engine*, View* view, Scene*, Renderer* renderer) {
       View* view = nullptr;
     };
 
-    driver::PixelBufferDescriptor buffer(
+    backend::PixelBufferDescriptor buffer(
         pixels,
         vp.width * vp.height * 3,
-        driver::PixelBufferDescriptor::PixelDataFormat::RGB,
-        driver::PixelBufferDescriptor::PixelDataType::UBYTE,
+        backend::PixelBufferDescriptor::PixelDataFormat::RGB,
+        backend::PixelBufferDescriptor::PixelDataType::UBYTE,
         [](void* buffer, size_t size, void* user) {
           if (size > 0) {
             CaptureState* state = static_cast<CaptureState*>(user);
