@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {IS_MOBILE} from '../../../constants.js';
 import {LoadingMixin} from '../../../features/loading.js';
 import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer} from '../../../features/loading/status-announcer.js';
 import ModelViewerElementBase from '../../../model-viewer-base.js';
@@ -35,6 +36,14 @@ suite('LoadingStatusAnnouncer', () => {
     };
     customElements.define(tagName, ModelViewerElement);
     loadingStatusAnnouncer = new LoadingStatusAnnouncer();
+  });
+
+  suite('a11y quirks', () => {
+    test('sets status element aria-hidden="true" on mobile devices', () => {
+      // @see https://github.com/GoogleWebComponents/model-viewer/issues/445
+      const {statusElement} = loadingStatusAnnouncer;
+      expect(statusElement.hasAttribute('aria-hidden')).to.be.equal(IS_MOBILE);
+    });
   });
 
   suite('when a model is registered', () => {

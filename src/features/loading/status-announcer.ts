@@ -14,6 +14,8 @@
  */
 
 import {EventDispatcher} from 'three';
+
+import {IS_MOBILE} from '../../constants.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {debounce, getFirstMapKey} from '../../utils.js';
 
@@ -78,6 +80,14 @@ export class LoadingStatusAnnouncer extends EventDispatcher {
     const {style} = statusElement;
 
     statusElement.setAttribute('role', 'status');
+
+    if (IS_MOBILE) {
+      // NOTE(cdata): per testing in #445, this should prevent the status
+      // element from being focused by mobile screen readers while still
+      // enabling the status to be announced.
+      // @see https://github.com/GoogleWebComponents/model-viewer/issues/445
+      statusElement.setAttribute('aria-hidden', 'true');
+    }
 
     style.position = 'absolute';
     style.color = 'transparent';
