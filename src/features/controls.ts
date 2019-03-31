@@ -77,7 +77,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         @property(
             {type: String, attribute: 'camera-orbit', hasChanged: () => true})
-        cameraOrbit: string;
+        cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
         protected[$promptElement]: HTMLElement|null;
 
@@ -114,8 +114,6 @@ export const ControlsMixin = (ModelViewerElement:
           this[$controls] =
               new SmoothControls(this[$orbitCamera], scene.canvas);
           this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
-
-          this.cameraOrbit = `0deg 75deg auto`;
 
           scene.setCamera(this[$orbitCamera]);
         }
