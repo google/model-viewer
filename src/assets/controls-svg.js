@@ -1,5 +1,5 @@
 export default `
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="250px" height="200px" viewBox="0 0 250 200" fill="transparent">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="250px" height="200px" viewBox="0 0 250 200" fill="transparent" focusable="false" aria-hidden="true">
   <!-- Rotation arc -->
   <path id="orbit"
         d="M50,75 C55,50 195,50 200,75 C195,100 55,100 50,75"
@@ -23,7 +23,6 @@ export default `
         stroke-dasharray="140 220"
         stroke="white"
         stroke-width="7"
-
         fill="transparent">
     <animate attributeName="stroke-dashoffset"
            dur="1.75s"
