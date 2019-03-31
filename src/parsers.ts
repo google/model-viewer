@@ -34,7 +34,6 @@ const parseAtomicValue = (valueString: string): ValueNode => {
 };
 
 const extractValue = (() => {
-  // const VALUE_RE = /^(([#]?[^-^.^0-9].*)|([-]?[0-9.]+))/;
   const VALUE_RE = /^(([^-^.^0-9].*)|([-]?[0-9.]+))/;
 
   return (inputString: string): string|null => {
