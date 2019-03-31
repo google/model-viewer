@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, ControlsMixin, IDLE_PROMPT, IDLE_PROMPT_THRESHOLD_MS} from '../../features/controls.js';
+import {$controls, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
@@ -229,28 +229,61 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           canvas.focus();
 
-          await until(() => canvas.getAttribute('aria-label') === IDLE_PROMPT);
+          await until(
+              () => canvas.getAttribute('aria-label') === INTERACTION_PROMPT);
 
           expect(promptElement.classList.contains('visible')).to.be.equal(true);
         });
+
+        test(
+            'does not prompt users to interact before a model is loaded',
+            async () => {
+              Object.defineProperty(
+                  element, 'loaded', {value: false, configurable: true});
+
+              element.interactionPromptThreshold = 500;
+
+              const {canvas} = element[$scene];
+              const promptElement = element[$promptElement];
+              const controls = element[$controls];
+
+              settleControls(controls);
+
+              await rafPasses();
+
+              canvas.focus();
+
+              await timePasses(element.interactionPromptThreshold + 100);
+
+              expect(promptElement.classList.contains('visible'))
+                  .to.be.equal(false);
+
+              Object.defineProperty(
+                  element, 'loaded', {value: true, configurable: true});
+
+              await timePasses(element.interactionPromptThreshold + 100);
+
+              expect(promptElement.classList.contains('visible'))
+                  .to.be.equal(true);
+            });
 
         test('does not prompt if user already interacted', async () => {
           const {canvas} = element[$scene];
           const promptElement = element[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
 
-          expect(originalLabel).to.not.be.equal(IDLE_PROMPT);
+          expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
 
           canvas.focus();
 
-          await timePasses(IDLE_PROMPT_THRESHOLD_MS / 2.0);
+          await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD / 2.0);
 
           interactWith(canvas);
 
-          await timePasses(IDLE_PROMPT_THRESHOLD_MS + 100);
+          await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD + 100);
 
           expect(canvas.getAttribute('aria-label'))
-              .to.not.be.equal(IDLE_PROMPT);
+              .to.not.be.equal(INTERACTION_PROMPT);
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
