@@ -42,8 +42,8 @@ const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 const ORBIT_CAMERA_NEAR_PLANE = FRAMED_HEIGHT / 10.0;
 const ORBIT_CAMERA_FAR_PLANE = FRAMED_HEIGHT * 10.0;
 
-export const IDLE_PROMPT_THRESHOLD_MS = 3000;
-export const IDLE_PROMPT =
+export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
+export const INTERACTION_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
 
 export const $controls = Symbol('controls');
@@ -58,9 +58,12 @@ const $defaultCamera = Symbol('defaultCamera');
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
 const $changeHandler = Symbol('changeHandler');
+const $promptTransitionendHandler = Symbol('promptTransitionendHandler');
+
 const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
+const $onPromptTransitionend = Symbol('onPromptTransitionend');
 
 const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
@@ -80,7 +83,11 @@ export const ControlsMixin = (ModelViewerElement:
             {type: String, attribute: 'camera-orbit', hasChanged: () => true})
         cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
-        protected[$promptElement]: HTMLElement|null;
+        @property({type: Number, attribute: 'interaction-prompt-threshold'})
+        interactionPromptThreshold: number =
+            DEFAULT_INTERACTION_PROMPT_THRESHOLD;
+
+        protected[$promptElement]: Element;
 
         protected[$defaultCamera]: PerspectiveCamera;
         protected[$orbitCamera]: PerspectiveCamera;
@@ -98,12 +105,15 @@ export const ControlsMixin = (ModelViewerElement:
         protected[$focusHandler]: () => void = () => this[$onFocus]();
         protected[$blurHandler]: () => void = () => this[$onBlur]();
 
+        protected[$promptTransitionendHandler]:
+            () => void = () => this[$onPromptTransitionend]();
+
         constructor() {
           super();
           const scene = (this as any)[$scene];
 
           this[$promptElement] =
-              this.shadowRoot!.querySelector('.controls-prompt');
+              this.shadowRoot!.querySelector('.controls-prompt')!;
 
           this[$defaultCamera] = scene.getCamera();
           this[$orbitCamera] = this[$defaultCamera].clone();
@@ -127,12 +137,17 @@ export const ControlsMixin = (ModelViewerElement:
         connectedCallback() {
           super.connectedCallback();
 
+          this[$promptTransitionendHandler]();
+          this[$promptElement].addEventListener(
+              'transitionend', this[$promptTransitionendHandler]);
           this[$controls].addEventListener('change', this[$changeHandler]);
         }
 
         disconnectedCallback() {
           super.disconnectedCallback();
 
+          this[$promptElement].removeEventListener(
+              'transitionend', this[$promptTransitionendHandler]);
           this[$controls].removeEventListener('change', this[$changeHandler]);
         }
 
@@ -189,11 +204,13 @@ export const ControlsMixin = (ModelViewerElement:
           super[$tick](time, delta);
 
           if (this[$waitingToPromptUser]) {
-            this[$idleTime] += delta;
+            if (this.loaded) {
+              this[$idleTime] += delta;
+            }
 
-            if (this[$idleTime] > IDLE_PROMPT_THRESHOLD_MS) {
+            if (this[$idleTime] > this.interactionPromptThreshold) {
               (this as any)[$scene].canvas.setAttribute(
-                  'aria-label', IDLE_PROMPT);
+                  'aria-label', INTERACTION_PROMPT);
 
               // NOTE(cdata): After notifying users that the controls are
               // available, we flag that the user has been prompted at least
@@ -203,7 +220,7 @@ export const ControlsMixin = (ModelViewerElement:
               this[$userPromptedOnce] = true;
               this[$waitingToPromptUser] = false;
 
-              this[$promptElement]!.classList.add('visible');
+              this[$promptElement].classList.add('visible');
             }
           }
 
@@ -288,6 +305,23 @@ export const ControlsMixin = (ModelViewerElement:
           }
         }
 
+        [$onPromptTransitionend]() {
+          const svg = this[$promptElement].querySelector('svg');
+
+          if (svg == null) {
+            return;
+          }
+
+          // NOTE(cdata): We need to make sure that SVG animations are paused
+          // when the prompt is not visible, otherwise we may a significant
+          // compositing cost even while the prompt is at opacity 0.
+          if (this[$promptElement].classList.contains('visible')) {
+            svg.unpauseAnimations();
+          } else {
+            svg.pauseAnimations();
+          }
+        }
+
         [$onResize](e: Event) {
           super[$onResize](e);
           this[$updateOrbitCamera]();
@@ -324,7 +358,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$onBlur]() {
           this[$waitingToPromptUser] = false;
-          this[$promptElement]!.classList.remove('visible');
+          this[$promptElement].classList.remove('visible');
         }
 
         [$onChange]() {
