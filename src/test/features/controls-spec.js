@@ -199,13 +199,26 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('a11y', () => {
         setup(async () => {
+          element.alt = 'A 3D model of a cube';
+          element.cameraOrbit = '0 90deg auto';
           await rafPasses();
         });
+
+        test(
+            'has initial aria-label set to alt before interaction',
+            async () => {
+              const {canvas} = element[$scene];
+
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal(element.alt);
+            });
 
         test('prompts user to interact when focused', async () => {
           const {canvas} = element[$scene];
           const promptElement = element[$promptElement];
-          const originalLabel = canvas.getAttribute('aria-label');
+          const controls = element[$controls];
+
+          settleControls(controls);
 
           // NOTE(cdata): This wait time was added in order to deflake tests on
           // iOS Simulator and Android Emulator on Sauce Labs. These same test
@@ -242,57 +255,69 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.be.equal(false);
         });
 
-        test('announces camera orientation when orbiting horizontally', () => {
-          const {canvas} = element[$scene];
-          const controls = element[$controls];
+        test(
+            'announces camera orientation when orbiting horizontally',
+            async () => {
+              const {canvas} = element[$scene];
+              const controls = element[$controls];
 
-          controls.setOrbit(-Math.PI / 2.0);
-          settleControls(controls);
+              await rafPasses();
+              canvas.focus();
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage left');
+              controls.setOrbit(-Math.PI / 2.0);
+              settleControls(controls);
 
-          controls.setOrbit(Math.PI / 2.0);
-          settleControls(controls);
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage left');
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage right');
+              controls.setOrbit(Math.PI / 2.0);
+              settleControls(controls);
 
-          controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
-          settleControls(controls);
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage right');
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage back');
+              controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+              settleControls(controls);
 
-          controls.adjustOrbit(Math.PI, 0, 0);
-          settleControls(controls);
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage back');
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage front');
-        });
+              controls.adjustOrbit(Math.PI, 0, 0);
+              settleControls(controls);
 
-        test('announces camera orientation when orbiting vertically', () => {
-          const {canvas} = element[$scene];
-          const controls = element[$controls];
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage front');
+            });
 
-          controls.setOrbit(0, 0);
-          settleControls(controls);
+        test(
+            'announces camera orientation when orbiting vertically',
+            async () => {
+              const {canvas} = element[$scene];
+              const controls = element[$controls];
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage upper-front');
+              await rafPasses();
+              canvas.focus();
 
-          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-          settleControls(controls);
+              settleControls(controls);
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage front');
+              controls.setOrbit(0, 0);
+              settleControls(controls);
 
-          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-          settleControls(controls);
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage upper-front');
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.be.equal('View from stage lower-front');
-        });
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              settleControls(controls);
+
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage front');
+
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              settleControls(controls);
+
+              expect(canvas.getAttribute('aria-label'))
+                  .to.be.equal('View from stage lower-front');
+            });
       });
     });
   });

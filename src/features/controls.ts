@@ -49,6 +49,7 @@ export const IDLE_PROMPT =
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 
+const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $orbitCamera = Symbol('orbitCamera');
@@ -209,6 +210,20 @@ export const ControlsMixin = (ModelViewerElement:
           this[$controls].update(time, delta);
         }
 
+        [$deferInteractionPrompt]() {
+          // Effectively cancel the timer waiting for user interaction:
+          this[$waitingToPromptUser] = false;
+          this[$promptElement]!.classList.remove('visible');
+
+          // Implicitly there was some reason to defer the prompt. If the user
+          // has been prompted at least once already, we no longer need to
+          // prompt the user, although if they have never been prompted we
+          // should probably prompt them at least once just in case.
+          if (this[$userPromptedOnce]) {
+            this[$shouldPromptUserToInteract] = false;
+          }
+        }
+
         /**
          * Copies over the default camera's values in order to frame
          * the scene correctly.
@@ -236,40 +251,40 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$updateAria]() {
-          // Effectively cancel the timer waiting for user interaction:
-          this[$waitingToPromptUser] = false;
-          this[$promptElement]!.classList.remove('visible');
-
-          // NOTE(cdata): On change (in other words, the camera has adjusted its
-          // orbit), if the user has been prompted at least once already, we no
-          // longer need to prompt the user in the future.
-          if (this[$userPromptedOnce]) {
-            this[$shouldPromptUserToInteract] = false;
-          }
-
+          // NOTE(cdata): It is possible that we might want to record the
+          // last spherical when the label actually changed. Right now, the
+          // side-effect the current implementation is that we will only
+          // announce the first view change that occurs after the element
+          // becomes focused.
           const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
           const {theta, phi} =
               this[$controls]!.getCameraSpherical(this[$lastSpherical]);
 
-          const lastAzimuthalQuadrant =
-              (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
-          const azimuthalQuadrant =
-              (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+          const rootNode = this.getRootNode() as Document | ShadowRoot | null;
 
-          const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
-          const polarTrient = Math.floor(phi / THIRD_PI);
+          // Only change the aria-label if <model-viewer> is currently focused:
+          if (rootNode != null && rootNode.activeElement === this) {
+            const lastAzimuthalQuadrant =
+                (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) %
+                4;
+            const azimuthalQuadrant =
+                (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
 
-          if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
-              polarTrient !== lastPolarTrient) {
-            const {canvas} = (this as any)[$scene];
-            const azimuthalQuadrantLabel =
-                AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
-            const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
+            const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
+            const polarTrient = Math.floor(phi / THIRD_PI);
 
-            const ariaLabel =
-                `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
+            if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
+                polarTrient !== lastPolarTrient) {
+              const {canvas} = (this as any)[$scene];
+              const azimuthalQuadrantLabel =
+                  AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
+              const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
 
-            canvas.setAttribute('aria-label', ariaLabel);
+              const ariaLabel = `View from stage ${polarTrientLabel}${
+                  azimuthalQuadrantLabel}`;
+
+              canvas.setAttribute('aria-label', ariaLabel);
+            }
           }
         }
 
@@ -313,6 +328,7 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]() {
+          this[$deferInteractionPrompt]();
           this[$updateAria]();
           this[$needsRender]();
         }
