@@ -1,3 +1,18 @@
+/*
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 export interface ValueNode {
   type: 'value';
   value: string|number|null;
@@ -26,19 +41,13 @@ export const parseValues = (valuesString: string): Array<ValueNode> => {
       .map(valueString => parseAtomicValue(valueString));
 };
 
-const parseAtomicValue = (valueString: string): ValueNode => {
-  const value = extractValue(valueString);
-  const unit = (value != null ? valueString.replace(value, '') : null) || null;
+const parseAtomicValue = (() => {
+  const VALUE_AND_UNIT_RE =
+      /^((?:(?:#|[a-zA-Z])[a-zA-Z\d]*)|(?:-?[\d.]+))([a-zA-Z%]*)$/;
 
-  return {type: 'value', value, unit};
-};
-
-const extractValue = (() => {
-  const VALUE_RE = /^(([^-^.^0-9].*)|([-]?[0-9.]+))/;
-
-  return (inputString: string): string|null => {
-    const match = inputString.match(VALUE_RE);
-    return match ? match[0] : null;
+  return (valueString: string): ValueNode => {
+    const match = valueString.match(VALUE_AND_UNIT_RE) || [];
+    return {type: 'value', value: match[1], unit: match[2] || null};
   };
 })();
 
