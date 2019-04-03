@@ -14,7 +14,7 @@
  */
 
 import {$controls, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene, $onUserModelOrbit} from '../../model-viewer-base.js';
 import {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -360,6 +360,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                   .to.be.equal('View from stage lower-front');
             });
       });
+
     });
   });
 });

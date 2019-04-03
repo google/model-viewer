@@ -21,7 +21,7 @@ import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
-import {Constructor} from './utils.js';
+import {Constructor} from './utilities.js';
 
 type ModelViewerMixin =
     (ModelViewerElement: Constructor<ModelViewerElementBase>) =>

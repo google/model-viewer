@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
-import {Constructor, deserializeUrl} from '../utils.js';
+import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
  * Takes a URL to a USDZ file and sets the appropriate fields so that Safari

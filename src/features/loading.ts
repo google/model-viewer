@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$ariaLabel, $canvas, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {Constructor, debounce, deserializeUrl, throttle} from '../utils.js';
+import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
