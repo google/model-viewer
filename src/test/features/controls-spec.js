@@ -73,6 +73,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.src = assetPath('cube.gltf');
 
         await waitForEvent(element, 'load');
+        // NOTE(cdata): Sometimes the load event dispatches quickly enough to
+        // cause a race condition where property change occurs _after_ load.
+        // In this condition, it is possible for the controls to be "unsettled"
+        // by the time that the test begins. Awaiting for a microtask ensures
+        // that we always have time for one internal property change in the
+        // element:
+        await timePasses();
 
         settleControls(element[$controls]);
       });
@@ -105,7 +112,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             element.getCameraOrbit(), {...orbit, theta: nextTheta});
       });
 
-      test('can independently adjust pole', async () => {
+      test('can independently adjust inclination', async () => {
         const orbit = element.getCameraOrbit();
         const nextPhi = orbit.phi + 1.0;
 
