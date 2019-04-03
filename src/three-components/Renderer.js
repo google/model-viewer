@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
-import {resolveDpr} from '../utils.js';
+import {resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import TextureUtils from './TextureUtils.js';

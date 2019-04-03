@@ -15,9 +15,10 @@
 
 import {Box3, BoxBufferGeometry, Mesh, Vector3} from 'three';
 
-import {CAPPED_DEVICE_PIXEL_RATIO, clamp, deserializeUrl, resolveDpr, step} from '../utils.js';
+import {CAPPED_DEVICE_PIXEL_RATIO, clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
 
 import {timePasses} from './helpers.js';
+import timerSpec from './utilities/timer-spec';
 
 const expect = chai.expect;
 
@@ -86,4 +87,6 @@ suite('utils', () => {
       expect(clamp(2.5, 2.0, 3.0)).to.be.equal(2.5);
     });
   });
+
+  timerSpec();
 });

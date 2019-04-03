@@ -1,6 +1,6 @@
 import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
 
-import {assertIsArCandidate} from '../utils.js';
+import {assertIsArCandidate} from '../utilities.js';
 
 import Reticle from './Reticle.js';
 import Shadow from './Shadow.js';
