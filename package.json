@@ -48,8 +48,8 @@
     "serve": "ws",
     "dev": "concurrently \"npm run watch\" \"npm run serve\"",
     "watch": "cross-os x-watch",
-    "watch:non-linux": "chokidar --initial src/*.js src/**/*.js -c \"npm run build\"",
-    "watch:linux": "chokidar --polling --poll-interval=1000 --initial src/*.js src/**/*.js -c \"npm run build\"",
+    "watch:non-linux": "chokidar --initial src/*.js src/**/*.js src/*.ts src/**/*.ts -c \"npm run build\"",
+    "watch:linux": "chokidar --polling --poll-interval=1000 --initial src/*.js src/**/*.js src/*.ts src/**/*.ts -c \"npm run build\"",
     "x-watch": {
       "darwin": "npm run watch:non-linux",
       "win32": "npm run watch:non-linux",
