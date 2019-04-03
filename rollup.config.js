@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-const fs = require('fs');
 const path = require('path');
-const rollup = require('rollup');
 const resolve = require('rollup-plugin-node-resolve');
 const cleanup = require('rollup-plugin-cleanup');
 
