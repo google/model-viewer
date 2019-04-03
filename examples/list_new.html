@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; Rendering Showcase</title>
+  <title>&lt;model-viewer&gt; List of Models</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -41,28 +41,9 @@
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-  <style>
-    .grid {
-        width: 100%;
-        height: 100%;
-        display: grid;
-        grid-gap: 10px;
-        grid-template-rows: 1fr 2fr 3fr 4fr;
-        grid-template-columns: 1fr 2fr 3fr 4fr;
-    }
-    .grid model-viewer {
-        width: 100%;
-        height: 100%;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-  </style>
 </head>
 <body>
+
   <div class="sample">
     <div class="content">
 
@@ -73,18 +54,27 @@
 
       <div class="wrapper">
 
-        <div id="intro">
-          <h3>Rendering Showcase</h3>
-          <p>A &lt;model-viewer&gt; rendering quality and stress test. Checkout more tests: <a href="./list_new.html" >List of Elements</a> and <a href="./pbr_new.html">Physically Based Rendering w/ HDR Environments &amp; Radiance Maps</a>.</p>
-        </div>
-
-        <h2 class="demo-title">Demonstrates how &lt;model-viewer&gt; is capable of rendering
-        many simultaneously visible models at once</h2>
+        <h2 class="demo-title">Shows how &lt;model-viewer&gt; optimizes rendering only elements
+        that are visible in the viewport.</h2>
 
       </div>
+
     </div>
-    <div class="demo">
-      <iframe name="demo-iframe" src="./multiple-elements.html"></iframe>
+
+    <div class="demo" style="background-color: #222; flex-direction: column; height: 400vh;">
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (1 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (2 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (3 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (4 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (5 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (6 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (7 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (8 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (9 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (10 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (11 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (12 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (13 of 13)"></model-viewer>
     </div>
 
   </div>
@@ -96,6 +86,7 @@
     </div>
     <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
+
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"

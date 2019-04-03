@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,18 +24,6 @@
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
-  <style>
-    @media only screen and (max-width: 800px) {
-      #demo-container {
-        height: 450px;
-      }
-      model-viewer {
-        padding-top: 60px;
-        background-color: #222;
-      }
-    }
-  </style>
-
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
 
   <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
@@ -55,43 +43,42 @@
 
 </head>
 <body>
-
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/augmented-reality.html"></a>
-  </div>
-
   <div class="sample">
-      <div id="demo-container" class="demo">
-        <example-snippet stamp-to="demo-container" highlight-as="html">
-            <template>
-                <model-viewer src="assets/Astronaut.glb"
-                    alt="A 3D model of an astronaut"
-                    background-color="#222"
-                    ios-src="assets/Astronaut.usdz"
-                    magic-leap
-                    unstable-webxr></model-viewer>
-            </template>
-        </example-snippet>
-      </div>
+      <div id="demo-container" class="demo"></div>
       <div class="content">
+        <div id="header">
+          <a class="icon-button icon-modelviewer" href="../index.html"></a>
+          <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/augmented-reality.html"></a>
+        </div>
         <div class="wrapper">
-          <div class="center heading">
-            <h2>Augmented Reality</h2>
+          <div class="heading">
+            <h2 class="demo-title">Augmented Reality</h2>
             <h4>This demonstrates several augmented reality features, including <span class="attribute">unstable-webxr</span>, <span class="attribute">magic-leap</span> and <span class="attribute">ios-src</span>.</h4>
           </div>
-          <!-- <h4 class="">iOS, Magic Leap & WebXR</h4> -->
+
+          <example-snippet stamp-to="demo-container" highlight-as="html">
+              <template>
+                  <model-viewer src="assets/Astronaut.glb"
+                      alt="A 3D model of an astronaut"
+                      background-color="#222"
+                      ios-src="assets/Astronaut.usdz"
+                      magic-leap
+                      unstable-webxr></model-viewer>
+              </template>
+          </example-snippet>
+
+          <h3 style="margin-top: 40px;">iOS, Magic Leap & WebXR</h3>
           <ul class="list-attribute">
             <li>
-              <h4>ios-src</h4>
+              <div>ios-src</div>
               <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>
             </li>
             <li>
-              <h4>magic-leap</h4>
+              <div>magic-leap</div>
               <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
             </li>
             <li>
-              <h4>unstable-webxr</h4>
+              <div>unstable-webxr</div>
               <p>Provides augmented reality via the experimental <a href="https://immersive-web.github.io/webxr/">WebXR Device API</a>, implemented in Chrome Canary only behind flags. For more information see the <a href="https://codelabs.developers.google.com/codelabs/ar-with-webxr/#1">AR with WebXR Codelab</a>.</p>
             </li>
           </ul>
@@ -102,11 +89,10 @@
 
   <div class="footer">
     <div class="attribution">
-      Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-      (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
+      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
     </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
   <!-- Documentation-specific dependencies: -->

@@ -43,24 +43,24 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<body class="multiple-samples">
-
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/staging-and-camera-control.html"></a>
-  </div>
-
-  <div class="center intro">
-    <h2>Staging &amp; Camera Control</h2>
-    <h4>This page showcases...</h4>
-  </div>
-
+<body>
   <div class="sample">
     <div class="demo" id="demo-container-1"></div>
     <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/staging-and-camera-control.html"></a>
+      </div>
+
       <div class="wrapper">
-        <div class="index">1</div>
-        <h2>Use the <span class="attribute">camera-controls</span> attribute to enable user interaction</h2>
+
+        <div id="intro">
+          <h3>Staging &amp; Camera Control</h3>
+          <p>Use these features to frame the perfect shot for your model</p>
+        </div>
+
+        <h2 class="demo-title">Use the <span class="attribute">camera-controls</span> attribute to enable user interaction</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
             <model-viewer
@@ -78,8 +78,8 @@
     <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">2</div>
-        <h2>Set the <span class="attribute">camera-orbit</span> change the
+
+        <h2 class="demo-title">Set the <span class="attribute">camera-orbit</span> change the
         initial angle and position of the camera</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
@@ -99,8 +99,8 @@
     <div class="demo" id="demo-container-3"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">3</div>
-        <h2>The camera automatically interpolates between orbits (even when
+
+        <h2 class="demo-title">The camera automatically interpolates between orbits (even when
         controls are disabled)</h2>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
@@ -135,8 +135,8 @@
     <div class="demo" id="demo-container-4"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">4</div>
-        <h2>By default, models are aligned by the center of their bounding box</h2>
+
+        <h2 class="demo-title">By default, models are aligned by the center of their bounding box</h2>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
             <model-viewer
@@ -154,8 +154,8 @@
     <div class="demo" id="demo-container-5"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">5</div>
-        <h2>Use the <span class="attribute">align-model</span> attribute to
+
+        <h2 class="demo-title">Use the <span class="attribute">align-model</span> attribute to
         center the model at its origin</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
@@ -173,11 +173,10 @@
 
   <div class="footer">
     <div class="attribution">
-      Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-      (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
+      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
     </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
   <script src="./scripts/helpers.js"></script>
 
   <!-- Documentation-specific dependencies: -->

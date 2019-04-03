@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,26 +42,27 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<body class="multiple-samples">
-
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lazy-loading.html"></a>
-  </div>
-
-  <div class="center intro">
-    <h2>Lazy Loading</h2>
-    <h4>This page tests usages of the <span class="attribute">&lt;model-viewer&gt;</span> element using the poster attribute.</h4>
-  </div>
+<body>
 
   <div class="sample">
     <div id="demo-container-1" class="demo"></div>
     <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lazy-loading.html"></a>
+      </div>
+
       <div class="wrapper">
-        <div class="index">1</div>
-        <h2>Display poster until loaded</h2>
+
+        <div id="intro">
+          <h3>Lazy Loading</h3>
+          <p>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the <span class="attribute">&lt;model-viewer&gt;</span> element using the poster attribute.</p>
+        </div>
+
+        <h2 class="demo-title">Display poster until loaded</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
-              <template>
+          <template>
 <model-viewer id="reveal" reveal-when-loaded preload poster="assets/poster.png" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
 <script>
   $('#reveal').addEventListener('load', e => {
@@ -79,8 +80,8 @@
     <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">2</div>
-        <h2>Preload with poster and show model on interaction</h2>
+
+        <h2 class="demo-title">Preload with poster and show model on interaction</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
 <!-- use unique asset to ensure preloading -->
@@ -101,8 +102,8 @@
     <div class="demo" id="demo-container-3"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">3</div>
-        <h2>Lazy load with poster until interaction</h2>
+
+        <h2 class="demo-title">Lazy load with poster until interaction</h2>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
 <!-- use unique asset to ensure lazy loading -->
@@ -123,8 +124,8 @@ $('#lazy-load').addEventListener('load', e => {
     <div class="demo" id="demo-container-4"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">4</div>
-        <h2>Model with poster and preload</h2>
+
+        <h2 class="demo-title">Model with poster and preload</h2>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
             <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
@@ -138,8 +139,8 @@ $('#lazy-load').addEventListener('load', e => {
     <div class="demo" id="demo-container-5"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">5</div>
-        <h2>Poster with invalid model</h2>
+
+        <h2 class="demo-title">Poster with invalid model</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
               <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
@@ -153,8 +154,8 @@ $('#lazy-load').addEventListener('load', e => {
     <div class="demo" id="demo-container-6"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">6</div>
-        <h2>Cycling between posters</h2>
+
+        <h2 class="demo-title">Cycling between posters</h2>
         <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
 <model-viewer id="toggle-poster" poster="assets/poster2.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
@@ -173,18 +174,16 @@ $('#lazy-load').addEventListener('load', e => {
   <div class="footer">
     <ul>
       <li class="attribution">
-        Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-        (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
       </li>
 
       <li class="attribution">
-        Shishkebab by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        <a href="https://poly.google.com/view/6uTsH2jqgVn">Shishkebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-        (<a href="https://poly.google.com/view/6uTsH2jqgVn">source</a>)
       </li>
     </ul>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
   <script src="./scripts/helpers.js"></script>
