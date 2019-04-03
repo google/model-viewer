@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,24 +42,25 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<body class="multiple-samples">
-
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/format-support.html"></a>
-  </div>
-
-  <div class="center intro">
-    <h2>Model Formats</h2>
-    <h4>This page tests configurations of the model source.</h4>
-  </div>
+<body>
 
   <div class="sample">
     <div class="demo" id="demo-container-1"></div>
     <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/format-support.html"></a>
+      </div>
+
       <div class="wrapper">
-        <div class="index">1</div>
-        <h2>With a glTF model</h2>
+
+        <div id="intro">
+          <h3>Model Formats</h2>
+          <p>Learn how model formats work on different platforms. This page tests configurations of the model source.</p>
+        </div>
+
+        <h2 class="demo-title">With a glTF model</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
 <model-viewer
@@ -77,8 +78,8 @@
     <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">2</div>
-        <h2>With a GLB model</h2>
+
+        <h2 class="demo-title">With a GLB model</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
 <model-viewer
@@ -96,9 +97,9 @@
     <div class="demo" id="demo-container-3" style="background: #ccc;"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">3</div>
-        <h2>With only a USDZ model</h2>
-        <h4 class="center">Note that this won't display a model (as that requires a glTF or GLB), but could be used with <span class="attribute">poster</span> to show a static image and the icon to enter augmented reality mode</h4>
+
+        <h2 class="demo-title">With only a USDZ model</h2>
+        <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with <span class="attribute">poster</span> to show a static image and the icon to enter augmented reality mode</h4>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
 <model-viewer
@@ -116,9 +117,9 @@
     <div class="demo" id="demo-container-4" style="background: #ccc;"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">4</div>
-        <h2>With no model</h2>
-        <h4 class="center">There's nothing to show, but also no error</h4>
+
+        <h2 class="demo-title">With no model</h2>
+        <h4>There's nothing to show, but also no error</h4>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
 <model-viewer
@@ -136,8 +137,8 @@
     <div class="demo" id="demo-container-5"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">5</div>
-        <h2>Cycling between different models</h2>
+
+        <h2 class="demo-title">Cycling between different models</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
 <model-viewer id="toggle-model" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab" background-color="#222" camera-controls auto-rotate></model-viewer>
@@ -154,11 +155,10 @@
 
   <div class="footer">
     <div class="attribution">
-      Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
-      (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
+      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
     </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
   </div>
 
   <script src="./scripts/helpers.js"></script>

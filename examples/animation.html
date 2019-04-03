@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,25 +43,25 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<body class="multiple-samples">
-
-  <div id="header">
-    <a class="icon-button icon-return" href="../index.html"></a>
-    <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lighting-and-environment.html"></a>
-  </div>
-
-  <div class="center intro">
-    <h2>Animation</h2>
-    <h4>This page showcases how you can control models with animations</h4>
-  </div>
+<body>
 
   <div class="sample">
     <div class="demo" id="demo-container-1"></div>
     <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lighting-and-environment.html"></a>
+      </div>
+
       <div class="wrapper">
-        <div class="index">1</div>
-        <h2>Automatically play animations with the
-          <span class="attribute">autoplay</span> attribute</h2>
+
+        <div id="intro">
+          <h3>Animation</h3>
+          <p>Use &lt;model-viewer&gt; to show off your animated models. This page showcases how you can control models with animations</p>
+        </div>
+
+        <h2 class="demo-title">Automatically play animations with the<span class="attribute">autoplay</span> attribute</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
             <model-viewer
@@ -80,8 +80,8 @@
     <div class="demo" id="demo-container-2"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">2</div>
-        <h2>Select a specific animation with <span class="attribute">animation-name</span></h2>
+
+        <h2 class="demo-title">Select a specific animation with <span class="attribute">animation-name</span></h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
             <model-viewer
@@ -101,8 +101,8 @@
     <div class="demo" id="demo-container-3"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">3</div>
-        <h2>Animations crossfade when you change them</h2>
+
+        <h2 class="demo-title">Animations crossfade when you change them</h2>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
             <model-viewer
@@ -134,8 +134,8 @@
     <div class="demo" id="demo-container-4"></div>
     <div class="content">
       <div class="wrapper">
-        <div class="index">4</div>
-        <h2>A paused model shows the first frame of the configured animation</h2>
+
+        <h2 class="demo-title">A paused model shows the first frame of the configured animation</h2>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
             <model-viewer
@@ -163,11 +163,10 @@
 
   <div class="footer">
     <div class="attribution">
-      RobotExpressive by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-      licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>
-      (<a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">source</a>)
+      <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+      licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
     </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
 
   <script src="./scripts/helpers.js"></script>
 

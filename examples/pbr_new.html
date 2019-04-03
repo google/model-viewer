@@ -41,60 +41,83 @@
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-<style>
-.sample {
-  grid-template-columns: 100%;
-}
-.demo {
-  grid-area: unset;
-  height: 600px;
-}
 
-.demo pre {
-  width: calc(100% - 32px);
-}
-</style>
 </head>
 <body>
 
-  <div id="intro">
-    <h4>These examples of <span class="attribute">&lt;model-viewer&gt;</span>
-    use high-resolution models with multiple maps (normal, ambient occlusion,
-    bump) with physically-based materials, and HDR environment maps.</h4>
-  </div>
+  <div class="sample">
+    <div class="content">
 
-    <div class="sample">
-      <div class="demo" id="demo-container-1">
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/rendering-showcase.html"></a>
+      </div>
+
+      <div class="wrapper">
+
+        <h2 class="demo-title"><span class="attribute">&lt;model-viewer&gt;</span>
+        use high-resolution models with multiple maps (normal, ambient occlusion,
+        bump) with physically-based materials, and HDR environment maps.</h2>
+
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer
+  <model-viewer
     src="assets/DamagedHelmet/DamagedHelmet.gltf"
     alt="A 3D model of a damaged helmet depicted within a hangar"
     camera-controls auto-rotate
     experimental-pmrem
     background-image="assets/aircraft_workshop_01_4k.hdr">
-</model-viewer>
+  </model-viewer>
           </template>
         </example-snippet>
+
       </div>
+
     </div>
 
-    <div class="sample">
-      <div class="demo" id="demo-container-2">
+    <div class="demo" id="demo-container-1"></div>
+
+  </div>
+
+  <div class="sample">
+    <div class="content">
+      <div class="wrapper">
+
+        <h2 class="demo-title"><span class="attribute">&lt;model-viewer&gt;</span>
+        use high-resolution models with multiple maps (normal, ambient occlusion,
+        bump) with physically-based materials, and HDR environment maps.</h2>
+
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-<model-viewer
-    src="assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf"
-    alt="A 3D model of a rubber duck depicted on a pier"
-    camera-controls auto-rotate
-    experimental-pmrem
-    background-image="assets/music_hall_01_4k.hdr">
-</model-viewer>
-          </template>
-        </example-snippet>
+    <model-viewer
+      src="assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf"
+      alt="A 3D model of a rubber duck depicted on a pier"
+      camera-controls auto-rotate
+      experimental-pmrem
+      background-image="assets/music_hall_01_4k.hdr">
+    </model-viewer>
+            </template>
+          </example-snippet>
+
+        </div>
       </div>
+      <div class="demo" id="demo-container-2"></div>
     </div>
 
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BarramundiFish">Antique Camera</a> by <a href="https://www.ux3d.io/">UX3D</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC-0</a>
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under Creative Commons Attribution-NonCommercial
+        </li>
+      </ul>
+      <div class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
+    </div>
 
     <script src="./scripts/helpers.js"></script>
 
