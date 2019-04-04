@@ -13,13 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, CubeCamera, EventDispatcher, Mesh, MeshBasicMaterial, PlaneBufferGeometry, PointLight, Scene, Vector3} from 'three';
-
-import Sky from '../third_party/three/Sky.js';
-
-import {assertContext} from './WebGLUtils.js';
-
-const SKYSPHERE_SIZE = 10000;
+import {CubeCamera, EventDispatcher, BoxBufferGeometry, MeshBasicMaterial, MeshStandardMaterial, BackSide, Mesh, PointLight, Scene} from 'three';
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   constructor(renderer) {
@@ -27,31 +21,87 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.renderer = renderer;
     this.scene = new Scene();
 
-    const gl = assertContext(this.renderer.getContext());
+    this.maxMapSize = 256;
 
-    this.maxMapSize = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
+    const geometry = new BoxBufferGeometry();
 
-    // Values generated from sky demo
-    // @see https://threejs.org/examples/webgl_shaders_sky.html
-    const distance = 400;
-    const theta = Math.PI * (0.45 - 0.5);
-    const phi = 2 * Math.PI * (.005 - 0.5);
-    const sunPosition = new Vector3().set(
-        distance * Math.cos(phi),
-        distance * Math.sin(phi) * Math.sin(theta),
-        distance * Math.sin(phi) * Math.cos(theta));
+    const material1 = new MeshStandardMaterial({roughness: 1, metalness: 0, side: BackSide});
+    const material2 = new MeshStandardMaterial({roughness: 1, metalness: 0});
+    const material3 = new MeshBasicMaterial();
 
-    this.sky = new Sky();
-    this.sky.scale.multiplyScalar(SKYSPHERE_SIZE);
-    this.sky.material.uniforms.luminance.value = 0.1;
-    this.sky.material.uniforms.turbidity.value = 1;
-    this.sky.material.uniforms.rayleigh.value = 0.2;
-    this.sky.material.uniforms.mieCoefficient.value = 0.056;
-    this.sky.material.uniforms.mieDirectionalG.value = 0.8;
-    this.sky.material.uniforms.sunPosition.value = sunPosition;
-    this.scene.add(this.sky);
+    //
 
-    this.camera = new CubeCamera(1, SKYSPHERE_SIZE * 3, this.maxMapSize);
+    const light = new PointLight(0xffffff,9.0,30);
+    light.position.set(0.418, 16.199, 0.300);
+    this.scene.add(light);
+
+    const room = new Mesh(geometry,material1);
+    room.position.set(-0.757, 13.219, 0.717);
+    room.scale.set(31.713, 28.305, 28.591);
+    this.scene.add(room);
+
+    const box1 = new Mesh(geometry,material2);
+    box1.position.set(-10.906, 2.009, 1.846);
+    box1.rotation.set(0,-0.195,0);
+    box1.scale.set(2.328, 7.905, 4.651);
+    this.scene.add(box1);
+
+    const box2 = new Mesh(geometry,material2);
+    box2.position.set(-5.607, -0.754, -0.758);
+    box2.rotation.set(0,0.994,0);
+    box2.scale.set(1.970, 1.534, 3.955);
+    this.scene.add(box2);
+
+    const box3 = new Mesh(geometry,material2);
+    box3.position.set(6.167, 0.857, 7.803);
+    box3.rotation.set(0,0.561,0);
+    box3.scale.set(3.927, 6.285, 3.687);
+    this.scene.add(box3);
+
+    const box4 = new Mesh(geometry,material2);
+    box4.position.set(-2.017, 0.018, 6.124);
+    box4.rotation.set(0,0.333,0);
+    box4.scale.set(2.002, 4.566, 2.064);
+    this.scene.add(box4);
+
+    const box5 = new Mesh(geometry,material2);
+    box5.position.set(2.291, -0.756, -2.621);
+    box5.rotation.set(0,-0.286,0);
+    box5.scale.set(1.546, 1.552, 1.496);
+    this.scene.add(box5);
+
+    const box6 = new Mesh(geometry,material2);
+    box6.position.set(-2.193, -0.369, -5.547);
+    box6.rotation.set(0,0.516,0);
+    box6.scale.set(3.875, 3.487, 2.986);
+    this.scene.add(box6);
+
+    const light1 = new Mesh(geometry,material3);
+    light1.position.set(-1.509, 19.227, 0.429);
+    light1.scale.set(7.268, 0.1, 7.851);
+    this.scene.add(light1);
+
+    const light2 = new Mesh(geometry,material3);
+    light2.position.set(-16.001, 13.499, -4.222);
+    light2.scale.set(0.1, 2.865, 4.53);
+    this.scene.add(light2);
+
+    const light3 = new Mesh(geometry,material3);
+    light3.position.set(14.527, 8.424, 0.489);
+    light3.scale.set(0.1, 6.325, 5.871);
+    this.scene.add(light3);
+
+    const light4 = new Mesh(geometry,material3);
+    light4.position.set(7.221, 12.760, 14.063);
+    light4.scale.set(3.78, 2.485, 0.1);
+    this.scene.add(light4);
+
+    const light5 = new Mesh(geometry,material3);
+    light5.position.set(-1.820, 10.209, -11.999);
+    light5.scale.set(6.38, 4.245, 0.15);
+    this.scene.add(light5);
+
+    this.camera = new CubeCamera(0.1, 100, this.maxMapSize);
   }
 
   /**
