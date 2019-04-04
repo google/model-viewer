@@ -116,4 +116,28 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       });
     });
   });
+
+  suite('without a loaded model', () => {
+    setup(async () => {
+      element = new ModelViewerElement();
+      document.body.appendChild(element);
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
+    suite('auto-rotate', () => {
+      setup(() => {
+        element.autoRotate = true;
+      });
+
+      test('does not cause the model root to rotate over time', async () => {
+        const {turntableRotation} = element;
+        await timePasses(50);  // An arbitrary amount of time, greater than one
+                               // rAF though
+        expect(element.turntableRotation).to.be.equal(turntableRotation);
+      });
+    });
+  });
 });
