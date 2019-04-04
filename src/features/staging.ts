@@ -84,7 +84,7 @@ export const StagingMixin = (ModelViewerElement:
         [$tick](time: number, delta: number) {
           super[$tick](time, delta);
 
-          if (this.autoRotate) {
+          if (this.autoRotate && (this as any)[$scene].model.hasModel()) {
             (this as any)[$scene].pivot.rotation.y +=
                 ROTATION_SPEED * delta * 0.001;
             this[$needsRender]();
