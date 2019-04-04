@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google Inc. All Rights Reserved.
+ * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,6 +250,8 @@ model-viewer:focus {
   border: 0px solid #555;
   box-sizing: border-box;
 }
+
+
 .demo-title {
   padding: var(--demo-title-padding);
 }
@@ -539,6 +541,11 @@ paper-button {
     font-size: 1em;
     line-height: 1.5em;
   }
+
+  body.single-example .demo-title {
+    transform: translate3d(0,-36px,0);
+  }
+
   .grouping-title {
     font-weight: 500;
   }
