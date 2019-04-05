@@ -88,6 +88,8 @@ const $upQuaternionInverse = Symbol('upQuaternionInverse');
 const $spherical = Symbol('spherical');
 const $targetSpherical = Symbol('targetSpherical');
 const $clampedTargetSpherical = Symbol('clampedTargetSpherical');
+const $minOverSpherical = Symbol('minOverSpherical');
+const $maxOverSpherical = Symbol('maxOverSpherical');
 const $velocity = Symbol('velocity');
 const $dampeningFactor = Symbol('dampeningFactor');
 const $touchMode = Symbol('touchMode');
@@ -105,6 +107,7 @@ const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
 const $positionToSpherical = Symbol('positionToSpherical');
 const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
+const $calculateOverSphericals = Symbol('calculateOverSphericals');
 
 // Event handlers
 const $onMouseMove = Symbol('onMouseMove');
@@ -168,6 +171,8 @@ export class SmoothControls extends EventDispatcher {
   private[$spherical]: Spherical = new Spherical();
   private[$targetSpherical]: Spherical = new Spherical();
   private[$clampedTargetSpherical]: Spherical = new Spherical();
+  private[$minOverSpherical]: Spherical = new Spherical();
+  private[$maxOverSpherical]: Spherical = new Spherical();
   private[$previousPosition]: Vector3 = new Vector3();
 
   private[$pointerIsDown]: boolean = false;
@@ -295,6 +300,8 @@ export class SmoothControls extends EventDispatcher {
     // changed (preserving OrbitalControls behavior):
     this[$targetSpherical].copy(this[$clampedTargetSpherical]);
     this[$spherical].copy(this[$targetSpherical]);
+
+    this[$calculateOverSphericals]();
   }
 
   /**
@@ -316,23 +323,9 @@ export class SmoothControls extends EventDispatcher {
       maximumPolarAngle,
       minimumRadius,
       maximumRadius,
-      overRotateAmount,
     } = this[$options];
 
     const {theta, phi, radius} = this[$targetSpherical];
-
-    const minOverRotatePolar = (0 - minimumPolarAngle!) * overRotateAmount! + minimumPolarAngle!;
-    const maxOverRotatePolar = (Math.PI - maximumPolarAngle!) * overRotateAmount! + maximumPolarAngle!;
-    let minOverRotateAzimuthal = minimumAzimuthalAngle!;
-    let maxOverRotateAzimuthal = maximumAzimuthalAngle!; 
-
-    if (minimumAzimuthalAngle! > -Math.PI) {
-      minOverRotateAzimuthal = (minimumAzimuthalAngle! - Math.PI) * overRotateAmount! + minimumAzimuthalAngle!;
-    }
-
-    if (maximumAzimuthalAngle! < Math.PI) {
-      maxOverRotateAzimuthal = (Math.PI - maximumAzimuthalAngle!) * overRotateAmount! + maximumAzimuthalAngle!;
-    }
 
     this[$clampedTargetSpherical].theta = clamp(
       targetTheta,
@@ -351,8 +344,8 @@ export class SmoothControls extends EventDispatcher {
     );
     this[$clampedTargetSpherical].makeSafe();
 
-    const nextTheta = clamp(targetTheta, minOverRotateAzimuthal, maxOverRotateAzimuthal);
-    const nextPhi = clamp(targetPhi, minOverRotatePolar, maxOverRotatePolar);
+    const nextTheta = clamp(targetTheta, this[$minOverSpherical].theta, this[$maxOverSpherical].theta);
+    const nextPhi = clamp(targetPhi, this[$minOverSpherical].phi, this[$maxOverSpherical].phi);
     const nextRadius = this[$clampedTargetSpherical].radius;
 
     if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
@@ -638,5 +631,42 @@ export class SmoothControls extends EventDispatcher {
         event.cancelable) {
       event.preventDefault();
     }
+  }
+
+  [$calculateOverSphericals]() {
+    const {
+      minimumAzimuthalAngle,
+      maximumAzimuthalAngle,
+      minimumPolarAngle,
+      maximumPolarAngle,
+      minimumRadius,
+      maximumRadius,
+      overRotateAmount,
+    } = this[$options];
+
+    const minOverRotatePolar = (0 - minimumPolarAngle!) * overRotateAmount! + minimumPolarAngle!;
+    const maxOverRotatePolar = (Math.PI - maximumPolarAngle!) * overRotateAmount! + maximumPolarAngle!;
+    let minOverRotateAzimuthal = minimumAzimuthalAngle!;
+    let maxOverRotateAzimuthal = maximumAzimuthalAngle!; 
+
+    if (minimumAzimuthalAngle! > -Math.PI) {
+      minOverRotateAzimuthal = (minimumAzimuthalAngle! - Math.PI) * overRotateAmount! + minimumAzimuthalAngle!;
+    }
+
+    if (maximumAzimuthalAngle! < Math.PI) {
+      maxOverRotateAzimuthal = (Math.PI - maximumAzimuthalAngle!) * overRotateAmount! + maximumAzimuthalAngle!;
+    }
+
+    this[$minOverSpherical].set(
+      minimumRadius!,
+      minOverRotatePolar,
+      minOverRotateAzimuthal,
+    );
+
+    this[$maxOverSpherical].set(
+      maximumRadius!,
+      maxOverRotatePolar,
+      maxOverRotateAzimuthal,
+    );
   }
 }
