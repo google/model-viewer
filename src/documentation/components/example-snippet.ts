@@ -53,6 +53,8 @@ export class ExampleSnippet extends UpdatingElement {
   highlightAs: string = 'markup';
   @property({type: Boolean, attribute: 'lazy'}) lazy: boolean = false;
   @property({type: Boolean}) preserveWhitespace: boolean = false;
+  @property({type: Boolean, attribute: 'inert-script'})
+  inertScript: boolean = false;
 
   readonly stamped: boolean = false;
 
@@ -78,7 +80,14 @@ export class ExampleSnippet extends UpdatingElement {
       }
 
       const {template, highlightAs} = this;
-      const content = template.content.cloneNode(true);
+      const content = template.content.cloneNode(true) as DocumentFragment;
+
+      if (this.inertScript) {
+        const scripts = Array.from(content.querySelectorAll('script'));
+        for (const script of scripts) {
+          script.parentNode!.removeChild(script);
+        }
+      }
 
       parentNode.appendChild(content);
 
