@@ -13,7 +13,21 @@
  * limitations under the License.
  */
 
-import {CubeCamera, EventDispatcher, BoxBufferGeometry, MeshBasicMaterial, MeshStandardMaterial, BackSide, Mesh, PointLight, Scene} from 'three';
+import {
+  BackSide,
+  BoxBufferGeometry,
+  CubeCamera,
+  EventDispatcher,
+  FloatType,
+  Group,
+  LinearToneMapping,
+  LinearMipMapLinearFilter,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  PointLight,
+  Scene
+} from 'three';
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   constructor(renderer) {
@@ -21,17 +35,18 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.renderer = renderer;
     this.scene = new Scene();
 
-    this.maxMapSize = 256;
+    // Scene
 
     const geometry = new BoxBufferGeometry();
 
     const material1 = new MeshStandardMaterial({roughness: 1, metalness: 0, side: BackSide});
     const material2 = new MeshStandardMaterial({roughness: 1, metalness: 0});
     const material3 = new MeshBasicMaterial();
+    material3.color.setRGB(10,10,10);
 
     //
 
-    const light = new PointLight(0xffffff,9.0,30);
+    const light = new PointLight(0xffffff,50,30);
     light.position.set(0.418, 16.199, 0.300);
     this.scene.add(light);
 
@@ -101,7 +116,11 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     light5.scale.set(6.38, 4.245, 0.15);
     this.scene.add(light5);
 
-    this.camera = new CubeCamera(0.1, 100, this.maxMapSize);
+    this.camera = new CubeCamera(0.1, 100, 256);
+    this.camera.renderTarget.texture.type = FloatType;
+    this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
+    this.camera.renderTarget.texture.generateMipmaps = true;
+
   }
 
   /**
@@ -109,11 +128,22 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
    *
    * @param {number} mapSize
    */
-  generate(mapSize) {
-    mapSize = Math.min(mapSize, this.maxMapSize);
-    this.camera.renderTarget.setSize(mapSize, mapSize);
+  generate() {
     this.camera.clear(this.renderer);
+
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
+
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
+
     this.camera.update(this.renderer, this.scene);
+
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
 
     return this.camera.renderTarget.texture;
   }

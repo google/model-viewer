@@ -34,7 +34,6 @@ const $cubeGenerator = Symbol('cubeGenerator');
 
 const defaultConfig = {
   cubemapSize: 1024,
-  synthesizedEnvmapSize: 256,
   pmremSamples: 32,
   pmremSize: 256,
   defaultEnvironmentPmremSamples: 8,
@@ -55,7 +54,6 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize
-   * @param {?number} config.synthesizedEnvmapSize
    * @param {?number} config.pmremSamples
    * @param {?number} config.pmremSize
    */
@@ -214,8 +212,7 @@ export default class TextureUtils extends EventDispatcher {
           // Otherwise, no skybox URL was specified, so fall back to generating
           // the environment:
           // TODO(#336): can cache this per renderer and color
-          environmentMap = this.environmentMapGenerator.generate(
-              this.config.synthesizedEnvmapSize);
+          environmentMap = this.environmentMapGenerator.generate();
           environmentMapWasGenerated = true;
         }
       }
