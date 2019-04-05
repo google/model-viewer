@@ -84,6 +84,7 @@ const $upQuaternion = Symbol('upQuaternion');
 const $upQuaternionInverse = Symbol('upQuaternionInverse');
 const $spherical = Symbol('spherical');
 const $targetSpherical = Symbol('targetSpherical');
+const $clampedTargetSpherical = Symbol('clampedTargetSpherical');
 const $velocity = Symbol('velocity');
 const $dampeningFactor = Symbol('dampeningFactor');
 const $touchMode = Symbol('touchMode');
@@ -163,6 +164,7 @@ export class SmoothControls extends EventDispatcher {
   private[$upQuaternionInverse]: Quaternion = new Quaternion();
   private[$spherical]: Spherical = new Spherical();
   private[$targetSpherical]: Spherical = new Spherical();
+  private[$clampedTargetSpherical]: Spherical = new Spherical();
   private[$previousPosition]: Vector3 = new Vector3();
 
   private[$pointerIsDown]: boolean = false;
@@ -210,6 +212,7 @@ export class SmoothControls extends EventDispatcher {
     this[$previousPosition].copy(this.camera.position);
     this[$positionToSpherical](this.camera.position, this[$spherical]);
     this[$targetSpherical].copy(this[$spherical]);
+    this[$clampedTargetSpherical].copy(this[$targetSpherical]);
 
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
 
@@ -287,6 +290,7 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit();
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
+    this[$targetSpherical].copy(this[$clampedTargetSpherical]);
     this[$spherical].copy(this[$targetSpherical]);
   }
 
@@ -312,19 +316,31 @@ export class SmoothControls extends EventDispatcher {
     } = this[$options];
 
     const {theta, phi, radius} = this[$targetSpherical];
+    
+    this[$clampedTargetSpherical].theta = clamp(
+      targetTheta,
+      minimumAzimuthalAngle!,
+      maximumAzimuthalAngle!
+    );
+    this[$clampedTargetSpherical].phi = clamp(
+      targetPhi,
+      minimumPolarAngle!,
+      maximumPolarAngle!
+    );
+    this[$clampedTargetSpherical].radius = clamp(
+      targetRadius,
+      minimumRadius!,
+      maximumRadius!
+    );
+    this[$clampedTargetSpherical].makeSafe();
 
-    const nextTheta =
-        clamp(targetTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
-    const nextPhi = clamp(targetPhi, minimumPolarAngle!, maximumPolarAngle!);
-    const nextRadius = clamp(targetRadius, minimumRadius!, maximumRadius!);
-
-    if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
+    if (targetTheta === theta && targetPhi === phi && this[$clampedTargetSpherical].radius === radius) {
       return false;
     }
 
-    this[$targetSpherical].theta = nextTheta;
-    this[$targetSpherical].phi = nextPhi;
-    this[$targetSpherical].radius = nextRadius;
+    this[$targetSpherical].theta = targetTheta;
+    this[$targetSpherical].phi = targetPhi;
+    this[$targetSpherical].radius = this[$clampedTargetSpherical].radius;
     this[$targetSpherical].makeSafe();
 
     return true;
@@ -541,6 +557,11 @@ export class SmoothControls extends EventDispatcher {
   private[$handlePointerUp](_event: MouseEvent|TouchEvent) {
     this.element.style.cursor = 'grab';
     this[$pointerIsDown] = false;
+    this.setOrbit(
+      this[$clampedTargetSpherical].theta,
+      this[$clampedTargetSpherical].phi,
+      this[$clampedTargetSpherical].radius
+    );
   }
 
   private[$handleWheel](event: Event) {
