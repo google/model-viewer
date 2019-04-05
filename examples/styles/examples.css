@@ -234,8 +234,8 @@ model-viewer:focus {
   grid-template-columns: 50% 50%;
   grid-template-areas: "content demo";
 }
-.sample:nth-child(2n) .content {
-  background: #fafafa;
+.sample {
+  border-bottom: var(--border-style);
 }
 
 .demo {
@@ -378,14 +378,15 @@ paper-button {
 }
 
 #list-example {
-  padding-left: 20px;
-  margin-top: 16px;
+  padding-left: 0px;
+  margin-top: 22px;
   margin-left: 0px;
   margin-bottom: 60px;
   grid-template-columns: 1fr 1fr;
   display: grid;
   grid-column-gap: 20px;
   grid-row-gap: 10px;
+  list-style: none;
 }
 #list-example li {
   padding-right: 20px;
@@ -396,8 +397,8 @@ paper-button {
 }
 #list-example a {
   margin: 0;
-  color: #222;
-  text-decoration: underline;
+  /* color: #222; */
+  /* text-decoration: underline; */
 }
 
 
