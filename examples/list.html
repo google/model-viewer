@@ -41,30 +41,52 @@
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
-<style>
-model-viewer {
-  width: 50%;
-  margin: 0 auto;
-}
-</style>
 </head>
 <body>
 
-  <div class="demo" style="background-color: #222; flex-direction: column; height: 400vh;">
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (1 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (2 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (3 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (4 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (5 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (6 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (7 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (8 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (9 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (10 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (11 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (12 of 13)"></model-viewer>
-    <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (13 of 13)"></model-viewer>
+  <div class="sample">
+    <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/rendering-showcase.html"></a>
+      </div>
+
+      <div class="wrapper">
+
+        <h2 class="demo-title">Shows how &lt;model-viewer&gt; optimizes rendering only elements
+        that are visible in the viewport.</h2>
+
+      </div>
+
+    </div>
+
+    <div class="demo" style="background-color: #222; flex-direction: column; height: 400vh;">
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (1 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (2 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (3 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (4 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (5 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (6 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (7 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (8 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (9 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (10 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (11 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (12 of 13)"></model-viewer>
+      <model-viewer auto-rotate background-color="#222" src="assets/Astronaut.glb" alt="A 3D model of an astronaut (13 of 13)"></model-viewer>
+    </div>
+
   </div>
+
+  <div class="footer">
+    <div class="attribution">
+      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+    </div>
+    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+  </div>
+
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"

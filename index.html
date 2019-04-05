@@ -40,46 +40,6 @@
 
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
-
-<!-- <style>
-@keyframes bounce {
-  20% {
-    transform: translateY(-2.5px) rotate(45deg);
-  }
-  35% {
-    transform: translateY(2.5px) rotate(45deg);
-  }
-  50% {
-    transform: translateY(-2.5px) rotate(45deg);
-  }
-  65% {
-    transform: translateY(2.5px) rotate(45deg);
-  }
-  80% {
-    transform: translateY(-2.5px) rotate(45deg);
-  }
-}
-
-@media only screen and (max-width: 800px) {
-
-  .demo example-snippet > pre {
-    margin-bottom: 50px;
-  }
-
-  .demo example-snippet > i {
-    display: block;
-    width: 10px;
-    height: 10px;
-    margin: 20px;
-    border-style: solid;
-    border-color: #ff5252;
-    border-width: 0 4px 4px 0px;
-    transform: translateY(-2.5px) rotate(45deg);
-    animation: bounce 2s infinite;
-  }
-}
-
-</style> -->
 </head>
 <body>
 
@@ -100,7 +60,7 @@
           <h3 style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
         </div>
 
-        <example-snippet stamp-to="demo-container" highlight-as="html">
+        <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
           <template>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
 <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
@@ -111,7 +71,6 @@
   camera-controls
   background-color="#455A64"></model-viewer>
           </template>
-          <i></i>
         </example-snippet>
 
         <h3 class="grouping-title border-bottom">Examples</h3>
@@ -121,7 +80,6 @@
           <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
           <li><a href="examples/lazy-loading.html"><h4>Lazy Loading</h4></a></li>
           <li><a href="examples/format-support.html"><h4>Format Support</h4></a></li>
-          <!-- <li><a href="examples/rendering-showcase.html"><h4>Rendering Showcase</h4></a></li> -->
           <li><a href="examples/animation.html"><h4>Animation</h4></a></li>
         </ul>
 
