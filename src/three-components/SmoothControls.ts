@@ -60,7 +60,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   decelerationMargin: 0.25,
   acceleration: 0.15,
   dampeningScale: 0.5,
-  overRotateAmount: 0.5,
+  overRotateAmount: 1,
   eventHandlingBehavior: 'prevent-all',
   interactionPolicy: 'allow-when-focused'
 });
@@ -369,8 +369,27 @@ export class SmoothControls extends EventDispatcher {
     const {theta, phi, radius} = this[$targetSpherical];
 
     const targetTheta = theta - deltaTheta;
-    const targetPhi = phi - deltaPhi;
+    let targetPhi = phi - deltaPhi;
     const targetRadius = radius + deltaRadius;
+
+    const {
+      // minimumAzimuthalAngle: minTheta,
+      // maximumAzimuthalAngle: maxTheta,
+      minimumPolarAngle: minPhi,
+      maximumPolarAngle: maxPhi,
+    } = this[$options];
+
+    let phiScale = 1;
+
+    if (targetPhi < minPhi!) {
+      phiScale = 1 - Math.min((targetPhi - minPhi!) / (this[$minOverSpherical].phi - minPhi!), 1);
+    }
+
+    if (targetPhi > maxPhi!) {
+      phiScale = 1 - Math.min((targetPhi - maxPhi!) / (this[$maxOverSpherical].phi - maxPhi!), 1);
+    }
+
+    targetPhi = phi - deltaPhi * phiScale;
 
     return this.setOrbit(targetTheta, targetPhi, targetRadius);
   }
