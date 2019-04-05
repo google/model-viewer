@@ -42,6 +42,8 @@ export interface SmoothControlsOptions {
   // A scalar in 0..1 that changes the dampening factor, corresponding to
   // factors from 0.05..0.3
   dampeningScale?: number;
+  // a percentage representing how much the model can be rotated beyond max min angles
+  overRotateAmount?: number;
   // Controls when events will be cancelled (always, or only when handled)
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
@@ -58,6 +60,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   decelerationMargin: 0.25,
   acceleration: 0.15,
   dampeningScale: 0.5,
+  overRotateAmount: 0.5,
   eventHandlingBehavior: 'prevent-all',
   interactionPolicy: 'allow-when-focused'
 });
@@ -312,11 +315,25 @@ export class SmoothControls extends EventDispatcher {
       minimumPolarAngle,
       maximumPolarAngle,
       minimumRadius,
-      maximumRadius
+      maximumRadius,
+      overRotateAmount,
     } = this[$options];
 
     const {theta, phi, radius} = this[$targetSpherical];
-    
+
+    const minOverRotatePolar = (0 - minimumPolarAngle!) * overRotateAmount! + minimumPolarAngle!;
+    const maxOverRotatePolar = (Math.PI - maximumPolarAngle!) * overRotateAmount! + maximumPolarAngle!;
+    let minOverRotateAzimuthal = minimumAzimuthalAngle!;
+    let maxOverRotateAzimuthal = maximumAzimuthalAngle!; 
+
+    if (minimumAzimuthalAngle! > -Math.PI) {
+      minOverRotateAzimuthal = (minimumAzimuthalAngle! - Math.PI) * overRotateAmount! + minimumAzimuthalAngle!;
+    }
+
+    if (maximumAzimuthalAngle! < Math.PI) {
+      maxOverRotateAzimuthal = (Math.PI - maximumAzimuthalAngle!) * overRotateAmount! + maximumAzimuthalAngle!;
+    }
+
     this[$clampedTargetSpherical].theta = clamp(
       targetTheta,
       minimumAzimuthalAngle!,
@@ -334,13 +351,17 @@ export class SmoothControls extends EventDispatcher {
     );
     this[$clampedTargetSpherical].makeSafe();
 
-    if (targetTheta === theta && targetPhi === phi && this[$clampedTargetSpherical].radius === radius) {
+    const nextTheta = clamp(targetTheta, minOverRotateAzimuthal, maxOverRotateAzimuthal);
+    const nextPhi = clamp(targetPhi, minOverRotatePolar, maxOverRotatePolar);
+    const nextRadius = this[$clampedTargetSpherical].radius;
+
+    if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
       return false;
     }
 
-    this[$targetSpherical].theta = targetTheta;
-    this[$targetSpherical].phi = targetPhi;
-    this[$targetSpherical].radius = this[$clampedTargetSpherical].radius;
+    this[$targetSpherical].theta = nextTheta;
+    this[$targetSpherical].phi = nextPhi;
+    this[$targetSpherical].radius = nextRadius;
     this[$targetSpherical].makeSafe();
 
     return true;
