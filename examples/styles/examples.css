@@ -367,7 +367,6 @@ code {
 paper-button {
   margin-top: 16px;
   font-weight: 500;
-  /* color: #ff5252; */
   text-transform: uppercase;
   padding: 7px 11px 6px 0px;
   border-radius: 2px;
@@ -397,8 +396,6 @@ paper-button {
 }
 #list-example a {
   margin: 0;
-  /* color: #222; */
-  /* text-decoration: underline; */
 }
 
 
@@ -544,6 +541,10 @@ paper-button {
     line-height: 1.5em;
   }
 
+  .heading {
+    margin-top: -12px;
+  }
+
   body.single-example .demo-title {
     transform: translate3d(0,-36px,0);
   }
@@ -556,7 +557,7 @@ paper-button {
   }
   .demo {
     position: relative;
-    height: 80vh;
+    height: 76vh;
     flex-direction: column-reverse;
     background-color: #455A64;
   }
@@ -575,7 +576,9 @@ paper-button {
   .content {
     max-width: unset;
   }
-
+  #list-example {
+    margin-top: 18px;
+  }
   .list-attribute li {
     flex-direction: column;
     padding-top: 10px;
