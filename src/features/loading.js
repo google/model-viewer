@@ -61,6 +61,10 @@ export const LoadingMixin = (ModelViewerElement) => {
           (this.src && CachingGLTFLoader.hasFinishedLoading(this.src));
     }
 
+    get modelIsVisible() {
+      return super.modelIsVisible && this[$posterHidden];
+    }
+
     constructor() {
       super();
 

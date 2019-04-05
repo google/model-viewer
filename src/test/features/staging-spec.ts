@@ -114,29 +114,19 @@ suite('ModelViewerElementBase with StagingMixin', () => {
                                // rAF though
         expect(element.turntableRotation).to.be.greaterThan(turntableRotation);
       });
-    });
-  });
 
-  suite('without a loaded model', () => {
-    setup(async () => {
-      element = new ModelViewerElement();
-      document.body.appendChild(element);
-    });
+      suite('when the model is not visible', () => {
+        setup(() => {
+          Object.defineProperty(
+            element, 'modelIsVisible', {value:false});
+        });
 
-    teardown(() => {
-      document.body.removeChild(element);
-    });
-
-    suite('auto-rotate', () => {
-      setup(() => {
-        element.autoRotate = true;
-      });
-
-      test('does not cause the model root to rotate over time', async () => {
-        const {turntableRotation} = element;
-        await timePasses(50);  // An arbitrary amount of time, greater than one
-                               // rAF though
-        expect(element.turntableRotation).to.be.equal(turntableRotation);
+        test('does not cause the model to rotate over time', async () => {
+          const {turntableRotation} = element;
+          await timePasses(50);  // An arbitrary amount of time, greater than one
+                                 // rAF though
+          expect(element.turntableRotation).to.be.equal(turntableRotation);
+        });
       });
     });
   });

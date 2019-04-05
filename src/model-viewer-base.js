@@ -80,6 +80,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return renderer;
   }
 
+  get modelIsVisible() {
+      return true;
+  }
+
   /**
    * Creates a new ModelViewerElement.
    */
