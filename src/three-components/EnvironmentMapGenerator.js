@@ -47,7 +47,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     //
 
     const light = new PointLight(0xffffff,50,30);
-    light.position.set(0.418, 16.199, 0.300);
+    light.position.set(-0.010, 15.934, 0.284);
     this.scene.add(light);
 
     const room = new Mesh(geometry,material1);
@@ -92,28 +92,28 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.scene.add(box6);
 
     const light1 = new Mesh(geometry,material3);
-    light1.position.set(-1.509, 19.227, 0.429);
-    light1.scale.set(7.268, 0.1, 7.851);
+    light1.position.set(-16.116, 12.757, 7.208);
+    light1.scale.set(0.1, 2.428, 3.739);
     this.scene.add(light1);
 
     const light2 = new Mesh(geometry,material3);
-    light2.position.set(-16.001, 13.499, -4.222);
-    light2.scale.set(0.1, 2.865, 4.53);
+    light2.position.set(-16.109, 16.021, -7.207);
+    light2.scale.set(0.1, 2.425, 3.751);
     this.scene.add(light2);
 
     const light3 = new Mesh(geometry,material3);
-    light3.position.set(14.527, 8.424, 0.489);
-    light3.scale.set(0.1, 6.325, 5.871);
+    light3.position.set(13.904, 10.198, -1.832);
+    light3.scale.set(0.15, 4.265, 6.331);
     this.scene.add(light3);
 
     const light4 = new Mesh(geometry,material3);
-    light4.position.set(7.221, 12.760, 14.063);
-    light4.scale.set(3.78, 2.485, 0.1);
+    light4.position.set(-0.462, 8.409, 14.520);
+    light4.scale.set(5.78, 6.341, 0.088);
     this.scene.add(light4);
 
     const light5 = new Mesh(geometry,material3);
-    light5.position.set(-1.820, 10.209, -11.999);
-    light5.scale.set(6.38, 4.245, 0.15);
+    light5.position.set(4.235, 13.486, -12.541);
+    light5.scale.set(4.52, 2.885, 0.1);
     this.scene.add(light5);
 
     this.camera = new CubeCamera(0.1, 100, 256);
