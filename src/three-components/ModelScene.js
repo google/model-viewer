@@ -50,11 +50,11 @@ export const FRAMED_HEIGHT = 10;
 // the room by a little bit so it's always slightly bigger than the model.
 export const ROOM_PADDING_SCALE = 1.01;
 
-const AMBIENT_LIGHT_LOW_INTENSITY = 0.05;
-const DIRECTIONAL_LIGHT_LOW_INTENSITY = 0.5;
+const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
+const DIRECTIONAL_LIGHT_LOW_INTENSITY = 0.6;
 
-const AMBIENT_LIGHT_HIGH_INTENSITY = 3.0;
-const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 0.75;
+const AMBIENT_LIGHT_HIGH_INTENSITY = 0.75;
+const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 1.75;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
