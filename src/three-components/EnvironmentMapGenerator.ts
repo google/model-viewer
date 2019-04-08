@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, Group, LinearMipMapLinearFilter, LinearToneMapping, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PointLight, Scene} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PointLight, Scene, Texture, WebGLRenderer} from 'three';
 
 const $getLightMaterial = Symbol('getLightMaterial');
+
+type AxisDirectionString = '-x'|'+x'|'-z'|'+z';
 
 /**
  * This class is intended to implement helper methods on top of Scene for
@@ -33,20 +35,37 @@ class Lightroom extends Scene {
     return 1.0 / 2.25;
   }
 
+  /**
+   * The diameter of the room in world units. This is a mostly arbitrary, but
+   * some ratios in the Lightroom implementation such as light decay don't
+   * quite scale proportionally as expected, so we are hardcoding 40 as it
+   * subjectively looks the best.
+   */
+  static get size() {
+    return 40.0
+  }
+
+  protected geometry: BoxBufferGeometry = new BoxBufferGeometry();
+  protected furnishingMaterial: MeshStandardMaterial =
+      new MeshStandardMaterial({roughness: 1, metalness: 0});
+  protected lightMaterials: Map<number, MeshBasicMaterial> =
+      new Map<number, MeshBasicMaterial>();
+
+  protected roomMaterial: MeshStandardMaterial =
+      new MeshStandardMaterial({roughness: 1, metalness: 0, side: BackSide});
+
+  protected room: Mesh = new Mesh(this.geometry, this.roomMaterial);
+
+  protected dolly: Object3D = new Object3D();
+
+  protected mainLight: PointLight;
+  protected floorLight: PointLight;
+
+
   constructor() {
     super();
 
-    const size = this.size = 40;
-    this.geometry = new BoxBufferGeometry();
-
-    this.furnishingMaterial =
-        new MeshStandardMaterial({roughness: 1, metalness: 0});
-    this.lightMaterials = new Map();
-
-    const roomMaterial = this.furnishingMaterial.clone();
-    roomMaterial.side = BackSide;
-
-    this.room = new Mesh(this.geometry, roomMaterial);
+    const {size} = Lightroom;
 
     this.room.position.set(0, size / 2.0, 0);
     this.room.scale.multiplyScalar(size);
@@ -70,15 +89,15 @@ class Lightroom extends Scene {
     this.add(this.mainLight);
     this.add(this.floorLight);
     this.add(this.room);
-
-    window.lightroom = this;
   }
 
   /**
    * Add a "furnishing", which is basically a box sitting somewhere in the room
    */
-  addFurnishing(x, z, rotation, width, height, depth) {
-    const {size} = this;
+  addFurnishing(
+      x: number, z: number, rotation: number, width: number, height: number,
+      depth: number) {
+    const {size} = Lightroom;
     const halfSize = size / 2.0;
     const furnishing = new Mesh(this.geometry, this.furnishingMaterial);
 
@@ -94,12 +113,15 @@ class Lightroom extends Scene {
    * a 2D plane in [-1,1] on both axes, and use the "facing" direction to place
    * the light on a particular wall.
    */
-  addWallAreaLight(x, y, width, height, facing, intensity) {
+  addWallAreaLight(
+      x: number, y: number, width: number, height: number,
+      facing: AxisDirectionString, intensity: number) {
     intensity *= Lightroom.areaLightIntensityRatio;
 
     const lightBox =
         new Mesh(this.geometry, this[$getLightMaterial](intensity));
-    const {dolly, size} = this;
+    const {size} = Lightroom;
+    const {dolly} = this;
     const halfSize = size / 2.0;
 
     lightBox.position.set(
@@ -129,7 +151,7 @@ class Lightroom extends Scene {
     this.add(lightBox);
   }
 
-  [$getLightMaterial](intensity) {
+  [$getLightMaterial](intensity: number) {
     if (!this.lightMaterials.has(intensity)) {
       const material = new MeshBasicMaterial();
       material.color.setRGB(intensity, intensity, intensity);
@@ -140,15 +162,14 @@ class Lightroom extends Scene {
   }
 }
 
-const rendererTextureCache = new Map();
+const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
-  constructor(renderer) {
+  protected scene: Lightroom = new Lightroom();
+  protected camera: CubeCamera = new CubeCamera(0.1, 100, 256);
+
+  constructor(protected renderer: WebGLRenderer) {
     super();
-
-    this.renderer = renderer;
-
-    this.scene = new Lightroom();
 
     // NOTE(cdata): Intensities here are mostly sampled from a relevant
     // environment map that we are trying to match closely to
@@ -176,12 +197,10 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   /**
    * Generate an environment map for a room.
-   *
-   * @param {number} mapSize
    */
-  generate() {
+  generate(): Texture {
     if (!rendererTextureCache.has(this.renderer)) {
-      this.camera.clear(this.renderer);
+      (this.camera as any).clear(this.renderer);
 
       var gammaOutput = this.renderer.gammaOutput;
       var toneMapping = this.renderer.toneMapping;
@@ -200,7 +219,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
       rendererTextureCache.set(this.renderer, this.camera.renderTarget.texture);
     }
 
-    return rendererTextureCache.get(this.renderer);
+    return rendererTextureCache.get(this.renderer)!;
   }
 
   dispose() {
