@@ -13,114 +13,165 @@
  * limitations under the License.
  */
 
-import {
-  BackSide,
-  BoxBufferGeometry,
-  CubeCamera,
-  EventDispatcher,
-  FloatType,
-  Group,
-  LinearToneMapping,
-  LinearMipMapLinearFilter,
-  Mesh,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  PointLight,
-  Scene
-} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, Group, LinearMipMapLinearFilter, LinearToneMapping, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PointLight, Scene} from 'three';
+
+const $getLightMaterial = Symbol('getLightMaterial');
+
+/**
+ * This class is intended to implement helper methods on top of Scene for
+ * constructing a "lightroom" in the spirit of a satisfying, neutral default
+ * studio lighting scenario.
+ */
+class Lightroom extends Scene {
+  /**
+   * This ratio is intended to approximate an averaging of the intensity over
+   * the area of a given light. This ratio has been emperically derived, and
+   * could probably benefit from additional massaging. However, it would be
+   * better if we worked on figuring out how to blur the environment map first.
+   */
+  static get areaLightIntensityRatio() {
+    return 1.0 / 2.25;
+  }
+
+  constructor() {
+    super();
+
+    const size = this.size = 40;
+    this.geometry = new BoxBufferGeometry();
+
+    this.furnishingMaterial =
+        new MeshStandardMaterial({roughness: 1, metalness: 0});
+    this.lightMaterials = new Map();
+
+    const roomMaterial = this.furnishingMaterial.clone();
+    roomMaterial.side = BackSide;
+
+    this.room = new Mesh(this.geometry, roomMaterial);
+
+    this.room.position.set(0, size / 2.0, 0);
+    this.room.scale.multiplyScalar(size);
+
+    this.dolly = new Object3D();
+    this.dolly.position.set(0, size / 2.0, 0);
+
+    const lightOffset = size * 0.15;
+    const roomMargin = size * -0.05;
+    const halfSize = size / 2.0;
+
+    this.mainLight =
+        new PointLight(0xffffff, size * 10.0, size - roomMargin, 1.75);
+    this.mainLight.position.set(0.0, halfSize + lightOffset, 0.0);
+
+    this.floorLight = new PointLight(0xffffff, size, size, 2.0);
+    this.floorLight.position.set(0.0, lightOffset, 0.0);
+
+    this.room.add(this.dolly);
+
+    this.add(this.mainLight);
+    this.add(this.floorLight);
+    this.add(this.room);
+
+    window.lightroom = this;
+  }
+
+  /**
+   * Add a "furnishing", which is basically a box sitting somewhere in the room
+   */
+  addFurnishing(x, z, rotation, width, height, depth) {
+    const {size} = this;
+    const halfSize = size / 2.0;
+    const furnishing = new Mesh(this.geometry, this.furnishingMaterial);
+
+    furnishing.scale.set(size * width, size * height, size * depth);
+    furnishing.rotation.set(0, rotation, 0);
+    furnishing.position.set(x * halfSize, size * height / 2.0, z * halfSize);
+
+    this.add(furnishing);
+  }
+
+  /**
+   * Add a light to the wall of the room. Specify the x and y coordinates on
+   * a 2D plane in [-1,1] on both axes, and use the "facing" direction to place
+   * the light on a particular wall.
+   */
+  addWallAreaLight(x, y, width, height, facing, intensity) {
+    intensity *= Lightroom.areaLightIntensityRatio;
+
+    const lightBox =
+        new Mesh(this.geometry, this[$getLightMaterial](intensity));
+    const {dolly, size} = this;
+    const halfSize = size / 2.0;
+
+    lightBox.position.set(
+        x * halfSize, (y - height / 2.0) * halfSize, -1.0 * halfSize + 1.0);
+    lightBox.scale.set(size * width, size * height, 0.1);
+
+    dolly.rotation.set(0, 0, 0);
+    dolly.add(lightBox);
+
+    switch (facing) {
+      case '-z':
+        dolly.rotation.y = Math.PI;
+        break;
+      case '+x':
+        dolly.rotation.y = Math.PI / -2.0;
+        break;
+      case '-x':
+        dolly.rotation.y = Math.PI / 2.0;
+        break;
+    }
+
+    dolly.updateMatrixWorld(true);
+    lightBox.updateMatrixWorld(true);
+    lightBox.matrix.identity();
+    lightBox.applyMatrix(lightBox.matrixWorld);
+
+    this.add(lightBox);
+  }
+
+  [$getLightMaterial](intensity) {
+    if (!this.lightMaterials.has(intensity)) {
+      const material = new MeshBasicMaterial();
+      material.color.setRGB(intensity, intensity, intensity);
+      this.lightMaterials.set(intensity, material);
+    }
+
+    return this.lightMaterials.get(intensity);
+  }
+}
+
+const rendererTextureCache = new Map();
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   constructor(renderer) {
     super();
+
     this.renderer = renderer;
-    this.scene = new Scene();
 
-    // Scene
+    this.scene = new Lightroom();
 
-    const geometry = new BoxBufferGeometry();
+    // NOTE(cdata): Intensities here are mostly sampled from a relevant
+    // environment map that we are trying to match closely to
+    this.scene.addWallAreaLight(-0.15, -0.1, 0.325, 0.25, '+z', 15.0);
+    this.scene.addWallAreaLight(0.55, 0.275, 0.2, 0.175, '-z', 30.0);
+    this.scene.addWallAreaLight(-0.55, 0.05, 0.2, 0.175, '-z', 25.0);
+    // NOTE(cdata): Intensity of this light was originally ~50
+    this.scene.addWallAreaLight(0, -0.3, 0.25, 0.25, '+x', 30.0);
+    this.scene.addWallAreaLight(0.25, -0.125, 0.15, 0.15, '-x', 13.0);
 
-    const material1 = new MeshStandardMaterial({roughness: 1, metalness: 0, side: BackSide});
-    const material2 = new MeshStandardMaterial({roughness: 1, metalness: 0});
-    const material3 = new MeshBasicMaterial();
-    material3.color.setRGB(10,10,10);
+    this.scene.addFurnishing(0.1, 0.6, Math.PI / -32.0, 0.1, 0.175, 0.1);
+    this.scene.addFurnishing(-0.025, 0.3, Math.PI / -6.0, 0.05, 0.02, 0.1);
+    this.scene.addFurnishing(0.375, 0.1, Math.PI / 12.0, 0.08, 0.08, 0.06);
+    this.scene.addFurnishing(-0.25, 0.1, Math.PI / 8.0, 0.07, 0.05, 0.08);
+    this.scene.addFurnishing(0.45, -0.35, Math.PI / 6.0, 0.12, 0.12, 0.1);
+    this.scene.addFurnishing(-0.125, -0.1, Math.PI / -16.0, 0.04, 0.02, 0.04);
 
-    //
-
-    const light = new PointLight(0xffffff,50,30);
-    light.position.set(-0.010, 15.934, 0.284);
-    this.scene.add(light);
-
-    const room = new Mesh(geometry,material1);
-    room.position.set(-0.757, 13.219, 0.717);
-    room.scale.set(31.713, 28.305, 28.591);
-    this.scene.add(room);
-
-    const box1 = new Mesh(geometry,material2);
-    box1.position.set(-10.906, 2.009, 1.846);
-    box1.rotation.set(0,-0.195,0);
-    box1.scale.set(2.328, 7.905, 4.651);
-    this.scene.add(box1);
-
-    const box2 = new Mesh(geometry,material2);
-    box2.position.set(-5.607, -0.754, -0.758);
-    box2.rotation.set(0,0.994,0);
-    box2.scale.set(1.970, 1.534, 3.955);
-    this.scene.add(box2);
-
-    const box3 = new Mesh(geometry,material2);
-    box3.position.set(6.167, 0.857, 7.803);
-    box3.rotation.set(0,0.561,0);
-    box3.scale.set(3.927, 6.285, 3.687);
-    this.scene.add(box3);
-
-    const box4 = new Mesh(geometry,material2);
-    box4.position.set(-2.017, 0.018, 6.124);
-    box4.rotation.set(0,0.333,0);
-    box4.scale.set(2.002, 4.566, 2.064);
-    this.scene.add(box4);
-
-    const box5 = new Mesh(geometry,material2);
-    box5.position.set(2.291, -0.756, -2.621);
-    box5.rotation.set(0,-0.286,0);
-    box5.scale.set(1.546, 1.552, 1.496);
-    this.scene.add(box5);
-
-    const box6 = new Mesh(geometry,material2);
-    box6.position.set(-2.193, -0.369, -5.547);
-    box6.rotation.set(0,0.516,0);
-    box6.scale.set(3.875, 3.487, 2.986);
-    this.scene.add(box6);
-
-    const light1 = new Mesh(geometry,material3);
-    light1.position.set(-16.116, 12.757, 7.208);
-    light1.scale.set(0.1, 2.428, 3.739);
-    this.scene.add(light1);
-
-    const light2 = new Mesh(geometry,material3);
-    light2.position.set(-16.109, 16.021, -7.207);
-    light2.scale.set(0.1, 2.425, 3.751);
-    this.scene.add(light2);
-
-    const light3 = new Mesh(geometry,material3);
-    light3.position.set(13.904, 10.198, -1.832);
-    light3.scale.set(0.15, 4.265, 6.331);
-    this.scene.add(light3);
-
-    const light4 = new Mesh(geometry,material3);
-    light4.position.set(-0.462, 8.409, 14.520);
-    light4.scale.set(5.78, 6.341, 0.088);
-    this.scene.add(light4);
-
-    const light5 = new Mesh(geometry,material3);
-    light5.position.set(4.235, 13.486, -12.541);
-    light5.scale.set(4.52, 2.885, 0.1);
-    this.scene.add(light5);
+    this.scene.position.set(-0, -4, 0);
 
     this.camera = new CubeCamera(0.1, 100, 256);
     this.camera.renderTarget.texture.type = FloatType;
     this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.camera.renderTarget.texture.generateMipmaps = true;
-
   }
 
   /**
@@ -129,23 +180,27 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
    * @param {number} mapSize
    */
   generate() {
-    this.camera.clear(this.renderer);
+    if (!rendererTextureCache.has(this.renderer)) {
+      this.camera.clear(this.renderer);
 
-    var gammaOutput = this.renderer.gammaOutput;
-    var toneMapping = this.renderer.toneMapping;
-    var toneMappingExposure = this.renderer.toneMappingExposure;
+      var gammaOutput = this.renderer.gammaOutput;
+      var toneMapping = this.renderer.toneMapping;
+      var toneMappingExposure = this.renderer.toneMappingExposure;
 
-    this.renderer.toneMapping = LinearToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.gammaOutput = false;
+      this.renderer.toneMapping = LinearToneMapping;
+      this.renderer.toneMappingExposure = 1.0;
+      this.renderer.gammaOutput = false;
 
-    this.camera.update(this.renderer, this.scene);
+      this.camera.update(this.renderer, this.scene);
 
-    this.renderer.toneMapping = toneMapping;
-    this.renderer.toneMappingExposure = toneMappingExposure;
-    this.renderer.gammaOutput = gammaOutput;
+      this.renderer.toneMapping = toneMapping;
+      this.renderer.toneMappingExposure = toneMappingExposure;
+      this.renderer.gammaOutput = gammaOutput;
 
-    return this.camera.renderTarget.texture;
+      rendererTextureCache.set(this.renderer, this.camera.renderTarget.texture);
+    }
+
+    return rendererTextureCache.get(this.renderer);
   }
 
   dispose() {
