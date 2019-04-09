@@ -19,7 +19,7 @@ import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 
-const ENVIRONMENT_BASE_INTENSITY = 0.4;
+const ENVIRONMENT_BASE_INTENSITY = 1.0;
 
 /**
  * An Object3D that can swap out its underlying

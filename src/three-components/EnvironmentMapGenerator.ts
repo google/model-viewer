@@ -49,7 +49,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     const boxMaterial =
         new MeshStandardMaterial({roughness: 0.5, metalness: 0});
 
-    const mainLight = new PointLight(0xffffff, 700.0, 28.5, 2);
+    const mainLight = new PointLight(0xffffff, 600.0, 28, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
     scene.add(mainLight);
 
@@ -126,8 +126,8 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     light5.scale.set(4.52, 2.885, 0.1);
     scene.add(light5);
 
-    scene.position.set(-0, -3.5, 0);
-    scene.rotation.y = Math.PI / 2.0;
+    scene.position.y = -3.5;
+    // scene.rotation.y = Math.PI / 2.0;
 
     this.camera = new CubeCamera(0.1, 100, 128);
     this.camera.renderTarget.texture.type = FloatType;
