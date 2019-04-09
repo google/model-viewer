@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene, Texture, WebGLRenderer} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
   protected camera: CubeCamera = new CubeCamera(0.1, 100, 256);
+
+  protected blurScene: Scene;
+  protected blurCamera: CubeCamera;
+  protected blurMaterial: ShaderMaterial;
+
+  protected blurRenderTarget1: WebGLRenderTargetCube;
+  protected blurRenderTarget2: WebGLRenderTargetCube;
 
   protected createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
@@ -32,8 +39,10 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
     // Scene
 
-    const geometry = new BoxBufferGeometry();
     const {scene} = this;
+
+    const geometry = new BoxBufferGeometry();
+    geometry.removeAttribute('uv');
 
     const roomMaterial = new MeshStandardMaterial(
         {roughness: 0.5, metalness: 0, side: BackSide, color: 0xffffff});
@@ -120,10 +129,54 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     scene.position.set(-0, -3.5, 0);
     scene.rotation.y = Math.PI / 2.0;
 
-    this.camera = new CubeCamera(0.1, 100, 256);
+    this.camera = new CubeCamera(0.1, 100, 128);
     this.camera.renderTarget.texture.type = FloatType;
     this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.camera.renderTarget.texture.generateMipmaps = true;
+
+    // Blur
+
+    this.blurScene = new Scene();
+
+    this.blurCamera = new CubeCamera(0.1, 100, 128);
+    this.blurCamera.renderTarget.texture.type = FloatType;
+    this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
+    this.blurCamera.renderTarget.texture.generateMipmaps = true;
+
+    this.blurMaterial = new ShaderMaterial({
+      uniforms: {
+        tCube: {value: null}
+      },
+      vertexShader: `
+        varying vec3 vWorldDirection;
+        #include <common>
+        void main() {
+          vWorldDirection = transformDirection( position, modelMatrix );
+          #include <begin_vertex>
+          #include <project_vertex>
+          gl_Position.z = gl_Position.w;
+        }
+      `,
+      fragmentShader: `
+        uniform samplerCube tCube;
+        varying vec3 vWorldDirection;
+        void main() {
+          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 1.0 );
+          gl_FragColor = mapTexelToLinear( texColor );
+        }
+      `,
+      side: BackSide,
+      depthTest: false,
+      depthWrite: false
+    });
+
+    this.blurScene.add(new Mesh(geometry,this.blurMaterial));
+
+    //
+
+    this.blurRenderTarget1 = this.camera.renderTarget;
+    this.blurRenderTarget2 = this.blurCamera.renderTarget;
+
   }
 
   /**
@@ -143,11 +196,25 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
       this.camera.update(this.renderer, this.scene);
 
+      // Blur
+
+      for (var i = 0; i < 16; i ++) {
+        // Ping-Pong
+        if (i % 2 === 0) {
+          this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget1.texture;
+          this.blurCamera.renderTarget = this.blurRenderTarget2;
+        } else {
+          this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget2.texture;
+          this.blurCamera.renderTarget = this.blurRenderTarget1;
+        }
+        this.blurCamera.update(this.renderer, this.blurScene);
+      }
+
       this.renderer.toneMapping = toneMapping;
       this.renderer.toneMappingExposure = toneMappingExposure;
       this.renderer.gammaOutput = gammaOutput;
 
-      rendererTextureCache.set(this.renderer, this.camera.renderTarget.texture);
+      rendererTextureCache.set(this.renderer, this.blurCamera.renderTarget.texture);
     }
 
     return rendererTextureCache.get(this.renderer)!;
@@ -155,5 +222,6 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   dispose() {
     this.camera.renderTarget.dispose();
+    this.blurCamera.renderTarget.dispose();
   }
 }
