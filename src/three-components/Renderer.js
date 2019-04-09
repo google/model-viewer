@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
+import {EventDispatcher, Uncharted2ToneMapping, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -22,8 +22,6 @@ import {resolveDpr} from '../utils.js';
 import {ARRenderer} from './ARRenderer.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
-
-const GAMMA_FACTOR = 2.2;
 
 export const $arRenderer = Symbol('arRenderer');
 
@@ -68,13 +66,11 @@ export default class Renderer extends EventDispatcher {
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
-      this.renderer.gammaFactor = GAMMA_FACTOR;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
-      // ACESFilmicToneMapping appears to be the most "saturated",
-      // and similar to Filament's gltf-viewer.
-      this.renderer.toneMapping = ACESFilmicToneMapping;
+      this.renderer.toneMapping = Uncharted2ToneMapping;
+      this.renderer.toneMappingWhitePoint = 1.75;
     } catch (error) {
       this.context = null;
       console.warn(error);
