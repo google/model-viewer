@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-import {$ariaLabel, $canvas, $updateSource} from '../model-viewer-base.js';
+import {property} from 'lit-element';
+
+import ModelViewerElementBase, {$ariaLabel, $canvas, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {debounce, deserializeUrl} from '../utils.js';
+import {Constructor, deserializeUrl} from '../utils.js';
+
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
-export const $posterElement = Symbol('posterElement');
-const $applyPreloadStrategy = Symbol('applyPreloadStrategy');
+export const $posterContainerElement = Symbol('posterContainerElement');
+export const $defaultPosterElement = Symbol('defaultPosterElement');
 
-const $dismissPoster = Symbol('dismissPoster');
 const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $posterHidden = Symbol('posterHidden');
@@ -45,45 +47,45 @@ const SPACE_KEY = 32;
 const ENTER_KEY = 13;
 
 
-export const LoadingMixin = (ModelViewerElement) => {
-  return class extends ModelViewerElement {
-    static get properties() {
-      return {
-        ...super.properties,
-        poster: {type: deserializeUrl},
-        preload: {type: Boolean},
-        revealWhenLoaded: {type: Boolean, attribute: 'reveal-when-loaded'}
-      };
+export const LoadingMixin = (ModelViewerElement:
+                                 Constructor<ModelViewerElementBase>) => {
+  class LoadingModelViewerElement extends ModelViewerElement {
+    @property({type: deserializeUrl}) poster: string|null = null;
+
+    @property({type: Boolean}) preload: boolean = false;
+
+    @property({type: Boolean, attribute: 'reveal-when-loaded'})
+    revealWhenLoaded: boolean = false;
+
+    protected[$posterHidden]: boolean = true;
+    protected[$preloadAnnounced]: boolean = false;
+
+    // Used to determine whether or not to display a poster image or
+    // to load the model if not preloaded.
+    protected[$userDismissedPoster]: boolean = false;
+
+    // TODO: Add this to the shadow root as part of this mixin's
+    // implementation:
+    protected[$posterContainerElement]: HTMLElement =
+        this.shadowRoot!.querySelector('.slot.poster') as HTMLElement;
+
+    protected[$defaultPosterElement]: HTMLElement =
+        this.shadowRoot!.querySelector('#default-poster') as HTMLElement;
+
+    protected[$ariaLabelCallToAction] =
+        this[$defaultPosterElement].getAttribute('aria-label');
+
+    protected[$clickHandler]: () => void = () => this[$onClick]();
+    protected[$keydownHandler]:
+        (event: KeyboardEvent) => void = (event) => this[$onKeydown](event);
+
+    get loaded(): boolean {
+      const src = (this as any).src;
+      return super.loaded || (src && CachingGLTFLoader.hasFinishedLoading(src));
     }
 
-    get loaded() {
-      return super.loaded ||
-          (this.src && CachingGLTFLoader.hasFinishedLoading(this.src));
-    }
-
-    get modelIsVisible() {
+    get modelIsVisible(): boolean {
       return super.modelIsVisible && this[$posterHidden];
-    }
-
-    constructor() {
-      super();
-
-      this[$posterHidden] = true;
-      this[$preloadAnnounced] = false;
-
-      // Used to determine whether or not to display a poster image or
-      // to load the model if not preloaded.
-      this[$userDismissedPoster] = false;
-
-      // TODO: Add this to the shadow root as part of this mixin's
-      // implementation:
-      this[$posterElement] = this.shadowRoot.querySelector('.poster');
-
-      this[$ariaLabelCallToAction] =
-          this[$posterElement].getAttribute('aria-label');
-
-      this[$clickHandler] = () => this[$onClick]();
-      this[$keydownHandler] = () => this[$onKeydown]();
     }
 
     connectedCallback() {
@@ -92,9 +94,10 @@ export const LoadingMixin = (ModelViewerElement) => {
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
-      this[$posterElement].addEventListener('click', () => this[$onClick]());
-      this[$posterElement].addEventListener(
-          'keydown', (event) => this[$onKeydown](event));
+      this[$posterContainerElement].addEventListener(
+          'click', this[$clickHandler]);
+      this[$posterContainerElement].addEventListener(
+          'keydown', this[$keydownHandler]);
 
       loadingStatusAnnouncer.registerInstance(this);
     }
@@ -102,9 +105,10 @@ export const LoadingMixin = (ModelViewerElement) => {
     disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$posterElement].removeEventListener('click', () => this[$onClick]());
-      this[$posterElement].removeEventListener(
-          'keydown', (event) => this[$onKeydown](event));
+      this[$posterContainerElement].removeEventListener(
+          'click', this[$clickHandler]);
+      this[$posterContainerElement].removeEventListener(
+          'keydown', this[$keydownHandler]);
 
       loadingStatusAnnouncer.unregisterInstance(this);
     }
@@ -120,13 +124,16 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     [$hidePoster]() {
-      const posterElement = this[$posterElement];
-      const posterOpacity = self.getComputedStyle(posterElement).opacity;
+      const posterContainerElement = this[$posterContainerElement];
+      const defaultPosterElement = this[$defaultPosterElement];
+
+      const posterOpacity =
+          parseFloat(self.getComputedStyle(posterContainerElement).opacity!);
       const onPosterHidden = () => {
         requestAnimationFrame(() => {
           this.dispatchEvent(
               new CustomEvent('poster-visibility', {detail: {visible: false}}));
-          this[$canvas].focus();
+          (this as any)[$canvas].focus();
         });
       };
 
@@ -135,26 +142,29 @@ export const LoadingMixin = (ModelViewerElement) => {
       if (posterOpacity > 0) {
         // NOTE(cdata): The canvas cannot receive focus until the poster has
         // been completely hidden:
-        posterElement.addEventListener(
+        posterContainerElement.addEventListener(
             'transitionend', onPosterHidden, {once: true});
       } else {
         // NOTE(cdata): Depending on timing, the opacity may already be 0, in
         // which case we will never receive a transitionend event. So, just
         // focus on the next animation frame:
         onPosterHidden();
-        // requestAnimationFrame(onPosterHidden);
       }
 
-      posterElement.classList.remove('show');
-      posterElement.setAttribute('aria-hidden', 'true');
-      posterElement.removeAttribute('tabindex');
+      posterContainerElement.classList.remove('show');
+
+      defaultPosterElement.setAttribute('aria-hidden', 'true');
+      defaultPosterElement.removeAttribute('tabindex');
     }
 
     [$showPoster]() {
-      const posterElement = this[$posterElement];
-      posterElement.classList.add('show');
-      posterElement.setAttribute('aria-hidden', 'false');
-      posterElement.tabIndex = 1;
+      const posterContainerElement = this[$posterContainerElement];
+      const defaultPosterElement = this[$defaultPosterElement];
+
+      posterContainerElement.classList.add('show');
+
+      defaultPosterElement.setAttribute('aria-hidden', 'false');
+      defaultPosterElement.tabIndex = 1;
 
       this[$posterHidden] = false;
 
@@ -166,7 +176,7 @@ export const LoadingMixin = (ModelViewerElement) => {
       this.dismissPoster();
     }
 
-    [$onKeydown](event) {
+    [$onKeydown](event: KeyboardEvent) {
       switch (event.keyCode) {
         // NOTE(cdata): Links and buttons can typically be activated with both
         // spacebar and enter to produce a synthetic click action
@@ -180,29 +190,30 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     get[$shouldDismissPoster]() {
+      const src = (this as any).src;
       return !this.poster ||
-          (CachingGLTFLoader.hasFinishedLoading(this.src) &&
+          (CachingGLTFLoader.hasFinishedLoading(src) &&
            (this.revealWhenLoaded || this[$userDismissedPoster]));
     }
 
     get[$shouldAttemptPreload]() {
-      return (this[$userDismissedPoster] || this.preload) && this.src &&
-          !this[$preloadAnnounced];
+      return (this[$userDismissedPoster] || this.preload) &&
+          (this as any).src && !this[$preloadAnnounced];
     }
 
-    updated(changedProperties) {
+    updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
-      const posterElement = this[$posterElement];
+      const defaultPosterElement = this[$defaultPosterElement];
 
       if (changedProperties.has('alt')) {
-        posterElement.setAttribute(
+        defaultPosterElement.setAttribute(
             'aria-label',
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
       if (changedProperties.has('poster') && this.poster) {
-        posterElement.style.backgroundImage = `url("${this.poster}")`;
+        defaultPosterElement.style.backgroundImage = `url("${this.poster}")`;
       }
 
       if (changedProperties.has('src')) {
@@ -222,10 +233,11 @@ export const LoadingMixin = (ModelViewerElement) => {
     }
 
     async[$ensurePreloaded]() {
-      const preloaded = CachingGLTFLoader.hasFinishedLoading(this.src);
+      const preloaded = CachingGLTFLoader.hasFinishedLoading((this as any).src);
 
       if (this[$shouldAttemptPreload]) {
-        const detail = {url: this.src};
+        const src = (this as any).src;
+        const detail = {url: src};
 
         this[$preloadAnnounced] = true;
 
@@ -233,7 +245,7 @@ export const LoadingMixin = (ModelViewerElement) => {
           this.dispatchEvent(new CustomEvent('preload', {detail}));
         } else {
           try {
-            await loader.preload(this.src);
+            await loader.preload(src);
 
             this.dispatchEvent(new CustomEvent('preload', {detail}));
             this.requestUpdate();
@@ -251,4 +263,6 @@ export const LoadingMixin = (ModelViewerElement) => {
       }
     }
   };
+
+  return LoadingModelViewerElement;
 }

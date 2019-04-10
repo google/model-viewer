@@ -25,42 +25,11 @@ template.innerHTML = `
       width: 300px;
       height: 150px;
     }
+
     .container {
       position: relative;
     }
-    .poster {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
 
-    .poster.show {
-      opacity: 1;
-      transition: none;
-    }
-
-    .poster:not(.show) {
-      pointer-events: none;
-    }
-
-    .click-to-view {
-      display: none;
-      position: absolute;
-      z-index: 9999;
-      width: 100%;
-      margin: 0 auto;
-      bottom: 20px;
-      background-color: rgba(0, 0, 0, 0.2);
-      color: white;
-      font-size: 120%;
-    }
-    .click-to-view.show {
-      display: block;
-    }
 
     a.enter-ar {
       width: 40px;
@@ -71,11 +40,13 @@ template.innerHTML = `
       top: 10px;
       display: none;
     }
+
     a.enter-ar svg {
       position: absolute;
       top: calc(50% - 12px);
       left: calc(50% - 12px);
     }
+
     a.enter-ar .disc {
       width: 100%;
       height: 100%;
@@ -84,13 +55,43 @@ template.innerHTML = `
       background-color: #fff;
       box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.2);
     }
+
     canvas {
       width: 100%;
       height: 100%;
       display: none;
     }
+
     canvas.show {
       display: block;
+    }
+
+    .slot {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .slot.poster {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .slot.poster.show {
+      opacity: 1;
+      transition: none;
+    }
+
+    .slot.poster:not(.show) {
+      pointer-events: none;
+    }
+
+    #default-poster {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background-size: cover;
+      background-position: center;
     }
 
     .slot.controls-prompt {
@@ -119,6 +120,11 @@ template.innerHTML = `
     }
   </style>
   <div class="container">
+    <div class="slot poster">
+      <slot name="poster">
+        <div id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
+      </slot>
+    </div>
     <a tabindex="2"
         class="enter-ar"
         href="#"
@@ -126,7 +132,6 @@ template.innerHTML = `
       <div class="disc"></div>
       ${ARGlyph}
     </a>
-    <div class="poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
     <canvas tabindex="1"
         aria-label="A depiction of a 3D model"
         aria-live="polite">
@@ -144,11 +149,11 @@ template.innerHTML = `
 
 export default template;
 
-export const makeTemplate = (tagName) => {
+export const makeTemplate = (tagName: string) => {
   const clone = document.createElement('template');
   clone.innerHTML = template.innerHTML;
-  if (window.ShadyCSS) {
-    window.ShadyCSS.prepareTemplate(clone, tagName);
+  if ((window as any).ShadyCSS) {
+    (window as any).ShadyCSS.prepareTemplate(clone, tagName);
   }
   return clone;
 };
