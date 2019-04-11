@@ -20,7 +20,7 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
-import {debounce, deserializeUrl} from './utils.js';
+import {debounce, deserializeUrl, resolveDpr} from './utils.js';
 
 let renderer = new Renderer();
 
@@ -33,6 +33,7 @@ const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
+const $lastDpr = Symbol('lastDpr');
 
 export const $ariaLabel = Symbol('ariaLabel');
 export const $updateSource = Symbol('updateSource');
@@ -80,6 +81,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$container]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
+  protected[$lastDpr]: number = resolveDpr();
 
   protected[$fallbackResizeHandler] = debounce(() => {
     const boundingRect = this.getBoundingClientRect();
@@ -249,6 +251,17 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$tick](_time: number, _delta: number) {
+    const dpr = resolveDpr();
+    // There is no standard way to detect when DPR changes on account of zoom.
+    // Here we keep a local copy of DPR updated, and when it changes we invoke
+    // the fallback resize handler. It might be better to invoke the resize
+    // handler directly in this case, but the fallback is debounced which will
+    // save us from doing too much work when DPR and window size changes at the
+    // same time.
+    if (dpr !== this[$lastDpr]) {
+      this[$lastDpr] = dpr;
+      this[$fallbackResizeHandler]();
+    }
   }
 
   [$markLoaded]() {
