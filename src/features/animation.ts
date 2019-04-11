@@ -89,6 +89,8 @@ export const AnimationMixin =
             }
 
             [$tick](_time: number, delta: number) {
+              super[$tick](_time, delta);
+
               if (this[$paused]) {
                 return;
               }
