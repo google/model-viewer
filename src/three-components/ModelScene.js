@@ -152,7 +152,7 @@ export default class ModelScene extends Scene {
   /**
    * Sets the model via URL.
    *
-   * @param {String} source
+   * @param {String?} source
    */
   async setModelSource(source) {
     try {

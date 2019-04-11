@@ -322,13 +322,13 @@ export const ControlsMixin = (ModelViewerElement:
           }
         }
 
-        [$onResize](e: Event) {
-          super[$onResize](e);
+        [$onResize](event: any) {
+          super[$onResize](event);
           this[$updateOrbitCamera]();
         }
 
-        [$onModelLoad](e: Event) {
-          super[$onModelLoad](e);
+        [$onModelLoad](event: any) {
+          super[$onModelLoad](event);
           this[$updateOrbitCamera]();
         }
 

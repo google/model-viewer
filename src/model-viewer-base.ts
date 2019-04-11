@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
@@ -30,6 +31,8 @@ const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
+const $resizeObserver = Symbol('resizeObserver');
+const $intersectionObserver = Symbol('intersectionObserver');
 
 export const $ariaLabel = Symbol('ariaLabel');
 export const $updateSource = Symbol('updateSource');
@@ -46,14 +49,9 @@ export const $resetRenderer = Symbol('resetRenderer');
 
 /**
  * Definition for a basic <model-viewer> element.
- *
  */
 export default class ModelViewerElementBase extends UpdatingElement {
-  static get properties() {
-    return {
-      alt: {type: String}, src: {converter: {fromAttribute: deserializeUrl}}
-    }
-  }
+  protected static[$template]: HTMLTemplateElement|void;
 
   static get is() {
     return 'model-viewer';
@@ -72,6 +70,25 @@ export default class ModelViewerElementBase extends UpdatingElement {
     renderer = new Renderer();
   }
 
+  @property({type: String}) alt: string|null = null;
+
+  @property({converter: {fromAttribute: deserializeUrl}})
+  src: string|null = null;
+
+  protected[$loaded]: boolean = false;
+  protected[$scene]: ModelScene;
+  protected[$container]: HTMLDivElement;
+  protected[$canvas]: HTMLCanvasElement;
+  protected[$defaultAriaLabel]: string;
+
+  protected[$fallbackResizeHandler] = debounce(() => {
+    const boundingRect = this.getBoundingClientRect();
+    this[$updateSize](boundingRect);
+  }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+
+  protected[$resizeObserver]: ResizeObserver|null = null;
+  protected[$intersectionObserver]: IntersectionObserver|null = null;
+
   get loaded() {
     return this[$loaded];
   }
@@ -81,7 +98,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get modelIsVisible() {
-      return true;
+    return true;
   }
 
   /**
@@ -92,24 +109,22 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this.attachShadow({mode: 'open', delegatesFocus: true});
 
-    if (window.ShadyCSS) {
-      window.ShadyCSS.styleElement(this);
+    if ((window as any).ShadyCSS) {
+      (window as any).ShadyCSS.styleElement(this);
     }
-    const {shadowRoot} = this;
-    const template = this.constructor.template;
+    const shadowRoot = this.shadowRoot!;
+    const template = (this.constructor as any).template as HTMLTemplateElement;
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this[$container] = shadowRoot.querySelector('.container');
-    this[$canvas] = shadowRoot.querySelector('canvas');
-    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label');
+    this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
+    this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
+    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label')!;
 
     // Create the underlying ModelScene.
     const {width, height} = this.getBoundingClientRect();
     this[$scene] = new ModelScene(
         {canvas: this[$canvas], element: this, width, height, renderer});
-
-    this[$loaded] = false;
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -124,32 +139,27 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
 
-    this[$fallbackResizeHandler] = debounce(() => {
-      const boundingRect = this.getBoundingClientRect();
-      this[$updateSize](boundingRect);
-    }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+    if (HAS_RESIZE_OBSERVER) {
+      // Set up a resize observer so we can scale our canvas
+      // if our <model-viewer> changes
+      this[$resizeObserver] = new ResizeObserver((entries) => {
+        // Don't resize anything if in AR mode; otherwise the canvas
+        // scaling to fullscreen on entering AR will clobber the flat/2d
+        // dimensions of the element.
+        if (renderer.isPresenting) {
+          return;
+        }
 
-    // Set a resize observer so we can scale our canvas
-    // if our <model-viewer> changes
-    this.resizeObserver = HAS_RESIZE_OBSERVER ?
-        new ResizeObserver((entries) => {
-          // Don't resize anything if in AR mode; otherwise the canvas
-          // scaling to fullscreen on entering AR will clobber the flat/2d
-          // dimensions of the element.
-          if (renderer.isPresenting) {
-            return;
+        for (let entry of entries) {
+          if (entry.target === this) {
+            this[$updateSize](entry.contentRect);
           }
-
-          for (let entry of entries) {
-            if (entry.target === this) {
-              this[$updateSize](entry.contentRect);
-            }
-          }
-        }) :
-        null;
+        }
+      });
+    }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver = new IntersectionObserver(entries => {
+      this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
             this[$scene].isVisible = entry.isIntersecting;
@@ -163,7 +173,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this.intersectionObserver = null;
       this[$scene].isVisible = true;
     }
   }
@@ -171,13 +180,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
   connectedCallback() {
     super.connectedCallback && super.connectedCallback();
     if (HAS_RESIZE_OBSERVER) {
-      this.resizeObserver.observe(this);
+      this[$resizeObserver]!.observe(this);
     } else {
       self.addEventListener('resize', this[$fallbackResizeHandler]);
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver.observe(this);
+      this[$intersectionObserver]!.observe(this);
     }
 
     this[$renderer].registerScene(this[$scene]);
@@ -187,19 +196,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
     if (HAS_RESIZE_OBSERVER) {
-      this.resizeObserver.unobserve(this);
+      this[$resizeObserver]!.unobserve(this);
     } else {
       self.removeEventListener('resize', this[$fallbackResizeHandler]);
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver.unobserve(this);
+      this[$intersectionObserver]!.unobserve(this);
     }
 
     this[$renderer].unregisterScene(this[$scene]);
   }
 
-  updated(changedProperties) {
+  updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space
@@ -225,7 +234,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize]({width, height}, forceApply) {
+  [$updateSize](
+      {width, height}: {width: any, height: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
     // Round off the pixel size
     width = parseInt(width, 10);
@@ -238,7 +248,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
   }
 
-  [$tick](time, delta) {
+  [$tick](_time: number, _delta: number) {
   }
 
   [$markLoaded]() {
@@ -255,11 +265,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene].isDirty = true;
   }
 
-  [$onModelLoad](e) {
+  [$onModelLoad](_event: any) {
     this[$needsRender]();
   }
 
-  [$onResize](e) {
+  [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
     this[$needsRender]();
   }
