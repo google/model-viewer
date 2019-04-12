@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
@@ -134,7 +134,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.camera.renderTarget.texture.generateMipmaps = true;
 
-    // Blur
+		// Blur
 
     this.blurScene = new Scene();
 
@@ -142,6 +142,11 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.blurCamera.renderTarget.texture.type = FloatType;
     this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.blurCamera.renderTarget.texture.generateMipmaps = true;
+
+    // Workaround: Firefox only supports RGBA32F
+    // https://stackoverflow.com/questions/45379051/cant-render-on-floating-point-rgb-texture-on-firefox
+    this.camera.renderTarget.texture.format = RGBAFormat;
+    this.blurCamera.renderTarget.texture.format = RGBAFormat;
 
     this.blurMaterial = new ShaderMaterial({
       uniforms: {
