@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,15 @@ import GLTFLoader from '../third_party/three/GLTFLoader.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
 
-export type ProgressCallback = (loaded: number, total: number) => void;
+export type ProgressCallback = (progress: number) => void;
 
 export const loadWithLoader =
     (url: string,
      loader: any,
-     progressCallback: ProgressCallback|null = null) => {
-      const onProgress = progressCallback != null ? (event: ProgressEvent) => {
-        progressCallback!(event.loaded, event.total);
-      } : () => {};
+     progressCallback: ProgressCallback = () => {}) => {
+      const onProgress = (event: ProgressEvent) => {
+        progressCallback!(event.loaded / event.total);
+      };
       return new Promise<Gltf>((resolve, reject) => {
         loader.load(url, resolve, onProgress, reject);
       });
@@ -35,6 +35,9 @@ const cache = new Map<string, Promise<Gltf>>();
 const preloaded = new Map<string, boolean>();
 
 export class CachingGLTFLoader {
+  static get cache() {
+    return cache;
+  }
   static clearCache() {
     cache.clear();
     preloaded.clear();
@@ -58,12 +61,18 @@ export class CachingGLTFLoader {
    * Preloads a glTF, populating the cache. Returns a promise that resolves
    * when the cache is populated.
    */
-  async preload(url: string, progressCallback: ProgressCallback|null = null) {
+  async preload(url: string, progressCallback: ProgressCallback = () => {}) {
     if (!cache.has(url)) {
-      cache.set(url, loadWithLoader(url, this.loader, progressCallback));
+      cache.set(url, loadWithLoader(url, this.loader, (progress: number) => {
+                  progressCallback(progress * 0.9);
+                }));
     }
 
     await cache.get(url);
+
+    if (progressCallback) {
+      progressCallback(1.0);
+    }
 
     preloaded.set(url, true);
   }
@@ -73,7 +82,7 @@ export class CachingGLTFLoader {
    * glTF. If the glTF has already been loaded, makes a clone of the cached
    * copy.
    */
-  async load(url: string, progressCallback: ProgressCallback|null = null) {
+  async load(url: string, progressCallback: ProgressCallback = () => {}) {
     await this.preload(url, progressCallback);
 
     const gltf = cloneGltf(await cache.get(url)!);

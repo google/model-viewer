@@ -15,9 +15,9 @@
 
 import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, UniformsUtils} from 'three';
 
-import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
-
+import {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {IlluminationRole} from '../three-components/ModelScene.js';
+
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
@@ -122,7 +122,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         const {environmentMap, skybox} =
             await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  backgroundImage, environmentImage, {pmrem});
+                  backgroundImage,
+                  environmentImage,
+                  {pmrem, progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
               resolve(await texturesLoad);
             });
@@ -139,6 +141,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
           const parsedColor = new Color(backgroundColor);
           this[$scene].background = parsedColor;
+          // Set the container node's background color so that it matches the
+          // background color configured for the scene. It's important to do
+          // this because we round the size of the canvas off to the nearest
+          // pixel, so it is possible (indeed likely) that there is a marginal
+          // gap around one or two edges of the canvas.
+          this[$container].style.backgroundColor = backgroundColor;
           this[$setShadowLightColor](parsedColor);
         }
 

@@ -84,7 +84,7 @@ export const dispatchSyntheticEvent = (element, type, properties = {
   clientY: 0,
   deltaY: 1.0
 }) => {
-  const event = new CustomEvent(type, {cancelable: true});
+  const event = new CustomEvent(type, {cancelable: true, bubbles: true});
   Object.assign(event, properties);
   element.dispatchEvent(event);
   return event;
@@ -124,4 +124,3 @@ export const isInDocumentTree = (element) => {
 
   return false;
 };
-

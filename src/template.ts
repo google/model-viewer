@@ -21,6 +21,7 @@ template.innerHTML = `
   <style>
     :host {
       display: block;
+      position: relative;
       contain: strict;
       width: 300px;
       height: 150px;
@@ -68,13 +69,21 @@ template.innerHTML = `
 
     .slot {
       position: absolute;
+      pointer-events: none;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
     }
+
+    .slot > * {
+      pointer-events: initial;
+    }
+
 
     .slot.poster {
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s 0.3s;
     }
 
     .slot.poster.show {
@@ -82,7 +91,11 @@ template.innerHTML = `
       transition: none;
     }
 
-    .slot.poster:not(.show) {
+    .slot.poster > * {
+      pointer-events: initial;
+    }
+
+    .slot.poster:not(.show) > * {
       pointer-events: none;
     }
 
@@ -90,8 +103,65 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       position: absolute;
-      background-size: cover;
-      background-position: center;
+      background-size: var(--poster-size, cover);
+      background-position: var(--poster-position, center);
+      background-color: var(--poster-color, var(--background-color, #fff));
+      background-image: var(--poster-image, none);
+    }
+
+    #default-progress-bar {
+      display: block;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #default-progress-bar > .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: var(--progress-mask-size, auto);
+      background-position: var(--progress-mask-position, auto);
+      background-color: var(--progress-mask-color, #fff);
+      background-image: var(--progress-mask-image, none);
+      transition: opacity 0.3s;
+      opacity: 0.2;
+    }
+
+    #default-progress-bar > .bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      transition: transform 0.09s;
+      transform-origin: top left;
+      transform: scaleX(0);
+      overflow: hidden;
+    }
+
+    #default-progress-bar > .bar:before {
+      content: '';
+      display: block;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      background-color: var(--progress-bar-color, rgba(0, 0, 0, 0.4));
+
+      transition: none;
+      transform-origin: top left;
+      transform: translateY(0);
+    }
+
+    #default-progress-bar > .bar.hide:before {
+      transition: transform 0.3s 1s;
+      transform: translateY(-100%);
     }
 
     .slot.controls-prompt {
@@ -110,6 +180,10 @@ template.innerHTML = `
       transition: transform 0.3s, opacity 0.3s;
     }
 
+    .slot.controls-prompt > * {
+      pointer-events: none;
+    }
+
     .slot.controls-prompt svg {
       transform: scale(0.5);
     }
@@ -123,6 +197,14 @@ template.innerHTML = `
     <div class="slot poster">
       <slot name="poster">
         <div id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
+      </slot>
+    </div>
+    <div class="slot progress-bar">
+      <slot name="progress-bar">
+        <div id="default-progress-bar" aria-hidden="true">
+          <div class="mask"></div>
+          <div class="bar"></div>
+        </div>
       </slot>
     </div>
     <a tabindex="2"

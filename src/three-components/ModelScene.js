@@ -153,10 +153,11 @@ export default class ModelScene extends Scene {
    * Sets the model via URL.
    *
    * @param {String?} source
+   * @param {Function?} progressCallback
    */
-  async setModelSource(source) {
+  async setModelSource(source, progressCallback) {
     try {
-      await this.model.setSource(source);
+      await this.model.setSource(source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);

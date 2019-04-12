@@ -20,6 +20,7 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
+import {ProgressTracker} from './utilities/progress-tracker.js';
 import {debounce, deserializeUrl, resolveDpr} from './utils.js';
 
 let renderer = new Renderer();
@@ -47,6 +48,7 @@ export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $renderer = Symbol('renderer');
 export const $resetRenderer = Symbol('resetRenderer');
+export const $progressTracker = Symbol('progressTracker');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -90,6 +92,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   protected[$resizeObserver]: ResizeObserver|null = null;
   protected[$intersectionObserver]: IntersectionObserver|null = null;
+
+  protected[$progressTracker]: ProgressTracker = new ProgressTracker();
 
   get loaded() {
     return this[$loaded];
@@ -219,7 +223,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
       this[$loaded] = false;
-      this[$updateSource]();
+      (async () => {
+        const updateSourceProgress = this[$progressTracker].beginActivity();
+        await this[$updateSource](
+            (progress: number) => updateSourceProgress(progress * 0.9));
+        updateSourceProgress(1.0);
+      })();
     }
 
     if (changedProperties.has('alt')) {
@@ -240,13 +249,16 @@ export default class ModelViewerElementBase extends UpdatingElement {
       {width, height}: {width: any, height: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
     // Round off the pixel size
-    width = parseInt(width, 10);
-    height = parseInt(height, 10);
+    const intWidth = parseInt(width, 10);
+    const intHeight = parseInt(height, 10);
 
-    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
-      this[$container].style.width = `${width}px`;
-      this[$container].style.height = `${height}px`;
-      this[$onResize]({width, height});
+    this[$container].style.width = `${width}px`;
+    this[$container].style.height = `${height}px`;
+
+    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
+      // this[$container].style.width = `${width}px`;
+      // this[$container].style.height = `${height}px`;
+      this[$onResize]({width: intWidth, height: intHeight});
     }
   }
 
@@ -292,12 +304,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * sets the views to use the new model based off of the `preload`
    * attribute.
    */
-  async[$updateSource]() {
+  async[$updateSource](
+      progressCallback: (progress: number) => void = () => {}) {
     const source = this.src;
 
     try {
       this[$canvas].classList.add('show');
-      await this[$scene].setModelSource(source);
+      await this[$scene].setModelSource(source, progressCallback);
     } catch (error) {
       this[$canvas].classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));

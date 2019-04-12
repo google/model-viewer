@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$posterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
@@ -67,7 +67,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       test('creates a poster element that captures interactions', () => {
         const picked = pickShadowDescendant(element);
         // TODO(cdata): Leaky internal details here:
-        expect(picked.classList.contains('poster')).to.be.equal(true);
+        expect(picked.id).to.be.equal('default-poster');
       });
 
       suite('preload', () => {
@@ -97,54 +97,65 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               });
         });
 
-        test('retains poster after preloading', async () => {
-          element.preload = true;
-          element.src = ASTRONAUT_GLB_PATH;
 
-          await waitForEvent(element, 'preload');
+        suite('reveal', () => {
+          suite('auto', () => {
+            test('hides poster when element loads', async () => {
+              element.preload = true;
+              element.src = ASTRONAUT_GLB_PATH;
 
-          const canvas = element[$canvas];
-          const picked = pickShadowDescendant(element);
+              await waitForEvent(element, 'load');
 
-          expect(picked).to.not.be.equal(canvas);
-        });
+              const canvas = element[$canvas];
+              const picked = pickShadowDescendant(element);
 
-        suite('when focused', () => {
-          test('can hide the poster with keyboard interaction', async () => {
-            element.preload = true;
-            element.src = ASTRONAUT_GLB_PATH;
-
-            const posterElement = element[$posterElement];
-            const canvasElement = element[$canvas];
-
-            await waitForEvent(element, 'preload');
-
-            // NOTE(cdata): Currently, Firefox does not forward focus when
-            // delegatesFocus is true but focus is triggered manually (e.g.,
-            // with the .focus() method).
-            posterElement.focus();
-
-            expect(element.shadowRoot.activeElement).to.be.equal(posterElement);
-
-            dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
-
-            await until(
-                () => element.shadowRoot.activeElement === canvasElement);
+              expect(picked).to.be.equal(canvas);
+            });
           });
-        });
 
-        suite('reveal-when-loaded', () => {
-          test('hides poster when element loads', async () => {
-            element.preload = true;
-            element.revealWhenLoaded = true;
-            element.src = ASTRONAUT_GLB_PATH;
+          suite('interaction', () => {
+            test('retains poster after preloading', async () => {
+              element.preload = true;
+              element.reveal = 'interaction';
+              element.src = ASTRONAUT_GLB_PATH;
 
-            await waitForEvent(element, 'load');
+              await waitForEvent(element, 'preload');
+              await timePasses(POSTER_TRANSITION_TIME + 100);
 
-            const canvas = element[$canvas];
-            const picked = pickShadowDescendant(element);
+              const canvas = element[$canvas];
+              const picked = pickShadowDescendant(element);
 
-            expect(picked).to.be.equal(canvas);
+              expect(picked).to.not.be.equal(canvas);
+            });
+
+            suite('when focused', () => {
+              test(
+                  'can hide the poster with keyboard interaction', async () => {
+                    element.preload = true;
+                    element.reveal = 'interaction';
+                    element.src = ASTRONAUT_GLB_PATH;
+
+                    const posterElement = element[$defaultPosterElement];
+                    const canvasElement = element[$canvas];
+
+                    await waitForEvent(element, 'preload');
+
+                    // NOTE(cdata): Currently, Firefox does not forward focus
+                    // when delegatesFocus is true but focus is triggered
+                    // manually (e.g., with the .focus() method).
+                    posterElement.focus();
+
+                    expect(element.shadowRoot.activeElement)
+                        .to.be.equal(posterElement);
+
+                    dispatchSyntheticEvent(
+                        posterElement, 'keydown', {keyCode: 13});
+
+                    await until(() => {
+                      return element.shadowRoot.activeElement === canvasElement;
+                    });
+                  });
+            });
           });
         });
       });
@@ -175,8 +186,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           await waitForEvent(
               element,
-              'poster-visibility',
-              event => event.detail.visible === false);
+              'model-visibility',
+              event => event.detail.visible === true);
 
           const ostensiblyNotThePoster = pickShadowDescendant(element);
 
@@ -188,8 +199,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             element.dismissPoster();
             await waitForEvent(
                 element,
-                'poster-visibility',
-                event => event.detail.visible === false);
+                'model-visibility',
+                event => event.detail.visible === true);
           });
 
           test('allows the canvas to be interactive', async () => {

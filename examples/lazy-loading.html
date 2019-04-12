@@ -16,13 +16,14 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>&lt;model-viewer&gt; Lazy Loading</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
     minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
-  <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
 
@@ -36,12 +37,13 @@
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+  <!--<script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>-->
 
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
+
 <body>
 
   <div class="sample">
@@ -50,28 +52,25 @@
 
       <div id="header">
         <a class="icon-button icon-modelviewer" href="../index.html"></a>
-        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lazy-loading.html"></a>
+        <a class="icon-github icon-button"
+          href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lazy-loading.html"></a>
       </div>
 
       <div class="wrapper">
 
         <div id="intro">
           <h3>Lazy Loading</h3>
-          <p>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the <span class="attribute">&lt;model-viewer&gt;</span> element using the poster attribute.</p>
+          <p>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the <span
+              class="attribute">&lt;model-viewer&gt;</span> element using the poster attribute.</p>
         </div>
 
-        <h2 class="demo-title">Display poster until loaded</h2>
+        <h2 class="demo-title">Display a poster until loaded</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer id="reveal" reveal-when-loaded preload poster="assets/poster.png" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
-<script>
-  $('#reveal').addEventListener('load', e => {
-    // Display a red border to illustrate load timing
-    e.target.style.border = '2px solid #ccc';
-  }, { once: true });
-</script>
-              </template>
-          </example-snippet>
+            <model-viewer id="reveal" preload poster="assets/poster.png" src="assets/shishkebab.glb"
+              alt="A 3D model of a shishkebab"></model-viewer>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>
@@ -84,14 +83,9 @@
         <h2 class="demo-title">Preload with poster and show model on interaction</h2>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-<!-- use unique asset to ensure preloading -->
-<model-viewer id="interaction" preload poster="assets/poster.png" src="assets/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
-<script>
-  $('#interaction').addEventListener('load', e => {
-    // Display a red border to illustrate load timing
-    e.target.style.border = '2px solid #ccc';
-  }, { once: true });
-</script>
+            <!-- use unique asset to ensure preloading -->
+            <model-viewer id="interaction" preload reveal="interaction" poster="assets/poster.png"
+              src="assets/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -106,14 +100,9 @@
         <h2 class="demo-title">Lazy load with poster until interaction</h2>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
-<!-- use unique asset to ensure lazy loading -->
-<model-viewer id="lazy-load" poster="assets/poster.png" src="assets/DamagedHelmet/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet"></model-viewer>
-<script>
-$('#lazy-load').addEventListener('load', e => {
-  // Display a red border to illustrate load timing
-  e.target.style.border = '2px solid #ccc';
-}, { once: true });
-</script>
+            <!-- use unique asset to ensure lazy loading -->
+            <model-viewer id="lazy-load" poster="assets/poster.png" reveal="interaction"
+              src="assets/DamagedHelmet/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -125,10 +114,10 @@ $('#lazy-load').addEventListener('load', e => {
     <div class="content">
       <div class="wrapper">
 
-        <h2 class="demo-title">Model with poster and preload</h2>
+        <h2 class="demo-title">Poster with invalid model</h2>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
-            <model-viewer poster="assets/poster.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -140,31 +129,17 @@ $('#lazy-load').addEventListener('load', e => {
     <div class="content">
       <div class="wrapper">
 
-        <h2 class="demo-title">Poster with invalid model</h2>
+        <h2 class="demo-title">Cycling between posters</h2>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-              <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
-          </template>
-        </example-snippet>
-      </div>
-    </div>
-  </div>
-
-  <div class="sample">
-    <div class="demo" id="demo-container-6"></div>
-    <div class="content">
-      <div class="wrapper">
-
-        <h2 class="demo-title">Cycling between posters</h2>
-        <example-snippet stamp-to="demo-container-6" highlight-as="html">
-          <template>
-<model-viewer id="toggle-poster" poster="assets/poster2.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
-<script>
-  const posters = ['poster.png', 'poster2.png'];
-  let i = 0;
-  setInterval(() =>
-    $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
-</script>
+            <model-viewer id="toggle-poster" reveal="interaction" poster="assets/poster2.png" src="assets/Astronaut.glb"
+              alt="A 3D model of an astronaut"></model-viewer>
+            <script>
+              const posters = ['poster.png', 'poster2.png'];
+              let i = 0;
+              setInterval(() =>
+                $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
+            </script>
           </template>
         </example-snippet>
       </div>
@@ -174,12 +149,14 @@ $('#lazy-load').addEventListener('load', e => {
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a
+          href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
       </li>
 
       <li class="attribution">
-        <a href="https://poly.google.com/view/6uTsH2jqgVn">Shishkebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        <a href="https://poly.google.com/view/6uTsH2jqgVn">Shishkebab</a> by <a
+          href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
       </li>
     </ul>
@@ -189,22 +166,19 @@ $('#lazy-load').addEventListener('load', e => {
   <script src="./scripts/helpers.js"></script>
 
   <!-- Documentation-specific dependencies: -->
-  <script type="module"
-      src="./built/dependencies.js">
+  <script type="module" src="./built/dependencies.js">
   </script>
-  <script nomodule
-      src="./built/dependencies-legacy.js">
+  <script nomodule src="./built/dependencies-legacy.js">
   </script>
 
   <!-- Loads <model-viewer> only on modern browsers: -->
-  <script type="module"
-      src="../dist/model-viewer.js">
+  <script type="module" src="../dist/model-viewer.js">
   </script>
 
   <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../dist/model-viewer-legacy.js">
+  <script nomodule src="../dist/model-viewer-legacy.js">
   </script>
 
 </body>
+
 </html>

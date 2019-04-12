@@ -95,42 +95,56 @@ export default class TextureUtils extends EventDispatcher {
 
   /**
    * @param {string} url
+   * @param {Function} progressCallback
    * @return {Promise<THREE.Texture>}
    */
-  async load(url) {
-    const isHDR = HDR_FILE_RE.test(url);
-    const loader = isHDR ? hdrLoader : ldrLoader;
-    const texture = await new Promise(
-        (resolve, reject) => loader.load(url, resolve, undefined, reject));
-    texture.userData = {
-      ...userData,
-      ...({
-        url: url,
-        mapping: 'Equirectangular',
-      })
-    };
+  async load(url, progressCallback = () => {}) {
+    try {
+      const isHDR = HDR_FILE_RE.test(url);
+      const loader = isHDR ? hdrLoader : ldrLoader;
+      const texture = await new Promise(
+          (resolve, reject) => loader.load(url, resolve, (event) => {
+            progressCallback(event.loaded / event.total * 0.9);
+          }, reject));
 
-    if (isHDR) {
-      texture.encoding = RGBEEncoding;
-      texture.minFilter = NearestFilter;
-      texture.magFilter = NearestFilter;
-      texture.flipY = true;
-    } else {
-      texture.encoding = GammaEncoding;
+      progressCallback(1.0);
+
+      texture.userData = {
+        ...userData,
+        ...({
+          url: url,
+          mapping: 'Equirectangular',
+        })
+      };
+
+      if (isHDR) {
+        texture.encoding = RGBEEncoding;
+        texture.minFilter = NearestFilter;
+        texture.magFilter = NearestFilter;
+        texture.flipY = true;
+      } else {
+        texture.encoding = GammaEncoding;
+      }
+
+      return texture;
+
+    } finally {
+      if (progressCallback) {
+        progressCallback(1);
+      }
     }
-
-    return texture;
   }
 
   /**
    * @param {string} url
+   * @param {Function} progressCallback
    * @return {Promise<THREE.WebGLRenderCubeTarget>}
    */
-  async loadEquirectAsCubeMap(url) {
+  async loadEquirectAsCubeMap(url, progressCallback = () => {}) {
     let equirect = null;
 
     try {
-      equirect = await this.load(url);
+      equirect = await this.load(url, progressCallback);
       return await this.equirectangularToCubemap(equirect);
     } finally {
       if (equirect != null) {
@@ -147,10 +161,14 @@ export default class TextureUtils extends EventDispatcher {
    * @see equirectangularToCubemap with regard to the THREE types.
    * @param {string} url
    * @param {boolean} config.pmrem
+   * @param {ProgressTracker} config.progressTracker
    * @return {Promise<Object|null>}
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl = null, environmentMapUrl = null, options = {}) {
+    const {progressTracker} = options;
+    let updateGenerationProgress = () => {};
+
     let skyboxLoads = Promise.resolve(null);
     let environmentMapLoads = Promise.resolve(null);
 
@@ -160,22 +178,29 @@ export default class TextureUtils extends EventDispatcher {
     try {
       let environmentMapWasGenerated = false;
 
-      // If we have a skybox URL, attempt to load it as a cubemap
-      if (!!skyboxUrl) {
-        skyboxLoads = this.loadEquirectAsCubeMap(skyboxUrl);
-      }
-
       // If we have a specific environment URL, attempt to load it as a cubemap
       // The case for this is that the user intends for the IBL to be different
       // from the scene background (which may be a skybox or solid color).
       if (!!environmentMapUrl) {
-        environmentMapLoads = this.loadEquirectAsCubeMap(environmentMapUrl);
+        environmentMapLoads = this.loadEquirectAsCubeMap(
+            environmentMapUrl,
+            progressTracker ? progressTracker.beginActivity() : () => {});
       }
+
+      // If we have a skybox URL, attempt to load it as a cubemap
+      if (!!skyboxUrl) {
+        skyboxLoads = this.loadEquirectAsCubeMap(
+            skyboxUrl,
+            progressTracker ? progressTracker.beginActivity() : () => {});
+      }
+
+      updateGenerationProgress =
+          progressTracker ? progressTracker.beginActivity() : () => {};
 
       // In practice, this should be nearly as parallel as Promise.all (which
       // we don't use since we can't easily destructure here):
-      skybox = await skyboxLoads;
       environmentMap = await environmentMapLoads;
+      skybox = await skyboxLoads;
 
       // If environment is still null, then no specific environment URL was
       // specified
@@ -232,6 +257,8 @@ export default class TextureUtils extends EventDispatcher {
       }
 
       throw error;
+    } finally {
+      updateGenerationProgress(1.0);
     }
   }
 
