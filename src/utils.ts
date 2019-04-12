@@ -61,6 +61,36 @@ export const toFullUrl = (partialUrl: string): string => {
 };
 
 
+/**
+ * Returns a throttled version of a given function that is only invoked at most
+ * once within a given threshold of time in milliseconds.
+ *
+ * The throttled version of the function has a "flush" property that resets the
+ * threshold for cases when immediate invokation is desired.
+ */
+export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
+  let timer: number|null = null;
+
+  const throttled = (...args: Array<any>) => {
+    if (timer != null) {
+      return;
+    }
+
+    fn(...args);
+
+    timer = self.setTimeout(() => timer = null, ms);
+  };
+
+  throttled.flush = () => {
+    if (timer != null) {
+      self.clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  return throttled;
+};
+
 export const debounce = (fn: (...args: Array<any>) => any, ms: number) => {
   let timer: number|null = null;
 
