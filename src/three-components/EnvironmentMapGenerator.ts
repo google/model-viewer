@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, FloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, HalfFloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
@@ -130,7 +130,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     // scene.rotation.y = Math.PI / 2.0;
 
     this.camera = new CubeCamera(0.1, 100, 128);
-    this.camera.renderTarget.texture.type = FloatType;
+    this.camera.renderTarget.texture.type = HalfFloatType;
     this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.camera.renderTarget.texture.generateMipmaps = true;
 
@@ -139,7 +139,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.blurScene = new Scene();
 
     this.blurCamera = new CubeCamera(0.1, 100, 128);
-    this.blurCamera.renderTarget.texture.type = FloatType;
+    this.blurCamera.renderTarget.texture.type = HalfFloatType;
     this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.blurCamera.renderTarget.texture.generateMipmaps = true;
 
