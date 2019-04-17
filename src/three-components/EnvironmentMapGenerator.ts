@@ -19,7 +19,7 @@ const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
-  protected camera: CubeCamera = new CubeCamera(0.1, 100, 256);
+  protected camera: CubeCamera;
 
   protected blurScene: Scene;
   protected blurCamera: CubeCamera;
@@ -49,7 +49,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     const boxMaterial =
         new MeshStandardMaterial({roughness: 0.5, metalness: 0});
 
-    const mainLight = new PointLight(0xffffff, 600.0, 28, 2);
+    const mainLight = new PointLight(0xffffff, 800.0, 27, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
     scene.add(mainLight);
 
@@ -129,17 +129,17 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     scene.position.y = -3.5;
     // scene.rotation.y = Math.PI / 2.0;
 
-    this.camera = new CubeCamera(0.1, 100, 128);
+    this.camera = new CubeCamera(0.1, 100, 256);
     this.camera.renderTarget.texture.type = HalfFloatType;
     this.camera.renderTarget.texture.format = RGBAFormat;
     this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.camera.renderTarget.texture.generateMipmaps = true;
 
-		// Blur
+    // Blur
 
     this.blurScene = new Scene();
 
-    this.blurCamera = new CubeCamera(0.1, 100, 128);
+    this.blurCamera = new CubeCamera(0.1, 100, 256);
     this.blurCamera.renderTarget.texture.type = HalfFloatType;
     this.blurCamera.renderTarget.texture.format = RGBAFormat;
     this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
