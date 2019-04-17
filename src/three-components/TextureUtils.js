@@ -34,10 +34,6 @@ const $cubeGenerator = Symbol('cubeGenerator');
 
 const defaultConfig = {
   cubemapSize: 1024,
-  pmremSamples: 32,
-  pmremSize: 256,
-  defaultEnvironmentPmremSamples: 8,
-  defaultEnvironmentPmremSize: 256,
 };
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -54,8 +50,6 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize
-   * @param {?number} config.pmremSamples
-   * @param {?number} config.pmremSize
    */
   constructor(renderer, config = {}) {
     super();
@@ -221,14 +215,8 @@ export default class TextureUtils extends EventDispatcher {
         // Apply the PMREM pass to the environment, which produces a distinct
         // texture from the source:
         const nonPmremEnvironmentMap = environmentMap;
-        const samples = environmentMapWasGenerated ?
-            this.config.defaultEnvironmentPmremSamples :
-            this.config.pmremSamples;
-        const size = environmentMapWasGenerated ?
-            this.config.defaultEnvironmentPmremSize :
-            this.config.pmremSize;
 
-        environmentMap = this.pmremPass(nonPmremEnvironmentMap, samples, size);
+        environmentMap = this.pmremPass(nonPmremEnvironmentMap);
 
         // If the source was generated, then we should dispose of it right away
         if (environmentMapWasGenerated) {
