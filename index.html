@@ -187,15 +187,25 @@
           </li>
           <li>
             <div>poster</div>
-            <p>Displays an image instead of the model. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+            <p>Configure to display an image while the model is still loading.
+            This attribute will override the corresponding --poster-image CSS
+            property if both are set.
           </li>
           <li>
             <div>preload</div>
-            <p>When poster is also enabled, the model will be downloaded before user action. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+            <p>When set, &lt;model-viewer&gt; will attempt to preload a model
+            even if other attributes indicate that model does not need to be
+            loaded yet.</p>
           </li>
           <li>
-            <div>reveal-when-loaded</div>
-            <p>When poster and preload are specified, hide the poster and show the model once the model has been loaded. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+            <div>reveal</div>
+            <p>This attribute controls whether or not the model should be
+            automatically revealed when loaded. It currently supports two
+            values: "auto" and "interaction". If reveal is set to "interaction",
+            &lt;model-viewer&gt; will wait until the user interacts with the
+            poster before loading and revealing the model. Otherwise, the model
+            will be revealed as soon as it is done loading and rendering.
+            Defaults to "auto".</p>
           </li>
           <li>
             <div>shadow-intensity</div>
@@ -262,6 +272,11 @@
             current animation to the beginning, you should also set the
             currentTime property to 0.</p>
           </li>
+          <li>
+            <div>dismissPoster()</div>
+            <p>Causes the model to load (if it has not already preloaded) and
+            render, and then be immediately revealed.</p>
+          </li>
         </ul>
 
         <h3 class="grouping-title">Events</h3>
@@ -297,6 +312,17 @@
           <li>
             <div>preload</div>
             <p>When preload is enabled this event is fired when preloading is done.</p>
+          </li>
+          <li>
+            <div>progress</div>
+            <p>This event is dispatched whenever there is loading or rendering
+            work occurring in preparation to display a model. Progress events
+            can be dispatched for any number of reasons (loading the environment
+            map, changing the model, applying one-time rendering effects etc).
+            They indicate that the model is being prepared to be rendered.
+            The model will be obscured by the poster until the progress events
+            have indicated that the work is done. You can measure an estimation
+            of total progress by looking at event.detail.totalProgress.</p>
           </li>
         </ul>
 
