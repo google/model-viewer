@@ -101,9 +101,9 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       position: absolute;
-      background-size: var(--poster-size, cover);
-      background-position: var(--poster-position, center);
-      background-color: var(--poster-color, var(--background-color, #fff));
+      background-size: cover;
+      background-position: center;
+      background-color: var(--poster-color, #fff);
       background-image: var(--poster-image, none);
     }
 
@@ -122,10 +122,7 @@ template.innerHTML = `
       left: 0;
       width: 100%;
       height: 100%;
-      background-size: var(--progress-mask-size, auto);
-      background-position: var(--progress-mask-position, auto);
-      background-color: var(--progress-mask-color, #fff);
-      background-image: var(--progress-mask-image, none);
+      background: var(--progress-mask, #fff);
       transition: opacity 0.3s;
       opacity: 0.2;
     }
