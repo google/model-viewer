@@ -305,7 +305,7 @@ export const LoadingMixin = (ModelViewerElement:
 
     get[$shouldRevealModel](): boolean {
       return this.reveal === RevealStrategy.AUTO ||
-          this.reveal === this[$posterDismissalSource];
+          !!this[$posterDismissalSource];
     }
 
     get[$shouldAttemptPreload](): boolean {
