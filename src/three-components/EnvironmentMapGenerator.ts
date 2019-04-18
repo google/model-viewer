@@ -30,7 +30,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   protected createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
-    material.color.setRGB(intensity, intensity, intensity);
+    material.color.setScalar(intensity);
     return material;
   }
 
@@ -40,14 +40,15 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     // Scene
 
     const {scene} = this;
-
+    scene.position.y = -3.5;
+    
     const geometry = new BoxBufferGeometry();
     geometry.removeAttribute('uv');
 
-    const roomMaterial = new MeshStandardMaterial(
-        {roughness: 0.5, metalness: 0, side: BackSide, color: 0xffffff});
+    const roomMaterial =
+        new MeshStandardMaterial({metalness: 0, side: BackSide});
     const boxMaterial =
-        new MeshStandardMaterial({roughness: 0.5, metalness: 0});
+        new MeshStandardMaterial({metalness: 0});
 
     const mainLight = new PointLight(0xffffff, 800.0, 27, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
@@ -126,9 +127,6 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     light5.scale.set(4.52, 2.885, 0.1);
     scene.add(light5);
 
-    scene.position.y = -3.5;
-    // scene.rotation.y = Math.PI / 2.0;
-
     this.camera = new CubeCamera(0.1, 100, 256);
     this.camera.renderTarget.texture.type = HalfFloatType;
     this.camera.renderTarget.texture.format = RGBAFormat;
@@ -138,12 +136,6 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     // Blur
 
     this.blurScene = new Scene();
-
-    this.blurCamera = new CubeCamera(0.1, 100, 256);
-    this.blurCamera.renderTarget.texture.type = HalfFloatType;
-    this.blurCamera.renderTarget.texture.format = RGBAFormat;
-    this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
-    this.blurCamera.renderTarget.texture.generateMipmaps = true;
 
     this.blurMaterial = new ShaderMaterial({
       uniforms: {
@@ -173,6 +165,12 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     });
 
     this.blurScene.add(new Mesh(geometry,this.blurMaterial));
+    
+    this.blurCamera = new CubeCamera(0.1, 100, 256);
+    this.blurCamera.renderTarget.texture.type = HalfFloatType;
+    this.blurCamera.renderTarget.texture.format = RGBAFormat;
+    this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
+    this.blurCamera.renderTarget.texture.generateMipmaps = true;
 
     //
 
@@ -224,6 +222,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   dispose() {
     this.camera.renderTarget.dispose();
-    this.blurCamera.renderTarget.dispose();
+    this.blurRenderTarget1.dispose();
+    this.blurRenderTarget2.dispose();
   }
 }
