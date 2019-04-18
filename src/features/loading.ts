@@ -194,8 +194,14 @@ export const LoadingMixin = (ModelViewerElement:
           parentNode.appendChild(this[$defaultProgressBarElement]);
         }
 
-        this[$defaultProgressBarElement].classList.toggle(
-            'hide', progress === 1.0);
+        // NOTE(cdata): IE11 does not properly respect the second parameter of
+        // classList.toggle, which this implementation originally used.
+        // @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/11865865/
+        if (progress === 1.0) {
+          this[$defaultProgressBarElement].classList.add('hide');
+        } else {
+          this[$defaultProgressBarElement].classList.remove('hide');
+        }
       });
     }, PROGRESS_BAR_UPDATE_THRESHOLD);
 

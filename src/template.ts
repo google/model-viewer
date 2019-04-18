@@ -31,7 +31,6 @@ template.innerHTML = `
       position: relative;
     }
 
-
     a.enter-ar {
       width: 40px;
       height: 40px;
@@ -79,7 +78,6 @@ template.innerHTML = `
     .slot > * {
       pointer-events: initial;
     }
-
 
     .slot.poster {
       opacity: 0;

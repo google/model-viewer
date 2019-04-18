@@ -113,13 +113,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
   constructor() {
     super();
 
-    this.attachShadow({mode: 'open', delegatesFocus: true});
+    // NOTE(cdata): It is *very important* to access this template first so that
+    // the ShadyCSS template preparation steps happen before element styling in
+    // IE11:
+    const template = (this.constructor as any).template as HTMLTemplateElement;
 
     if ((window as any).ShadyCSS) {
-      (window as any).ShadyCSS.styleElement(this);
+      (window as any).ShadyCSS.styleElement(this, {});
     }
+
+    // NOTE(cdata): The canonical ShadyCSS examples suggest that the Shadow Root
+    // should be created after the invocation of ShadyCSS.styleElement
+    this.attachShadow({mode: 'open', delegatesFocus: true});
+
     const shadowRoot = this.shadowRoot!;
-    const template = (this.constructor as any).template as HTMLTemplateElement;
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
@@ -256,8 +263,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$container].style.height = `${height}px`;
 
     if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
-      // this[$container].style.width = `${width}px`;
-      // this[$container].style.height = `${height}px`;
       this[$onResize]({width: intWidth, height: intHeight});
     }
   }
