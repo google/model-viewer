@@ -33,6 +33,7 @@ before_deploy:
 - echo '!node_modules/@magicleap' >> .gitignore
 - echo '!node_modules/fullscreen-polyfill' >> .gitignore
 - echo '!node_modules/resize-observer-polyfill' >> .gitignore
+- git log -n 1 > VERSION
 deploy:
   - provider: script
     script: ./scripts/record-fidelity-results.sh
