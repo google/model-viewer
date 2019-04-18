@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Uncharted2ToneMapping, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
 import {IS_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -66,11 +66,11 @@ export default class Renderer extends EventDispatcher {
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
+      this.renderer.gammaFactor = 2.2;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
-      this.renderer.toneMapping = Uncharted2ToneMapping;
-      this.renderer.toneMappingWhitePoint = 1.75;
+      this.renderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
       this.context = null;
       console.warn(error);
