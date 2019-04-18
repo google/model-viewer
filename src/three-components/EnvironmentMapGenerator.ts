@@ -30,7 +30,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   protected createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
-    material.color.setScalar(intensity);
+    material.color.setScalar(intensity / 4.0);
     return material;
   }
 
@@ -41,7 +41,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
     const {scene} = this;
     scene.position.y = -3.5;
-    
+
     const geometry = new BoxBufferGeometry();
     geometry.removeAttribute('uv');
 
@@ -50,7 +50,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     const boxMaterial =
         new MeshStandardMaterial({metalness: 0});
 
-    const mainLight = new PointLight(0xffffff, 800.0, 27, 2);
+    const mainLight = new PointLight(0xffffff, 600.0, 27, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
     scene.add(mainLight);
 
@@ -97,32 +97,31 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
 
     // -z right
-    const light1 = new Mesh(geometry, this.createAreaLightMaterial(30));
+    const light1 = new Mesh(geometry, this.createAreaLightMaterial(40));
     light1.position.set(-16.116, 12.757, 7.208);
     light1.scale.set(0.1, 2.428, 3.739);
     scene.add(light1);
 
     // -z left
-    const light2 = new Mesh(geometry, this.createAreaLightMaterial(25));
+    const light2 = new Mesh(geometry, this.createAreaLightMaterial(40));
     light2.position.set(-16.109, 16.021, -7.207);
     light2.scale.set(0.1, 2.425, 3.751);
     scene.add(light2);
 
     // +z
-    const light3 = new Mesh(geometry, this.createAreaLightMaterial(15));
+    const light3 = new Mesh(geometry, this.createAreaLightMaterial(35));
     light3.position.set(13.904, 10.198, -1.832);
     light3.scale.set(0.15, 4.265, 6.331);
     scene.add(light3);
 
     // +x
-    // NOTE(cdata): The intensity for this light is ~50 in the reference map
-    const light4 = new Mesh(geometry, this.createAreaLightMaterial(21));
+    const light4 = new Mesh(geometry, this.createAreaLightMaterial(50));
     light4.position.set(-0.462, 8.409, 14.520);
     light4.scale.set(5.78, 6.341, 0.088);
     scene.add(light4);
 
     // -x
-    const light5 = new Mesh(geometry, this.createAreaLightMaterial(13.5));
+    const light5 = new Mesh(geometry, this.createAreaLightMaterial(30));
     light5.position.set(4.235, 13.486, -12.541);
     light5.scale.set(4.52, 2.885, 0.1);
     scene.add(light5);
@@ -155,7 +154,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
         uniform samplerCube tCube;
         varying vec3 vWorldDirection;
         void main() {
-          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 1.0 );
+          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.5 );
           gl_FragColor = mapTexelToLinear( texColor );
         }
       `,
@@ -165,7 +164,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     });
 
     this.blurScene.add(new Mesh(geometry,this.blurMaterial));
-    
+
     this.blurCamera = new CubeCamera(0.1, 100, 256);
     this.blurCamera.renderTarget.texture.type = HalfFloatType;
     this.blurCamera.renderTarget.texture.format = RGBAFormat;
