@@ -19,8 +19,6 @@ import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 
-const ENVIRONMENT_BASE_INTENSITY = 1.0;
-
 /**
  * An Object3D that can swap out its underlying
  * model.
@@ -90,8 +88,6 @@ export default class Model extends Object3D {
     if (!intensityIsNumber) {
       intensity = 1.0;
     }
-
-    intensity *= ENVIRONMENT_BASE_INTENSITY;
 
     this.modelContainer.traverse(object => {
       if (object && object.isMesh && object.material) {
