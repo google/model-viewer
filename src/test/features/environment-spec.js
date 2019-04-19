@@ -242,9 +242,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
             await timePasses();
             expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
           });
-      test('the directional light is tinted', () => {
+
+      test('the directional light is not tinted', () => {
         const lightColor = scene.shadowLight.color.getHexString().toLowerCase();
-        expect(lightColor).to.not.be.equal('ffffff');
+        expect(lightColor).to.be.equal('ffffff');
       });
 
       suite('on an unlit model', () => {

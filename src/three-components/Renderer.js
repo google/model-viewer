@@ -70,6 +70,8 @@ export default class Renderer extends EventDispatcher {
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
+      // ACESFilmicToneMapping appears to be the most "saturated",
+      // and similar to Filament's gltf-viewer.
       this.renderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
       this.context = null;
