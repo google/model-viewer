@@ -47,10 +47,9 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
     const roomMaterial =
         new MeshStandardMaterial({metalness: 0, side: BackSide});
-    const boxMaterial =
-        new MeshStandardMaterial({metalness: 0});
+    const boxMaterial = new MeshStandardMaterial({metalness: 0});
 
-    const mainLight = new PointLight(0xffffff, 400.0, 29, 2);
+    const mainLight = new PointLight(0xffffff, 500.0, 28, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
     scene.add(mainLight);
 
@@ -97,33 +96,33 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
 
     // -z right
-    const light1 = new Mesh(geometry, this.createAreaLightMaterial(30));
-    light1.position.set(-16.116, 12.757, 7.208);
-    light1.scale.set(0.1, 2.428, 3.739);
+    const light1 = new Mesh(geometry, this.createAreaLightMaterial(50));
+    light1.position.set(-16.116, 14.37, 8.208);
+    light1.scale.set(0.1, 2.428, 2.739);
     scene.add(light1);
 
     // -z left
-    const light2 = new Mesh(geometry, this.createAreaLightMaterial(30));
-    light2.position.set(-16.109, 18.021, -7.207);
-    light2.scale.set(0.1, 2.425, 3.751);
+    const light2 = new Mesh(geometry, this.createAreaLightMaterial(50));
+    light2.position.set(-16.109, 18.021, -8.207);
+    light2.scale.set(0.1, 2.425, 2.751);
     scene.add(light2);
 
     // +z
-    const light3 = new Mesh(geometry, this.createAreaLightMaterial(25));
+    const light3 = new Mesh(geometry, this.createAreaLightMaterial(17));
     light3.position.set(14.904, 12.198, -1.832);
     light3.scale.set(0.15, 4.265, 6.331);
     scene.add(light3);
 
     // +x
-    const light4 = new Mesh(geometry, this.createAreaLightMaterial(40));
-    light4.position.set(-0.462, 8.409, 14.520);
-    light4.scale.set(4.78, 5.341, 0.088);
+    const light4 = new Mesh(geometry, this.createAreaLightMaterial(43));
+    light4.position.set(-0.462, 8.89, 14.520);
+    light4.scale.set(4.38, 5.441, 0.088);
     scene.add(light4);
 
     // -x
     const light5 = new Mesh(geometry, this.createAreaLightMaterial(20));
     light5.position.set(3.235, 11.486, -12.541);
-    light5.scale.set(4.52, 2.885, 0.1);
+    light5.scale.set(2.5, 2.0, 0.1);
     scene.add(light5);
 
     this.camera = new CubeCamera(0.1, 100, 256);
@@ -137,9 +136,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     this.blurScene = new Scene();
 
     this.blurMaterial = new ShaderMaterial({
-      uniforms: {
-        tCube: {value: null}
-      },
+      uniforms: {tCube: {value: null}},
       vertexShader: `
         varying vec3 vWorldDirection;
         #include <common>
@@ -163,7 +160,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
       depthWrite: false
     });
 
-    this.blurScene.add(new Mesh(geometry,this.blurMaterial));
+    this.blurScene.add(new Mesh(geometry, this.blurMaterial));
 
     this.blurCamera = new CubeCamera(0.1, 100, 256);
     this.blurCamera.renderTarget.texture.type = HalfFloatType;
@@ -175,7 +172,6 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
     this.blurRenderTarget1 = this.camera.renderTarget;
     this.blurRenderTarget2 = this.blurCamera.renderTarget;
-
   }
 
   /**
@@ -197,13 +193,15 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
       // Blur
 
-      for (var i = 0; i < 16; i ++) {
+      for (var i = 0; i < 16; i++) {
         // Ping-Pong
         if (i % 2 === 0) {
-          this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget1.texture;
+          this.blurMaterial.uniforms.tCube.value =
+              this.blurRenderTarget1.texture;
           this.blurCamera.renderTarget = this.blurRenderTarget2;
         } else {
-          this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget2.texture;
+          this.blurMaterial.uniforms.tCube.value =
+              this.blurRenderTarget2.texture;
           this.blurCamera.renderTarget = this.blurRenderTarget1;
         }
         this.blurCamera.update(this.renderer, this.blurScene);
@@ -213,7 +211,8 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
       this.renderer.toneMappingExposure = toneMappingExposure;
       this.renderer.gammaOutput = gammaOutput;
 
-      rendererTextureCache.set(this.renderer, this.blurCamera.renderTarget.texture);
+      rendererTextureCache.set(
+          this.renderer, this.blurCamera.renderTarget.texture);
     }
 
     return rendererTextureCache.get(this.renderer)!;
