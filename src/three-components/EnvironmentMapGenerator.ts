@@ -30,7 +30,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
   protected createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
-    material.color.setScalar(intensity / 4.0);
+    material.color.setScalar(intensity);
     return material;
   }
 
@@ -50,7 +50,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     const boxMaterial =
         new MeshStandardMaterial({metalness: 0});
 
-    const mainLight = new PointLight(0xffffff, 600.0, 27, 2);
+    const mainLight = new PointLight(0xffffff, 400.0, 29, 2);
     mainLight.position.set(0.418, 16.199, 0.300);
     scene.add(mainLight);
 
@@ -97,32 +97,32 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
 
     // -z right
-    const light1 = new Mesh(geometry, this.createAreaLightMaterial(40));
+    const light1 = new Mesh(geometry, this.createAreaLightMaterial(30));
     light1.position.set(-16.116, 12.757, 7.208);
     light1.scale.set(0.1, 2.428, 3.739);
     scene.add(light1);
 
     // -z left
-    const light2 = new Mesh(geometry, this.createAreaLightMaterial(40));
-    light2.position.set(-16.109, 16.021, -7.207);
+    const light2 = new Mesh(geometry, this.createAreaLightMaterial(30));
+    light2.position.set(-16.109, 18.021, -7.207);
     light2.scale.set(0.1, 2.425, 3.751);
     scene.add(light2);
 
     // +z
-    const light3 = new Mesh(geometry, this.createAreaLightMaterial(35));
-    light3.position.set(13.904, 10.198, -1.832);
+    const light3 = new Mesh(geometry, this.createAreaLightMaterial(25));
+    light3.position.set(14.904, 12.198, -1.832);
     light3.scale.set(0.15, 4.265, 6.331);
     scene.add(light3);
 
     // +x
-    const light4 = new Mesh(geometry, this.createAreaLightMaterial(50));
+    const light4 = new Mesh(geometry, this.createAreaLightMaterial(40));
     light4.position.set(-0.462, 8.409, 14.520);
-    light4.scale.set(5.78, 6.341, 0.088);
+    light4.scale.set(4.78, 5.341, 0.088);
     scene.add(light4);
 
     // -x
-    const light5 = new Mesh(geometry, this.createAreaLightMaterial(30));
-    light5.position.set(4.235, 13.486, -12.541);
+    const light5 = new Mesh(geometry, this.createAreaLightMaterial(20));
+    light5.position.set(3.235, 11.486, -12.541);
     light5.scale.set(4.52, 2.885, 0.1);
     scene.add(light5);
 
