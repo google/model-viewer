@@ -154,7 +154,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
         uniform samplerCube tCube;
         varying vec3 vWorldDirection;
         void main() {
-          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.5 );
+          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.0 );
           gl_FragColor = mapTexelToLinear( texColor );
         }
       `,
