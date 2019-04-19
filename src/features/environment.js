@@ -196,9 +196,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       const illuminationRole = this.experimentalPmrem ?
           IlluminationRole.Secondary :
           IlluminationRole.Primary;
+      const environmentIntensity = this.experimentalPmrem ?
+          this.environmentIntensity * 0.65 :
+          this.environmentIntensity;
 
       scene.configureStageLighting(this.stageLightIntensity, illuminationRole);
-      scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
+      scene.model.setEnvironmentMapIntensity(environmentIntensity);
     }
 
     [$deallocateTextures]() {
