@@ -202,13 +202,18 @@ template.innerHTML = `
         </div>
       </slot>
     </div>
-    <a tabindex="2"
-        class="enter-ar"
-        href="#"
-        aria-label="View this 3D model in augmented reality">
-      <div class="disc"></div>
-      ${ARGlyph}
-    </a>
+    <div class="slot ar-button">
+      <slot name="ar-button">
+        <a tabindex="2"
+            class="enter-ar"
+            href="#"
+            aria-label="View this 3D model up close">
+          <div class="disc"></div>
+          ${ARGlyph}
+        </a>
+      </slot>
+    </div>
+    
     <canvas tabindex="1"
         aria-label="A depiction of a 3D model"
         aria-live="polite">
