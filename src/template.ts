@@ -189,6 +189,13 @@ template.innerHTML = `
     }
   </style>
   <div class="container">
+    <canvas tabindex="1"
+      aria-label="A depiction of a 3D model"
+      aria-live="polite">
+    </canvas>
+
+    <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
+         will have their <slot> elements removed by ShadyCSS -->
     <div class="slot poster">
       <slot name="poster">
         <div id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
@@ -213,21 +220,15 @@ template.innerHTML = `
         </a>
       </slot>
     </div>
-    
-    <canvas tabindex="1"
-        aria-label="A depiction of a 3D model"
-        aria-live="polite">
-    </canvas>
-    <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
-         will have their <slot> elements removed by ShadyCSS -->
     <div class="slot controls-prompt">
       <slot name="controls-prompt" aria-hidden="true">
         ${ControlsPrompt}
       </slot>
     </div>
-  </div>
-  <slot></slot>
-`;
+    <div class="slot default">
+      <slot></slot>
+    </div>
+  </div>`;
 
 export default template;
 
