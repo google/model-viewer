@@ -21,8 +21,13 @@ import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
+import {Constructor} from './utils.js';
 
-const ModelViewerElement = [
+type ModelViewerMixin =
+    (ModelViewerElement: Constructor<ModelViewerElementBase>) =>
+        Constructor<ModelViewerElementBase>;
+
+const mixins: Array<ModelViewerMixin> = ([
   AnimationMixin,
   LoadingMixin,
   ARMixin,
@@ -30,6 +35,12 @@ const ModelViewerElement = [
   EnvironmentMixin,
   StagingMixin,
   MagicLeapMixin
-].reduce((Base, Mixin) => Mixin(Base), ModelViewerElementBase);
+] as Array<ModelViewerMixin>);  // NOTE(cdata): Remove cast when all mixins are
+                                // converted to TypeScript
+
+const ModelViewerElement: Constructor<ModelViewerElementBase> = mixins.reduce(
+    (Base: Constructor<ModelViewerElementBase>, Mixin: ModelViewerMixin) =>
+        Mixin(Base),
+    ModelViewerElementBase);
 
 customElements.define('model-viewer', ModelViewerElement);
