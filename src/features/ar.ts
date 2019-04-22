@@ -14,6 +14,7 @@
  */
 
 import {property} from 'lit-element';
+
 import {IS_AR_CANDIDATE, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS} from '../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl, openIOSARQuickLook} from '../utils.js';
@@ -26,6 +27,8 @@ export const ARMixin = (ModelViewerElement:
                             Constructor<ModelViewerElementBase>):
     Constructor<ModelViewerElementBase> => {
       class ARModelViewerElement extends ModelViewerElement {
+        @property({attribute: 'ar'}) ar: boolean = false;
+
         @property({type: Boolean, attribute: 'unstable-webxr'})
         unstableWebxr: boolean = false;
 
@@ -38,15 +41,13 @@ export const ARMixin = (ModelViewerElement:
               'none';
         }
 
+        // TODO: Add this to the shadow root as part of this mixin's
+        // implementation:
         protected[$enterARElement]: HTMLElement =
             this.shadowRoot!.querySelector('.enter-ar') as HTMLElement;
 
         constructor() {
           super();
-
-          // TODO: Add this to the shadow root as part of this mixin's
-          // implementation:
-          // this[$enterARElement] = this.shadowRoot.querySelector('.enter-ar');
 
           this[$enterARElement].addEventListener('click', e => {
             e.preventDefault();
@@ -122,7 +123,8 @@ export const ARMixin = (ModelViewerElement:
             return;
           }
 
-          const canShowButton = this.unstableWebxr && IS_AR_CANDIDATE;
+          const canShowButton =
+              this.ar && this.unstableWebxr && IS_AR_CANDIDATE;
           const iosCandidate =
               IS_IOS && IS_AR_QUICKLOOK_CANDIDATE && this.iosSrc != null;
           const renderer = this[$renderer];
