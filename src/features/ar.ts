@@ -15,19 +15,68 @@
 
 import {property} from 'lit-element';
 
-import {IS_AR_CANDIDATE, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS} from '../constants.js';
+import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
-import {Constructor, deserializeUrl, openIOSARQuickLook} from '../utils.js';
+import {Constructor, deserializeUrl} from '../utils.js';
 
-const $enterARElement = Symbol('enterARElement');
-const $enterARWithQuickLook = Symbol('enterARWithQuickLook');
+/**
+ * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
+ * iOS can intent to their AR Quick Look.
+ */
+export const openIOSARQuickLook = (() => {
+  const anchor = document.createElement('a');
+  anchor.setAttribute('rel', 'ar');
+  anchor.appendChild(document.createElement('img'));
+
+  return (usdzSrc: string) => {
+    anchor.setAttribute('href', usdzSrc);
+    anchor.click();
+  };
+})();
+
+export const openARViewer = (() => {
+  const anchor = document.createElement('a');
+
+  return (gltfSrc: string, title: string) => {
+    const location = window.location.toString();
+    const modelUrl = new URL(gltfSrc);
+    const link = encodeURIComponent(location);
+    const scheme = modelUrl.protocol.replace(':', '');
+
+    title = encodeURIComponent(title);
+    modelUrl.protocol = 'intent://';
+
+    const intent = `${modelUrl.toString()}?link=${link}&title=${
+        title}#Intent;scheme=${
+        scheme};package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
+
+    anchor.setAttribute('href', intent);
+    anchor.click();
+  };
+})();
+
+type ARMode = 'quick-look'|'ar-viewer'|'unstable-webxr'|'none';
+
+const ARMode: {[index: string]: ARMode} = {
+  QUICK_LOOK: 'quick-look',
+  AR_VIEWER: 'ar-viewer',
+  UNSTABLE_WEBXR: 'unstable-webxr',
+  NONE: 'none'
+};
+
+const $arButton = Symbol('enterARElement');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
+const $canActivateAR = Symbol('canActivateAR');
+const $arMode = Symbol('arMode');
+
+const $arButtonClickHandler = Symbol('arButtonClickHandler');
+const $onARButtonClick = Symbol('onARButtonClick');
 
 export const ARMixin = (ModelViewerElement:
                             Constructor<ModelViewerElementBase>):
     Constructor<ModelViewerElementBase> => {
       class ARModelViewerElement extends ModelViewerElement {
-        @property({attribute: 'ar'}) ar: boolean = false;
+        @property({attribute: 'ar', type: Boolean}) ar: boolean = false;
 
         @property({type: Boolean, attribute: 'unstable-webxr'})
         unstableWebxr: boolean = false;
@@ -37,22 +86,23 @@ export const ARMixin = (ModelViewerElement:
         iosSrc: string|null = null;
 
         get canActivateAR(): boolean {
-          return window.getComputedStyle(this[$enterARElement]).display !==
-              'none';
+          return this[$arMode] !== ARMode.NONE;
         }
+
+        protected[$canActivateAR]: boolean = false;
 
         // TODO: Add this to the shadow root as part of this mixin's
         // implementation:
-        protected[$enterARElement]: HTMLElement =
-            this.shadowRoot!.querySelector('.enter-ar') as HTMLElement;
+        protected[$arButton]: HTMLAnchorElement =
+            this.shadowRoot!.querySelector('.ar-button') as HTMLAnchorElement;
+
+        protected[$arButtonClickHandler]:
+            (event: Event) => void = (event) => this[$onARButtonClick](event);
+
+        protected[$arMode]: ARMode = ARMode.NONE;
 
         constructor() {
           super();
-
-          this[$enterARElement].addEventListener('click', e => {
-            e.preventDefault();
-            this.enterAR();
-          });
 
           const renderer = this[$renderer];
           const scene = this[$scene];
@@ -72,23 +122,32 @@ export const ARMixin = (ModelViewerElement:
         }
 
         /**
-         * Enables the AR
+         * Activates AR. Note that for any mode that is not WebXR-based, this
+         * method most likely has to be called synchronous from a user
+         * interaction handler. Otherwise, attempts to activate modes that
+         * require user interaction will most likely be ignored.
          */
-        enterAR() {
-          if (IS_IOS) {
-            this[$enterARWithQuickLook]();
-          } else if (IS_AR_CANDIDATE) {
-            this[$enterARWithWebXR]();
+        async activateAR() {
+          switch (this[$arMode]) {
+            case ARMode.QUICK_LOOK:
+              openIOSARQuickLook(this.iosSrc!);
+              break;
+            case ARMode.UNSTABLE_WEBXR:
+              await this[$enterARWithWebXR]();
+              break;
+            case ARMode.AR_VIEWER:
+              this.requestFullscreen();
+              openARViewer(this.src!, this.alt || '');
+              break;
+            default:
+              console.warn(
+                  'No AR Mode can be activated. This is probably due to missing \
+configuration or device capabilities');
+              break;
           }
         }
 
-        async[$enterARWithQuickLook]() {
-          if (this.iosSrc != null) {
-            openIOSARQuickLook(this.iosSrc);
-          }
-        }
-
-        async[$enterARWithWebXR]() {
+        protected async[$enterARWithWebXR]() {
           const renderer = this[$renderer];
 
           console.log('Attempting to enter fullscreen and present in AR...');
@@ -119,25 +178,46 @@ export const ARMixin = (ModelViewerElement:
           super.update(changedProperties);
 
           if (!changedProperties.has('unstableWebxr') &&
-              !changedProperties.has('iosSrc')) {
+              !changedProperties.has('iosSrc') &&
+              !changedProperties.has('ar') && !changedProperties.has('src') &&
+              !changedProperties.has('alt')) {
             return;
           }
 
-          const canShowButton =
-              this.ar && this.unstableWebxr && IS_AR_CANDIDATE;
-          const iosCandidate =
-              IS_IOS && IS_AR_QUICKLOOK_CANDIDATE && this.iosSrc != null;
           const renderer = this[$renderer];
+          const unstableWebxrCandidate = this.unstableWebxr &&
+              IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
+          const arViewerCandidate = IS_ANDROID && this.ar;
+          const iosQuickLookCandidate =
+              IS_IOS && IS_AR_QUICKLOOK_CANDIDATE && !!this.iosSrc;
 
-          // On iOS, always enable the AR button. On non-iOS,
-          // see if AR is supported, and if so, display the button after
-          // an XRDevice has been initialized
-          if (iosCandidate ||
-              (canShowButton && await renderer.supportsPresentation())) {
-            this[$enterARElement].style.display = 'block';
+          const showArButton = unstableWebxrCandidate || arViewerCandidate ||
+              iosQuickLookCandidate;
+
+          if (unstableWebxrCandidate) {
+            this[$arMode] = ARMode.UNSTABLE_WEBXR;
+          } else if (arViewerCandidate) {
+            this[$arMode] = ARMode.AR_VIEWER;
+          } else if (iosQuickLookCandidate) {
+            this[$arMode] = ARMode.QUICK_LOOK;
           } else {
-            this[$enterARElement].style.display = 'none';
+            this[$arMode] = ARMode.NONE;
           }
+
+          if (showArButton) {
+            this[$arButton].style.display = 'block';
+            this[$arButton].addEventListener(
+                'click', this[$arButtonClickHandler]);
+          } else {
+            this[$arButton].removeEventListener(
+                'click', this[$arButtonClickHandler]);
+            this[$arButton].style.display = 'none';
+          }
+        }
+
+        [$onARButtonClick](event: Event) {
+          event.preventDefault();
+          this.activateAR();
         }
       }
 

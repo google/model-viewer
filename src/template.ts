@@ -31,31 +31,6 @@ template.innerHTML = `
       position: relative;
     }
 
-    a.enter-ar {
-      width: 40px;
-      height: 40px;
-      position: absolute;
-      display: block;
-      right: 10px;
-      top: 10px;
-      display: none;
-    }
-
-    a.enter-ar svg {
-      position: absolute;
-      top: calc(50% - 12px);
-      left: calc(50% - 12px);
-    }
-
-    a.enter-ar .disc {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      opacity: 0.6;
-      background-color: #fff;
-      box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.2);
-    }
-
     canvas {
       width: 100%;
       height: 100%;
@@ -187,6 +162,35 @@ template.innerHTML = `
       opacity: 1;
       transform: scale(1);
     }
+
+    .slot.ar-button {
+      -moz-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .fab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      background-color: #fff;
+      box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.15);
+      border-radius: 100px;
+    }
+
+    .fab > * {
+      opacity: 0.87;
+    }
+
+    #default-ar-button {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+    }
   </style>
   <div class="container">
     <canvas tabindex="1"
@@ -211,11 +215,8 @@ template.innerHTML = `
     </div>
     <div class="slot ar-button">
       <slot name="ar-button">
-        <a tabindex="2"
-            class="enter-ar"
-            href="#"
+        <a id="default-ar-button" class="fab" href="#"
             aria-label="View this 3D model up close">
-          <div class="disc"></div>
           ${ARGlyph}
         </a>
       </slot>

@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
-import {IS_AR_CANDIDATE} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {resolveDpr} from '../utils.js';
 
@@ -47,7 +47,7 @@ export default class Renderer extends EventDispatcher {
     const webGlOptions = {alpha: false, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
-    if (IS_AR_CANDIDATE) {
+    if (IS_WEBXR_AR_CANDIDATE) {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
