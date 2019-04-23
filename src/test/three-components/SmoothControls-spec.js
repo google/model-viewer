@@ -66,6 +66,8 @@ suite('SmoothControls', () => {
     camera = new PerspectiveCamera();
     controls = new SmoothControls(camera, element);
 
+    controls.applyOptions({overRotateAmount: 0});
+
     element.style.height = '100px';
     element.tabIndex = 0;
 
