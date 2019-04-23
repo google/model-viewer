@@ -317,21 +317,17 @@ export class SmoothControls extends EventDispatcher {
       targetPhi: number = this[$targetSpherical].phi,
       targetRadius: number = this[$targetSpherical].radius): boolean {
     const {
-      minimumAzimuthalAngle,
-      maximumAzimuthalAngle,
       minimumPolarAngle,
       maximumPolarAngle,
       minimumRadius,
-      maximumRadius,
+      maximumRadius
     } = this[$options];
 
     const {theta, phi, radius} = this[$targetSpherical];
 
-    this[$clampedTargetSpherical].theta = clamp(
-      targetTheta,
-      minimumAzimuthalAngle!,
-      maximumAzimuthalAngle!
-    );
+    // currently we will not clamp theta / azimuthal angles
+    this[$clampedTargetSpherical].theta = targetTheta;
+
     this[$clampedTargetSpherical].phi = clamp(
       targetPhi,
       minimumPolarAngle!,
@@ -373,8 +369,6 @@ export class SmoothControls extends EventDispatcher {
     const targetRadius = radius + deltaRadius;
 
     const {
-      // minimumAzimuthalAngle: minTheta,
-      // maximumAzimuthalAngle: maxTheta,
       minimumPolarAngle: minPhi,
       maximumPolarAngle: maxPhi,
     } = this[$options];
@@ -660,21 +654,13 @@ export class SmoothControls extends EventDispatcher {
       maximumPolarAngle,
       minimumRadius,
       maximumRadius,
-      overRotateAmount,
+      overRotateAmount
     } = this[$options];
 
     const minOverRotatePolar = (0 - minimumPolarAngle!) * overRotateAmount! + minimumPolarAngle!;
     const maxOverRotatePolar = (Math.PI - maximumPolarAngle!) * overRotateAmount! + maximumPolarAngle!;
-    let minOverRotateAzimuthal = minimumAzimuthalAngle!;
-    let maxOverRotateAzimuthal = maximumAzimuthalAngle!; 
-
-    if (minimumAzimuthalAngle! > -Math.PI) {
-      minOverRotateAzimuthal = (minimumAzimuthalAngle! - Math.PI) * overRotateAmount! + minimumAzimuthalAngle!;
-    }
-
-    if (maximumAzimuthalAngle! < Math.PI) {
-      maxOverRotateAzimuthal = (Math.PI - maximumAzimuthalAngle!) * overRotateAmount! + maximumAzimuthalAngle!;
-    }
+    const minOverRotateAzimuthal = minimumAzimuthalAngle!;
+    const maxOverRotateAzimuthal = maximumAzimuthalAngle!; 
 
     this[$minOverSpherical].set(
       minimumRadius!,
