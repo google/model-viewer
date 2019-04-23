@@ -364,7 +364,6 @@ export class SmoothControls extends EventDispatcher {
       boolean {
     const {theta, phi, radius} = this[$targetSpherical];
 
-    const targetTheta = theta - deltaTheta;
     let targetPhi = phi - deltaPhi;
     const targetRadius = radius + deltaRadius;
 
@@ -384,6 +383,11 @@ export class SmoothControls extends EventDispatcher {
     }
 
     targetPhi = phi - deltaPhi * phiScale;
+
+    // we adjust the deltaTheta based on phiScale
+    // because it makes this feel way more natural as if you
+    // can't rotate the object on theta axis because it's taut
+    const targetTheta = theta - deltaTheta * phiScale;
 
     return this.setOrbit(targetTheta, targetPhi, targetRadius);
   }
