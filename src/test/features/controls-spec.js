@@ -335,6 +335,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             async () => {
               const {canvas} = element[$scene];
               const controls = element[$controls];
+              const minPolar = controls.options.minimumPolarAngle;
+              const maxPolar = controls.options.maximumPolarAngle;
+              const polarDiff = maxPolar - minPolar;
+              const halfPolar = polarDiff * 0.5;
 
               await rafPasses();
               canvas.focus();
@@ -347,13 +351,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage upper-front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -halfPolar, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -halfPolar, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))

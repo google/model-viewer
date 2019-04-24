@@ -32,7 +32,6 @@ export interface SphericalPosition {
 const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 
 const HALF_PI = Math.PI / 2.0;
-const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
 const PHI = 2.0 * Math.PI;
 
@@ -287,8 +286,16 @@ export const ControlsMixin = (ModelViewerElement:
             const azimuthalQuadrant =
                 (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
 
-            const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
-            const polarTrient = Math.floor(phi / THIRD_PI);
+            const minPolar = this[$controls].options.minimumPolarAngle!;
+            const maxPolar = this[$controls].options.maximumPolarAngle!;
+            const diffPolar = maxPolar - minPolar;
+            const polarIncrement = diffPolar / POLAR_TRIENT_LABELS.length;
+
+            let lastPolarTrient = Math.floor((lastPhi - minPolar) / polarIncrement);
+            let polarTrient = Math.floor((phi - minPolar) / polarIncrement);
+
+            lastPolarTrient = Math.min(Math.max(lastPolarTrient, 0), POLAR_TRIENT_LABELS.length - 1);
+            polarTrient = Math.min(Math.max(polarTrient, 0), POLAR_TRIENT_LABELS.length - 1);
 
             if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
                 polarTrient !== lastPolarTrient) {
