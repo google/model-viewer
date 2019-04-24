@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utils.js';
 
 /**
@@ -64,13 +64,22 @@ const ARMode: {[index: string]: ARMode} = {
   NONE: 'none'
 };
 
-const $arButton = Symbol('enterARElement');
+const $exitFullscreenButtonContainer = Symbol('exitFullscreenButtonContainer');
+const $arButtonContainer = Symbol('arButtonContainer');
+const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
 
-const $arButtonClickHandler = Symbol('arButtonClickHandler');
-const $onARButtonClick = Symbol('onARButtonClick');
+const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
+const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
+
+const $exitFullscreenButtonContainerClickHandler =
+    Symbol('exitFullscreenButtonContainerClickHandler');
+const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
+
+const $fullscreenchangeHandler = Symbol('fullscreenHandler');
+const $onFullscreenchange = Symbol('onFullscreen');
 
 export const ARMixin = (ModelViewerElement:
                             Constructor<ModelViewerElementBase>):
@@ -93,33 +102,26 @@ export const ARMixin = (ModelViewerElement:
 
         // TODO: Add this to the shadow root as part of this mixin's
         // implementation:
-        protected[$arButton]: HTMLAnchorElement =
-            this.shadowRoot!.querySelector('.ar-button') as HTMLAnchorElement;
+        protected[$arButtonContainer]: HTMLElement =
+            this.shadowRoot!.querySelector('.ar-button') as HTMLElement;
 
-        protected[$arButtonClickHandler]:
-            (event: Event) => void = (event) => this[$onARButtonClick](event);
+        protected[$exitFullscreenButtonContainer]: HTMLElement =
+            this.shadowRoot!.querySelector('.slot.exit-fullscreen-button') as
+            HTMLElement;
+        protected[$defaultExitFullscreenButton]: HTMLElement =
+            this.shadowRoot!.querySelector('#default-exit-fullscreen-button') as
+            HTMLElement;
+
+        protected[$arButtonContainerClickHandler]: (event: Event) => void =
+            (event) => this[$onARButtonContainerClick](event);
+
+        protected[$exitFullscreenButtonContainerClickHandler]:
+            () => void = () => this[$onExitFullscreenButtonClick]();
+
+        protected[$fullscreenchangeHandler]:
+            () => void = () => this[$onFullscreenchange]();
 
         protected[$arMode]: ARMode = ARMode.NONE;
-
-        constructor() {
-          super();
-
-          const renderer = this[$renderer];
-          const scene = this[$scene];
-          const onFullscreenchange = () => {
-            if (document.fullscreenElement !== this &&
-                renderer.presentedScene === scene) {
-              try {
-                renderer.stopPresenting();
-              } catch (error) {
-                console.warn('Unexpected error while stopping AR presentation');
-                console.error(error);
-              }
-            }
-          };
-
-          document.addEventListener('fullscreenchange', onFullscreenchange);
-        }
 
         /**
          * Activates AR. Note that for any mode that is not WebXR-based, this
@@ -144,6 +146,46 @@ export const ARMixin = (ModelViewerElement:
                   'No AR Mode can be activated. This is probably due to missing \
 configuration or device capabilities');
               break;
+          }
+        }
+
+        connectedCallback() {
+          super.connectedCallback();
+          document.addEventListener(
+              'fullscreenchange', this[$fullscreenchangeHandler]);
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          document.removeEventListener(
+              'fullscreenchange', this[$fullscreenchangeHandler]);
+        }
+
+        [$onExitFullscreenButtonClick]() {
+          if (document.fullscreenElement === this) {
+            document.exitFullscreen();
+          }
+        }
+
+        [$onFullscreenchange]() {
+          const renderer = this[$renderer];
+          const scene = this[$scene];
+          const isFullscreen = document.fullscreenElement === this;
+
+          if (isFullscreen) {
+            this[$container].classList.add('fullscreen');
+          } else {
+            this[$container].classList.remove('fullscreen');
+          }
+
+          if (document.fullscreenElement !== this &&
+              renderer.presentedScene === scene) {
+            try {
+              renderer.stopPresenting();
+            } catch (error) {
+              console.warn('Unexpected error while stopping AR presentation');
+              console.error(error);
+            }
           }
         }
 
@@ -205,17 +247,21 @@ configuration or device capabilities');
           }
 
           if (showArButton) {
-            this[$arButton].style.display = 'block';
-            this[$arButton].addEventListener(
-                'click', this[$arButtonClickHandler]);
+            this[$arButtonContainer].classList.add('enabled');
+            this[$arButtonContainer].addEventListener(
+                'click', this[$arButtonContainerClickHandler]);
+            this[$exitFullscreenButtonContainer].addEventListener(
+                'click', this[$exitFullscreenButtonContainerClickHandler]);
           } else {
-            this[$arButton].removeEventListener(
-                'click', this[$arButtonClickHandler]);
-            this[$arButton].style.display = 'none';
+            this[$arButtonContainer].removeEventListener(
+                'click', this[$arButtonContainerClickHandler]);
+            this[$exitFullscreenButtonContainer].removeEventListener(
+                'click', this[$exitFullscreenButtonContainerClickHandler]);
+            this[$arButtonContainer].classList.remove('enabled');
           }
         }
 
-        [$onARButtonClick](event: Event) {
+        [$onARButtonContainerClick](event: Event) {
           event.preventDefault();
           this.activateAR();
         }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import CloseIcon from './assets/close-material-svg.js';
 import ControlsPrompt from './assets/controls-svg.js';
 import ARGlyph from './assets/view-in-ar-material-svg.js';
 
@@ -169,6 +170,11 @@ template.innerHTML = `
       user-select: none;
     }
 
+    .slot.ar-button:not(.enabled),
+    .fullscreen .slot.ar-button {
+      display: none;
+    }
+
     .fab {
       display: flex;
       align-items: center;
@@ -191,6 +197,26 @@ template.innerHTML = `
       bottom: 16px;
       right: 16px;
     }
+
+    :not(.fullscreen) .slot.exit-fullscreen-button {
+      display: none;
+    }
+
+    #default-exit-fullscreen-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 40px;
+      height: 40px;
+      box-sizing: border-box;
+    }
+
+    #default-exit-fullscreen-button > svg {
+      fill: #fff;
+    }
   </style>
   <div class="container">
     <canvas tabindex="1"
@@ -205,6 +231,7 @@ template.innerHTML = `
         <div id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
       </slot>
     </div>
+
     <div class="slot progress-bar">
       <slot name="progress-bar">
         <div id="default-progress-bar" aria-hidden="true">
@@ -213,19 +240,34 @@ template.innerHTML = `
         </div>
       </slot>
     </div>
+
     <div class="slot ar-button">
       <slot name="ar-button">
         <a id="default-ar-button" class="fab" href="#"
+            tabindex="2"
             aria-label="View this 3D model up close">
           ${ARGlyph}
         </a>
       </slot>
     </div>
+
+    <div class="slot exit-fullscreen-button">
+      <slot name="exit-fullscreen-button">
+        <a id="default-exit-fullscreen-button"
+            tabindex="3"
+            aria-label="Exit fullscreen"
+            aria-hidden="true">
+          ${CloseIcon}
+        </a>
+      </slot>
+    </div>
+
     <div class="slot controls-prompt">
       <slot name="controls-prompt" aria-hidden="true">
         ${ControlsPrompt}
       </slot>
     </div>
+
     <div class="slot default">
       <slot></slot>
     </div>
