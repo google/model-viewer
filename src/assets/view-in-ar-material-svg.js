@@ -1,6 +1,4 @@
 export default `
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 21.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" focusable="false" aria-hidden="true">
 <rect fill="none" width="24" height="24"/>
@@ -13,5 +11,4 @@ export default `
 	<path d="M3.95,3.95H7v-1.9H3.55c-0.83,0-1.5,0.67-1.5,1.5V7h1.9V3.95z"/>
 	<path d="M17,2.05v1.9h3.05V7h1.9V3.55c0-0.83-0.67-1.5-1.5-1.5H17z"/>
 </g>
-</svg>
-`;
+</svg>`;
