@@ -5,7 +5,7 @@ export default `
         d="M50,75 C55,50 195,50 200,75 C195,100 55,100 50,75"
         stroke-linecap="round"
         stroke-dasharray="180 180"
-        stroke-dashoffset="-60"
+        stroke-dashoffset="-40"
         stroke="#a1a1a1"
         stroke-width="7"
         fill="transparent">
@@ -21,6 +21,7 @@ export default `
         opacity="1"
         stroke-linecap="round"
         stroke-dasharray="140 220"
+        stroke-dashoffset="-225"
         stroke="white"
         stroke-width="7"
         fill="transparent">
@@ -55,16 +56,22 @@ export default `
     </g>
   </g>
 
+  <path id="orbit-hidden"
+          d="M-30,15 C-35,-10 115,-10 120,15 C115,40 -35,40 -30,15"
+          stroke-width="0"
+          fill="transparent"></path>
+  
   <!-- Arrow -->
-  <polyline id="Path-3" stroke="#a1a1a1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" transform="translate(-33.952293, -4) rotate(-39.000000) " points="35.5366949 39.6822958 26.6550872 26.0761929 41.2494988 29.5432078">
-    <animateMotion
-        calcMode="linear"
-        keyPoints="0.095;0.09668;0.10124;0.10796;0.11612;0.125;0.13388;0.14204;0.14876;0.15332;0.155;0.15332;0.14876;0.14204;0.13388;0.125;0.11612;0.10796;0.10124;0.09668;0.095"
-        keyTimes="0;0.05;0.1;0.15;0.2;0.25;0.3;0.35;0.4;0.45;0.5;0.55;0.6;0.65;0.7;0.75;0.8;0.85;0.9;0.95;1"
-        dur="1.75s"
-        repeatCount="indefinite">
-      <mpath xlink:href="#orbit"/>
-    </animateMotion>
-  </polyline>
-</svg>
-`;
+  <g transform="translate(80, 60)">
+    <polyline id="Path-3" stroke="#a1a1a1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" transform="translate(-33.952293, -4) rotate(-39.000000)" points="35.5366949 39.6822958 26.6550872 26.0761929 41.2494988 29.5432078">
+      <animateMotion
+          calcMode="linear"
+          keyPoints="0.095;0.09668;0.10124;0.10796;0.11612;0.125;0.13388;0.14204;0.14876;0.15332;0.155;0.15332;0.14876;0.14204;0.13388;0.125;0.11612;0.10796;0.10124;0.09668;0.095"
+          keyTimes="0;0.05;0.1;0.15;0.2;0.25;0.3;0.35;0.4;0.45;0.5;0.55;0.6;0.65;0.7;0.75;0.8;0.85;0.9;0.95;1"
+          dur="1.75s"
+          repeatCount="indefinite">
+        <mpath xlink:href="#orbit-hidden"/>
+      </animateMotion>
+    </polyline>
+  </g>
+</svg>`;
