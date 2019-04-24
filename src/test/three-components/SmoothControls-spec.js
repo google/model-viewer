@@ -324,5 +324,139 @@ suite('SmoothControls', () => {
         });
       });
     });
+
+    suite('elastic over rotate', () => {
+      setup(() => {
+        controls.applyOptions({
+          overRotateAmount: 1,
+          minimumPolarAngle: QUARTER_PI,
+          maximumPolarAngle: THREE_QUARTERS_PI
+        });
+        controls.setOrbit(0, 0, 0);
+        settleControls(controls);
+      });
+
+      test('can over rotate below minimumPolarAngle', () => {
+        const minPolar = controls.options.minimumPolarAngle;
+
+        controls.setOrbit(0, minPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(minPolar);
+
+        controls.adjustOrbit(0, QUARTER_PI * 0.25, 0);
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.lessThan(minPolar);
+      });
+
+      test('can over rotate above maximumPolarAngle', () => {
+        const maxPolar = controls.options.maximumPolarAngle;
+
+        controls.setOrbit(0, maxPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(maxPolar);
+
+        controls.adjustOrbit(0, -QUARTER_PI * 0.25, 0);
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.greaterThan(maxPolar);
+      });
+
+      test('can return to minimumPolarAngle on mouseup', () => {
+        const minPolar = controls.options.minimumPolarAngle;
+
+        controls.setOrbit(0, minPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(minPolar);
+
+        controls.adjustOrbit(0, QUARTER_PI * 0.25, 0);
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.lessThan(minPolar);
+
+        dispatchSyntheticEvent(element, 'mouseup');
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(minPolar);
+      });
+
+      test('can return to maximumPolarAngle on mouseup', () => {
+        const maxPolar = controls.options.maximumPolarAngle;
+
+        controls.setOrbit(0, maxPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(maxPolar);
+
+        controls.adjustOrbit(0, -QUARTER_PI * 0.25, 0);
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.greaterThan(maxPolar);
+
+        dispatchSyntheticEvent(element, 'mouseup');
+
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(maxPolar);
+      });
+
+      test('increment decreases when going beyond maximumPolarAngle', () => {
+        const maxPolar = controls.options.maximumPolarAngle;
+
+        controls.setOrbit(0, maxPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(maxPolar);
+
+        controls.adjustOrbit(0, -QUARTER_PI * 0.1, 0);
+        settleControls(controls);
+
+        const rotation1 = controls.getCameraSpherical().phi;
+        const increment1 = rotation1 - maxPolar;
+
+        controls.adjustOrbit(0, -QUARTER_PI * 0.1, 0);
+        settleControls(controls);
+
+        const rotation2 = controls.getCameraSpherical().phi;
+        const increment2 = rotation2 - rotation1;
+
+        expect(increment1).to.be.greaterThan(0);
+        expect(increment2).to.be.greaterThan(0);
+        expect(increment2).to.be.lessThan(increment1);
+      });
+
+      test('increment decreases when going beyond minimumPolarAngle', () => {
+        const minPolar = controls.options.minimumPolarAngle;
+
+        controls.setOrbit(0, minPolar, 0);
+        settleControls(controls);
+
+        expect(controls.getCameraSpherical().phi).to.be.equal(minPolar);
+
+        controls.adjustOrbit(0, QUARTER_PI * 0.1, 0);
+        settleControls(controls);
+
+        const rotation1 = controls.getCameraSpherical().phi;
+        const increment1 = minPolar - rotation1;
+
+        controls.adjustOrbit(0, QUARTER_PI * 0.1, 0);
+        settleControls(controls);
+
+        const rotation2 = controls.getCameraSpherical().phi;
+        const increment2 = rotation1 - rotation2;
+
+        expect(increment1).to.be.greaterThan(0);
+        expect(increment2).to.be.greaterThan(0);
+        expect(increment2).to.be.lessThan(increment1);
+      });
+    });
   });
 });
