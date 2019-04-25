@@ -36,19 +36,44 @@ export const openIOSARQuickLook = (() => {
 
 export const openARViewer = (() => {
   const anchor = document.createElement('a');
+  const noArViewerSigil = '#model-viewer-no-ar-fallback';
+  let fallbackInvoked = false;
 
   return (gltfSrc: string, title: string) => {
-    const location = window.location.toString();
+    // If the fallback has ever been invoked this session, bounce early:
+    if (fallbackInvoked) {
+      return;
+    }
+
+    const location = self.location.toString();
+    const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
     const link = encodeURIComponent(location);
     const scheme = modelUrl.protocol.replace(':', '');
+
+    locationUrl.hash = noArViewerSigil;
 
     title = encodeURIComponent(title);
     modelUrl.protocol = 'intent://';
 
     const intent = `${modelUrl.toString()}?link=${link}&title=${
         title}#Intent;scheme=${
-        scheme};package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
+        scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+        encodeURIComponent(locationUrl.toString())};end;`;
+
+    const undoHashChange = () => {
+      if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
+        fallbackInvoked = true;
+        // The new history will be the current URL with a new hash.
+        // Go back one step so that we reset to the expected URL.
+        // NOTE(cdata): this should not invoke any browser-level navigation
+        // because hash-only changes modify the URL in-place without
+        // navigating:
+        self.history.back();
+      }
+    };
+
+    self.addEventListener('hashchange', undoHashChange, {once: true});
 
     anchor.setAttribute('href', intent);
     anchor.click();
