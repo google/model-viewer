@@ -180,15 +180,6 @@ export class ArtifactCreator {
           });
         });
 
-        const environmentChanges = new Promise((resolve, reject) => {
-          const timeout = setTimeout(reject, 10000);
-
-          modelViewer.addEventListener('environment-change', () => {
-            clearTimeout(timeout);
-            resolve();
-          });
-        });
-
         const modelVisible = new Promise((resolve, reject) => {
           const timeout = setTimeout(reject, 10000);
 
@@ -202,7 +193,7 @@ export class ArtifactCreator {
           });
         });
 
-        await Promise.all([modelLoads, environmentChanges, modelVisible]);
+        await Promise.all([modelLoads, modelVisible]);
       }
     });
 
