@@ -189,7 +189,20 @@ export class ArtifactCreator {
           });
         });
 
-        await Promise.all([modelLoads, environmentChanges]);
+        const modelVisible = new Promise((resolve, reject) => {
+          const timeout = setTimeout(reject, 10000);
+
+          modelViewer.addEventListener('model-visibility', (event) => {
+            clearTimeout(timeout);
+            if ((event as any).detail.visible) {
+              resolve();
+            } else {
+              reject();
+            }
+          });
+        });
+
+        await Promise.all([modelLoads, environmentChanges, modelVisible]);
       }
     });
 
