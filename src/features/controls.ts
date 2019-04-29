@@ -53,7 +53,6 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $orbitCamera = Symbol('orbitCamera');
-const $defaultCamera = Symbol('defaultCamera');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -89,7 +88,6 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$promptElement]: Element;
 
-        protected[$defaultCamera]: PerspectiveCamera;
         protected[$orbitCamera]: PerspectiveCamera;
 
         protected[$idleTime]: number = 0;
@@ -115,8 +113,7 @@ export const ControlsMixin = (ModelViewerElement:
           this[$promptElement] =
               this.shadowRoot!.querySelector('.controls-prompt')!;
 
-          this[$defaultCamera] = scene.getCamera();
-          this[$orbitCamera] = this[$defaultCamera].clone();
+          this[$orbitCamera] = scene.getCamera().clone();
 
           this[$orbitCamera].near = ORBIT_CAMERA_NEAR_PLANE;
           this[$orbitCamera].far = ORBIT_CAMERA_FAR_PLANE;
@@ -241,19 +238,11 @@ export const ControlsMixin = (ModelViewerElement:
           }
         }
 
-        /**
-         * Copies over the default camera's values in order to frame
-         * the scene correctly.
-         */
         [$updateOrbitCamera]() {
           const camera = this[$orbitCamera];
           const controls = this[$controls];
           const scene = (this as any)[$scene];
 
-          // The default camera already has positioned itself correctly
-          // to frame the canvas. Copy its values.
-          camera.position.copy(this[$defaultCamera].position);
-          camera.aspect = this[$defaultCamera].aspect;
           camera.rotation.set(0, 0, 0);
           camera.updateProjectionMatrix();
 
