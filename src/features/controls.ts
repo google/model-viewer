@@ -18,7 +18,6 @@ import {PerspectiveCamera, Spherical} from 'three';
 
 import {deserializeSpherical} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
-import {FRAMED_HEIGHT} from '../three-components/ModelScene.js';
 import {SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utils.js';
 
@@ -30,6 +29,8 @@ export interface SphericalPosition {
 
 
 const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+// Vertical field of view of camera, in degrees.
+const DEFAULT_FOV = 45;
 
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
@@ -38,9 +39,6 @@ const PHI = 2.0 * Math.PI;
 
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
-
-const ORBIT_CAMERA_NEAR_PLANE = FRAMED_HEIGHT / 10.0;
-const ORBIT_CAMERA_FAR_PLANE = FRAMED_HEIGHT * 10.0;
 
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT =
@@ -53,6 +51,8 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $orbitCamera = Symbol('orbitCamera');
+const $fov = Symbol('fov');
+const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -89,6 +89,8 @@ export const ControlsMixin = (ModelViewerElement:
         protected[$promptElement]: Element;
 
         protected[$orbitCamera]: PerspectiveCamera;
+        protected[$fov]: number = DEFAULT_FOV;
+        protected[$idealCameraDistance] = 1.0;
 
         protected[$idleTime]: number = 0;
         protected[$userPromptedOnce]: boolean = false;
@@ -113,22 +115,16 @@ export const ControlsMixin = (ModelViewerElement:
           this[$promptElement] =
               this.shadowRoot!.querySelector('.controls-prompt')!;
 
-          this[$orbitCamera] = scene.getCamera().clone();
-
-          this[$orbitCamera].near = ORBIT_CAMERA_NEAR_PLANE;
-          this[$orbitCamera].far = ORBIT_CAMERA_FAR_PLANE;
-          this[$orbitCamera].updateProjectionMatrix();
+          this[$orbitCamera] = scene.getCamera();
 
           this[$controls] =
               new SmoothControls(this[$orbitCamera], scene.canvas);
-          this[$controls].target.set(0, FRAMED_HEIGHT / 2, 0);
-
-          scene.setCamera(this[$orbitCamera]);
+          this[$controls].target.set(0, 0, 0);
         }
 
         getCameraOrbit(): SphericalPosition {
           const {theta, phi, radius} = this[$lastSpherical];
-          return {theta, phi, radius: radius / FRAMED_HEIGHT};
+          return {theta, phi, radius};
         }
 
         connectedCallback() {
@@ -160,8 +156,6 @@ export const ControlsMixin = (ModelViewerElement:
 
               scene.canvas.addEventListener('focus', this[$focusHandler]);
               scene.canvas.addEventListener('blur', this[$blurHandler]);
-
-              this[$updateOrbitCamera]();
             } else {
               scene.canvas.removeEventListener('focus', this[$focusHandler]);
               scene.canvas.removeEventListener('blur', this[$blurHandler]);
@@ -171,30 +165,28 @@ export const ControlsMixin = (ModelViewerElement:
           }
 
           if (changedProperties.has('cameraOrbit')) {
-            let sphericalValues = deserializeSpherical(this.cameraOrbit);
-
-            if (sphericalValues == null) {
-              sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
-            }
-
-            let [theta, phi, radius] = sphericalValues;
-
-            if (typeof radius === 'string') {
-              switch (radius) {
-                default:
-                case 'auto':
-                  radius = scene.idealCameraDistance;
-                  break;
-              }
-            } else {
-              // TODO(#450): We are using FRAMED_HEIGHT as a proxy for 1 unit
-              // distance in world space. In other words, 1 * FRAMED_HEIGHT =
-              // 1m. It's possible that this is not ideal.
-              radius *= FRAMED_HEIGHT;
-            }
-
-            controls.setOrbit(theta, phi, radius as number);
+            this.setCameraOrbit();
           }
+        }
+
+        setCameraOrbit() {
+          let sphericalValues = deserializeSpherical(this.cameraOrbit);
+
+          if (sphericalValues == null) {
+            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
+          }
+
+          let [theta, phi, radius] = sphericalValues;
+
+          if (typeof radius === 'string') {
+            switch (radius) {
+              default:
+              case 'auto':
+                radius = this[$idealCameraDistance];
+                break;
+            }
+          }
+          this[$controls].setOrbit(theta, phi, radius as number);
         }
 
         [$tick](time: number, delta: number) {
@@ -243,17 +235,25 @@ export const ControlsMixin = (ModelViewerElement:
           const controls = this[$controls];
           const scene = (this as any)[$scene];
 
-          camera.rotation.set(0, 0, 0);
+          camera.fov = this[$fov];
+          let near = (scene.modelSizeY / 2) /
+              Math.tan((camera.fov / 2) * Math.PI / 180);
+          camera.near = scene.modelSizeY / 10.0;
+          camera.far = scene.modelSizeY * 10.0;
+
+          this[$idealCameraDistance] = near + scene.modelSizeXZ / 2;
+
+          camera.aspect = scene.aspect;
           camera.updateProjectionMatrix();
 
           // Zooming out beyond the 'frame' doesn't serve much purpose
           // and will only end up showing the skysphere if zoomed out enough
-          const minimumRadius = ORBIT_CAMERA_NEAR_PLANE + FRAMED_HEIGHT / 2.0;
-          const maximumRadius = scene.idealCameraDistance;
+          const minimumRadius = camera.near + scene.modelSizeY / 2.0;
+          const maximumRadius = this[$idealCameraDistance];
 
           controls.applyOptions({minimumRadius, maximumRadius});
 
-          controls.target.set(0, FRAMED_HEIGHT / 2, 0);
+          controls.target.set(0, 0, 0);
         }
 
         [$updateAria]() {
@@ -319,6 +319,7 @@ export const ControlsMixin = (ModelViewerElement:
         [$onModelLoad](event: any) {
           super[$onModelLoad](event);
           this[$updateOrbitCamera]();
+          this.setCameraOrbit();
         }
 
         [$onFocus]() {
