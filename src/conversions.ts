@@ -102,3 +102,16 @@ export const deserializeSpherical =
       return null;
     };
 
+export const deserializeAngle =
+    (angleString: string): number|null => {
+      try {
+        const angleValueNode = parseValues(angleString);
+
+        if (angleValueNode.length === 1) {
+          return angleValueNodeToRadians(angleValueNode[0]);
+        }
+      } catch (_error) {
+      }
+
+      return null;
+    };
