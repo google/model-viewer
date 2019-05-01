@@ -49,26 +49,17 @@
   <div class="sample">
     <div id="demo-container-1" class="demo"></div>
     <div class="content">
-
-      <div id="header">
-        <a class="icon-button icon-modelviewer" href="../index.html"></a>
-        <a class="icon-github icon-button"
-          href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/lazy-loading.html"></a>
-      </div>
-
       <div class="wrapper">
+        <a class="lockup" href="../../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Lazy Loading. </span>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the &lt;model-viewer&gt; element using the poster attribute.</h4>
 
-        <div id="intro">
-          <h3>Lazy Loading</h3>
-          <p>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the <span
-              class="attribute">&lt;model-viewer&gt;</span> element using the poster attribute.</p>
+        <div class="heading">
+          <h2 class="demo-title">Display a poster until loaded</h2>
+          <h4></h4>
         </div>
-
-        <h2 class="demo-title">Display a poster until loaded</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-            <model-viewer id="reveal" preload poster="assets/poster.png" src="assets/shishkebab.glb"
-              alt="A 3D model of a shishkebab"></model-viewer>
+<model-viewer id="reveal" preload camera-controls auto-rotate poster="assets/poster-shishkebab.png" src="assets/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -76,16 +67,17 @@
   </div>
 
   <div class="sample">
-    <div class="demo" id="demo-container-2"></div>
+    <div id="demo-container-2" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Preload with poster and show model on interaction</h2>
+        <div class="heading">
+          <h2 class="demo-title">Preload with poster and show model on interaction</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-            <!-- use unique asset to ensure preloading -->
-            <model-viewer id="interaction" preload reveal="interaction" poster="assets/poster.png"
-              src="assets/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
+<!-- use unique asset to ensure preloading -->
+<model-viewer id="interaction" camera-controls preload reveal="interaction" poster="assets/poster-sphere.png" src="assets/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -93,31 +85,41 @@
   </div>
 
   <div class="sample">
-    <div class="demo" id="demo-container-3"></div>
+    <div id="demo-container-3" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Lazy load with poster until interaction</h2>
+        <div class="heading">
+          <h2 class="demo-title">Lazy load with poster until interaction</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
-            <!-- use unique asset to ensure lazy loading -->
-            <model-viewer id="lazy-load" poster="assets/poster.png" reveal="interaction"
-              src="assets/DamagedHelmet/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet"></model-viewer>
+<!-- use unique asset to ensure lazy loading -->
+<model-viewer id="lazy-load" camera-controls poster="assets/poster-damagedhelmet.png" src="assets/DamagedHelmet/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet"></model-viewer>
+<script>
+$('#lazy-load').addEventListener('load', e => {
+  // Display a red border to illustrate load timing
+  // e.target.style.border = '1px solid #ccc';
+}, { once: true });
+</script>
           </template>
         </example-snippet>
       </div>
     </div>
   </div>
 
+
   <div class="sample">
-    <div class="demo" id="demo-container-4"></div>
+    <div id="demo-container-4" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Poster with invalid model</h2>
+        <div class="heading">
+          <h2 class="demo-title">Poster with invalid model</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
-            <model-viewer poster="assets/poster.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
+  <model-viewer poster="assets/poster-astronaut.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -125,21 +127,23 @@
   </div>
 
   <div class="sample">
-    <div class="demo" id="demo-container-5"></div>
+    <div id="demo-container-5" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Cycling between posters</h2>
+        <div class="heading">
+          <h2 class="demo-title">Cycling between posters</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-            <model-viewer id="toggle-poster" reveal="interaction" poster="assets/poster2.png" src="assets/Astronaut.glb"
-              alt="A 3D model of an astronaut"></model-viewer>
-            <script>
-              const posters = ['poster.png', 'poster2.png'];
-              let i = 0;
-              setInterval(() =>
-                $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
-            </script>
+<model-viewer id="toggle-poster" reveal="interaction" auto-rotate poster="assets/poster-astronaut.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+  const posters = ['poster-astronaut2.png', 'poster-astronaut3.png', 'poster-astronaut4.png'];
+  let i = 0;
+  setInterval(() =>
+    $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
+</script>
+
           </template>
         </example-snippet>
       </div>
@@ -149,18 +153,24 @@
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a
-          href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
       </li>
 
       <li class="attribution">
-        <a href="https://poly.google.com/view/6uTsH2jqgVn">Shishkebab</a> by <a
-          href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+      </li>
+
+      <li class="attribution">
+        <a href="https://poly.google.com/view/6uTsH2jqgVn">Shish kebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
       </li>
     </ul>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+
   </div>
 
   <script src="./scripts/helpers.js"></script>
