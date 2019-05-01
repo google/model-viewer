@@ -60,7 +60,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
     suite('align-model', () => {
       test('centers the model in the frame by default', () => {
-        const offset = (element as any)[$scene].unscaledModelOffset;
+        const offset = (element as any)[$scene].model.position;
         expect(offset).to.be.deep.equal(CENTER_OFFSET);
       });
 
@@ -73,7 +73,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         test('aligns model origin with the scene origin', () => {
           // NOTE(cdata): We clone the offset as a cheap way of normalizing
           // -0 values as 0
-          const offset = (element as any)[$scene].unscaledModelOffset.clone();
+          const offset = (element as any)[$scene].model.position.clone();
           expect(offset).to.be.deep.equal(ORIGIN_OFFSET);
         });
       });
@@ -84,7 +84,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
             element.alignModel = 'center origin';
             await timePasses();
 
-            const offset = (element as any)[$scene].unscaledModelOffset.clone();
+            const offset = (element as any)[$scene].model.position.clone();
             expect(offset).to.be.deep.equal(
                 new Vector3(CENTER_OFFSET.x, ORIGIN_OFFSET.y, CENTER_OFFSET.z));
           });
@@ -95,7 +95,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
             element.alignModel = 'origin center origin';
             await timePasses();
 
-            const offset = (element as any)[$scene].unscaledModelOffset.clone();
+            const offset = (element as any)[$scene].model.position.clone();
             expect(offset).to.be.deep.equal(
                 new Vector3(ORIGIN_OFFSET.x, CENTER_OFFSET.y, ORIGIN_OFFSET.z));
           });
@@ -117,14 +117,13 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
       suite('when the model is not visible', () => {
         setup(() => {
-          Object.defineProperty(
-            element, 'modelIsVisible', {value:false});
+          Object.defineProperty(element, 'modelIsVisible', {value: false});
         });
 
         test('does not cause the model to rotate over time', async () => {
           const {turntableRotation} = element;
-          await timePasses(50);  // An arbitrary amount of time, greater than one
-                                 // rAF though
+          await timePasses(50);  // An arbitrary amount of time, greater than
+                                 // one rAF though
           expect(element.turntableRotation).to.be.equal(turntableRotation);
         });
       });

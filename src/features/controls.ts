@@ -46,13 +46,13 @@ export const INTERACTION_PROMPT =
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
+export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateOrbitCamera = Symbol('updateOrbitCamera');
 const $orbitCamera = Symbol('orbitCamera');
 const $fov = Symbol('fov');
-const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -320,6 +320,7 @@ export const ControlsMixin = (ModelViewerElement:
           super[$onModelLoad](event);
           this[$updateOrbitCamera]();
           this.setCameraOrbit();
+          this[$controls].jumpToTarget();
         }
 
         [$onFocus]() {

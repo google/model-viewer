@@ -346,6 +346,14 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
+   * Go instantly to $targetSpherical
+   */
+  jumpToTarget() {
+    this[$spherical] = this[$targetSpherical];
+    this.moveCamera();
+  }
+
+  /**
    * Update controls. In most cases, this will result in the camera
    * interpolating its position and rotation until it lines up with the
    * designated target orbital position.
@@ -399,6 +407,10 @@ export class SmoothControls extends EventDispatcher {
     this[$spherical].phi += incrementPhi;
     this[$spherical].radius += incrementRadius;
 
+    this.moveCamera();
+  }
+
+  moveCamera() {
     // Derive the new camera position from the updated spherical:
     this[$spherical].makeSafe();
     this[$sphericalToPosition](this[$spherical], this.camera.position);

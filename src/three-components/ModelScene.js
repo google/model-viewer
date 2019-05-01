@@ -209,7 +209,8 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Scales the model to fit the enclosed room.
+   * Moves the model to be centered at the origin, with the move scaled by
+   * $modelAlignmentMask
    */
   alignModel() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
