@@ -31,6 +31,7 @@
   --button-size: 36px;
   --icon-size: 28px;
   --header-height: 72px;
+  --poster-color: #FFFFFF;
 }
 
 body {
@@ -67,7 +68,6 @@ b {
   margin-top: -60px;
   position: sticky;
   top: 0;
-  /* top: calc(100vh - 56px); */
   display: flex;
   background: white;
   height: 56px;
@@ -78,7 +78,6 @@ b {
 }
 #sticky-shortcut > div {
   margin-right: 12px;
-  /* font-weight: 500; */
   white-space: nowrap;
 }
 
@@ -375,7 +374,6 @@ code {
 }
 
 #button-home {
-  /* font-family: var(--font-monospace); */
   font-weight: 500;
   font-size: 20px;
   margin: 0px 0 12px 0;
@@ -604,7 +602,6 @@ paper-button {
     --browser-support-desc-margin-top: 20px;
     --browser-support-icons-margin-top: 8px;
     --header-height: 56px;
-    /* --button-size: 32px; */
   }
   body {
     font-size: 14px;
