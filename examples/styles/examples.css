@@ -381,11 +381,11 @@ code {
   display: flex;
   align-items: center;
 }
-  #button-home .icon-modelviewer {
-    margin-right: 6px;
-    margin-left: -6px;
-    margin-top: 2px;
-  }
+#button-home .icon-modelviewer {
+  margin-right: 6px;
+  margin-left: -6px;
+  margin-top: 2px;
+}
 
 .demo model-viewer {
   width: 100%;
