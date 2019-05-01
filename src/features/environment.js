@@ -15,9 +15,9 @@
 
 import {BackSide, BoxBufferGeometry, Color, Mesh, ShaderLib, ShaderMaterial, UniformsUtils} from 'three';
 
-import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
-
+import {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {IlluminationRole} from '../three-components/ModelScene.js';
+
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_STRENGTH = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
@@ -28,7 +28,6 @@ const WHITE = new Color('#ffffff');
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $setShadowLightColor = Symbol('setShadowLightColor');
 const $deallocateTextures = Symbol('deallocateTextures');
 const $updateLighting = Symbol('updateLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
@@ -122,7 +121,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         const {environmentMap, skybox} =
             await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  backgroundImage, environmentImage, {pmrem});
+                  backgroundImage,
+                  environmentImage,
+                  {pmrem, progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
               resolve(await texturesLoad);
             });
@@ -131,7 +132,6 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
         if (skybox != null) {
           this[$scene].background = skybox;
-          this[$setShadowLightColor](WHITE);
         } else {
           if (!backgroundColor) {
             backgroundColor = DEFAULT_BACKGROUND_COLOR;
@@ -139,7 +139,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
           const parsedColor = new Color(backgroundColor);
           this[$scene].background = parsedColor;
-          this[$setShadowLightColor](parsedColor);
+          // Set the container node's background color so that it matches the
+          // background color configured for the scene. It's important to do
+          // this because we round the size of the canvas off to the nearest
+          // pixel, so it is possible (indeed likely) that there is a marginal
+          // gap around one or two edges of the canvas.
+          this[$container].style.backgroundColor = backgroundColor;
         }
 
         this[$applyEnvironmentMap](environmentMap);
@@ -191,14 +196,12 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       const illuminationRole = this.experimentalPmrem ?
           IlluminationRole.Secondary :
           IlluminationRole.Primary;
+      const environmentIntensity = this.experimentalPmrem ?
+          this.environmentIntensity * 0.65 :
+          this.environmentIntensity;
 
       scene.configureStageLighting(this.stageLightIntensity, illuminationRole);
-      scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
-    }
-
-    [$setShadowLightColor](color) {
-      this[$scene].shadowLight.color.copy(color);
-      this[$scene].shadowLight.color.lerpHSL(WHITE, 0.5);
+      scene.model.setEnvironmentMapIntensity(environmentIntensity);
     }
 
     [$deallocateTextures]() {

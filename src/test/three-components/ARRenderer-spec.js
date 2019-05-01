@@ -15,7 +15,7 @@
 
 import {Matrix4, Plane, Ray, Vector3} from 'three';
 
-import {IS_AR_CANDIDATE} from '../../constants.js';
+import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
@@ -132,7 +132,7 @@ suite('ARRenderer', () => {
   suite('when presenting a scene', () => {
     let modelScene;
 
-    if (!IS_AR_CANDIDATE) {
+    if (!IS_WEBXR_AR_CANDIDATE) {
       return;
     }
 

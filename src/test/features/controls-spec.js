@@ -149,7 +149,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(element[$controls]);
         });
 
-        test('starts at the initially configured orbit', () => {
+        // NOTE(cdata): Flakey test is flakey
+        test.skip('starts at the initially configured orbit', () => {
           const orbit = element.getCameraOrbit();
 
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)

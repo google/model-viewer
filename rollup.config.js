@@ -57,106 +57,103 @@ const outputOptions = [{
   onwarn,
 }];
 
-if (NODE_ENV === 'production') {
-  plugins.unshift(
-    cleanup({
-      // Ideally we'd also clean third_party/three, which saves
-      // ~45kb in filesize alone... but takes 2 minutes to build
-      include: ['lib/**'],
-      comments: 'none',
-    }),
-  );
+if (NODE_ENV !== 'development') {
+  plugins.unshift(cleanup({
+    // Ideally we'd also clean third_party/three, which saves
+    // ~45kb in filesize alone... but takes 2 minutes to build
+    include: ['lib/**'],
+    comments: 'none',
+  }));
 
   outputOptions.push(
-    {
-      input: './lib/model-viewer.js',
-      output: {
-        file: './dist/model-viewer-umd.js',
-        sourcemap: true,
-        format: 'umd',
-        name: 'ModelViewerElement'
+      {
+        input: './lib/model-viewer.js',
+        output: {
+          file: './dist/model-viewer-umd.js',
+          sourcemap: true,
+          format: 'umd',
+          name: 'ModelViewerElement'
+        },
+        watch: {
+          include: 'lib/**',
+        },
+        plugins,
+        onwarn,
       },
-      watch: {
-        include: 'lib/**',
+      {
+        input: './lib/test/index.js',
+        output: {
+          file: './dist/unit-tests.js',
+          format: 'esm',
+          name: 'ModelViewerElementUnitTests'
+        },
+        watch: {
+          include: 'lib/**',
+        },
+        plugins,
+        onwarn,
       },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/test/index.js',
-      output: {
-        file: './dist/unit-tests.js',
-        format: 'esm',
-        name: 'ModelViewerElementUnitTests'
+      {
+        input: './lib/test/index.js',
+        output: {
+          file: './dist/unit-tests-umd.js',
+          format: 'umd',
+          name: 'ModelViewerElementUnitTests'
+        },
+        watch: {
+          include: 'lib/**',
+        },
+        plugins,
+        onwarn,
       },
-      watch: {
-        include: 'lib/**',
+      {
+        input: './lib/test/fidelity/components/image-comparison-app.js',
+        output: {
+          file: './dist/image-comparison-app.js',
+          sourcemap: true,
+          format: 'iife',
+          name: 'ImageComparisonApp'
+        },
+        watch: {
+          include: '{lib/test/fidelity/**,lib/third_party/**}',
+        },
+        plugins,
+        onwarn,
       },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/test/index.js',
-      output: {
-        file: './dist/unit-tests-umd.js',
-        format: 'umd',
-        name: 'ModelViewerElementUnitTests'
+      {
+        input: './lib/test/fidelity/image-comparison-worker.js',
+        output: {
+          file: './dist/image-comparison-worker.js',
+          sourcemap: true,
+          format: 'iife',
+          name: 'ImageComparisonWorker'
+        },
+        watch: {
+          include: '{lib/test/fidelity/**,lib/third_party/**}',
+        },
+        plugins,
+        onwarn,
       },
-      watch: {
-        include: 'lib/**',
+      {
+        input: './lib/documentation/components/example-snippet.js',
+        output: {
+          file: './examples/built/dependencies.js',
+          format: 'esm',
+          name: 'DocumentationDependencies'
+        },
+        plugins,
+        onwarn,
       },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/test/fidelity/components/image-comparison-app.js',
-      output: {
-        file: './dist/image-comparison-app.js',
-        sourcemap: true,
-        format: 'iife',
-        name: 'ImageComparisonApp'
-      },
-      watch: {
-        include: '{lib/test/fidelity/**,lib/third_party/**}',
-      },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/test/fidelity/image-comparison-worker.js',
-      output: {
-        file: './dist/image-comparison-worker.js',
-        sourcemap: true,
-        format: 'iife',
-        name: 'ImageComparisonWorker'
-      },
-      watch: {
-        include: '{lib/test/fidelity/**,lib/third_party/**}',
-      },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/documentation/components/example-snippet.js',
-      output: {
-        file: './examples/built/dependencies.js',
-        format: 'esm',
-        name: 'DocumentationDependencies'
-      },
-      plugins,
-      onwarn,
-    },
-    {
-      input: './lib/documentation/components/example-snippet.js',
-      output: {
-        file: './examples/built/dependencies-umd.js',
-        format: 'umd',
-        name: 'DocumentationDependencies'
-      },
-      plugins,
-      onwarn,
-    }
-  );
+      {
+        input: './lib/documentation/components/example-snippet.js',
+        output: {
+          file: './examples/built/dependencies-umd.js',
+          format: 'umd',
+          name: 'DocumentationDependencies'
+        },
+        plugins,
+        onwarn,
+      });
 }
 
 export default outputOptions;

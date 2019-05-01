@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AmbientLight, Box3, Color, DirectionalLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import {resolveDpr} from '../utils.js';
 
@@ -50,11 +50,11 @@ export const FRAMED_HEIGHT = 10;
 // the room by a little bit so it's always slightly bigger than the model.
 export const ROOM_PADDING_SCALE = 1.01;
 
-const AMBIENT_LIGHT_LOW_INTENSITY = 0.05;
-const DIRECTIONAL_LIGHT_LOW_INTENSITY = 0.5;
+const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
+const DIRECTIONAL_LIGHT_LOW_INTENSITY = 2.0;
 
 const AMBIENT_LIGHT_HIGH_INTENSITY = 3.0;
-const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 0.75;
+const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 4.0;
 
 // Vertical field of view of camera, in degrees.
 const FOV = 45;
@@ -97,8 +97,10 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-    this.light = new AmbientLight(0xffffff, AMBIENT_LIGHT_HIGH_INTENSITY);
-    this.light.name = 'AmbientLight';
+    this.light =
+        new HemisphereLight(0xBBBBBB, 0x444444, AMBIENT_LIGHT_HIGH_INTENSITY);
+    this.light.name = 'HemisphereLight';
+    this.light.position.set(2, 4, 2);
 
     // This light is only for generating (fake) shadows
     // and does not needed to be added to the scene.
@@ -152,11 +154,12 @@ export default class ModelScene extends Scene {
   /**
    * Sets the model via URL.
    *
-   * @param {String} source
+   * @param {String?} source
+   * @param {Function?} progressCallback
    */
-  async setModelSource(source) {
+  async setModelSource(source, progressCallback) {
     try {
-      await this.model.setSource(source);
+      await this.model.setSource(source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);

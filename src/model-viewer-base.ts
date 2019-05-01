@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
-import {debounce, deserializeUrl} from './utils.js';
+import {ProgressTracker} from './utilities/progress-tracker.js';
+import {debounce, deserializeUrl, resolveDpr} from './utils.js';
 
 let renderer = new Renderer();
 
@@ -30,6 +32,9 @@ const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
+const $resizeObserver = Symbol('resizeObserver');
+const $intersectionObserver = Symbol('intersectionObserver');
+const $lastDpr = Symbol('lastDpr');
 
 export const $ariaLabel = Symbol('ariaLabel');
 export const $updateSource = Symbol('updateSource');
@@ -43,17 +48,13 @@ export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $renderer = Symbol('renderer');
 export const $resetRenderer = Symbol('resetRenderer');
+export const $progressTracker = Symbol('progressTracker');
 
 /**
  * Definition for a basic <model-viewer> element.
- *
  */
 export default class ModelViewerElementBase extends UpdatingElement {
-  static get properties() {
-    return {
-      alt: {type: String}, src: {converter: {fromAttribute: deserializeUrl}}
-    }
-  }
+  protected static[$template]: HTMLTemplateElement|void;
 
   static get is() {
     return 'model-viewer';
@@ -72,6 +73,28 @@ export default class ModelViewerElementBase extends UpdatingElement {
     renderer = new Renderer();
   }
 
+  @property({type: String}) alt: string|null = null;
+
+  @property({converter: {fromAttribute: deserializeUrl}})
+  src: string|null = null;
+
+  protected[$loaded]: boolean = false;
+  protected[$scene]: ModelScene;
+  protected[$container]: HTMLDivElement;
+  protected[$canvas]: HTMLCanvasElement;
+  protected[$defaultAriaLabel]: string;
+  protected[$lastDpr]: number = resolveDpr();
+
+  protected[$fallbackResizeHandler] = debounce(() => {
+    const boundingRect = this.getBoundingClientRect();
+    this[$updateSize](boundingRect);
+  }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+
+  protected[$resizeObserver]: ResizeObserver|null = null;
+  protected[$intersectionObserver]: IntersectionObserver|null = null;
+
+  protected[$progressTracker]: ProgressTracker = new ProgressTracker();
+
   get loaded() {
     return this[$loaded];
   }
@@ -81,7 +104,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get modelIsVisible() {
-      return true;
+    return true;
   }
 
   /**
@@ -90,26 +113,31 @@ export default class ModelViewerElementBase extends UpdatingElement {
   constructor() {
     super();
 
+    // NOTE(cdata): It is *very important* to access this template first so that
+    // the ShadyCSS template preparation steps happen before element styling in
+    // IE11:
+    const template = (this.constructor as any).template as HTMLTemplateElement;
+
+    if ((window as any).ShadyCSS) {
+      (window as any).ShadyCSS.styleElement(this, {});
+    }
+
+    // NOTE(cdata): The canonical ShadyCSS examples suggest that the Shadow Root
+    // should be created after the invocation of ShadyCSS.styleElement
     this.attachShadow({mode: 'open', delegatesFocus: true});
 
-    if (window.ShadyCSS) {
-      window.ShadyCSS.styleElement(this);
-    }
-    const {shadowRoot} = this;
-    const template = this.constructor.template;
+    const shadowRoot = this.shadowRoot!;
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this[$container] = shadowRoot.querySelector('.container');
-    this[$canvas] = shadowRoot.querySelector('canvas');
-    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label');
+    this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
+    this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
+    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label')!;
 
     // Create the underlying ModelScene.
     const {width, height} = this.getBoundingClientRect();
     this[$scene] = new ModelScene(
         {canvas: this[$canvas], element: this, width, height, renderer});
-
-    this[$loaded] = false;
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -124,32 +152,27 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$updateSize](this.getBoundingClientRect(), true);
     });
 
-    this[$fallbackResizeHandler] = debounce(() => {
-      const boundingRect = this.getBoundingClientRect();
-      this[$updateSize](boundingRect);
-    }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+    if (HAS_RESIZE_OBSERVER) {
+      // Set up a resize observer so we can scale our canvas
+      // if our <model-viewer> changes
+      this[$resizeObserver] = new ResizeObserver((entries) => {
+        // Don't resize anything if in AR mode; otherwise the canvas
+        // scaling to fullscreen on entering AR will clobber the flat/2d
+        // dimensions of the element.
+        if (renderer.isPresenting) {
+          return;
+        }
 
-    // Set a resize observer so we can scale our canvas
-    // if our <model-viewer> changes
-    this.resizeObserver = HAS_RESIZE_OBSERVER ?
-        new ResizeObserver((entries) => {
-          // Don't resize anything if in AR mode; otherwise the canvas
-          // scaling to fullscreen on entering AR will clobber the flat/2d
-          // dimensions of the element.
-          if (renderer.isPresenting) {
-            return;
+        for (let entry of entries) {
+          if (entry.target === this) {
+            this[$updateSize](entry.contentRect);
           }
-
-          for (let entry of entries) {
-            if (entry.target === this) {
-              this[$updateSize](entry.contentRect);
-            }
-          }
-        }) :
-        null;
+        }
+      });
+    }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver = new IntersectionObserver(entries => {
+      this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
             this[$scene].isVisible = entry.isIntersecting;
@@ -163,7 +186,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this.intersectionObserver = null;
       this[$scene].isVisible = true;
     }
   }
@@ -171,13 +193,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
   connectedCallback() {
     super.connectedCallback && super.connectedCallback();
     if (HAS_RESIZE_OBSERVER) {
-      this.resizeObserver.observe(this);
+      this[$resizeObserver]!.observe(this);
     } else {
       self.addEventListener('resize', this[$fallbackResizeHandler]);
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver.observe(this);
+      this[$intersectionObserver]!.observe(this);
     }
 
     this[$renderer].registerScene(this[$scene]);
@@ -187,19 +209,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
     if (HAS_RESIZE_OBSERVER) {
-      this.resizeObserver.unobserve(this);
+      this[$resizeObserver]!.unobserve(this);
     } else {
       self.removeEventListener('resize', this[$fallbackResizeHandler]);
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      this.intersectionObserver.unobserve(this);
+      this[$intersectionObserver]!.unobserve(this);
     }
 
     this[$renderer].unregisterScene(this[$scene]);
   }
 
-  updated(changedProperties) {
+  updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space
@@ -208,7 +230,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
       this[$loaded] = false;
-      this[$updateSource]();
+      (async () => {
+        const updateSourceProgress = this[$progressTracker].beginActivity();
+        await this[$updateSource](
+            (progress: number) => updateSourceProgress(progress * 0.9));
+        updateSourceProgress(1.0);
+      })();
     }
 
     if (changedProperties.has('alt')) {
@@ -225,20 +252,33 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize]({width, height}, forceApply) {
+  [$updateSize](
+      {width, height}: {width: any, height: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
     // Round off the pixel size
-    width = parseInt(width, 10);
-    height = parseInt(height, 10);
+    const intWidth = parseInt(width, 10);
+    const intHeight = parseInt(height, 10);
 
-    if (forceApply || (prevWidth !== width || prevHeight !== height)) {
-      this[$container].style.width = `${width}px`;
-      this[$container].style.height = `${height}px`;
-      this[$onResize]({width, height});
+    this[$container].style.width = `${width}px`;
+    this[$container].style.height = `${height}px`;
+
+    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
+      this[$onResize]({width: intWidth, height: intHeight});
     }
   }
 
-  [$tick](time, delta) {
+  [$tick](_time: number, _delta: number) {
+    const dpr = resolveDpr();
+    // There is no standard way to detect when DPR changes on account of zoom.
+    // Here we keep a local copy of DPR updated, and when it changes we invoke
+    // the fallback resize handler. It might be better to invoke the resize
+    // handler directly in this case, but the fallback is debounced which will
+    // save us from doing too much work when DPR and window size changes at the
+    // same time.
+    if (dpr !== this[$lastDpr]) {
+      this[$lastDpr] = dpr;
+      this[$fallbackResizeHandler]();
+    }
   }
 
   [$markLoaded]() {
@@ -255,11 +295,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene].isDirty = true;
   }
 
-  [$onModelLoad](e) {
+  [$onModelLoad](_event: any) {
     this[$needsRender]();
   }
 
-  [$onResize](e) {
+  [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
     this[$needsRender]();
   }
@@ -269,12 +309,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * sets the views to use the new model based off of the `preload`
    * attribute.
    */
-  async[$updateSource]() {
+  async[$updateSource](
+      progressCallback: (progress: number) => void = () => {}) {
     const source = this.src;
 
     try {
       this[$canvas].classList.add('show');
-      await this[$scene].setModelSource(source);
+      await this[$scene].setModelSource(source, progressCallback);
     } catch (error) {
       this[$canvas].classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));

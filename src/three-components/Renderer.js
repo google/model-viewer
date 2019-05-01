@@ -15,15 +15,13 @@
 
 import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
-import {IS_AR_CANDIDATE} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {resolveDpr} from '../utils.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
-
-const GAMMA_FACTOR = 2.2;
 
 export const $arRenderer = Symbol('arRenderer');
 
@@ -49,7 +47,7 @@ export default class Renderer extends EventDispatcher {
     const webGlOptions = {alpha: false, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
-    if (IS_AR_CANDIDATE) {
+    if (IS_WEBXR_AR_CANDIDATE) {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
@@ -68,7 +66,7 @@ export default class Renderer extends EventDispatcher {
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
-      this.renderer.gammaFactor = GAMMA_FACTOR;
+      this.renderer.gammaFactor = 2.2;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 

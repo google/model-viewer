@@ -30,7 +30,8 @@ export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
 export const HAS_INTERSECTION_OBSERVER = self.IntersectionObserver != null;
 
-export const IS_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
+export const IS_WEBXR_AR_CANDIDATE =
+    HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
 
 export const IS_MOBILE = (() => {
   const userAgent =
@@ -45,6 +46,8 @@ export const IS_MOBILE = (() => {
   }
   return check;
 })();
+
+export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
 export const IS_IOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream;

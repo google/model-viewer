@@ -34,11 +34,6 @@ const $cubeGenerator = Symbol('cubeGenerator');
 
 const defaultConfig = {
   cubemapSize: 1024,
-  synthesizedEnvmapSize: 256,
-  pmremSamples: 32,
-  pmremSize: 256,
-  defaultEnvironmentPmremSamples: 8,
-  defaultEnvironmentPmremSize: 256,
 };
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -55,9 +50,6 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize
-   * @param {?number} config.synthesizedEnvmapSize
-   * @param {?number} config.pmremSamples
-   * @param {?number} config.pmremSize
    */
   constructor(renderer, config = {}) {
     super();
@@ -95,42 +87,56 @@ export default class TextureUtils extends EventDispatcher {
 
   /**
    * @param {string} url
+   * @param {Function} progressCallback
    * @return {Promise<THREE.Texture>}
    */
-  async load(url) {
-    const isHDR = HDR_FILE_RE.test(url);
-    const loader = isHDR ? hdrLoader : ldrLoader;
-    const texture = await new Promise(
-        (resolve, reject) => loader.load(url, resolve, undefined, reject));
-    texture.userData = {
-      ...userData,
-      ...({
-        url: url,
-        mapping: 'Equirectangular',
-      })
-    };
+  async load(url, progressCallback = () => {}) {
+    try {
+      const isHDR = HDR_FILE_RE.test(url);
+      const loader = isHDR ? hdrLoader : ldrLoader;
+      const texture = await new Promise(
+          (resolve, reject) => loader.load(url, resolve, (event) => {
+            progressCallback(event.loaded / event.total * 0.9);
+          }, reject));
 
-    if (isHDR) {
-      texture.encoding = RGBEEncoding;
-      texture.minFilter = NearestFilter;
-      texture.magFilter = NearestFilter;
-      texture.flipY = true;
-    } else {
-      texture.encoding = GammaEncoding;
+      progressCallback(1.0);
+
+      texture.userData = {
+        ...userData,
+        ...({
+          url: url,
+          mapping: 'Equirectangular',
+        })
+      };
+
+      if (isHDR) {
+        texture.encoding = RGBEEncoding;
+        texture.minFilter = NearestFilter;
+        texture.magFilter = NearestFilter;
+        texture.flipY = true;
+      } else {
+        texture.encoding = GammaEncoding;
+      }
+
+      return texture;
+
+    } finally {
+      if (progressCallback) {
+        progressCallback(1);
+      }
     }
-
-    return texture;
   }
 
   /**
    * @param {string} url
+   * @param {Function} progressCallback
    * @return {Promise<THREE.WebGLRenderCubeTarget>}
    */
-  async loadEquirectAsCubeMap(url) {
+  async loadEquirectAsCubeMap(url, progressCallback = () => {}) {
     let equirect = null;
 
     try {
-      equirect = await this.load(url);
+      equirect = await this.load(url, progressCallback);
       return await this.equirectangularToCubemap(equirect);
     } finally {
       if (equirect != null) {
@@ -147,10 +153,14 @@ export default class TextureUtils extends EventDispatcher {
    * @see equirectangularToCubemap with regard to the THREE types.
    * @param {string} url
    * @param {boolean} config.pmrem
+   * @param {ProgressTracker} config.progressTracker
    * @return {Promise<Object|null>}
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl = null, environmentMapUrl = null, options = {}) {
+    const {progressTracker} = options;
+    let updateGenerationProgress = () => {};
+
     let skyboxLoads = Promise.resolve(null);
     let environmentMapLoads = Promise.resolve(null);
 
@@ -160,22 +170,29 @@ export default class TextureUtils extends EventDispatcher {
     try {
       let environmentMapWasGenerated = false;
 
-      // If we have a skybox URL, attempt to load it as a cubemap
-      if (!!skyboxUrl) {
-        skyboxLoads = this.loadEquirectAsCubeMap(skyboxUrl);
-      }
-
       // If we have a specific environment URL, attempt to load it as a cubemap
       // The case for this is that the user intends for the IBL to be different
       // from the scene background (which may be a skybox or solid color).
       if (!!environmentMapUrl) {
-        environmentMapLoads = this.loadEquirectAsCubeMap(environmentMapUrl);
+        environmentMapLoads = this.loadEquirectAsCubeMap(
+            environmentMapUrl,
+            progressTracker ? progressTracker.beginActivity() : () => {});
       }
+
+      // If we have a skybox URL, attempt to load it as a cubemap
+      if (!!skyboxUrl) {
+        skyboxLoads = this.loadEquirectAsCubeMap(
+            skyboxUrl,
+            progressTracker ? progressTracker.beginActivity() : () => {});
+      }
+
+      updateGenerationProgress =
+          progressTracker ? progressTracker.beginActivity() : () => {};
 
       // In practice, this should be nearly as parallel as Promise.all (which
       // we don't use since we can't easily destructure here):
-      skybox = await skyboxLoads;
       environmentMap = await environmentMapLoads;
+      skybox = await skyboxLoads;
 
       // If environment is still null, then no specific environment URL was
       // specified
@@ -189,8 +206,7 @@ export default class TextureUtils extends EventDispatcher {
           // Otherwise, no skybox URL was specified, so fall back to generating
           // the environment:
           // TODO(#336): can cache this per renderer and color
-          environmentMap = this.environmentMapGenerator.generate(
-              this.config.synthesizedEnvmapSize);
+          environmentMap = this.environmentMapGenerator.generate();
           environmentMapWasGenerated = true;
         }
       }
@@ -199,14 +215,8 @@ export default class TextureUtils extends EventDispatcher {
         // Apply the PMREM pass to the environment, which produces a distinct
         // texture from the source:
         const nonPmremEnvironmentMap = environmentMap;
-        const samples = environmentMapWasGenerated ?
-            this.config.defaultEnvironmentPmremSamples :
-            this.config.pmremSamples;
-        const size = environmentMapWasGenerated ?
-            this.config.defaultEnvironmentPmremSize :
-            this.config.pmremSize;
 
-        environmentMap = this.pmremPass(nonPmremEnvironmentMap, samples, size);
+        environmentMap = this.pmremPass(nonPmremEnvironmentMap);
 
         // If the source was generated, then we should dispose of it right away
         if (environmentMapWasGenerated) {
@@ -232,6 +242,8 @@ export default class TextureUtils extends EventDispatcher {
       }
 
       throw error;
+    } finally {
+      updateGenerationProgress(1.0);
     }
   }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_AR_CANDIDATE} from './constants.js';
+import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
 
 export type Constructor<T = object> = {
   new (...args: any[]): T,
@@ -25,7 +25,7 @@ export const deserializeUrl = (url: string): string|null =>
 
 
 export const assertIsArCandidate = () => {
-  if (IS_AR_CANDIDATE) {
+  if (IS_WEBXR_AR_CANDIDATE) {
     return;
   }
 
@@ -60,6 +60,36 @@ export const toFullUrl = (partialUrl: string): string => {
   return url.toString();
 };
 
+
+/**
+ * Returns a throttled version of a given function that is only invoked at most
+ * once within a given threshold of time in milliseconds.
+ *
+ * The throttled version of the function has a "flush" property that resets the
+ * threshold for cases when immediate invokation is desired.
+ */
+export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
+  let timer: number|null = null;
+
+  const throttled = (...args: Array<any>) => {
+    if (timer != null) {
+      return;
+    }
+
+    fn(...args);
+
+    timer = self.setTimeout(() => timer = null, ms);
+  };
+
+  throttled.flush = () => {
+    if (timer != null) {
+      self.clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  return throttled;
+};
 
 export const debounce = (fn: (...args: Array<any>) => any, ms: number) => {
   let timer: number|null = null;
@@ -98,21 +128,6 @@ export const clamp =
         lowerLimit === -Infinity ? value : lowerLimit,
         Math.min(upperLimit === Infinity ? value : upperLimit, value));
 
-
-/**
- * Takes a URL to a USDZ file and sets the appropriate
- * fields so that Safari iOS can intent to their
- * AR Quick Look.
- *
- * @param {String} url
- */
-export const openIOSARQuickLook = (url: string) => {
-  const anchor = document.createElement('a');
-  anchor.setAttribute('rel', 'ar');
-  anchor.setAttribute('href', url);
-  anchor.appendChild(document.createElement('img'));
-  anchor.click();
-};
 
 
 // The DPR we use for a "capped" scenario (see resolveDpr below):

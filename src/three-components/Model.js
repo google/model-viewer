@@ -117,9 +117,13 @@ export default class Model extends Object3D {
 
   /**
    * @param {String} url
+   * @param {Function?} progressCallback
    */
-  async setSource(url) {
+  async setSource(url, progressCallback) {
     if (!url || url === this.url) {
+      if (progressCallback) {
+        progressCallback(1);
+      }
       return;
     }
 
@@ -138,7 +142,7 @@ export default class Model extends Object3D {
       scene = await new Promise(async (resolve, reject) => {
         this[$cancelPendingSourceChange] = () => reject();
         try {
-          const result = await this.loader.load(url);
+          const result = await this.loader.load(url, progressCallback);
           resolve(result);
         } catch (error) {
           reject(error);
