@@ -330,6 +330,11 @@ export class SmoothControls extends EventDispatcher {
     return true;
   }
 
+  setRadius(radius: number) {
+    this[$targetSpherical].radius = radius;
+    this.setOrbit();
+  }
+
   /**
    * Adjust the orbital position of the camera relative to its current orbital
    * position.

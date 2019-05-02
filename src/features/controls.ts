@@ -236,10 +236,10 @@ export const ControlsMixin = (ModelViewerElement:
           const scene = (this as any)[$scene];
 
           camera.fov = this[$fov];
-          let near = (scene.modelSizeY / 2) /
+          let near = (scene.framedHeight / 2) /
               Math.tan((camera.fov / 2) * Math.PI / 180);
-          camera.near = scene.modelSizeY / 10.0;
-          camera.far = scene.modelSizeY * 10.0;
+          camera.near = scene.framedHeight / 10.0;
+          camera.far = scene.framedHeight * 10.0;
 
           this[$idealCameraDistance] = near + scene.modelSizeXZ / 2;
 
@@ -248,12 +248,15 @@ export const ControlsMixin = (ModelViewerElement:
 
           // Zooming out beyond the 'frame' doesn't serve much purpose
           // and will only end up showing the skysphere if zoomed out enough
-          const minimumRadius = camera.near + scene.modelSizeY / 2.0;
+          const minimumRadius = camera.near + scene.framedHeight / 2.0;
           const maximumRadius = this[$idealCameraDistance];
 
           controls.applyOptions({minimumRadius, maximumRadius});
 
           controls.target.set(0, 0, 0);
+
+          controls.setRadius(this[$idealCameraDistance]);
+          controls.jumpToTarget()
         }
 
         [$updateAria]() {

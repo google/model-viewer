@@ -36,6 +36,13 @@ export const IlluminationRole = {
 
 const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 
+// The model is sized to the room, and if too perfect of a fit,
+// the front of the model becomes clipped by the near plane. Rather than
+// change the near plane or camera's position (if we wanted to implement a
+// visible "room" in the future where framing needs to be precise), we shrink
+// the room by a little bit so it's always slightly bigger than the model.
+export const ROOM_PADDING_SCALE = 1.01;
+
 const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
 const DIRECTIONAL_LIGHT_LOW_INTENSITY = 2.0;
 
@@ -104,7 +111,7 @@ export default class ModelScene extends Scene {
     this.isVisible = false;
     this.isDirty = false;
 
-    this.modelSizeY = 1;
+    this.framedHeight = 1;
     this.modelSizeXZ = 1;
     this.setSize(width, height);
 
@@ -173,7 +180,6 @@ export default class ModelScene extends Scene {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
-      this.aspect = this.width / this.height;
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
       this.applyCanvasSize();
@@ -186,6 +192,13 @@ export default class ModelScene extends Scene {
     this.canvas.height = this.height * dpr;
     this.canvas.style.width = `${this.width}px`;
     this.canvas.style.height = `${this.height}px`;
+    this.aspect = this.width / this.height;
+
+    const modelSize = this.model.size;
+    this.framedHeight = ROOM_PADDING_SCALE *
+        Math.max(
+            modelSize.y, modelSize.x / this.aspect, modelSize.z / this.aspect);
+    this.modelSizeXZ = Math.max(modelSize.x, modelSize.z);
   }
 
   configureStageLighting(intensityScale, illuminationRole) {
@@ -219,11 +232,7 @@ export default class ModelScene extends Scene {
 
     this.resetModelPose();
 
-    const modelSize = this.model.size;
-    this.modelSizeY = modelSize.y;
-    this.modelSizeXZ = Math.max(modelSize.x, modelSize.z);
     const modelCenter = this.model.boundingBox.getCenter(new Vector3());
-
     this.model.position.copy(modelCenter)
         .multiply(this[$modelAlignmentMask])
         .multiplyScalar(-1);
@@ -289,6 +298,6 @@ export default class ModelScene extends Scene {
 
     // This should be ultimately user-configurable,
     // but for now, move the shadow to the bottom of the model.
-    this.shadow.position.y = -this.modelSizeY / 2;
+    this.shadow.position.y = -this.framedHeight / 2;
   }
 }

@@ -16,6 +16,7 @@
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import ModelScene, {ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
@@ -72,6 +73,42 @@ suite('ModelScene', () => {
       expect(scene.height).to.be.equal(200);
       expect(scene.canvas.height).to.be.equal(200 * devicePixelRatio);
       expect(scene.canvas.style.height).to.be.equal('200px');
+    });
+
+    test('scales when X-bound', () => {
+      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(10, 3, 1));
+      scene.model.setObject(dummyMesh);
+
+      const width = 2000;
+      const height = 1000;
+      const aspect = width / height;
+      scene.setSize(width, height);
+
+      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10 / aspect);
+    });
+
+    test('scales when Z-bound', () => {
+      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
+      scene.model.setObject(dummyMesh);
+
+      const width = 2000;
+      const height = 1000;
+      const aspect = width / height;
+      scene.setSize(width, height);
+
+      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10 / aspect);
+    });
+
+    test('scales when Y-bound', () => {
+      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(3, 10, 1));
+      scene.model.setObject(dummyMesh);
+
+      const width = 2000;
+      const height = 1000;
+      const aspect = width / height;
+      scene.setSize(width, height);
+
+      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {
