@@ -255,6 +255,7 @@ export const ControlsMixin = (ModelViewerElement:
           const maximumRadius = this[$idealCameraDistance];
 
           controls.applyOptions({minimumRadius, maximumRadius});
+          controls.updateZoom(scene.framedHeight);
 
           controls.target.set(0, 0, 0);
 

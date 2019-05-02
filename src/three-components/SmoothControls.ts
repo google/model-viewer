@@ -214,7 +214,6 @@ export class SmoothControls extends EventDispatcher {
     this[$targetSpherical].copy(this[$spherical]);
 
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
-    this.updateZoom();
 
     this.setOrbit();
   }
@@ -291,13 +290,11 @@ export class SmoothControls extends EventDispatcher {
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
     this[$spherical].copy(this[$targetSpherical]);
-    this.updateZoom();
   }
 
-  updateZoom() {
+  updateZoom(framedHeight: number) {
     // Make zoom sensitivity scale with model size:
-    const {minimumRadius, maximumRadius} = this[$options];
-    this[$zoomMeters] = maximumRadius! - minimumRadius!;
+    this[$zoomMeters] = framedHeight / 10;
   }
 
   /**
@@ -364,7 +361,7 @@ export class SmoothControls extends EventDispatcher {
    * Go instantly to $targetSpherical
    */
   jumpToTarget() {
-    this[$spherical] = this[$targetSpherical];
+    this[$spherical].copy(this[$targetSpherical]);
     this.moveCamera();
   }
 
@@ -376,9 +373,14 @@ export class SmoothControls extends EventDispatcher {
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
+    if (this[$targetSpherical] === this[$spherical]) {
+      return;
+    }
     const deltaTheta = this[$targetSpherical].theta - this[$spherical].theta;
     const deltaPhi = this[$targetSpherical].phi - this[$spherical].phi;
-    const deltaRadius = this[$targetSpherical].radius - this[$spherical].radius;
+    const deltaRadius =
+        (this[$targetSpherical].radius - this[$spherical].radius) /
+        this[$zoomMeters];
     const distance = magnitude(deltaTheta, deltaPhi, deltaRadius);
     const frames = delta / FRAME_MILLISECONDS;
 
@@ -420,7 +422,7 @@ export class SmoothControls extends EventDispatcher {
 
     this[$spherical].theta += incrementTheta;
     this[$spherical].phi += incrementPhi;
-    this[$spherical].radius += incrementRadius;
+    this[$spherical].radius += incrementRadius * this[$zoomMeters];
 
     this.moveCamera();
   }
@@ -504,7 +506,7 @@ export class SmoothControls extends EventDispatcher {
             const touchDistance =
                 this[$twoTouchDistance](touches[0], touches[1]);
             const radiusDelta = -1 * this[$zoomMeters] *
-                (touchDistance - lastTouchDistance) / 100.0;
+                (touchDistance - lastTouchDistance) / 10.0;
 
             handled = this.adjustOrbit(0, 0, radiusDelta);
           }
@@ -576,8 +578,7 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
-    const deltaRadius =
-        (event as WheelEvent).deltaY * this[$zoomMeters] / 300.0;
+    const deltaRadius = (event as WheelEvent).deltaY * this[$zoomMeters] / 10.0;
 
     if ((this.adjustOrbit(0, 0, deltaRadius) ||
          this[$options].eventHandlingBehavior === 'prevent-all') &&
@@ -596,11 +597,11 @@ export class SmoothControls extends EventDispatcher {
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, this[$zoomMeters] / 5);
+        handled = this.adjustOrbit(0, 0, this[$zoomMeters]);
         break;
       case KeyCode.PAGE_DOWN:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, this[$zoomMeters] / -5);
+        handled = this.adjustOrbit(0, 0, -1 * this[$zoomMeters]);
         break;
       case KeyCode.UP:
         relevantKey = true;
