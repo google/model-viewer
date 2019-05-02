@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 import {Vector3} from 'three';
 
-import {StagingMixin} from '../../features/staging.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {StagingMixin, AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION} from '../../features/staging.js';
+import ModelViewerElementBase, {$scene, $onUserModelOrbit} from '../../model-viewer-base.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
@@ -126,6 +126,20 @@ suite('ModelViewerElementBase with StagingMixin', () => {
                                  // one rAF though
           expect(element.turntableRotation).to.be.equal(turntableRotation);
         });
+      });
+
+      test('pauses rotate after user interaction', async () => {
+        const {turntableRotation: initialTurntableRotation} = element;
+
+        element[$onUserModelOrbit]();
+
+        await timePasses(50);  // An arbitrary amount of time, greater than one
+                               // rAF though
+        expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
+
+        await timePasses(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+
+        expect(element.turntableRotation).to.be.greaterThan(initialTurntableRotation);
       });
     });
   });

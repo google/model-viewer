@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {Camera, EventDispatcher, Quaternion, Spherical, Vector2, Vector3} from 'three';
+import {Camera, Event, EventDispatcher, Quaternion, Spherical, Vector2, Vector3} from 'three';
 
-import {clamp, step} from '../utils.js';
+import {clamp, step} from '../utilities.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
@@ -91,6 +91,8 @@ const $previousPosition = Symbol('previousPosition');
 const $canInteract = Symbol('canInteract');
 const $interactionEnabled = Symbol('interactionEnabled');
 const $zoomMeters = Symbol('zoomMeters');
+const $userAdjustOrbit = Symbol('userAdjustOrbit');
+const $isUserChange = Symbol('isUserChange');
 
 // Pointer state
 const $pointerIsDown = Symbol('pointerIsDown');
@@ -119,6 +121,8 @@ const $handleWheel = Symbol('handleWheel');
 const $handleKey = Symbol('handleKey');
 
 // Constants
+const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
+const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ORBIT_STEP_EDGE = 0.001;
@@ -137,6 +141,17 @@ export const KeyCode = {
   DOWN: 40
 };
 
+/**
+ * ChangEvents are dispatched whenever the camera position or orientation has
+ * changed
+ */
+export interface ChangeEvent extends Event {
+  /**
+   * determines what was the originating reason for the change event eg user or
+   * none
+   */
+  source: string,
+}
 
 /**
  * SmoothControls is a Three.js helper for adding delightful pointer and
@@ -165,6 +180,7 @@ export class SmoothControls extends EventDispatcher {
   private[$spherical]: Spherical = new Spherical();
   private[$targetSpherical]: Spherical = new Spherical();
   private[$previousPosition]: Vector3 = new Vector3();
+  private[$isUserChange]: boolean = false;
 
   private[$pointerIsDown]: boolean = false;
   private[$lastPointerPosition]: Vector2 = new Vector2();
@@ -334,6 +350,8 @@ export class SmoothControls extends EventDispatcher {
     this[$targetSpherical].radius = nextRadius;
     this[$targetSpherical].makeSafe();
 
+    this[$isUserChange] = false;
+
     return true;
   }
 
@@ -438,7 +456,11 @@ export class SmoothControls extends EventDispatcher {
     // the spherical->position derivation:
     if (!this[$previousPosition].equals(this.camera.position)) {
       this[$previousPosition].copy(this.camera.position);
-      this.dispatchEvent({type: 'change'});
+
+      const source = this[$isUserChange] ? USER_INTERACTION_CHANGE_SOURCE :
+                                           DEFAULT_INTERACTION_CHANGE_SOURCE;
+
+      this.dispatchEvent({type: 'change', source});
     } else {
       this[$targetSpherical].copy(this[$spherical]);
     }
@@ -457,6 +479,15 @@ export class SmoothControls extends EventDispatcher {
     return MINIMUM_DAMPENING_FACTOR -
         this[$options].dampeningScale! *
         (MINIMUM_DAMPENING_FACTOR - MAXIMUM_DAMPENING_FACTOR)
+  }
+
+  private[$userAdjustOrbit](
+      deltaTheta: number, deltaPhi: number, deltaRadius: number): boolean {
+    const handled = this.adjustOrbit(deltaTheta, deltaPhi, deltaRadius);
+
+    this[$isUserChange] = true;
+
+    return handled;
   }
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
@@ -508,7 +539,7 @@ export class SmoothControls extends EventDispatcher {
             const radiusDelta = -1 * this[$zoomMeters] *
                 (touchDistance - lastTouchDistance) / 10.0;
 
-            handled = this.adjustOrbit(0, 0, radiusDelta);
+            handled = this[$userAdjustOrbit](0, 0, radiusDelta);
           }
 
           break;
@@ -519,7 +550,7 @@ export class SmoothControls extends EventDispatcher {
           const deltaTheta = this[$pixelLengthToSphericalAngle](xTwo - xOne);
           const deltaPhi = this[$pixelLengthToSphericalAngle](yTwo - yOne);
 
-          handled = this.adjustOrbit(deltaTheta, deltaPhi, 0)
+          handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0)
 
           break;
       }
@@ -533,7 +564,7 @@ export class SmoothControls extends EventDispatcher {
       const deltaPhi =
           this[$pixelLengthToSphericalAngle](y - this[$lastPointerPosition].y);
 
-      handled = this.adjustOrbit(deltaTheta, deltaPhi, 0.0);
+      handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0.0);
 
       this[$lastPointerPosition].set(x, y);
     }
@@ -580,7 +611,7 @@ export class SmoothControls extends EventDispatcher {
 
     const deltaRadius = (event as WheelEvent).deltaY * this[$zoomMeters] / 10.0;
 
-    if ((this.adjustOrbit(0, 0, deltaRadius) ||
+    if ((this[$userAdjustOrbit](0, 0, deltaRadius) ||
          this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
@@ -597,27 +628,27 @@ export class SmoothControls extends EventDispatcher {
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, this[$zoomMeters]);
+        handled = this[$userAdjustOrbit](0, 0, this[$zoomMeters]);
         break;
       case KeyCode.PAGE_DOWN:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, -1 * this[$zoomMeters]);
+        handled = this[$userAdjustOrbit](0, 0, -1 * this[$zoomMeters]);
         break;
       case KeyCode.UP:
         relevantKey = true;
-        handled = this.adjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
+        handled = this[$userAdjustOrbit](0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.DOWN:
         relevantKey = true;
-        handled = this.adjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
+        handled = this[$userAdjustOrbit](0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.LEFT:
         relevantKey = true;
-        handled = this.adjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        handled = this[$userAdjustOrbit](-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       case KeyCode.RIGHT:
         relevantKey = true;
-        handled = this.adjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        handled = this[$userAdjustOrbit](KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
     }
 

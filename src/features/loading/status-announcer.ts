@@ -15,7 +15,7 @@
 
 import {EventDispatcher} from 'three';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {debounce, getFirstMapKey} from '../../utils.js';
+import {debounce, getFirstMapKey} from '../../utilities.js';
 
 export const INITIAL_STATUS_ANNOUNCEMENT =
     'This page includes one or more 3D models that are loading';

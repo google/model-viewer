@@ -14,12 +14,12 @@
  */
 
 import {property} from 'lit-element';
-import {PerspectiveCamera, Spherical} from 'three';
+import {Event, PerspectiveCamera, Spherical} from 'three';
 
 import {deserializeSpherical} from '../conversions.js';
-import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
-import {SmoothControls} from '../three-components/SmoothControls.js';
-import {Constructor} from '../utils.js';
+import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
+import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
   theta: number;
@@ -101,7 +101,9 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$lastSpherical]: Spherical = new Spherical();
 
-        protected[$changeHandler]: () => void = () => this[$onChange]();
+        protected[$changeHandler]: (event: Event) => void = (event: Event) =>
+            this[$onChange](event as ChangeEvent);
+
         protected[$focusHandler]: () => void = () => this[$onFocus]();
         protected[$blurHandler]: () => void = () => this[$onBlur]();
 
@@ -133,6 +135,7 @@ export const ControlsMixin = (ModelViewerElement:
           this[$promptTransitionendHandler]();
           this[$promptElement].addEventListener(
               'transitionend', this[$promptTransitionendHandler]);
+
           this[$controls].addEventListener('change', this[$changeHandler]);
         }
 
@@ -359,10 +362,14 @@ export const ControlsMixin = (ModelViewerElement:
           this[$promptElement].classList.remove('visible');
         }
 
-        [$onChange]() {
+        [$onChange]({source}: ChangeEvent) {
           this[$deferInteractionPrompt]();
           this[$updateAria]();
           this[$needsRender]();
+
+          if (source === 'user-interaction') {
+            this[$onUserModelOrbit]();
+          }
         }
       }
 
