@@ -90,6 +90,7 @@ const $touchMode = Symbol('touchMode');
 const $previousPosition = Symbol('previousPosition');
 const $canInteract = Symbol('canInteract');
 const $interactionEnabled = Symbol('interactionEnabled');
+const $zoomMeters = Symbol('zoomMeters');
 
 // Pointer state
 const $pointerIsDown = Symbol('pointerIsDown');
@@ -181,6 +182,7 @@ export class SmoothControls extends EventDispatcher {
   private[$onTouchMove]: (event: Event) => void;
 
   private[$velocity]: number = 0;
+  private[$zoomMeters]: number = 1;
 
   // The target position that the camera will orbit around
   readonly target: Vector3 = new Vector3();
@@ -212,6 +214,7 @@ export class SmoothControls extends EventDispatcher {
     this[$targetSpherical].copy(this[$spherical]);
 
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
+    this.updateZoom();
 
     this.setOrbit();
   }
@@ -288,6 +291,13 @@ export class SmoothControls extends EventDispatcher {
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
     this[$spherical].copy(this[$targetSpherical]);
+    this.updateZoom();
+  }
+
+  updateZoom() {
+    // Make zoom sensitivity scale with model size:
+    const {minimumRadius, maximumRadius} = this[$options];
+    this[$zoomMeters] = maximumRadius! - minimumRadius!;
   }
 
   /**
@@ -493,7 +503,8 @@ export class SmoothControls extends EventDispatcher {
                 this[$lastTouches][0], this[$lastTouches][1]);
             const touchDistance =
                 this[$twoTouchDistance](touches[0], touches[1]);
-            const radiusDelta = -1 * (touchDistance - lastTouchDistance) / 10.0;
+            const radiusDelta = -1 * this[$zoomMeters] *
+                (touchDistance - lastTouchDistance) / 100.0;
 
             handled = this.adjustOrbit(0, 0, radiusDelta);
           }
@@ -565,7 +576,8 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
-    const deltaRadius = (event as WheelEvent).deltaY / 10.0;
+    const deltaRadius =
+        (event as WheelEvent).deltaY * this[$zoomMeters] / 300.0;
 
     if ((this.adjustOrbit(0, 0, deltaRadius) ||
          this[$options].eventHandlingBehavior === 'prevent-all') &&
@@ -584,11 +596,11 @@ export class SmoothControls extends EventDispatcher {
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, 1);
+        handled = this.adjustOrbit(0, 0, this[$zoomMeters] / 5);
         break;
       case KeyCode.PAGE_DOWN:
         relevantKey = true;
-        handled = this.adjustOrbit(0, 0, -1);
+        handled = this.adjustOrbit(0, 0, this[$zoomMeters] / -5);
         break;
       case KeyCode.UP:
         relevantKey = true;

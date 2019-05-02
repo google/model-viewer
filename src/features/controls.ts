@@ -241,6 +241,9 @@ export const ControlsMixin = (ModelViewerElement:
           camera.near = scene.framedHeight / 10.0;
           camera.far = scene.framedHeight * 10.0;
 
+          const zoom = controls ? controls.getCameraSpherical().radius /
+                  this[$idealCameraDistance] :
+                                  1;
           this[$idealCameraDistance] = near + scene.modelSizeXZ / 2;
 
           camera.aspect = scene.aspect;
@@ -255,7 +258,7 @@ export const ControlsMixin = (ModelViewerElement:
 
           controls.target.set(0, 0, 0);
 
-          controls.setRadius(this[$idealCameraDistance]);
+          controls.setRadius(zoom * this[$idealCameraDistance]);
           controls.jumpToTarget()
         }
 

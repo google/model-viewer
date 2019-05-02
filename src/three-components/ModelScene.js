@@ -41,6 +41,8 @@ const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 // change the near plane or camera's position (if we wanted to implement a
 // visible "room" in the future where framing needs to be precise), we shrink
 // the room by a little bit so it's always slightly bigger than the model.
+// NOTE(elalish): this description has been incorrect for awhile (this is not
+// how the near plane is set) so this should probably be removed for simplicity.
 export const ROOM_PADDING_SCALE = 1.01;
 
 const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
