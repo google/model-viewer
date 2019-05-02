@@ -114,7 +114,7 @@ export default class ModelScene extends Scene {
     this.isDirty = false;
 
     this.framedHeight = 1;
-    this.modelSizeXZ = 1;
+    this.modelDepth = 1;
     this.setSize(width, height);
 
     this.background = new Color(0xffffff);
@@ -200,7 +200,7 @@ export default class ModelScene extends Scene {
     this.framedHeight = ROOM_PADDING_SCALE *
         Math.max(
             modelSize.y, modelSize.x / this.aspect, modelSize.z / this.aspect);
-    this.modelSizeXZ = Math.max(modelSize.x, modelSize.z);
+    this.modelDepth = ROOM_PADDING_SCALE * Math.max(modelSize.x, modelSize.z);
   }
 
   configureStageLighting(intensityScale, illuminationRole) {
@@ -288,8 +288,8 @@ export default class ModelScene extends Scene {
     this.pivot.rotation.y = 0;
 
     this.shadow.position.set(0, 0, 0);
-    this.shadow.scale.x = this.modelSizeXZ;
-    this.shadow.scale.z = this.modelSizeXZ;
+    this.shadow.scale.x = this.model.size.x;
+    this.shadow.scale.z = this.model.size.z;
 
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
@@ -300,6 +300,6 @@ export default class ModelScene extends Scene {
 
     // This should be ultimately user-configurable,
     // but for now, move the shadow to the bottom of the model.
-    this.shadow.position.y = -this.framedHeight / 2;
+    this.shadow.position.y = -this.model.size.y / 2;
   }
 }

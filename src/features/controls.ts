@@ -244,7 +244,7 @@ export const ControlsMixin = (ModelViewerElement:
           const zoom = controls ? controls.getCameraSpherical().radius /
                   this[$idealCameraDistance] :
                                   1;
-          this[$idealCameraDistance] = near + scene.modelSizeXZ / 2;
+          this[$idealCameraDistance] = near + scene.modelDepth / 2;
 
           camera.aspect = scene.aspect;
           camera.updateProjectionMatrix();
