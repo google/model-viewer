@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/* @import url('https://fonts.googleapis.com/css?family=Rubik'); */
 @import url('https://fonts.googleapis.com/css?family=Rubik:400,500');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,500');
 
@@ -21,17 +20,18 @@
   --color-red: #ff5252;
   --font-monospace: 'Roboto Mono', monospace;
   --border-style: 1px solid rgba(0,0,0,.15);
-  --grouping-title-margin-top: 60px;
+  --grouping-title-margin-top: 40px;
   --snippet-offset: 20px -20px;
   --pre-padding: 16px 20px;
-  --demo-title-padding: 60px 10% 40px 0;
+  --demo-title-padding: 24px 10% 24px 0;
   --heading-h3-max-width: 480px;
+  --heading-h1-margin-top: 40px;
   --browser-support-desc-margin-top: 40px;
   --browser-support-icons-margin-top: 16px;
-  --button-size: 56px;
-  --icon-size: 32px;
+  --button-size: 36px;
+  --icon-size: 28px;
   --header-height: 72px;
-  --poster-color: #455A64;
+  --poster-color: #F5F5F5;
 }
 
 body {
@@ -55,6 +55,32 @@ a {
 b {
   font-weight: 500;
 }
+#button-github {
+  background-color: white;
+  border-radius: 100%;
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  z-index: 1000;
+}
+#sticky-shortcut {
+  padding: 0 20px;
+  margin-top: -60px;
+  position: sticky;
+  top: 0;
+  display: flex;
+  background: white;
+  height: 56px;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+  border-bottom: var(--border-style);
+}
+#sticky-shortcut > div {
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
 table {
   text-align: left;
   border-spacing: 0;
@@ -112,7 +138,9 @@ table.browser-support img {
 #browser-support-icon-group {
   margin-top: var(--browser-support-icons-margin-top);
 }
-
+.zero-interaction {
+  pointer-events: none !important;
+}
 .icon-desc {
   padding: 8px 0;
   width: 50%;
@@ -167,25 +195,24 @@ h1, h2, h3, h4 {
   font-weight: 400;
 }
 h1 {
-  font-family: var(--font-monospace);
-  font-weight: 500;
+  /* font-weight: 500; */
   white-space: nowrap;
-  font-size: 2.6em;
+  font-size: 1.92em;
   line-height: 1.24em;
   margin-bottom: .12em;
   margin-top: 0;
 }
 h2 {
-  font-size: 2em;
-  line-height: 1.28em;
-  margin-top: .16em;
-  margin-bottom: .16em;
+  font-size: 1.72em;
+  line-height: 1.32em;
+  margin-top: .12em;
+  margin-bottom: .12em;
 }
 h3 {
-  font-size: 1.6em;
-  line-height: 1.4em;
-  margin-top: .16em;
-  margin-bottom: .16em;
+  font-size: 1.4em;
+  line-height: 1.34em;
+  margin-top: .12em;
+  margin-bottom: .12em;
 }
 h4 {
   font-size: 1.2em;
@@ -202,7 +229,6 @@ h1 span {
   margin: var(--snippet-offset);
 }
 
-
 .footer {
   background: #eee;
   padding: 40px 40px 40px 40px;
@@ -210,9 +236,13 @@ h1 span {
 }
 .footer ul {
   margin-top: 0;
-  padding-left: 20px;
+  padding-left: 0px;
+  margin-bottom: 0;
+  list-style: none;
 }
-
+.font-medium {
+  font-weight: 500;
+}
 p {
   margin-top: .25em;
   margin-bottom: .25em;
@@ -220,13 +250,18 @@ p {
 }
 
 model-viewer:focus {
-  outline: 1px solid #ccc;
-  outline-offset: -1px;
+  outline: none;
 }
 
 #intro {
-  max-width: 600px;
+  margin-top: 8px;
+  max-width: 480px;
 }
+#intro div {
+  font-weight: 500;
+}
+
+
 
 .sample {
   display: grid;
@@ -262,10 +297,10 @@ model-viewer:focus {
   width: 40px;
   content: "";
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .demo-title + h4 {
-  margin-top: -34px;
+  margin-top: -24px;
   margin-bottom: 40px;
 }
 
@@ -297,6 +332,7 @@ code {
   font-family: var(--font-monospace);
 }
 
+
 .icon-button {
   width: var(--button-size);
   height: var(--button-size);
@@ -314,7 +350,41 @@ code {
   background-image: url(../assets/ic_github_black_24dp.svg);
 }
 .icon-modelviewer {
+  background-image: url(../assets/ic_modelviewer_red.svg);
+}
+.icon-modelviewer-black {
   background-image: url(../assets/ic_modelviewer.svg);
+}
+
+.lockup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  color: rgba(0,0,0,.87);
+}
+.lockup h1 {
+  margin: 0;
+}
+.lockup .icon-button {
+  margin-left: -4px;
+  margin-right: 8px;
+  width: 34px;
+  height: 34px;
+  background-size: 34px;
+}
+
+#button-home {
+  font-weight: 500;
+  font-size: 20px;
+  margin: 0px 0 12px 0;
+  display: block;
+  display: flex;
+  align-items: center;
+}
+#button-home .icon-modelviewer {
+  margin-right: 6px;
+  margin-left: -6px;
+  margin-top: 2px;
 }
 
 .demo model-viewer {
@@ -324,22 +394,27 @@ code {
 .content {
   grid-area: content;
   position: relative;
+  padding-top: 20px;
 }
 
-.content .wrapper {
+.wrapper {
   margin: 0px auto;
-  padding: 60px;
+  padding: 40px 60px;
   position: relative;
   max-width: 920px;
 }
 
-
 #header {
   height: var(--header-height);
-  padding: 0 10px;
+  width: 50%;
+  padding: 0 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .center {
@@ -379,13 +454,13 @@ paper-button {
 
 #list-example {
   padding-left: 0px;
-  margin-top: 22px;
+  margin-top: 16px;
   margin-left: 0px;
-  margin-bottom: 60px;
+  margin-bottom: 16px;
   grid-template-columns: 1fr 1fr;
   display: grid;
   grid-column-gap: 20px;
-  grid-row-gap: 10px;
+  grid-row-gap: 8px;
   list-style: none;
 }
 #list-example li {
@@ -407,14 +482,13 @@ paper-button {
 }
 .list-attribute li {
   display: flex;
-  border-top: var(--border-style);
-  margin-bottom: 24px;
-  padding-top: 16px;
+  border-bottom: var(--border-style);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
 }
 .list-attribute li > div {
   min-width: 200px;
   flex: 1;
-  margin-bottom: 16px;
   font-weight: 500;
   padding-right: 16px;
 }
@@ -437,10 +511,20 @@ paper-button {
 
 .grouping-title {
   margin-top: var(--grouping-title-margin-top);
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 14px 0 12px 0;
+  border-bottom: var(--border-style);
+  z-index: 100;
+  text-transform: lowercase;
 }
 .grouping-title.border-bottom {
-  border-bottom: var(--border-style);
   padding-bottom: 10px;
+}
+
+.border-bottom {
+  border-bottom: var(--border-style);
 }
 
 .attribute {
@@ -496,11 +580,11 @@ paper-button {
   }
 }
 
-@media only screen and (max-width: 1440px) {
+@media only screen and (max-width: 1280px) {
   #list-example {
     grid-template-columns: 1fr;
   }
-  .content .wrapper {
+  .wrapper {
     margin: 0px 20px;
     padding: 20px;
     min-height: auto;
@@ -510,19 +594,18 @@ paper-button {
 
 @media only screen and (max-width: 800px) {
   :root {
-    --grouping-title-margin-top: 40px;
-    --demo-title-padding: 36px 12px 40px 0;
+    --grouping-title-margin-top: 20px;
+    --demo-title-padding: 8px 12px 24px 0;
     --snippet-offset: 0;
     --heading-h3-max-width: 320px;
+    --heading-h1-margin-top: 0;
     --browser-support-desc-margin-top: 20px;
     --browser-support-icons-margin-top: 8px;
-    --header-height: 60px;
-    --button-size: 40px;
-    --icon-size: 24px;
+    --header-height: 56px;
   }
   body {
     font-size: 14px;
-    line-height: 24px;
+    line-height: 22px;
   }
   h1 {
     font-size: 1.8em;
@@ -530,41 +613,63 @@ paper-button {
   }
   h2 {
     font-size: 1.56em;
-    line-height: 1.4em;
+    line-height: 1.36em;
   }
   h3 {
     font-size: 1.2em;
-    line-height: 1.4em;
+    line-height: 1.48em;
     font-weight: 500;
   }
   h4 {
     font-size: 1em;
     line-height: 1.5em;
   }
-
-  .heading {
-    margin-top: -12px;
+  .lockup {
+    margin-bottom: 2px;
+  }
+  .lockup .icon-button {
+    margin-left: 0px;
+    margin-right: 6px;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    background-size: var(--icon-size);
+  }
+  #button-github {
+    right: 10px;
+    bottom: 10px;
+    top: auto;
+    box-shadow: 0 0 4px rgba(0,0,0,.2);
+  }
+  #button-home {
+    margin: 0px 0 12px 0;
+  }
+  #header {
+    position: relative;
+    width: 100%;
+  }
+  #intro {
+    margin-bottom: 20px;
   }
 
   body.single-example .demo-title {
     transform: translate3d(0,-36px,0);
   }
 
+  .demo-title + h4 {
+    margin-bottom: 20px;
+  }
+
   .grouping-title {
     font-weight: 500;
   }
-  .content .wrapper {
-    padding: 0 0 40px 0;
+  .wrapper {
+    padding: 0 0 20px 0;
   }
   .demo {
     position: relative;
     height: 76vh;
     flex-direction: column-reverse;
     background-color: #455A64;
-  }
-
-  .intro {
-    padding: 32px 20px 24px 20px;
   }
   .index {
     width: 48px;
@@ -576,13 +681,15 @@ paper-button {
 
   .content {
     max-width: unset;
+    padding-top: 16px;
   }
   #list-example {
-    margin-top: 18px;
+    margin-top: 12px;
+    font-size: 16px;
   }
   .list-attribute li {
     flex-direction: column;
-    padding-top: 10px;
+    padding-top: 0px;
     margin-bottom: 12px;
   }
   .list-attribute li > h4 {

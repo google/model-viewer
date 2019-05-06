@@ -46,30 +46,18 @@
 <body>
 
   <div class="sample">
-    <div class="demo" id="demo-container-1"></div>
+    <div id="demo-container-1" class="demo"></div>
     <div class="content">
-
-      <div id="header">
-        <a class="icon-button icon-modelviewer" href="../index.html"></a>
-        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/animation.html"></a>
-      </div>
-
       <div class="wrapper">
-
-        <div id="intro">
-          <h3>Animation</h3>
-          <p>Use &lt;model-viewer&gt; to show off your animated models. This page showcases how you can control models with animations</p>
+        <a class="lockup" href="../../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Animation. </span>Use &lt;model-viewer&gt; to show off your animated models. This page showcases how you can control models with animations</h4>
+        <div class="heading">
+          <h2 class="demo-title">Automatically play animations with theautoplay attribute</h2>
+          <h4></h4>
         </div>
-
-        <h2 class="demo-title">Automatically play animations with the<span class="attribute">autoplay</span> attribute</h2>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-            <model-viewer
-                camera-controls
-                autoplay
-                src="assets/RobotExpressive.glb"
-                background-color="#622dcf"
-                alt="An animated 3D model of a robot"></model-viewer>
+  <model-viewer camera-controls autoplay src="assets/RobotExpressive.glb" background-color="#622dcf" alt="An animated 3D model of a robot"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -77,96 +65,87 @@
   </div>
 
   <div class="sample">
-    <div class="demo" id="demo-container-2"></div>
+    <div id="demo-container-2" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Select a specific animation with <span class="attribute">animation-name</span></h2>
+        <div class="heading">
+          <h2 class="demo-title">Select a specific animation with animation-name</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-            <model-viewer
-                camera-controls
-                autoplay
-                animation-name="Running"
-                src="assets/RobotExpressive.glb"
-                background-color="#25997c"
-                alt="An animate 3D model of a robot"></model-viewer>
+  <model-viewer camera-controls autoplay animation-name="Running" src="assets/RobotExpressive.glb" background-color="#25997c" alt="An animate 3D model of a robot"></model-viewer>
           </template>
-        </example-snippet>
+        </example-snippet>        
       </div>
     </div>
   </div>
 
   <div class="sample">
-    <div class="demo" id="demo-container-3"></div>
+    <div id="demo-container-3" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">Animations crossfade when you change them</h2>
+        <div class="heading">
+          <h2 class="demo-title">Animations crossfade when you change them</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
-            <model-viewer
-                id="paused-change-demo"
-                camera-controls
-                autoplay
-                animation-name="Running"
-                src="assets/RobotExpressive.glb"
-                background-color="#622dcf"
-                alt="An animated 3D model of a robot"></model-viewer>
-<script>
-(() => {
-  const modelViewer = document.querySelector('#paused-change-demo');
+  <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" src="assets/RobotExpressive.glb" background-color="#622dcf" alt="An animated 3D model of a robot"></model-viewer>
+  <script>
+  (() => {
+    const modelViewer = document.querySelector('#paused-change-demo');
 
-  self.setInterval(() => {
-    modelViewer.animationName = modelViewer.animationName === 'Running' ?
-      'Wave' : 'Running';
-  }, 1500.0);
-})();
-</script>
+    self.setInterval(() => {
+      modelViewer.animationName = modelViewer.animationName === 'Running' ?
+        'Wave' : 'Running';
+    }, 1500.0);
+  })();
+  </script>
           </template>
         </example-snippet>
       </div>
     </div>
   </div>
-
 
   <div class="sample">
-    <div class="demo" id="demo-container-4"></div>
+    <div id="demo-container-4" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
-        <h2 class="demo-title">A paused model shows the first frame of the configured animation</h2>
+        <div class="heading">
+          <h2 class="demo-title">A paused model shows the first frame of the configured animation</h2>
+          <h4></h4>
+        </div>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
-            <model-viewer
-                id="xfade-demo"
-                camera-controls
-                animation-name="Running"
-                src="assets/RobotExpressive.glb"
-                background-color="#622dcf"
-                alt="An animated 3D model of a robot"></model-viewer>
-<script>
-(() => {
-  const modelViewer = document.querySelector('#xfade-demo');
+  <model-viewer id="xfade-demo" camera-controls animation-name="Running" src="assets/RobotExpressive.glb" background-color="#25997c" alt="An animated 3D model of a robot"></model-viewer>
+  <script>
+  (() => {
+    const modelViewer = document.querySelector('#xfade-demo');
 
-  self.setInterval(() => {
-    modelViewer.animationName = modelViewer.animationName === 'Running' ?
-      'Idle' : 'Running';
-  }, 1500.0);
-})();
-</script>
+    self.setInterval(() => {
+      modelViewer.animationName = modelViewer.animationName === 'Running' ?
+        'Idle' : 'Running';
+    }, 1500.0);
+  })();
+  </script>
           </template>
         </example-snippet>
       </div>
     </div>
   </div>
 
+
   <div class="footer">
-    <div class="attribution">
-      <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-      licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
-    </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <ul>
+      <li class="attribution">
+        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+  </div>
 
   <script src="./scripts/helpers.js"></script>
 

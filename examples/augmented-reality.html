@@ -42,58 +42,54 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<body class="single-example">
+<body>
+
   <div class="sample">
-      <div id="demo-container" class="demo"></div>
-      <div class="content">
-        <div id="header">
-          <a class="icon-button icon-modelviewer" href="../index.html"></a>
-          <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/augmented-reality.html"></a>
+    <div id="demo-container-1" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+
+        <a class="lockup" href="../../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <div class="heading">
+          <h2 class="demo-title">Augmented Reality</h2>
+          <h4>This demonstrates several augmented reality features, including unstable-webxr, magic-leap and ios-src.</h4>
         </div>
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Augmented Reality</h2>
-            <h4>This demonstrates several augmented reality features, including <span class="attribute">unstable-webxr</span>, <span class="attribute">magic-leap</span> and <span class="attribute">ios-src</span>.</h4>
-          </div>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <template>
+<model-viewer src="assets/Astronaut.glb" camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
+          </template>
+        </example-snippet>
 
-          <example-snippet stamp-to="demo-container" highlight-as="html">
-              <template>
-                  <model-viewer src="assets/Astronaut.glb"
-                      alt="A 3D model of an astronaut"
-                      background-color="#222"
-                      ios-src="assets/Astronaut.usdz"
-                      magic-leap
-                      ar
-                      unstable-webxr></model-viewer>
-              </template>
-          </example-snippet>
+        <h3 style="margin-top: 40px; padding-bottom: 8px;" class="border-bottom">iOS, Magic Leap & WebXR</h3>
+        <ul class="list-attribute">
+          <li>
+            <div>ios-src</div>
+            <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>
+          </li>
+          <li>
+            <div>magic-leap</div>
+            <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
+          </li>
+          <li>
+            <div>unstable-webxr</div>
+            <p>Provides augmented reality via the experimental <a href="https://immersive-web.github.io/webxr/">WebXR Device API</a>, implemented in Chrome Canary only behind flags. For more information see the <a href="https://codelabs.developers.google.com/codelabs/ar-with-webxr/#1">AR with WebXR Codelab</a>.</p>
+          </li>
+        </ul>
 
-          <h3 style="margin-top: 40px;">iOS, Magic Leap & WebXR</h3>
-          <ul class="list-attribute">
-            <li>
-              <div>ios-src</div>
-              <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>
-            </li>
-            <li>
-              <div>magic-leap</div>
-              <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
-            </li>
-            <li>
-              <div>unstable-webxr</div>
-              <p>Provides augmented reality via the experimental <a href="https://immersive-web.github.io/webxr/">WebXR Device API</a>, implemented in Chrome Canary only behind flags. For more information see the <a href="https://codelabs.developers.google.com/codelabs/ar-with-webxr/#1">AR with WebXR Codelab</a>.</p>
-            </li>
-          </ul>
-
-        </div>
       </div>
+    </div>
   </div>
 
   <div class="footer">
-    <div class="attribution">
-      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
-    </div>
-    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <ul>
+      <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+    </ul>
+
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
   </div>
 
   <!-- Documentation-specific dependencies: -->
