@@ -13,35 +13,36 @@
  * limitations under the License.
  */
 
-import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {
+  Box3,
+  Color,
+  DirectionalLight,
+  HemisphereLight,
+  Mesh,
+  MeshBasicMaterial,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  SphereBufferGeometry,
+  Vector3
+} from 'three';
 
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import StaticShadow from './StaticShadow.js';
 
-// Valid types for `setScaleType` -- 'framed' scales the model
-// so that it fits within its 2D plane nicely. 'lifesize' is
-// unaltered scaling and uses whatever size the model provides,
-// such that 1 unit === 1 meter, used in AR.
-export const ScaleTypes = {
-  Framed: 'framed',
-  Lifesize: 'lifesize',
-};
-
 export const IlluminationRole = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
-
-const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
 
 // The model is sized to the room, and if too perfect of a fit,
 // the front of the model becomes clipped by the near plane. Rather than
 // change the near plane or camera's position (if we wanted to implement a
 // visible "room" in the future where framing needs to be precise), we shrink
 // the room by a little bit so it's always slightly bigger than the model.
-// NOTE(elalish): this description has been incorrect for awhile (this is not
+// TODO(#527): this description has been incorrect for awhile (this is not
 // how the near plane is set) so this should probably be removed for simplicity.
 export const ROOM_PADDING_SCALE = 1.01;
 
@@ -79,7 +80,6 @@ export default class ModelScene extends Scene {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
     this.renderer = renderer;
-    this.scaleType = ScaleTypes.Lifesize;
     this.exposure = 1;
     this[$modelAlignmentMask] = new Vector3(1, 1, 1);
 
@@ -98,6 +98,8 @@ export default class ModelScene extends Scene {
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
+    // These default camera values are never used, as they are reset once the
+    // model is loaded and framing is computed.
     this.camera = new PerspectiveCamera(45, this.aspect, 0.1, 100);
     this.camera.name = 'MainCamera';
 
@@ -113,6 +115,8 @@ export default class ModelScene extends Scene {
     this.isVisible = false;
     this.isDirty = false;
 
+    // See description of updateFraming() below for a description of these
+    // variables.
     this.framedHeight = 1;
     this.modelDepth = 1;
     this.setSize(width, height);
@@ -184,11 +188,18 @@ export default class ModelScene extends Scene {
       this.height = Math.max(height, 1);
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
-      this.applyCanvasSize();
+      this.updateFraming();
     }
   }
 
-  applyCanvasSize() {
+  /**
+   * To frame the scene, a box is fit around the model such that the X and Z
+   * dimensions (modelDepth) are the same (for Y-rotation) and the X/Y ratio is
+   * the aspect ratio of the canvas (framedHeight is the Y dimension). At the
+   * ideal distance, the camera's fov exactly covers the front face of this box
+   * when looking down the Z-axis.
+   */
+  updateFraming() {
     const dpr = resolveDpr();
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
@@ -204,14 +215,14 @@ export default class ModelScene extends Scene {
   }
 
   configureStageLighting(intensityScale, illuminationRole) {
-    this.light.intensity = intensityScale *
-        (illuminationRole === IlluminationRole.Primary ?
-             AMBIENT_LIGHT_HIGH_INTENSITY :
-             AMBIENT_LIGHT_LOW_INTENSITY);
-    this.shadowLight.intensity = intensityScale *
-        (illuminationRole === IlluminationRole.Primary ?
-             DIRECTIONAL_LIGHT_HIGH_INTENSITY :
-             DIRECTIONAL_LIGHT_LOW_INTENSITY);
+    this.light.intensity =
+        intensityScale * (illuminationRole === IlluminationRole.Primary ?
+                              AMBIENT_LIGHT_HIGH_INTENSITY :
+                              AMBIENT_LIGHT_LOW_INTENSITY);
+    this.shadowLight.intensity =
+        intensityScale * (illuminationRole === IlluminationRole.Primary ?
+                              DIRECTIONAL_LIGHT_HIGH_INTENSITY :
+                              DIRECTIONAL_LIGHT_LOW_INTENSITY);
     this.isDirty = true;
   }
 
@@ -224,8 +235,8 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Moves the model to be centered at the origin, with the move scaled by
-   * $modelAlignmentMask
+   * Moves the model to be centered at the origin, taking into account
+   * setModelAlignmentMask(), described above.
    */
   alignModel() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
@@ -266,7 +277,7 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event) {
-    this.applyCanvasSize();
+    this.updateFraming();
     this.alignModel();
     this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});

@@ -49,8 +49,7 @@ suite('ModelScene', () => {
       element: element,
       canvas: element[$canvas],
       width: 200,
-      height: 100,
-      renderer,
+      height: 100, renderer,
     });
   });
 
@@ -109,6 +108,14 @@ suite('ModelScene', () => {
       scene.setSize(width, height);
 
       expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10);
+    });
+
+    test('model is not scaled', () => {
+      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
+      scene.model.setObject(dummyMesh);
+
+      scene.setSize(1000, 500);
+      expect(scene.model.scale).to.be.eql(new Vector3(1, 1, 1));
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

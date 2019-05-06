@@ -18,7 +18,10 @@ import {Event, PerspectiveCamera, Spherical} from 'three';
 
 import {deserializeSpherical} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
-import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import {
+  ChangeEvent,
+  SmoothControls
+} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
@@ -50,8 +53,9 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
-const $updateOrbitCamera = Symbol('updateOrbitCamera');
-const $orbitCamera = Symbol('orbitCamera');
+const $updateCamera = Symbol('updateCamera');
+const $applyCameraOrbit = Symbol('applyCameraOrbit');
+const $camera = Symbol('camera');
 const $fov = Symbol('fov');
 
 const $blurHandler = Symbol('blurHandler');
@@ -71,24 +75,23 @@ const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 
-export const ControlsMixin = (ModelViewerElement:
-                                  Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
+export const ControlsMixin =
+    (ModelViewerElement: Constructor<ModelViewerElementBase>): Constructor<
+        ModelViewerElementBase> => {
       class ControlsModelViewerElement extends ModelViewerElement {
         @property({type: Boolean, attribute: 'camera-controls'})
-        cameraControls: boolean = false;
+        cameraControls: boolean=false;
 
         @property(
-            {type: String, attribute: 'camera-orbit', hasChanged: () => true})
-        cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
+            {type: String, attribute: 'camera-orbit', hasChanged: ()=> true})
+        cameraOrbit: string=DEFAULT_CAMERA_ORBIT;
 
         @property({type: Number, attribute: 'interaction-prompt-threshold'})
-        interactionPromptThreshold: number =
-            DEFAULT_INTERACTION_PROMPT_THRESHOLD;
+        interactionPromptThreshold: number=DEFAULT_INTERACTION_PROMPT_THRESHOLD;
 
         protected[$promptElement]: Element;
 
-        protected[$orbitCamera]: PerspectiveCamera;
+        protected[$camera]: PerspectiveCamera;
         protected[$fov]: number = DEFAULT_FOV;
         protected[$idealCameraDistance] = 1.0;
 
@@ -115,12 +118,11 @@ export const ControlsMixin = (ModelViewerElement:
           const scene = (this as any)[$scene];
 
           this[$promptElement] =
-              this.shadowRoot!.querySelector('.controls-prompt')!;
+              this.shadowRoot !.querySelector('.controls-prompt') !;
 
-          this[$orbitCamera] = scene.getCamera();
+          this[$camera] = scene.getCamera();
 
-          this[$controls] =
-              new SmoothControls(this[$orbitCamera], scene.canvas);
+          this[$controls] = new SmoothControls(this[$camera], scene.canvas);
           this[$controls].target.set(0, 0, 0);
         }
 
@@ -168,15 +170,15 @@ export const ControlsMixin = (ModelViewerElement:
           }
 
           if (changedProperties.has('cameraOrbit')) {
-            this.setCameraOrbit();
+            this[$applyCameraOrbit]();
           }
         }
 
-        setCameraOrbit() {
+        [$applyCameraOrbit]() {
           let sphericalValues = deserializeSpherical(this.cameraOrbit);
 
           if (sphericalValues == null) {
-            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
+            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT) !;
           }
 
           let [theta, phi, radius] = sphericalValues;
@@ -222,7 +224,7 @@ export const ControlsMixin = (ModelViewerElement:
         [$deferInteractionPrompt]() {
           // Effectively cancel the timer waiting for user interaction:
           this[$waitingToPromptUser] = false;
-          this[$promptElement]!.classList.remove('visible');
+          this[$promptElement] !.classList.remove('visible');
 
           // Implicitly there was some reason to defer the prompt. If the user
           // has been prompted at least once already, we no longer need to
@@ -233,8 +235,13 @@ export const ControlsMixin = (ModelViewerElement:
           }
         }
 
-        [$updateOrbitCamera]() {
-          const camera = this[$orbitCamera];
+        /**
+         * Changes the camera's radius to properly frame the scene based on
+         * changes to framedHeight or fov, and maintains relative camera zoom
+         * state.
+         */
+        [$updateCamera]() {
+          const camera = this[$camera];
           const controls = this[$controls];
           const scene = (this as any)[$scene];
 
@@ -244,9 +251,13 @@ export const ControlsMixin = (ModelViewerElement:
           camera.near = scene.framedHeight / 10.0;
           camera.far = scene.framedHeight * 10.0;
 
-          const zoom = controls ? controls.getCameraSpherical().radius /
+          // When we update the idealCameraDistance due to reframing, we want to
+          // maintain the user's zoom level (how they have changed the camera
+          // radius), which we represent here as a ratio.
+          const zoom = controls ?
+              controls.getCameraSpherical().radius /
                   this[$idealCameraDistance] :
-                                  1;
+              1;
           this[$idealCameraDistance] = near + scene.modelDepth / 2;
 
           camera.aspect = scene.aspect;
@@ -258,12 +269,12 @@ export const ControlsMixin = (ModelViewerElement:
           const maximumRadius = this[$idealCameraDistance];
 
           controls.applyOptions({minimumRadius, maximumRadius});
-          controls.updateZoom(scene.framedHeight);
+          controls.updateFramedHeight(scene.framedHeight);
 
           controls.target.set(0, 0, 0);
 
           controls.setRadius(zoom * this[$idealCameraDistance]);
-          controls.jumpToTarget()
+          controls.jumpCamera()
         }
 
         [$updateAria]() {
@@ -274,7 +285,7 @@ export const ControlsMixin = (ModelViewerElement:
           // becomes focused.
           const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
           const {theta, phi} =
-              this[$controls]!.getCameraSpherical(this[$lastSpherical]);
+              this[$controls] !.getCameraSpherical(this[$lastSpherical]);
 
           const rootNode = this.getRootNode() as Document | ShadowRoot | null;
 
@@ -323,14 +334,14 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$onResize](event: any) {
           super[$onResize](event);
-          this[$updateOrbitCamera]();
+          this[$updateCamera]();
         }
 
         [$onModelLoad](event: any) {
           super[$onModelLoad](event);
-          this[$updateOrbitCamera]();
-          this.setCameraOrbit();
-          this[$controls].jumpToTarget();
+          this[$updateCamera]();
+          this[$applyCameraOrbit]();
+          this[$controls].jumpCamera();
         }
 
         [$onFocus]() {
