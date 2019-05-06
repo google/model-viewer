@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
-import {Constructor} from '../utils.js';
+import ModelViewerElementBase, {$needsRender, $scene, $tick, $onUserModelOrbit} from '../model-viewer-base.js';
+import {Constructor, Timer} from '../utilities.js';
 
 const Alignment = {
   CENTER: 'center',
@@ -27,6 +27,7 @@ const Alignment = {
 // How much the model will rotate per
 // second in radians:
 const ROTATION_SPEED = Math.PI / 32;
+const AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION = 3000;
 
 const UNBOUNDED_WHITESPACE_RE = /\s+/;
 
@@ -56,7 +57,12 @@ const alignmentToMaskValues = (alignmentString: string) => {
   return maskValues;
 };
 
+const $autoRotateTimer = Symbol('autoRotateTimer');
 const $updateAlignment = Symbol('updateAlignment');
+
+export {
+  AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION
+};
 
 export const StagingMixin = (ModelViewerElement:
                                  Constructor<ModelViewerElementBase>):
@@ -67,6 +73,24 @@ export const StagingMixin = (ModelViewerElement:
 
         @property({type: String, attribute: 'align-model'})
         alignModel: string = 'center';
+
+        private [$autoRotateTimer]: Timer;
+
+        constructor() {
+          super();
+
+          this[$autoRotateTimer] = new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+        }
+
+        connectedCallback() {
+          super.connectedCallback();
+          this[$autoRotateTimer].stop();
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          this[$autoRotateTimer].stop();
+        }
 
         updated(changedProperties: Map<string, any>) {
           super.updated(changedProperties);
@@ -84,11 +108,26 @@ export const StagingMixin = (ModelViewerElement:
         [$tick](time: number, delta: number) {
           super[$tick](time, delta);
 
-          if (this.autoRotate && this.modelIsVisible) {
-            (this as any)[$scene].pivot.rotation.y +=
-                ROTATION_SPEED * delta * 0.001;
+          if (!this.autoRotate || !this.modelIsVisible) {
+            return;
+          }
+
+          this[$autoRotateTimer].tick(delta);
+
+          if (this[$autoRotateTimer].hasStopped) {
+            (this as any)[$scene].pivot.rotation.y += ROTATION_SPEED * delta * 0.001;
             this[$needsRender]();
           }
+        }
+
+        [$onUserModelOrbit]() {
+          super[$onUserModelOrbit]();
+
+          if (!this.autoRotate) {
+            return;
+          }
+
+          this[$autoRotateTimer].reset();
         }
 
         [$updateAlignment]() {

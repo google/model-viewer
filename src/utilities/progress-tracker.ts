@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {clamp} from '../utils.js';
+import {clamp} from '../utilities.js';
 
 interface OngoingActivity {
   progress: number;

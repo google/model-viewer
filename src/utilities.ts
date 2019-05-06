@@ -14,6 +14,11 @@
  */
 
 import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
+import Timer from './utilities/timer';
+
+export {
+  Timer,
+};
 
 export type Constructor<T = object> = {
   new (...args: any[]): T,

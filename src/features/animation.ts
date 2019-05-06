@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick, $updateSource} from '../model-viewer-base.js';
-import {Constructor} from '../utils.js';
+import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
 

@@ -15,7 +15,7 @@
 
 import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
-import {resolveDpr} from '../utils.js';
+import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import StaticShadow from './StaticShadow.js';
