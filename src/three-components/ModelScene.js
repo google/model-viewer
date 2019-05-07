@@ -13,19 +13,7 @@
  * limitations under the License.
  */
 
-import {
-  Box3,
-  Color,
-  DirectionalLight,
-  HemisphereLight,
-  Mesh,
-  MeshBasicMaterial,
-  Object3D,
-  PerspectiveCamera,
-  Scene,
-  SphereBufferGeometry,
-  Vector3
-} from 'three';
+import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
 
 import {resolveDpr} from '../utilities.js';
 
@@ -208,21 +196,25 @@ export default class ModelScene extends Scene {
     this.aspect = this.width / this.height;
 
     const modelSize = this.model.size;
-    this.framedHeight = ROOM_PADDING_SCALE *
-        Math.max(
-            modelSize.y, modelSize.x / this.aspect, modelSize.z / this.aspect);
-    this.modelDepth = ROOM_PADDING_SCALE * Math.max(modelSize.x, modelSize.z);
+    if (modelSize.x != 0 || modelSize.y != 0 || modelSize.z != 0) {
+      this.framedHeight = ROOM_PADDING_SCALE *
+          Math.max(
+              modelSize.y,
+              modelSize.x / this.aspect,
+              modelSize.z / this.aspect);
+      this.modelDepth = ROOM_PADDING_SCALE * Math.max(modelSize.x, modelSize.z);
+    }
   }
 
   configureStageLighting(intensityScale, illuminationRole) {
-    this.light.intensity =
-        intensityScale * (illuminationRole === IlluminationRole.Primary ?
-                              AMBIENT_LIGHT_HIGH_INTENSITY :
-                              AMBIENT_LIGHT_LOW_INTENSITY);
-    this.shadowLight.intensity =
-        intensityScale * (illuminationRole === IlluminationRole.Primary ?
-                              DIRECTIONAL_LIGHT_HIGH_INTENSITY :
-                              DIRECTIONAL_LIGHT_LOW_INTENSITY);
+    this.light.intensity = intensityScale *
+        (illuminationRole === IlluminationRole.Primary ?
+             AMBIENT_LIGHT_HIGH_INTENSITY :
+             AMBIENT_LIGHT_LOW_INTENSITY);
+    this.shadowLight.intensity = intensityScale *
+        (illuminationRole === IlluminationRole.Primary ?
+             DIRECTIONAL_LIGHT_HIGH_INTENSITY :
+             DIRECTIONAL_LIGHT_LOW_INTENSITY);
     this.isDirty = true;
   }
 
