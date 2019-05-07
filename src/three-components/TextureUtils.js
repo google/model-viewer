@@ -14,11 +14,11 @@
  */
 
 import {Cache, CubeTexture, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
+import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
+import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
-import EquirectangularToCubeGenerator from '../third_party/three/EquirectangularToCubeGenerator.js';
-import PMREMCubeUVPacker from '../third_party/three/PMREMCubeUVPacker.js';
-import PMREMGenerator from '../third_party/three/PMREMGenerator.js';
-import RGBELoader from '../third_party/three/RGBELoader.js';
+import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
+import {RGBELoader} from '../third_party/three/RGBELoader.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
