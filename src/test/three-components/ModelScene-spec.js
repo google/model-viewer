@@ -16,7 +16,6 @@
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import ModelScene, {ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
@@ -49,7 +48,8 @@ suite('ModelScene', () => {
       element: element,
       canvas: element[$canvas],
       width: 200,
-      height: 100, renderer,
+      height: 100,
+      renderer,
     });
   });
 
@@ -83,7 +83,7 @@ suite('ModelScene', () => {
       const aspect = width / height;
       scene.setSize(width, height);
 
-      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10 / aspect);
+      expect(scene.framedHeight).to.be.equal(10 / aspect);
     });
 
     test('scales when Z-bound', () => {
@@ -95,7 +95,7 @@ suite('ModelScene', () => {
       const aspect = width / height;
       scene.setSize(width, height);
 
-      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10 / aspect);
+      expect(scene.framedHeight).to.be.equal(10 / aspect);
     });
 
     test('scales when Y-bound', () => {
@@ -107,7 +107,7 @@ suite('ModelScene', () => {
       const aspect = width / height;
       scene.setSize(width, height);
 
-      expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10);
+      expect(scene.framedHeight).to.be.equal(10);
     });
 
     test('model is not scaled', () => {

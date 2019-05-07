@@ -160,7 +160,6 @@ static void cleanup(Engine* engine, View* view, Scene* scene) {
 }
 
 const float FRAMED_HEIGHT = 10.0f;
-const float ROOM_PADDING_SCALE = 1.01f;
 const float FOV = 45.0f;
 
 static float roomDepth = 0.0f;
@@ -202,8 +201,6 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   float scale = std::min(roomSize.x / modelSize.x, roomSize.y / modelSize.y);
   scale = std::min(scale, roomSize.z / modelSize.z);
 
-  scale /= ROOM_PADDING_SCALE;
-
   modelCenter *= scale;
 
   float3 center = (roomCenter - modelCenter);
@@ -214,7 +211,7 @@ static void setup(Engine* engine, View* view, Scene* scene) {
       rooti, mat4f::translation(center) * mat4f::scaling(float3(scale)));
 
   if (modelSize.y >= modelSize.x && modelSize.y >= modelSize.z) {
-    roomDepth = std::max(modelSize.x, modelSize.z) * scale * ROOM_PADDING_SCALE;
+    roomDepth = std::max(modelSize.x, modelSize.z) * scale;
   } else {
     roomDepth = std::abs(roomSize.z);
   }
@@ -257,7 +254,8 @@ static void setup(Engine* engine, View* view, Scene* scene) {
   // filament.patch
   FilamentApp& filamentApp = FilamentApp::get();
   IBL* ibl = filamentApp.getIBL();
-  ibl->getIndirectLight()->setRotation(mat3f::rotation(M_PI_2, float3{0, 1, 0}));
+  ibl->getIndirectLight()->setRotation(
+      mat3f::rotation(M_PI_2, float3{0, 1, 0}));
 }
 
 static void preRender(Engine*, View* view, Scene*, Renderer*) {
