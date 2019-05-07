@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import GLTFLoader from '../third_party/three/GLTFLoader.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
 
