@@ -76,7 +76,7 @@ export default class StaticShadow extends Mesh {
 
     this.material.opacity =
         BASE_SHADOW_OPACITY * (intensityIsNumber ? intensity : 0.0);
-    
+
     this.visible = this.material.opacity > 0;
   }
 
@@ -141,7 +141,9 @@ export default class StaticShadow extends Mesh {
       shadowParent.remove(this);
     }
 
-    renderer.render(scene, this[$camera], this[$renderTarget], true);
+    renderer.setRenderTarget(this[$renderTarget]);
+    renderer.clear();
+    renderer.render(scene, this[$camera]);
 
     if (shadowParent) {
       shadowParent.add(this);
