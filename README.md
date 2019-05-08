@@ -175,9 +175,10 @@ Different platforms enable slightly different experiences, but generally finds
 a real-world surface and allows the user to place the model, to be viewed through
 a camera.
 
-The attributes `ios-src`, `magic-leap` and `unstable-webxr` enable AR features
-on certain platforms -- read the [API attributes](#attributes) for each to
-understand the support and caveats.
+The attributes `ar`, `ios-src`, `magic-leap` and `unstable-webxr` enable AR
+features on certain platforms. See the
+[documentation](https://googlewebcomponents.github.io/model-viewer/) for each
+to understand the support and caveats.
 
 When in augmented reality, all current platforms assume that the models unit size
 be in meters, such that a 1.5 unit tall model will be 1.5 meters when in AR.
