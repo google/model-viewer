@@ -310,7 +310,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Resets the input sensitivity based on model scale, here represented by
+   * Resets the zoom sensitivity based on model scale, here represented by
    * framedHeight.
    * @param framedHeight
    */

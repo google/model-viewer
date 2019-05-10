@@ -51,7 +51,7 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
-const $applyCameraOrbit = Symbol('applyCameraOrbit');
+const $updateCameraOrbit = Symbol('applyCameraOrbit');
 const $camera = Symbol('camera');
 const $fov = Symbol('fov');
 
@@ -168,11 +168,11 @@ export const ControlsMixin = (ModelViewerElement:
           }
 
           if (changedProperties.has('cameraOrbit')) {
-            this[$applyCameraOrbit]();
+            this[$updateCameraOrbit]();
           }
         }
 
-        [$applyCameraOrbit]() {
+        [$updateCameraOrbit]() {
           let sphericalValues = deserializeSpherical(this.cameraOrbit);
 
           if (sphericalValues == null) {
@@ -337,7 +337,7 @@ export const ControlsMixin = (ModelViewerElement:
         [$onModelLoad](event: any) {
           super[$onModelLoad](event);
           this[$updateCamera]();
-          this[$applyCameraOrbit]();
+          this[$updateCameraOrbit]();
           this[$controls].jumpToDestination();
         }
 
