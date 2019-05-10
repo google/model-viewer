@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene, $onUserModelOrbit} from '../../model-viewer-base.js';
-import {FRAMED_HEIGHT} from '../../three-components/ModelScene.js';
+import {$controls, $idealCameraDistance, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
@@ -91,10 +90,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults radius to ideal camera distance', () => {
-        const scene = element[$scene];
-
-        expect(element.getCameraOrbit().radius * FRAMED_HEIGHT)
-            .to.be.equal(scene.idealCameraDistance);
+        expect(element.getCameraOrbit().radius)
+            .to.be.equal(element[$idealCameraDistance]);
       });
 
       test('can independently adjust azimuth', async () => {
@@ -360,7 +357,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                   .to.be.equal('View from stage lower-front');
             });
       });
-
     });
   });
 });

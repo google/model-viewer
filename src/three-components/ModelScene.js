@@ -20,34 +20,18 @@ import {resolveDpr} from '../utilities.js';
 import Model from './Model.js';
 import StaticShadow from './StaticShadow.js';
 
-// Valid types for `setScaleType` -- 'framed' scales the model
-// so that it fits within its 2D plane nicely. 'lifesize' is
-// unaltered scaling and uses whatever size the model provides,
-// such that 1 unit === 1 meter, used in AR.
-export const ScaleTypes = {
-  Framed: 'framed',
-  Lifesize: 'lifesize',
-};
-
 export const IlluminationRole = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
-
-const ScaleTypeNames = Object.keys(ScaleTypes).map(type => ScaleTypes[type]);
-
-// This (arbitrary) value represents the height of the scene in
-// meters. With a fixed dimension, we can scale everything accordingly
-// to fit within this space and properly frame the model within view.
-// For example, if the containing canvas is 800px x 400px, then the scene
-// would be 20m x 10m if FRAMED_HEIGHT === 10.
-export const FRAMED_HEIGHT = 10;
 
 // The model is sized to the room, and if too perfect of a fit,
 // the front of the model becomes clipped by the near plane. Rather than
 // change the near plane or camera's position (if we wanted to implement a
 // visible "room" in the future where framing needs to be precise), we shrink
 // the room by a little bit so it's always slightly bigger than the model.
+// TODO(#527): this description has been incorrect for awhile (this is not
+// how the near plane is set) so this should probably be removed for simplicity.
 export const ROOM_PADDING_SCALE = 1.01;
 
 const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
@@ -56,12 +40,8 @@ const DIRECTIONAL_LIGHT_LOW_INTENSITY = 2.0;
 const AMBIENT_LIGHT_HIGH_INTENSITY = 3.0;
 const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 4.0;
 
-// Vertical field of view of camera, in degrees.
-const FOV = 45;
-
 const $paused = Symbol('paused');
 const $modelAlignmentMask = Symbol('modelAlignmentMask');
-const $idealCameraDistance = Symbol('idealCameraDistance');
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -88,12 +68,8 @@ export default class ModelScene extends Scene {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
     this.renderer = renderer;
-    this.scaleType = ScaleTypes.Framed;
     this.exposure = 1;
     this[$modelAlignmentMask] = new Vector3(1, 1, 1);
-    this[$idealCameraDistance] = 1.0;
-
-    this.unscaledModelOffset = new Vector3(0, 0, 0);
 
     this.model = new Model();
     this.shadow = new StaticShadow();
@@ -110,9 +86,10 @@ export default class ModelScene extends Scene {
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
-    this.camera = new PerspectiveCamera(FOV, this.aspect, 0.1, 100);
+    // These default camera values are never used, as they are reset once the
+    // model is loaded and framing is computed.
+    this.camera = new PerspectiveCamera(45, this.aspect, 0.1, 100);
     this.camera.name = 'MainCamera';
-
 
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
@@ -126,17 +103,15 @@ export default class ModelScene extends Scene {
     this.isVisible = false;
     this.isDirty = false;
 
-    this.roomBox = new Box3();
-    this.roomSize = new Vector3();
+    // See description of updateFraming() below for a description of these
+    // variables.
+    this.framedHeight = 1;
+    this.modelDepth = 1;
     this.setSize(width, height);
 
     this.background = new Color(0xffffff);
 
     this.model.addEventListener('model-load', this.onModelLoad);
-  }
-
-  get idealCameraDistance() {
-    return this[$idealCameraDistance];
   }
 
   get paused() {
@@ -184,7 +159,7 @@ export default class ModelScene extends Scene {
    */
   setModelAlignmentMask(...alignmentMaskValues) {
     this[$modelAlignmentMask].set(...alignmentMaskValues);
-    this.scaleModelToFitRoom();
+    this.alignModel();
     this.isDirty = true;
   }
 
@@ -199,62 +174,36 @@ export default class ModelScene extends Scene {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
-      this.aspect = this.width / this.height;
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
-      this.applyRoomSize();
+      this.updateFraming();
     }
   }
 
   /**
-   * Updates the 3D room and model scale based on the 2D
-   * dimensions for the encapsulating element.
+   * To frame the scene, a box is fit around the model such that the X and Z
+   * dimensions (modelDepth) are the same (for Y-rotation) and the X/Y ratio is
+   * the aspect ratio of the canvas (framedHeight is the Y dimension). At the
+   * ideal distance, the camera's fov exactly covers the front face of this box
+   * when looking down the Z-axis.
    */
-  applyRoomSize() {
+  updateFraming() {
     const dpr = resolveDpr();
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
     this.canvas.style.width = `${this.width}px`;
     this.canvas.style.height = `${this.height}px`;
+    this.aspect = this.width / this.height;
 
-    // Use the room width as the room depth as well, since
-    // the model can rotate on its Y axis
-    const halfWidth = this.aspect * FRAMED_HEIGHT / 2;
-    this.roomBox.min.set(-halfWidth, 0, -halfWidth);
-    this.roomBox.max.set(halfWidth, FRAMED_HEIGHT, halfWidth);
-    this.roomBox.getSize(this.roomSize);
-
-    this.scaleModelToFitRoom();
-
-    // Now that the room has been scaled with width === depth,
-    // we may be able to reduce the depth so that the camera
-    // doesn't have to be so far back. This can only occur
-    // when the model is scale-limited on the Y axis, since
-    // otherwise, width === depth must be equal for rotation.
     const modelSize = this.model.size;
-    if (modelSize.length() !== 0 && modelSize.y >= modelSize.x &&
-        modelSize.y >= modelSize.z) {
-      // Calculate the depth from before applying the padding
-      // @see ROOM_PADDING_SCALE
-      const depth = Math.max(modelSize.x, modelSize.z) * this.model.scale.z *
-          ROOM_PADDING_SCALE;
-      this.roomBox.max.z = depth / 2;
-      this.roomBox.min.z = depth / -2;
-      this.roomSize.z = depth;
+    if (modelSize.x != 0 || modelSize.y != 0 || modelSize.z != 0) {
+      this.framedHeight = ROOM_PADDING_SCALE *
+          Math.max(
+              modelSize.y,
+              modelSize.x / this.aspect,
+              modelSize.z / this.aspect);
+      this.modelDepth = ROOM_PADDING_SCALE * Math.max(modelSize.x, modelSize.z);
     }
-
-    // Position the camera such that the element is perfectly framed
-    this.camera.near =
-        (FRAMED_HEIGHT / 2) / Math.tan((FOV / 2) * Math.PI / 180);
-
-    this[$idealCameraDistance] = this.camera.near + this.roomBox.max.z;
-
-    this.camera.position.z = this[$idealCameraDistance];
-    this.camera.position.y = FRAMED_HEIGHT / 2.0;
-    this.camera.aspect = this.aspect;
-    this.camera.updateProjectionMatrix();
-
-    this.updateStaticShadow();
   }
 
   configureStageLighting(intensityScale, illuminationRole) {
@@ -278,34 +227,20 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Scales the model to fit the enclosed room.
+   * Moves the model to be centered at the origin, taking into account
+   * setModelAlignmentMask(), described above.
    */
-  scaleModelToFitRoom() {
+  alignModel() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
       return;
     }
 
     this.resetModelPose();
 
-    const roomSize = this.roomSize;
-    const modelSize = this.model.size;
-    const roomCenter = this.roomBox.getCenter(new Vector3());
     const modelCenter = this.model.boundingBox.getCenter(new Vector3());
-
-    let scale = Math.min(
-        roomSize.x / modelSize.x,
-        roomSize.y / modelSize.y,
-        roomSize.z / modelSize.z);
-
-    // @see ROOM_PADDING_SCALE
-    scale /= ROOM_PADDING_SCALE;
-
-    modelCenter.multiply(this[$modelAlignmentMask]);
-    this.unscaledModelOffset.copy(modelCenter).multiplyScalar(-1);
-    modelCenter.multiplyScalar(scale);
-
-    this.model.scale.multiplyScalar(scale);
-    this.model.position.subVectors(roomCenter, modelCenter);
+    this.model.position.copy(modelCenter)
+        .multiply(this[$modelAlignmentMask])
+        .multiplyScalar(-1);
   }
 
   resetModelPose() {
@@ -334,7 +269,9 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event) {
-    this.applyRoomSize();
+    this.updateFraming();
+    this.alignModel();
+    this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
@@ -354,8 +291,8 @@ export default class ModelScene extends Scene {
     this.pivot.rotation.y = 0;
 
     this.shadow.position.set(0, 0, 0);
-    this.shadow.scale.x = this.roomSize.x;
-    this.shadow.scale.z = this.roomSize.z;
+    this.shadow.scale.x = this.model.size.x;
+    this.shadow.scale.z = this.model.size.z;
 
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
@@ -364,13 +301,8 @@ export default class ModelScene extends Scene {
     this.pivot.add(this.shadow);
     this.pivot.rotation.y = currentRotation;
 
-    // If model has vertical room, it'll be positioned at (0, 5, 0)
-    // and appear to be floating. This should be ultimately user-configurable,
-    // but for now, move the shadow to the bottom of the model if the
-    // element and model are width-bound.
-    const modelHeight = this.model.size.y * this.model.scale.y;
-    if (modelHeight < FRAMED_HEIGHT) {
-      this.shadow.position.y = (FRAMED_HEIGHT / 2) - modelHeight / 2
-    }
+    // This should be ultimately user-configurable,
+    // but for now, move the shadow to the bottom of the model.
+    this.shadow.position.y = -this.model.size.y / 2;
   }
 }
