@@ -74,7 +74,7 @@
         </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-<model-viewer camera-controls camera-orbit="45deg 55deg 1.2m" src="assets/Astronaut.glb" background-color="#622dcf" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer camera-controls camera-orbit="45deg 55deg 2.5m" src="assets/Astronaut.glb" background-color="#622dcf" alt="A 3D model of an astronaut"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -96,8 +96,8 @@
 (() => {
   const modelViewer = document.querySelector('#orbit-demo');
   const orbitCycle = [
-    '45deg 55deg 2m',
-    '-60deg 110deg 1m',
+    '45deg 55deg 4m',
+    '-60deg 110deg 2m',
     modelViewer.cameraOrbit
   ];
 

@@ -56,12 +56,18 @@
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer src="assets/Astronaut.glb" camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
+<model-viewer src="assets/Astronaut.glb" ar camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
           </template>
         </example-snippet>
 
         <h3 style="margin-top: 40px; padding-bottom: 8px;" class="border-bottom">iOS, Magic Leap & WebXR</h3>
         <ul class="list-attribute">
+          <li>
+            <div>ar</div>
+            <p>Enable the ability to launch
+            <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
+            on supported devices.</p>
+          </li>
           <li>
             <div>ios-src</div>
             <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>

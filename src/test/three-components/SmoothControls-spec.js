@@ -392,7 +392,7 @@ suite('SmoothControls', () => {
             });
 
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-            
+
             controls.update(performance.now, ONE_FRAME_DELTA);
             controls.update(performance.now, ONE_FRAME_DELTA);
 
@@ -404,7 +404,6 @@ suite('SmoothControls', () => {
             expect(changeSource.length).to.equal(4);
             expect(changeSource).to.eql(expectedSources);
           });
-
         });
       });
     });
