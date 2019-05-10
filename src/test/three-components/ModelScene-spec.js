@@ -49,7 +49,8 @@ suite('ModelScene', () => {
       element: element,
       canvas: element[$canvas],
       width: 200,
-      height: 100, renderer,
+      height: 100,
+      renderer,
     });
   });
 

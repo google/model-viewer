@@ -18,10 +18,7 @@ import {Event, PerspectiveCamera, Spherical} from 'three';
 
 import {deserializeSpherical} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
-import {
-  ChangeEvent,
-  SmoothControls
-} from '../three-components/SmoothControls.js';
+import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
@@ -75,19 +72,20 @@ const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 
-export const ControlsMixin =
-    (ModelViewerElement: Constructor<ModelViewerElementBase>): Constructor<
-        ModelViewerElementBase> => {
+export const ControlsMixin = (ModelViewerElement:
+                                  Constructor<ModelViewerElementBase>):
+    Constructor<ModelViewerElementBase> => {
       class ControlsModelViewerElement extends ModelViewerElement {
         @property({type: Boolean, attribute: 'camera-controls'})
-        cameraControls: boolean=false;
+        cameraControls: boolean = false;
 
         @property(
-            {type: String, attribute: 'camera-orbit', hasChanged: ()=> true})
-        cameraOrbit: string=DEFAULT_CAMERA_ORBIT;
+            {type: String, attribute: 'camera-orbit', hasChanged: () => true})
+        cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
         @property({type: Number, attribute: 'interaction-prompt-threshold'})
-        interactionPromptThreshold: number=DEFAULT_INTERACTION_PROMPT_THRESHOLD;
+        interactionPromptThreshold: number =
+            DEFAULT_INTERACTION_PROMPT_THRESHOLD;
 
         protected[$promptElement]: Element;
 
@@ -118,7 +116,7 @@ export const ControlsMixin =
           const scene = (this as any)[$scene];
 
           this[$promptElement] =
-              this.shadowRoot !.querySelector('.controls-prompt') !;
+              this.shadowRoot!.querySelector('.controls-prompt')!;
 
           this[$camera] = scene.getCamera();
 
@@ -178,7 +176,7 @@ export const ControlsMixin =
           let sphericalValues = deserializeSpherical(this.cameraOrbit);
 
           if (sphericalValues == null) {
-            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT) !;
+            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
           }
 
           let [theta, phi, radius] = sphericalValues;
@@ -224,7 +222,7 @@ export const ControlsMixin =
         [$deferInteractionPrompt]() {
           // Effectively cancel the timer waiting for user interaction:
           this[$waitingToPromptUser] = false;
-          this[$promptElement] !.classList.remove('visible');
+          this[$promptElement]!.classList.remove('visible');
 
           // Implicitly there was some reason to defer the prompt. If the user
           // has been prompted at least once already, we no longer need to
@@ -254,10 +252,9 @@ export const ControlsMixin =
           // When we update the idealCameraDistance due to reframing, we want to
           // maintain the user's zoom level (how they have changed the camera
           // radius), which we represent here as a ratio.
-          const zoom = controls ?
-              controls.getCameraSpherical().radius /
+          const zoom = controls ? controls.getCameraSpherical().radius /
                   this[$idealCameraDistance] :
-              1;
+                                  1;
           this[$idealCameraDistance] = near + scene.modelDepth / 2;
 
           camera.aspect = scene.aspect;
@@ -274,7 +271,7 @@ export const ControlsMixin =
           controls.target.set(0, 0, 0);
 
           controls.setRadius(zoom * this[$idealCameraDistance]);
-          controls.jumpCamera()
+          controls.jumpToDestination();
         }
 
         [$updateAria]() {
@@ -285,7 +282,7 @@ export const ControlsMixin =
           // becomes focused.
           const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
           const {theta, phi} =
-              this[$controls] !.getCameraSpherical(this[$lastSpherical]);
+              this[$controls]!.getCameraSpherical(this[$lastSpherical]);
 
           const rootNode = this.getRootNode() as Document | ShadowRoot | null;
 
@@ -341,7 +338,7 @@ export const ControlsMixin =
           super[$onModelLoad](event);
           this[$updateCamera]();
           this[$applyCameraOrbit]();
-          this[$controls].jumpCamera();
+          this[$controls].jumpToDestination();
         }
 
         [$onFocus]() {

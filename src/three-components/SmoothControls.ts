@@ -13,21 +13,13 @@
  * limitations under the License.
  */
 
-import {
-  Camera,
-  Event,
-  EventDispatcher,
-  Quaternion,
-  Spherical,
-  Vector2,
-  Vector3
-} from 'three';
+import {Camera, Event, EventDispatcher, Quaternion, Spherical, Vector2, Vector3} from 'three';
 
 import {clamp, step} from '../utilities.js';
 
-export type EventHandlingBehavior = 'prevent-all' | 'prevent-handled';
-export type InteractionPolicy = 'always-allow' | 'allow-when-focused';
-export type TouchMode = 'rotate' | 'zoom';
+export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
+export type InteractionPolicy = 'always-allow'|'allow-when-focused';
+export type TouchMode = 'rotate'|'zoom';
 
 export interface SmoothControlsOptions {
   // The closest the camera can be to the target
@@ -328,9 +320,9 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Set the absolute orbital position of the camera relative to the configured
-   * target. The change will be applied over a number of frames depending
-   * on configured acceleration and dampening options.
+   * Set the absolute orbital destination of the camera. The change will be
+   * applied over a number of frames depending on configured acceleration and
+   * dampening options.
    *
    * Returns true if invoking the method will result in the camera changing
    * position and/or rotation, otherwise false.
@@ -339,19 +331,21 @@ export class SmoothControls extends EventDispatcher {
       targetTheta: number = this[$targetSpherical].theta,
       targetPhi: number = this[$targetSpherical].phi,
       targetRadius: number = this[$targetSpherical].radius): boolean {
-    const {minimumAzimuthalAngle,
-           maximumAzimuthalAngle,
-           minimumPolarAngle,
-           maximumPolarAngle,
-           minimumRadius,
-           maximumRadius} = this[$options];
+    const {
+      minimumAzimuthalAngle,
+      maximumAzimuthalAngle,
+      minimumPolarAngle,
+      maximumPolarAngle,
+      minimumRadius,
+      maximumRadius
+    } = this[$options];
 
     const {theta, phi, radius} = this[$targetSpherical];
 
     const nextTheta =
-        clamp(targetTheta, minimumAzimuthalAngle !, maximumAzimuthalAngle !);
-    const nextPhi = clamp(targetPhi, minimumPolarAngle !, maximumPolarAngle !);
-    const nextRadius = clamp(targetRadius, minimumRadius !, maximumRadius !);
+        clamp(targetTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
+    const nextPhi = clamp(targetPhi, minimumPolarAngle!, maximumPolarAngle!);
+    const nextRadius = clamp(targetRadius, minimumRadius!, maximumRadius!);
 
     if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
       return false;
@@ -395,7 +389,7 @@ export class SmoothControls extends EventDispatcher {
    * Move the camera instantly instead of accelerating toward the setOrbit()
    * parameters.
    */
-  jumpCamera() {
+  jumpToDestination() {
     this[$spherical].copy(this[$targetSpherical]);
     this[$moveCamera]();
   }
@@ -403,12 +397,14 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Update controls. In most cases, this will result in the camera
    * interpolating its position and rotation until it lines up with the
-   * designated target orbital position.
+   * designated destination orbital position.
    *
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
-    if (this[$targetSpherical] === this[$spherical]) {
+    if (this[$targetSpherical].theta === this[$spherical].theta &&
+        this[$targetSpherical].phi === this[$spherical].phi &&
+        this[$targetSpherical].radius === this[$spherical].radius) {
       return;
     }
     const deltaTheta = this[$targetSpherical].theta - this[$spherical].theta;
@@ -422,10 +418,10 @@ export class SmoothControls extends EventDispatcher {
     // Velocity represents a scale along [0, 1] that changes based on the
     // acceleration constraint. We only "apply" velocity when accelerating.
     // When decelerating, we apply dampening exclusively.
-    const applyVelocity = distance > this[$options].decelerationMargin !;
+    const applyVelocity = distance > this[$options].decelerationMargin!;
 
     const nextVelocity =
-        Math.min(this[$velocity] + this[$options].acceleration ! * frames, 1.0);
+        Math.min(this[$velocity] + this[$options].acceleration! * frames, 1.0);
     if (applyVelocity) {
       this[$velocity] = nextVelocity;
     } else if (this[$velocity] > 0) {
@@ -494,7 +490,7 @@ export class SmoothControls extends EventDispatcher {
 
   private get[$dampeningFactor](): number {
     return MINIMUM_DAMPENING_FACTOR -
-        this[$options].dampeningScale ! *
+        this[$options].dampeningScale! *
         (MINIMUM_DAMPENING_FACTOR - MAXIMUM_DAMPENING_FACTOR)
   }
 
@@ -534,7 +530,7 @@ export class SmoothControls extends EventDispatcher {
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
-  private[$handlePointerMove](event: MouseEvent | TouchEvent) {
+  private[$handlePointerMove](event: MouseEvent|TouchEvent) {
     if (!this[$pointerIsDown] || !this[$canInteract]) {
       return;
     }
@@ -567,9 +563,8 @@ export class SmoothControls extends EventDispatcher {
           const deltaTheta = this[$pixelLengthToSphericalAngle](xTwo - xOne);
           const deltaPhi = this[$pixelLengthToSphericalAngle](yTwo - yOne);
 
-          handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0)
-
-              break;
+          handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0);
+          break;
       }
 
       this[$lastTouches] = touches;
@@ -592,7 +587,7 @@ export class SmoothControls extends EventDispatcher {
     };
   }
 
-  private[$handlePointerDown](event: MouseEvent | TouchEvent) {
+  private[$handlePointerDown](event: MouseEvent|TouchEvent) {
     this[$pointerIsDown] = true;
 
     if (TOUCH_EVENT_RE.test(event.type)) {
@@ -616,7 +611,7 @@ export class SmoothControls extends EventDispatcher {
     }
   }
 
-  private[$handlePointerUp](_event: MouseEvent | TouchEvent) {
+  private[$handlePointerUp](_event: MouseEvent|TouchEvent) {
     this.element.style.cursor = 'grab';
     this[$pointerIsDown] = false;
   }
