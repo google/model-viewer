@@ -107,6 +107,7 @@ export default class ModelScene extends Scene {
     // variables.
     this.framedHeight = 1;
     this.modelDepth = 1;
+    this.target = new Vector3(0, 0, 0);
     this.setSize(width, height);
 
     this.background = new Color(0xffffff);
@@ -183,9 +184,10 @@ export default class ModelScene extends Scene {
   /**
    * To frame the scene, a box is fit around the model such that the X and Z
    * dimensions (modelDepth) are the same (for Y-rotation) and the X/Y ratio is
-   * the aspect ratio of the canvas (framedHeight is the Y dimension). At the
-   * ideal distance, the camera's fov exactly covers the front face of this box
-   * when looking down the Z-axis.
+   * the aspect ratio of the canvas (framedHeight is the Y dimension). For
+   * non-centered models, the box is fit symmetrically about the XZ origin to
+   * keep them in frame as they are rotated. At the ideal distance, the camera's
+   * fov exactly covers the front face of this box when looking down the Z-axis.
    */
   updateFraming() {
     const dpr = resolveDpr();
@@ -195,14 +197,26 @@ export default class ModelScene extends Scene {
     this.canvas.style.height = `${this.height}px`;
     this.aspect = this.width / this.height;
 
-    const modelSize = this.model.size;
-    if (modelSize.x != 0 || modelSize.y != 0 || modelSize.z != 0) {
+    if (this.model.size.x != 0 || this.model.size.y != 0 ||
+        this.model.size.z != 0) {
+      let cameraBoundingBox =
+          this.model.boundingBox.clone().translate(this.model.position);
+
+      const modelMinY = Math.min(0, cameraBoundingBox.min.y);
+      const modelMaxY = Math.max(0, cameraBoundingBox.max.y);
+      this.target.y = this[$modelAlignmentMask].y * (modelMaxY + modelMinY) / 2;
+
+      const mirrorBoundingBox = cameraBoundingBox.clone().translate(
+          cameraBoundingBox.getCenter(new Vector3()).multiplyScalar(-2));
+      cameraBoundingBox.union(mirrorBoundingBox);
+      let boxHalfSize = cameraBoundingBox.max;
+      boxHalfSize.y =
+          Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
+
+      this.modelDepth = 2 * Math.max(boxHalfSize.x, boxHalfSize.z);
       this.framedHeight = ROOM_PADDING_SCALE *
-          Math.max(
-              modelSize.y,
-              modelSize.x / this.aspect,
-              modelSize.z / this.aspect);
-      this.modelDepth = ROOM_PADDING_SCALE * Math.max(modelSize.x, modelSize.z);
+          Math.max(2 * boxHalfSize.y, this.modelDepth / this.aspect);
+      this.modelDepth *= ROOM_PADDING_SCALE;
     }
   }
 
@@ -227,8 +241,9 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Moves the model to be centered at the origin, taking into account
-   * setModelAlignmentMask(), described above.
+   * Moves the model to be centered at the XZ origin, with Y = 0 being the floor
+   * under the model, taking into account setModelAlignmentMask(), described
+   * above.
    */
   alignModel() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
@@ -237,10 +252,14 @@ export default class ModelScene extends Scene {
 
     this.resetModelPose();
 
-    const modelCenter = this.model.boundingBox.getCenter(new Vector3());
-    this.model.position.copy(modelCenter)
+    let centeredOrigin = this.model.boundingBox.getCenter(new Vector3());
+    centeredOrigin.y -= this.model.size.y / 2;
+    this.model.position.copy(centeredOrigin)
         .multiply(this[$modelAlignmentMask])
         .multiplyScalar(-1);
+
+    this.updateFraming();
+    this.updateStaticShadow();
   }
 
   resetModelPose() {
@@ -269,9 +288,7 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event) {
-    this.updateFraming();
     this.alignModel();
-    this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
@@ -290,7 +307,9 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    this.shadow.position.set(0, 0, 0);
+    const modelPos = this.model.boundingBox.getCenter(new Vector3())
+                         .add(this.model.position);
+    this.shadow.position.set(modelPos.x, 0, modelPos.z);
     this.shadow.scale.x = this.model.size.x;
     this.shadow.scale.z = this.model.size.z;
 
@@ -300,9 +319,5 @@ export default class ModelScene extends Scene {
     // a generated texture.
     this.pivot.add(this.shadow);
     this.pivot.rotation.y = currentRotation;
-
-    // This should be ultimately user-configurable,
-    // but for now, move the shadow to the bottom of the model.
-    this.shadow.position.y = -this.model.size.y / 2;
   }
 }
