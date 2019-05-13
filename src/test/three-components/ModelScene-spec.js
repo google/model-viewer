@@ -26,6 +26,7 @@ const expect = chai.expect;
 suite('ModelScene', () => {
   let element;
   let scene;
+  let dummyRadius;
   let dummyMesh;
   let renderer;
   let ModelViewerElement = class extends ModelViewerElementBase {};
@@ -43,7 +44,8 @@ suite('ModelScene', () => {
   setup(() => {
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
-    dummyMesh = new Mesh(new SphereBufferGeometry(0.5, 32, 32));
+    dummyRadius = 0.5;
+    dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
     scene = new ModelScene({
       element: element,
@@ -138,14 +140,15 @@ suite('ModelScene', () => {
       scene.alignModel();
     });
 
-    test('updates object position to center its volume within box', () => {
+    test('updates object position to center it on the floor', () => {
       scene.setSize(1000, 500);
       dummyMesh.geometry.applyMatrix(new Matrix4().makeTranslation(5, 10, 20));
       scene.model.setObject(dummyMesh);
 
       scene.alignModel();
 
-      expect(scene.model.position).to.be.eql(new Vector3(-5, -10, -20));
+      expect(scene.model.position)
+          .to.be.eql(new Vector3(-5, dummyRadius - 10, -20));
     });
   });
 });

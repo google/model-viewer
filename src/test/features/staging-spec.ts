@@ -15,15 +15,15 @@
 
 import {Vector3} from 'three';
 
-import {StagingMixin, AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION} from '../../features/staging.js';
-import ModelViewerElementBase, {$scene, $onUserModelOrbit} from '../../model-viewer-base.js';
+import {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION, StagingMixin} from '../../features/staging.js';
+import ModelViewerElementBase, {$onUserModelOrbit, $scene} from '../../model-viewer-base.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
-const CENTER_OFFSET = new Vector3(0.5, -1.25, 0.5);
+const CENTER_OFFSET = new Vector3(0.5, 1.0, 0.5);
 const ORIGIN_OFFSET = new Vector3();
 
 suite('ModelViewerElementBase with StagingMixin', () => {
@@ -139,7 +139,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         await timePasses(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
 
-        expect(element.turntableRotation).to.be.greaterThan(initialTurntableRotation);
+        expect(element.turntableRotation)
+            .to.be.greaterThan(initialTurntableRotation);
       });
     });
   });
