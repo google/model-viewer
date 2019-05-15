@@ -199,23 +199,24 @@ export default class ModelScene extends Scene {
 
     if (this.model.size.x != 0 || this.model.size.y != 0 ||
         this.model.size.z != 0) {
-      let cameraBoundingBox =
-          this.model.boundingBox.clone().translate(this.model.position);
+      const boxHalfX = Math.max(
+          Math.abs(this.model.boundingBox.min.x + this.model.position.x),
+          Math.abs(this.model.boundingBox.max.x + this.model.position.x));
+      const boxHalfZ = Math.max(
+          Math.abs(this.model.boundingBox.min.z + this.model.position.z),
+          Math.abs(this.model.boundingBox.max.z + this.model.position.z));
 
-      const modelMinY = Math.min(0, cameraBoundingBox.min.y);
-      const modelMaxY = Math.max(0, cameraBoundingBox.max.y);
+      const modelMinY =
+          Math.min(0, this.model.boundingBox.min.y + this.model.position.y);
+      const modelMaxY =
+          Math.max(0, this.model.boundingBox.max.y + this.model.position.y);
       this.target.y = this[$modelAlignmentMask].y * (modelMaxY + modelMinY) / 2;
-
-      const mirrorBoundingBox = cameraBoundingBox.clone().translate(
-          cameraBoundingBox.getCenter(new Vector3()).multiplyScalar(-2));
-      cameraBoundingBox.union(mirrorBoundingBox);
-      let boxHalfSize = cameraBoundingBox.max;
-      boxHalfSize.y =
+      const boxHalfY =
           Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
 
-      this.modelDepth = 2 * Math.max(boxHalfSize.x, boxHalfSize.z);
+      this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
       this.framedHeight = ROOM_PADDING_SCALE *
-          Math.max(2 * boxHalfSize.y, this.modelDepth / this.aspect);
+          Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
       this.modelDepth *= ROOM_PADDING_SCALE;
     }
   }
@@ -307,9 +308,9 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    const modelPos = this.model.boundingBox.getCenter(new Vector3())
-                         .add(this.model.position);
-    this.shadow.position.set(modelPos.x, 0, modelPos.z);
+    const modelPosition = this.model.boundingBox.getCenter(new Vector3())
+                              .add(this.model.position);
+    this.shadow.position.set(modelPosition.x, 0, modelPosition.z);
     this.shadow.scale.x = this.model.size.x;
     this.shadow.scale.z = this.model.size.z;
 

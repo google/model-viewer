@@ -22,8 +22,8 @@ import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js
 import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
-  theta: number;  // equator angle around the y (up) axis. Default is 0.
-  phi: number;    // polar angle from the y (up) axis. Default is 0.
+  theta: number;  // equator angle around the y (up) axis.
+  phi: number;    // polar angle from the y (up) axis.
   radius: number;
 }
 
