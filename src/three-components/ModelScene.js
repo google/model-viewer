@@ -197,19 +197,17 @@ export default class ModelScene extends Scene {
     this.canvas.style.height = `${this.height}px`;
     this.aspect = this.width / this.height;
 
-    if (this.model.size.x != 0 || this.model.size.y != 0 ||
-        this.model.size.z != 0) {
+    const {boundingBox, position, size} = this.model;
+    if (size.x != 0 || size.y != 0 || size.z != 0) {
       const boxHalfX = Math.max(
-          Math.abs(this.model.boundingBox.min.x + this.model.position.x),
-          Math.abs(this.model.boundingBox.max.x + this.model.position.x));
+          Math.abs(boundingBox.min.x + position.x),
+          Math.abs(boundingBox.max.x + position.x));
       const boxHalfZ = Math.max(
-          Math.abs(this.model.boundingBox.min.z + this.model.position.z),
-          Math.abs(this.model.boundingBox.max.z + this.model.position.z));
+          Math.abs(boundingBox.min.z + position.z),
+          Math.abs(boundingBox.max.z + position.z));
 
-      const modelMinY =
-          Math.min(0, this.model.boundingBox.min.y + this.model.position.y);
-      const modelMaxY =
-          Math.max(0, this.model.boundingBox.max.y + this.model.position.y);
+      const modelMinY = Math.min(0, boundingBox.min.y + position.y);
+      const modelMaxY = Math.max(0, boundingBox.max.y + position.y);
       this.target.y = this[$modelAlignmentMask].y * (modelMaxY + modelMinY) / 2;
       const boxHalfY =
           Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
@@ -310,9 +308,8 @@ export default class ModelScene extends Scene {
 
     const modelPosition = this.model.boundingBox.getCenter(new Vector3())
                               .add(this.model.position);
-    this.shadow.position.set(modelPosition.x, 0, modelPosition.z);
-    this.shadow.scale.x = this.model.size.x;
-    this.shadow.scale.z = this.model.size.z;
+    this.shadow.scale.x = 2 * Math.abs(modelPosition.x) + this.model.size.x;
+    this.shadow.scale.z = 2 * Math.abs(modelPosition.z) + this.model.size.z;
 
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
