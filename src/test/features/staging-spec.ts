@@ -25,7 +25,7 @@ const expect = chai.expect;
 const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
 const CENTER_OFFSET = new Vector3(0.5, 1.0, 0.5);
 const ORIGIN_OFFSET = new Vector3();
-const SIZE = new Vector3(4, 4.5, 4);
+const FRAMED_SIZE = new Vector3(5, 4.5, 5);
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;
@@ -79,13 +79,9 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         });
 
         test('places shadow under a non-centered model', () => {
-          const shadowPosition = (element as any)[$scene].shadow.position;
-          expect(shadowPosition)
-              .to.be.deep.equal(
-                  new Vector3(-CENTER_OFFSET.x, 0, -CENTER_OFFSET.z));
           const shadowSize = (element as any)[$scene].shadow.scale;
-          expect(shadowSize.x).to.be.equal(SIZE.x);
-          expect(shadowSize.z).to.be.equal(SIZE.z);
+          expect(shadowSize.x).to.be.equal(FRAMED_SIZE.x);
+          expect(shadowSize.z).to.be.equal(FRAMED_SIZE.z);
         });
       });
 
