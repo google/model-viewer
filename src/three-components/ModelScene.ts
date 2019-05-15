@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {Color, DirectionalLight, HemisphereLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
+import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
+import Renderer from './Renderer.js';
 import StaticShadow from './StaticShadow.js';
 
 export const IlluminationRole = {
@@ -34,20 +36,43 @@ const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 4.0;
 const $paused = Symbol('paused');
 const $modelAlignmentMask = Symbol('modelAlignmentMask');
 
+export interface ModelSceneOptions {
+  element: ModelViewerElementBase;
+  canvas: HTMLCanvasElement;
+  width: number;
+  height: number;
+  renderer: Renderer;
+}
+
 /**
- * A THREE.Scene object that takes a Model and CanvasHTMLElement and
+ * A THREE.Scene object that takes a Model and HTMLCanvasElement and
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
 export default class ModelScene extends Scene {
-  /**
-   * @param {ModelViewerElementBase} options.element
-   * @param {CanvasHTMLElement} options.canvas
-   * @param {number} options.width
-   * @param {number} options.height
-   * @param {THREE.WebGLRenderer} options.renderer
-   */
-  constructor({canvas, element, width, height, renderer}) {
+  private[$paused]: boolean;
+  private[$modelAlignmentMask]: Vector3;
+  element: ModelViewerElementBase;
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D|null;
+  renderer: any;
+  exposure: number;
+  model: Model;
+  shadow: StaticShadow;
+  light: HemisphereLight;
+  shadowLight: DirectionalLight;
+  camera: PerspectiveCamera;
+  aspect: number|undefined;
+  activeCamera: any;
+  pivot: Object3D;
+  isVisible: boolean;
+  isDirty: boolean;
+  framedHeight: number;
+  modelDepth: number;
+  width: any;
+  height: any;
+
+  constructor({canvas, element, width, height, renderer}: ModelSceneOptions) {
     super();
 
     this.name = 'ModelScene';
@@ -123,7 +148,7 @@ export default class ModelScene extends Scene {
    * @param {String?} source
    * @param {Function?} progressCallback
    */
-  async setModelSource(source, progressCallback) {
+  async setModelSource(source: string|null, progressCallback: Function) {
     try {
       await this.model.setSource(source, progressCallback);
     } catch (e) {
@@ -148,7 +173,7 @@ export default class ModelScene extends Scene {
    * @param {number} y
    * @param {number} z
    */
-  setModelAlignmentMask(...alignmentMaskValues) {
+  setModelAlignmentMask(...alignmentMaskValues: [number, number, number]) {
     this[$modelAlignmentMask].set(...alignmentMaskValues);
     this.alignModel();
     this.isDirty = true;
@@ -161,7 +186,7 @@ export default class ModelScene extends Scene {
    * @param {number} width
    * @param {number} height
    */
-  setSize(width, height) {
+  setSize(width: number, height: number) {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
@@ -194,7 +219,7 @@ export default class ModelScene extends Scene {
     }
   }
 
-  configureStageLighting(intensityScale, illuminationRole) {
+  configureStageLighting(intensityScale: number, illuminationRole: string) {
     this.light.intensity = intensityScale *
         (illuminationRole === IlluminationRole.Primary ?
              AMBIENT_LIGHT_HIGH_INTENSITY :
@@ -249,14 +274,14 @@ export default class ModelScene extends Scene {
    * Sets the passed in camera to be used for rendering.
    * @param {THREE.Camera}
    */
-  setCamera(camera) {
+  setCamera(camera: PerspectiveCamera) {
     this.activeCamera = camera;
   }
 
   /**
    * Called when the model's contents have loaded, or changed.
    */
-  onModelLoad(event) {
+  onModelLoad(event: any) {
     this.updateFraming();
     this.alignModel();
     this.updateStaticShadow();

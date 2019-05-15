@@ -116,7 +116,7 @@ export default class Model extends Object3D {
   }
 
   /**
-   * @param {String} url
+   * @param {String|null} url
    * @param {Function?} progressCallback
    */
   async setSource(url, progressCallback) {
