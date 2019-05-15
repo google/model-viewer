@@ -55,22 +55,22 @@ export default class ModelScene extends Scene {
   element: ModelViewerElementBase;
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D|null;
-  renderer: any;
+  renderer: Renderer;
   exposure: number;
   model: Model;
   shadow: StaticShadow;
   light: HemisphereLight;
   shadowLight: DirectionalLight;
   camera: PerspectiveCamera;
-  aspect: number|undefined;
-  activeCamera: any;
+  aspect: number = 1;
+  activeCamera: PerspectiveCamera;
   pivot: Object3D;
   isVisible: boolean;
   isDirty: boolean;
   framedHeight: number;
   modelDepth: number;
-  width: any;
-  height: any;
+  width: number = 1;
+  height: number = 1;
 
   constructor({canvas, element, width, height, renderer}: ModelSceneOptions) {
     super();
@@ -144,11 +144,8 @@ export default class ModelScene extends Scene {
 
   /**
    * Sets the model via URL.
-   *
-   * @param {String?} source
-   * @param {Function?} progressCallback
    */
-  async setModelSource(source: string|null, progressCallback: Function) {
+  async setModelSource(source: string|null, progressCallback: Function|null) {
     try {
       await this.model.setSource(source, progressCallback);
     } catch (e) {
@@ -182,9 +179,6 @@ export default class ModelScene extends Scene {
   /**
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
-   *
-   * @param {number} width
-   * @param {number} height
    */
   setSize(width: number, height: number) {
     if (width !== this.width || height !== this.height) {
@@ -233,7 +227,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Returns the size of the corresponding canvas element.
-   * @return {Object}
    */
   getSize() {
     return {width: this.width, height: this.height};
@@ -264,7 +257,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Returns the current camera.
-   * @return {THREE.PerspectiveCamera}
    */
   getCamera() {
     return this.activeCamera;
@@ -272,7 +264,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Sets the passed in camera to be used for rendering.
-   * @param {THREE.Camera}
    */
   setCamera(camera: PerspectiveCamera) {
     this.activeCamera = camera;

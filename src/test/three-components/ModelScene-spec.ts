@@ -24,9 +24,9 @@ const expect = chai.expect;
 
 suite('ModelScene', () => {
   let element;
-  let scene;
-  let dummyMesh;
-  let renderer;
+  let scene: ModelScene;
+  let dummyMesh: Mesh;
+  let renderer: Renderer;
   let ModelViewerElement = class extends ModelViewerElementBase {};
 
   customElements.define('model-viewer-modelscene', ModelViewerElement);
@@ -57,7 +57,7 @@ suite('ModelScene', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource(assetPath('Astronaut.glb'));
+      await scene.setModelSource(assetPath('Astronaut.glb'), null);
       expect(fired).to.be.ok;
     });
   });
@@ -65,7 +65,6 @@ suite('ModelScene', () => {
   suite('setSize', () => {
     test('updates visual and buffer size', () => {
       scene.setSize(500, 200);
-      const {width, height} = scene;
       expect(scene.width).to.be.equal(500);
       expect(scene.canvas.width).to.be.equal(500 * devicePixelRatio);
       expect(scene.canvas.style.width).to.be.equal('500px');
@@ -104,7 +103,6 @@ suite('ModelScene', () => {
 
       const width = 2000;
       const height = 1000;
-      const aspect = width / height;
       scene.setSize(width, height);
 
       expect(scene.framedHeight).to.be.equal(10);
