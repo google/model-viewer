@@ -177,6 +177,11 @@ export default class ModelScene extends Scene {
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
       this.updateFraming();
+      // Render a frame right away
+      this.isDirty = true;
+      this.camera.aspect = this.aspect;
+      this.camera.updateProjectionMatrix();
+      this.renderer.render(performance.now());
     }
   }
 
