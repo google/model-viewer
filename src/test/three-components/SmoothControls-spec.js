@@ -15,7 +15,7 @@
 
 import {PerspectiveCamera, Spherical, Vector3} from 'three';
 
-import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {$idealCameraDistance, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
@@ -84,6 +84,11 @@ suite('SmoothControls', () => {
   });
 
   suite('when updated', () => {
+    test('defaults radius to ideal camera distance', () => {
+      expect(element.getCameraOrbit().radius)
+          .to.be.equal(element[$idealCameraDistance]);
+    });
+
     test('repositions the camera within the configured radius optionss', () => {
       settleControls(controls);
 

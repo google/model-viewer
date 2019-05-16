@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
+import {$controls, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -87,11 +87,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         if (element.parentNode != null) {
           element.parentNode.removeChild(element);
         }
-      });
-
-      test('defaults radius to ideal camera distance', () => {
-        expect(element.getCameraOrbit().radius)
-            .to.be.equal(element[$idealCameraDistance]);
       });
 
       test('can independently adjust azimuth', async () => {

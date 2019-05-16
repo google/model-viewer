@@ -38,14 +38,6 @@ export interface SmoothControlsOptions {
   minimumFov?: number;
   // The maximum camera field of view in degrees
   maximumFov?: number;
-  // The distance from the target orbital position where deceleration will begin
-  decelerationMargin?: number;
-  // The rate of acceleration as the camera starts to change orbital position
-  // The value is measured in world-meters-per-frame-per-frame
-  acceleration?: number;
-  // A scalar in 0..1 that changes the dampening factor, corresponding to
-  // factors from 0.05..0.3
-  dampeningScale?: number;
   // Controls when events will be cancelled (always, or only when handled)
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
@@ -71,7 +63,7 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 // to spherical values. Should only be used as an internal implementation detail
 // of the $positionToSpherical method on SmoothControls!
 const vector3 = new Vector3();
-const $v = Symbol('v');
+const $velocity = Symbol('v');
 
 // Internal orbital position state
 const $spherical = Symbol('spherical');
@@ -126,8 +118,9 @@ const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
 const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
-const DECAY_MILLISECONDS = 300;
+const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQ = 1 / DECAY_MILLISECONDS;
+const NIL_SPEED = 0.0002 * NATURAL_FREQ;
 const TAU = 2 * Math.PI;
 const UP = new Vector3(0, 1, 0);
 
@@ -153,18 +146,23 @@ export interface ChangeEvent extends Event {
 }
 
 class Damper {
-  private[$v]: number = 0;
+  private[$velocity]: number = 0;
 
-  update(x: number, xDest: number, time_step_milliseconds: number): number {
+  update(
+      x: number, xDest: number, timeStepMilliseconds: number,
+      xNormalization: number): number {
+    const delta = clamp(timeStepMilliseconds, 0, 1000);
     // Critically damped
-    const delta = clamp(time_step_milliseconds, 0, 1000);
-    const a =
-        NATURAL_FREQ * NATURAL_FREQ * (xDest - x) - 2 * NATURAL_FREQ * this[$v];
-    this[$v] += a * delta;
-    if (Math.abs(this[$v]) < 0.0001 && a * (xDest - x) <= 0)
+    const acceleration = NATURAL_FREQ * NATURAL_FREQ * (xDest - x) -
+        2 * NATURAL_FREQ * this[$velocity];
+    this[$velocity] += acceleration * delta;
+    if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
+        acceleration * (xDest - x) <= 0)
+      // This ensures the controls settle and stop calling this function instead
+      // of asymptotically approaching their destination.
       return xDest;
     else
-      return x + this[$v] * delta;
+      return x + this[$velocity] * delta;
   }
 }
 
@@ -469,13 +467,25 @@ export class SmoothControls extends EventDispatcher {
    */
   update(_time: number, delta: number) {
     if (this[$isMoving]) {
+      const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
+
       this[$spherical].theta = this[$thetaDamper].update(
-          this[$spherical].theta, this[$destSpherical].theta, delta);
+          this[$spherical].theta, this[$destSpherical].theta, delta, Math.PI);
+
       this[$spherical].phi = this[$phiDamper].update(
-          this[$spherical].phi, this[$destSpherical].phi, delta);
+          this[$spherical].phi,
+          this[$destSpherical].phi,
+          delta,
+          maximumPolarAngle!);
+
       this[$spherical].radius = this[$radiusDamper].update(
-          this[$spherical].radius, this[$destSpherical].radius, delta);
-      this[$fov] = this[$fovDamper].update(this[$fov], this[$destFov], delta);
+          this[$spherical].radius,
+          this[$destSpherical].radius,
+          delta,
+          maximumRadius!);
+
+      this[$fov] = this[$fovDamper].update(
+          this[$fov], this[$destFov], delta, maximumFov!);
 
       this[$moveCamera]();
     }
