@@ -191,6 +191,7 @@ export default class Renderer extends EventDispatcher {
           this.renderer.domElement,
           0,
           0,
+          this.canvas.height - heightDPR,
           widthDPR,
           heightDPR,
           0,
