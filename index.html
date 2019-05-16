@@ -197,8 +197,14 @@
               <p>When poster is also enabled, the model will be downloaded before user action. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
             </li>
             <li>
-              <div>reveal-when-loaded</div>
-              <p>When poster and preload are specified, hide the poster and show the model once the model has been loaded. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+              <div>reveal</div>
+              <p>This attribute controls whether or not the model should be
+            automatically revealed when loaded. It currently supports two
+            values: "auto" and "interaction". If reveal is set to "interaction",
+            &lt;model-viewer&gt; will wait until the user interacts with the
+            poster before loading and revealing the model. Otherwise, the model
+            will be revealed as soon as it is done loading and rendering.
+            Defaults to "auto".</p>
             </li>
             <li>
               <div>shadow-intensity</div>
