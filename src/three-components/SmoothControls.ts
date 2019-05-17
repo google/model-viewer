@@ -45,8 +45,8 @@ export interface SmoothControlsOptions {
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
-  minimumRadius: 8,
-  maximumRadius: 32,
+  minimumRadius: 0.5,
+  maximumRadius: 2,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
@@ -151,18 +151,23 @@ class Damper {
   update(
       x: number, xDest: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    const delta = clamp(timeStepMilliseconds, 0, 1000);
+    if (timeStepMilliseconds > DECAY_MILLISECONDS)
+      // This clamps at the point where a large time step would cause the
+      // discrete step to overshoot.
+      return xDest;
+    if (timeStepMilliseconds < 0)
+      return x;
     // Critically damped
     const acceleration = NATURAL_FREQ * NATURAL_FREQ * (xDest - x) -
         2 * NATURAL_FREQ * this[$velocity];
-    this[$velocity] += acceleration * delta;
+    this[$velocity] += acceleration * timeStepMilliseconds;
     if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
         acceleration * (xDest - x) <= 0)
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their destination.
       return xDest;
     else
-      return x + this[$velocity] * delta;
+      return x + this[$velocity] * timeStepMilliseconds;
   }
 }
 
