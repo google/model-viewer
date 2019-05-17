@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-import {Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
+import {Camera, Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
-const matrix4 = new Matrix4();
-const vector3 = new Vector3();
 const originArray = new Float32Array(3);
 const directionArray = new Float32Array(3);
 
@@ -26,11 +24,15 @@ const directionArray = new Float32Array(3);
  * horizontal surface.
  */
 export default class Reticle extends Object3D {
+  private ring: Mesh;
+  private camera: Camera;
+  private raycaster: Raycaster|null = null;
+
   /**
    * @param {XRSession} xrSession
    * @param {THREE.Camera} camera
    */
-  constructor(camera) {
+  constructor(camera: Camera) {
     super();
 
     this.name = 'Reticle';
@@ -53,9 +55,9 @@ export default class Reticle extends Object3D {
    * upon the surface if found.
    *
    * @param {XRSession} session
-   * @param {XRCoordinateSystem} frameOfRef
+   * @param {XRFrameOfReference} frameOfRef
    */
-  async update(session, frameOfRef) {
+  async update(session: XRSession, frameOfRef: XRFrameOfReference) {
     this.raycaster = this.raycaster || new Raycaster();
     this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
     const ray = this.raycaster.ray;
@@ -63,7 +65,7 @@ export default class Reticle extends Object3D {
     originArray.set(ray.origin.toArray());
     directionArray.set(ray.direction.toArray());
 
-    let hits;
+    let hits: Array<XRHitResult>;
 
     try {
       hits =
@@ -74,7 +76,7 @@ export default class Reticle extends Object3D {
 
     if (hits.length) {
       const hit = hits[0];
-      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix);
+      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix as any);
 
       // Now apply the position from the hitMatrix onto our model
       this.position.setFromMatrixPosition(hitMatrix);
