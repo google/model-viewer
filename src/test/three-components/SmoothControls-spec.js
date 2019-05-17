@@ -105,7 +105,7 @@ suite('SmoothControls', () => {
 
     suite('when target is modified', () => {
       test('camera looks at the configured target', () => {
-        controls.target.set(3, 2, 0.25);
+        controls.target.set(3, 2, 1);
         settleControls(controls);
 
         expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
@@ -119,7 +119,7 @@ suite('SmoothControls', () => {
 
           expect(camera.position.length())
               .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
-          controls.setOrbit(0, 0, 1.5);
+          controls.setOrbit(0, HALF_PI, 1.5);
           settleControls(controls);
           expect(camera.position.length()).to.be.equal(1.5);
         });

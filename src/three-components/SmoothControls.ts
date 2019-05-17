@@ -59,10 +59,6 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 
-// A Vector3 for holding interstitial values while converting Vector3 positions
-// to spherical values. Should only be used as an internal implementation detail
-// of the $positionToSpherical method on SmoothControls!
-const vector3 = new Vector3();
 const $velocity = Symbol('v');
 
 // Internal orbital position state
@@ -94,7 +90,6 @@ const $lastTouches = Symbol('lastTouches');
 
 // Value conversion methods
 const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
-const $positionToSpherical = Symbol('positionToSpherical');
 const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
 
@@ -190,7 +185,7 @@ class Damper {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher {
-  protected[$idealCameraDistance]: number = 1.0;
+  protected[$idealCameraDistance]: number = -1;
 
   private[$interactionEnabled]: boolean = false;
 
@@ -251,12 +246,11 @@ export class SmoothControls extends EventDispatcher {
     this[$onTouchMove] = (event: Event) =>
         this[$handlePointerMove](event as TouchEvent);
 
-    this[$positionToSpherical](this.camera.position, this[$spherical]);
-    this[$destSpherical].copy(this[$spherical]);
-
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
 
-    this.setOrbit();
+    this[$destFov] = this[$options].maximumFov!;
+    this.setOrbit(0, Math.PI / 2, 1);
+    this.jumpToDestination();
   }
 
   get interactionEnabled(): boolean {
@@ -348,7 +342,9 @@ export class SmoothControls extends EventDispatcher {
     // When we update the idealCameraDistance due to reframing, we want to
     // maintain the user's zoom level (how they have changed the camera
     // radius), which we represent here as a ratio.
-    const zoom = this[$spherical].radius / this[$idealCameraDistance];
+    const zoom = this[$idealCameraDistance] > 0 ?
+        this[$spherical].radius / this[$idealCameraDistance] :
+        1;
     this[$idealCameraDistance] = near + modelDepth / 2;
 
     camera.aspect = aspect;
@@ -540,14 +536,6 @@ export class SmoothControls extends EventDispatcher {
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
     return TAU * pixelLength / this.element.clientHeight;
-  }
-
-  private[$positionToSpherical](position: Vector3, spherical: Spherical) {
-    vector3.copy(position).sub(this.target);
-    vector3.applyQuaternion(this[$upQuaternion]);
-
-    spherical.setFromVector3(vector3);
-    spherical.radius = vector3.length();
   }
 
   private[$sphericalToPosition](spherical: Spherical, position: Vector3) {
