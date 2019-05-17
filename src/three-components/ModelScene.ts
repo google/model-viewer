@@ -164,7 +164,7 @@ export default class ModelScene extends Scene {
   async setModelSource(
       source: string|null, progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(source, progressCallback || null);
+      await this.model.setSource(source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);
