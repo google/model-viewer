@@ -29,19 +29,18 @@ const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 export default class Model extends Object3D {
   private loader = new CachingGLTFLoader();
   private modelContainer = new Object3D();
-  private url: string|null = null;
   private mixer: AnimationMixer = new AnimationMixer(null);
   private[$cancelPendingSourceChange]: (() => void)|null;
 
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
-
   private currentAnimationAction: AnimationAction|null = null;
 
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
   public userData: {url: string|null} = {url: null};
+  public url: string|null = null;
 
   /**
    * Creates a model.
