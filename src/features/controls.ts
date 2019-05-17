@@ -260,10 +260,14 @@ export const ControlsMixin = (ModelViewerElement:
           camera.aspect = scene.aspect;
           camera.updateProjectionMatrix();
 
-          // Zooming out beyond the 'frame' doesn't serve much purpose
-          // and will only end up showing the skysphere if zoomed out enough
+          // We allow enough zoom out to see the entire model in frame at any
+          // phi-theta orientation (double check this math).
           const minimumRadius = camera.near + scene.framedHeight / 2.0;
-          const maximumRadius = this[$idealCameraDistance];
+          const maximumRadius = 0.5 *
+              Math.sqrt(
+                  2 * scene.modelDepth * scene.modelDepth +
+                  scene.framedHeight * scene.framedHeight) /
+              Math.sin((camera.fov / 2) * Math.PI / 180);
 
           controls.applyOptions({minimumRadius, maximumRadius});
           controls.updateFramedHeight(scene.framedHeight);
