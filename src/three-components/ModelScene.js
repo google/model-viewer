@@ -317,5 +317,11 @@ export default class ModelScene extends Scene {
     // a generated texture.
     this.pivot.add(this.shadow);
     this.pivot.rotation.y = currentRotation;
+
+    // TODO(#453) When we add a configurable camera target we should put the
+    // floor back at y=0 for a consistent coordinate system.
+    if (this[$modelAlignmentMask].y == 0) {
+      this.shadow.position.y = modelPosition.y - this.model.size.y / 2;
+    }
   }
 }
