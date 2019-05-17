@@ -13,14 +13,26 @@
  * limitations under the License.
  */
 
-import {Box3, Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, SphereBufferGeometry, Vector3} from 'three';
+import {Camera, Color, DirectionalLight, HemisphereLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
+import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
+import Renderer from './Renderer.js';
 import StaticShadow from './StaticShadow.js';
 
-export const IlluminationRole = {
+export interface ModelSceneConfig {
+  element: ModelViewerElementBase;
+  canvas: HTMLCanvasElement;
+  width: number;
+  height: number;
+  renderer: Renderer;
+}
+
+export type IlluminationRole = 'primary'|'secondary'
+
+export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
@@ -49,27 +61,48 @@ const $modelAlignmentMask = Symbol('modelAlignmentMask');
  * Provides lights and cameras to be used in a renderer.
  */
 export default class ModelScene extends Scene {
+  private[$paused]: boolean = false;
+  private[$modelAlignmentMask] = new Vector3(1, 1, 1);
+  private target = new Vector3();
+  private canvas: HTMLCanvasElement;
+  private renderer: Renderer;
+  private shadow: StaticShadow;
+  private light: HemisphereLight;
+  private shadowLight: DirectionalLight;
+  private pivot: Object3D;
+  private aspect: number;
+  private width: number;
+  private height: number;
+
+  public framedHeight: number = 1;
+  public modelDepth: number = 1;
+  public isVisible: boolean = false;
+  public isDirty: boolean = false;
+  public element: ModelViewerElementBase;
+  public context: CanvasRenderingContext2D;
+  public exposure: number;
+  public model: Model;
+  public camera: PerspectiveCamera;
+  public activeCamera: Camera;
+
+
   /**
    * @param {ModelViewerElementBase} options.element
    * @param {CanvasHTMLElement} options.canvas
    * @param {number} options.width
    * @param {number} options.height
-   * @param {THREE.WebGLRenderer} options.renderer
+   * @param {Renderer} options.renderer
    */
-  constructor({canvas, element, width, height, renderer}) {
+  constructor({canvas, element, width, height, renderer}: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
 
-    this.onModelLoad = this.onModelLoad.bind(this);
-    this[$paused] = false;
-
     this.element = element;
     this.canvas = canvas;
-    this.context = canvas.getContext('2d');
+    this.context = canvas.getContext('2d')!;
     this.renderer = renderer;
     this.exposure = 1;
-    this[$modelAlignmentMask] = new Vector3(1, 1, 1);
 
     this.model = new Model();
     this.shadow = new StaticShadow();
@@ -86,6 +119,9 @@ export default class ModelScene extends Scene {
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
+    this.width = width;
+    this.height = height;
+    this.aspect = width / height;
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
     this.camera = new PerspectiveCamera(45, this.aspect, 0.1, 100);
@@ -100,19 +136,11 @@ export default class ModelScene extends Scene {
     this.add(this.shadowLight);
     this.pivot.add(this.model);
 
-    this.isVisible = false;
-    this.isDirty = false;
-
-    // See description of updateFraming() below for a description of these
-    // variables.
-    this.framedHeight = 1;
-    this.modelDepth = 1;
-    this.target = new Vector3(0, 0, 0);
     this.setSize(width, height);
-
     this.background = new Color(0xffffff);
 
-    this.model.addEventListener('model-load', this.onModelLoad);
+    this.model.addEventListener(
+        'model-load', (event: any) => this.onModelLoad(event));
   }
 
   get paused() {
@@ -133,9 +161,10 @@ export default class ModelScene extends Scene {
    * @param {String?} source
    * @param {Function?} progressCallback
    */
-  async setModelSource(source, progressCallback) {
+  async setModelSource(
+      source: string|null, progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(source, progressCallback);
+      await this.model.setSource(source, progressCallback || null);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);
@@ -158,7 +187,7 @@ export default class ModelScene extends Scene {
    * @param {number} y
    * @param {number} z
    */
-  setModelAlignmentMask(...alignmentMaskValues) {
+  setModelAlignmentMask(...alignmentMaskValues: [number, number, number]) {
     this[$modelAlignmentMask].set(...alignmentMaskValues);
     this.alignModel();
     this.isDirty = true;
@@ -171,7 +200,7 @@ export default class ModelScene extends Scene {
    * @param {number} width
    * @param {number} height
    */
-  setSize(width, height) {
+  setSize(width: number, height: number) {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
@@ -219,7 +248,8 @@ export default class ModelScene extends Scene {
     }
   }
 
-  configureStageLighting(intensityScale, illuminationRole) {
+  configureStageLighting(
+      intensityScale: number, illuminationRole: IlluminationRole) {
     this.light.intensity = intensityScale *
         (illuminationRole === IlluminationRole.Primary ?
              AMBIENT_LIGHT_HIGH_INTENSITY :
@@ -235,7 +265,7 @@ export default class ModelScene extends Scene {
    * Returns the size of the corresponding canvas element.
    * @return {Object}
    */
-  getSize() {
+  getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
   }
 
@@ -269,9 +299,9 @@ export default class ModelScene extends Scene {
 
   /**
    * Returns the current camera.
-   * @return {THREE.PerspectiveCamera}
+   * @return {THREE.Camera}
    */
-  getCamera() {
+  getCamera(): Camera {
     return this.activeCamera;
   }
 
@@ -279,14 +309,14 @@ export default class ModelScene extends Scene {
    * Sets the passed in camera to be used for rendering.
    * @param {THREE.Camera}
    */
-  setCamera(camera) {
+  setCamera(camera: Camera) {
     this.activeCamera = camera;
   }
 
   /**
    * Called when the model's contents have loaded, or changed.
    */
-  onModelLoad(event) {
+  onModelLoad(event: {url: string}) {
     this.alignModel();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
