@@ -207,9 +207,8 @@ export default class ModelScene extends Scene {
 
     const modelSize = this.model.size;
     if (modelSize.x != 0 || modelSize.y != 0 || modelSize.z != 0) {
-      this.framedHeight = Math.max(
-          modelSize.y, modelSize.x / this.aspect, modelSize.z / this.aspect);
       this.modelDepth = Math.max(modelSize.x, modelSize.z);
+      this.framedHeight = Math.max(modelSize.y, this.modelDepth / this.aspect);
     }
   }
 
