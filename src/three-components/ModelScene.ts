@@ -71,9 +71,9 @@ export default class ModelScene extends Scene {
   private shadowLight: DirectionalLight;
   private pivot: Object3D;
   private aspect: number;
-  private width: number;
-  private height: number;
 
+  public width: number;
+  public height: number;
   public framedHeight: number = 1;
   public modelDepth: number = 1;
   public isVisible: boolean = false;

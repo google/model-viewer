@@ -42,6 +42,7 @@ const $cubeGenerator = Symbol('cubeGenerator');
 
 export interface TextureUtilsConfig {
   cubemapSize?: number;
+  pmremSamples?: number;
 }
 
 const defaultConfig: TextureUtilsConfig = {
