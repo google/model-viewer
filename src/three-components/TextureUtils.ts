@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader} from 'three';
-import {WebGLRenderer} from 'three';
-import {WebGLRenderTarget} from 'three';
+import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
-
 import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
-
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
+
+
 
 export interface EnvironmentGenerationConfig {
   pmrem?: boolean;
