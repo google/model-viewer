@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
-import {Cache, CubeTexture, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
+import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader} from 'three';
+import {WebGLRenderer} from 'three';
+import {WebGLRenderTarget} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
 import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
+import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
+
+export interface EnvironmentGenerationConfig {
+  pmrem?: boolean;
+  progressTracker?: ProgressTracker;
+}
 
 // Enable three's loader cache so we don't create redundant
 // Image objects to decode images fetched over the network.
@@ -32,7 +40,11 @@ const hdrLoader = new RGBELoader();
 
 const $cubeGenerator = Symbol('cubeGenerator');
 
-const defaultConfig = {
+export interface TextureUtilsConfig {
+  cubemapSize?: number;
+}
+
+const defaultConfig: TextureUtilsConfig = {
   cubemapSize: 1024,
 };
 
@@ -47,33 +59,37 @@ const userData = {
 };
 
 export default class TextureUtils extends EventDispatcher {
+  private config: TextureUtilsConfig;
+  private renderer: WebGLRenderer;
+  private environmentMapGenerator: EnvironmentMapGenerator;
+  private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
+
   /**
    * @param {THREE.WebGLRenderer} renderer
    * @param {?number} config.cubemapSize
    */
-  constructor(renderer, config = {}) {
+  constructor(renderer: WebGLRenderer, config: TextureUtilsConfig = {}) {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
     this.environmentMapGenerator = new EnvironmentMapGenerator(this.renderer);
-    this[$cubeGenerator] = null;
   }
 
   /**
    * @param {THREE.Texture} texture
    * @return {THREE.WebGLRenderCubeTarget}
    */
-  equirectangularToCubemap(texture) {
+  equirectangularToCubemap(texture: Texture) {
     const generator = new EquirectangularToCubeGenerator(texture, {
       resolution: this.config.cubemapSize,
     });
 
     generator.update(this.renderer);
 
-    generator.renderTarget.texture.userData = {
+    (generator.renderTarget.texture as any).userData = {
       ...userData,
       ...({
-        url: texture.userData ? texture.userData.url : null,
+        url: (texture as any).userData ? (texture as any).userData.url : null,
         mapping: 'Cube',
       })
     };
@@ -90,18 +106,21 @@ export default class TextureUtils extends EventDispatcher {
    * @param {Function} progressCallback
    * @return {Promise<THREE.Texture>}
    */
-  async load(url, progressCallback = () => {}) {
+  async load(
+      url: string, progressCallback: (progress: number) => void = () => {}):
+      Promise<Texture> {
     try {
-      const isHDR = HDR_FILE_RE.test(url);
-      const loader = isHDR ? hdrLoader : ldrLoader;
-      const texture = await new Promise(
-          (resolve, reject) => loader.load(url, resolve, (event) => {
-            progressCallback(event.loaded / event.total * 0.9);
-          }, reject));
+      const isHDR: boolean = HDR_FILE_RE.test(url);
+      const loader: DataTextureLoader = isHDR ? hdrLoader : ldrLoader;
+      const texture: Texture = await new Promise<Texture>(
+          (resolve, reject) => loader.load(
+              url, resolve, (event: {loaded: number, total: number}) => {
+                progressCallback(event.loaded / event.total * 0.9);
+              }, reject));
 
       progressCallback(1.0);
 
-      texture.userData = {
+      (texture as any).userData = {
         ...userData,
         ...({
           url: url,
@@ -132,7 +151,8 @@ export default class TextureUtils extends EventDispatcher {
    * @param {Function} progressCallback
    * @return {Promise<THREE.WebGLRenderCubeTarget>}
    */
-  async loadEquirectAsCubeMap(url, progressCallback = () => {}) {
+  async loadEquirectAsCubeMap(
+      url: string, progressCallback: (progress: number) => void = () => {}) {
     let equirect = null;
 
     try {
@@ -140,7 +160,7 @@ export default class TextureUtils extends EventDispatcher {
       return await this.equirectangularToCubemap(equirect);
     } finally {
       if (equirect != null) {
-        equirect.dispose();
+        (equirect as any).dispose();
       }
     }
   }
@@ -157,12 +177,15 @@ export default class TextureUtils extends EventDispatcher {
    * @return {Promise<Object|null>}
    */
   async generateEnvironmentMapAndSkybox(
-      skyboxUrl = null, environmentMapUrl = null, options = {}) {
+      skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
+      options: EnvironmentGenerationConfig = {}) {
     const {progressTracker} = options;
-    let updateGenerationProgress = () => {};
+    let updateGenerationProgress: Activity|((...args: any[]) => void) =
+        () => {};
 
-    let skyboxLoads = Promise.resolve(null);
-    let environmentMapLoads = Promise.resolve(null);
+    let skyboxLoads: Promise<WebGLRenderTarget|null> = Promise.resolve(null);
+    let environmentMapLoads: Promise<WebGLRenderTarget|null> =
+        Promise.resolve(null);
 
     let skybox = null;
     let environmentMap = null;
@@ -223,7 +246,7 @@ export default class TextureUtils extends EventDispatcher {
           nonPmremEnvironmentMap.dispose();
         }
       } else if (environmentMapWasGenerated) {
-        environmentMap.userData = {
+        (environmentMap as any).userData = {
           ...userData,
           ...({
             mapping: 'Cube',
@@ -234,11 +257,11 @@ export default class TextureUtils extends EventDispatcher {
       return {environmentMap, skybox};
     } catch (error) {
       if (skybox != null) {
-        skybox.dispose();
+        (skybox as any).dispose();
       }
 
       if (environmentMap != null) {
-        environmentMap.dispose();
+        (environmentMap as any).dispose();
       }
 
       throw error;
@@ -257,7 +280,7 @@ export default class TextureUtils extends EventDispatcher {
    * @param {number} resolution
    * @return {THREE.Texture}
    */
-  pmremPass(texture, samples, size) {
+  pmremPass(texture: Texture, samples?: number, size?: number) {
     const generator = new PMREMGenerator(texture, samples, size);
     generator.update(this.renderer);
 
@@ -269,10 +292,10 @@ export default class TextureUtils extends EventDispatcher {
     generator.dispose();
     packer.dispose();
 
-    renderTarget.texture.userData = {
+    (renderTarget.texture as any).userData = {
       ...userData,
       ...({
-        url: texture.userData ? texture.userData.url : null,
+        url: (texture as any).userData ? (texture as any).userData.url : null,
         mapping: 'PMREM',
       })
     };
@@ -287,9 +310,9 @@ export default class TextureUtils extends EventDispatcher {
     // implementation does not guard for this correctly:
     try {
       this.environmentMapGenerator.dispose();
-      this.environmentMapGenerator = null;
-      if (this[$cubeGenerator]) {
-        this[$cubeGenerator].dispose();
+      (this as any).environmentMapGenerator = null;
+      if (this[$cubeGenerator] != null) {
+        this[$cubeGenerator]!.dispose();
         this[$cubeGenerator] = null;
       }
     } catch (_error) {

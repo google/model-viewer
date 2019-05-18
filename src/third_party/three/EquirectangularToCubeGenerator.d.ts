@@ -20,6 +20,8 @@ export interface EquirectangularToCubeGeneratorOptions {
 }
 
 export class EquirectangularToCubeGenerator {
+  public renderTarget: WebGLRenderTarget;
+
   constructor(
       sourceTexture: Texture, options: EquirectangularToCubeGeneratorOptions)
 
