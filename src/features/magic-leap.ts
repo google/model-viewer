@@ -90,7 +90,7 @@ export const MagicLeapMixin = (ModelViewerElement:
           }
         }
 
-        [$showMlModel]() {
+        private[$showMlModel]() {
           if (this[$mlModel] == null) {
             this[$mlModel] = document.createElement('ml-model');
             this[$mlModel]!.setAttribute(
@@ -117,7 +117,7 @@ export const MagicLeapMixin = (ModelViewerElement:
           this.shadowRoot!.appendChild(this[$mlModel]!);
         }
 
-        [$hideMlModel]() {
+        private[$hideMlModel]() {
           if (this[$mlModel] == null) {
             return;
           }
