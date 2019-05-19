@@ -93,7 +93,8 @@ export const waitForEvent = <T extends AnyEvent = Event>(
 export interface SyntheticEventProperties {
   clientX?: number;
   clientY?: number;
-  deltaY?: number
+  deltaY?: number;
+  keyCode?: number;
 }
 
 /**
