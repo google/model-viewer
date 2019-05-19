@@ -106,16 +106,14 @@ export interface SyntheticEventProperties {
  * @param {*} properties
  */
 export const dispatchSyntheticEvent =
-    (element: HTMLElement,
-     type: string,
-     properties: SyntheticEventProperties = {
-       clientX: 0,
-       clientY: 0,
-       deltaY: 1.0
-     }): CustomEvent => {
+    (target: EventTarget, type: string, properties: SyntheticEventProperties = {
+      clientX: 0,
+      clientY: 0,
+      deltaY: 1.0
+    }): CustomEvent => {
       const event = new CustomEvent(type, {cancelable: true, bubbles: true});
       Object.assign(event, properties);
-      element.dispatchEvent(event);
+      target.dispatchEvent(event);
       return event;
     };
 

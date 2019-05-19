@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {PerspectiveCamera, Spherical, Vector3} from 'three';
-
+import {Camera, PerspectiveCamera, Vector3} from 'three';
 import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
+
+
 
 const expect = chai.expect;
 
@@ -39,7 +40,7 @@ const FLOAT_EQUALITY_THRESHOLD = 1e-6;
  * Returns true if the camera is looking at a given position, within +/-
  * FLOAT_EQUALITY_THRESHOLD on each axis.
  */
-const cameraIsLookingAt = (camera, position) => {
+const cameraIsLookingAt = (camera: Camera, position: Vector3) => {
   const cameraDirection = camera.getWorldDirection(new Vector3());
   const expectedDirection = position.clone().sub(camera.position).normalize();
 
@@ -56,16 +57,16 @@ const cameraIsLookingAt = (camera, position) => {
 /**
  * Settle controls by performing 50 frames worth of updates
  */
-export const settleControls = controls =>
-    controls.update(performance.now, FIFTY_FRAME_DELTA);
+export const settleControls = (controls: SmoothControls) =>
+    controls.update(performance.now(), FIFTY_FRAME_DELTA);
 
 suite('SmoothControls', () => {
-  let controls;
-  let camera;
-  let element;
+  let controls: SmoothControls;
+  let camera: PerspectiveCamera;
+  let element: HTMLDivElement;
 
   setup(() => {
-    element = document.createElement('div');
+    element = document.createElement<'div'>('div');
     camera = new PerspectiveCamera();
     controls = new SmoothControls(camera, element);
 
@@ -90,7 +91,8 @@ suite('SmoothControls', () => {
       const radius = camera.position.length();
 
       expect(radius).to.be.within(
-          DEFAULT_OPTIONS.minimumRadius, DEFAULT_OPTIONS.maximumRadius);
+          DEFAULT_OPTIONS.minimumRadius as number,
+          DEFAULT_OPTIONS.maximumRadius as number);
     });
 
     test('causes the camera to look at the target', () => {
@@ -122,7 +124,7 @@ suite('SmoothControls', () => {
     });
 
     suite('keyboard input', () => {
-      let initialCameraPosition;
+      let initialCameraPosition: Vector3;
 
       setup(() => {
         settleControls(controls);
@@ -224,7 +226,7 @@ suite('SmoothControls', () => {
           });
 
           test('always preventDefaults handled, cancellable UI events', () => {
-            const mousedown = dispatchSyntheticEvent(element, 'mousedown');
+            dispatchSyntheticEvent(element, 'mousedown');
 
             const mousemove = dispatchSyntheticEvent(element, 'mousemove');
 
@@ -238,7 +240,8 @@ suite('SmoothControls', () => {
           });
 
           test('does not cancel unhandled UI events', () => {
-            const mousedown = dispatchSyntheticEvent(element, 'mousedown');
+            dispatchSyntheticEvent(element, 'mousedown');
+
             const mousemove = dispatchSyntheticEvent(element, 'mousemove');
 
             expect(mousemove.defaultPrevented).to.be.equal(false);
@@ -287,7 +290,7 @@ suite('SmoothControls', () => {
             settleControls(controls);
 
             expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius);
+                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
           });
         });
 
@@ -320,7 +323,7 @@ suite('SmoothControls', () => {
             settleControls(controls);
 
             expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius);
+                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
           });
         });
 
@@ -363,16 +366,16 @@ suite('SmoothControls', () => {
               USER_INTERACTION_CHANGE_SOURCE,
               USER_INTERACTION_CHANGE_SOURCE,
             ];
-            let changeSource = [];
+            let changeSource: Array<string> = [];
 
             controls.addEventListener('change', ({source}) => {
               changeSource.push(source);
             });
 
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-            controls.update(performance.now, ONE_FRAME_DELTA);
-            controls.update(performance.now, ONE_FRAME_DELTA);
-            controls.update(performance.now, ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
 
             expect(changeSource.length).to.equal(3);
             expect(changeSource).to.eql(expectedSources);
@@ -385,7 +388,7 @@ suite('SmoothControls', () => {
               DEFAULT_INTERACTION_CHANGE_SOURCE,
               DEFAULT_INTERACTION_CHANGE_SOURCE,
             ];
-            let changeSource = [];
+            let changeSource: Array<string> = [];
 
             controls.addEventListener('change', ({source}) => {
               changeSource.push(source);
@@ -393,13 +396,13 @@ suite('SmoothControls', () => {
 
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
 
-            controls.update(performance.now, ONE_FRAME_DELTA);
-            controls.update(performance.now, ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
 
             controls.setOrbit(3, 3, 3);
 
-            controls.update(performance.now, ONE_FRAME_DELTA);
-            controls.update(performance.now, ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
+            controls.update(performance.now(), ONE_FRAME_DELTA);
 
             expect(changeSource.length).to.equal(4);
             expect(changeSource).to.eql(expectedSources);
