@@ -23,7 +23,6 @@ import ModelScene from '../../three-components/ModelScene.js';
 import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
-
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('quick_4k.png');
 const BG_IMAGE_URL = assetPath('spruit_sunrise_2k.jpg');

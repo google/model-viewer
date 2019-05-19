@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {EventDispatcher, Texture} from 'three';
+import {deserializeUrl} from '../utilities.js';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
@@ -128,7 +129,8 @@ export const ASSETS_DIRECTORY = '../examples/assets/';
  * @param {string} name
  * @return {string}
  */
-export const assetPath = (name: string): string => `${ASSETS_DIRECTORY}${name}`;
+export const assetPath = (name: string): string =>
+    deserializeUrl(`${ASSETS_DIRECTORY}${name}`)!;
 
 
 /**
