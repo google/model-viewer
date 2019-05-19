@@ -18,6 +18,10 @@ import {property} from 'lit-element';
 import ModelViewerElementBase, {$container, $scene} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
+export interface MagicLeapInterface {
+  magicLeap: boolean;
+}
+
 const $showMlModel = Symbol('showMlModel');
 const $hideMlModel = Symbol('hideMlModel');
 const $isHeliosBrowser = Symbol('isHeliosBrowser');
@@ -42,7 +46,7 @@ const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
  */
 export const MagicLeapMixin = (ModelViewerElement:
                                    Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
+    Constructor<ModelViewerElementBase&MagicLeapInterface> => {
       class MagicLeapModelViewerElement extends ModelViewerElement {
         @property({type: Boolean, attribute: 'magic-leap'})
         magicLeap: boolean = false;
