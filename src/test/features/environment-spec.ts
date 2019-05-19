@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-import {EnvironmentMixin} from '../../features/environment.js';
+import {Color, Material, Mesh, Scene} from 'three';
+import {MeshStandardMaterial} from 'three';
+
+import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import Model from '../../three-components/Model.js';
+import ModelScene from '../../three-components/ModelScene.js';
+import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
+
 
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('quick_4k.png');
@@ -27,16 +33,16 @@ const UNLIT_MODEL_URL =
 const MULTI_MATERIAL_MODEL_URL = assetPath('Triangle.gltf');
 
 const backgroundHasMap =
-    (scene, url) => {
-      return textureMatchesMeta(scene.background.texture, {url: url});
+    (scene: Scene, url: string) => {
+      return textureMatchesMeta((scene.background as any).texture, {url: url});
     }
 
 const backgroundHasColor =
-    (scene, hex) => {
-      if (!scene.background || !scene.background.isColor) {
+    (scene: Scene, hex: string) => {
+      if (!scene.background || !(scene.background as any).isColor) {
         return false;
       }
-      return scene.background.getHexString() === hex;
+      return (scene.background as Color).getHexString() === hex;
     }
 
 /**
@@ -48,32 +54,43 @@ const backgroundHasColor =
  * @param {THREE.Scene} scene
  * @param {Object} meta
  */
-const modelUsingEnvMap = (scene, meta) => {
+const modelUsingEnvMap =
+    (scene: ModelScene, meta: {[index: string]: any}): boolean => {
+      let found = false;
+      scene.model.traverse(object => {
+        const mesh = object as Mesh;
+
+        if (Array.isArray(mesh.material)) {
+          found = found || mesh.material.some((m: Material) => {
+            return textureMatchesMeta(
+                (m as MeshStandardMaterial).envMap!, meta);
+          });
+        } else if (
+            mesh.material && (mesh.material as MeshStandardMaterial).envMap) {
+          found = found ||
+              textureMatchesMeta(
+                      (mesh.material as MeshStandardMaterial).envMap!, meta);
+        }
+      });
+      return found;
+    };
+
+const modelHasEnvMap = (scene: ModelScene): boolean => {
   let found = false;
   scene.model.traverse(object => {
-    if (Array.isArray(object.material)) {
-      found = found || object.material.some(m => {
-        return textureMatchesMeta(m.envMap, meta);
-      });
-    } else if (object.material && object.material.envMap) {
-      found = found || textureMatchesMeta(object.material.envMap, meta);
+    const mesh = object as Mesh;
+
+    if (Array.isArray(mesh.material)) {
+      found = found ||
+          mesh.material.some(
+              (m: Material) => !!(m as MeshStandardMaterial).envMap);
+    } else if (
+        mesh.material && (mesh.material as MeshStandardMaterial).envMap) {
+      found = true;
     }
   });
   return found;
 };
-
-const modelHasEnvMap =
-    (scene) => {
-      let found = false;
-      scene.model.traverse(object => {
-        if (Array.isArray(object.material)) {
-          found = found || object.material.some(m => m.envMap);
-        } else if (object.material && object.material.envMap) {
-          found = true;
-        }
-      });
-      return found;
-    }
 
 /**
  * Takes a model object and a meta object and returns
@@ -85,8 +102,8 @@ const modelHasEnvMap =
  * @param {Model} model
  * @param {Object} meta
  */
-const waitForEnvMap = (model, meta) =>
-    waitForEvent(model, 'envmap-change', event => {
+const waitForEnvMap = (model: Model, meta: {[index: string]: any}) =>
+    waitForEvent<{value: any}>(model, 'envmap-change', event => {
       return textureMatchesMeta(event.value, {...meta});
     });
 
@@ -96,18 +113,21 @@ const waitForEnvMap = (model, meta) =>
  * @see textureMatchesMeta
  */
 const waitForLoadAndEnvMap =
-    (scene, element, meta) => {
+    (scene: ModelScene,
+     element: ModelViewerElementBase,
+     meta: {[index: string]: any}) => {
       const load = waitForEvent(element, 'load');
       const envMap = waitForEnvMap(scene.model, meta);
       return Promise.all([load, envMap]);
-    }
+    };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
   let nextId = 0;
-  let tagName;
-  let ModelViewerElement;
-  let element;
-  let scene;
+  let tagName: string;
+  let ModelViewerElement:
+      Constructor<ModelViewerElementBase&EnvironmentInterface>;
+  let element: ModelViewerElementBase&EnvironmentInterface;
+  let scene: ModelScene;
 
   setup(() => {
     tagName = `model-viewer-environment-${nextId++}`;
@@ -155,7 +175,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('displays background with the correct map', async function() {
-        expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
+        expect(backgroundHasMap(scene, element.backgroundImage!)).to.be.ok;
       });
 
       test('applies the image as an environment map', async function() {
@@ -334,10 +354,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
 
     test('changes the opacity of the static shadow', async () => {
-      const originalOpacity = scene.shadow.material.opacity;
+      const originalOpacity = (scene.shadow.material as Material).opacity;
       element.shadowIntensity = 1.0;
       await timePasses();
-      const newOpacity = scene.shadow.material.opacity;
+      const newOpacity = (scene.shadow.material as Material).opacity;
       expect(newOpacity).to.be.greaterThan(originalOpacity);
     });
   });
@@ -388,7 +408,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
 
     test('displays background with background-image', async function() {
-      expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
+      expect(backgroundHasMap(scene, element.backgroundImage!)).to.be.ok;
     });
 
     test('applies background-image environment map on model', async function() {

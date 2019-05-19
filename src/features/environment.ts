@@ -19,6 +19,16 @@ import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progres
 import {IlluminationRole} from '../three-components/ModelScene.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
+export interface EnvironmentInterface {
+  environmentImage: string|null;
+  environmentIntensity: number;
+  backgroundImage: string|null;
+  backgroundColor: string;
+  experimentalPmrem: boolean;
+  shadowIntensity: number;
+  stageLightIntensity: number;
+  exposure: number;
+}
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
@@ -37,7 +47,7 @@ const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
 export const EnvironmentMixin = (ModelViewerElement:
                                      Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
+    Constructor<ModelViewerElementBase&EnvironmentInterface> => {
       class EnvironmentModelViewerElement extends ModelViewerElement {
         @property({
           type: String,
