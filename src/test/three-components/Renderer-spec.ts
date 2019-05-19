@@ -16,7 +16,6 @@
 import ModelViewerElementBase, {$canvas, $onResize, $renderer, $resetRenderer} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
-import {timePasses} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -26,12 +25,16 @@ const ModelViewerElement = class extends ModelViewerElementBase {
   }
 };
 
+interface TestScene {
+  renderCount?: number;
+}
+
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
-function createScene() {
+function createScene(): ModelScene&TestScene {
   const element = new ModelViewerElement();
   const renderer = element[$renderer];
-  const scene = new ModelScene({
+  const scene: ModelScene&TestScene = new ModelScene({
     element: element,
     canvas: element[$canvas],
     width: 200,
@@ -42,9 +45,9 @@ function createScene() {
 
   scene.renderCount = 0;
   const drawImage = scene.context.drawImage;
-  scene.context.drawImage = (...args) => {
-    scene.renderCount++;
-    drawImage.call(scene.context, ...args);
+  (scene.context as any).drawImage = (...args: any[]) => {
+    (scene.renderCount as number)++;
+    (drawImage as any).call(scene.context, ...args);
   };
 
   renderer.registerScene(scene);
@@ -53,9 +56,8 @@ function createScene() {
 }
 
 suite('Renderer', () => {
-  let scene;
-  let renderer;
-
+  let scene: ModelScene&TestScene;
+  let renderer: Renderer;
 
   setup(() => {
     scene = createScene();
@@ -67,7 +69,7 @@ suite('Renderer', () => {
   });
 
   suite('render', () => {
-    let otherScene;
+    let otherScene: ModelScene&TestScene;
 
     setup(() => {
       otherScene = createScene();
@@ -77,13 +79,11 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
       expect(otherScene.renderCount).to.be.equal(0);
-      expect(renderer.scenesRendered).to.be.equal(0);
 
       scene.isDirty = true;
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(otherScene.renderCount).to.be.equal(0);
-      expect(renderer.scenesRendered).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function() {
@@ -106,18 +106,16 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
       expect(scene.isDirty).to.be.ok;
-      expect(renderer.scenesRendered).to.be.equal(0);
 
       scene.isVisible = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
-      expect(renderer.scenesRendered).to.be.equal(1);
     });
 
     suite('when resizing', () => {
-      let originalDpr;
+      let originalDpr: number;
 
       setup(() => {
         originalDpr = self.devicePixelRatio;
