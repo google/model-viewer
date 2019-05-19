@@ -17,18 +17,18 @@ import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import ModelScene, {ROOM_PADDING_SCALE} from '../../three-components/ModelScene.js';
-import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
+
 
 const expect = chai.expect;
 
 suite('ModelScene', () => {
-  let element;
-  let scene;
-  let dummyRadius;
-  let dummyMesh;
-  let renderer;
+  let element: ModelViewerElementBase;
+  let scene: ModelScene;
+  let dummyRadius: number;
+  let dummyMesh: Mesh;
+  let renderer: Renderer;
   let ModelViewerElement = class extends ModelViewerElementBase {};
 
   customElements.define('model-viewer-modelscene', ModelViewerElement);
@@ -68,7 +68,6 @@ suite('ModelScene', () => {
   suite('setSize', () => {
     test('updates visual and buffer size', () => {
       scene.setSize(500, 200);
-      const {width, height} = scene;
       expect(scene.width).to.be.equal(500);
       expect(scene.canvas.width).to.be.equal(500 * devicePixelRatio);
       expect(scene.canvas.style.width).to.be.equal('500px');
@@ -107,7 +106,6 @@ suite('ModelScene', () => {
 
       const width = 2000;
       const height = 1000;
-      const aspect = width / height;
       scene.setSize(width, height);
 
       expect(scene.framedHeight).to.be.equal(ROOM_PADDING_SCALE * 10);
