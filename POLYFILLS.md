@@ -130,7 +130,7 @@ If you are using the polyfills recommended above, you can install them with
 this NPM command:
 
 ```
-npm i --save @webcomponents/webcomponentjs \
+npm i --save @webcomponents/webcomponentsjs \
              resize-observer-polyfill \
              fullscreen-polyfill \
              intersection-observer
