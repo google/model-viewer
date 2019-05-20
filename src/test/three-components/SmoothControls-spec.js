@@ -15,7 +15,7 @@
 
 import {PerspectiveCamera, Spherical, Vector3} from 'three';
 
-import {$idealCameraDistance, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
@@ -84,12 +84,7 @@ suite('SmoothControls', () => {
   });
 
   suite('when updated', () => {
-    test('defaults radius to ideal camera distance', () => {
-      expect(controls.getCameraSpherical().radius)
-          .to.be.equal(controls[$idealCameraDistance]);
-    });
-
-    test('repositions the camera within the configured radius optionss', () => {
+    test('repositions the camera within the configured radius options', () => {
       settleControls(controls);
 
       const radius = camera.position.length();
@@ -157,7 +152,7 @@ suite('SmoothControls', () => {
       });
     });
 
-    suite('customizing optionss', () => {
+    suite('customizing options', () => {
       suite('azimuth', () => {
         setup(() => {
           controls.applyOptions({
@@ -166,7 +161,7 @@ suite('SmoothControls', () => {
           });
         });
 
-        test('prevents camera azimuth from exceeding optionss', () => {
+        test('prevents camera azimuth from exceeding options', () => {
           controls.setOrbit(-Math.PI, 0, 0);
           settleControls(controls);
 
@@ -187,7 +182,7 @@ suite('SmoothControls', () => {
           });
         });
 
-        test('prevents camera polar angle from exceeding optionss', () => {
+        test('prevents camera polar angle from exceeding options', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 
@@ -206,7 +201,7 @@ suite('SmoothControls', () => {
           controls.applyOptions({minimumRadius: 10, maximumRadius: 20});
         });
 
-        test('prevents camera distance from exceeding optionss', () => {
+        test('prevents camera distance from exceeding options', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 

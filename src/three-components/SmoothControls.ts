@@ -45,7 +45,7 @@ export interface SmoothControlsOptions {
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
-  minimumRadius: 0.5,
+  minimumRadius: 1,
   maximumRadius: 2,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
@@ -56,8 +56,6 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   eventHandlingBehavior: 'prevent-all',
   interactionPolicy: 'allow-when-focused'
 });
-
-export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $velocity = Symbol('v');
 
@@ -71,6 +69,7 @@ const $fov = Symbol('fov');
 const $destFov = Symbol('destFov');
 const $fovDamper = Symbol('fovDamper');
 
+const $idealCameraDistance = Symbol('idealCameraDistance');
 const $options = Symbol('options');
 const $upQuaternion = Symbol('upQuaternion');
 const $upQuaternionInverse = Symbol('upQuaternionInverse');
@@ -146,10 +145,12 @@ class Damper {
   update(
       x: number, xDest: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (timeStepMilliseconds > DECAY_MILLISECONDS)
+    if (timeStepMilliseconds > DECAY_MILLISECONDS) {
       // This clamps at the point where a large time step would cause the
       // discrete step to overshoot.
+      this[$velocity] = 0;
       return xDest;
+    }
     if (timeStepMilliseconds < 0)
       return x;
     // Critically damped
@@ -157,11 +158,12 @@ class Damper {
         2 * NATURAL_FREQ * this[$velocity];
     this[$velocity] += acceleration * timeStepMilliseconds;
     if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
-        acceleration * (xDest - x) <= 0)
+        acceleration * (xDest - x) <= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their destination.
+      this[$velocity] = 0;
       return xDest;
-    else
+    } else
       return x + this[$velocity] * timeStepMilliseconds;
   }
 }
