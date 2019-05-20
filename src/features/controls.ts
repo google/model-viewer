@@ -22,8 +22,8 @@ import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js
 import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
-  theta: number;
-  phi: number;
+  theta: number;  // equator angle around the y (up) axis.
+  phi: number;    // polar angle from the y (up) axis.
   radius: number;
 }
 
@@ -268,7 +268,7 @@ export const ControlsMixin = (ModelViewerElement:
           controls.applyOptions({minimumRadius, maximumRadius});
           controls.updateFramedHeight(scene.framedHeight);
 
-          controls.target.set(0, 0, 0);
+          controls.target.copy(scene.target);
 
           controls.setRadius(zoom * this[$idealCameraDistance]);
           controls.jumpToDestination();

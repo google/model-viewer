@@ -15,16 +15,17 @@
 
 import {Vector3} from 'three';
 
-import {StagingMixin, AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION} from '../../features/staging.js';
-import ModelViewerElementBase, {$scene, $onUserModelOrbit} from '../../model-viewer-base.js';
+import {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION, StagingMixin} from '../../features/staging.js';
+import ModelViewerElementBase, {$onUserModelOrbit, $scene} from '../../model-viewer-base.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
-const CENTER_OFFSET = new Vector3(0.5, -1.25, 0.5);
+const CENTER_OFFSET = new Vector3(0.5, 1.0, 0.5);
 const ORIGIN_OFFSET = new Vector3();
+const FRAMED_SIZE = new Vector3(5, 4.5, 5);
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;
@@ -75,6 +76,12 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           // -0 values as 0
           const offset = (element as any)[$scene].model.position.clone();
           expect(offset).to.be.deep.equal(ORIGIN_OFFSET);
+        });
+
+        test('places shadow under a non-centered model', () => {
+          const shadowSize = (element as any)[$scene].shadow.scale;
+          expect(shadowSize.x).to.be.equal(FRAMED_SIZE.x);
+          expect(shadowSize.z).to.be.equal(FRAMED_SIZE.z);
         });
       });
 
@@ -139,7 +146,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         await timePasses(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
 
-        expect(element.turntableRotation).to.be.greaterThan(initialTurntableRotation);
+        expect(element.turntableRotation)
+            .to.be.greaterThan(initialTurntableRotation);
       });
     });
   });
