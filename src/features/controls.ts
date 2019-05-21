@@ -118,7 +118,6 @@ export const ControlsMixin = (ModelViewerElement:
           this[$controls] = new SmoothControls(scene.getCamera(), scene.canvas);
           this[$updateCameraOrbit]();
           this[$updateCameraFov]();
-          this[$controls].target.set(0, 0, 0);
         }
 
         getCameraOrbit(): SphericalPosition {
@@ -342,11 +341,11 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]({source}: ChangeEvent) {
-          this[$deferInteractionPrompt]();
           this[$updateAria]();
           this[$needsRender]();
 
           if (source === 'user-interaction') {
+            this[$deferInteractionPrompt]();
             this[$onUserModelOrbit]();
           }
         }

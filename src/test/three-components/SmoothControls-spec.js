@@ -95,15 +95,16 @@ suite('SmoothControls', () => {
 
     test('causes the camera to look at the target', () => {
       settleControls(controls);
-      expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
+      expect(cameraIsLookingAt(camera, controls.getTarget())).to.be.equal(true);
     });
 
     suite('when target is modified', () => {
       test('camera looks at the configured target', () => {
-        controls.target.set(3, 2, 1);
+        controls.setTarget(3, 2, 1);
         settleControls(controls);
 
-        expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
+        expect(cameraIsLookingAt(camera, controls.getTarget()))
+            .to.be.equal(true);
       });
     });
 

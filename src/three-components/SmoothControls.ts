@@ -68,6 +68,7 @@ const $radiusDamper = Symbol('radiusDamper');
 const $fov = Symbol('fov');
 const $destFov = Symbol('destFov');
 const $fovDamper = Symbol('fovDamper');
+const $target = Symbol('target');
 
 const $idealCameraDistance = Symbol('idealCameraDistance');
 const $options = Symbol('options');
@@ -145,7 +146,7 @@ class Damper {
   update(
       x: number, xDest: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (timeStepMilliseconds > DECAY_MILLISECONDS) {
+    if (timeStepMilliseconds >= DECAY_MILLISECONDS) {
       // This clamps at the point where a large time step would cause the
       // discrete step to overshoot.
       this[$velocity] = 0;
@@ -204,6 +205,7 @@ export class SmoothControls extends EventDispatcher {
   private[$fov]: number;
   private[$destFov]: number;
   private[$fovDamper]: Damper = new Damper();
+  private[$target]: Vector3 = new Vector3();
 
   private[$pointerIsDown]: boolean = false;
   private[$lastPointerPosition]: Vector2 = new Vector2();
@@ -221,9 +223,6 @@ export class SmoothControls extends EventDispatcher {
   private[$onTouchMove]: (event: Event) => void;
 
   private[$zoomMeters]: number = 1;
-
-  // The target position that the camera will orbit around
-  readonly target: Vector3 = new Vector3();
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -250,8 +249,9 @@ export class SmoothControls extends EventDispatcher {
 
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
 
-    this[$destFov] = this[$options].maximumFov!;
     this.setOrbit(0, Math.PI / 2, 1);
+    this.setFov(100);
+    this.setTarget(0, 0, 0);
     this.jumpToDestination();
   }
 
@@ -359,8 +359,6 @@ export class SmoothControls extends EventDispatcher {
 
     this.applyOptions({minimumRadius, maximumRadius});
 
-    this.target.set(0, 0, 0);
-
     this.setRadius(zoom * this[$idealCameraDistance]);
     this.jumpToDestination();
   }
@@ -418,7 +416,6 @@ export class SmoothControls extends EventDispatcher {
 
   /**
    * Subset of setOrbit() above, which only sets the camera's radius.
-   * @param radius
    */
   setRadius(radius: number) {
     this[$destSpherical].radius = radius;
@@ -427,11 +424,28 @@ export class SmoothControls extends EventDispatcher {
 
   /**
    * Sets the destination field of view for the camera
-   * @param fov
    */
   setFov(fov: number) {
     const {minimumFov, maximumFov} = this[$options];
     this[$destFov] = clamp(fov, minimumFov!, maximumFov!);
+  }
+
+  /**
+   * Sets the target the camera is pointing toward
+   */
+  setTarget(x: number, y: number, z: number) {
+    // if (this[$target].x !== x || this[$target].y !== y ||
+    //     this[$target].z !== z) {
+    this[$target].set(x, y, z);
+    this[$moveCamera]();
+    // }
+  }
+
+  /**
+   * Returns a copy of the target position the camera is pointed toward
+   */
+  getTarget(): Vector3 {
+    return this[$target].clone();
   }
 
   /**
@@ -450,15 +464,11 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Move the camera instantly instead of accelerating toward the setOrbit()
+   * Move the camera instantly instead of accelerating toward the destination
    * parameters.
    */
   jumpToDestination() {
-    if (this[$isMoving]) {
-      this[$spherical].copy(this[$destSpherical]);
-      this[$fov] = this[$destFov];
-      this[$moveCamera]();
-    }
+    this.update(0, DECAY_MILLISECONDS);
   }
 
   /**
@@ -469,7 +479,7 @@ export class SmoothControls extends EventDispatcher {
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
-    if (this[$isMoving]) {
+    if (this[$isMoving]()) {
       const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
 
       this[$spherical].theta = this[$thetaDamper].update(
@@ -505,12 +515,12 @@ export class SmoothControls extends EventDispatcher {
     // Derive the new camera position from the updated spherical:
     this[$spherical].makeSafe();
     this[$sphericalToPosition](this[$spherical], this.camera.position);
+    this.camera.lookAt(this[$target]);
+
     if (this.camera.fov !== this[$fov]) {
       this.camera.fov = this[$fov];
       this.camera.updateProjectionMatrix();
     }
-
-    this.camera.lookAt(this.target);
 
     const source = this[$isUserChange] ? USER_INTERACTION_CHANGE_SOURCE :
                                          DEFAULT_INTERACTION_CHANGE_SOURCE;
@@ -543,7 +553,7 @@ export class SmoothControls extends EventDispatcher {
   private[$sphericalToPosition](spherical: Spherical, position: Vector3) {
     position.setFromSpherical(spherical);
     position.applyQuaternion(this[$upQuaternionInverse]);
-    position.add(this.target);
+    position.add(this[$target]);
   }
 
   private[$twoTouchDistance](touchOne: Touch, touchTwo: Touch): number {
