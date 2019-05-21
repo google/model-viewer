@@ -57,15 +57,19 @@ const lengthValueNodeToMeters = (lengthValueNode: ValueNode): number => {
  * Assumes radians if unit is not specified or recognized. Returns 0 for a
  * ValueNode that cannot be parsed.
  */
-const angleValueNodeToRadians = (angleValueNode: ValueNode): number => {
-  const value = parseFloat(angleValueNode.value as any);
+const convertAngleValueNode =
+    (angleValueNode: ValueNode, desiredUnits: string = 'rad'): number => {
+      const value = parseFloat(angleValueNode.value as any);
 
-  if ((self as any).isNaN(value)) {
-    return 0;
-  }
+      if ((self as any).isNaN(value)) {
+        return 0;
+      }
 
-  return angleValueNode.unit === 'deg' ? ThreeMath.degToRad(value) : value;
-};
+      const inputUnits = angleValueNode.unit;
+      return inputUnits === 'deg' ?
+          desiredUnits === 'deg' ? value : ThreeMath.degToRad(value) :
+          desiredUnits === 'deg' ? ThreeMath.radToDeg(value) : value;
+    };
 
 /**
  * Spherical String => Spherical Values
@@ -88,8 +92,8 @@ export const deserializeSpherical =
         if (sphericalValueNodes.length === 3) {
           const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
 
-          const theta = angleValueNodeToRadians(thetaNode);
-          const phi = angleValueNodeToRadians(phiNode);
+          const theta = convertAngleValueNode(thetaNode);
+          const phi = convertAngleValueNode(phiNode);
           const radius = radiusNode.value === 'auto' ?
               'auto' :
               lengthValueNodeToMeters(radiusNode);
@@ -102,16 +106,15 @@ export const deserializeSpherical =
       return null;
     };
 
-export const deserializeAngle =
-    (angleString: string): number|null => {
-      try {
-        const angleValueNode = parseValues(angleString);
+export const deserializeAngleToDeg = (angleString: string): number|null => {
+  try {
+    const angleValueNode = parseValues(angleString);
 
-        if (angleValueNode.length === 1) {
-          return angleValueNodeToRadians(angleValueNode[0]);
-        }
-      } catch (_error) {
-      }
+    if (angleValueNode.length === 1) {
+      return convertAngleValueNode(angleValueNode[0], 'deg');
+    }
+  } catch (_error) {
+  }
 
-      return null;
-    };
+  return null;
+};

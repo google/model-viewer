@@ -315,6 +315,13 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
+   * Returns the camera's current vertical field of view in degrees.
+   */
+  getCameraFov(): number {
+    return this.camera.fov;
+  }
+
+  /**
    * Configure the options of the controls. Configured options will be
    * merged with whatever options have already been configured for this
    * controls instance.

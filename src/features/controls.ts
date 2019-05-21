@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 import {Event, Spherical} from 'three';
 
-import {deserializeAngle, deserializeSpherical} from '../conversions.js';
+import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
 import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
@@ -125,6 +125,10 @@ export const ControlsMixin = (ModelViewerElement:
           return {theta, phi, radius};
         }
 
+        getCameraFov(): number {
+          return this[$controls].getCameraFov();
+        }
+
         connectedCallback() {
           super.connectedCallback();
 
@@ -172,9 +176,9 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$updateCameraFov]() {
-          let fov = deserializeAngle(this.cameraFOV);
+          let fov = deserializeAngleToDeg(this.cameraFOV);
           if (fov == null) {
-            fov = deserializeAngle(DEFAULT_CAMERA_FOV);
+            fov = deserializeAngleToDeg(DEFAULT_CAMERA_FOV);
           }
           this[$controls].setFov(fov as number);
         }
