@@ -190,7 +190,7 @@ export default class Renderer extends EventDispatcher {
       context.drawImage(
           this.renderer.domElement,
           0,
-          0,
+          this.canvas.height - heightDPR,
           widthDPR,
           heightDPR,
           0,

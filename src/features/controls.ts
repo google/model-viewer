@@ -22,8 +22,8 @@ import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js
 import {Constructor} from '../utilities.js';
 
 export interface SphericalPosition {
-  theta: number;
-  phi: number;
+  theta: number;  // equator angle around the y (up) axis.
+  phi: number;    // polar angle from the y (up) axis.
   radius: number;
 }
 
@@ -246,6 +246,7 @@ export const ControlsMixin = (ModelViewerElement:
 
           this[$controls].updateFraming(
               scene.framedHeight, scene.modelDepth, scene.aspect);
+          this[$controls].setTarget(scene.target);
         }
 
         [$updateAria]() {

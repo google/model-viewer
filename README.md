@@ -144,7 +144,7 @@ Safari has support for something like the WebXR Device and Hit Test APIs.
 
 Models are often large, so especially on pages with large numbers of them it
 may be desirable to load them after user action. Three parameters -
-*`poster`*, *`preload`*, and *`reveal-when-loaded`* - control the loading
+*`poster`*, *`preload`*, and *`reveal`* - control the loading
 behavior.
 
 Four configuration options are available:

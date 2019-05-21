@@ -251,7 +251,6 @@ export class SmoothControls extends EventDispatcher {
 
     this.setOrbit(0, Math.PI / 2, 1);
     this.setFov(100);
-    this.setTarget(0, 0, 0);
     this.jumpToDestination();
   }
 
@@ -440,12 +439,11 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Sets the target the camera is pointing toward
    */
-  setTarget(x: number, y: number, z: number) {
-    // if (this[$target].x !== x || this[$target].y !== y ||
-    //     this[$target].z !== z) {
-    this[$target].set(x, y, z);
-    this[$moveCamera]();
-    // }
+  setTarget(target: Vector3) {
+    if (!this[$target].equals(target)) {
+      this[$target].copy(target);
+      this[$moveCamera]();
+    }
   }
 
   /**

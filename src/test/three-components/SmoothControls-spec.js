@@ -100,7 +100,7 @@ suite('SmoothControls', () => {
 
     suite('when target is modified', () => {
       test('camera looks at the configured target', () => {
-        controls.setTarget(3, 2, 1);
+        controls.setTarget(new Vector3(3, 2, 1));
         settleControls(controls);
 
         expect(cameraIsLookingAt(camera, controls.getTarget()))
