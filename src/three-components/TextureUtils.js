@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {Cache, CubeTexture, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, TextureLoader} from 'three';
+import {Cache, CubeTexture, EventDispatcher, FloatType, GammaEncoding, LinearEncoding, RGBEEncoding, TextureLoader} from 'three';
+import {LinearFilter} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
@@ -29,6 +30,7 @@ Cache.enabled = true;
 const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
+hdrLoader.setType(FloatType);
 
 const $cubeGenerator = Symbol('cubeGenerator');
 
@@ -110,9 +112,8 @@ export default class TextureUtils extends EventDispatcher {
       };
 
       if (isHDR) {
-        texture.encoding = RGBEEncoding;
-        texture.minFilter = NearestFilter;
-        texture.magFilter = NearestFilter;
+        texture.encoding = LinearEncoding;
+        texture.generateMipmaps = true;
         texture.flipY = true;
       } else {
         texture.encoding = GammaEncoding;
