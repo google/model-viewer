@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {$defaultPosterElement, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -26,8 +26,9 @@ const HORSE_GLB_PATH = assetPath('Horse.glb');
 suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
-    let tagName;
-    let ModelViewerElement;
+    let tagName: string;
+    let ModelViewerElement:
+        Constructor<ModelViewerElementBase&LoadingInterface>;
 
     setup(() => {
       tagName = `model-viewer-loading-${nextId++}`;
@@ -45,7 +46,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
     // TODO: Elements must have loaded to hide poster...
 
     suite('loading', () => {
-      let element;
+      let element: ModelViewerElementBase&LoadingInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
@@ -66,8 +67,9 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
       test('creates a poster element that captures interactions', () => {
         const picked = pickShadowDescendant(element);
+        expect(picked).to.be.ok;
         // TODO(cdata): Leaky internal details here:
-        expect(picked.id).to.be.equal('default-poster');
+        expect(picked!.id).to.be.equal('default-poster');
       });
 
       suite('preload', () => {
@@ -82,16 +84,16 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                 element.src = HORSE_GLB_PATH;
 
                 let preloadEvent = null;
-                const onPreload = (event) => {
+                const onPreload = (event: CustomEvent) => {
                   if (event.detail.url === HORSE_GLB_PATH) {
                     preloadEvent = event;
                   }
                 };
-                element.addEventListener('preload', onPreload);
+                element.addEventListener<any>('preload', onPreload);
 
                 await until(() => element.loaded);
 
-                element.removeEventListener('preload', onPreload);
+                element.removeEventListener<any>('preload', onPreload);
 
                 expect(preloadEvent).to.be.ok;
               });
@@ -135,7 +137,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                     element.reveal = 'interaction';
                     element.src = ASTRONAUT_GLB_PATH;
 
-                    const posterElement = element[$defaultPosterElement];
+                    const posterElement =
+                        (element as any)[$defaultPosterElement];
                     const canvasElement = element[$canvas];
 
                     await waitForEvent(element, 'preload');
@@ -145,14 +148,15 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                     // manually (e.g., with the .focus() method).
                     posterElement.focus();
 
-                    expect(element.shadowRoot.activeElement)
+                    expect(element.shadowRoot!.activeElement)
                         .to.be.equal(posterElement);
 
                     dispatchSyntheticEvent(
                         posterElement, 'keydown', {keyCode: 13});
 
                     await until(() => {
-                      return element.shadowRoot.activeElement === canvasElement;
+                      return element.shadowRoot!.activeElement ===
+                          canvasElement;
                     });
                   });
             });
@@ -184,7 +188,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           element.dismissPoster();
 
-          await waitForEvent(
+          await waitForEvent<CustomEvent>(
               element,
               'model-visibility',
               event => event.detail.visible === true);
@@ -197,7 +201,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         suite('when poster is hidden', () => {
           setup(async () => {
             element.dismissPoster();
-            await waitForEvent(
+            await waitForEvent<CustomEvent>(
                 element,
                 'model-visibility',
                 event => event.detail.visible === true);

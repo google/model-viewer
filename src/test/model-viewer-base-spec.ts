@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
-
+import ModelViewerElementBase, {$canvas, $scene} from '../model-viewer-base.js';
+import {Constructor} from '../utilities.js';
 import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
+
 
 const expect = chai.expect;
 
@@ -27,8 +28,8 @@ suite('ModelViewerElementBase', () => {
 
   suite('when registered', () => {
     let nextId = 0;
-    let tagName;
-    let ModelViewerElement;
+    let tagName: string;
+    let ModelViewerElement: Constructor<ModelViewerElementBase>;
 
     setup(() => {
       tagName = `model-viewer-${nextId++}`;
@@ -43,8 +44,8 @@ suite('ModelViewerElementBase', () => {
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('with alt text', () => {
-      let element;
-      let canvas;
+      let element: ModelViewerElementBase;
+      let canvas: HTMLCanvasElement;
 
       setup(() => {
         element = new ModelViewerElement();
@@ -83,7 +84,7 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('with a valid src', () => {
-      let element;
+      let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
@@ -126,7 +127,7 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('with an invalid src', () => {
-      let element;
+      let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
@@ -146,7 +147,7 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('orchestrates rendering', () => {
-      let elements = [];
+      let elements: Array<ModelViewerElementBase> = [];
 
       setup(async () => {
         elements.push(new ModelViewerElement());
@@ -156,7 +157,6 @@ suite('ModelViewerElementBase', () => {
         const loaded = elements.map(e => waitForEvent(e, 'load'));
 
         for (let element of elements) {
-          element.autoRotate = true;
           element.style.position = 'relative';
           element.style.marginBottom = '100vh';
           element.src = assetPath('cube.gltf');
@@ -181,8 +181,6 @@ suite('ModelViewerElementBase', () => {
       });
 
       test.skip('only models visible in the viewport', async () => {
-        const renderer = elements[0][$renderer];
-
         // IntersectionObserver needs to set appropriate
         // visibility on the scene, lots of timing issues when
         // running -- wait for the visibility flags to be flipped

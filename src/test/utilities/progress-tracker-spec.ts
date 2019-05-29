@@ -44,7 +44,8 @@ suite('ProgressTracker', () => {
           'causes the ProgressTracker to dispatch a progress event',
           async () => {
             const progressEventDispatches =
-                waitForEvent(progressTracker, 'progress');
+                waitForEvent<CustomEvent<ProgressDetails>>(
+                    progressTracker, 'progress');
             firstActivity(0.5);
             const event: CustomEvent<ProgressDetails> =
                 await progressEventDispatches;
@@ -80,7 +81,8 @@ suite('ProgressTracker', () => {
     suite('completed', () => {
       test('ProgressTracker dispatches a final progress event', async () => {
         const progressEventDispatches =
-            waitForEvent(progressTracker, 'progress');
+            waitForEvent<CustomEvent<ProgressDetails>>(
+                progressTracker, 'progress');
         firstActivity(1.0);
         const event: CustomEvent<ProgressDetails> =
             await progressEventDispatches;
@@ -131,7 +133,8 @@ suite('ProgressTracker', () => {
             async () => {
               secondActivity(1.0);
               const progressEventDispatches =
-                  waitForEvent(progressTracker, 'progress');
+                  waitForEvent<CustomEvent<ProgressDetails>>(
+                      progressTracker, 'progress');
               firstActivity(1.0);
               const event: CustomEvent<ProgressDetails> =
                   await progressEventDispatches;

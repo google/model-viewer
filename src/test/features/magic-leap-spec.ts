@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {MagicLeapMixin} from '../../features/magic-leap.js';
+import {MagicLeapInterface, MagicLeapMixin} from '../../features/magic-leap.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
+import {Constructor} from '../../utilities.js';
 import {assetPath, pickShadowDescendant, timePasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
@@ -23,8 +24,9 @@ const expect = chai.expect;
 suite('ModelViewerElementBase with MagicLeapMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
-    let tagName;
-    let ModelViewerElement;
+    let tagName: string;
+    let ModelViewerElement:
+        Constructor<ModelViewerElementBase&MagicLeapInterface>;
 
     setup(() => {
       tagName = `model-viewer-magic-leap-${nextId++}`;
@@ -41,7 +43,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
     suite('magic-leap', () => {
       suite('in standard browser environments', () => {
-        let element;
+        let element: ModelViewerElementBase&MagicLeapInterface;
 
         setup(async () => {
           element = new ModelViewerElement();
@@ -61,12 +63,13 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
         test('does not change model presentation', () => {
           const presented = pickShadowDescendant(element);
 
-          expect(presented.classList.contains('container')).to.be.equal(true);
+          expect(presented).to.be.ok;
+          expect(presented!.classList.contains('container')).to.be.equal(true);
         });
       });
 
       suite('in the Helios browser environment', () => {
-        let element;
+        let element: ModelViewerElementBase&MagicLeapInterface;
 
         setup(async () => {
           self.mlWorld = {};
@@ -88,7 +91,8 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
         test('shows an <ml-model>', () => {
           const presented = pickShadowDescendant(element);
-          expect(presented.tagName).to.be.equal('ML-MODEL');
+          expect(presented).to.be.ok;
+          expect(presented!.tagName).to.be.equal('ML-MODEL');
         });
 
         suite('with a src property', () => {
@@ -100,7 +104,8 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
           test('sets the same src on the <ml-model>', () => {
             const mlModel = pickShadowDescendant(element);
-            expect(mlModel.getAttribute('src')).to.be.equal(element.src);
+            expect(mlModel).to.be.ok;
+            expect(mlModel!.getAttribute('src')).to.be.equal(element.src);
           });
         });
       });

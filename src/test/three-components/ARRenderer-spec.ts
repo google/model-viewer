@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-import {Matrix4, Plane, Ray, Vector3} from 'three';
+import {Camera, Matrix4, Plane, Ray, Vector3} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import ModelScene from '../../three-components/ModelScene.js';
-import {$arRenderer} from '../../three-components/Renderer.js';
+import Renderer from '../../three-components/Renderer.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+
 
 const expect = chai.expect;
 
 const applyPhoneRotation =
-    camera => {
+    (camera: Camera) => {
       // Rotate 180 degrees on Y (so it's not the default)
       // and angle 45 degrees towards the ground, like a phone.
       camera.matrix.identity()
@@ -34,41 +35,57 @@ const applyPhoneRotation =
               new Vector3(1, 0, 0), -Math.PI / 4));
     }
 
-class MockXRFrame {
-  constructor(session) {
-    this.session = session;
+class MockXRFrame implements XRFrame {
+  constructor(public session: XRSession) {
   }
 
   // We don't use nor test the returned XRInputPose
   // other than its existence.
-  getInputPose(xrInputSource, frameOfRef) {
-    return xrInputSource ? {} : null;
+  getInputPose(_xrInputSource: XRInputSource, _frameOfRef?: XRReferenceSpace) {
+    return {} as XRInputPose;
+  }
+
+  getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
+    return {} as XRViewerPose
   }
 }
 
 customElements.define('model-viewer-element', ModelViewerElementBase);
 
 suite('ARRenderer', () => {
-  let element;
-  let scene;
-  let renderer;
-  let arRenderer;
-  let xrSession;
+  let element: ModelViewerElementBase;
+  let renderer: Renderer;
+  let arRenderer: ARRenderer;
+  let xrSession: XRSession;
 
-  let inputSources = [];
-  const setInputSources = sources => {
+  let inputSources: Array<XRInputSource> = [];
+
+  const setInputSources = (sources: Array<XRInputSource>) => {
     inputSources = sources;
   };
 
-  const stubWebXrInterface = (arRenderer) => {
+  const stubWebXrInterface = (arRenderer: ARRenderer) => {
     const xzPlane = new Plane(new Vector3(0, 1, 0));
     const mat4 = new Matrix4();
     const vec3 = new Vector3();
 
-    arRenderer.resolveARSession = () => {
-      class FakeSession extends EventTarget {
+    arRenderer.resolveARSession = async () => {
+      class FakeSession extends EventTarget implements XRSession {
+        public baseLayer: XRLayer = {} as XRLayer;
+
         requestFrameOfReference() {
           return {};
+        }
+
+        async requestReferenceSpace(_options: XRReferenceSpaceOptions):
+            Promise<XRReferenceSpace> {
+          return {
+            originOffset: {
+              position: {} as DOMPointReadOnly,
+              orientation: {} as DOMPointReadOnly,
+              matrix: new Float32Array()
+            }
+          } as XRReferenceSpace;
         }
 
         getInputSources() {
@@ -78,14 +95,16 @@ suite('ARRenderer', () => {
         /**
          * Returns a hit if ray collides with the XZ plane
          */
-        requestHitTest(origin, dir, frameOfRef) {
+        async requestHitTest(
+            origin: Float32Array, dir: Float32Array,
+            _frameOfRef: XRFrameOfReference): Promise<Array<XRHitResult>> {
           const hits = [];
           const ray = new Ray(new Vector3(...origin), new Vector3(...dir));
           const success = ray.intersectPlane(xzPlane, vec3);
 
           if (success) {
             const hitMatrix = new Float32Array(16);
-            mat4.identity().setPosition(vec3).toArray(hitMatrix);
+            (mat4.identity().setPosition(vec3) as any).toArray(hitMatrix);
             hits.push({hitMatrix});
           }
 
@@ -99,7 +118,7 @@ suite('ARRenderer', () => {
         cancelAnimationFrame() {
         }
 
-        end() {
+        async end() {
           this.dispatchEvent(new CustomEvent('end'));
         }
       }
@@ -130,7 +149,7 @@ suite('ARRenderer', () => {
   });
 
   suite('when presenting a scene', () => {
-    let modelScene;
+    let modelScene: ModelScene;
 
     if (!IS_WEBXR_AR_CANDIDATE) {
       return;
@@ -209,7 +228,7 @@ suite('ARRenderer', () => {
         arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
         arRenderer.camera.updateMatrixWorld(true);
 
-        setInputSources([{targetRayMode: 'screen'}]);
+        setInputSources([{targetRayMode: 'screen', handedness: ''}]);
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await waitForEvent(arRenderer, 'modelmove');
 
@@ -235,7 +254,7 @@ suite('ARRenderer', () => {
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
 
-        setInputSources([{targetRayMode: 'gaze'}]);
+        setInputSources([{targetRayMode: 'gaze', handedness: ''}]);
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await timePasses();
 

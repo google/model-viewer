@@ -13,7 +13,15 @@
  * limitations under the License.
  */
 
-import {Color, Mesh, MeshBasicMaterial, MultiplyBlending, OrthographicCamera, PlaneGeometry, RGBAFormat, ShaderMaterial, UniformsUtils, Vector3, WebGLRenderTarget} from 'three';
+import {DirectionalLight, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, Vector3, WebGLRenderTarget} from 'three';
+import {WebGLRenderer} from 'three';
+
+export interface ShadowGenerationConfig {
+  near?: number;
+  far?: number;
+  textureWidth?: number;
+  textureHeight?: number;
+}
 
 const $camera = Symbol('camera');
 const $renderTarget = Symbol('renderTarget');
@@ -22,7 +30,7 @@ const scale = new Vector3();
 
 const BASE_SHADOW_OPACITY = 0.1;
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: ShadowGenerationConfig = {
   near: 0.01,
   far: 100,
   textureWidth: 512,
@@ -46,6 +54,8 @@ const shadowTextureMaterial = new MeshBasicMaterial({
  * and can be freely rotated and positioned like a regular texture.
  */
 export default class StaticShadow extends Mesh {
+  private[$renderTarget]: WebGLRenderTarget;
+  private[$camera]: OrthographicCamera;
   /**
    * Create a shadow mesh.
    */
@@ -57,27 +67,27 @@ export default class StaticShadow extends Mesh {
     this.name = 'StaticShadow';
 
     this[$renderTarget] = new WebGLRenderTarget(
-        DEFAULT_CONFIG.textureWidth, DEFAULT_CONFIG.textureHeight, {
+        DEFAULT_CONFIG.textureWidth!, DEFAULT_CONFIG.textureHeight!, {
           format: RGBAFormat,
         });
-    this.material.map = this[$renderTarget].texture;
-    this.material.needsUpdate = true;
+    (this.material as any).map = this[$renderTarget].texture;
+    (this.material as any).needsUpdate = true;
 
-    this[$camera] = new OrthographicCamera();
+    this[$camera] = new OrthographicCamera(-1, 1, 1, -1);
   }
 
-  get intensity() {
-    return this.material.opacity / BASE_SHADOW_OPACITY;
+  get intensity(): number {
+    return (this.material as any).opacity / BASE_SHADOW_OPACITY;
   }
 
-  set intensity(intensity) {
+  set intensity(intensity: number) {
     const intensityIsNumber =
-        typeof intensity === 'number' && !self.isNaN(intensity);
+        typeof intensity === 'number' && !(self as any).isNaN(intensity);
 
-    this.material.opacity =
+    (this.material as any).opacity =
         BASE_SHADOW_OPACITY * (intensityIsNumber ? intensity : 0.0);
 
-    this.visible = this.material.opacity > 0;
+    this.visible = (this.material as any).opacity > 0;
   }
 
   /**
@@ -94,7 +104,9 @@ export default class StaticShadow extends Mesh {
    * @param {number} config.textureWidth
    * @param {number} config.textureHeight
    */
-  render(renderer, scene, light, config = {}) {
+  render(
+      renderer: WebGLRenderer, scene: Scene, light: DirectionalLight,
+      config: ShadowGenerationConfig = {}) {
     const userSceneOverrideMaterial = scene.overrideMaterial;
     const userSceneBackground = scene.background;
     const userClearAlpha = renderer.getClearAlpha();
@@ -110,7 +122,7 @@ export default class StaticShadow extends Mesh {
     // Update render target size if necessary
     if (this[$renderTarget].width !== config.textureWidth ||
         this[$renderTarget].height !== config.textureHeight) {
-      this[$renderTarget].setSize(config.textureWidth, config.textureHeight);
+      this[$renderTarget].setSize(config.textureWidth!, config.textureHeight!);
     }
 
     // Set the camera to where the light source is,
@@ -131,8 +143,8 @@ export default class StaticShadow extends Mesh {
     this[$camera].bottom = scale.z / -2;
     this[$camera].left = scale.x / -2;
     this[$camera].right = scale.x / 2;
-    this[$camera].near = config.near;
-    this[$camera].far = config.far;
+    this[$camera].near = config.near!;
+    this[$camera].far = config.far!;
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;
@@ -149,7 +161,7 @@ export default class StaticShadow extends Mesh {
       shadowParent.add(this);
     }
 
-    this.material.needsUpdate = true;
+    (this.material as any).needsUpdate = true;
 
     // Reset the values on the renderer and scene
     scene.overrideMaterial = userSceneOverrideMaterial;

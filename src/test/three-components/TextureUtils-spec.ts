@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-import {TextureLoader, WebGLRenderer} from 'three';
+import {Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
+
+
 
 const expect = chai.expect;
 
@@ -27,8 +29,8 @@ const EQUI_URL = assetPath('spruit_sunrise_2k.jpg');
 const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
 
 suite('TextureUtils', () => {
-  let textureUtils;
-  let renderer;
+  let textureUtils: TextureUtils;
+  let renderer: WebGLRenderer;
 
   setup(() => {
     renderer = new WebGLRenderer({canvas});
@@ -45,7 +47,7 @@ suite('TextureUtils', () => {
     test('loads a valid texture from URL', async () => {
       let texture = await textureUtils.load(EQUI_URL);
       texture.dispose();
-      expect(texture.isTexture).to.be.ok;
+      expect((texture as any).isTexture).to.be.ok;
       expect(textureMatchesMeta(
                  texture, {mapping: 'Equirectangular', url: EQUI_URL}))
           .to.be.ok;
@@ -53,14 +55,14 @@ suite('TextureUtils', () => {
     test('loads a valid HDR texture from URL', async () => {
       let texture = await textureUtils.load(HDR_EQUI_URL);
       texture.dispose();
-      expect(texture.isTexture).to.be.ok;
+      expect((texture as any).isTexture).to.be.ok;
       expect(textureMatchesMeta(
                  texture, {mapping: 'Equirectangular', url: HDR_EQUI_URL}))
           .to.be.ok;
     });
     test('throws on invalid URL', async () => {
       try {
-        await textureUtils.load(null);
+        await (textureUtils.load as any)(null);
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -82,14 +84,14 @@ suite('TextureUtils', () => {
       const target = textureUtils.equirectangularToCubemap(texture);
       texture.dispose();
       target.dispose();
-      expect(target.texture.isTexture).to.be.ok;
+      expect((target.texture as any).isTexture).to.be.ok;
       expect(
           textureMatchesMeta(target.texture, {mapping: 'Cube', url: EQUI_URL}))
           .to.be.ok;
     });
     test('throws on invalid texture', async () => {
       try {
-        await textureUtils.equirectangularToCubemap({});
+        await textureUtils.equirectangularToCubemap({} as Texture);
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -98,22 +100,23 @@ suite('TextureUtils', () => {
   });
 
   suite('generating an environment map and skybox', () => {
-    let textures;
+    let textures: {skybox: WebGLRenderTargetCube|null, environmentMap: Texture}|
+        null;
     teardown(() => {
       if (textures) {
-        textures.skybox.dispose();
         textures.environmentMap.dispose();
+        textures.skybox!.dispose();
         textures = null;
       }
     });
 
     test('returns an environmentMap and skybox texture from url', async () => {
       textures = await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
-      expect(textures.skybox.texture.isTexture).to.be.ok;
-      expect(textures.environmentMap.isTexture).to.be.ok;
+      expect((textures.skybox!.texture as any).isTexture).to.be.ok;
+      expect((textures.environmentMap as any).isTexture).to.be.ok;
 
       expect(textureMatchesMeta(
-                 textures.skybox.texture, {mapping: 'Cube', url: EQUI_URL}))
+                 textures.skybox!.texture, {mapping: 'Cube', url: EQUI_URL}))
           .to.be.ok;
 
       expect(textureMatchesMeta(
@@ -126,10 +129,10 @@ suite('TextureUtils', () => {
         async () => {
           textures =
               await textureUtils.generateEnvironmentMapAndSkybox(HDR_EQUI_URL);
-          expect(textures.skybox.texture.isTexture).to.be.ok;
-          expect(textures.environmentMap.isTexture).to.be.ok;
+          expect((textures.skybox!.texture as any).isTexture).to.be.ok;
+          expect((textures.environmentMap as any).isTexture).to.be.ok;
 
-          expect(textureMatchesMeta(textures.skybox.texture, {
+          expect(textureMatchesMeta(textures.skybox!.texture, {
             mapping: 'Cube',
             url: HDR_EQUI_URL
           })).to.be.ok;
@@ -148,12 +151,13 @@ suite('TextureUtils', () => {
                 pmrem: true,
               });
 
-          expect(textures.skybox.texture.isTexture).to.be.ok;
-          expect(textures.environmentMap.isTexture).to.be.ok;
+          expect((textures.skybox!.texture as any).isTexture).to.be.ok;
+          expect((textures.environmentMap as any).isTexture).to.be.ok;
 
-          expect(textureMatchesMeta(
-                     textures.skybox.texture, {mapping: 'Cube', url: EQUI_URL}))
-              .to.be.ok;
+          expect(textureMatchesMeta(textures.skybox!.texture, {
+            mapping: 'Cube',
+            url: EQUI_URL
+          })).to.be.ok;
 
           expect(textureMatchesMeta(textures.environmentMap, {
             mapping: 'PMREM',
@@ -168,10 +172,10 @@ suite('TextureUtils', () => {
               HDR_EQUI_URL, null, {
                 pmrem: true,
               });
-          expect(textures.skybox.texture.isTexture).to.be.ok;
-          expect(textures.environmentMap.isTexture).to.be.ok;
+          expect((textures.skybox!.texture as any).isTexture).to.be.ok;
+          expect((textures.environmentMap as any).isTexture).to.be.ok;
 
-          expect(textureMatchesMeta(textures.skybox.texture, {
+          expect(textureMatchesMeta(textures.skybox!.texture, {
             mapping: 'Cube',
             url: HDR_EQUI_URL
           })).to.be.ok;
@@ -184,7 +188,7 @@ suite('TextureUtils', () => {
 
     test('throws if given an invalid url', async () => {
       try {
-        await textureUtils.generateEnvironmentMapAndSkybox({});
+        await textureUtils.generateEnvironmentMapAndSkybox({} as string);
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;

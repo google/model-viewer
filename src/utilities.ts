@@ -25,7 +25,7 @@ export type Constructor<T = object> = {
   prototype: T
 };
 
-export const deserializeUrl = (url: string): string|null =>
+export const deserializeUrl = (url: string|null): string|null =>
     (url != null && url !== 'null') ? toFullUrl(url) : null;
 
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Mesh, PlaneGeometry, ShadowMaterial,} from 'three';
+import {Mesh, PlaneGeometry, ShadowMaterial} from 'three';
 
 /**
  * Creates a mesh that can receive and render shadows.
@@ -26,10 +26,10 @@ export default class Shadow extends Mesh {
     const geometry = new PlaneGeometry(2000, 2000);
     geometry.rotateX(-Math.PI / 2);
 
-    const material = new ShadowMaterial({
+    const material = new ShadowMaterial(({
       color: 0x111111,
       opacity: 0.2,
-    });
+    } as any));
 
     super(geometry, material);
     this.receiveShadow = true;

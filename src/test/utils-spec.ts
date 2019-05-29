@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, BoxBufferGeometry, Mesh, Vector3} from 'three';
-
-import {CAPPED_DEVICE_PIXEL_RATIO, clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
-
-import {timePasses} from './helpers.js';
+import {clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
 import timerSpec from './utilities/timer-spec';
 
 const expect = chai.expect;
@@ -35,7 +31,7 @@ suite('utils', () => {
     test('yields a url on the same origin for relative paths', () => {
       const {origin} = window.location;
 
-      expect(deserializeUrl('foo').indexOf(origin)).to.be.equal(0);
+      expect(deserializeUrl('foo')!.indexOf(origin)).to.be.equal(0);
     });
   });
 

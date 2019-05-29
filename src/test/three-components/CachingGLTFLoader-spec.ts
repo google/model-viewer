@@ -21,7 +21,7 @@ const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
   suite('when loading a glTF', () => {
-    let loader;
+    let loader: CachingGLTFLoader;
 
     setup(() => {
       loader = new CachingGLTFLoader();
@@ -55,7 +55,7 @@ suite('CachingGLTFLoader', () => {
     test('yields a promise that resolves a scene', async () => {
       const scene = await loader.load(ASTRONAUT_GLB_PATH);
       expect(scene).to.be.ok;
-      expect(scene.type).to.be.equal('Scene');
+      expect(scene!.type).to.be.equal('Scene');
     });
   });
 });

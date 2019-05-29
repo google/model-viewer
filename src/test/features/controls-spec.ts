@@ -13,42 +13,47 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT} from '../../features/controls.js';
+import {$controls, $idealCameraDistance, $promptElement, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {SmoothControls} from '../../three-components/SmoothControls.js';
+import {Constructor} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 
-const interactWith = (element) => {
+const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
   dispatchSyntheticEvent(element, 'mousemove', {clientX: 0, clientY: 0});
 };
 
-const expectSphericalsToBeEqual = (sphericalOne, sphericalTwo) => {
-  const precision = 5;
+const expectSphericalsToBeEqual =
+    (sphericalOne: SphericalPosition, sphericalTwo: SphericalPosition) => {
+      const precision = 5;
 
-  expect(sphericalOne.theta.toFixed(precision))
-      .to.be.equal(
-          sphericalTwo.theta.toFixed(precision),
-          'Spherical theta does not match');
+      expect(sphericalOne.theta.toFixed(precision))
+          .to.be.equal(
+              sphericalTwo.theta.toFixed(precision),
+              'Spherical theta does not match');
 
-  expect(sphericalOne.phi.toFixed(precision))
-      .to.be.equal(
-          sphericalTwo.phi.toFixed(precision), 'Spherical phi does not match');
+      expect(sphericalOne.phi.toFixed(precision))
+          .to.be.equal(
+              sphericalTwo.phi.toFixed(precision),
+              'Spherical phi does not match');
 
-  expect(sphericalOne.radius.toFixed(precision))
-      .to.be.equal(
-          sphericalTwo.radius.toFixed(precision),
-          'Spherical radius does not match');
-};
+      expect(sphericalOne.radius.toFixed(precision))
+          .to.be.equal(
+              sphericalTwo.radius.toFixed(precision),
+              'Spherical radius does not match');
+    };
 
 suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
-    let tagName;
-    let ModelViewerElement;
+    let tagName: string;
+    let ModelViewerElement:
+        Constructor<ModelViewerElementBase&ControlsInterface>;
 
     setup(() => {
       tagName = `model-viewer-controls-${nextId++}`;
@@ -64,10 +69,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('camera-orbit', () => {
-      let element;
+      let element: ModelViewerElementBase&ControlsInterface;
+      let controls: SmoothControls;
 
       setup(async () => {
         element = new ModelViewerElement();
+        controls = (element as any)[$controls];
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
 
@@ -80,7 +87,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         // element:
         await timePasses();
 
-        settleControls(element[$controls]);
+        settleControls(controls);
       });
 
       teardown(() => {
@@ -90,8 +97,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults radius to ideal camera distance', () => {
-        expect(element.getCameraOrbit().radius)
-            .to.be.equal(element[$idealCameraDistance]);
+        expect((element as any).getCameraOrbit().radius)
+            .to.be.equal((element as any)[$idealCameraDistance]);
       });
 
       test('can independently adjust azimuth', async () => {
@@ -103,7 +110,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         await timePasses();
 
-        settleControls(element[$controls]);
+        settleControls(controls);
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, theta: nextTheta});
@@ -118,7 +125,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         await timePasses();
 
-        settleControls(element[$controls]);
+        settleControls(controls);
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, phi: nextPhi});
@@ -133,7 +140,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         await timePasses();
 
-        settleControls(element[$controls]);
+        settleControls(controls);
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, radius: nextRadius});
@@ -143,7 +150,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         setup(async () => {
           element.cameraOrbit = `1rad 1rad 1.5m`;
           await timePasses();
-          settleControls(element[$controls]);
+          settleControls(controls);
         });
 
         // NOTE(cdata): Flakey test is flakey
@@ -155,7 +162,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('updates with current orbit after interaction', async () => {
-          const controls = element[$controls];
           controls.adjustOrbit(0, 0.5, 0);
           settleControls(controls);
 
@@ -167,10 +173,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
     });
 
     suite('camera-controls', () => {
-      let element;
+      let element: ModelViewerElementBase&ControlsInterface;
+      let controls: SmoothControls;
 
       setup(async () => {
         element = new ModelViewerElement();
+        controls = (element as any)[$controls]
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
         element.cameraControls = true;
@@ -186,20 +194,19 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('creates SmoothControls if enabled', () => {
-        expect(element[$controls]).to.be.ok;
+        expect(controls).to.be.ok;
       });
 
       test('sets max radius to the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
             element[$scene].model.position);
-        expect(element[$controls].options.maximumRadius)
-            .to.be.equal(cameraDistance);
+        expect(controls.options.maximumRadius).to.be.equal(cameraDistance);
       });
 
       test('disables interaction if disabled after enabled', async () => {
         element.cameraControls = false;
         await timePasses();
-        expect(element[$controls].interactionEnabled).to.be.false;
+        expect(controls.interactionEnabled).to.be.false;
       });
 
       suite('a11y', () => {
@@ -212,16 +219,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'has initial aria-label set to alt before interaction',
             async () => {
-              const {canvas} = element[$scene];
+              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal(element.alt);
             });
 
         test('prompts user to interact when focused', async () => {
-          const {canvas} = element[$scene];
-          const promptElement = element[$promptElement];
-          const controls = element[$controls];
+          const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+          const promptElement: HTMLElement = (element as any)[$promptElement];
 
           settleControls(controls);
 
@@ -248,9 +254,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
               element.interactionPromptThreshold = 500;
 
-              const {canvas} = element[$scene];
-              const promptElement = element[$promptElement];
-              const controls = element[$controls];
+              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+              const promptElement: HTMLElement =
+                  (element as any)[$promptElement];
 
               settleControls(controls);
 
@@ -273,8 +279,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             });
 
         test('does not prompt if user already interacted', async () => {
-          const {canvas} = element[$scene];
-          const promptElement = element[$promptElement];
+          const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+          const promptElement = (element as any)[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
 
           expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
@@ -296,8 +302,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting horizontally',
             async () => {
-              const {canvas} = element[$scene];
-              const controls = element[$controls];
+              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
 
               await rafPasses();
               canvas.focus();
@@ -330,8 +335,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting vertically',
             async () => {
-              const {canvas} = element[$scene];
-              const controls = element[$controls];
+              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
 
               await rafPasses();
               canvas.focus();

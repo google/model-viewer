@@ -20,6 +20,7 @@ import {$tick} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
+import ModelScene from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
 
@@ -37,6 +38,17 @@ export const $arRenderer = Symbol('arRenderer');
  * the texture.
  */
 export default class Renderer extends EventDispatcher {
+  public renderer!: WebGLRenderer;
+  public context!: WebGLRenderingContext|null;
+  public canvas: HTMLCanvasElement;
+  public textureUtils: TextureUtils|null;
+  public width: number = 0;
+  public height: number = 0;
+
+  private[$arRenderer]: ARRenderer;
+  private scenes: Set<ModelScene> = new Set();
+  private lastTick: number;
+
   get canRender() {
     return this.renderer != null && this.context != null;
   }
@@ -83,13 +95,11 @@ export default class Renderer extends EventDispatcher {
         new TextureUtils(this.renderer, {pmremSamples: 128}) :
         null;
 
-    this.scenes = new Set();
-    this.scenesRendered = 0;
     this.setRendererSize(1, 1);
     this.lastTick = performance.now();
   }
 
-  setRendererSize(width, height) {
+  setRendererSize(width: number, height: number) {
     if (this.canRender) {
       this.renderer.setSize(width, height, false);
     }
@@ -98,17 +108,17 @@ export default class Renderer extends EventDispatcher {
     this.height = height;
   }
 
-  registerScene(scene) {
+  registerScene(scene: ModelScene) {
     this.scenes.add(scene);
     if (this.canRender && this.scenes.size > 0) {
-      this.renderer.setAnimationLoop((time) => this.render(time));
+      this.renderer.setAnimationLoop((time: number) => this.render(time));
     }
   }
 
-  unregisterScene(scene) {
+  unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
     if (this.canRender && this.scenes.size === 0) {
-      this.renderer.setAnimationLoop(null);
+      (this.renderer.setAnimationLoop as any)(null);
     }
   }
 
@@ -120,7 +130,7 @@ export default class Renderer extends EventDispatcher {
     return this[$arRenderer].presentedScene;
   }
 
-  async present(scene) {
+  async present(scene: ModelScene): Promise<HTMLCanvasElement> {
     try {
       return await this[$arRenderer].present(scene);
     } catch (error) {
@@ -133,26 +143,23 @@ export default class Renderer extends EventDispatcher {
     }
   }
 
-  stopPresenting() {
+  stopPresenting(): Promise<void> {
     return this[$arRenderer].stopPresenting();
   }
 
-  get isPresenting() {
+  get isPresenting(): boolean {
     return this[$arRenderer] != null && this[$arRenderer].isPresenting;
   }
 
-  render(t) {
+  render(t: number) {
     if (!this.canRender || this.isPresenting) {
       return;
     }
-
-    this.scenesRendered = 0;
 
     const delta = t - this.lastTick;
     const dpr = resolveDpr();
 
     if (dpr !== this.renderer.getPixelRatio()) {
-      console.warn('Updating pixel ratio', dpr);
       this.renderer.setPixelRatio(dpr);
     }
 
@@ -169,12 +176,12 @@ export default class Renderer extends EventDispatcher {
       if (width > this.width || height > this.height) {
         const maxWidth = Math.max(width, this.width);
         const maxHeight = Math.max(height, this.height);
-        this.setRendererSize(maxWidth, maxHeight, false);
+        this.setRendererSize(maxWidth, maxHeight);
       }
 
       const {exposure} = scene;
       const exposureIsNumber =
-          typeof exposure === 'number' && !self.isNaN(exposure);
+          typeof exposure === 'number' && !(self as any).isNaN(exposure);
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
       // Need to set the render target in order to prevent
@@ -199,7 +206,6 @@ export default class Renderer extends EventDispatcher {
           heightDPR);
 
       scene.isDirty = false;
-      this.scenesRendered++;
     }
     this.lastTick = t;
   }
@@ -214,7 +220,7 @@ export default class Renderer extends EventDispatcher {
     }
 
     this.textureUtils = null;
-    this.renderer = null;
+    (this as any).renderer = null;
 
     this.scenes.clear();
   }

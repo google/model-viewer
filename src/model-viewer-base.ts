@@ -20,8 +20,8 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
-import {ProgressTracker} from './utilities/progress-tracker.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {ProgressTracker} from './utilities/progress-tracker.js';
 
 let renderer = new Renderer();
 
@@ -305,7 +305,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$needsRender]();
   }
 
-  [$onUserModelOrbit]() {}
+  [$onUserModelOrbit]() {
+  }
 
   /**
    * Parses the element for an appropriate source URL and
