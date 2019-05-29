@@ -87,7 +87,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         // element:
         await timePasses();
 
-        settleControls((element as any)[$controls]);
+        settleControls(controls);
       });
 
       teardown(() => {
