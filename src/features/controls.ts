@@ -69,9 +69,18 @@ const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 
+export interface ControlsInterface {
+  cameraControls: boolean;
+  cameraOrbit: string;
+  cameraFOV: string;
+  interactionPromptThreshold: number;
+  getCameraOrbit(): SphericalPosition;
+  getCameraFov(): number;
+}
+
 export const ControlsMixin = (ModelViewerElement:
                                   Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
+    Constructor<ModelViewerElementBase&ControlsInterface> => {
       class ControlsModelViewerElement extends ModelViewerElement {
         @property({type: Boolean, attribute: 'camera-controls'})
         cameraControls: boolean = false;

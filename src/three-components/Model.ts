@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {AnimationMixer, Box3, Object3D, SkinnedMesh, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
 
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
+
 
 /**
  * An Object3D that can swap out its underlying
@@ -26,24 +27,28 @@ const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
  * @extends THREE.Object3D
  */
 export default class Model extends Object3D {
+  private loader = new CachingGLTFLoader();
+  private mixer: AnimationMixer = new AnimationMixer(null);
+  private[$cancelPendingSourceChange]: (() => void)|null;
+  private animations: Array<AnimationClip> = [];
+  private animationsByName: Map<string, AnimationClip> = new Map();
+  private currentAnimationAction: AnimationAction|null = null;
+
+  public modelContainer = new Object3D();
+  public animationNames: Array<string> = [];
+  public boundingBox = new Box3();
+  public size = new Vector3();
+  public userData: {url: string|null} = {url: null};
+  public url: string|null = null;
+
   /**
    * Creates a model.
    */
   constructor() {
     super();
+
     this.name = 'Model';
-    this.loader = new CachingGLTFLoader();
-    this.modelContainer = new Object3D();
     this.modelContainer.name = 'ModelContainer';
-    this.boundingBox = new Box3();
-    this.size = new Vector3();
-    this.url = null;
-    this.mixer = new AnimationMixer();
-    this.animations = null;
-    this.animationsByName = null;
-    this.animationNames = [];
-    this.currentAnimationAction = null;
-    this.userData = {url: null};
 
     this.add(this.modelContainer);
   }
@@ -54,49 +59,53 @@ export default class Model extends Object3D {
    *
    * @return {Boolean}
    */
-  hasModel() {
+  hasModel(): boolean {
     return !!this.modelContainer.children.length;
   }
 
-  applyEnvironmentMap(map) {
+  applyEnvironmentMap(map: Texture|null) {
     // Note that unlit models (using MeshBasicMaterial) should not apply
     // an environment map, even though `map` is the currently configured
     // environment map.
-    this.modelContainer.traverse(obj => {
+    this.modelContainer.traverse((obj: Object3D) => {
       // There are some cases where `obj.material` is
       // an array of materials.
-      if (Array.isArray(obj.material)) {
-        for (let material of obj.material) {
-          if (material.isMeshBasicMaterial) {
+      const mesh: Mesh = obj as Mesh;
+
+      if (Array.isArray(mesh.material)) {
+        for (let material of (mesh.material as Array<Material>)) {
+          if ((material as any).isMeshBasicMaterial) {
             continue;
           }
-          material.envMap = map;
+          (material as MeshStandardMaterial).envMap = map;
           material.needsUpdate = true;
         }
-      } else if (obj.material && !obj.material.isMeshBasicMaterial) {
-        obj.material.envMap = map;
-        obj.material.needsUpdate = true;
+      } else if (mesh.material && !(mesh.material as any).isMeshBasicMaterial) {
+        (mesh.material as MeshStandardMaterial).envMap = map;
+        (mesh.material as Material).needsUpdate = true;
       }
     });
     this.dispatchEvent({type: 'envmap-change', value: map});
   }
 
-  setEnvironmentMapIntensity(intensity) {
+  setEnvironmentMapIntensity(intensity: number) {
     const intensityIsNumber =
-        typeof intensity === 'number' && !self.isNaN(intensity);
+        typeof intensity === 'number' && !(self as any).isNaN(intensity);
 
     if (!intensityIsNumber) {
       intensity = 1.0;
     }
 
     this.modelContainer.traverse(object => {
-      if (object && object.isMesh && object.material) {
-        const {material} = object;
-        if (Array.isArray(object.material)) {
-          object.material.forEach(
-              material => material.envMapIntensity = intensity);
+      if (object && (object as Mesh).isMesh && (object as Mesh).material) {
+        const {material} = object as Mesh;
+        if (Array.isArray(material)) {
+          material.forEach(
+              material => (material as MeshStandardMaterial).envMapIntensity =
+                  intensity);
         } else {
-          object.material.envMapIntensity = intensity;
+          ((object as Mesh).material as MeshStandardMaterial).envMapIntensity =
+              intensity;
         }
       }
     });
@@ -108,7 +117,7 @@ export default class Model extends Object3D {
    *
    * @param {THREE.Object3D}
    */
-  setObject(model) {
+  setObject(model: Object3D) {
     this.clear();
     this.modelContainer.add(model);
     this.updateBoundingBox();
@@ -116,10 +125,11 @@ export default class Model extends Object3D {
   }
 
   /**
-   * @param {String} url
+   * @param {String?} url
    * @param {Function?} progressCallback
    */
-  async setSource(url, progressCallback) {
+  async setSource(
+      url: string|null, progressCallback?: (progress: number) => void) {
     if (!url || url === this.url) {
       if (progressCallback) {
         progressCallback(1);
@@ -130,16 +140,16 @@ export default class Model extends Object3D {
     // If we have pending work due to a previous source change in progress,
     // cancel it so that we do not incur a race condition:
     if (this[$cancelPendingSourceChange] != null) {
-      this[$cancelPendingSourceChange]();
+      this[$cancelPendingSourceChange]!();
       this[$cancelPendingSourceChange] = null;
     }
 
     this.url = url;
 
-    let scene = null;
+    let scene: Scene|null = null;
 
     try {
-      scene = await new Promise(async (resolve, reject) => {
+      scene = await new Promise<Scene|null>(async (resolve, reject) => {
         this[$cancelPendingSourceChange] = () => reject();
         try {
           const result = await this.loader.load(url, progressCallback);
@@ -158,8 +168,8 @@ export default class Model extends Object3D {
 
     this.clear();
 
-    while (scene && scene.children.length) {
-      this.modelContainer.add(scene.children.shift());
+    while (scene != null && scene.children.length) {
+      this.modelContainer.add(scene.children.shift()!);
     }
 
     this.modelContainer.traverse(obj => {
@@ -168,15 +178,13 @@ export default class Model extends Object3D {
       }
     });
 
-    const {animations} = scene.userData;
+    const animations = scene ? scene.userData.animations : [];
     const animationsByName = new Map();
     const animationNames = [];
 
-    if (animations != null) {
-      for (const animation of animations) {
-        animationsByName.set(animation.name, animation);
-        animationNames.push(animation.name);
-      }
+    for (const animation of animations) {
+      animationsByName.set(animation.name, animation);
+      animationNames.push(animation.name);
     }
 
     this.animations = animations;
@@ -190,13 +198,13 @@ export default class Model extends Object3D {
     this.dispatchEvent({type: 'model-load', url});
   }
 
-  set animationTime(value = 0) {
+  set animationTime(value: number) {
     if (this.currentAnimationAction != null) {
       this.currentAnimationAction.time = value;
     }
   }
 
-  get animationTime() {
+  get animationTime(): number {
     if (this.currentAnimationAction != null) {
       return this.currentAnimationAction.time;
     }
@@ -204,7 +212,7 @@ export default class Model extends Object3D {
     return 0;
   }
 
-  get hasActiveAnimation() {
+  get hasActiveAnimation(): boolean {
     return this.currentAnimationAction != null;
   }
 
@@ -214,7 +222,7 @@ export default class Model extends Object3D {
    * provided, or if no animation is found by the given name, always falls back
    * to playing the first animation.
    */
-  playAnimation(name = null, crossfadeTime = 0) {
+  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
     const {animations} = this;
     if (animations == null || animations.length === 0) {
       console.warn(
@@ -242,7 +250,7 @@ export default class Model extends Object3D {
       if (lastAnimationAction != null &&
           this.currentAnimationAction !== lastAnimationAction) {
         this.currentAnimationAction.crossFadeFrom(
-            lastAnimationAction, crossfadeTime);
+            lastAnimationAction, crossfadeTime, false);
       }
     } catch (error) {
       console.error(error);
@@ -259,7 +267,7 @@ export default class Model extends Object3D {
     this.mixer.stopAllAction();
   }
 
-  updateAnimation(step) {
+  updateAnimation(step: number) {
     this.mixer.update(step);
   }
 

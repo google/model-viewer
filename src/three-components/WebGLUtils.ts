@@ -13,23 +13,26 @@
  * limitations under the License.
  */
 
-export const assertContext = (context) => {
-  if (context == null) {
-    throw new Error('WebGL is not available!');
-  }
-  return context;
-};
+export const assertContext =
+    (context: WebGLRenderingContext|null): WebGLRenderingContext => {
+      if (context == null) {
+        throw new Error('WebGL is not available!');
+      }
+      return context;
+    };
 
-export const getContext = (canvas, options) => assertContext(
-    canvas.getContext('webgl', options) ||
-    canvas.getContext('experimental-webgl', options));
+export const getContext =
+    (canvas: HTMLCanvasElement, options: WebGLContextAttributes):
+        WebGLRenderingContext => assertContext(
+            canvas.getContext('webgl', options) ||
+            canvas.getContext('experimental-webgl', options));
 
 /**
  * Patch the values reported by WebGLRenderingContext's
  * extension store to fix compatibility issues.
  */
-export const applyExtensionCompatibility = gl => {
-  const testShaders = {
+export const applyExtensionCompatibility = (gl: WebGLRenderingContext) => {
+  const testShaders: {[index: string]: string} = {
     // In some Firefox builds (mobile Android on Pixel at least),
     // EXT_shader_texture_lod is reported as being supported, but
     // fails in practice.
@@ -43,19 +46,19 @@ export const applyExtensionCompatibility = gl => {
       }`,
   };
 
-  function confirmExtension(gl, name) {
+  function confirmExtension(gl: WebGLRenderingContext, name: string) {
     const shader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(shader, testShaders[name]);
-    gl.compileShader(shader);
+    gl.shaderSource(shader!, testShaders[name]);
+    gl.compileShader(shader!);
 
-    const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    const status = gl.getShaderParameter(shader!, gl.COMPILE_STATUS);
 
     gl.deleteShader(shader);
     return status;
   }
 
   const getExtension = gl.getExtension;
-  gl.getExtension = name => {
+  gl.getExtension = (name: string) => {
     let extension;
 
     if (testShaders[name]) {
