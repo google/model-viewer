@@ -45,6 +45,7 @@ export const INTERACTION_PROMPT =
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
+export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -106,6 +107,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$controls]: SmoothControls;
 
+        protected[$idealCameraDistance] = -1.0;
         protected[$lastSpherical]: Spherical = new Spherical();
 
         protected[$changeHandler]: (event: Event) => void = (event: Event) =>
@@ -199,9 +201,17 @@ export const ControlsMixin = (ModelViewerElement:
             sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
           }
 
-          const [theta, phi, radius] = sphericalValues;
+          let [theta, phi, radius] = sphericalValues;
 
-          this[$controls].setOrbit(theta, phi, radius);
+          if (typeof radius === 'string') {
+            switch (radius) {
+              default:
+              case 'auto':
+                radius = this[$idealCameraDistance];
+                break;
+            }
+          }
+          this[$controls].setOrbit(theta, phi, radius as number);
         }
 
         [$tick](time: number, delta: number) {
@@ -252,10 +262,37 @@ export const ControlsMixin = (ModelViewerElement:
          */
         [$updateCamera]() {
           const scene = (this as any)[$scene];
+          const controls = this[$controls];
+          const framedHeight = scene.framedHeight;
 
-          this[$controls].updateFraming(
-              scene.framedHeight, scene.modelDepth, scene.aspect);
-          this[$controls].setTarget(scene.target);
+          // Make zoom sensitivity scale with model size:
+          const zoomSensitivity = framedHeight / 10;
+          const framedDistance = (framedHeight / 2) /
+              Math.tan((controls.getCameraFov() / 2) * Math.PI / 180);
+          const near = framedHeight / 10.0;
+          const far = framedHeight * 10.0;
+
+          // When we update the idealCameraDistance due to reframing, we want to
+          // maintain the user's zoom level (how they have changed the camera
+          // radius), which we represent here as a ratio.
+          const zoom = this[$idealCameraDistance] > 0 ?
+              controls.getCameraSpherical().radius /
+                  this[$idealCameraDistance] :
+              1;
+          this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
+
+          controls.updateIntrinsics(near, far, scene.aspect, zoomSensitivity);
+
+          // Zooming out beyond the 'frame' doesn't serve much purpose
+          // and will only end up showing the skysphere if zoomed out enough
+          const minimumRadius = near + framedHeight / 2.0;
+          const maximumRadius = this[$idealCameraDistance];
+
+          controls.applyOptions({minimumRadius, maximumRadius});
+
+          controls.setRadius(zoom * this[$idealCameraDistance]);
+          controls.setTarget(scene.target);
+          controls.jumpToDestination();
         }
 
         [$updateAria]() {

@@ -70,7 +70,6 @@ const $destFov = Symbol('destFov');
 const $fovDamper = Symbol('fovDamper');
 const $target = Symbol('target');
 
-const $idealCameraDistance = Symbol('idealCameraDistance');
 const $options = Symbol('options');
 const $upQuaternion = Symbol('upQuaternion');
 const $upQuaternionInverse = Symbol('upQuaternionInverse');
@@ -188,8 +187,6 @@ class Damper {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher {
-  protected[$idealCameraDistance]: number = -1;
-
   private[$interactionEnabled]: boolean = false;
 
   private[$options]: SmoothControlsOptions;
@@ -336,37 +333,16 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   *
+   * Sets the non-interpolated camera parameters
    */
-  updateFraming(framedHeight: number, modelDepth: number, aspect: number) {
-    const camera = this.camera;
-    // Make zoom sensitivity scale with model size:
-    this[$zoomMeters] = framedHeight / 10;
-    const near =
-        (framedHeight / 2) / Math.tan((camera.fov / 2) * Math.PI / 180);
-    camera.near = framedHeight / 10.0;
-    camera.far = framedHeight * 10.0;
-
-    // When we update the idealCameraDistance due to reframing, we want to
-    // maintain the user's zoom level (how they have changed the camera
-    // radius), which we represent here as a ratio.
-    const zoom = this[$idealCameraDistance] > 0 ?
-        this[$spherical].radius / this[$idealCameraDistance] :
-        1;
-    this[$idealCameraDistance] = near + modelDepth / 2;
-
-    camera.aspect = aspect;
-    camera.updateProjectionMatrix();
-
-    // Zooming out beyond the 'frame' doesn't serve much purpose
-    // and will only end up showing the skysphere if zoomed out enough
-    const minimumRadius = camera.near + framedHeight / 2.0;
-    const maximumRadius = this[$idealCameraDistance];
-
-    this.applyOptions({minimumRadius, maximumRadius});
-
-    this.setRadius(zoom * this[$idealCameraDistance]);
-    this.jumpToDestination();
+  updateIntrinsics(
+      nearPlane: number, farPlane: number, aspect: number,
+      zoomSensitivity: number) {
+    this[$zoomMeters] = zoomSensitivity;
+    this.camera.near = nearPlane;
+    this.camera.far = farPlane;
+    this.camera.aspect = aspect;
+    this.camera.updateProjectionMatrix();
   }
 
   /**
@@ -380,7 +356,7 @@ export class SmoothControls extends EventDispatcher {
   setOrbit(
       destTheta: number = this[$destSpherical].theta,
       destPhi: number = this[$destSpherical].phi,
-      destRadius: string|number = this[$destSpherical].radius): boolean {
+      destRadius: number = this[$destSpherical].radius): boolean {
     const {
       minimumAzimuthalAngle,
       maximumAzimuthalAngle,
@@ -391,15 +367,6 @@ export class SmoothControls extends EventDispatcher {
     } = this[$options];
 
     const {theta, phi, radius} = this[$destSpherical];
-
-    if (typeof destRadius === 'string') {
-      switch (destRadius) {
-        default:
-        case 'auto':
-          destRadius = this[$idealCameraDistance];
-          break;
-      }
-    }
 
     const nextTheta =
         clamp(destTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $idealCameraDistance, $promptElement, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -95,6 +95,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         if (element.parentNode != null) {
           element.parentNode.removeChild(element);
         }
+      });
+
+      test('defaults radius to ideal camera distance', () => {
+        expect((element as any).getCameraOrbit().radius)
+            .to.be.equal((element as any)[$idealCameraDistance]);
       });
 
       test('can independently adjust azimuth', async () => {
