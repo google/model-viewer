@@ -91,7 +91,7 @@ export const ControlsMixin = (ModelViewerElement:
         cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
         @property(
-            {type: String, attribute: 'camera-FOV', hasChanged: () => true})
+            {type: String, attribute: 'camera-fov', hasChanged: () => true})
         cameraFOV: string = DEFAULT_CAMERA_FOV;
 
         @property({type: Number, attribute: 'interaction-prompt-threshold'})
@@ -292,7 +292,7 @@ export const ControlsMixin = (ModelViewerElement:
 
           controls.setRadius(zoom * this[$idealCameraDistance]);
           controls.setTarget(scene.target);
-          controls.jumpToDestination();
+          controls.jumpToGoal();
         }
 
         [$updateAria]() {
@@ -359,7 +359,7 @@ export const ControlsMixin = (ModelViewerElement:
           super[$onModelLoad](event);
           this[$updateCamera]();
           this[$updateCameraOrbit]();
-          this[$controls].jumpToDestination();
+          this[$controls].jumpToGoal();
         }
 
         [$onFocus]() {
