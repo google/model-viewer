@@ -14,7 +14,7 @@
  */
 
 import {Camera, PerspectiveCamera, Vector3} from 'three';
-import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {Damper, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
@@ -59,6 +59,26 @@ const cameraIsLookingAt = (camera: Camera, position: Vector3) => {
  */
 export const settleControls = (controls: SmoothControls) =>
     controls.update(performance.now(), FIFTY_FRAME_DELTA);
+
+suite('Damper', () => {
+  let damper: Damper;
+  const initial = 5;
+  const goal = 2;
+
+  setup(() => {
+    damper = new Damper();
+  });
+
+  test('converges to goal with large time step without overshoot', () => {
+    const final = damper.update(initial, goal, FIFTY_FRAME_DELTA, initial);
+    expect(final).to.be.eql(goal);
+  });
+
+  test('stays at initial value for negative time step', () => {
+    const final = damper.update(initial, goal, -1 * FIFTY_FRAME_DELTA, initial);
+    expect(final).to.be.eql(initial);
+  });
+});
 
 suite('SmoothControls', () => {
   let controls: SmoothControls;
