@@ -73,7 +73,7 @@ const $lastSpherical = Symbol('lastSpherical');
 export interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
-  cameraFOV: string;
+  fieldOfView: string;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getCameraFov(): number;
@@ -92,7 +92,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         @property(
             {type: String, attribute: 'camera-fov', hasChanged: () => true})
-        cameraFOV: string = DEFAULT_CAMERA_FOV;
+        fieldOfView: string = DEFAULT_CAMERA_FOV;
 
         @property({type: Number, attribute: 'interaction-prompt-threshold'})
         interactionPromptThreshold: number =
@@ -181,17 +181,17 @@ export const ControlsMixin = (ModelViewerElement:
           if (changedProperties.has('cameraOrbit')) {
             this[$updateCameraOrbit]();
           }
-          if (changedProperties.has('cameraFOV')) {
+          if (changedProperties.has('fieldOfView')) {
             this[$updateCameraFov]();
           }
         }
 
         [$updateCameraFov]() {
-          let fov = deserializeAngleToDeg(this.cameraFOV);
+          let fov = deserializeAngleToDeg(this.fieldOfView);
           if (fov == null) {
             fov = deserializeAngleToDeg(DEFAULT_CAMERA_FOV);
           }
-          this[$controls].setFov(fov as number);
+          this[$controls].setFov(fov!);
         }
 
         [$updateCameraOrbit]() {

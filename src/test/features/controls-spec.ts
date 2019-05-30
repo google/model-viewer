@@ -155,7 +155,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         const fov = element.getCameraFov();
         const nextFov = fov - 1.0;
 
-        element.cameraFOV = `${nextFov}deg`;
+        element.fieldOfView = `${nextFov}deg`;
 
         await timePasses();
 

@@ -79,7 +79,7 @@ const $interactionEnabled = Symbol('interactionEnabled');
 const $zoomMeters = Symbol('zoomMeters');
 const $userAdjustOrbit = Symbol('userAdjustOrbit');
 const $isUserChange = Symbol('isUserChange');
-const $isMoving = Symbol('isMoving');
+const $isStationary = Symbol('isMoving');
 const $moveCamera = Symbol('moveCamera');
 
 // Pointer state
@@ -329,10 +329,10 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit();
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
-    if (this[$isMoving]()) {
-      this[$spherical].copy(this[$goalSpherical]);
-      this[$moveCamera]();
-    }
+    if (this[$isStationary]())
+      return;
+    this[$spherical].copy(this[$goalSpherical]);
+    this[$moveCamera]();
   }
 
   /**
@@ -454,36 +454,36 @@ export class SmoothControls extends EventDispatcher {
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
-    if (this[$isMoving]()) {
-      const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
+    if (this[$isStationary]())
+      return;
+    const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
 
-      this[$spherical].theta = this[$thetaDamper].update(
-          this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
+    this[$spherical].theta = this[$thetaDamper].update(
+        this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
 
-      this[$spherical].phi = this[$phiDamper].update(
-          this[$spherical].phi,
-          this[$goalSpherical].phi,
-          delta,
-          maximumPolarAngle!);
+    this[$spherical].phi = this[$phiDamper].update(
+        this[$spherical].phi,
+        this[$goalSpherical].phi,
+        delta,
+        maximumPolarAngle!);
 
-      this[$spherical].radius = this[$radiusDamper].update(
-          this[$spherical].radius,
-          this[$goalSpherical].radius,
-          delta,
-          maximumRadius!);
+    this[$spherical].radius = this[$radiusDamper].update(
+        this[$spherical].radius,
+        this[$goalSpherical].radius,
+        delta,
+        maximumRadius!);
 
-      this[$fov] = this[$fovDamper].update(
-          this[$fov], this[$goalFov], delta, maximumFov!);
+    this[$fov] =
+        this[$fovDamper].update(this[$fov], this[$goalFov], delta, maximumFov!);
 
-      this[$moveCamera]();
-    }
+    this[$moveCamera]();
   }
 
-  private[$isMoving](): boolean {
-    return this[$goalSpherical].theta !== this[$spherical].theta ||
-        this[$goalSpherical].phi !== this[$spherical].phi ||
-        this[$goalSpherical].radius !== this[$spherical].radius ||
-        this[$goalFov] !== this[$fov];
+  private[$isStationary](): boolean {
+    return this[$goalSpherical].theta === this[$spherical].theta &&
+        this[$goalSpherical].phi === this[$spherical].phi &&
+        this[$goalSpherical].radius === this[$spherical].radius &&
+        this[$goalFov] === this[$fov];
   }
 
   private[$moveCamera]() {
