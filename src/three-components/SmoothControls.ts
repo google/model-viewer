@@ -329,7 +329,10 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit();
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
-    this[$spherical].copy(this[$destSpherical]);
+    if (this[$isMoving]()) {
+      this[$spherical].copy(this[$destSpherical]);
+      this[$moveCamera]();
+    }
   }
 
   /**
