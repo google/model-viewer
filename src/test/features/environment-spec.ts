@@ -329,7 +329,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       expect(newLightIntensity).to.be.lessThan(originalLightIntensity);
     });
 
-    suite('with experimental-pmrem', () => {
+    suite('with hdr environment', () => {
       test('further lowers scene light intensity', async () => {
         element.stageLightIntensity = 0.5;
         await timePasses();
