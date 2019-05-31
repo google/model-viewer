@@ -138,46 +138,23 @@ suite('TextureUtils', () => {
           })).to.be.ok;
 
           expect(textureMatchesMeta(textures.environmentMap, {
-            mapping: 'Cube',
-            url: HDR_EQUI_URL
-          })).to.be.ok;
-        });
-
-    test(
-        'returns an environmentMap and skybox texture from url with PMREM',
-        async () => {
-          textures = await textureUtils.generateEnvironmentMapAndSkybox(
-              EQUI_URL, null, {
-                pmrem: true,
-              });
-
-          expect((textures.skybox!.texture as any).isTexture).to.be.ok;
-          expect((textures.environmentMap as any).isTexture).to.be.ok;
-
-          expect(textureMatchesMeta(textures.skybox!.texture, {
-            mapping: 'Cube',
-            url: EQUI_URL
-          })).to.be.ok;
-
-          expect(textureMatchesMeta(textures.environmentMap, {
             mapping: 'PMREM',
-            url: EQUI_URL
+            url: HDR_EQUI_URL
           })).to.be.ok;
         });
 
     test(
-        'returns an environmentMap and skybox texture from an HDR url',
+        'returns an environmentMap and skybox texture from two urls',
         async () => {
           textures = await textureUtils.generateEnvironmentMapAndSkybox(
-              HDR_EQUI_URL, null, {
-                pmrem: true,
-              });
+              EQUI_URL, HDR_EQUI_URL);
+
           expect((textures.skybox!.texture as any).isTexture).to.be.ok;
           expect((textures.environmentMap as any).isTexture).to.be.ok;
 
           expect(textureMatchesMeta(textures.skybox!.texture, {
             mapping: 'Cube',
-            url: HDR_EQUI_URL
+            url: EQUI_URL
           })).to.be.ok;
 
           expect(textureMatchesMeta(textures.environmentMap, {
@@ -202,16 +179,6 @@ suite('TextureUtils', () => {
           await textureUtils.generateEnvironmentMapAndSkybox();
 
       expect(textureMatchesMeta(texture, {mapping: 'Cube', url: null}))
-          .to.be.ok;
-    });
-
-    test('creates a cubemap render target with PMREM', async () => {
-      const {environmentMap: texture} =
-          await textureUtils.generateEnvironmentMapAndSkybox(null, null, {
-            pmrem: true,
-          });
-
-      expect(textureMatchesMeta(texture, {mapping: 'PMREM', url: null}))
           .to.be.ok;
     });
   });

@@ -24,7 +24,6 @@ import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
 
 export interface EnvironmentGenerationConfig {
-  pmrem?: boolean;
   progressTracker?: ProgressTracker;
 }
 
@@ -233,7 +232,7 @@ export default class TextureUtils extends EventDispatcher {
         }
       }
 
-      if (options.pmrem) {
+      if (environmentMap.encoding === RGBEEncoding) {
         // Apply the PMREM pass to the environment, which produces a distinct
         // texture from the source:
         const nonPmremEnvironmentMap = environmentMap;

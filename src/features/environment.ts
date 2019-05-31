@@ -24,7 +24,6 @@ export interface EnvironmentInterface {
   environmentIntensity: number;
   backgroundImage: string|null;
   backgroundColor: string;
-  experimentalPmrem: boolean;
   shadowIntensity: number;
   stageLightIntensity: number;
   exposure: number;
@@ -44,6 +43,7 @@ const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
+const $experimentalPmrem = Symbol('experimentalPmrem');
 
 export const EnvironmentMixin = (ModelViewerElement:
                                      Constructor<ModelViewerElementBase>):
@@ -69,9 +69,6 @@ export const EnvironmentMixin = (ModelViewerElement:
         @property({type: String, attribute: 'background-color'})
         backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
 
-        @property({type: Boolean, attribute: 'experimental-pmrem'})
-        experimentalPmrem: boolean = false;
-
         @property({type: Number, attribute: 'shadow-intensity'})
         shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
 
@@ -84,6 +81,7 @@ export const EnvironmentMixin = (ModelViewerElement:
         exposure: number = DEFAULT_EXPOSURE;
 
         private[$currentEnvironmentMap]: Texture|null = null;
+        private[$experimentalPmrem] = false;
 
         private[$cancelEnvironmentUpdate]:
             ((...args: any[]) => any)|null = null;
@@ -130,8 +128,7 @@ export const EnvironmentMixin = (ModelViewerElement:
         }
 
         async[$updateEnvironment]() {
-          const {backgroundImage, environmentImage, experimentalPmrem: pmrem} =
-              this;
+          const {backgroundImage, environmentImage} = this;
           let {backgroundColor} = this;
 
           if (this[$cancelEnvironmentUpdate] != null) {
@@ -151,7 +148,7 @@ export const EnvironmentMixin = (ModelViewerElement:
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
                   backgroundImage,
                   environmentImage,
-                  {pmrem, progressTracker: this[$progressTracker]});
+                  {progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
               resolve(await texturesLoad);
             });
@@ -202,6 +199,9 @@ export const EnvironmentMixin = (ModelViewerElement:
          */
         private[$applyEnvironmentMap](environmentMap: Texture|null) {
           this[$currentEnvironmentMap] = environmentMap;
+          this[$experimentalPmrem] =
+              (!!environmentMap &&
+               (environmentMap as any).userData.mapping === 'PMREM');
           this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
           this.dispatchEvent(new CustomEvent('environment-change'));
 
@@ -221,10 +221,10 @@ export const EnvironmentMixin = (ModelViewerElement:
 
         private[$updateLighting]() {
           const scene = this[$scene];
-          const illuminationRole = this.experimentalPmrem ?
+          const illuminationRole = this[$experimentalPmrem] ?
               IlluminationRole.Secondary :
               IlluminationRole.Primary;
-          const environmentIntensity = this.experimentalPmrem ?
+          const environmentIntensity = this[$experimentalPmrem] ?
               this.environmentIntensity * 0.65 :
               this.environmentIntensity;
 
