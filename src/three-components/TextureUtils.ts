@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, HalfFloatType, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
@@ -232,7 +232,10 @@ export default class TextureUtils extends EventDispatcher {
         }
       }
 
-      if (environmentMap.encoding === RGBEEncoding) {
+      // Apply PMREM to HDR textures, which if loaded from file have
+      // RGBEEncoding, and if generated are HalfFloatType
+      if (environmentMap.encoding === RGBEEncoding ||
+          environmentMap.type === HalfFloatType) {
         // Apply the PMREM pass to the environment, which produces a distinct
         // texture from the source:
         const nonPmremEnvironmentMap = environmentMap;
