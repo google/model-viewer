@@ -108,7 +108,7 @@ template.innerHTML = `
       top: 0;
       left: 0;
       width: 100%;
-      height: 5px;
+      height: var(--progress-bar-height, 5px);
       transition: transform 0.09s;
       transform-origin: top left;
       transform: scaleX(0);
