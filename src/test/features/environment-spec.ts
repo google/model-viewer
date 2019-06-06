@@ -322,23 +322,23 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
 
     test('changes model scene light intensity', async () => {
-      const originalLightIntensity = scene.light.intensity;
+      const originalLightIntensity = scene.shadowLight.intensity;
       element.stageLightIntensity = 0.5;
       await timePasses();
-      const newLightIntensity = scene.light.intensity;
+      const newLightIntensity = scene.shadowLight.intensity;
       expect(newLightIntensity).to.be.lessThan(originalLightIntensity);
     });
 
-    suite('with hdr environment', () => {
-      test('further lowers scene light intensity', async () => {
+    suite('with ldr environment', () => {
+      test('raises scene light intensity', async () => {
         element.stageLightIntensity = 0.5;
         await timePasses();
-        const lightIntensity = scene.light.intensity;
+        const lightIntensity = scene.shadowLight.intensity;
         const environmentChanged = waitForEvent(element, 'environment-change');
-        element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
+        element.setAttribute('environment-image', BG_IMAGE_URL);
         await environmentChanged;
-        const newLightIntensity = scene.light.intensity;
-        expect(newLightIntensity).to.be.lessThan(lightIntensity);
+        const newLightIntensity = scene.shadowLight.intensity;
+        expect(newLightIntensity).to.be.greaterThan(lightIntensity);
       });
     });
   });
@@ -365,10 +365,11 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   suite('environment-image', () => {
     setup(async () => {
-      let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
+      let onLoad =
+          waitForLoadAndEnvMap(scene, element, {url: HDR_BG_IMAGE_URL});
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('background-color', '#ff0077');
-      element.setAttribute('environment-image', BG_IMAGE_URL);
+      element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
       document.body.appendChild(element);
       await onLoad;
     });
@@ -396,10 +397,11 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   suite('with background-color and background-image properties', () => {
     setup(async () => {
-      let onLoad = waitForLoadAndEnvMap(scene, element, {url: BG_IMAGE_URL});
+      let onLoad =
+          waitForLoadAndEnvMap(scene, element, {url: HDR_BG_IMAGE_URL});
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('background-color', '#ff0077');
-      element.setAttribute('background-image', BG_IMAGE_URL);
+      element.setAttribute('background-image', HDR_BG_IMAGE_URL);
       document.body.appendChild(element);
       await onLoad;
     });
@@ -436,7 +438,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         });
 
         test('uses background-image as environment map', () => {
-          expect(modelUsingEnvMap(scene, {url: BG_IMAGE_URL})).to.be.ok;
+          expect(modelUsingEnvMap(scene, {url: HDR_BG_IMAGE_URL})).to.be.ok;
         });
       });
 

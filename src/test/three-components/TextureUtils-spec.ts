@@ -174,11 +174,11 @@ suite('TextureUtils', () => {
   });
 
   suite('dynamically generating environment maps', () => {
-    test('creates a cubemap render target', async () => {
+    test('creates a cubemap render target with PMREM', async () => {
       const {environmentMap: texture} =
           await textureUtils.generateEnvironmentMapAndSkybox();
 
-      expect(textureMatchesMeta(texture, {mapping: 'Cube', url: null}))
+      expect(textureMatchesMeta(texture, {mapping: 'PMREM', url: null}))
           .to.be.ok;
     });
   });
