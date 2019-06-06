@@ -298,20 +298,6 @@
       }
     },
     {
-      "slug": "khronos-TextureCoordinateTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
       "slug": "khronos-TextureSettingsTest",
       "goldens": [{
         "name": "<model-viewer> (master)",
