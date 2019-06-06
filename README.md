@@ -1,5 +1,5 @@
-> ## 🚨 Status: Experimental
-> `<model-viewer>` is currently in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.
+> ## 🛠 Status: In Development
+> `<model-viewer>` is currently in development. It's on the fast track to a 1.0 release, so we encourage you to use it and give us your feedback, but there are things that haven't been finalized yet and you can expect some changes.
 
 
 # `<model-viewer>`
