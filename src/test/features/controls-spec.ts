@@ -148,11 +148,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults FOV correctly', async () => {
-        expect(element.getCameraFov()).to.be.equal(DEFAULT_FOV);
+        expect(element.getFieldOfView()).to.be.equal(DEFAULT_FOV);
       });
 
       test('can independently adjust FOV', async () => {
-        const fov = element.getCameraFov();
+        const fov = element.getFieldOfView();
         const nextFov = fov - 1.0;
 
         element.fieldOfView = `${nextFov}deg`;
@@ -161,7 +161,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        expect(element.getCameraFov()).to.be.equal(nextFov);
+        expect(element.getFieldOfView()).to.be.equal(nextFov);
       });
 
       suite('getCameraOrbit', () => {

@@ -160,8 +160,9 @@ export class Damper {
       this[$velocity] = 0;
       return xGoal;
     }
-    if (timeStepMilliseconds < 0)
+    if (timeStepMilliseconds < 0) {
       return x;
+    }
     // Critically damped
     const acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
         2 * NATURAL_FREQUENCY * this[$velocity];
@@ -172,8 +173,9 @@ export class Damper {
       // of asymptotically approaching their goal.
       this[$velocity] = 0;
       return xGoal;
-    } else
+    } else {
       return x + this[$velocity] * timeStepMilliseconds;
+    }
   }
 }
 
@@ -322,7 +324,7 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Returns the camera's current vertical field of view in degrees.
    */
-  getCameraFov(): number {
+  getFieldOfView(): number {
     return this.camera.fov;
   }
 
@@ -338,8 +340,9 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit();
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
-    if (this[$isStationary]())
+    if (this[$isStationary]()) {
       return;
+    }
     this[$spherical].copy(this[$goalSpherical]);
     this[$moveCamera]();
   }
@@ -463,8 +466,9 @@ export class SmoothControls extends EventDispatcher {
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
-    if (this[$isStationary]())
+    if (this[$isStationary]()) {
       return;
+    }
     const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
 
     this[$spherical].theta = this[$thetaDamper].update(
