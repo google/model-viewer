@@ -328,19 +328,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       const newLightIntensity = scene.shadowLight.intensity;
       expect(newLightIntensity).to.be.lessThan(originalLightIntensity);
     });
-
-    suite('with ldr environment', () => {
-      test('raises scene light intensity', async () => {
-        element.stageLightIntensity = 0.5;
-        await timePasses();
-        const lightIntensity = scene.shadowLight.intensity;
-        const environmentChanged = waitForEvent(element, 'environment-change');
-        element.setAttribute('environment-image', BG_IMAGE_URL);
-        await environmentChanged;
-        const newLightIntensity = scene.shadowLight.intensity;
-        expect(newLightIntensity).to.be.greaterThan(lightIntensity);
-      });
-    });
   });
 
   suite('shadow-intensity', () => {

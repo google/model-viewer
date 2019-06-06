@@ -120,7 +120,7 @@ suite('TextureUtils', () => {
           .to.be.ok;
 
       expect(textureMatchesMeta(
-                 textures.environmentMap, {mapping: 'Cube', url: EQUI_URL}))
+                 textures.environmentMap, {mapping: 'PMREM', url: EQUI_URL}))
           .to.be.ok;
     });
 

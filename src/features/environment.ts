@@ -43,7 +43,6 @@ const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
-const $experimentalPmrem = Symbol('experimentalPmrem');
 
 export const EnvironmentMixin = (ModelViewerElement:
                                      Constructor<ModelViewerElementBase>):
@@ -81,7 +80,6 @@ export const EnvironmentMixin = (ModelViewerElement:
         exposure: number = DEFAULT_EXPOSURE;
 
         private[$currentEnvironmentMap]: Texture|null = null;
-        private[$experimentalPmrem] = false;
 
         private[$cancelEnvironmentUpdate]:
             ((...args: any[]) => any)|null = null;
@@ -199,9 +197,6 @@ export const EnvironmentMixin = (ModelViewerElement:
          */
         private[$applyEnvironmentMap](environmentMap: Texture|null) {
           this[$currentEnvironmentMap] = environmentMap;
-          this[$experimentalPmrem] =
-              (!!environmentMap &&
-               (environmentMap as any).userData.mapping === 'PMREM');
           this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
           this.dispatchEvent(new CustomEvent('environment-change'));
 
@@ -221,16 +216,11 @@ export const EnvironmentMixin = (ModelViewerElement:
 
         private[$updateLighting]() {
           const scene = this[$scene];
-          const illuminationRole = this[$experimentalPmrem] ?
-              IlluminationRole.Secondary :
-              IlluminationRole.Primary;
-          const environmentIntensity = this[$experimentalPmrem] ?
-              this.environmentIntensity * 0.65 :
-              this.environmentIntensity;
-
+          const illuminationRole = IlluminationRole.Secondary;
           scene.configureStageLighting(
               this.stageLightIntensity, illuminationRole);
-          scene.model.setEnvironmentMapIntensity(environmentIntensity);
+          scene.model.setEnvironmentMapIntensity(
+              this.environmentIntensity * 0.65);
         }
 
         private[$deallocateTextures]() {
