@@ -22,7 +22,7 @@ cache:
   - examples/assets/glTF-Sample-Models
   - node_modules
 after_success:
-- npm run check-fidelity
+- ./scripts/run-fidelity-check.sh
 - ./scripts/compare-fidelity-to-last-recorded.sh
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
