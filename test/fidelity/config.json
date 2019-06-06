@@ -32,20 +32,6 @@
       }
     },
     {
-      "slug": "khronos-AlphaBlendModeTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 2048,
-        "height": 1536
-      }
-    },
-    {
       "slug": "khronos-AntiqueCamera",
       "goldens": [{
         "name": "<model-viewer> (master)",
