@@ -16,5 +16,6 @@
 #
 
 if [ "${TEST_TYPE}" = "fidelity" ]; then
+  npm run build
   npm run check-fidelity
 fi
