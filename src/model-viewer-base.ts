@@ -320,7 +320,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
-    this[$needsRender]();
   }
 
   /**
