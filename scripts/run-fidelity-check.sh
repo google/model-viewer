@@ -15,10 +15,6 @@
 # limitations under the License.
 #
 
-set +e
-set -x
-
-npm run check-fidelity
-
-set -e
-set +x
+if [ "${TEST_TYPE}" = "fidelity" ]; then
+  npm run check-fidelity
+fi

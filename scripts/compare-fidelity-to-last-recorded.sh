@@ -15,19 +15,21 @@
 # limitations under the License.
 ##
 
-set -x
+if [ "${TEST_TYPE}" = "fidelity" ]; then
+  set -x
 
-git checkout origin/gh-pages -- ./fidelity
-LAST_RESULT="`tail -n 1 ./fidelity/manifest`"
+  git checkout origin/gh-pages -- ./fidelity
+  LAST_RESULT="`tail -n 1 ./fidelity/manifest`"
 
-set -e
+  set -e
 
-if [ -z "$LAST_RESULT" ]; then
-  echo "No previous fidelity results available for comparison!";
-  exit 0;
+  if [ -z "$LAST_RESULT" ]; then
+    echo "No previous fidelity results available for comparison!";
+    exit 0;
+  fi
+
+  node ./scripts/compare-fidelity-results.js "./test/fidelity/results" "./fidelity/$LAST_RESULT"
+
+  set +e
+  set +x
 fi
-
-node ./scripts/compare-fidelity-results.js "./test/fidelity/results" "./fidelity/$LAST_RESULT"
-
-set +e
-set +x
