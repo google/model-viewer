@@ -171,7 +171,8 @@ suite('ModelViewerElementBase', () => {
 
       suite('toDataURL', () => {
         test('produces a URL-compatible string', () => {
-          expect(/^data\:image\//.test(element.toDataURL())).to.be.true;
+          const dataUrlMatcher = /^data\:image\//;
+          expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
         });
       });
     });
