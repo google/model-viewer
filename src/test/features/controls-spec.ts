@@ -189,12 +189,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.equal(`1rad 0.5rad 1.5m`);
         });
 
-        test('jumpToGoal updates instantly', () => {
+        test('jumpCameraToGoal updates instantly', async () => {
           const cameraOrbit = `0.5rad 0.25rad 1.8m`;
           element.cameraOrbit = cameraOrbit;
           const fieldOfView = 30;
           element.fieldOfView = `${fieldOfView}deg`;
-          element.jumpToGoal();
+          element.jumpCameraToGoal();
+
+          await timePasses();
 
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)

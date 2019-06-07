@@ -77,7 +77,7 @@ export interface ControlsInterface {
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getFieldOfView(): number;
-  jumpToGoal(): void;
+  jumpCameraToGoal(): void;
 }
 
 export const ControlsMixin = (ModelViewerElement:
@@ -141,7 +141,7 @@ export const ControlsMixin = (ModelViewerElement:
           return this[$controls].getFieldOfView();
         }
 
-        jumpToGoal() {
+        jumpCameraToGoal() {
           this[$controls].jumpToGoal();
         }
 
