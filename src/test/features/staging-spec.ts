@@ -135,7 +135,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         });
       });
 
-      test('pauses rotate after user interaction', async () => {
+      // TODO(#582)
+      test.skip('pauses rotate after user interaction', async () => {
         const {turntableRotation: initialTurntableRotation} = element;
 
         element[$onUserModelOrbit]();

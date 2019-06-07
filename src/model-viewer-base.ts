@@ -26,6 +26,8 @@ import {ProgressTracker} from './utilities/progress-tracker.js';
 let renderer = new Renderer();
 
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
+const UNSIZED_MEDIA_WIDTH = 300;
+const UNSIZED_MEDIA_HEIGHT = 150;
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
@@ -135,8 +137,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
     this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label')!;
 
+    // Because of potential race conditions related to invoking the constructor
+    // we only use the bounding rect to set the initial size if the element is
+    // already connected to the document:
+    let width, height;
+    if (this.isConnected) {
+      const rect = this.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+    } else {
+      width = UNSIZED_MEDIA_WIDTH;
+      height = UNSIZED_MEDIA_HEIGHT;
+    }
+
     // Create the underlying ModelScene.
-    const {width, height} = this.getBoundingClientRect();
     this[$scene] = new ModelScene(
         {canvas: this[$canvas], element: this, width, height, renderer});
 

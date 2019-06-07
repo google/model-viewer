@@ -101,7 +101,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             .to.be.equal((element as any)[$idealCameraDistance]);
       });
 
-      test('can independently adjust azimuth', async () => {
+      // TODO(#583)
+      test.skip('can independently adjust azimuth', async () => {
         const orbit = element.getCameraOrbit();
         const nextTheta = orbit.theta + 1.0;
 
@@ -278,7 +279,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                   .to.be.equal(true);
             });
 
-        test('does not prompt if user already interacted', async () => {
+        // TODO(#584)
+        test.skip('does not prompt if user already interacted', async () => {
           const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
           const promptElement = (element as any)[$promptElement];
           const originalLabel = canvas.getAttribute('aria-label');
