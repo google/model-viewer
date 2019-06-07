@@ -15,27 +15,27 @@ gaps for some of the newest features.
 
 These browser features are **required** for `<model-viewer>` to work correctly:
 
-Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
----------------------------|--------|--------|-----------|------------|------|------
-Custom Elements            |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
-Shadow DOM                 |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
+---------------------------|--------|--------|-----------|------------|------|-------|------------------
+Custom Elements            |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋ |               ✅
+Shadow DOM                 |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋ |               ✅
 
 These browser features are **optional** and are only used if available for
-performance optimization:
+performance optimization or specific features:
 
-Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
----------------------------|--------|--------|-----------|------------|------|------
-Resize Observer[¹](1)      |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋
-Intersection Observer[²](2)|     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
+---------------------------|--------|--------|-----------|------------|------|-------|------------------
+Resize Observer[¹](1)      |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋ |               ✅
+Intersection Observer[²](2)|     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋ |               ✅
+Fullscreen API[³](3)       |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋ |               ✋
 
 These browser features are **optional** and are only needed if you wish to use
 the `unstable-webxr` feature:
 
-Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11
----------------------------|--------|--------|-----------|------------|------|------
-Fullscreen API[³](3)       |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋
-WebXR Device API           |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
-WebXR HitTest API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫
+Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
+---------------------------|--------|--------|-----------|------------|------|-------|------------------
+WebXR Device API           |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
+WebXR HitTest API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
 
 
 [1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer
@@ -88,10 +88,15 @@ need to support and the fidelity of the polyfills used.
 
 ### Regarding Fullscreen API
 
-The Fullscreen API is only necessary for the experimental Web XR
-Device API-based AR mode. Since this is only available behind a flag in Chrome
-Dev today, it is not necessary to load a Fullscreen API polyfill in production
-scenarios.
+The Fullscreen API is necessary for AR use cases. Currently, it is  necessary
+for the experimental Web XR Device API-based AR mode. Since this is only
+available behind a flag in Chrome Dev today, it is not necessary to load a
+Fullscreen API polyfill in production scenarios.
+
+**Importantly:** Fullscreen API is used as a fallback when Scene Viewer fails
+to launch on Android. If you do not include a polyfill for this API, the AR
+button may appear to do nothing on Samsung Internet and other browsers like it
+that do not have Fullscreen API yet.
 
 ### Regarding Resize Observer
 

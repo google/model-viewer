@@ -35,7 +35,7 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
   <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
@@ -381,6 +381,7 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Custom Elements</td>
@@ -390,6 +391,7 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
             <tr>
               <td>Shadow DOM</td>
@@ -399,6 +401,7 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
           </table>
 
@@ -412,6 +415,7 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Resize Observer</td>
@@ -421,6 +425,7 @@
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
             <tr>
               <td>Intersection Observer</td>
@@ -429,6 +434,17 @@
               <td><img class="icon-warning"></td>
               <td><img class="icon-check"></td>
               <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
+            </tr>
+            <tr>
+              <td>Fullscreen API</td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
             </tr>
           </table>
@@ -443,20 +459,14 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
-            <tr>
-              <td>Fullscreen API</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-            </tr>
+            
             <tr>
               <td>WebXR Device API</td>
               <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
@@ -466,6 +476,7 @@
               <td>WebXR HitTest API</td>
               <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
