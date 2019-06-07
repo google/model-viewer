@@ -29,7 +29,6 @@ cache:
   - node_modules
 after_success:
 - ./scripts/run-fidelity-check.sh
-- ./scripts/compare-fidelity-to-last-recorded.sh
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
 - touch .nojekyll
@@ -41,10 +40,6 @@ before_deploy:
 - echo '!node_modules/resize-observer-polyfill' >> .gitignore
 - git log -n 1 > VERSION
 deploy:
-  - provider: script
-    script: ./scripts/record-fidelity-results.sh
-    on:
-      tags: true
   - provider: pages
     skip-cleanup: true
     preserve-history: true
@@ -52,3 +47,4 @@ deploy:
     verbose: true
     on:
       branch: master
+      condition: $TEST_TYPE = unit
