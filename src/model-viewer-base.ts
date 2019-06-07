@@ -259,6 +259,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
   }
 
+  toDataURL(type?: string, encoderOptions?: number): string {
+    return this[$canvas].toDataURL(type, encoderOptions);
+  }
+
   get[$ariaLabel]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
                                                        this.alt;
