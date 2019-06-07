@@ -22,6 +22,7 @@ import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
+const DEFAULT_FOV = 45;
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
@@ -145,6 +146,23 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, radius: nextRadius});
+      });
+
+      test('defaults FOV correctly', async () => {
+        expect(element.getFieldOfView()).to.be.equal(DEFAULT_FOV);
+      });
+
+      test('can independently adjust FOV', async () => {
+        const fov = element.getFieldOfView();
+        const nextFov = fov - 1.0;
+
+        element.fieldOfView = `${nextFov}deg`;
+
+        await timePasses();
+
+        settleControls(controls);
+
+        expect(element.getFieldOfView()).to.be.equal(nextFov);
       });
 
       suite('getCameraOrbit', () => {

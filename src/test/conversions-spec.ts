@@ -14,7 +14,8 @@
  */
 
 import {Math as ThreeMath} from 'three';
-import {deserializeSpherical} from '../conversions.js';
+
+import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
 
 const expect = chai.expect;
 
@@ -46,6 +47,21 @@ suite('conversions', () => {
 
     test('is resilient to awkward whitespace', () => {
       expect(deserializeSpherical('  0 0\n   0 ')).to.be.eql([0, 0, 0]);
+    });
+  });
+
+  suite('deserializeAngleToDeg', () => {
+    test('converts an angle string to degrees', () => {
+      expect(deserializeAngleToDeg('1.23rad'))
+          .to.be.eql(ThreeMath.radToDeg(1.23));
+    });
+
+    test('assumes radians when units are omitted', () => {
+      expect(deserializeAngleToDeg('1.23')).to.be.eql(ThreeMath.radToDeg(1.23));
+    });
+
+    test('allows degress to be used instead of radians', () => {
+      expect(deserializeAngleToDeg('1.23deg')).to.be.eql(1.23);
     });
   });
 });
