@@ -146,7 +146,7 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
-    suite.only('capturing screenshots', () => {
+    suite('capturing screenshots', () => {
       let element: ModelViewerElementBase;
       setup(async () => {
         element = new ModelViewerElement();
