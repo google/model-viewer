@@ -15,8 +15,11 @@
 # limitations under the License.
 ##
 
-xvfb-run npm run test
+if [ "${TEST_TYPE}" = "unit" ]; then
 
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
-  ./scripts/run-sauce-tests.sh;
+  xvfb-run npm run test
+
+  if  [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" != "master" ]; then
+    ./scripts/run-sauce-tests.sh;
+  fi
 fi
