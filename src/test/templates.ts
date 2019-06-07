@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+import {Cache} from 'three';
+
 import ModelViewerElementBase, {$resetRenderer} from '../model-viewer-base.js';
+import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
+
 import {timePasses} from './helpers.js';
 
 export type Constructor<T = object> = {
@@ -28,6 +32,8 @@ export const BasicSpecTemplate =
       teardown(() => {
         // Ensure that the renderer is disposed across every test run:
         ModelViewerElementBase[$resetRenderer]();
+        CachingGLTFLoader.clearCache();
+        Cache.clear();
       });
 
       test('can be directly instantiated', () => {
