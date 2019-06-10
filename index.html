@@ -35,7 +35,7 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
   <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
@@ -318,6 +318,15 @@
               current animation to the beginning, you should also set the
               currentTime property to 0.</p>
             </li>
+            <li>
+              <div>toDataURL(type, encoderOptions)</div>
+              <p>Returns a screenshot of the current model render in the format
+              specified by <i>type</i> (defaults to image/png). The screenshot is
+              encoded as a data URL string. In formats that support a sliding scale
+              of quality (such as image/jpeg and image/webp) you can also specify a
+              value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i>
+              defaults to 0.92 otherwise).</p>
+            </li>
           </ul>
 
         </div>
@@ -383,6 +392,7 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Custom Elements</td>
@@ -392,6 +402,7 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
             <tr>
               <td>Shadow DOM</td>
@@ -401,6 +412,7 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
           </table>
 
@@ -414,6 +426,7 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Resize Observer</td>
@@ -423,6 +436,7 @@
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
             <tr>
               <td>Intersection Observer</td>
@@ -431,6 +445,17 @@
               <td><img class="icon-warning"></td>
               <td><img class="icon-check"></td>
               <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
+            </tr>
+            <tr>
+              <td>Fullscreen API</td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
             </tr>
           </table>
@@ -445,20 +470,14 @@
               <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
-            <tr>
-              <td>Fullscreen API</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-            </tr>
+            
             <tr>
               <td>WebXR Device API</td>
               <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
@@ -468,6 +487,7 @@
               <td>WebXR HitTest API</td>
               <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>

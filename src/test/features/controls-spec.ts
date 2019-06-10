@@ -190,18 +190,19 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('jumpCameraToGoal updates instantly', async () => {
-          const cameraOrbit = `0.5rad 0.25rad 1.8m`;
+          const cameraOrbit = `0.5rad 1.5rad 1.2m`;
           element.cameraOrbit = cameraOrbit;
           const fieldOfView = 30;
           element.fieldOfView = `${fieldOfView}deg`;
-          element.jumpCameraToGoal();
 
           await timePasses();
 
+          element.jumpCameraToGoal();
+
+          expect(element.getFieldOfView()).to.be.equal(fieldOfView);
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
               .to.equal(cameraOrbit);
-          expect(element.getFieldOfView()).to.be.equal(fieldOfView);
         });
       });
     });
