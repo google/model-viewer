@@ -295,6 +295,17 @@
               of user interaction or camera interpolation.</p>
             </li>
             <li>
+              <div>getFieldOfView()</div>
+              <p>Returns the realtime camera vertical field of view in degrees. 
+              This value may differ from the value configured with the field-of-view 
+              attribute on account of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>jumpCameraToGoal()</div>
+              <p>Changes the camera to its last configured goal state immediately on 
+              the next update instead of interpolating the motion over time.</p>
+            </li>
+            <li>
               <div>play()</div>
               <p>Causes animations to be played. Use the autoplay attribute if
               you want animations to be played automatically. If there are no

@@ -69,6 +69,7 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
+const $jumpCamera = Symbol('jumpCamera');
 
 export interface ControlsInterface {
   cameraControls: boolean;
@@ -77,6 +78,7 @@ export interface ControlsInterface {
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getFieldOfView(): number;
+  jumpCameraToGoal(): void;
 }
 
 export const ControlsMixin = (ModelViewerElement:
@@ -100,24 +102,25 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$promptElement]: Element;
 
-        protected[$idleTime]: number = 0;
-        protected[$userPromptedOnce]: boolean = false;
-        protected[$waitingToPromptUser]: boolean = false;
-        protected[$shouldPromptUserToInteract]: boolean = true;
+        protected[$idleTime] = 0;
+        protected[$userPromptedOnce] = false;
+        protected[$waitingToPromptUser] = false;
+        protected[$shouldPromptUserToInteract] = true;
 
         protected[$controls]: SmoothControls;
 
         protected[$idealCameraDistance]: number|null = null;
-        protected[$lastSpherical]: Spherical = new Spherical();
+        protected[$lastSpherical] = new Spherical();
+        protected[$jumpCamera] = false;
 
-        protected[$changeHandler]: (event: Event) => void = (event: Event) =>
+        protected[$changeHandler] = (event: Event) =>
             this[$onChange](event as ChangeEvent);
 
-        protected[$focusHandler]: () => void = () => this[$onFocus]();
-        protected[$blurHandler]: () => void = () => this[$onBlur]();
+        protected[$focusHandler] = () => this[$onFocus]();
+        protected[$blurHandler] = () => this[$onBlur]();
 
-        protected[$promptTransitionendHandler]:
-            () => void = () => this[$onPromptTransitionend]();
+        protected[$promptTransitionendHandler] = () =>
+            this[$onPromptTransitionend]();
 
         constructor() {
           super();
@@ -138,6 +141,10 @@ export const ControlsMixin = (ModelViewerElement:
 
         getFieldOfView(): number {
           return this[$controls].getFieldOfView();
+        }
+
+        jumpCameraToGoal() {
+          this[$jumpCamera] = true;
         }
 
         connectedCallback() {
@@ -183,6 +190,10 @@ export const ControlsMixin = (ModelViewerElement:
           }
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
+          }
+          if (this[$jumpCamera] === true) {
+            this[$controls].jumpToGoal();
+            this[$jumpCamera] = false;
           }
         }
 
