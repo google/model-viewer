@@ -146,6 +146,37 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
+    suite('capturing screenshots', () => {
+      let element: ModelViewerElementBase;
+      setup(async () => {
+        element = new ModelViewerElement();
+
+        // Avoid testing our memory ceiling in CI by limiting the size
+        // of the screenshots we produce in these tests:
+        element.style.width = '64px';
+        element.style.height = '64px';
+
+        document.body.appendChild(element);
+
+        const modelLoads = waitForEvent(element, 'load');
+        element.src = assetPath('cube.gltf');
+        await modelLoads;
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      suite('toDataURL', () => {
+        test('produces a URL-compatible string', () => {
+          const dataUrlMatcher = /^data\:image\//;
+          expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
+        });
+      });
+    });
+
     suite('orchestrates rendering', () => {
       let elements: Array<ModelViewerElementBase> = [];
 

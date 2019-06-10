@@ -14,7 +14,7 @@
  */
 
 import {Camera, PerspectiveCamera, Vector3} from 'three';
-import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {Damper, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
@@ -60,6 +60,26 @@ const cameraIsLookingAt = (camera: Camera, position: Vector3) => {
 export const settleControls = (controls: SmoothControls) =>
     controls.update(performance.now(), FIFTY_FRAME_DELTA);
 
+suite('Damper', () => {
+  let damper: Damper;
+  const initial = 5;
+  const goal = 2;
+
+  setup(() => {
+    damper = new Damper();
+  });
+
+  test('converges to goal with large time step without overshoot', () => {
+    const final = damper.update(initial, goal, FIFTY_FRAME_DELTA, initial);
+    expect(final).to.be.eql(goal);
+  });
+
+  test('stays at initial value for negative time step', () => {
+    const final = damper.update(initial, goal, -1 * FIFTY_FRAME_DELTA, initial);
+    expect(final).to.be.eql(initial);
+  });
+});
+
 suite('SmoothControls', () => {
   let controls: SmoothControls;
   let camera: PerspectiveCamera;
@@ -85,7 +105,7 @@ suite('SmoothControls', () => {
   });
 
   suite('when updated', () => {
-    test('repositions the camera within the configured radius optionss', () => {
+    test('repositions the camera within the configured radius options', () => {
       settleControls(controls);
 
       const radius = camera.position.length();
@@ -97,15 +117,16 @@ suite('SmoothControls', () => {
 
     test('causes the camera to look at the target', () => {
       settleControls(controls);
-      expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
+      expect(cameraIsLookingAt(camera, controls.getTarget())).to.be.equal(true);
     });
 
     suite('when target is modified', () => {
       test('camera looks at the configured target', () => {
-        controls.target.set(3, 2, 1);
+        controls.setTarget(new Vector3(3, 2, 1));
         settleControls(controls);
 
-        expect(cameraIsLookingAt(camera, controls.target)).to.be.equal(true);
+        expect(cameraIsLookingAt(camera, controls.getTarget()))
+            .to.be.equal(true);
       });
     });
 
@@ -116,9 +137,9 @@ suite('SmoothControls', () => {
 
           expect(camera.position.length())
               .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
-          controls.setOrbit(0, 0, 10);
+          controls.setOrbit(0, HALF_PI, 1.5);
           settleControls(controls);
-          expect(camera.position.length()).to.be.equal(10);
+          expect(camera.position.length()).to.be.equal(1.5);
         });
       });
     });
@@ -154,7 +175,7 @@ suite('SmoothControls', () => {
       });
     });
 
-    suite('customizing optionss', () => {
+    suite('customizing options', () => {
       suite('azimuth', () => {
         setup(() => {
           controls.applyOptions({
@@ -163,7 +184,7 @@ suite('SmoothControls', () => {
           });
         });
 
-        test('prevents camera azimuth from exceeding optionss', () => {
+        test('prevents camera azimuth from exceeding options', () => {
           controls.setOrbit(-Math.PI, 0, 0);
           settleControls(controls);
 
@@ -184,7 +205,7 @@ suite('SmoothControls', () => {
           });
         });
 
-        test('prevents camera polar angle from exceeding optionss', () => {
+        test('prevents camera polar angle from exceeding options', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 
@@ -203,7 +224,7 @@ suite('SmoothControls', () => {
           controls.applyOptions({minimumRadius: 10, maximumRadius: 20});
         });
 
-        test('prevents camera distance from exceeding optionss', () => {
+        test('prevents camera distance from exceeding options', () => {
           controls.setOrbit(0, 0, 0);
           settleControls(controls);
 

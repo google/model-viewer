@@ -155,7 +155,7 @@ export class ImageComparator {
         const position = index * COMPONENTS_PER_PIXEL;
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
-        const exactlyMatched = (delta < thresholdSquared ? 1 : 0) * 255;
+        const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
 
         if (exactlyMatched) {
           matched++;

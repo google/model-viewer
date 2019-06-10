@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {Camera, Event, EventDispatcher, Quaternion, Spherical, Vector2, Vector3} from 'three';
+import {Event, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector2, Vector3} from 'three';
 
-import {clamp, step} from '../utilities.js';
+import {clamp} from '../utilities.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
@@ -34,14 +34,10 @@ export interface SmoothControlsOptions {
   minimumAzimuthalAngle?: number;
   // The maximum angle between model-forward and the camera azimuthal position
   maximumAzimuthalAngle?: number;
-  // The distance from the target orbital position where deceleration will begin
-  decelerationMargin?: number;
-  // The rate of acceleration as the camera starts to change orbital position
-  // The value is measured in world-meters-per-frame-per-frame
-  acceleration?: number;
-  // A scalar in 0..1 that changes the dampening factor, corresponding to
-  // factors from 0.05..0.3
-  dampeningScale?: number;
+  // The minimum camera field of view in degrees
+  minimumFov?: number;
+  // The maximum camera field of view in degrees
+  maximumFov?: number;
   // Controls when events will be cancelled (always, or only when handled)
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
@@ -49,50 +45,41 @@ export interface SmoothControlsOptions {
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
-  minimumRadius: 8,
-  maximumRadius: 32,
+  minimumRadius: 1,
+  maximumRadius: 2,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
   maximumAzimuthalAngle: Infinity,
-  decelerationMargin: 0.25,
-  acceleration: 0.15,
-  dampeningScale: 0.5,
+  minimumFov: 20,
+  maximumFov: 45,
   eventHandlingBehavior: 'prevent-all',
   interactionPolicy: 'allow-when-focused'
 });
 
-
-/**
- * This quick and dirty helper allows us to use Vector3's magnitude
- * implementation without allocating temporary Vector3 instances.
- */
-const magnitude = (() => {
-  const vector3 = new Vector3();
-
-  return (x: number, y: number, z: number) => vector3.set(x, y, z).length();
-})();
-
-// A Vector3 for holding interstitial values while converting Vector3 positions
-// to spherical values. Should only be used as an internal implementation detail
-// of the $positionToSpherical method on SmoothControls!
-const vector3 = new Vector3();
+const $velocity = Symbol('v');
 
 // Internal orbital position state
+const $spherical = Symbol('spherical');
+const $goalSpherical = Symbol('goalSpherical');
+const $thetaDamper = Symbol('thetaDamper');
+const $phiDamper = Symbol('phiDamper');
+const $radiusDamper = Symbol('radiusDamper');
+const $fov = Symbol('fov');
+const $goalFov = Symbol('goalFov');
+const $fovDamper = Symbol('fovDamper');
+const $target = Symbol('target');
+
 const $options = Symbol('options');
 const $upQuaternion = Symbol('upQuaternion');
 const $upQuaternionInverse = Symbol('upQuaternionInverse');
-const $spherical = Symbol('spherical');
-const $targetSpherical = Symbol('targetSpherical');
-const $velocity = Symbol('velocity');
-const $dampeningFactor = Symbol('dampeningFactor');
 const $touchMode = Symbol('touchMode');
-const $previousPosition = Symbol('previousPosition');
 const $canInteract = Symbol('canInteract');
 const $interactionEnabled = Symbol('interactionEnabled');
 const $zoomMeters = Symbol('zoomMeters');
 const $userAdjustOrbit = Symbol('userAdjustOrbit');
 const $isUserChange = Symbol('isUserChange');
+const $isStationary = Symbol('isMoving');
 const $moveCamera = Symbol('moveCamera');
 
 // Pointer state
@@ -102,7 +89,6 @@ const $lastTouches = Symbol('lastTouches');
 
 // Value conversion methods
 const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
-const $positionToSpherical = Symbol('positionToSpherical');
 const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
 
@@ -126,10 +112,9 @@ const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
 const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
-const ORBIT_STEP_EDGE = 0.001;
-const MAXIMUM_DAMPENING_FACTOR = 0.05;
-const MINIMUM_DAMPENING_FACTOR = 0.3;
-const FRAME_MILLISECONDS = 1000.0 / 60.0;
+const DECAY_MILLISECONDS = 50;
+const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
+const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
 const TAU = 2 * Math.PI;
 const UP = new Vector3(0, 1, 0);
 
@@ -155,6 +140,46 @@ export interface ChangeEvent extends Event {
 }
 
 /**
+ * The Damper class is a generic second-order critically damped system that does
+ * one linear step of the desired length of time. The only parameter is
+ * DECAY_MILLISECONDS, which should be adjustable: TODO(#580). This common
+ * parameter makes all states converge at the same rate regardless of scale.
+ * xNormalization is a number to provide the rough scale of x, such that
+ * NIL_SPEED clamping also happens at roughly the same convergence for all
+ * states.
+ */
+export class Damper {
+  private[$velocity]: number = 0;
+
+  update(
+      x: number, xGoal: number, timeStepMilliseconds: number,
+      xNormalization: number): number {
+    if (timeStepMilliseconds >= DECAY_MILLISECONDS) {
+      // This clamps at the point where a large time step would cause the
+      // discrete step to overshoot.
+      this[$velocity] = 0;
+      return xGoal;
+    }
+    if (timeStepMilliseconds < 0) {
+      return x;
+    }
+    // Critically damped
+    const acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
+        2 * NATURAL_FREQUENCY * this[$velocity];
+    this[$velocity] += acceleration * timeStepMilliseconds;
+    if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
+        acceleration * (xGoal - x) <= 0) {
+      // This ensures the controls settle and stop calling this function instead
+      // of asymptotically approaching their goal.
+      this[$velocity] = 0;
+      return xGoal;
+    } else {
+      return x + this[$velocity] * timeStepMilliseconds;
+    }
+  }
+}
+
+/**
  * SmoothControls is a Three.js helper for adding delightful pointer and
  * keyboard-based input to a staged Three.js scene. Its API is very similar to
  * OrbitControls, but it offers more opinionated (subjectively more delightful)
@@ -176,15 +201,22 @@ export class SmoothControls extends EventDispatcher {
   private[$interactionEnabled]: boolean = false;
 
   private[$options]: SmoothControlsOptions;
-  private[$upQuaternion]: Quaternion = new Quaternion();
-  private[$upQuaternionInverse]: Quaternion = new Quaternion();
-  private[$spherical]: Spherical = new Spherical();
-  private[$targetSpherical]: Spherical = new Spherical();
-  private[$previousPosition]: Vector3 = new Vector3();
-  private[$isUserChange]: boolean = false;
+  private[$upQuaternion] = new Quaternion();
+  private[$upQuaternionInverse] = new Quaternion();
+  private[$isUserChange] = false;
 
-  private[$pointerIsDown]: boolean = false;
-  private[$lastPointerPosition]: Vector2 = new Vector2();
+  private[$spherical] = new Spherical();
+  private[$goalSpherical] = new Spherical();
+  private[$thetaDamper] = new Damper();
+  private[$phiDamper] = new Damper();
+  private[$radiusDamper] = new Damper();
+  private[$fov]: number;
+  private[$goalFov]: number;
+  private[$fovDamper] = new Damper();
+  private[$target] = new Vector3();
+
+  private[$pointerIsDown] = false;
+  private[$lastPointerPosition] = new Vector2();
   private[$lastTouches]: TouchList;
   private[$touchMode]: TouchMode;
 
@@ -198,13 +230,10 @@ export class SmoothControls extends EventDispatcher {
   private[$onTouchEnd]: (event: Event) => void;
   private[$onTouchMove]: (event: Event) => void;
 
-  private[$velocity]: number = 0;
-  private[$zoomMeters]: number = 1;
+  private[$zoomMeters] = 1;
 
-  // The target position that the camera will orbit around
-  readonly target: Vector3 = new Vector3();
-
-  constructor(readonly camera: Camera, readonly element: HTMLElement) {
+  constructor(
+      readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
     super();
 
     this[$upQuaternion].setFromUnitVectors(camera.up, UP);
@@ -226,13 +255,11 @@ export class SmoothControls extends EventDispatcher {
     this[$onTouchMove] = (event: Event) =>
         this[$handlePointerMove](event as TouchEvent);
 
-    this[$previousPosition].copy(this.camera.position);
-    this[$positionToSpherical](this.camera.position, this[$spherical]);
-    this[$targetSpherical].copy(this[$spherical]);
-
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
 
-    this.setOrbit();
+    this.setOrbit(0, Math.PI / 2, 1);
+    this.setFov(100);
+    this.jumpToGoal();
   }
 
   get interactionEnabled(): boolean {
@@ -295,6 +322,13 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
+   * Returns the camera's current vertical field of view in degrees.
+   */
+  getFieldOfView(): number {
+    return this.camera.fov;
+  }
+
+  /**
    * Configure the options of the controls. Configured options will be
    * merged with whatever options have already been configured for this
    * controls instance.
@@ -306,21 +340,28 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit();
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
-    this[$spherical].copy(this[$targetSpherical]);
+    if (this[$isStationary]()) {
+      return;
+    }
+    this[$spherical].copy(this[$goalSpherical]);
+    this[$moveCamera]();
   }
 
   /**
-   * Resets the zoom sensitivity based on model scale, here represented by
-   * framedHeight.
-   * @param framedHeight
+   * Sets the non-interpolated camera parameters
    */
-  updateFramedHeight(framedHeight: number) {
-    // Make zoom sensitivity scale with model size:
-    this[$zoomMeters] = framedHeight / 10;
+  updateIntrinsics(
+      nearPlane: number, farPlane: number, aspect: number,
+      zoomSensitivity: number) {
+    this[$zoomMeters] = zoomSensitivity;
+    this.camera.near = nearPlane;
+    this.camera.far = farPlane;
+    this.camera.aspect = aspect;
+    this.camera.updateProjectionMatrix();
   }
 
   /**
-   * Set the absolute orbital destination of the camera. The change will be
+   * Set the absolute orbital goal of the camera. The change will be
    * applied over a number of frames depending on configured acceleration and
    * dampening options.
    *
@@ -328,9 +369,9 @@ export class SmoothControls extends EventDispatcher {
    * position and/or rotation, otherwise false.
    */
   setOrbit(
-      targetTheta: number = this[$targetSpherical].theta,
-      targetPhi: number = this[$targetSpherical].phi,
-      targetRadius: number = this[$targetSpherical].radius): boolean {
+      goalTheta: number = this[$goalSpherical].theta,
+      goalPhi: number = this[$goalSpherical].phi,
+      goalRadius: number = this[$goalSpherical].radius): boolean {
     const {
       minimumAzimuthalAngle,
       maximumAzimuthalAngle,
@@ -340,21 +381,21 @@ export class SmoothControls extends EventDispatcher {
       maximumRadius
     } = this[$options];
 
-    const {theta, phi, radius} = this[$targetSpherical];
+    const {theta, phi, radius} = this[$goalSpherical];
 
     const nextTheta =
-        clamp(targetTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
-    const nextPhi = clamp(targetPhi, minimumPolarAngle!, maximumPolarAngle!);
-    const nextRadius = clamp(targetRadius, minimumRadius!, maximumRadius!);
+        clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
+    const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
+    const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
 
     if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
       return false;
     }
 
-    this[$targetSpherical].theta = nextTheta;
-    this[$targetSpherical].phi = nextPhi;
-    this[$targetSpherical].radius = nextRadius;
-    this[$targetSpherical].makeSafe();
+    this[$goalSpherical].theta = nextTheta;
+    this[$goalSpherical].phi = nextPhi;
+    this[$goalSpherical].radius = nextRadius;
+    this[$goalSpherical].makeSafe();
 
     this[$isUserChange] = false;
 
@@ -363,11 +404,35 @@ export class SmoothControls extends EventDispatcher {
 
   /**
    * Subset of setOrbit() above, which only sets the camera's radius.
-   * @param radius
    */
   setRadius(radius: number) {
-    this[$targetSpherical].radius = radius;
+    this[$goalSpherical].radius = radius;
     this.setOrbit();
+  }
+
+  /**
+   * Sets the goal field of view for the camera
+   */
+  setFov(fov: number) {
+    const {minimumFov, maximumFov} = this[$options];
+    this[$goalFov] = clamp(fov, minimumFov!, maximumFov!);
+  }
+
+  /**
+   * Sets the target the camera is pointing toward
+   */
+  setTarget(target: Vector3) {
+    if (!this[$target].equals(target)) {
+      this[$target].copy(target);
+      this[$moveCamera]();
+    }
+  }
+
+  /**
+   * Returns a copy of the target position the camera is pointed toward
+   */
+  getTarget(): Vector3 {
+    return this[$target].clone();
   }
 
   /**
@@ -376,107 +441,79 @@ export class SmoothControls extends EventDispatcher {
    */
   adjustOrbit(deltaTheta: number, deltaPhi: number, deltaRadius: number):
       boolean {
-    const {theta, phi, radius} = this[$targetSpherical];
+    const {theta, phi, radius} = this[$goalSpherical];
 
-    const targetTheta = theta - deltaTheta;
-    const targetPhi = phi - deltaPhi;
-    const targetRadius = radius + deltaRadius;
+    const goalTheta = theta - deltaTheta;
+    const goalPhi = phi - deltaPhi;
+    const goalRadius = radius + deltaRadius;
 
-    return this.setOrbit(targetTheta, targetPhi, targetRadius);
+    return this.setOrbit(goalTheta, goalPhi, goalRadius);
   }
 
   /**
-   * Move the camera instantly instead of accelerating toward the setOrbit()
+   * Move the camera instantly instead of accelerating toward the goal
    * parameters.
    */
-  jumpToDestination() {
-    this[$spherical].copy(this[$targetSpherical]);
-    this[$moveCamera]();
+  jumpToGoal() {
+    this.update(0, DECAY_MILLISECONDS);
   }
 
   /**
    * Update controls. In most cases, this will result in the camera
    * interpolating its position and rotation until it lines up with the
-   * designated destination orbital position.
+   * designated goal orbital position.
    *
    * Time and delta are measured in milliseconds.
    */
   update(_time: number, delta: number) {
-    if (this[$targetSpherical].theta === this[$spherical].theta &&
-        this[$targetSpherical].phi === this[$spherical].phi &&
-        this[$targetSpherical].radius === this[$spherical].radius) {
+    if (this[$isStationary]()) {
       return;
     }
-    const deltaTheta = this[$targetSpherical].theta - this[$spherical].theta;
-    const deltaPhi = this[$targetSpherical].phi - this[$spherical].phi;
-    const deltaRadius =
-        (this[$targetSpherical].radius - this[$spherical].radius) /
-        this[$zoomMeters];
-    const distance = magnitude(deltaTheta, deltaPhi, deltaRadius);
-    const frames = delta / FRAME_MILLISECONDS;
+    const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
 
-    // Velocity represents a scale along [0, 1] that changes based on the
-    // acceleration constraint. We only "apply" velocity when accelerating.
-    // When decelerating, we apply dampening exclusively.
-    const applyVelocity = distance > this[$options].decelerationMargin!;
+    this[$spherical].theta = this[$thetaDamper].update(
+        this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
 
-    const nextVelocity =
-        Math.min(this[$velocity] + this[$options].acceleration! * frames, 1.0);
-    if (applyVelocity) {
-      this[$velocity] = nextVelocity;
-    } else if (this[$velocity] > 0) {
-      this[$velocity] = Math.max(nextVelocity, 0.0);
-    }
+    this[$spherical].phi = this[$phiDamper].update(
+        this[$spherical].phi,
+        this[$goalSpherical].phi,
+        delta,
+        maximumPolarAngle!);
 
-    const scale = this[$dampeningFactor] *
-        (applyVelocity ? this[$velocity] * frames : frames);
+    this[$spherical].radius = this[$radiusDamper].update(
+        this[$spherical].radius,
+        this[$goalSpherical].radius,
+        delta,
+        maximumRadius!);
 
-    const scaledDeltaTheta = deltaTheta * scale;
-    const scaledDeltaPhi = deltaPhi * scale;
-    const scaledDeltaRadius = deltaRadius * scale;
-
-    let incrementTheta =
-        step(ORBIT_STEP_EDGE, Math.abs(scaledDeltaTheta)) * scaledDeltaTheta;
-    let incrementPhi =
-        step(ORBIT_STEP_EDGE, Math.abs(scaledDeltaPhi)) * scaledDeltaPhi;
-    let incrementRadius =
-        step(ORBIT_STEP_EDGE, Math.abs(scaledDeltaRadius)) * scaledDeltaRadius;
-
-    // NOTE(cdata): If we evaluate enough frames at once, then there is the
-    // possibility that the next incremental step will overshoot the target.
-    // If that is the case, we just jump straight to the target:
-    if (magnitude(incrementTheta, incrementPhi, incrementRadius) > distance) {
-      incrementTheta = deltaTheta;
-      incrementPhi = deltaPhi;
-      incrementRadius = deltaRadius;
-    }
-
-    this[$spherical].theta += incrementTheta;
-    this[$spherical].phi += incrementPhi;
-    this[$spherical].radius += incrementRadius * this[$zoomMeters];
+    this[$fov] =
+        this[$fovDamper].update(this[$fov], this[$goalFov], delta, maximumFov!);
 
     this[$moveCamera]();
+  }
+
+  private[$isStationary](): boolean {
+    return this[$goalSpherical].theta === this[$spherical].theta &&
+        this[$goalSpherical].phi === this[$spherical].phi &&
+        this[$goalSpherical].radius === this[$spherical].radius &&
+        this[$goalFov] === this[$fov];
   }
 
   private[$moveCamera]() {
     // Derive the new camera position from the updated spherical:
     this[$spherical].makeSafe();
     this[$sphericalToPosition](this[$spherical], this.camera.position);
+    this.camera.lookAt(this[$target]);
 
-    this.camera.lookAt(this.target);
-
-    // Dispatch change events only when the camera position changes due to
-    // the spherical->position derivation:
-    if (!this[$previousPosition].equals(this.camera.position)) {
-      this[$previousPosition].copy(this.camera.position);
-
-      const source = this[$isUserChange] ? USER_INTERACTION_CHANGE_SOURCE :
-                                           DEFAULT_INTERACTION_CHANGE_SOURCE;
-
-      this.dispatchEvent({type: 'change', source});
-    } else {
-      this[$targetSpherical].copy(this[$spherical]);
+    if (this.camera.fov !== this[$fov]) {
+      this.camera.fov = this[$fov];
+      this.camera.updateProjectionMatrix();
     }
+
+    const source = this[$isUserChange] ? USER_INTERACTION_CHANGE_SOURCE :
+                                         DEFAULT_INTERACTION_CHANGE_SOURCE;
+
+    this.dispatchEvent({type: 'change', source});
   }
 
   private get[$canInteract](): boolean {
@@ -486,12 +523,6 @@ export class SmoothControls extends EventDispatcher {
     }
 
     return this[$options].interactionPolicy === 'always-allow';
-  }
-
-  private get[$dampeningFactor](): number {
-    return MINIMUM_DAMPENING_FACTOR -
-        this[$options].dampeningScale! *
-        (MINIMUM_DAMPENING_FACTOR - MAXIMUM_DAMPENING_FACTOR)
   }
 
   private[$userAdjustOrbit](
@@ -507,18 +538,10 @@ export class SmoothControls extends EventDispatcher {
     return TAU * pixelLength / this.element.clientHeight;
   }
 
-  private[$positionToSpherical](position: Vector3, spherical: Spherical) {
-    vector3.copy(position).sub(this.target);
-    vector3.applyQuaternion(this[$upQuaternion]);
-
-    spherical.setFromVector3(vector3);
-    spherical.radius = vector3.length();
-  }
-
   private[$sphericalToPosition](spherical: Spherical, position: Vector3) {
     position.setFromSpherical(spherical);
     position.applyQuaternion(this[$upQuaternionInverse]);
-    position.add(this.target);
+    position.add(this[$target]);
   }
 
   private[$twoTouchDistance](touchOne: Touch, touchTwo: Touch): number {
