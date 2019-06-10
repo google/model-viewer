@@ -194,10 +194,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.cameraOrbit = cameraOrbit;
           const fieldOfView = 30;
           element.fieldOfView = `${fieldOfView}deg`;
+          element.jumpCameraToGoal();
 
           await timePasses();
-
-          element.jumpCameraToGoal();
 
           expect(element.getFieldOfView()).to.be.equal(fieldOfView);
           const orbit = element.getCameraOrbit();

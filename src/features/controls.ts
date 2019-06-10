@@ -69,6 +69,7 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
+const $jumpCamera = Symbol('jumpCamera');
 
 export interface ControlsInterface {
   cameraControls: boolean;
@@ -110,6 +111,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$idealCameraDistance]: number|null = null;
         protected[$lastSpherical]: Spherical = new Spherical();
+        protected[$jumpCamera] = false;
 
         protected[$changeHandler]: (event: Event) => void = (event: Event) =>
             this[$onChange](event as ChangeEvent);
@@ -142,7 +144,7 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         jumpCameraToGoal() {
-          this[$controls].jumpToGoal();
+          this[$jumpCamera] = true;
         }
 
         connectedCallback() {
@@ -188,6 +190,10 @@ export const ControlsMixin = (ModelViewerElement:
           }
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
+          }
+          if (this[$jumpCamera] === true) {
+            this[$controls].jumpToGoal();
+            this[$jumpCamera] = false;
           }
         }
 
