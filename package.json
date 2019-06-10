@@ -107,7 +107,8 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "typescript": "^3.1.3",
     "wct-browser-legacy": "^1.0.1",
-    "web-component-tester": "^6.9.2"
+    "web-component-tester": "^6.9.2",
+    "wkfs-polyfill": "^0.2.1"
   },
   "dependencies": {
     "lit-element": "^2.0.0",

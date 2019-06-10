@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import 'wkfs-polyfill';
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
 
