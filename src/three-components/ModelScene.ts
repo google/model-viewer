@@ -37,15 +37,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
-// The model is sized to the room, and if too perfect of a fit,
-// the front of the model becomes clipped by the near plane. Rather than
-// change the near plane or camera's position (if we wanted to implement a
-// visible "room" in the future where framing needs to be precise), we shrink
-// the room by a little bit so it's always slightly bigger than the model.
-// TODO(#527): this description has been incorrect for awhile (this is not
-// how the near plane is set) so this should probably be removed for simplicity.
-export const ROOM_PADDING_SCALE = 1.01;
-
 const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
 const DIRECTIONAL_LIGHT_LOW_INTENSITY = 2.0;
 
@@ -242,9 +233,7 @@ export default class ModelScene extends Scene {
           Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
 
       this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
-      this.framedHeight = ROOM_PADDING_SCALE *
-          Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
-      this.modelDepth *= ROOM_PADDING_SCALE;
+      this.framedHeight = Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
     }
   }
 
