@@ -14,10 +14,10 @@
  */
 
 import {IS_IOS} from '../../constants.js';
-import {$isAllowedQuickLookBrowser, ARInterface, ARMixin} from '../../features/ar.js';
+import {ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
-import {assetPath, IOS_CHROME_USER_AGENT, IOS_SAFARI_USER_AGENT, spoofUserAgent, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;

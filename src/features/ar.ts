@@ -101,7 +101,7 @@ const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
-export const $isAllowedQuickLookBrowser = Symbol('isAllowedBrowser');
+const $isAllowedQuickLookBrowser = Symbol('isAllowedBrowser');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
