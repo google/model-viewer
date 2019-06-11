@@ -14,10 +14,10 @@
  */
 
 import {IS_IOS} from '../../constants.js';
-import {ARMixin} from '../../features/ar.js';
+import {$isAllowedQuickLookBrowser, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
-import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, IOS_CHROME_USER_AGENT, IOS_SAFARI_USER_AGENT, spoofUserAgent, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -26,7 +26,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName: string;
-    let ModelViewerElement: Constructor<ModelViewerElementBase>;
+    let ModelViewerElement: Constructor<ModelViewerElementBase&ARInterface>;
 
     setup(() => {
       tagName = `model-viewer-ar-${nextId++}`;
@@ -41,14 +41,21 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
+    suite('quick-look-browsers', () => {
+      // TODO(#624,#625): We cannot implement these tests without the ability
+      // to mock our constants
+      test('shows the AR button for allowed browsers');
+      test('hides the AR button for non-allowed browsers');
+    });
+
     suite('with unstable-webxr', () => {
-      let element: ModelViewerElementBase;
+      let element: ModelViewerElementBase&ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
 
-        (element as any).unstableWebxr = true;
+        element.unstableWebxr = true;
         element.src = assetPath('Astronaut.glb');
 
         await waitForEvent(element, 'load');
@@ -61,14 +68,14 @@ suite('ModelViewerElementBase with ARMixin', () => {
       });
 
       test('hides the AR button if not on AR platform', () => {
-        expect((element as any).canActivateAR).to.be.equal(false);
+        expect(element.canActivateAR).to.be.equal(false);
       });
 
       test('shows the AR button if on AR platform');
     });
 
     suite('ios-src', () => {
-      let element: ModelViewerElementBase;
+      let element: ModelViewerElementBase&ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
@@ -88,34 +95,34 @@ suite('ModelViewerElementBase with ARMixin', () => {
       if (IS_IOS) {
         suite('on iOS Safari', () => {
           test('hides the AR button', () => {
-            expect((element as any).canActivateAR).to.be.equal(false);
+            expect(element.canActivateAR).to.be.equal(false);
           });
 
           suite('with an ios-src', () => {
             setup(async () => {
-              (element as any).iosSrc = assetPath('Astronaut.usdz');
+              element.iosSrc = assetPath('Astronaut.usdz');
               await timePasses();
             });
 
             test('shows the AR button', () => {
-              expect((element as any).canActivateAR).to.be.equal(true);
+              expect(element.canActivateAR).to.be.equal(true);
             });
           });
         });
       } else {
         suite('on browsers that are not iOS Safari', () => {
           test('hides the AR button', () => {
-            expect((element as any).canActivateAR).to.be.equal(false);
+            expect(element.canActivateAR).to.be.equal(false);
           });
 
           suite('with an ios-src', () => {
             setup(async () => {
-              (element as any).iosSrc = assetPath('Astronaut.usdz');
+              element.iosSrc = assetPath('Astronaut.usdz');
               await timePasses();
             });
 
             test('still hides the AR button', () => {
-              expect((element as any).canActivateAR).to.be.equal(false);
+              expect(element.canActivateAR).to.be.equal(false);
             });
           });
         });

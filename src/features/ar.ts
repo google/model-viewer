@@ -15,7 +15,8 @@
 
 import {property} from 'lit-element';
 
-import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {enumerationDeserializer} from '../conversions.js';
 import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
@@ -80,7 +81,12 @@ export const openARViewer = (() => {
   };
 })();
 
-type ARMode = 'quick-look'|'ar-viewer'|'unstable-webxr'|'none';
+export type QuickLookBrowser = 'safari'|'chrome';
+
+const deserializeQuickLookBrowsers =
+    enumerationDeserializer<QuickLookBrowser>(['safari', 'chrome']);
+
+export type ARMode = 'quick-look'|'ar-viewer'|'unstable-webxr'|'none';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
@@ -95,6 +101,8 @@ const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
+export const $isAllowedQuickLookBrowser = Symbol('isAllowedBrowser');
+const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
@@ -106,11 +114,20 @@ const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
 const $fullscreenchangeHandler = Symbol('fullscreenHandler');
 const $onFullscreenchange = Symbol('onFullscreen');
 
+export interface ARInterface {
+  ar: boolean;
+  unstableWebxr: boolean;
+  iosSrc: string|null;
+  quickLookBrowsers: string;
+  readonly canActivateAR: boolean;
+  activateAR(): Promise<void>;
+}
+
 export const ARMixin = (ModelViewerElement:
                             Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
+    Constructor<ModelViewerElementBase&ARInterface> => {
       class ARModelViewerElement extends ModelViewerElement {
-        @property({attribute: 'ar', type: Boolean}) ar: boolean = false;
+        @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
 
         @property({type: Boolean, attribute: 'unstable-webxr'})
         unstableWebxr: boolean = false;
@@ -118,6 +135,9 @@ export const ARMixin = (ModelViewerElement:
         @property(
             {converter: {fromAttribute: deserializeUrl}, attribute: 'ios-src'})
         iosSrc: string|null = null;
+
+        @property({type: String, attribute: 'quick-look-browsers'})
+        quickLookBrowsers: string = 'safari';
 
         get canActivateAR(): boolean {
           return this[$arMode] !== ARMode.NONE;
@@ -147,6 +167,8 @@ export const ARMixin = (ModelViewerElement:
             () => void = () => this[$onFullscreenchange]();
 
         protected[$arMode]: ARMode = ARMode.NONE;
+
+        protected[$quickLookBrowsers]: Set<QuickLookBrowser> = new Set();
 
         /**
          * Activates AR. Note that for any mode that is not WebXR-based, this
@@ -244,6 +266,11 @@ configuration or device capabilities');
         async update(changedProperties: Map<string, any>) {
           super.update(changedProperties);
 
+          if (changedProperties.has('quickLookBrowsers')) {
+            this[$quickLookBrowsers] =
+                deserializeQuickLookBrowsers(this.quickLookBrowsers);
+          }
+
           if (!changedProperties.has('unstableWebxr') &&
               !changedProperties.has('iosSrc') &&
               !changedProperties.has('ar') && !changedProperties.has('src') &&
@@ -255,8 +282,8 @@ configuration or device capabilities');
           const unstableWebxrCandidate = this.unstableWebxr &&
               IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
           const arViewerCandidate = IS_ANDROID && this.ar;
-          const iosQuickLookCandidate =
-              IS_IOS && IS_AR_QUICKLOOK_CANDIDATE && !!this.iosSrc;
+          const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
+              this[$isAllowedQuickLookBrowser] && !!this.iosSrc;
 
           const showArButton = unstableWebxrCandidate || arViewerCandidate ||
               iosQuickLookCandidate;
@@ -289,6 +316,16 @@ configuration or device capabilities');
         [$onARButtonContainerClick](event: Event) {
           event.preventDefault();
           this.activateAR();
+        }
+
+        get[$isAllowedQuickLookBrowser](): boolean {
+          if (IS_IOS_CHROME) {
+            return this[$quickLookBrowsers].has('chrome');
+          } else if (IS_IOS_SAFARI) {
+            return this[$quickLookBrowsers].has('safari');
+          }
+
+          return false;
         }
       }
 

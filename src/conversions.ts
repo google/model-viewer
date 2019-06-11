@@ -118,3 +118,14 @@ export const deserializeAngleToDeg = (angleString: string): number|null => {
 
   return null;
 };
+
+export const enumerationDeserializer = <T extends string>(allowedNames: T[]) =>
+    (valueString: string): Set<T> => {
+      try {
+        return new Set(parseValues(valueString)
+                           .map(valueNode => valueNode.value as T)
+                           .filter((name) => allowedNames.indexOf(name) > -1));
+      } catch (_error) {
+      }
+      return new Set();
+    };
