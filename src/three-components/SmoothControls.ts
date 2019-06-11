@@ -54,7 +54,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumFov: 20,
   maximumFov: 45,
   eventHandlingBehavior: 'prevent-all',
-  interactionPolicy: 'allow-when-focused'
+  interactionPolicy: 'always-allow'
 });
 
 const $velocity = Symbol('v');
