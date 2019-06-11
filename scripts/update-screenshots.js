@@ -29,13 +29,13 @@ const filamentScreenshotScript =
 const backgroundImageRe = /background-image\="([^"]+)"/;
 const modelSourceRe = /src\="([^"]+)"/
 
-let rendererWhitelist = null;
+let scenarioWhitelist = null;
 
 if (process.argv.length > 2) {
-  rendererWhitelist = new Set();
+  scenarioWhitelist = new Set();
 
   for (let i = 2; i < process.argv.length; i++) {
-    rendererWhitelist.add(process.argv[i]);
+    scenarioWhitelist.add(process.argv[i]);
   }
 }
 
@@ -72,8 +72,8 @@ const updateScreenshots = async (config) => {
       const {name, file} = golden;
       const filePath = path.resolve(scenarioDirectory, file);
 
-      if (rendererWhitelist != null && !rendererWhitelist.has(name)) {
-        console.log(`⏭  Skipping ${name}...`);
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(slug)) {
+        console.log(`⏭  Skipping ${slug}...`);
         continue;
       }
 
@@ -96,14 +96,25 @@ const updateScreenshots = async (config) => {
 
           break;
         case 'Filament':
-          await screenshotFromScript(scenario, scenarioDirectory, filePath, name, filamentScreenshotScript);
+          await screenshotFromScript(
+              scenario,
+              scenarioDirectory,
+              filePath,
+              name,
+              filamentScreenshotScript);
           break;
       }
     }
   }
 };
 
-const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name, script) => {
+const screenshotFromScript =
+    async (
+        scenario,
+        scenarioDirectory,
+        filePath,
+        name,
+        script) => {
   const testHtmlPath = path.join(scenarioDirectory, 'index.html');
 
   const html = (await fs.readFile(testHtmlPath)).toString();
@@ -118,8 +129,7 @@ const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name,
   const {width, height} = scenario.dimensions;
 
   if (modelSource == null) {
-    warn(`Could not determine model source for ${
-        scenario.slug}; skipping...`);
+    warn(`Could not determine model source for ${scenario.slug}; skipping...`);
     return;
   }
 
@@ -131,11 +141,11 @@ const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name,
   const backgroundImagePath =
       path.resolve(path.dirname(testHtmlPath), backgroundImage);
 
-  const modelSourcePath =
-      path.resolve(path.dirname(testHtmlPath), modelSource);
+  const modelSourcePath = path.resolve(path.dirname(testHtmlPath), modelSource);
 
   await new Promise((resolve, reject) => {
-    console.log(`🖌️  Rendering ${name} screenshot for ${scenario.slug}...`);
+    console.log(
+        `🖌️  Rendering ${name} screenshot for ${scenario.slug}...`);
 
     const childProcess = spawn(
         script,
@@ -171,13 +181,12 @@ const screenshotFromScript = async (scenario, scenarioDirectory, filePath, name,
       }
     });
   });
-
-
 }
 
-updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
-    .then(() => exit(0))
-    .catch((error) => {
-      console.error(error);
-      exit(1);
-    });
+                   updateScreenshots(
+                       require(path.join(fidelityTestDirectory, 'config.json')))
+                       .then(() => exit(0))
+                       .catch((error) => {
+                         console.error(error);
+                         exit(1);
+                       });
