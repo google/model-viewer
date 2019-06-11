@@ -53,19 +53,15 @@ const $updateCamera = Symbol('updateCamera');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
 const $updateFieldOfView = Symbol('updateFieldOfView');
 
-const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
 const $changeHandler = Symbol('changeHandler');
 const $promptTransitionendHandler = Symbol('promptTransitionendHandler');
 
-const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 const $onPromptTransitionend = Symbol('onPromptTransitionend');
 
-const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
-const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
@@ -103,9 +99,7 @@ export const ControlsMixin = (ModelViewerElement:
         protected[$promptElement]: Element;
 
         protected[$idleTime] = 0;
-        protected[$userPromptedOnce] = false;
-        protected[$waitingToPromptUser] = false;
-        protected[$shouldPromptUserToInteract] = true;
+        protected[$waitingToPromptUser] = true;
 
         protected[$controls]: SmoothControls;
 
@@ -117,7 +111,6 @@ export const ControlsMixin = (ModelViewerElement:
             this[$onChange](event as ChangeEvent);
 
         protected[$focusHandler] = () => this[$onFocus]();
-        protected[$blurHandler] = () => this[$onBlur]();
 
         protected[$promptTransitionendHandler] = () =>
             this[$onPromptTransitionend]();
@@ -176,10 +169,8 @@ export const ControlsMixin = (ModelViewerElement:
               controls.enableInteraction();
 
               scene.canvas.addEventListener('focus', this[$focusHandler]);
-              scene.canvas.addEventListener('blur', this[$blurHandler]);
             } else {
               scene.canvas.removeEventListener('focus', this[$focusHandler]);
-              scene.canvas.removeEventListener('blur', this[$blurHandler]);
 
               controls.disableInteraction();
             }
@@ -229,7 +220,7 @@ export const ControlsMixin = (ModelViewerElement:
           super[$tick](time, delta);
 
           if (this[$waitingToPromptUser]) {
-            if (this.loaded) {
+            if (this.modelIsVisible) {
               this[$idleTime] += delta;
             }
 
@@ -238,11 +229,9 @@ export const ControlsMixin = (ModelViewerElement:
                   'aria-label', INTERACTION_PROMPT);
 
               // NOTE(cdata): After notifying users that the controls are
-              // available, we flag that the user has been prompted at least
-              // once, and then effectively stop the idle timer. If the camera
+              // available, we stop the idle timer. If the camera
               // orbit changes after this point, the user will never be prompted
               // again for this particular <model-element> instance:
-              this[$userPromptedOnce] = true;
               this[$waitingToPromptUser] = false;
 
               this[$promptElement].classList.add('visible');
@@ -254,16 +243,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$deferInteractionPrompt]() {
           // Effectively cancel the timer waiting for user interaction:
-          this[$waitingToPromptUser] = false;
           this[$promptElement]!.classList.remove('visible');
-
-          // Implicitly there was some reason to defer the prompt. If the user
-          // has been prompted at least once already, we no longer need to
-          // prompt the user, although if they have never been prompted we
-          // should probably prompt them at least once just in case.
-          if (this[$userPromptedOnce]) {
-            this[$shouldPromptUserToInteract] = false;
-          }
         }
 
         /**
@@ -386,28 +366,14 @@ export const ControlsMixin = (ModelViewerElement:
           if (canvas.getAttribute('aria-label') !== ariaLabel) {
             canvas.setAttribute('aria-label', ariaLabel);
           }
-
-          // NOTE(cdata): When focused, if the user has yet to interact with the
-          // camera controls (that is, we "should" prompt the user), we begin
-          // the idle timer and indicate that we are waiting for it to cross the
-          // prompt threshold:
-          if (this[$shouldPromptUserToInteract]) {
-            this[$waitingToPromptUser] = true;
-            this[$idleTime] = 0;
-          }
-        }
-
-        [$onBlur]() {
-          this[$waitingToPromptUser] = false;
-          this[$promptElement].classList.remove('visible');
         }
 
         [$onChange]({source}: ChangeEvent) {
-          this[$deferInteractionPrompt]();
           this[$updateAria]();
           this[$needsRender]();
 
           if (source === 'user-interaction') {
+            this[$deferInteractionPrompt]();
             this[$onUserModelOrbit]();
           }
         }

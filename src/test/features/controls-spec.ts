@@ -281,10 +281,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test(
-            'does not prompt users to interact before a model is loaded',
+            'does not prompt users to interact before a model is visible',
             async () => {
               Object.defineProperty(
-                  element, 'loaded', {value: false, configurable: true});
+                  element,
+                  'modelIsVisible',
+                  {value: false, configurable: true});
 
               element.interactionPromptThreshold = 500;
 
@@ -304,7 +306,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                   .to.be.equal(false);
 
               Object.defineProperty(
-                  element, 'loaded', {value: true, configurable: true});
+                  element, 'modelIsVisible', {value: true, configurable: true});
 
               await timePasses(element.interactionPromptThreshold + 100);
 
