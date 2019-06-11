@@ -178,6 +178,34 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         });
       });
 
+      suite('when element starts in non-rendered state', () => {
+        setup(() => {
+          element.style.display = 'none';
+        });
+
+        suite('model-visibility event', () => {
+          test('is dispatched', async () => {
+            const modelBecomesVisible =
+                waitForEvent(element, 'model-visibility');
+            element.src = ASTRONAUT_GLB_PATH;
+            await modelBecomesVisible;
+          });
+        });
+
+        suite('modelIsVisible', () => {
+          test(
+              'is true when the element eventually becomes renderable',
+              async () => {
+                const modelBecomesVisible =
+                    waitForEvent(element, 'model-visibility');
+                element.src = ASTRONAUT_GLB_PATH;
+                await modelBecomesVisible;
+                element.style.display = 'block';
+                expect(element.modelIsVisible).to.be.equal(true);
+              });
+        });
+      });
+
       suite('with loaded model src', () => {
         setup(() => {
           element.src = ASTRONAUT_GLB_PATH;

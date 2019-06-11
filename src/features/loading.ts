@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$ariaLabel, $canvas, $progressTracker, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $canvas, $onResize, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
@@ -68,8 +68,10 @@ const $shouldRevealModel = Symbol('shouldRevealModel');
 const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsVisible = Symbol('modelIsVisible');
+const $changeModelVisibilityState = Symbol('changeModelVisibilityState');
 const $preloadAttempted = Symbol('preloadAttempted');
 const $sourceUpdated = Symbol('sourceUpdated');
+const $elementIsRenderable = Symbol('elementIsRenderable');
 
 const $updateLoadingAndVisibility = Symbol('updateLoadingAndVisibility');
 
@@ -147,6 +149,7 @@ export const LoadingMixin = (ModelViewerElement:
           this.requestUpdate();
         }
 
+        protected[$elementIsRenderable] = true;
         protected[$modelIsVisible] = false;
         protected[$preloadAttempted] = false;
         protected[$sourceUpdated] = false;
@@ -270,6 +273,14 @@ export const LoadingMixin = (ModelViewerElement:
           this[$updateLoadingAndVisibility]()
         }
 
+        [$onResize](event: {width: number, height: number}) {
+          super[$onResize](event);
+          // Capture this state at resize time. Note that if the element is
+          // hidden due to circumstances like 'display: none', its width and
+          // height will be reported as 0.
+          this[$elementIsRenderable] = event.width > 0 && event.height > 0;
+        }
+
         [$onClick]() {
           this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
           this.requestUpdate();
@@ -359,21 +370,35 @@ export const LoadingMixin = (ModelViewerElement:
           }
         }
 
+        [$changeModelVisibilityState](visible: boolean) {
+          if (this[$modelIsVisible] === visible) {
+            return;
+          }
+
+          this[$modelIsVisible] = visible;
+          this[$announceModelVisibility](visible);
+        }
+
         [$showPoster]() {
           const posterContainerElement = this[$posterContainerElement];
           const defaultPosterElement = this[$defaultPosterElement];
-          const posterContainerOpacity = parseFloat(
-              self.getComputedStyle(posterContainerElement).opacity!);
 
           defaultPosterElement.tabIndex = 1;
           defaultPosterElement.removeAttribute('aria-hidden');
           posterContainerElement.classList.add('show');
 
-          if (posterContainerOpacity < 1.0) {
-            posterContainerElement.addEventListener('transitionend', () => {
-              this[$modelIsVisible] = false;
-              this[$announceModelVisibility](false);
-            }, {once: true});
+          if (this[$elementIsRenderable]) {
+            const posterContainerOpacity = parseFloat(
+                self.getComputedStyle(posterContainerElement).opacity!);
+
+            if (posterContainerOpacity < 1.0) {
+              posterContainerElement.addEventListener(
+                  'transitionend',
+                  () => this[$changeModelVisibilityState](false),
+                  {once: true});
+            }
+          } else {
+            this[$changeModelVisibilityState](false)
           }
         }
 
@@ -382,30 +407,39 @@ export const LoadingMixin = (ModelViewerElement:
           const defaultPosterElement = this[$defaultPosterElement];
 
           if (posterContainerElement.classList.contains('show')) {
+            const finishHidingPoster = () => {
+              // Ensure that the poster is no longer focusable or visible to
+              // screen readers
+              defaultPosterElement.setAttribute('aria-hidden', 'true');
+              defaultPosterElement.removeAttribute('tabindex');
+            };
             posterContainerElement.classList.remove('show');
 
-            // We might need to forward focus to our internal canvas, but that
-            // cannot happen until the poster has completely transitioned away
-            posterContainerElement.addEventListener('transitionend', () => {
-              this[$announceModelVisibility](true);
-              requestAnimationFrame(() => {
-                this[$modelIsVisible] = true;
+            if (this[$elementIsRenderable]) {
+              // We might need to forward focus to our internal canvas, but that
+              // cannot happen until the poster has completely transitioned away
+              posterContainerElement.addEventListener('transitionend', () => {
+                requestAnimationFrame(() => {
+                  this[$changeModelVisibilityState](true);
 
-                const root = this.getRootNode();
+                  const root = this.getRootNode();
 
-                // If the <model-viewer> is still focused, forward the focus to
-                // the canvas that has just been revealed
-                if (root &&
-                    (root as Document | ShadowRoot).activeElement === this) {
-                  this[$canvas].focus();
-                }
+                  // If the <model-viewer> is still focused, forward the focus
+                  // to the canvas that has just been revealed
+                  if (root &&
+                      (root as Document | ShadowRoot).activeElement === this) {
+                    this[$canvas].focus();
+                  }
 
-                // Ensure that the poster is no longer focusable or visible to
-                // screen readers
-                defaultPosterElement.setAttribute('aria-hidden', 'true');
-                defaultPosterElement.removeAttribute('tabindex');
-              });
-            }, {once: true});
+                  finishHidingPoster();
+                });
+              }, {once: true});
+            } else {
+              // For non-renderable cases, we don't need to bother focusing the
+              // canvas because it cannot be focused anyway
+              this[$changeModelVisibilityState](true);
+              finishHidingPoster();
+            }
           }
         }
 
