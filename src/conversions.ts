@@ -142,9 +142,16 @@ export const deserializeAngleToDeg = (angleString: string): number|null => {
 export const enumerationDeserializer = <T extends string>(allowedNames: T[]) =>
     (valueString: string): Set<T> => {
       try {
-        return new Set(parseValues(valueString)
-                           .map(valueNode => valueNode.value as T)
-                           .filter((name) => allowedNames.indexOf(name) > -1));
+        const names = parseValues(valueString)
+                          .map(valueNode => valueNode.value as T)
+                          .filter((name) => allowedNames.indexOf(name) > -1);
+        // NOTE(cdata): IE11 does not support constructing a Set directly from
+        // an iterable, so we need to manually add all the items:
+        const result = new Set<T>();
+        for (const name of names) {
+          result.add(name);
+        }
+        return result;
       } catch (_error) {
       }
       return new Set();

@@ -101,7 +101,7 @@ const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
-const $isAllowedQuickLookBrowser = Symbol('isAllowedBrowser');
+const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
@@ -283,7 +283,7 @@ configuration or device capabilities');
               IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
           const arViewerCandidate = IS_ANDROID && this.ar;
           const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
-              this[$isAllowedQuickLookBrowser] && !!this.iosSrc;
+              this[$canLaunchQuickLook] && !!this.iosSrc;
 
           const showArButton = unstableWebxrCandidate || arViewerCandidate ||
               iosQuickLookCandidate;
@@ -318,7 +318,7 @@ configuration or device capabilities');
           this.activateAR();
         }
 
-        get[$isAllowedQuickLookBrowser](): boolean {
+        get[$canLaunchQuickLook](): boolean {
           if (IS_IOS_CHROME) {
             return this[$quickLookBrowsers].has('chrome');
           } else if (IS_IOS_SAFARI) {
