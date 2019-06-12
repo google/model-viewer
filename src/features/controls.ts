@@ -27,8 +27,15 @@ export interface SphericalPosition {
   radius: number;
 }
 
+export type InteractionPromptStrategy = 'auto'|'when-focused';
 
-const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+const InteractionPromptStrategy:
+    {[index: string]: InteractionPromptStrategy} = {
+      AUTO: 'auto',
+      WHEN_FOCUSED: 'when-focused'
+    };
+
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
 
 const HALF_PI = Math.PI / 2.0;
@@ -75,6 +82,7 @@ export interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
   fieldOfView: string;
+  interactionPrompt: InteractionPromptStrategy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getFieldOfView(): number;
@@ -99,6 +107,10 @@ export const ControlsMixin = (ModelViewerElement:
         @property({type: Number, attribute: 'interaction-prompt-threshold'})
         interactionPromptThreshold: number =
             DEFAULT_INTERACTION_PROMPT_THRESHOLD;
+
+        @property({type: String, attribute: 'interaction-prompt'})
+        interactionPrompt: InteractionPromptStrategy =
+            InteractionPromptStrategy.WHEN_FOCUSED;
 
         protected[$promptElement]: Element;
 
@@ -185,12 +197,20 @@ export const ControlsMixin = (ModelViewerElement:
             }
           }
 
+          if (changedProperties.has('interactionPrompt')) {
+            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+              this[$waitingToPromptUser] = true;
+            }
+          }
+
           if (changedProperties.has('cameraOrbit')) {
             this[$updateCameraOrbit]();
           }
+
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
           }
+
           if (this[$jumpCamera] === true) {
             this[$controls].jumpToGoal();
             this[$jumpCamera] = false;
@@ -403,11 +423,17 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]({source}: ChangeEvent) {
-          this[$deferInteractionPrompt]();
+          if (this.interactionPrompt ===
+              InteractionPromptStrategy.WHEN_FOCUSED) {
+            this[$deferInteractionPrompt]();
+          }
           this[$updateAria]();
           this[$needsRender]();
 
           if (source === 'user-interaction') {
+            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+              this[$deferInteractionPrompt]();
+            }
             this[$onUserModelOrbit]();
           }
         }

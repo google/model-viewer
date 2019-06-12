@@ -243,6 +243,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(controls.interactionEnabled).to.be.false;
       });
 
+      suite('interaction-prompt', () => {
+        test('can be configured to raise automatically', async () => {
+          element.interactionPrompt = 'auto';
+          await timePasses(element.interactionPromptThreshold + 100);
+
+          const promptElement: HTMLElement = (element as any)[$promptElement];
+          expect(promptElement.classList.contains('visible')).to.be.equal(true);
+        });
+      });
+
       suite('a11y', () => {
         setup(async () => {
           element.alt = 'A 3D model of a cube';
