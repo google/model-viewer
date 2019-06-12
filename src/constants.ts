@@ -59,3 +59,7 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
       tempAnchor.relList && tempAnchor.relList.supports &&
       tempAnchor.relList.supports('ar'));
 })();
+
+// @see https://developer.chrome.com/multidevice/user-agent
+export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
+export const IS_IOS_SAFARI = IS_IOS && /Safari\//.test(navigator.userAgent);
