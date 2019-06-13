@@ -154,7 +154,7 @@ export class Damper {
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (!isFinite(x)) {
+    if (x == null) {
       return xGoal;
     }
     if (timeStepMilliseconds < 0) {
