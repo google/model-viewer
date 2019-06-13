@@ -154,27 +154,32 @@ export class Damper {
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (timeStepMilliseconds >= DECAY_MILLISECONDS) {
-      // This clamps at the point where a large time step would cause the
-      // discrete step to overshoot.
-      this[$velocity] = 0;
+    if (x == null) {
       return xGoal;
     }
     if (timeStepMilliseconds < 0) {
       return x;
     }
-    // Critically damped
-    const acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
-        2 * NATURAL_FREQUENCY * this[$velocity];
-    this[$velocity] += acceleration * timeStepMilliseconds;
-    if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
-        acceleration * (xGoal - x) <= 0) {
+    // Exact solution to a critically damped second-order system, where:
+    // acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
+    // 2 * NATURAL_FREQUENCY * this[$velocity];
+    const deltaX = (x - xGoal);
+    const intermediateVelocity = this[$velocity] + NATURAL_FREQUENCY * deltaX;
+    const intermediateX = deltaX + timeStepMilliseconds * intermediateVelocity;
+    const decay = Math.exp(-NATURAL_FREQUENCY * timeStepMilliseconds);
+    const newVelocity =
+        (intermediateVelocity - NATURAL_FREQUENCY * intermediateX) * decay;
+    const acceleration =
+        -NATURAL_FREQUENCY * (newVelocity + intermediateVelocity * decay);
+    if (Math.abs(newVelocity) < NIL_SPEED * xNormalization &&
+        acceleration * deltaX >= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their goal.
       this[$velocity] = 0;
       return xGoal;
     } else {
-      return x + this[$velocity] * timeStepMilliseconds;
+      this[$velocity] = newVelocity;
+      return xGoal + intermediateX * decay;
     }
   }
 }
@@ -455,7 +460,7 @@ export class SmoothControls extends EventDispatcher {
    * parameters.
    */
   jumpToGoal() {
-    this.update(0, DECAY_MILLISECONDS);
+    this.update(0, 100 * DECAY_MILLISECONDS);
   }
 
   /**
