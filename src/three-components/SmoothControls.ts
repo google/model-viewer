@@ -154,27 +154,30 @@ export class Damper {
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (timeStepMilliseconds >= DECAY_MILLISECONDS) {
-      // This clamps at the point where a large time step would cause the
-      // discrete step to overshoot.
-      this[$velocity] = 0;
+    if (!x) {
       return xGoal;
     }
     if (timeStepMilliseconds < 0) {
       return x;
     }
-    // Critically damped
-    const acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
-        2 * NATURAL_FREQUENCY * this[$velocity];
-    this[$velocity] += acceleration * timeStepMilliseconds;
-    if (Math.abs(this[$velocity]) < NIL_SPEED * xNormalization &&
-        acceleration * (xGoal - x) <= 0) {
+    // Exact solution to a critically damped second-order system, where:
+    // acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
+    // 2 * NATURAL_FREQUENCY * this[$velocity];
+    const c1 = (x - xGoal);
+    const c2 = this[$velocity] + NATURAL_FREQUENCY * c1;
+    const c3 = c1 + timeStepMilliseconds * c2;
+    const decay = Math.exp(-NATURAL_FREQUENCY * timeStepMilliseconds);
+    const newVelocity = (c2 - NATURAL_FREQUENCY * c3) * decay;
+    const acceleration = -NATURAL_FREQUENCY * (newVelocity + c2 * decay);
+    if (Math.abs(newVelocity) < NIL_SPEED * xNormalization &&
+        acceleration * c1 >= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their goal.
       this[$velocity] = 0;
       return xGoal;
     } else {
-      return x + this[$velocity] * timeStepMilliseconds;
+      this[$velocity] = newVelocity;
+      return xGoal + c3 * decay;
     }
   }
 }
@@ -455,7 +458,7 @@ export class SmoothControls extends EventDispatcher {
    * parameters.
    */
   jumpToGoal() {
-    this.update(0, DECAY_MILLISECONDS);
+    this.update(0, 100 * DECAY_MILLISECONDS);
   }
 
   /**
