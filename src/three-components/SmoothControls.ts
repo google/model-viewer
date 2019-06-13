@@ -154,7 +154,7 @@ export class Damper {
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (!x) {
+    if (!isFinite(x)) {
       return xGoal;
     }
     if (timeStepMilliseconds < 0) {
@@ -163,21 +163,23 @@ export class Damper {
     // Exact solution to a critically damped second-order system, where:
     // acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
     // 2 * NATURAL_FREQUENCY * this[$velocity];
-    const c1 = (x - xGoal);
-    const c2 = this[$velocity] + NATURAL_FREQUENCY * c1;
-    const c3 = c1 + timeStepMilliseconds * c2;
+    const deltaX = (x - xGoal);
+    const intermediateVelocity = this[$velocity] + NATURAL_FREQUENCY * deltaX;
+    const intermediateX = deltaX + timeStepMilliseconds * intermediateVelocity;
     const decay = Math.exp(-NATURAL_FREQUENCY * timeStepMilliseconds);
-    const newVelocity = (c2 - NATURAL_FREQUENCY * c3) * decay;
-    const acceleration = -NATURAL_FREQUENCY * (newVelocity + c2 * decay);
+    const newVelocity =
+        (intermediateVelocity - NATURAL_FREQUENCY * intermediateX) * decay;
+    const acceleration =
+        -NATURAL_FREQUENCY * (newVelocity + intermediateVelocity * decay);
     if (Math.abs(newVelocity) < NIL_SPEED * xNormalization &&
-        acceleration * c1 >= 0) {
+        acceleration * deltaX >= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their goal.
       this[$velocity] = 0;
       return xGoal;
     } else {
       this[$velocity] = newVelocity;
-      return xGoal + c3 * decay;
+      return xGoal + intermediateX * decay;
     }
   }
 }
