@@ -17,9 +17,29 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-[Demo](https://model-viewer.glitch.me) • [Documentation](https://googlewebcomponents.github.io/model-viewer/index.html) • [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) • [Quality Tests](https://googlewebcomponents.github.io/model-viewer/test/fidelity/results-viewer.html)
+[Documentation](https://googlewebcomponents.github.io/model-viewer/index.html) • [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) • [Quality Tests](https://googlewebcomponents.github.io/model-viewer/test/fidelity/results-viewer.html)
 
 ![sample-render](examples/sample-render.png)
+
+## Demos
+
+[Animation](https://googlewebcomponents.github.io/model-viewer/examples/animation.html) • 
+
+[Lazy Loading](https://googlewebcomponents.github.io/model-viewer/examples/lazy-loading.html) • 
+
+[Model Formats](https://googlewebcomponents.github.io/model-viewer/examples/model-formats.html) • 
+
+[Staging &amp; Camera Control](https://googlewebcomponents.github.io/model-viewer/examples/staging-and-camera-control.html) • 
+
+[Lighting &amp; Environment](https://googlewebcomponents.github.io/model-viewer/examples/lighting-and-environment.html) • 
+
+[Augmented Reality](https://googlewebcomponents.github.io/model-viewer/examples/augmented-reality.html) • 
+
+[Background &amp; Reflections](https://googlewebcomponents.github.io/model-viewer/examples/pbr.html) • 
+
+[Multiple Simultaneous Models Rendering Only In Viewport](https://googlewebcomponents.github.io/model-viewer/examples/list.html) • 
+
+[Rendering Many Simultaneously At Once](https://googlewebcomponents.github.io/model-viewer/examples/rendering-showcase.html) 
 
 
 ## Installing
