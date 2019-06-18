@@ -1,0 +1,105 @@
+diff --git a/samples/CMakeLists.txt b/samples/CMakeLists.txt
+index e404a08..9a9d33f 100644
+--- a/samples/CMakeLists.txt
++++ b/samples/CMakeLists.txt
+@@ -250,6 +250,7 @@ if (NOT ANDROID)
+     add_assimp_demo(lightbulb)
+     add_assimp_demo(material_sandbox)
+     add_assimp_demo(sample_full_pbr)
++    add_assimp_demo(gltf_renderer)
+ 
+     add_filamesh_demo(sample_cloth)
+     add_filamesh_demo(sample_normal_map)
+@@ -258,6 +259,7 @@ if (NOT ANDROID)
+ 
+     # Sample app specific
+     target_link_libraries(frame_generator PRIVATE imageio)
++    target_link_libraries(gltf_renderer PRIVATE imageio)
+     target_link_libraries(suzanne PRIVATE suzanne-resources)
+     target_link_libraries(gltf_viewer PRIVATE gltf-resources gltfio)
+ endif()
+diff --git a/samples/app/Config.h b/samples/app/Config.h
+index 8efe32d..a57cfda 100644
+--- a/samples/app/Config.h
++++ b/samples/app/Config.h
+@@ -26,6 +26,9 @@ struct Config {
+     std::string iblDirectory;
+     float scale = 1.0f;
+     bool splitView = false;
++    int width = 768;
++    int height = 768;
++    std::string outputPath;
+     filament::Engine::Backend backend = filament::Engine::Backend::OPENGL;
+ };
+ 
+diff --git a/samples/app/FilamentApp.cpp b/samples/app/FilamentApp.cpp
+index 200d2d2..796b0d5 100644
+--- a/samples/app/FilamentApp.cpp
++++ b/samples/app/FilamentApp.cpp
+@@ -68,9 +68,23 @@ void FilamentApp::run(const Config& config, SetupCallback setupCallback,
+         CleanupCallback cleanupCallback, ImGuiCallback imguiCallback,
+         PreRenderCallback preRender, PostRenderCallback postRender,
+         size_t width, size_t height) {
++  run(config, nullptr, setupCallback, cleanupCallback, imguiCallback,
++      preRender, postRender, width, height);
++}
++
++void FilamentApp::run(const Config& config,
++        WindowCreatedCallback configureWindow, SetupCallback setupCallback,
++        CleanupCallback cleanupCallback, ImGuiCallback imguiCallback,
++        PreRenderCallback preRender, PostRenderCallback postRender,
++        size_t width, size_t height) {
++
+     std::unique_ptr<FilamentApp::Window> window(
+             new FilamentApp::Window(this, config, config.title, width, height));
+ 
++    if (configureWindow) {
++      configureWindow(window->mWindow);
++    }
++
+     mDepthMaterial = Material::Builder()
+             .package(RESOURCES_DEPTHVISUALIZER_DATA, RESOURCES_DEPTHVISUALIZER_SIZE)
+             .build(*mEngine);
+@@ -294,6 +308,7 @@ void FilamentApp::run(const Config& config, SetupCallback setupCallback,
+                     break;
+                 case SDL_WINDOWEVENT:
+                     switch (event.window.event) {
++                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                         case SDL_WINDOWEVENT_RESIZED:
+                             window->resize();
+                             break;
+@@ -432,7 +447,7 @@ FilamentApp::Window::Window(FilamentApp* filamentApp,
+         : mFilamentApp(filamentApp) {
+     const int x = SDL_WINDOWPOS_CENTERED;
+     const int y = SDL_WINDOWPOS_CENTERED;
+-    const uint32_t windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
++    const uint32_t windowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
+     mWindow = SDL_CreateWindow(title.c_str(), x, y, (int) w, (int) h, windowFlags);
+ 
+     // Create the Engine after the window in case this happens to be a single-threaded platform.
+diff --git a/samples/app/FilamentApp.h b/samples/app/FilamentApp.h
+index dfa2474..f54b99a 100644
+--- a/samples/app/FilamentApp.h
++++ b/samples/app/FilamentApp.h
+@@ -48,6 +48,7 @@ class MeshAssimp;
+ 
+ class FilamentApp {
+ public:
++    using WindowCreatedCallback = std::function<void(SDL_Window* window)>;
+     using SetupCallback = std::function<void(filament::Engine*, filament::View*, filament::Scene*)>;
+     using CleanupCallback =
+             std::function<void(filament::Engine*, filament::View*, filament::Scene*)>;
+@@ -72,6 +73,13 @@ public:
+             PostRenderCallback postRender = PostRenderCallback(),
+             size_t width = 1024, size_t height = 640);
+ 
++    void run(const Config& config, WindowCreatedCallback configureWindow,
++            SetupCallback setup, CleanupCallback cleanup,
++            ImGuiCallback imgui = ImGuiCallback(),
++            PreRenderCallback preRender = PreRenderCallback(),
++            PostRenderCallback postRender = PostRenderCallback(),
++            size_t width = 1024, size_t height = 640);
++
+     filament::Material const* getDefaultMaterial() const noexcept { return mDefaultMaterial; }
+     filament::Material const* getTransparentMaterial() const noexcept { return mTransparentMaterial; }
+     IBL* getIBL() const noexcept { return mIBL.get(); }

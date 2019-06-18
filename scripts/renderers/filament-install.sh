@@ -34,6 +34,7 @@ set -e
 
 FILAMENT_REPO="https://github.com/google/filament.git"
 FILAMENT_DIR=$RENDERER_BASE_PATH/filament
+FILAMENT_PATCH_PATH=$MODEL_VIEWER_CHECKOUT_DIRECTORY/src/test/fidelity/filament.patch
 GLTF_RENDERER_CPP_PATH=$MODEL_VIEWER_CHECKOUT_DIRECTORY/src/test/fidelity/gltf_renderer.cpp
 
 if [ -d "$FILAMENT_DIR" ] && [ "$REBUILD_EVERYTHING" = true ]; then
@@ -49,6 +50,7 @@ pushd $FILAMENT_DIR
 git fetch --depth=1 origin
 git reset --hard origin/master
 
+git apply $FILAMENT_PATCH_PATH
 cp $GLTF_RENDERER_CPP_PATH $FILAMENT_DIR/samples
 
 # Export critical environment variables for building Filament
