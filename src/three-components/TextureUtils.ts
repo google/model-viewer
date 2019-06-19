@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
+
 import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
+
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
 
@@ -267,6 +269,69 @@ export default class TextureUtils extends EventDispatcher {
     } finally {
       updateGenerationProgress(1.0);
     }
+  }
+
+  gaussianBlur(cubeMap: Texture, standardDeviationRadians: number) {
+    const blurScene = new Scene();
+
+    const geometry = new BoxBufferGeometry();
+    geometry.removeAttribute('uv');
+
+    const blurMaterial = new ShaderMaterial({
+      uniforms: {tCube: {value: null}, direction: {value: null}},
+      vertexShader: `
+        varying vec3 vWorldDirection;
+        #include <common>
+        void main() {
+          vWorldDirection = transformDirection( position, modelMatrix );
+          #include <begin_vertex>
+          #include <project_vertex>
+          gl_Position.z = gl_Position.w;
+        }
+      `,
+      fragmentShader: `
+        uniform samplerCube tCube;
+        varying vec3 vWorldDirection;
+        void main() {
+          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.0 );
+          gl_FragColor = mapTexelToLinear( texColor );
+        }
+      `,
+      side: BackSide,
+      depthTest: false,
+      depthWrite: false
+    });
+
+    blurScene.add(new Mesh(geometry, blurMaterial));
+
+    const blurCamera = new CubeCamera(0.1, 100, 256);
+    blurCamera.renderTarget.texture.type = UnsignedByteType;
+    blurCamera.renderTarget.texture.format = RGBEFormat;
+    blurCamera.renderTarget.texture.encoding = RGBEEncoding;
+    blurCamera.renderTarget.texture.magFilter = NearestFilter;
+    blurCamera.renderTarget.texture.minFilter = NearestFilter;
+    blurCamera.renderTarget.texture.generateMipmaps = false;
+
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
+
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
+
+    blurMaterial.uniforms.direction.value = 'latitudinal';
+    blurMaterial.uniforms.tCube.value = cubeMap;
+    blurCamera.update(this.renderer, blurScene);
+
+    blurMaterial.uniforms.direction.value = 'longitudinal';
+    blurMaterial.uniforms.tCube.value = blurCamera.renderTarget.texture;
+    blurCamera.renderTarget.texture = cubeMap;
+    blurCamera.update(this.renderer, blurScene);
+
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
   }
 
   /**
