@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
@@ -231,6 +231,7 @@ export default class TextureUtils extends EventDispatcher {
           // the environment:
           // TODO(#336): can cache this per renderer and color
           environmentMap = this.environmentMapGenerator.generate();
+          this.gaussianBlur(environmentMap);
           environmentMapWasGenerated = true;
         }
       }
@@ -271,14 +272,14 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  gaussianBlur(cubeMap: Texture, standardDeviationRadians: number) {
+  gaussianBlur(cubeMap: Texture) {  //, standardDeviationRadians: number
     const blurScene = new Scene();
 
     const geometry = new BoxBufferGeometry();
     geometry.removeAttribute('uv');
 
     const blurMaterial = new ShaderMaterial({
-      uniforms: {tCube: {value: null}, direction: {value: null}},
+      uniforms: {tCube: {value: null}, longitudinal: {value: 0}},
       vertexShader: `
         varying vec3 vWorldDirection;
         #include <common>
@@ -291,10 +292,23 @@ export default class TextureUtils extends EventDispatcher {
       `,
       fragmentShader: `
         uniform samplerCube tCube;
+        uniform bool longitudinal;
+        float dTheta = 0.1;
         varying vec3 vWorldDirection;
         void main() {
-          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.0 );
-          gl_FragColor = mapTexelToLinear( texColor );
+          vWorldDirection.x *= -1.0;
+          vec4 texColor;
+          for( int i = -3; i < 4; i++ ) {
+            float diTheta = dTheta * i;
+            if( longitudinal ) {
+              mat2 R = mat2( cos(diTheta), sin(diTheta), - sin(diTheta), cos(diTheta) );
+              vec3 sampleDirection = vec3( R * vWorldDirection.xy, vWorldDirection.z );
+              texColor += mapTexelToLinear( textureCube( tCube, sampleDirection ) );
+            } else {
+
+            }
+          }
+          gl_FragColor = mapLinearToTexel( texColor / 7.0 );
         }
       `,
       side: BackSide,
@@ -320,11 +334,11 @@ export default class TextureUtils extends EventDispatcher {
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.gammaOutput = false;
 
-    blurMaterial.uniforms.direction.value = 'latitudinal';
+    blurMaterial.uniforms.longitudinal.value = 0;
     blurMaterial.uniforms.tCube.value = cubeMap;
     blurCamera.update(this.renderer, blurScene);
 
-    blurMaterial.uniforms.direction.value = 'longitudinal';
+    blurMaterial.uniforms.longitudinal.value = 1;
     blurMaterial.uniforms.tCube.value = blurCamera.renderTarget.texture;
     blurCamera.renderTarget.texture = cubeMap;
     blurCamera.update(this.renderer, blurScene);
