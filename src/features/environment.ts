@@ -167,6 +167,7 @@ export const EnvironmentMixin = (ModelViewerElement:
             }
 
             this[$applyEnvironmentMap](environmentMap);
+            this[$scene].model.dispatchEvent({type: 'envmap-update'});
           } catch (errorOrPromise) {
             if (errorOrPromise instanceof Error) {
               this[$applyEnvironmentMap](null);

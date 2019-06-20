@@ -160,11 +160,17 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
   suite('with no background-image property', () => {
+    let environmentChanges = 0;
     suite('and a src property', () => {
       setup(async () => {
         let onLoad = waitForLoadAndEnvMap(scene, element, {url: null});
         element.src = MODEL_URL;
         document.body.appendChild(element);
+
+        environmentChanges = 0;
+        scene.model.addEventListener('envmap-update', () => {
+          environmentChanges++;
+        });
         await onLoad;
       });
 
@@ -180,6 +186,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         expect(modelUsingEnvMap(scene, {
           url: null,
         })).to.be.ok;
+      });
+
+      test('changes the environment exactly once', async function() {
+        expect(environmentChanges).to.be.eq(1);
       });
     });
   });
