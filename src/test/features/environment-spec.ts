@@ -32,7 +32,7 @@ const UNLIT_MODEL_URL =
 const MULTI_MATERIAL_MODEL_URL = assetPath('Triangle.gltf');
 
 const backgroundHasMap =
-    (scene: Scene, url: string) => {
+    (scene: Scene, url: string|null) => {
       return textureMatchesMeta((scene.background as any).texture, {url: url});
     }
 
@@ -158,6 +158,41 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await timePasses();
         expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
+
+  suite('with no background-image property', () => {
+    let environmentChanges = 0;
+    suite('and a src property', () => {
+      setup(async () => {
+        let onLoad = waitForLoadAndEnvMap(scene, element, {url: null});
+        element.src = MODEL_URL;
+        document.body.appendChild(element);
+
+        environmentChanges = 0;
+        scene.model.addEventListener('envmap-update', () => {
+          environmentChanges++;
+        });
+        await onLoad;
+      });
+
+      teardown(() => {
+        document.body.removeChild(element);
+      });
+
+      test('displays default background', async function() {
+        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
+      });
+
+      test('applies a generated environment map on model', async function() {
+        expect(modelUsingEnvMap(scene, {
+          url: null,
+        })).to.be.ok;
+      });
+
+      test('changes the environment exactly once', async function() {
+        expect(environmentChanges).to.be.eq(1);
+      });
+    });
+  });
 
   suite('with a background-image property', () => {
     suite('and a src property', () => {

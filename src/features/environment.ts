@@ -112,15 +112,6 @@ export const EnvironmentMixin = (ModelViewerElement:
           }
         }
 
-        firstUpdated(changedProperties: Map<string, any>) {
-          super.firstUpdated && super.firstUpdated(changedProperties);
-          // In case no environment-related properties were confiured, we should
-          // make sure that the environment is updated at least once:
-          if (this[$cancelEnvironmentUpdate] == null) {
-            this[$updateEnvironment]();
-          }
-        }
-
         [$onModelLoad](event: any) {
           super[$onModelLoad](event);
 
@@ -176,6 +167,7 @@ export const EnvironmentMixin = (ModelViewerElement:
             }
 
             this[$applyEnvironmentMap](environmentMap);
+            this[$scene].model.dispatchEvent({type: 'envmap-update'});
           } catch (errorOrPromise) {
             if (errorOrPromise instanceof Error) {
               this[$applyEnvironmentMap](null);
