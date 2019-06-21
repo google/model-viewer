@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, RGBEEncoding, Scene, Texture, UnsignedByteType, WebGLRenderer, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, PointLight, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 const rendererTextureCache = new Map<WebGLRenderer, Texture>();
 
@@ -126,10 +126,11 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
 
     this.camera = new CubeCamera(0.1, 100, 256);
     this.camera.renderTarget.texture.type = UnsignedByteType;
-    this.camera.renderTarget.texture.format = RGBAFormat;
+    this.camera.renderTarget.texture.format = RGBEFormat;
     this.camera.renderTarget.texture.encoding = RGBEEncoding;
-    this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
-    this.camera.renderTarget.texture.generateMipmaps = true;
+    this.camera.renderTarget.texture.magFilter = NearestFilter;
+    this.camera.renderTarget.texture.minFilter = NearestFilter;
+    this.camera.renderTarget.texture.generateMipmaps = false;
   }
 
   /**

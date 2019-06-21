@@ -219,7 +219,12 @@ export default class TextureUtils extends EventDispatcher {
     geometry.removeAttribute('uv');
 
     const blurMaterial = new ShaderMaterial({
-      uniforms: {tCube: {value: null}, longitudinal: {value: 0}},
+      uniforms: {
+        tCube: {value: null},
+        latitudinal: {value: false},
+        w: {value: [0.1633, 0.1531, 0.12245, 0.0918, 0.051]},
+        dTheta: {value: 0}
+      },
       vertexShader: `
         varying vec3 vWorldDirection;
         #include <common>
@@ -232,23 +237,30 @@ export default class TextureUtils extends EventDispatcher {
       `,
       fragmentShader: `
         uniform samplerCube tCube;
-        uniform bool longitudinal;
-        float dTheta = 0.1;
+        uniform bool latitudinal;
+        uniform float dTheta;
+        uniform float w[5];
         varying vec3 vWorldDirection;
         void main() {
-          vWorldDirection.x *= -1.0;
-          vec4 texColor;
-          for( int i = -3; i < 4; i++ ) {
+          vec4 texColor = vec4(0.0);
+          for (float i = -4.0; i < 5.0; i++) {
+            vec3 sampleDirection = vWorldDirection;
             float diTheta = dTheta * i;
-            if( longitudinal ) {
-              mat2 R = mat2( cos(diTheta), sin(diTheta), - sin(diTheta), cos(diTheta) );
-              vec3 sampleDirection = vec3( R * vWorldDirection.xy, vWorldDirection.z );
-              texColor += mapTexelToLinear( textureCube( tCube, sampleDirection ) );
+            mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+            if (latitudinal) {
+              sampleDirection.xz = R * sampleDirection.xz;
+              texColor +=
+                  w[int(abs(i))] * RGBEToLinear(textureCube(tCube, sampleDirection));
             } else {
-
+              float xz = length(sampleDirection.xz);
+              vec2 xzY = R * vec2(xz, sampleDirection.y);
+              sampleDirection.xz *= xzY.x / xz;
+              sampleDirection.y = xzY.y;
+              texColor +=
+                  w[int(abs(i))] * RGBEToLinear(textureCube(tCube, sampleDirection));
             }
           }
-          gl_FragColor = mapLinearToTexel( texColor / 7.0 );
+          gl_FragColor = linearToOutputTexel(texColor);
         }
       `,
       side: BackSide,
@@ -274,13 +286,17 @@ export default class TextureUtils extends EventDispatcher {
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.gammaOutput = false;
 
-    blurMaterial.uniforms.longitudinal.value = 0;
+    blurMaterial.uniforms.dTheta.value = 0.01;
+    blurMaterial.uniforms.latitudinal.value = false;
     blurMaterial.uniforms.tCube.value = cubeMap;
+    // (blurCamera as any).clear(this.renderer);
     blurCamera.update(this.renderer, blurScene);
 
-    blurMaterial.uniforms.longitudinal.value = 1;
+    blurMaterial.uniforms.dTheta.value = 0.01;
+    blurMaterial.uniforms.latitudinal.value = true;
     blurMaterial.uniforms.tCube.value = blurCamera.renderTarget.texture;
     blurCamera.renderTarget.texture = cubeMap;
+    // (blurCamera as any).clear(this.renderer);
     blurCamera.update(this.renderer, blurScene);
 
     this.renderer.toneMapping = toneMapping;
