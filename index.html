@@ -167,6 +167,22 @@
               environment entirely. Defaults to 1.</p>
             </li>
             <li>
+              <div>field-of-view</div>
+              <p>Used to configure the field of view of the camera. Accepts values
+              units in both degrees and radians (e.g., "30deg" or "0.5rad"). Accepts
+              any value between 20 and 45 degrees. Defaults to "45deg".</p>
+            </li>
+            <li>
+              <div>interaction-prompt</div>
+              <p>Allows you to change the conditions under which the visual and
+              audible interaction prompt will display. Allowed values are "auto"
+              and "when-focused". If set to "auto", the interaction prompt will
+              be displayed as soon as the interaction-prompt-threshold (see below)
+              time has elapsed (after the model is revealed). If set to "when-focused",
+              the interaction prompt will only be activated if the element has
+              first received focus. Defaults to "when-focused".</p>
+            </li>
+            <li>
               <div>interaction-prompt-threshold</div>
               <p>When camera-controls are enabled, &lt;model-viewer&gt; will
               prompt the user visually (and audibly, for screen readers) to
@@ -190,6 +206,13 @@
             <li>
               <div>preload</div>
               <p>When poster is also enabled, the model will be downloaded before user action. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+            </li>
+            <li>
+              <div>quick-look-browsers</div>
+              <p>Set this attribute to control which iOS browsers will be allowed
+              to launch AR Quick Look on iOS. Allowed values are "safari" and
+              "chrome". You can specify any number of browsers separated by
+              whitespace, for example: "safari chrome". Defaults to "safari".</p>
             </li>
             <li>
               <div>reveal</div>
@@ -286,6 +309,17 @@
               distance (radius) is represented in meters. This value may differ
               from the value configured with the camera-orbit attribute on account
               of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>getFieldOfView()</div>
+              <p>Returns the realtime camera vertical field of view in degrees. 
+              This value may differ from the value configured with the field-of-view 
+              attribute on account of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>jumpCameraToGoal()</div>
+              <p>Changes the camera to its last configured goal state immediately on 
+              the next update instead of interpolating the motion over time.</p>
             </li>
             <li>
               <div>play()</div>

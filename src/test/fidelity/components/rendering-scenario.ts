@@ -120,7 +120,7 @@ h2 {
 
 .screenshot > img {
   max-width: 256px;
-  flex: 1 1 auto;
+  flex: 0 0 0;
 }
 
 .check {

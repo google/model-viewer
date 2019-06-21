@@ -188,6 +188,21 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
               .to.equal(`1rad 0.5rad 1.5m`);
         });
+
+        test('jumpCameraToGoal updates instantly', async () => {
+          const cameraOrbit = `0.5rad 1.5rad 1.2m`;
+          element.cameraOrbit = cameraOrbit;
+          const fieldOfView = 30;
+          element.fieldOfView = `${fieldOfView}deg`;
+          element.jumpCameraToGoal();
+
+          await timePasses();
+
+          expect(element.getFieldOfView()).to.be.equal(fieldOfView);
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(cameraOrbit);
+        });
       });
     });
 
@@ -226,6 +241,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.cameraControls = false;
         await timePasses();
         expect(controls.interactionEnabled).to.be.false;
+      });
+
+      suite('interaction-prompt', () => {
+        test('can be configured to raise automatically', async () => {
+          element.interactionPrompt = 'auto';
+          await timePasses(element.interactionPromptThreshold + 100);
+
+          const promptElement: HTMLElement = (element as any)[$promptElement];
+          expect(promptElement.classList.contains('visible')).to.be.equal(true);
+        });
       });
 
       suite('a11y', () => {

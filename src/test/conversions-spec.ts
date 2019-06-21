@@ -15,7 +15,7 @@
 
 import {Math as ThreeMath} from 'three';
 
-import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
+import {deserializeAngleToDeg, deserializeSpherical, enumerationDeserializer} from '../conversions.js';
 
 const expect = chai.expect;
 
@@ -62,6 +62,37 @@ suite('conversions', () => {
 
     test('allows degress to be used instead of radians', () => {
       expect(deserializeAngleToDeg('1.23deg')).to.be.eql(1.23);
+    });
+  });
+
+  suite('enumerationDeserializer', () => {
+    type Animal = 'elephant'|'octopus'|'chinchilla';
+    let animals: Animal[];
+    let deserializeAnimals: (input: string) => Set<Animal>;
+
+    setup(() => {
+      animals = ['elephant', 'octopus', 'chinchilla'];
+      deserializeAnimals = enumerationDeserializer<Animal>(animals);
+    });
+
+    test('yields the members of the enumeration in the input string', () => {
+      const deserialized = deserializeAnimals('elephant chinchilla');
+      expect(deserialized.size).to.be.equal(2);
+      expect(deserialized.has('elephant')).to.be.true;
+      expect(deserialized.has('chinchilla')).to.be.true;
+    });
+
+    test('filters out non-members of the enumeration', () => {
+      const deserialized = deserializeAnimals('octopus paris');
+      expect(deserialized.size).to.be.equal(1);
+      expect(deserialized.has('octopus')).to.be.true;
+    });
+
+    test('yields an empty set from null input', () => {
+      // tsc would normally warn about null not being accepted
+      // but it is worth ensuring the correct behavior all the same:
+      const deserialized = deserializeAnimals(null as any);
+      expect(deserialized.size).to.be.equal(0);
     });
   });
 });

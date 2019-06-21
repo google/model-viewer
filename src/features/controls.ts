@@ -27,8 +27,15 @@ export interface SphericalPosition {
   radius: number;
 }
 
+export type InteractionPromptStrategy = 'auto'|'when-focused';
 
-const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+const InteractionPromptStrategy:
+    {[index: string]: InteractionPromptStrategy} = {
+      AUTO: 'auto',
+      WHEN_FOCUSED: 'when-focused'
+    };
+
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
 
 const HALF_PI = Math.PI / 2.0;
@@ -69,14 +76,17 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
+const $jumpCamera = Symbol('jumpCamera');
 
 export interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
   fieldOfView: string;
+  interactionPrompt: InteractionPromptStrategy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getFieldOfView(): number;
+  jumpCameraToGoal(): void;
 }
 
 export const ControlsMixin = (ModelViewerElement:
@@ -98,26 +108,31 @@ export const ControlsMixin = (ModelViewerElement:
         interactionPromptThreshold: number =
             DEFAULT_INTERACTION_PROMPT_THRESHOLD;
 
+        @property({type: String, attribute: 'interaction-prompt'})
+        interactionPrompt: InteractionPromptStrategy =
+            InteractionPromptStrategy.WHEN_FOCUSED;
+
         protected[$promptElement]: Element;
 
-        protected[$idleTime]: number = 0;
-        protected[$userPromptedOnce]: boolean = false;
-        protected[$waitingToPromptUser]: boolean = false;
-        protected[$shouldPromptUserToInteract]: boolean = true;
+        protected[$idleTime] = 0;
+        protected[$userPromptedOnce] = false;
+        protected[$waitingToPromptUser] = false;
+        protected[$shouldPromptUserToInteract] = true;
 
         protected[$controls]: SmoothControls;
 
         protected[$idealCameraDistance]: number|null = null;
-        protected[$lastSpherical]: Spherical = new Spherical();
+        protected[$lastSpherical] = new Spherical();
+        protected[$jumpCamera] = false;
 
-        protected[$changeHandler]: (event: Event) => void = (event: Event) =>
+        protected[$changeHandler] = (event: Event) =>
             this[$onChange](event as ChangeEvent);
 
-        protected[$focusHandler]: () => void = () => this[$onFocus]();
-        protected[$blurHandler]: () => void = () => this[$onBlur]();
+        protected[$focusHandler] = () => this[$onFocus]();
+        protected[$blurHandler] = () => this[$onBlur]();
 
-        protected[$promptTransitionendHandler]:
-            () => void = () => this[$onPromptTransitionend]();
+        protected[$promptTransitionendHandler] = () =>
+            this[$onPromptTransitionend]();
 
         constructor() {
           super();
@@ -138,6 +153,10 @@ export const ControlsMixin = (ModelViewerElement:
 
         getFieldOfView(): number {
           return this[$controls].getFieldOfView();
+        }
+
+        jumpCameraToGoal() {
+          this[$jumpCamera] = true;
         }
 
         connectedCallback() {
@@ -178,11 +197,23 @@ export const ControlsMixin = (ModelViewerElement:
             }
           }
 
+          if (changedProperties.has('interactionPrompt')) {
+            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+              this[$waitingToPromptUser] = true;
+            }
+          }
+
           if (changedProperties.has('cameraOrbit')) {
             this[$updateCameraOrbit]();
           }
+
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
+          }
+
+          if (this[$jumpCamera] === true) {
+            this[$controls].jumpToGoal();
+            this[$jumpCamera] = false;
           }
         }
 
@@ -392,11 +423,17 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]({source}: ChangeEvent) {
-          this[$deferInteractionPrompt]();
+          if (this.interactionPrompt ===
+              InteractionPromptStrategy.WHEN_FOCUSED) {
+            this[$deferInteractionPrompt]();
+          }
           this[$updateAria]();
           this[$needsRender]();
 
           if (source === 'user-interaction') {
+            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+              this[$deferInteractionPrompt]();
+            }
             this[$onUserModelOrbit]();
           }
         }
