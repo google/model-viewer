@@ -86,12 +86,29 @@
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">An equirectangular <span class="attribute">background-image</span> with an unlit model</h2>
+          <h2 class="demo-title">An equirectangular <span class="attribute">background-image</span> with a lit model</h2>
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
-  <model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a reflective sphere depicted within a forest" src="assets/Astronaut-Unlit.glb"></model-viewer>
+  <model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D astronaut model depicted within a forest" src="assets/Astronaut.glb"></model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-3.5" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">An equirectangular <span class="attribute">background-image</span> with an unlit model</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-3.5" highlight-as="html">
+          <template>
+  <model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="An unlit 3D astronaut model depicted within a forest" src="assets/Astronaut-Unlit.glb"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -125,7 +142,7 @@
         </div>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-<model-viewer camera-controls background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a reflective sphere depicted within a forest" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="assets/reflective-sphere.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -142,7 +159,7 @@
         </div>
         <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
-<model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.jpg" environment-image="assets/spruit_sunrise_2k.jpg" alt="A 3D model of a reflective sphere depicted within a forest" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.jpg" environment-image="assets/spruit_sunrise_2k.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="assets/reflective-sphere.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -159,7 +176,7 @@
       </div>
       <example-snippet stamp-to="demo-container-7" highlight-as="html">
         <template>
-<model-viewer camera-controls id="environment-intensity-demo" environment-intensity="1" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a reflective sphere depicted within a forest" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls id="environment-intensity-demo" environment-intensity="1" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest at varying intensity" src="assets/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#environment-intensity-demo');
@@ -189,7 +206,7 @@
         </div>
         <example-snippet stamp-to="demo-container-8" highlight-as="html">
           <template>
-<model-viewer id="stage-light-demo" camera-controls stage-light-intensity="1" background-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of an astronaut depicted within a forest" src="assets/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></model-viewer>
+<model-viewer id="stage-light-demo" camera-controls stage-light-intensity="1" background-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a duck depicted within a forest with varying stage light intensity" src="assets/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#stage-light-demo');
@@ -225,7 +242,7 @@
         </div>
         <example-snippet stamp-to="demo-container-9" highlight-as="html">
           <template>
-<model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a reflective sphere depicted within a forest" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="assets/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#shadow-intensity-demo');
