@@ -272,18 +272,30 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  gaussianBlur(cubeMap: Texture) {  //, standardDeviationRadians: number
+  gaussianBlur(cubeMap: Texture, standardDeviationRadians: number = 0.04) {
     const blurScene = new Scene();
 
     const geometry = new BoxBufferGeometry();
     geometry.removeAttribute('uv');
 
+    const cubeResolution = cubeMap.image == null ? 256 : cubeMap.image[0].width;
+    const standardDeviations = 3;
+    const n = Math.ceil(
+        standardDeviations * standardDeviationRadians * cubeResolution * 2 /
+        Math.PI);
+    const norm = standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
+    let weights = [];
+    for (let i = 0; i < n; ++i) {
+      const x = standardDeviations * i / (n - 1);
+      weights.push(norm * Math.exp(-x * x / 2));
+    }
+
     const blurMaterial = new ShaderMaterial({
       uniforms: {
         tCube: {value: null},
         latitudinal: {value: false},
-        w: {value: [0.1633, 0.1531, 0.12245, 0.0918, 0.051]},
-        dTheta: {value: 0}
+        weights: {value: weights},
+        dTheta: {value: standardDeviationRadians * standardDeviations / (n - 1)}
       },
       vertexShader: `
         varying vec3 vWorldDirection;
@@ -295,34 +307,38 @@ export default class TextureUtils extends EventDispatcher {
           gl_Position.z = gl_Position.w;
         }
       `,
-      fragmentShader: `
+      fragmentShader: [
+        'const float n = ' + n + '.0;',
+        'uniform float weights[' + n + '];',
+        `
         uniform samplerCube tCube;
         uniform bool latitudinal;
         uniform float dTheta;
-        uniform float w[5];
         varying vec3 vWorldDirection;
         void main() {
           vec4 texColor = vec4(0.0);
-          for (float i = -4.0; i < 5.0; i++) {
+          for (float i = 1.0 - n; i < n; i++) {
             vec3 sampleDirection = vWorldDirection;
-            float diTheta = dTheta * i;
-            mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+            float xz = length(sampleDirection.xz);
+            float weight = weights[int(abs(i))];
             if (latitudinal) {
+              float diTheta = dTheta * i / xz;
+              mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
               sampleDirection.xz = R * sampleDirection.xz;
-              texColor +=
-                  w[int(abs(i))] * RGBEToLinear(textureCube(tCube, sampleDirection));
+              texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
             } else {
-              float xz = length(sampleDirection.xz);
+              float diTheta = dTheta * i;
+              mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
               vec2 xzY = R * vec2(xz, sampleDirection.y);
               sampleDirection.xz *= xzY.x / xz;
               sampleDirection.y = xzY.y;
-              texColor +=
-                  w[int(abs(i))] * RGBEToLinear(textureCube(tCube, sampleDirection));
+              texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
             }
           }
           gl_FragColor = linearToOutputTexel(texColor);
         }
-      `,
+      `
+      ].join('\n'),
       side: BackSide,
       depthTest: false,
       depthWrite: false
@@ -330,7 +346,7 @@ export default class TextureUtils extends EventDispatcher {
 
     blurScene.add(new Mesh(geometry, blurMaterial));
 
-    const blurCamera = new CubeCamera(0.1, 100, 256);
+    const blurCamera = new CubeCamera(0.1, 100, cubeResolution);
     blurCamera.renderTarget.texture.type = UnsignedByteType;
     blurCamera.renderTarget.texture.format = RGBEFormat;
     blurCamera.renderTarget.texture.encoding = RGBEEncoding;
@@ -346,17 +362,13 @@ export default class TextureUtils extends EventDispatcher {
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.gammaOutput = false;
 
-    blurMaterial.uniforms.dTheta.value = 0.01;
     blurMaterial.uniforms.latitudinal.value = false;
     blurMaterial.uniforms.tCube.value = cubeMap;
-    // (blurCamera as any).clear(this.renderer);
     blurCamera.update(this.renderer, blurScene);
 
-    blurMaterial.uniforms.dTheta.value = 0.01;
     blurMaterial.uniforms.latitudinal.value = true;
     blurMaterial.uniforms.tCube.value = blurCamera.renderTarget.texture;
     blurCamera.renderTarget.texture = cubeMap;
-    // (blurCamera as any).clear(this.renderer);
     blurCamera.update(this.renderer, blurScene);
 
     this.renderer.toneMapping = toneMapping;
