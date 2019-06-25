@@ -271,7 +271,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const cameraChangeDispatches =
               waitForEvent<CustomEvent<CameraChangeDetails>>(
                   element, 'camera-change');
-          element.focus();
+
+          await rafPasses();
+          element[$canvas].focus();
           interactWith(element[$canvas]);
           const event = await cameraChangeDispatches;
           expect(event.detail.source)
