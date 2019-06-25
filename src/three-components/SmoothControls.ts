@@ -108,8 +108,6 @@ const $handleWheel = Symbol('handleWheel');
 const $handleKey = Symbol('handleKey');
 
 // Constants
-const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
-const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const DECAY_MILLISECONDS = 50;
@@ -127,6 +125,13 @@ export const KeyCode = {
   DOWN: 40
 };
 
+export type ChangeSource = 'user-interaction'|'none';
+
+export const ChangeSource: {[index: string]: ChangeSource} = {
+  USER_INTERACTION: 'user-interaction',
+  NONE: 'none'
+};
+
 /**
  * ChangEvents are dispatched whenever the camera position or orientation has
  * changed
@@ -136,7 +141,7 @@ export interface ChangeEvent extends Event {
    * determines what was the originating reason for the change event eg user or
    * none
    */
-  source: string,
+  source: ChangeSource,
 }
 
 /**
@@ -515,8 +520,8 @@ export class SmoothControls extends EventDispatcher {
       this.camera.updateProjectionMatrix();
     }
 
-    const source = this[$isUserChange] ? USER_INTERACTION_CHANGE_SOURCE :
-                                         DEFAULT_INTERACTION_CHANGE_SOURCE;
+    const source =
+        this[$isUserChange] ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
 
     this.dispatchEvent({type: 'change', source});
   }
