@@ -22,12 +22,14 @@ import {MagicLeapMixin} from './features/magic-leap.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 import {Constructor} from './utilities.js';
+import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
 type ModelViewerMixin =
     (ModelViewerElement: Constructor<ModelViewerElementBase>) =>
         Constructor<ModelViewerElementBase>;
 
-const mixins: Array<ModelViewerMixin> = ([
+const mixins = [
+  FocusVisiblePolyfillMixin,
   AnimationMixin,
   LoadingMixin,
   ARMixin,
@@ -35,8 +37,7 @@ const mixins: Array<ModelViewerMixin> = ([
   EnvironmentMixin,
   StagingMixin,
   MagicLeapMixin
-] as Array<ModelViewerMixin>);  // NOTE(cdata): Remove cast when all mixins are
-                                // converted to TypeScript
+];
 
 const ModelViewerElement: Constructor<ModelViewerElementBase> = mixins.reduce(
     (Base: Constructor<ModelViewerElementBase>, Mixin: ModelViewerMixin) =>
