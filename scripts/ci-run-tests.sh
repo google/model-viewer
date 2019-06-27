@@ -15,6 +15,9 @@
 # limitations under the License.
 ##
 
+set -e
+set -x
+
 if [ "${TEST_TYPE}" = "unit" ]; then
 
   xvfb-run npm run test
@@ -23,3 +26,6 @@ if [ "${TEST_TYPE}" = "unit" ]; then
     ./scripts/run-sauce-tests.sh;
   fi
 fi
+
+set +x
+set +e
