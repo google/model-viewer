@@ -278,9 +278,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const intWidth = parseInt(width, 10);
     const intHeight = parseInt(height, 10);
 
-    this[$container].style.width = `${width}px`;
-    this[$container].style.height = `${height}px`;
-
     if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
       this[$onResize]({width: intWidth, height: intHeight});
     }

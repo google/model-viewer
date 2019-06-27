@@ -388,8 +388,6 @@ export const ControlsMixin = (ModelViewerElement:
         [$onResize](event: any) {
           super[$onResize](event);
           this[$updateCamera]();
-          // Render a frame right away
-          this[$scene].renderer.render(performance.now());
         }
 
         [$onModelLoad](event: any) {

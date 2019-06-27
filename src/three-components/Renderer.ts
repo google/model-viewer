@@ -164,7 +164,7 @@ export default class Renderer extends EventDispatcher {
     }
 
     for (let scene of this.scenes) {
-      const {element, width, height, context} = scene;
+      const {element, width, height, context, canvas} = scene;
       element[$tick](t, delta);
 
       if (!scene.isVisible || !scene.isDirty || scene.paused) {
@@ -194,6 +194,12 @@ export default class Renderer extends EventDispatcher {
 
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
+
+      if (scene.isResized) {
+        canvas.width = widthDPR;
+        canvas.height = heightDPR;
+      }
+
       context.drawImage(
           this.renderer.domElement,
           0,
@@ -206,6 +212,7 @@ export default class Renderer extends EventDispatcher {
           heightDPR);
 
       scene.isDirty = false;
+      scene.isResized = false;
     }
     this.lastTick = t;
   }

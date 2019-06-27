@@ -16,7 +16,6 @@
 import {Camera, Color, DirectionalLight, HemisphereLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
-import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import Renderer from './Renderer.js';
@@ -69,6 +68,7 @@ export default class ModelScene extends Scene {
   public modelDepth: number = 1;
   public isVisible: boolean = false;
   public isDirty: boolean = false;
+  public isResized: boolean = true;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D;
   public exposure: number;
@@ -195,6 +195,14 @@ export default class ModelScene extends Scene {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
+
+      // If we were to update the canvas (non-CSS) width/height here, it would
+      // cause the canvas contents to be cleared for a frame. Instead, we set
+      // the "isResized" flag to inform the renderer of the change at render
+      // time.
+      // @see https://github.com/GoogleWebComponents/model-viewer/pull/555
+      this.isResized = true;
+
       // In practice, invocations of setSize are throttled at the element level,
       // so no need to throttle here:
       this.updateFraming();
@@ -210,11 +218,6 @@ export default class ModelScene extends Scene {
    * fov exactly covers the front face of this box when looking down the Z-axis.
    */
   updateFraming() {
-    const dpr = resolveDpr();
-    this.canvas.width = this.width * dpr;
-    this.canvas.height = this.height * dpr;
-    this.canvas.style.width = `${this.width}px`;
-    this.canvas.style.height = `${this.height}px`;
     this.aspect = this.width / this.height;
 
     const {boundingBox, position, size} = this.model;
