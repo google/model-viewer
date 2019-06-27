@@ -34,6 +34,7 @@ before_deploy:
 - touch .nojekyll
 - echo 'node_modules/*' > .gitignore
 - echo '!node_modules/@webcomponents' >> .gitignore
+- echo '!node_modules/focus-visible' >> .gitignore
 - echo '!node_modules/intersection-observer' >> .gitignore
 - echo '!node_modules/@magicleap' >> .gitignore
 - echo '!node_modules/fullscreen-polyfill' >> .gitignore
