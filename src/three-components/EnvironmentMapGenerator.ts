@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, HalfFloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, HalfFloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
-const rendererTextureCache = new Map<WebGLRenderer, Texture>();
+const rendererTextureCache = new Map<WebGLRenderer, WebGLRenderTargetCube>();
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
@@ -177,7 +177,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
   /**
    * Generate an environment map for a room.
    */
-  generate(): Texture {
+  generate(): WebGLRenderTargetCube {
     if (!rendererTextureCache.has(this.renderer)) {
       (this.camera as any).clear(this.renderer);
 
@@ -211,8 +211,7 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
       this.renderer.toneMappingExposure = toneMappingExposure;
       this.renderer.gammaOutput = gammaOutput;
 
-      rendererTextureCache.set(
-          this.renderer, this.blurCamera.renderTarget.texture);
+      rendererTextureCache.set(this.renderer, this.blurCamera.renderTarget);
     }
 
     return rendererTextureCache.get(this.renderer)!;
