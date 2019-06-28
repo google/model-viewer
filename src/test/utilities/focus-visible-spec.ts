@@ -15,6 +15,7 @@
 
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {FocusVisiblePolyfillMixin} from '../../utilities/focus-visible.js';
+import {assetPath, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -37,16 +38,30 @@ suite('ModelViewerElementBase with FocusVisiblePolyfillMixin', () => {
     customElements.define(tagName, ModelViewerElement);
   });
 
+
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  test('typically does not show the focus ring when focused', () => {
-    element = new ModelViewerElement();
-    element.tabIndex = 0;
-    document.body.appendChild(element);
+  suite('when polyfill is present', () => {
+    setup(async () => {
+      element = new ModelViewerElement();
+      element.tabIndex = 0;
+      element.src = assetPath('cube.gltf');
+      document.body.appendChild(element);
+      await waitForEvent(element, 'load');
+    });
 
-    element.focus();
+    teardown(() => {
+      if (element.parentNode != null) {
+        element.parentNode.removeChild(element);
+      }
+    });
 
-    expect(element.matches(':focus')).to.be.equal(true);
-    expect(window.getComputedStyle(element).outlineStyle).to.be.equal('none');
+    test('typically does not show the focus ring when focused', async () => {
+      element.dispatchEvent(new CustomEvent('mousedown'));
+      element.focus();
+
+      expect(document.activeElement).to.be.equal(element);
+      expect(window.getComputedStyle(element).outlineStyle).to.be.equal('none');
+    });
   });
 });
