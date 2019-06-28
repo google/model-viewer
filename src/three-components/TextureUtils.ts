@@ -61,7 +61,7 @@ const userData = {
 export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
-  private environmentMapGenerator: EnvironmentMapGenerator;
+  private environmentMapGenerator: EnvironmentMapGenerator|null = null;
   private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
 
   /**
@@ -72,7 +72,6 @@ export default class TextureUtils extends EventDispatcher {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
-    this.environmentMapGenerator = new EnvironmentMapGenerator(this.renderer);
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
@@ -220,6 +219,8 @@ export default class TextureUtils extends EventDispatcher {
           // generating the environment:
           environmentMapUrl = 'generated:env';
           if (!targetCache.has(environmentMapUrl)) {
+            this.environmentMapGenerator =
+                new EnvironmentMapGenerator(this.renderer);
             environmentMap = this.environmentMapGenerator.generate();
             environmentMapWasGenerated = true;
           }
@@ -294,8 +295,10 @@ export default class TextureUtils extends EventDispatcher {
     // dispose of them because the framebuffer has not been created yet but
     // the implementation does not guard for this correctly:
     try {
-      this.environmentMapGenerator.dispose();
-      (this as any).environmentMapGenerator = null;
+      if (this.environmentMapGenerator != null) {
+        this.environmentMapGenerator.dispose();
+        (this as any).environmentMapGenerator = null;
+      }
       if (this[$cubeGenerator] != null) {
         this[$cubeGenerator]!.dispose();
         this[$cubeGenerator] = null;

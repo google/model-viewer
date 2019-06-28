@@ -15,8 +15,6 @@
 
 import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, HalfFloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
-const rendererTextureCache = new Map<WebGLRenderer, WebGLRenderTargetCube>();
-
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
   protected camera: CubeCamera;
@@ -178,43 +176,37 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
    * Generate an environment map for a room.
    */
   generate(): WebGLRenderTargetCube {
-    if (!rendererTextureCache.has(this.renderer)) {
-      (this.camera as any).clear(this.renderer);
+    (this.camera as any).clear(this.renderer);
 
-      var gammaOutput = this.renderer.gammaOutput;
-      var toneMapping = this.renderer.toneMapping;
-      var toneMappingExposure = this.renderer.toneMappingExposure;
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
 
-      this.renderer.toneMapping = LinearToneMapping;
-      this.renderer.toneMappingExposure = 1.0;
-      this.renderer.gammaOutput = false;
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
 
-      this.camera.update(this.renderer, this.scene);
+    this.camera.update(this.renderer, this.scene);
 
-      // Blur
+    // Blur
 
-      for (var i = 0; i < 16; i++) {
-        // Ping-Pong
-        if (i % 2 === 0) {
-          this.blurMaterial.uniforms.tCube.value =
-              this.blurRenderTarget1.texture;
-          this.blurCamera.renderTarget = this.blurRenderTarget2;
-        } else {
-          this.blurMaterial.uniforms.tCube.value =
-              this.blurRenderTarget2.texture;
-          this.blurCamera.renderTarget = this.blurRenderTarget1;
-        }
-        this.blurCamera.update(this.renderer, this.blurScene);
+    for (var i = 0; i < 16; i++) {
+      // Ping-Pong
+      if (i % 2 === 0) {
+        this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget1.texture;
+        this.blurCamera.renderTarget = this.blurRenderTarget2;
+      } else {
+        this.blurMaterial.uniforms.tCube.value = this.blurRenderTarget2.texture;
+        this.blurCamera.renderTarget = this.blurRenderTarget1;
       }
-
-      this.renderer.toneMapping = toneMapping;
-      this.renderer.toneMappingExposure = toneMappingExposure;
-      this.renderer.gammaOutput = gammaOutput;
-
-      rendererTextureCache.set(this.renderer, this.blurCamera.renderTarget);
+      this.blurCamera.update(this.renderer, this.blurScene);
     }
 
-    return rendererTextureCache.get(this.renderer)!;
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
+
+    return this.blurCamera.renderTarget
   }
 
   dispose() {
