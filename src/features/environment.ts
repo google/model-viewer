@@ -161,7 +161,7 @@ export const EnvironmentMixin = (ModelViewerElement:
               this[$container].style.backgroundColor = backgroundColor;
             }
 
-            this[$applyEnvironmentMap](environmentMap);
+            this[$applyEnvironmentMap](environmentMap.texture);
             this[$scene].model.dispatchEvent({type: 'envmap-update'});
           } catch (errorOrPromise) {
             if (errorOrPromise instanceof Error) {
@@ -184,8 +184,6 @@ export const EnvironmentMixin = (ModelViewerElement:
         /**
          * Sets the Model to use the provided environment map,
          * or `null` if the Model should remove its' environment map.
-         *
-         * @param {THREE.Texture} environmentMap
          */
         private[$applyEnvironmentMap](environmentMap: Texture|null) {
           this[$currentEnvironmentMap] = environmentMap;
