@@ -17,9 +17,13 @@ import {property} from 'lit-element';
 import {Event, Spherical} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
-import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
-import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
+
+export interface CameraChangeDetails {
+  source: ChangeSource;
+}
 
 export interface SphericalPosition {
   theta: number;  // equator angle around the y (up) axis.
@@ -430,12 +434,13 @@ export const ControlsMixin = (ModelViewerElement:
           this[$updateAria]();
           this[$needsRender]();
 
-          if (source === 'user-interaction') {
-            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
-              this[$deferInteractionPrompt]();
-            }
-            this[$onUserModelOrbit]();
+          if (source === ChangeSource.USER_INTERACTION &&
+              this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+            this[$deferInteractionPrompt]();
           }
+
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'camera-change', {detail: {source}}));
         }
       }
 

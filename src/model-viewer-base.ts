@@ -323,9 +323,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$needsRender]();
   }
 
-  [$onUserModelOrbit]() {
-  }
-
   /**
    * Parses the element for an appropriate source URL and
    * sets the views to use the new model based off of the `preload`
