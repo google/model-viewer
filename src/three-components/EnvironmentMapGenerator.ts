@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, PointLight, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, WebGLRenderer} from 'three';
-
-const rendererTextureCache = new Map<WebGLRenderer, Texture>();
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, PointLight, RGBEEncoding, RGBEFormat, Scene, UnsignedByteType, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
@@ -130,28 +128,24 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
   /**
    * Generate an environment map for a room.
    */
-  generate(): Texture {
-    if (!rendererTextureCache.has(this.renderer)) {
-      (this.camera as any).clear(this.renderer);
+  generate(): WebGLRenderTargetCube {
+    (this.camera as any).clear(this.renderer);
 
-      var gammaOutput = this.renderer.gammaOutput;
-      var toneMapping = this.renderer.toneMapping;
-      var toneMappingExposure = this.renderer.toneMappingExposure;
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
 
-      this.renderer.toneMapping = LinearToneMapping;
-      this.renderer.toneMappingExposure = 1.0;
-      this.renderer.gammaOutput = false;
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
 
-      this.camera.update(this.renderer, this.scene);
+    this.camera.update(this.renderer, this.scene);
 
-      this.renderer.toneMapping = toneMapping;
-      this.renderer.toneMappingExposure = toneMappingExposure;
-      this.renderer.gammaOutput = gammaOutput;
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
 
-      rendererTextureCache.set(this.renderer, this.camera.renderTarget.texture);
-    }
-
-    return rendererTextureCache.get(this.renderer)!;
+    return this.camera.renderTarget;
   }
 
   dispose() {

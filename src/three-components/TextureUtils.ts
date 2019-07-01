@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
@@ -23,10 +23,9 @@ import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
-
+const targetCache = new Map<string, WebGLRenderTarget>();
 
 export interface EnvironmentGenerationConfig {
-  pmrem?: boolean;
   progressTracker?: ProgressTracker;
 }
 
@@ -62,7 +61,7 @@ const userData = {
 export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
-  private environmentMapGenerator: EnvironmentMapGenerator;
+  private environmentMapGenerator: EnvironmentMapGenerator|null = null;
   private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
 
   /**
@@ -73,14 +72,9 @@ export default class TextureUtils extends EventDispatcher {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
-    this.environmentMapGenerator = new EnvironmentMapGenerator(this.renderer);
   }
 
-  /**
-   * @param {THREE.Texture} texture
-   * @return {THREE.WebGLRenderCubeTarget}
-   */
-  equirectangularToCubemap(texture: Texture) {
+  equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
     const generator = new EquirectangularToCubeGenerator(texture, {
       resolution: this.config.cubemapSize,
     });
@@ -102,11 +96,6 @@ export default class TextureUtils extends EventDispatcher {
     return generator.renderTarget;
   }
 
-  /**
-   * @param {string} url
-   * @param {Function} progressCallback
-   * @return {Promise<THREE.Texture>}
-   */
   async load(
       url: string, progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
@@ -147,13 +136,9 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  /**
-   * @param {string} url
-   * @param {Function} progressCallback
-   * @return {Promise<THREE.WebGLRenderCubeTarget>}
-   */
   async loadEquirectAsCubeMap(
-      url: string, progressCallback: (progress: number) => void = () => {}) {
+      url: string, progressCallback: (progress: number) => void = () => {}):
+      Promise<WebGLRenderTargetCube> {
     let equirect = null;
 
     try {
@@ -170,26 +155,24 @@ export default class TextureUtils extends EventDispatcher {
    * Returns a { skybox, environmentMap } object with the targets/textures
    * accordingly. `skybox` is a WebGLRenderCubeTarget, and `environmentMap`
    * is a Texture from a WebGLRenderCubeTarget.
-   *
-   * @see equirectangularToCubemap with regard to the THREE types.
-   * @param {string} url
-   * @param {boolean} config.pmrem
-   * @param {ProgressTracker} config.progressTracker
-   * @return {Promise<Object|null>}
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
-      options: EnvironmentGenerationConfig = {}) {
+      options: EnvironmentGenerationConfig = {}): Promise<{
+    environmentMap: WebGLRenderTarget,
+    skybox: WebGLRenderTargetCube|null
+  }> {
     const {progressTracker} = options;
     let updateGenerationProgress: Activity|((...args: any[]) => void) =
         () => {};
 
-    let skyboxLoads: Promise<WebGLRenderTarget|null> = Promise.resolve(null);
+    let skyboxLoads: Promise<WebGLRenderTargetCube|null> =
+        Promise.resolve(null);
     let environmentMapLoads: Promise<WebGLRenderTarget|null> =
         Promise.resolve(null);
 
-    let skybox = null;
-    let environmentMap = null;
+    let skybox: WebGLRenderTargetCube|null = null;
+    let environmentMap: WebGLRenderTarget|null = null;
 
     try {
       let environmentMapWasGenerated = false;
@@ -197,14 +180,14 @@ export default class TextureUtils extends EventDispatcher {
       // If we have a specific environment URL, attempt to load it as a cubemap
       // The case for this is that the user intends for the IBL to be different
       // from the scene background (which may be a skybox or solid color).
-      if (!!environmentMapUrl) {
+      if (!!environmentMapUrl && !targetCache.has(environmentMapUrl + ':env')) {
         environmentMapLoads = this.loadEquirectAsCubeMap(
             environmentMapUrl,
             progressTracker ? progressTracker.beginActivity() : () => {});
       }
 
       // If we have a skybox URL, attempt to load it as a cubemap
-      if (!!skyboxUrl) {
+      if (!!skyboxUrl && !targetCache.has(skyboxUrl)) {
         skyboxLoads = this.loadEquirectAsCubeMap(
             skyboxUrl,
             progressTracker ? progressTracker.beginActivity() : () => {});
@@ -218,42 +201,48 @@ export default class TextureUtils extends EventDispatcher {
       environmentMap = await environmentMapLoads;
       skybox = await skyboxLoads;
 
-      // If environment is still null, then no specific environment URL was
-      // specified
-      if (environmentMap != null) {
-        environmentMap = environmentMap.texture
-      } else {
-        if (skybox != null) {
-          // Infer the environment from the skybox if we have one:
-          environmentMap = skybox.texture;
+      if (!!skyboxUrl) {
+        if (targetCache.has(skyboxUrl)) {
+          skybox = targetCache.get(skyboxUrl)!;
         } else {
-          // Otherwise, no skybox URL was specified, so fall back to generating
-          // the environment:
-          // TODO(#336): can cache this per renderer and color
-          environmentMap = this.environmentMapGenerator.generate();
-          this.gaussianBlur(environmentMap);
-          environmentMapWasGenerated = true;
+          targetCache.set(skyboxUrl, skybox!);
         }
       }
 
-      if (options.pmrem) {
-        // Apply the PMREM pass to the environment, which produces a distinct
-        // texture from the source:
-        const nonPmremEnvironmentMap = environmentMap;
+      if (environmentMapUrl == null) {
+        if (skybox != null) {
+          // Infer the environment from the skybox if we have one:
+          environmentMapUrl = skyboxUrl + ':env';
+          environmentMap = skybox;
+        } else {
+          // Otherwise, no skybox URL was specified, so fall back to
+          // generating the environment:
+          environmentMapUrl = 'generated:env';
+          if (!targetCache.has(environmentMapUrl)) {
+            this.environmentMapGenerator =
+                new EnvironmentMapGenerator(this.renderer);
+            environmentMap = this.environmentMapGenerator.generate();
+            this.gaussianBlur(environmentMap);
+            environmentMapWasGenerated = true;
+          }
+        }
+      } else {
+        environmentMapUrl = environmentMapUrl + ':env';
+      }
 
+      // Apply the PMREM pass to the environment, which produces a distinct
+      // texture from the source:
+      if (targetCache.has(environmentMapUrl)) {
+        environmentMap = targetCache.get(environmentMapUrl)!;
+      } else {
+        const nonPmremEnvironmentMap = environmentMap!.texture;
         environmentMap = this.pmremPass(nonPmremEnvironmentMap);
+        targetCache.set(environmentMapUrl, environmentMap);
 
         // If the source was generated, then we should dispose of it right away
         if (environmentMapWasGenerated) {
           nonPmremEnvironmentMap.dispose();
         }
-      } else if (environmentMapWasGenerated) {
-        (environmentMap as any).userData = {
-          ...userData,
-          ...({
-            mapping: 'Cube',
-          })
-        };
       }
 
       return {environmentMap, skybox};
@@ -272,13 +261,15 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  gaussianBlur(cubeMap: Texture, standardDeviationRadians: number = 0.04) {
+  gaussianBlur(
+      cubeTarget: WebGLRenderTargetCube,
+      standardDeviationRadians: number = 0.04) {
     const blurScene = new Scene();
 
     const geometry = new BoxBufferGeometry();
     geometry.removeAttribute('uv');
 
-    const cubeResolution = cubeMap.image == null ? 256 : cubeMap.image[0].width;
+    const cubeResolution = cubeTarget.width;
     const standardDeviations = 3;
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * cubeResolution * 2 /
@@ -347,12 +338,13 @@ export default class TextureUtils extends EventDispatcher {
     blurScene.add(new Mesh(geometry, blurMaterial));
 
     const blurCamera = new CubeCamera(0.1, 100, cubeResolution);
-    blurCamera.renderTarget.texture.type = UnsignedByteType;
-    blurCamera.renderTarget.texture.format = RGBEFormat;
-    blurCamera.renderTarget.texture.encoding = RGBEEncoding;
-    blurCamera.renderTarget.texture.magFilter = NearestFilter;
-    blurCamera.renderTarget.texture.minFilter = NearestFilter;
-    blurCamera.renderTarget.texture.generateMipmaps = false;
+    const tempTarget = blurCamera.renderTarget;
+    tempTarget.texture.type = UnsignedByteType;
+    tempTarget.texture.format = RGBEFormat;
+    tempTarget.texture.encoding = RGBEEncoding;
+    tempTarget.texture.magFilter = NearestFilter;
+    tempTarget.texture.minFilter = NearestFilter;
+    tempTarget.texture.generateMipmaps = false;
 
     var gammaOutput = this.renderer.gammaOutput;
     var toneMapping = this.renderer.toneMapping;
@@ -363,30 +355,28 @@ export default class TextureUtils extends EventDispatcher {
     this.renderer.gammaOutput = false;
 
     blurMaterial.uniforms.latitudinal.value = false;
-    blurMaterial.uniforms.tCube.value = cubeMap;
+    blurMaterial.uniforms.tCube.value = cubeTarget.texture;
     blurCamera.update(this.renderer, blurScene);
 
     blurMaterial.uniforms.latitudinal.value = true;
-    blurMaterial.uniforms.tCube.value = blurCamera.renderTarget.texture;
-    blurCamera.renderTarget.texture = cubeMap;
+    blurMaterial.uniforms.tCube.value = tempTarget.texture;
+    blurCamera.renderTarget = cubeTarget;
     blurCamera.update(this.renderer, blurScene);
 
     this.renderer.toneMapping = toneMapping;
     this.renderer.toneMappingExposure = toneMappingExposure;
     this.renderer.gammaOutput = gammaOutput;
+
+    tempTarget.dispose();
   }
 
   /**
    * Takes a cube-ish (@see equirectangularToCubemap) texture and
    * returns a texture of the prefiltered mipmapped radiance environment map
    * to be used as environment maps in models.
-   *
-   * @param {THREE.Texture} texture
-   * @param {number} samples
-   * @param {number} resolution
-   * @return {THREE.Texture}
    */
-  pmremPass(texture: Texture, samples?: number, size?: number) {
+  pmremPass(texture: Texture, samples?: number, size?: number):
+      WebGLRenderTarget {
     const generator = new PMREMGenerator(texture, samples, size);
     generator.update(this.renderer);
 
@@ -406,17 +396,19 @@ export default class TextureUtils extends EventDispatcher {
       })
     };
 
-    return renderTarget.texture;
+    return renderTarget;
   }
 
   dispose() {
     // NOTE(cdata): In the case that the generators are invoked with
     // an incorrect texture, the generators will throw when we attempt to
-    // dispose of them because the framebuffer has not been created yet but the
-    // implementation does not guard for this correctly:
+    // dispose of them because the framebuffer has not been created yet but
+    // the implementation does not guard for this correctly:
     try {
-      this.environmentMapGenerator.dispose();
-      (this as any).environmentMapGenerator = null;
+      if (this.environmentMapGenerator != null) {
+        this.environmentMapGenerator.dispose();
+        (this as any).environmentMapGenerator = null;
+      }
       if (this[$cubeGenerator] != null) {
         this[$cubeGenerator]!.dispose();
         this[$cubeGenerator] = null;

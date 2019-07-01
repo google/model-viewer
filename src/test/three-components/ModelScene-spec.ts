@@ -15,7 +15,7 @@
 
 import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
@@ -33,20 +33,13 @@ suite('ModelScene', () => {
 
   customElements.define('model-viewer-modelscene', ModelViewerElement);
 
-  suiteSetup(() => {
-    renderer = new Renderer();
-  });
-
-  suiteTeardown(() => {
-    renderer.dispose();
-  });
-
   setup(() => {
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyRadius = 0.5;
     dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
+    renderer = element[$renderer];
     scene = new ModelScene({
       element: element,
       canvas: element[$canvas],
