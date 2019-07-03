@@ -361,7 +361,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.stageLightIntensity = 0.5;
       await timePasses();
       const newLightIntensity = scene.shadowLight.intensity;
-      expect(newLightIntensity).to.be.lessThan(originalLightIntensity);
+      expect(newLightIntensity).to.be.greaterThan(originalLightIntensity);
     });
   });
 

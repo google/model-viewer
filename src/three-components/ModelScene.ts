@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Color, DirectionalLight, HemisphereLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+import {Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -37,12 +37,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
-const AMBIENT_LIGHT_LOW_INTENSITY = 0.0;
-const DIRECTIONAL_LIGHT_LOW_INTENSITY = 2.0;
-
-const AMBIENT_LIGHT_HIGH_INTENSITY = 3.0;
-const DIRECTIONAL_LIGHT_HIGH_INTENSITY = 4.0;
-
 const $paused = Symbol('paused');
 const $modelAlignmentMask = Symbol('modelAlignmentMask');
 
@@ -58,7 +52,6 @@ export default class ModelScene extends Scene {
   private aspect: number;
 
   public canvas: HTMLCanvasElement;
-  public light: HemisphereLight;
   public renderer: Renderer;
   public shadowLight: DirectionalLight;
   public shadow: StaticShadow;
@@ -97,16 +90,8 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-    this.light =
-        new HemisphereLight(0xBBBBBB, 0x444444, AMBIENT_LIGHT_HIGH_INTENSITY);
-    this.light.name = 'HemisphereLight';
-    this.light.position.set(2, 4, 2);
 
-    // This light is only for generating (fake) shadows
-    // and does not needed to be added to the scene.
-    // @see StaticShadow.js
-    this.shadowLight =
-        new DirectionalLight(0xffffff, DIRECTIONAL_LIGHT_HIGH_INTENSITY);
+    this.shadowLight = new DirectionalLight(0xffffff, 1.0);
     this.shadowLight.position.set(0, 10, 0);
     this.shadowLight.name = 'ShadowLight';
 
@@ -123,7 +108,6 @@ export default class ModelScene extends Scene {
     this.pivot.name = 'Pivot';
 
     this.add(this.pivot);
-    this.add(this.light);
     this.add(this.shadowLight);
     this.pivot.add(this.model);
 
@@ -237,16 +221,8 @@ export default class ModelScene extends Scene {
     }
   }
 
-  configureStageLighting(
-      intensityScale: number, illuminationRole: IlluminationRole) {
-    this.light.intensity = intensityScale *
-        (illuminationRole === IlluminationRole.Primary ?
-             AMBIENT_LIGHT_HIGH_INTENSITY :
-             AMBIENT_LIGHT_LOW_INTENSITY);
-    this.shadowLight.intensity = intensityScale *
-        (illuminationRole === IlluminationRole.Primary ?
-             DIRECTIONAL_LIGHT_HIGH_INTENSITY :
-             DIRECTIONAL_LIGHT_LOW_INTENSITY);
+  configureStageLighting(intensityScale: number) {
+    this.shadowLight.intensity = intensityScale;
     this.isDirty = true;
   }
 
