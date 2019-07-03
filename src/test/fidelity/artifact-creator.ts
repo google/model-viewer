@@ -22,8 +22,6 @@ const makeDir = require('make-dir');
 import {ImageComparisonAnalysis, ImageComparator, ImageComparisonConfig, GoldenConfig, ScenarioConfig, Dimensions} from './common.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 
-const DEVICE_PIXEL_RATIO = 2;
-
 export type AnalysisResults = Array<Array<ImageComparisonAnalysis>>;
 
 export interface ScenarioRecord extends ScenarioConfig {
@@ -131,6 +129,7 @@ export class ArtifactCreator {
       slug: string, dimensions: Dimensions,
       outputPath: string =
           path.join(this.config.outputDirectory, slug, 'model-viewer.png')) {
+    const DEVICE_PIXEL_RATIO = slug.includes('Filament') ? 1 : 2;
     const scaledWidth = dimensions.width / DEVICE_PIXEL_RATIO;
     const scaledHeight = dimensions.height / DEVICE_PIXEL_RATIO;
 
@@ -141,7 +140,8 @@ export class ArtifactCreator {
         width: scaledWidth,
         height: scaledHeight,
         deviceScaleFactor: DEVICE_PIXEL_RATIO
-      }
+      },
+      headless: false
     });
 
     const page = await browser.newPage();
@@ -164,45 +164,58 @@ export class ArtifactCreator {
 
     await page.goto(url);
 
-    console.log(`🖌  Rendering ${slug} with <model-viewer>`);
+    const name = slug.includes('Filament') ? '<model-viewer>' : 'Filament';
+    console.log(`🖌  Rendering ${slug} with ${name}`);
 
-    await page.evaluate(async () => {
-      const modelViewer =
-          document.querySelector('model-viewer') as ModelViewerElementBase;
+    await page.evaluate(async (slug: string) => {
+      if (slug.includes('Filament')) {
+        const filament = document.getElementsByTagName('canvas')[0];
 
-      if (!modelViewer.loaded!) {
         const modelLoads = new Promise((resolve, reject) => {
           const timeout = setTimeout(reject, 10000);
 
-          modelViewer.addEventListener('load', () => {
+          filament.addEventListener('model-loaded', () => {
             clearTimeout(timeout);
             resolve();
           });
         });
 
-        const modelVisible = new Promise((resolve, reject) => {
-          const timeout = setTimeout(reject, 10000);
+        await modelLoads;
+      } else {
+        const modelViewer =
+            document.querySelector('model-viewer') as ModelViewerElementBase;
 
-          modelViewer.addEventListener('model-visibility', (event) => {
-            clearTimeout(timeout);
-            if ((event as any).detail.visible) {
+        if (!modelViewer.loaded!) {
+          const modelLoads = new Promise((resolve, reject) => {
+            const timeout = setTimeout(reject, 10000);
+
+            modelViewer.addEventListener('load', () => {
+              clearTimeout(timeout);
               resolve();
-            } else {
-              reject();
-            }
+            });
           });
-        });
 
-        await Promise.all([modelLoads, modelVisible]);
+          const modelVisible = new Promise((resolve, reject) => {
+            const timeout = setTimeout(reject, 10000);
+
+            modelViewer.addEventListener('model-visibility', (event) => {
+              clearTimeout(timeout);
+              if ((event as any).detail.visible) {
+                resolve();
+              } else {
+                reject();
+              }
+            });
+          });
+
+          await Promise.all([modelLoads, modelVisible]);
+        }
       }
-    });
+    }, slug);
 
     console.log(`🖼  Capturing screenshot`);
 
-    const screenshot = await page.screenshot({
-      path: outputPath,
-      clip: {x: 0, y: 0, width: scaledWidth, height: scaledHeight}
-    });
+    const screenshot = await page.screenshot({path: outputPath});
 
     await browser.close();
 
