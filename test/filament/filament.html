@@ -19,7 +19,6 @@ canvas     { position: absolute; width: 100%; height: 100%; }
     <pre id="messages"></pre>
 </div>
 <script src="../../node_modules/filament/filament.js"></script>
-<script src="../../node_modules/gl-matrix/gl-matrix-min.js"></script>
 <script src="https://unpkg.com/gltumble"></script>
 <script>
 const ibl_url = 'pillars_ibl.ktx';
@@ -36,7 +35,7 @@ class App {
         this.canvas = canvas;
         const engine = this.engine = Filament.Engine.create(this.canvas);
         const scene = this.scene = engine.createScene();
-        this.trackball = new Trackball(canvas, {startSpin: 0.035});
+        // this.trackball = new Trackball(canvas, {startSpin: 0.035});
         const sunlight = Filament.EntityManager.get().create();
         Filament.LightManager.Builder(LightType.SUN)
             .color([0.98, 0.92, 0.89])
@@ -54,7 +53,7 @@ class App {
         const skybox = engine.createSkyFromKtx(sky_url);
         this.scene.setSkybox(skybox);
         const loader = engine.createAssetLoader();
-        const asset = this.asset = loader.createAssetFromJson(mesh_url);
+        const asset = this.asset = loader.createAssetFromBinary(mesh_url);
         const messages = document.getElementById('messages');
         // Crudely indicate progress by printing the URL of each resource as it is loaded.
         // Note that we wait 1 ms after the last asset has downloaded, but before finalization.
@@ -84,10 +83,12 @@ class App {
         window.requestAnimationFrame(this.render);
     }
     render() {
-        const tcm = this.engine.getTransformManager();
-        const inst = tcm.getInstance(this.asset.getRoot());
-        tcm.setTransform(inst, this.trackball.getMatrix());
-        inst.delete();
+        // const tcm = this.engine.getTransformManager();
+        // const inst = tcm.getInstance(this.asset.getRoot());
+        // tcm.setTransform(inst, this.trackball.getMatrix());
+        // inst.delete();
+        const eye = [0, 0, 15], center = [0, 0, 0], up = [0, 1, 0];
+        this.camera.lookAt(eye, center, up);
         this.renderer.render(this.swapChain, this.view);
         window.requestAnimationFrame(this.render);
     }
@@ -100,7 +101,7 @@ class App {
         this.camera.lookAt(eye, center, up);
         const aspect = width / height;
         const fov = aspect < 1 ? Fov.HORIZONTAL : Fov.VERTICAL;
-        this.camera.setProjectionFov(30, aspect, 1.0, 10.0, fov);
+        this.camera.setProjectionFov(45, aspect, 0.1, 1000.0, fov);
     }
 }
 </script>
