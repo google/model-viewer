@@ -1,3 +1,19 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,12 +34,12 @@ canvas     { position: absolute; width: 100%; height: 100%; }
     <canvas></canvas>
     <pre id="messages"></pre>
 </div>
-<script src="../../node_modules/filament/filament.js"></script>
+<script src="../../../node_modules/filament/filament.js"></script>
 <script src="https://unpkg.com/gltumble"></script>
 <script>
 const ibl_url = 'pillars_ibl.ktx';
 const sky_url = 'pillars_skybox.ktx';
-const mesh_url = '../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb';
+const mesh_url = '../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb';
 Filament.init([mesh_url, ibl_url, sky_url], () => {
     window.gltfio = Filament.gltfio;
     window.Fov = Filament.Camera$Fov;
@@ -35,7 +51,7 @@ class App {
         this.canvas = canvas;
         const engine = this.engine = Filament.Engine.create(this.canvas);
         const scene = this.scene = engine.createScene();
-        // this.trackball = new Trackball(canvas, {startSpin: 0.035});
+        // this.trackball = new Trackball(canvas, {startSpin: 0.0});
         const sunlight = Filament.EntityManager.get().create();
         Filament.LightManager.Builder(LightType.SUN)
             .color([0.98, 0.92, 0.89])
@@ -66,6 +82,8 @@ class App {
                 loader.delete();
                 const entities = asset.getEntities();
                 scene.addEntities(entities);
+                const loaded = new Event('model-loaded');
+                canvas.dispatchEvent(loaded);
                 messages.remove();
             }, 1);
         };
@@ -76,6 +94,7 @@ class App {
         this.view = engine.createView();
         this.view.setCamera(this.camera);
         this.view.setScene(this.scene);
+        
         this.resize();
         this.render = this.render.bind(this);
         this.resize = this.resize.bind(this);
@@ -87,8 +106,7 @@ class App {
         // const inst = tcm.getInstance(this.asset.getRoot());
         // tcm.setTransform(inst, this.trackball.getMatrix());
         // inst.delete();
-        const eye = [0, 0, 15], center = [0, 0, 0], up = [0, 1, 0];
-        this.camera.lookAt(eye, center, up);
+        
         this.renderer.render(this.swapChain, this.view);
         window.requestAnimationFrame(this.render);
     }
@@ -97,11 +115,12 @@ class App {
         const width = this.canvas.width = window.innerWidth * dpr;
         const height = this.canvas.height = window.innerHeight * dpr;
         this.view.setViewport([0, 0, width, height]);
-        const y = -0.125, eye = [0, y, 2], center = [0, y, 0], up = [0, 1, 0];
-        this.camera.lookAt(eye, center, up);
         const aspect = width / height;
         const fov = aspect < 1 ? Fov.HORIZONTAL : Fov.VERTICAL;
         this.camera.setProjectionFov(45, aspect, 0.1, 1000.0, fov);
+
+        const eye = [0, 0, 15], center = [0, 0, 0], up = [0, 1, 0];
+        this.camera.lookAt(eye, center, up);
     }
 }
 </script>

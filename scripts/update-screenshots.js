@@ -24,8 +24,7 @@ const exit = (code = 0) => {
 };
 
 const fidelityTestDirectory = path.resolve('./test/fidelity');
-const filamentScreenshotScript =
-    path.resolve('./scripts/filament-screenshot.sh');
+const filamentIBLScript = path.resolve('./scripts/genIBL.sh');
 const backgroundImageRe = /background-image\="([^"]+)"/;
 const modelSourceRe = /src\="([^"]+)"/
 
@@ -96,25 +95,29 @@ const updateScreenshots = async (config) => {
 
           break;
         case 'Filament':
-          await screenshotFromScript(
-              scenario,
-              scenarioDirectory,
-              filePath,
-              name,
-              filamentScreenshotScript);
+          console.log(`💡 Rendering ${name} screenshot for ${slug}...`);
+
+          await iblFromScript(
+              scenario, scenarioDirectory, name, filamentIBLScript);
+
+          try {
+            await run('node', [
+              './scripts/model-viewer-screenshot.js',
+              `${slug}-Filament`,
+              filePath
+            ]);
+          } catch (error) {
+            throw new Error(`Failed to capture <model-viewer> screenshot: ${
+                error.message}`);
+          }
+
           break;
       }
     }
   }
 };
 
-const screenshotFromScript =
-    async (
-        scenario,
-        scenarioDirectory,
-        filePath,
-        name,
-        script) => {
+const iblFromScript = async (scenario, scenarioDirectory, name, script) => {
   const testHtmlPath = path.join(scenarioDirectory, 'index.html');
 
   const html = (await fs.readFile(testHtmlPath)).toString();
@@ -125,8 +128,6 @@ const screenshotFromScript =
 
   const modelSourceMatch = html.match(modelSourceRe);
   const modelSource = modelSourceMatch != null ? modelSourceMatch[1] : null;
-
-  const {width, height} = scenario.dimensions;
 
   if (modelSource == null) {
     warn(`Could not determine model source for ${scenario.slug}; skipping...`);
@@ -150,16 +151,8 @@ const screenshotFromScript =
     const childProcess = spawn(
         script,
         [
-          '-w',
-          `${width}`,
-          '-h',
-          `${height}`,
           '-i',
           backgroundImagePath,
-          '-m',
-          modelSourcePath,
-          '-o',
-          filePath
         ],
         {
           cwd: process.cwd(),
@@ -181,12 +174,11 @@ const screenshotFromScript =
       }
     });
   });
-}
+};
 
-                   updateScreenshots(
-                       require(path.join(fidelityTestDirectory, 'config.json')))
-                       .then(() => exit(0))
-                       .catch((error) => {
-                         console.error(error);
-                         exit(1);
-                       });
+updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
+    .then(() => exit(0))
+    .catch((error) => {
+      console.error(error);
+      exit(1);
+    });
