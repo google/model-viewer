@@ -44,7 +44,9 @@ if (outputFile == null) {
 (async () => {
   try {
     await screenshotCreator.captureScreenshot(
-        slug, configReader.dimensionsForSlug(slug), outputFile);
+        slug,
+        configReader.dimensionsForSlug(slug.replace('-Filament', '')),
+        outputFile);
   } catch (error) {
     console.error(error);
     code = 1;
