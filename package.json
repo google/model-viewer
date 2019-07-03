@@ -110,8 +110,7 @@
     "web-component-tester": "^6.9.2"
   },
   "dependencies": {
-    "filament": "^1.2.0",
-    "gl-matrix": "^3.0.0",
+    "filament": "^1.3.0",
     "lit-element": "^2.0.0",
     "three": "^0.105.2"
   },
