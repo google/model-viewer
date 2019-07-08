@@ -145,7 +145,7 @@ export class ArtifactCreator {
     });
 
     const page = await browser.newPage();
-    const url = `${this.baseUrl}${slug}/`;
+    const url = `${this.baseUrl}${slug}`;
 
     page.on('error', (error: any) => {
       console.log(`🚨 ${error}`);
