@@ -4,7 +4,7 @@
   "analysisThresholds": [0.0, 1.0, 10.0],
   "scenarios": [
     {
-      "slug": "damaged-helmet-hdr-pmrem",
+      "slug": "khronos-DamagedHelmet",
       "goldens": [{
         "name": "<model-viewer> (master)",
         "file": "model-viewer-golden.png"
@@ -379,18 +379,7 @@
       }]
     },
     {
-      "slug": "damaged-helmet-hdr-pmrem",
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      },
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }]
-    },
-    {
-      "slug": "damaged-helmet-solid-color-pmrem",
+      "slug": "damaged-helmet-solid-color",
       "dimensions": {
         "width": 1536,
         "height": 1536

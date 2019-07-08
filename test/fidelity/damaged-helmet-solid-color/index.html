@@ -19,7 +19,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>&lt;model-viewer&gt; Fidelity Test - Damaged Helmet HDR PMREM</title>
+  <title>&lt;model-viewer&gt; Fidelity Test - Damaged Helmet Solid Color PMREM</title>
 
   <style>
     body { margin: 0; }
@@ -27,13 +27,12 @@
   </style>
 </head>
 <body>
-  <model-viewer src="../../../examples/assets/DamagedHelmet/DamagedHelmet.gltf"
+  <model-viewer src="../../../examples/assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
       camera-orbit="0 90deg auto"
-      background-image="../../../examples/assets/aircraft_workshop_01_1k.hdr"
+      background-color="#BEA6CC"
       exposure="0.8"
       style="width: 768px; height: 768px;">
   </model-viewer>
-  <p>This test shows a high-res model with an HDR environment map / IBL, and PMREM generation enabled</p>
   <script src="../../../dist/model-viewer.js"></script>
 </body>
 </html>
