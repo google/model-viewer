@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+require = require('esm')(module)
+const {ConfigReader} = require('../lib/test/fidelity/config-reader.js');
+const config = require('../test/fidelity/config.json');
+const configReader = new ConfigReader(config);
+
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
 const path = require('path');
@@ -66,6 +71,7 @@ const updateScreenshots = async (config) => {
   for (const scenario of scenarios) {
     const {goldens, slug} = scenario;
     const scenarioDirectory = path.join(fidelityTestDirectory, slug);
+    const dimensions = configReader.dimensionsForSlug(slug);
 
     for (const golden of goldens) {
       const {name, file} = golden;
@@ -82,12 +88,14 @@ const updateScreenshots = async (config) => {
               `✋ Cannot automatically update ${name} screenshots (yet)`);
           break;
         case '<model-viewer> (master)':
-          console.log(`💡 Rendering ${name} screenshot for ${slug}...`);
-
           try {
-            await run(
-                'node',
-                ['./scripts/model-viewer-screenshot.js', slug, filePath]);
+            await run('node', [
+              './scripts/model-viewer-screenshot.js',
+              slug,
+              dimensions.width,
+              dimensions.height,
+              filePath
+            ]);
           } catch (error) {
             throw new Error(`Failed to capture <model-viewer> screenshot: ${
                 error.message}`);
@@ -95,8 +103,6 @@ const updateScreenshots = async (config) => {
 
           break;
         case 'Filament':
-          console.log(`💡 Rendering ${name} screenshot for ${slug}...`);
-
           await iblFromScript(
               scenario, scenarioDirectory, name, filamentIBLScript);
 
@@ -104,6 +110,8 @@ const updateScreenshots = async (config) => {
             await run('node', [
               './scripts/model-viewer-screenshot.js',
               `${slug}-Filament`,
+              dimensions.width,
+              dimensions.height,
               filePath
             ]);
           } catch (error) {

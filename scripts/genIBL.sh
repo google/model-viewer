@@ -85,7 +85,7 @@ if [ ! -d $IBL_DIR ]; then
 fi
 
 if [ "$REGENERATE_IBL" = true ] || [ ! -d $IBL_OUTPUT_PATH ]; then
-  $CMGEN_BIN -x $IBL_DIR $IBL_INPUT_FILE
+  $CMGEN_BIN --format=ktx -x $IBL_DIR $IBL_INPUT_FILE
 fi
 
 set +e
