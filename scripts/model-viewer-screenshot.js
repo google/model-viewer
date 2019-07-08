@@ -19,17 +19,18 @@ const fs = require('fs').promises;
 const path = require('path');
 const LocalWebServer = require('local-web-server')
 const {ArtifactCreator} = require('../lib/test/fidelity/artifact-creator.js');
-const {ConfigReader} = require('../lib/test/fidelity/config-reader.js');
 
 const config = require('../test/fidelity/config.json');
-const configReader = new ConfigReader(config);
 
 const screenshotCreator =
     new ArtifactCreator(config, 'http://localhost:9040/test/fidelity/');
 const localWebServer = new LocalWebServer()
 const server = localWebServer.listen({port: 9040, directory: './'});
 const slug = process.argv[2];
-const outputFile = process.argv[3];
+let dimensions = {};
+dimensions.width = process.argv[3];
+dimensions.height = process.argv[4];
+const outputFile = process.argv[5];
 
 if (slug == null) {
   console.error(' Test slug not specified!');
@@ -43,10 +44,7 @@ if (outputFile == null) {
 
 (async () => {
   try {
-    await screenshotCreator.captureScreenshot(
-        slug,
-        configReader.dimensionsForSlug(slug.replace('-Filament', '')),
-        outputFile);
+    await screenshotCreator.captureScreenshot(slug, dimensions, outputFile);
   } catch (error) {
     console.error(error);
     code = 1;
