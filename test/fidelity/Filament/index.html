@@ -37,9 +37,22 @@ canvas     { position: absolute; width: 100%; height: 100%; }
 <script src="../../../node_modules/filament/filament.js"></script>
 <script src="https://unpkg.com/gltumble"></script>
 <script>
-const ibl_url = 'pillars_ibl.ktx';
-const sky_url = 'pillars_skybox.ktx';
-const mesh_url = '../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb';
+function getUrlParams() {
+  let params = {};
+  let parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+      params[key] = value;
+  });
+  return params;
+}
+const params = getUrlParams();
+const background = params['background'].slice(0, -1);
+const environment_url=`../../../renderers/filament/ibl/tmp/${background}`;
+const ibl_url = `${environment_url}/${background}_ibl.ktx`;
+const sky_url = `${environment_url}/${background}_skybox.ktx`;
+const mesh_url = params['model'];
+console.log('ibl_url = '+ibl_url);
+console.log('sky_url = '+sky_url);
+console.log('mesh_url = '+mesh_url);
 Filament.init([mesh_url, ibl_url, sky_url], () => {
     window.gltfio = Filament.gltfio;
     window.Fov = Filament.Camera$Fov;
