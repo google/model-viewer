@@ -135,7 +135,7 @@ const iblFromScript = async (scenario, scenarioDirectory, name, script) => {
   const html = (await fs.readFile(testHtmlPath)).toString();
 
   const backgroundImageMatch = html.match(backgroundImageRe);
-  const backgroundImage =
+  let backgroundImage =
       backgroundImageMatch != null ? backgroundImageMatch[1] : null;
 
   const modelSourceMatch = html.match(modelSourceRe);
@@ -151,10 +151,14 @@ const iblFromScript = async (scenario, scenarioDirectory, name, script) => {
     return;
   }
 
+  if (path.parse(backgroundImage).ext === '.jpg') {
+    // CMGEN doesn't read JPGs, so you must manually convert them to PNG. Here
+    // we assume that's been done and the name is the same.
+    backgroundImage = backgroundImage.replace('.jpg', '.png');
+  }
+
   const backgroundImagePath =
       path.resolve(path.dirname(testHtmlPath), backgroundImage);
-
-  const modelSourcePath = path.resolve(path.dirname(testHtmlPath), modelSource);
 
   await new Promise((resolve, reject) => {
     console.log(

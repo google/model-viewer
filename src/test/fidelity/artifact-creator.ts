@@ -140,8 +140,7 @@ export class ArtifactCreator {
         width: scaledWidth,
         height: scaledHeight,
         deviceScaleFactor: DEVICE_PIXEL_RATIO
-      },
-      headless: false
+      }
     });
 
     const page = await browser.newPage();
