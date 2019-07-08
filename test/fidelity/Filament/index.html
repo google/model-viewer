@@ -45,7 +45,7 @@ function getUrlParams() {
   return params;
 }
 const params = getUrlParams();
-const background = params['background'].slice(0, -1);
+const background = params['background'].replace(/\/$/, "");
 const environment_url=`../../../renderers/filament/ibl/tmp/${background}`;
 const ibl_url = `${environment_url}/${background}_ibl.ktx`;
 const sky_url = `${environment_url}/${background}_skybox.ktx`;
