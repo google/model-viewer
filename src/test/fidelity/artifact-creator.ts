@@ -135,12 +135,15 @@ export class ArtifactCreator {
 
     console.log(`🚀 Launching browser`);
 
+    const headless = slug.includes('Filament') ? false : true;
+
     const browser = await puppeteer.launch({
       defaultViewport: {
         width: scaledWidth,
         height: scaledHeight,
         deviceScaleFactor: DEVICE_PIXEL_RATIO
-      }
+      },
+      headless: headless
     });
 
     const page = await browser.newPage();
