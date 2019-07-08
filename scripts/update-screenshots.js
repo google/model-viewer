@@ -103,13 +103,17 @@ const updateScreenshots = async (config) => {
 
           break;
         case 'Filament':
-          await iblFromScript(
+          paths = await iblFromScript(
               scenario, scenarioDirectory, name, filamentIBLScript);
+
+          const background = path.parse(paths.backgroundImage).name;
+          const url = `Filament/index.html?model=${
+              paths.modelSource}&background=${background}`;
 
           try {
             await run('node', [
               './scripts/model-viewer-screenshot.js',
-              `${slug}-Filament`,
+              url,
               dimensions.width,
               dimensions.height,
               filePath
@@ -182,6 +186,8 @@ const iblFromScript = async (scenario, scenarioDirectory, name, script) => {
       }
     });
   });
+
+  return {modelSource, backgroundImage};
 };
 
 updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
