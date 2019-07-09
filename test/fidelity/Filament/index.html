@@ -50,9 +50,6 @@ const environment_url=`../../../renderers/filament/ibl/tmp/${background}`;
 const ibl_url = `${environment_url}/${background}_ibl.ktx`;
 const sky_url = `${environment_url}/${background}_skybox.ktx`;
 const mesh_url = params['model'];
-console.log('ibl_url = '+ibl_url);
-console.log('sky_url = '+sky_url);
-console.log('mesh_url = '+mesh_url);
 Filament.init([mesh_url, ibl_url, sky_url], () => {
     window.gltfio = Filament.gltfio;
     window.Fov = Filament.Camera$Fov;
@@ -78,12 +75,17 @@ class App {
         // this.scene.addEntity(sunlight);
         const indirectLight = this.ibl = engine.createIblFromKtx(ibl_url);
         this.scene.setIndirectLight(indirectLight);
-        indirectLight.setIntensity(100000);
+        indirectLight.setIntensity(50000);
+        // This rotates both the IBL and the skybox
+        indirectLight.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);// 90 degrees
         const skybox = engine.createSkyFromKtx(sky_url);
         this.scene.setSkybox(skybox);
         const loader = engine.createAssetLoader();
         const asset = this.asset = loader.createAssetFromBinary(mesh_url);
         const messages = document.getElementById('messages');
+        this.boundingBox = {};
+        this.boundingBox.min=[-1, -1, -1];
+        this.boundingBox.max=[1, 1, 1];
         // Crudely indicate progress by printing the URL of each resource as it is loaded.
         // Note that we wait 1 ms after the last asset has downloaded, but before finalization.
         // This gives the browser time to display the latest status.
@@ -96,8 +98,8 @@ class App {
                 const entities = asset.getEntities();
                 scene.addEntities(entities);
                 const loaded = new Event('model-loaded');
-                const boundingBox = asset.getBoundingBox();
-                console.log(boundingBox);
+                this.boundingBox = asset.getBoundingBox();
+                this.resize();
                 canvas.dispatchEvent(loaded);
                 messages.remove();
             }, 1);
@@ -109,6 +111,10 @@ class App {
         this.view = engine.createView();
         this.view.setCamera(this.camera);
         this.view.setScene(this.scene);
+        // const aperture = this.camera.getAperture();
+        // const shutterSpeed = this.camera.getShutterSpeed();
+        // const sensitivity = this.camera.getSensitivity();
+        // this.camera.setExposure(aperture, shutterSpeed, sensitivity);
         
         this.resize();
         this.render = this.render.bind(this);
@@ -131,11 +137,40 @@ class App {
         const height = this.canvas.height = window.innerHeight * dpr;
         this.view.setViewport([0, 0, width, height]);
         const aspect = width / height;
-        const fov = aspect < 1 ? Fov.HORIZONTAL : Fov.VERTICAL;
-        this.camera.setProjectionFov(45, aspect, 0.1, 1000.0, fov);
+        // const fov = aspect < 1 ? Fov.HORIZONTAL : Fov.VERTICAL;
 
-        const eye = [0, 0, 15], center = [0, 0, 0], up = [0, 1, 0];
-        this.camera.lookAt(eye, center, up);
+        let target = [0, 0, 0];
+        let eye = [0, 0, 0];
+        for(let i = 0; i < 3; i++){
+            target[i] = (this.boundingBox.min[i] + this.boundingBox.max[i]) / 2.0;
+            eye[i] = target[i];
+        }
+
+        const boxHalfX = Math.max(
+            Math.abs(this.boundingBox.min[0] - target[0]),
+            Math.abs(this.boundingBox.max[0] - target[0]));
+        const boxHalfZ = Math.max(
+            Math.abs(this.boundingBox.min[2] - target[2]),
+            Math.abs(this.boundingBox.max[2] - target[2]));
+        const boxHalfY = Math.max(
+            Math.abs(this.boundingBox.min[1] - target[1]),
+            Math.abs(this.boundingBox.max[1] - target[1]));
+
+        const modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
+        const framedHeight = Math.max(2 * boxHalfY, modelDepth / aspect);
+
+        const fov = 45;
+
+        const framedDistance = (framedHeight / 2) /
+              Math.tan((fov / 2) * Math.PI / 180);
+        const near = framedHeight / 10.0;
+        const far = framedHeight * 10.0;
+        const cameraDistance = framedDistance + modelDepth / 2;
+
+        this.camera.setProjectionFov(fov, aspect, near, far, Fov.VERTICAL);
+        eye[2] += cameraDistance;
+        const up = [0, 1, 0];
+        this.camera.lookAt(eye, target, up);
     }
 }
 </script>
