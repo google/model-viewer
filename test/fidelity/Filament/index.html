@@ -75,8 +75,8 @@ class App {
         // this.scene.addEntity(sunlight);
         const indirectLight = this.ibl = engine.createIblFromKtx(ibl_url);
         this.scene.setIndirectLight(indirectLight);
-        indirectLight.setIntensity(50000);
-        // This rotates both the IBL and the skybox
+        // Functions on the indirectLight affect both the IBL and the skybox
+        indirectLight.setIntensity(40000);
         indirectLight.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);// 90 degrees
         const skybox = engine.createSkyFromKtx(sky_url);
         this.scene.setSkybox(skybox);
