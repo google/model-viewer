@@ -166,7 +166,7 @@ export class ArtifactCreator {
 
     await page.goto(url);
 
-    const name = slug.includes('Filament') ? '<model-viewer>' : 'Filament';
+    const name = slug.includes('Filament') ? 'Filament' : '<model-viewer>';
     console.log(`🖌  Rendering ${slug} with ${name}`);
 
     await page.evaluate(async (slug: string) => {
