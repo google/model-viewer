@@ -10,7 +10,8 @@ export interface CubemapGeneratorOptions {
 export class CubemapGenerator {
   constructor(renderer: WebGLRenderer);
   public fromEquirectangular(
-      texture: Texture, options?: CubemapGeneratorOptions): WebGLRenderTarget;
+      texture: Texture,
+      options?: CubemapGeneratorOptions): WebGLRenderTargetCube;
 }
 
 export interface EquirectangularToCubeGeneratorOptions {

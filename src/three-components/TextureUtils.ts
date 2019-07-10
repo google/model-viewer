@@ -17,7 +17,7 @@ import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, Event
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
-import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
+import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
 
@@ -36,8 +36,6 @@ Cache.enabled = true;
 const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
-
-const $cubeGenerator = Symbol('cubeGenerator');
 
 export interface TextureUtilsConfig {
   cubemapSize?: number;
@@ -62,7 +60,6 @@ export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
   private environmentMapGenerator: EnvironmentMapGenerator|null = null;
-  private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
 
   /**
    * @param {THREE.WebGLRenderer} renderer
@@ -75,13 +72,13 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
-    const generator = new EquirectangularToCubeGenerator(texture, {
+    const generator = new CubemapGenerator(this.renderer);
+
+    let target = generator.fromEquirectangular(texture, {
       resolution: this.config.cubemapSize,
     });
 
-    generator.update(this.renderer);
-
-    (generator.renderTarget.texture as any).userData = {
+    (target.texture as any).userData = {
       ...userData,
       ...({
         url: (texture as any).userData ? (texture as any).userData.url : null,
@@ -89,11 +86,7 @@ export default class TextureUtils extends EventDispatcher {
       })
     };
 
-    // It's up to the previously served texture to dispose itself,
-    // and therefore the generator's render target.
-    this[$cubeGenerator] = generator;
-
-    return generator.renderTarget;
+    return target;
   }
 
   async load(
@@ -408,10 +401,6 @@ export default class TextureUtils extends EventDispatcher {
       if (this.environmentMapGenerator != null) {
         this.environmentMapGenerator.dispose();
         (this as any).environmentMapGenerator = null;
-      }
-      if (this[$cubeGenerator] != null) {
-        this[$cubeGenerator]!.dispose();
-        this[$cubeGenerator] = null;
       }
     } catch (_error) {
     }
