@@ -17,7 +17,7 @@ import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, Event
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
-import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
+import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
@@ -42,7 +42,6 @@ const hdrLoader = new RGBELoader();
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
-const $cubeGenerator = Symbol('cubeGenerator');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
 
 const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
@@ -74,7 +73,6 @@ export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
 
-  private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
@@ -91,13 +89,13 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
-    const generator = new EquirectangularToCubeGenerator(texture, {
+    const generator = new CubemapGenerator(this.renderer);
+
+    let target = generator.fromEquirectangular(texture, {
       resolution: this.config.cubemapSize,
     });
 
-    generator.update(this.renderer);
-
-    (generator.renderTarget.texture as any).userData = {
+    (target.texture as any).userData = {
       ...userData,
       ...({
         url: (texture as any).userData ? (texture as any).userData.url : null,
@@ -105,11 +103,7 @@ export default class TextureUtils extends EventDispatcher {
       })
     };
 
-    // It's up to the previously served texture to dispose itself,
-    // and therefore the generator's render target.
-    this[$cubeGenerator] = generator;
-
-    return generator.renderTarget;
+    return target;
   }
 
   async load(
@@ -434,18 +428,6 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   async dispose() {
-    // NOTE(cdata): In the case that the generators are invoked with
-    // an incorrect texture, the generators will throw when we attempt to
-    // dispose of them because the framebuffer has not been created yet but
-    // the implementation does not guard for this correctly:
-    try {
-      if (this[$cubeGenerator] != null) {
-        this[$cubeGenerator]!.dispose();
-        this[$cubeGenerator] = null;
-      }
-    } catch (_error) {
-    }
-
     for (const environmentMapLoads of this[$environmentMapCache].values()) {
       const environmentMap = await environmentMapLoads;
       if (environmentMap != null) {
