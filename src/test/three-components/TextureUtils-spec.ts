@@ -30,16 +30,14 @@ const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
 
 suite('TextureUtils', () => {
   let textureUtils: TextureUtils;
-  let renderer: WebGLRenderer;
+  const renderer = new WebGLRenderer({canvas});
 
   setup(() => {
-    renderer = new WebGLRenderer({canvas});
     // NOTE(cdata): We need to lower the samples here or else tests that use
     // PMREM have a tendency to time out on iOS Simulator
     textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
   });
   teardown(() => {
-    renderer.dispose();
     textureUtils.dispose();
   });
 
