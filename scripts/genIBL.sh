@@ -20,11 +20,11 @@ showUsage() {
 
 Usage:
 
-  filament-screenshot.sh -i <ibl input file> [-r <renderer install path>] [-vI]
+  genIBL.sh -i <ibl input file> [-r <renderer install path>] [-vI]
 
-Note: script caches Filament repo and non-screenshot artifacts across
-multiple invocations. To force regeneration of the IBL, add the -I flag (be
-aware that this will take longer).';
+Note: script caches generated IBLs across multiple invocations. 
+To force regeneration of the IBL, add the -I flag (be aware that 
+this will take longer).';
 }
 
 if [ -z "$MODEL_VIEWER_CHECKOUT_DIRECTORY" ]; then
