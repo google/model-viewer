@@ -111,7 +111,7 @@ export const MagicLeapMixin = (ModelViewerElement:
             this[$mlModel]!.setAttribute('extractable', 'true');
             this[$mlModel]!.setAttribute('extracted-scale', '1');
             this[$mlModel]!.setAttribute(
-                'environment-lighting', 'color-intensity: 2;');
+                'environment-lighting', 'color-intensity: 8;');
 
             if (this.src != null) {
               this[$mlModel]!.setAttribute('src', this.src);
