@@ -36,7 +36,7 @@ const DEFAULT_HOLOGRAM_INLINE_SCALE = 0.65;
 // NOTE(cdata): This probably needs to scale proportionally with the dimensions
 // of the inline model, but we need more experimentation to decide how that
 // should work:
-const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
+const DEFAULT_HOLOGRAM_Z_OFFSET = '300px';
 
 /**
  * In order to use Magic Leap support, please include prismatic.js in your
