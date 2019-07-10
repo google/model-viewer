@@ -130,20 +130,6 @@
       }
     },
     {
-      "slug": "khronos-Cube",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
       "slug": "khronos-Duck",
       "goldens": [{
         "name": "<model-viewer> (master)",
@@ -154,20 +140,6 @@
       }],
       "dimensions": {
         "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-EnvironmentTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 2048,
         "height": 1536
       }
     },
@@ -285,48 +257,6 @@
     },
     {
       "slug": "khronos-OrientationTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-SciFiHelmet",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-Suzanne",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-TextureTransformTest",
       "goldens": [{
         "name": "<model-viewer> (master)",
         "file": "model-viewer-golden.png"
