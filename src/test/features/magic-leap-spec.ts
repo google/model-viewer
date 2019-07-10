@@ -68,7 +68,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
         });
       });
 
-      suite('in the Helios browser environment', () => {
+      suite('in the Helio browser environment', () => {
         let element: ModelViewerElementBase&MagicLeapInterface;
 
         setup(async () => {

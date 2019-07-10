@@ -24,7 +24,7 @@ export interface MagicLeapInterface {
 
 const $showMlModel = Symbol('showMlModel');
 const $hideMlModel = Symbol('hideMlModel');
-const $isHeliosBrowser = Symbol('isHeliosBrowser');
+const $isHelioBrowser = Symbol('isHelioBrowser');
 const $mlModel = Symbol('mlModel');
 
 
@@ -53,14 +53,14 @@ export const MagicLeapMixin = (ModelViewerElement:
 
         // NOTE(cdata): Check at construction time because the check is cheap
         // and it makes testing easier
-        private[$isHeliosBrowser]: boolean = self.mlWorld != null;
+        private[$isHelioBrowser]: boolean = self.mlWorld != null;
 
         private[$mlModel]: HTMLElement|null = null;
 
         updated(changedProperties: Map<string, any>) {
           super.updated(changedProperties);
 
-          if (!this[$isHeliosBrowser]) {
+          if (!this[$isHelioBrowser]) {
             return;
           }
 

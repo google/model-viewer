@@ -16,7 +16,7 @@ https://glitch.com/edit/#!/model-viewer
 - [ ] Chrome
 - [ ] Edge
 - [ ] Firefox
-- [ ] Helios
+- [ ] Helio
 - [ ] IE
 - [ ] Safari
 
