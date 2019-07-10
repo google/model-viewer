@@ -74,7 +74,7 @@
   ],
   "devDependencies": {
     "@jsantell/event-target": "^1.0.0",
-    "@magicleap/prismatic": "^0.17.5",
+    "@magicleap/prismatic": "^0.20.2",
     "@polymer/iron-demo-helpers": "^3.0.2",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
