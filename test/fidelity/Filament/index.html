@@ -81,7 +81,9 @@ class App {
         const skybox = engine.createSkyFromKtx(sky_url);
         this.scene.setSkybox(skybox);
         const loader = engine.createAssetLoader();
-        const asset = this.asset = loader.createAssetFromBinary(mesh_url);
+        const asset = this.asset = mesh_url.split('.').pop() === 'glb' ? 
+            loader.createAssetFromBinary(mesh_url) : 
+            loader.createAssetFromJson(mesh_url);// this doesn't work due to a Filament bug.
         const messages = document.getElementById('messages');
         this.boundingBox = {};
         this.boundingBox.min=[-1, -1, -1];
