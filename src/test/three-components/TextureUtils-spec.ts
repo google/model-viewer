@@ -30,6 +30,10 @@ const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
 
 suite('TextureUtils', () => {
   let textureUtils: TextureUtils;
+  // The renderer can retain state, so these tests have the possibility of
+  // getting different results in different orders. However, our use of the
+  // renderer *should* always return its state to what it was before to avoid
+  // this kind of problem (and many other headaches).
   const renderer = new WebGLRenderer({canvas});
 
   setup(() => {

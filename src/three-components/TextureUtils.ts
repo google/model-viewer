@@ -217,11 +217,12 @@ export default class TextureUtils extends EventDispatcher {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * cubeResolution * 2 /
         Math.PI);
-    const norm = standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
+    const inverseIntegral =
+        standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
     let weights = [];
     for (let i = 0; i < n; ++i) {
       const x = standardDeviations * i / (n - 1);
-      weights.push(norm * Math.exp(-x * x / 2));
+      weights.push(inverseIntegral * Math.exp(-x * x / 2));
     }
 
     const blurMaterial = new ShaderMaterial({
@@ -241,10 +242,9 @@ export default class TextureUtils extends EventDispatcher {
           gl_Position.z = gl_Position.w;
         }
       `,
-      fragmentShader: [
-        'const float n = ' + n + '.0;',
-        'uniform float weights[' + n + '];',
-        `
+      fragmentShader: `
+        const float n = ${n.toFixed(1)};
+        uniform float weights[${n}]; 
         uniform samplerCube tCube;
         uniform bool latitudinal;
         uniform float dTheta;
@@ -271,8 +271,7 @@ export default class TextureUtils extends EventDispatcher {
           }
           gl_FragColor = linearToOutputTexel(texColor);
         }
-      `
-      ].join('\n'),
+      `,
       side: BackSide,
       depthTest: false,
       depthWrite: false
