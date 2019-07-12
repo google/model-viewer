@@ -214,6 +214,34 @@
       }
     },
     {
+      "slug": "khronos-MetalRoughSpheres-HDR",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
+      "slug": "khronos-MetalRoughSpheres-LDR",
+      "goldens": [{
+        "name": "<model-viewer> (master)",
+        "file": "model-viewer-golden.png"
+      }, {
+        "name": "Filament",
+        "file": "filament-golden.png"
+      }],
+      "dimensions": {
+        "width": 1536,
+        "height": 1536
+      }
+    },
+    {
       "slug": "khronos-MultiUVTest",
       "goldens": [{
         "name": "<model-viewer> (master)",
