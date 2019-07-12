@@ -179,6 +179,14 @@ export default class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
+      const widthDPR = width * dpr;
+      const heightDPR = height * dpr;
+
+      if (scene.isResized) {
+        canvas.width = widthDPR;
+        canvas.height = heightDPR;
+      }
+
       const {exposure} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
@@ -192,14 +200,6 @@ export default class Renderer extends EventDispatcher {
       this.renderer.setViewport(0, 0, width, height);
       this.renderer.render(scene, camera);
 
-      const widthDPR = width * dpr;
-      const heightDPR = height * dpr;
-
-      if (scene.isResized) {
-        canvas.width = widthDPR;
-        canvas.height = heightDPR;
-      }
-
       context.drawImage(
           this.renderer.domElement,
           0,
@@ -210,10 +210,8 @@ export default class Renderer extends EventDispatcher {
           0,
           widthDPR,
           heightDPR);
-
-      scene.isDirty = false;
-      scene.isResized = false;
     }
+
     this.lastTick = t;
   }
 

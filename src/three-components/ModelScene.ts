@@ -76,6 +76,13 @@ export default class ModelScene extends Scene {
   public camera: PerspectiveCamera;
   public activeCamera: Camera;
 
+  onAfterRender = () => {
+    this.isDirty = false;
+    this.isResized = false;
+
+    this.canvas.style.width = `${this.width}px`;
+    this.canvas.style.height = `${this.height}px`;
+  };
 
   /**
    * @param {ModelViewerElementBase} options.element
@@ -304,6 +311,7 @@ export default class ModelScene extends Scene {
   setCamera(camera: Camera) {
     this.activeCamera = camera;
   }
+
 
   /**
    * Called when the model's contents have loaded, or changed.
