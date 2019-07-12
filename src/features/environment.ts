@@ -16,7 +16,6 @@
 import {property} from 'lit-element';
 import {Color, Texture} from 'three';
 import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
-import {IlluminationRole} from '../three-components/ModelScene.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 export interface EnvironmentInterface {
@@ -32,7 +31,7 @@ export interface EnvironmentInterface {
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
-const DEFAULT_STAGE_LIGHT_INTENSITY = 1.0;
+const DEFAULT_STAGE_LIGHT_INTENSITY = 0.0;
 const DEFAULT_ENVIRONMENT_INTENSITY = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
@@ -206,11 +205,8 @@ export const EnvironmentMixin = (ModelViewerElement:
 
         private[$updateLighting]() {
           const scene = this[$scene];
-          const illuminationRole = IlluminationRole.Secondary;
-          scene.configureStageLighting(
-              this.stageLightIntensity, illuminationRole);
-          scene.model.setEnvironmentMapIntensity(
-              this.environmentIntensity * 0.65);
+          scene.configureStageLighting(this.stageLightIntensity);
+          scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
         }
 
         private[$deallocateTextures]() {
