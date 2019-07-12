@@ -19,11 +19,14 @@ import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
 import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
-import {Activity, ProgressTracker} from '../utilities/progress-tracker.js';
+import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 
-const targetCache = new Map<string, WebGLRenderTarget>();
+export interface EnvironmentMapAndSkybox {
+  environmentMap: WebGLRenderTarget;
+  skybox: WebGLRenderTargetCube|null;
+}
 
 export interface EnvironmentGenerationConfig {
   progressTracker?: ProgressTracker;
@@ -37,7 +40,16 @@ const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 
+const $environmentMapCache = Symbol('environmentMapCache');
+const $skyboxCache = Symbol('skyboxCache');
 const $cubeGenerator = Symbol('cubeGenerator');
+const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
+
+const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
+const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
+const $loadEnvironmentMapFromSkyboxUrl =
+    Symbol('loadEnvironmentMapFromSkyboxUrl');
+const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
 
 export interface TextureUtilsConfig {
   cubemapSize?: number;
@@ -61,8 +73,12 @@ const userData = {
 export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
-  private environmentMapGenerator: EnvironmentMapGenerator|null = null;
+
   private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
+  private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
+
+  private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
+  private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
   /**
    * @param {THREE.WebGLRenderer} renderer
@@ -158,107 +174,129 @@ export default class TextureUtils extends EventDispatcher {
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
-      options: EnvironmentGenerationConfig = {}): Promise<{
-    environmentMap: WebGLRenderTarget,
-    skybox: WebGLRenderTargetCube|null
-  }> {
+      options: EnvironmentGenerationConfig = {}):
+      Promise<EnvironmentMapAndSkybox> {
     const {progressTracker} = options;
-    let updateGenerationProgress: Activity|((...args: any[]) => void) =
-        () => {};
-
-    let skyboxLoads: Promise<WebGLRenderTargetCube|null> =
-        Promise.resolve(null);
-    let environmentMapLoads: Promise<WebGLRenderTarget|null> =
-        Promise.resolve(null);
-
-    let skybox: WebGLRenderTargetCube|null = null;
-    let environmentMap: WebGLRenderTarget|null = null;
+    const updateGenerationProgress =
+        progressTracker != null ? progressTracker.beginActivity() : () => {};
 
     try {
-      let environmentMapWasGenerated = false;
-
-      // If we have a specific environment URL, attempt to load it as a cubemap
-      // The case for this is that the user intends for the IBL to be different
-      // from the scene background (which may be a skybox or solid color).
-      if (!!environmentMapUrl && !targetCache.has(environmentMapUrl + ':env')) {
-        environmentMapLoads = this.loadEquirectAsCubeMap(
-            environmentMapUrl,
-            progressTracker ? progressTracker.beginActivity() : () => {});
-      }
+      let skyboxLoads: Promise<WebGLRenderTargetCube|null> =
+          Promise.resolve(null);
+      let environmentMapLoads: Promise<WebGLRenderTarget>;
 
       // If we have a skybox URL, attempt to load it as a cubemap
-      if (!!skyboxUrl && !targetCache.has(skyboxUrl)) {
-        skyboxLoads = this.loadEquirectAsCubeMap(
-            skyboxUrl,
-            progressTracker ? progressTracker.beginActivity() : () => {});
-      }
-
-      updateGenerationProgress =
-          progressTracker ? progressTracker.beginActivity() : () => {};
-
-      // In practice, this should be nearly as parallel as Promise.all (which
-      // we don't use since we can't easily destructure here):
-      environmentMap = await environmentMapLoads;
-      skybox = await skyboxLoads;
-
       if (!!skyboxUrl) {
-        if (targetCache.has(skyboxUrl)) {
-          skybox = targetCache.get(skyboxUrl)!;
-        } else {
-          targetCache.set(skyboxUrl, skybox!);
-        }
+        skyboxLoads = this[$loadSkyboxFromUrl](skyboxUrl, progressTracker);
       }
 
-      if (environmentMapUrl == null) {
-        if (skybox != null) {
-          // Infer the environment from the skybox if we have one:
-          environmentMapUrl = skyboxUrl + ':env';
-          environmentMap = skybox;
-        } else {
-          // Otherwise, no skybox URL was specified, so fall back to
-          // generating the environment:
-          environmentMapUrl = 'generated:env';
-          if (!targetCache.has(environmentMapUrl)) {
-            this.environmentMapGenerator =
-                new EnvironmentMapGenerator(this.renderer);
-            environmentMap = this.environmentMapGenerator.generate();
-            environmentMapWasGenerated = true;
-          }
-        }
+      if (!!environmentMapUrl) {
+        // We have an available environment map URL
+        environmentMapLoads = this[$loadEnvironmentMapFromUrl](
+            environmentMapUrl, progressTracker);
+      } else if (!!skyboxUrl) {
+        // Fallback to deriving the environment map from an available skybox
+        environmentMapLoads =
+            this[$loadEnvironmentMapFromSkyboxUrl](skyboxUrl, progressTracker);
       } else {
-        environmentMapUrl = environmentMapUrl + ':env';
+        // Fallback to generating the environment map
+        environmentMapLoads = this[$loadGeneratedEnvironmentMap]();
       }
 
-      // Apply the PMREM pass to the environment, which produces a distinct
-      // texture from the source:
-      if (targetCache.has(environmentMapUrl)) {
-        environmentMap = targetCache.get(environmentMapUrl)!;
-      } else {
-        const nonPmremEnvironmentMap = environmentMap!.texture;
-        environmentMap = this.pmremPass(nonPmremEnvironmentMap);
-        targetCache.set(environmentMapUrl, environmentMap);
-
-        // If the source was generated, then we should dispose of it right away
-        if (environmentMapWasGenerated) {
-          nonPmremEnvironmentMap.dispose();
-        }
-      }
+      const [environmentMap, skybox] =
+          await Promise.all([environmentMapLoads, skyboxLoads]);
 
       return {environmentMap, skybox};
-    } catch (error) {
-      if (skybox != null) {
-        (skybox as any).dispose();
-      }
-
-      if (environmentMap != null) {
-        (environmentMap as any).dispose();
-      }
-
-      throw error;
     } finally {
       updateGenerationProgress(1.0);
     }
   }
+
+  /**
+   * Loads a WebGLRenderTargetCube from a given URL. The render target in this
+   * case will be assumed to be used as a skybox.
+   */
+  private[$loadSkyboxFromUrl](url: string, progressTracker?: ProgressTracker):
+      Promise<WebGLRenderTargetCube> {
+    if (!this[$skyboxCache].has(url)) {
+      const progressCallback =
+          progressTracker ? progressTracker.beginActivity() : () => {};
+      this[$skyboxCache].set(
+          url, this.loadEquirectAsCubeMap(url, progressCallback));
+    }
+
+    return this[$skyboxCache].get(url)!;
+  }
+
+  /**
+   * Loads a WebGLRenderTarget from a given URL. The render target in this
+   * case will be assumed to be used as an environment map.
+   */
+  private[$loadEnvironmentMapFromUrl](
+      url: string,
+      progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
+    if (!this[$environmentMapCache].has(url)) {
+      const progressCallback =
+          progressTracker ? progressTracker.beginActivity() : () => {};
+      const environmentMapLoads =
+          this.loadEquirectAsCubeMap(url, progressCallback)
+              .then(interstitialEnvironmentMap => {
+                const environmentMap =
+                    this.pmremPass(interstitialEnvironmentMap.texture);
+                // In this case, we don't care about the interstitial
+                // environment map because it will never be used for anything,
+                // so dispose of it right away:
+                interstitialEnvironmentMap.dispose();
+                return environmentMap;
+              });
+
+      this[$environmentMapCache].set(url, environmentMapLoads);
+    }
+
+    return this[$environmentMapCache].get(url)!;
+  }
+
+  /**
+   * Loads a skybox from a given URL, then PMREM is applied to the
+   * skybox texture and the resulting WebGLRenderTarget is returned,
+   * with the assumption that it will be used as an environment map.
+   */
+  private[$loadEnvironmentMapFromSkyboxUrl](
+      url: string,
+      progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
+    if (!this[$environmentMapCache].has(url)) {
+      const skyboxLoads = this[$loadSkyboxFromUrl](url, progressTracker);
+      const environmentMapLoads =
+          skyboxLoads.then(skybox => this.pmremPass(skybox.texture));
+
+      this[$environmentMapCache].set(url, environmentMapLoads);
+    }
+
+    return this[$environmentMapCache].get(url)!;
+  }
+
+  /**
+   * Loads a dynamically generated environment map.
+   */
+  private[$loadGeneratedEnvironmentMap](): Promise<WebGLRenderTarget> {
+    if (this[$generatedEnvironmentMap] == null) {
+      const environmentMapGenerator =
+          new EnvironmentMapGenerator(this.renderer);
+      const interstitialEnvironmentMap = environmentMapGenerator.generate();
+
+      this[$generatedEnvironmentMap] =
+          this.pmremPass(interstitialEnvironmentMap.texture);
+
+      // We should only ever generate this map once, and we will not be using
+      // the environment map as a skybox, so go ahead and dispose of all
+      // interstitial artifacts:
+      interstitialEnvironmentMap.dispose();
+      environmentMapGenerator.dispose();
+    }
+
+    return Promise.resolve(this[$generatedEnvironmentMap]!);
+  }
+
 
   /**
    * Takes a cube-ish (@see equirectangularToCubemap) texture and
@@ -289,21 +327,40 @@ export default class TextureUtils extends EventDispatcher {
     return renderTarget;
   }
 
-  dispose() {
+  async dispose() {
     // NOTE(cdata): In the case that the generators are invoked with
     // an incorrect texture, the generators will throw when we attempt to
     // dispose of them because the framebuffer has not been created yet but
     // the implementation does not guard for this correctly:
     try {
-      if (this.environmentMapGenerator != null) {
-        this.environmentMapGenerator.dispose();
-        (this as any).environmentMapGenerator = null;
-      }
       if (this[$cubeGenerator] != null) {
         this[$cubeGenerator]!.dispose();
         this[$cubeGenerator] = null;
       }
     } catch (_error) {
+    }
+
+    for (const environmentMapLoads of this[$environmentMapCache].values()) {
+      const environmentMap = await environmentMapLoads;
+      if (environmentMap != null) {
+        environmentMap.dispose();
+      }
+    }
+
+    this[$environmentMapCache].clear();
+
+    for (const skyboxLoads of this[$skyboxCache].values()) {
+      const skybox = await skyboxLoads;
+      if (skybox != null) {
+        skybox.dispose();
+      }
+    }
+
+    this[$skyboxCache].clear();
+
+    if (this[$generatedEnvironmentMap] != null) {
+      this[$generatedEnvironmentMap]!.dispose();
+      this[$generatedEnvironmentMap] = null;
     }
   }
 }
