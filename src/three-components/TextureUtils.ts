@@ -322,44 +322,48 @@ export default class TextureUtils extends EventDispatcher {
         dTheta: {value: standardDeviationRadians * standardDeviations / (n - 1)}
       },
       vertexShader: `
-        varying vec3 vWorldDirection;
-        #include <common>
-        void main() {
-          vWorldDirection = transformDirection( position, modelMatrix );
-          #include <begin_vertex>
-          #include <project_vertex>
-          gl_Position.z = gl_Position.w;
-        }
+varying vec3 vWorldDirection;
+#include <common>
+void main() {
+  vWorldDirection = transformDirection( position, modelMatrix );
+  #include <begin_vertex>
+  #include <project_vertex>
+  gl_Position.z = gl_Position.w;
+}
       `,
       fragmentShader: `
-        const float n = ${n.toFixed(1)};
-        uniform float weights[${n}]; 
-        uniform samplerCube tCube;
-        uniform bool latitudinal;
-        uniform float dTheta;
-        varying vec3 vWorldDirection;
-        void main() {
-          vec4 texColor = vec4(0.0);
-          for (float i = 1.0 - n; i < n; i++) {
-            vec3 sampleDirection = vWorldDirection;
-            float xz = length(sampleDirection.xz);
-            float weight = weights[int(abs(i))];
-            if (latitudinal) {
-              float diTheta = dTheta * i / xz;
-              mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-              sampleDirection.xz = R * sampleDirection.xz;
-              texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
-            } else {
-              float diTheta = dTheta * i;
-              mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-              vec2 xzY = R * vec2(xz, sampleDirection.y);
-              sampleDirection.xz *= xzY.x / xz;
-              sampleDirection.y = xzY.y;
-              texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
-            }
-          }
-          gl_FragColor = linearToOutputTexel(texColor);
-        }
+const int n = ${n};
+uniform float weights[${n}];
+uniform samplerCube tCube;
+uniform bool latitudinal;
+uniform float dTheta;
+varying vec3 vWorldDirection;
+void main() {
+  vec4 texColor = vec4(0.0);
+  for (int i = 0; i < n; i++) {
+    for (int dir = -1; dir < 2; dir += 2) {
+      if (i == 0 && dir == 1)
+        continue;
+      vec3 sampleDirection = vWorldDirection;
+      float xz = length(sampleDirection.xz);
+      float weight = weights[i];
+      if (latitudinal) {
+        float diTheta = dTheta * float(dir * i) / xz;
+        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+        sampleDirection.xz = R * sampleDirection.xz;
+        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+      } else {
+        float diTheta = dTheta * float(dir * i);
+        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+        vec2 xzY = R * vec2(xz, sampleDirection.y);
+        sampleDirection.xz *= xzY.x / xz;
+        sampleDirection.y = xzY.y;
+        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+      }
+    }
+  }
+  gl_FragColor = linearToOutputTexel(texColor);
+}
       `,
       side: BackSide,
       depthTest: false,

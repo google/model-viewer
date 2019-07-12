@@ -35,6 +35,7 @@ suite('TextureUtils', () => {
   // renderer *should* always return its state to what it was before to avoid
   // this kind of problem (and many other headaches).
   const renderer = new WebGLRenderer({canvas});
+  renderer.debug.checkShaderErrors = true;
 
   setup(() => {
     // NOTE(cdata): We need to lower the samples here or else tests that use
