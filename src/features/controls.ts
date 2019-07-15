@@ -42,7 +42,7 @@ const InteractionPromptStrategy:
 
 const InteractionPolicy:
     {[index: string]: InteractionPolicy} = {
-      ALWAYS: 'always-allow',
+      ALWAYS_ALLOW: 'always-allow',
       WHEN_FOCUSED: 'allow-when-focused'
     };
 
@@ -126,7 +126,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         @property({type: String, attribute: 'interaction-policy'})
         interactionPolicy: InteractionPolicy =
-            InteractionPolicy.ALWAYS;
+            InteractionPolicy.ALWAYS_ALLOW;
 
         protected[$promptElement]: Element;
 
