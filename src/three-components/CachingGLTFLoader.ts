@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+import {Material, Shader} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import chunk from './cube_uv_reflection_fragment.glsl.js';
 import {cloneGltf, Gltf} from './ModelUtils.js';
 
 export type ProgressCallback = (progress: number) => void;
@@ -88,8 +90,23 @@ export class CachingGLTFLoader {
     const gltf = cloneGltf(await cache.get(url)!);
     const model = gltf.scene ? gltf.scene : null;
 
+    // This is a patch to three's handling of PMREM environments.
+    const updateShader = (shader: Shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <cube_uv_reflection_fragment>', chunk);
+    };
+
     if (model != null) {
       model.userData.animations = gltf.animations;  // save animations
+      model.traverse((node: any) => {
+        if (Array.isArray(node.material)) {
+          (node.material as Array<Material>).forEach(material => {
+            material.onBeforeCompile = updateShader;
+          });
+        } else if (node.material != null) {
+          node.material.onBeforeCompile = updateShader;
+        }
+      });
     }
 
     return model;
