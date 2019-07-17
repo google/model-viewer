@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RGBEEncoding, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 export default class PMREMGenerator {
   private mipmapShader = this.getMipmapShader();
   private packingShader = this.getPackingShader();
-  private cubeCamera: CubeCamera|null = null;
+  private cubeCamera = new CubeCamera(0.1, 100, 1);
   private flatCamera = new OrthographicCamera(-1, 1, 1, -1);
   private mipmapScene = new Scene();
   private packingScene = new Scene();
@@ -46,11 +46,10 @@ export default class PMREMGenerator {
 
   setup(cubeTarget: WebGLRenderTargetCube) {
     const size = cubeTarget.width;
-    if (this.cubeCamera == null ||
-        this.cubeCamera.renderTarget.width !== size) {
-      this.cubeCamera = new CubeCamera(0.1, 100, size);
+    if (cubeTarget.texture.encoding !== RGBEEncoding) {
+      console.error(
+          'Input cubeTarget to PMREMGenerator must have a texture with RGBEEncoding!');
     }
-    this.mipmapScene.add(this.cubeCamera);
 
     const params = {
       format: cubeTarget.texture.format,
@@ -59,7 +58,7 @@ export default class PMREMGenerator {
       type: cubeTarget.texture.type,
       generateMipmaps: false,
       anisotropy: cubeTarget.texture.anisotropy,
-      encoding: cubeTarget.texture.encoding
+      encoding: RGBEEncoding
     };
 
     // Hard-coded to max faceSize = 256 until we can add a uniform.
@@ -70,7 +69,6 @@ export default class PMREMGenerator {
     let offset = 0;
     for (let i = 0; i < numLods + 1; i++) {
       const sizeLod = Math.pow(2, i);
-      const sizePad = sizeLod + 2;
       if (this.cubeLods.length <= i) {
         if (sizeLod === size) {
           this.addLodObjects(cubeTarget, offset);
@@ -82,7 +80,7 @@ export default class PMREMGenerator {
           this.addLodObjects(renderTarget, offset);
         }
       }
-      offset += 2 * sizePad;
+      offset += 2 * (sizeLod + 2);
     }
 
     if (numLods !== this.numLods) {
@@ -150,8 +148,8 @@ export default class PMREMGenerator {
     this.mipmapShader.uniforms['invMapSize'].value = 1.0 / cubeTarget.width;
     this.mipmapShader.uniforms['envMap'].value = cubeTarget.texture;
     for (let i = this.numLods - 1; i >= 0; i--) {
-      renderer.setRenderTarget(this.cubeLods[i]);
-      this.cubeCamera!.update(renderer, this.mipmapScene);
+      this.cubeCamera.renderTarget = this.cubeLods[i];
+      this.cubeCamera.update(renderer, this.mipmapScene);
       this.mipmapShader.uniforms['invMapSize'].value =
           1.0 / this.cubeLods[i].width;
       this.mipmapShader.uniforms['envMap'].value = this.cubeLods[i].texture;
@@ -209,7 +207,6 @@ void main() {
 `,
 
       fragmentShader: `
-#include <common>
 varying vec2 vUv;
 varying vec3 vPosition;
 uniform float invMapSize;
@@ -252,16 +249,16 @@ void main() {
   int face = getFace(vPosition);
   vec2 uv = vUv - 0.5 * invMapSize;
   vec3 texelDir = getDirection(uv, face);
-  vec3 color = envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  vec3 color = RGBEToLinear(textureCube(envMap, texelDir)).rgb;
   uv.x += invMapSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  color += RGBEToLinear(textureCube(envMap, texelDir)).rgb;
   uv.y += invMapSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  color += RGBEToLinear(textureCube(envMap, texelDir)).rgb;
   uv.x -= invMapSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  color += RGBEToLinear(textureCube(envMap, texelDir)).rgb;
   gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0));
 }
 `,
@@ -323,13 +320,13 @@ void main() {
       vec2 uv = vUv;
       uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
       vec3 direction = getDirection(uv, faceIndex);
-      vec3 color = envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      vec3 color = RGBEToLinear(textureCube(envMap, direction)).rgb;
       uv.y += vUv.y < 0.0 ? invMapSize : -invMapSize;
       direction = getDirection(uv, faceIndex);
-      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      color += RGBEToLinear(textureCube(envMap, direction)).rgb;
       uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
       direction = getDirection(uv, faceIndex);
-      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      color += RGBEToLinear(textureCube(envMap, direction)).rgb;
       gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
     }
 }
