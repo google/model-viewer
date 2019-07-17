@@ -19,7 +19,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>&lt;model-viewer&gt; Fidelity Test - PBR Spheres</title>
+  <title>&lt;model-viewer&gt; Fidelity Test - Khronos Metal-Rough Spheres</title>
 
   <style>
     body { margin: 0; }
@@ -27,20 +27,12 @@
   </style>
 </head>
 <body>
-  <model-viewer src="../../../examples/assets/pbr-spheres.glb"
+  <model-viewer src="../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"
       camera-orbit="0 90deg auto"
-      background-image="../../../examples/assets/lightroom_14b.hdr"
+      background-image="../../../examples/assets/spruit_sunrise_2k.jpg"
       exposure="0.8"
       style="width: 768px; height: 768px;">
   </model-viewer>
-
-  <p>This model demonstrates PBR qualities in different ratios.</p>
-  <ul>
-    <li>Top left: metallic 1, specular 1, roughness 0</li>
-    <li>Top right: metallic 1, specular 1, roughness 1</li>
-    <li>Bottom right: metallic 0, specular 0, roughness 0</li>
-    <li>Bottom left: metallic 0, specular 0, roughness 0</li>
-  </ul>
   <script src="../../../dist/model-viewer.js"></script>
 </body>
 </html>
