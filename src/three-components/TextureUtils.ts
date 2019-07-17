@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
 import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
-import {EquirectangularToCubeGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
+import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
@@ -42,7 +42,6 @@ const hdrLoader = new RGBELoader();
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
-const $cubeGenerator = Symbol('cubeGenerator');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
 
 const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
@@ -74,7 +73,6 @@ export default class TextureUtils extends EventDispatcher {
   private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
 
-  private[$cubeGenerator]: EquirectangularToCubeGenerator|null = null;
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
@@ -91,13 +89,13 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
-    const generator = new EquirectangularToCubeGenerator(texture, {
+    const generator = new CubemapGenerator(this.renderer);
+
+    let target = generator.fromEquirectangular(texture, {
       resolution: this.config.cubemapSize,
     });
 
-    generator.update(this.renderer);
-
-    (generator.renderTarget.texture as any).userData = {
+    (target.texture as any).userData = {
       ...userData,
       ...({
         url: (texture as any).userData ? (texture as any).userData.url : null,
@@ -105,11 +103,7 @@ export default class TextureUtils extends EventDispatcher {
       })
     };
 
-    // It's up to the previously served texture to dispose itself,
-    // and therefore the generator's render target.
-    this[$cubeGenerator] = generator;
-
-    return generator.renderTarget;
+    return target;
   }
 
   async load(
@@ -284,6 +278,8 @@ export default class TextureUtils extends EventDispatcher {
           new EnvironmentMapGenerator(this.renderer);
       const interstitialEnvironmentMap = environmentMapGenerator.generate();
 
+      this.gaussianBlur(interstitialEnvironmentMap);
+
       this[$generatedEnvironmentMap] =
           this.pmremPass(interstitialEnvironmentMap.texture);
 
@@ -297,6 +293,117 @@ export default class TextureUtils extends EventDispatcher {
     return Promise.resolve(this[$generatedEnvironmentMap]!);
   }
 
+  gaussianBlur(
+      cubeTarget: WebGLRenderTargetCube,
+      standardDeviationRadians: number = 0.04) {
+    const blurScene = new Scene();
+
+    const geometry = new BoxBufferGeometry();
+    geometry.removeAttribute('uv');
+
+    const cubeResolution = cubeTarget.width;
+    const standardDeviations = 3;
+    const n = Math.ceil(
+        standardDeviations * standardDeviationRadians * cubeResolution * 2 /
+        Math.PI);
+    const inverseIntegral =
+        standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
+    let weights = [];
+    for (let i = 0; i < n; ++i) {
+      const x = standardDeviations * i / (n - 1);
+      weights.push(inverseIntegral * Math.exp(-x * x / 2));
+    }
+
+    const blurMaterial = new ShaderMaterial({
+      uniforms: {
+        tCube: {value: null},
+        latitudinal: {value: false},
+        weights: {value: weights},
+        dTheta: {value: standardDeviationRadians * standardDeviations / (n - 1)}
+      },
+      vertexShader: `
+varying vec3 vWorldDirection;
+#include <common>
+void main() {
+  vWorldDirection = transformDirection( position, modelMatrix );
+  #include <begin_vertex>
+  #include <project_vertex>
+  gl_Position.z = gl_Position.w;
+}
+      `,
+      fragmentShader: `
+const int n = ${n};
+uniform float weights[${n}];
+uniform samplerCube tCube;
+uniform bool latitudinal;
+uniform float dTheta;
+varying vec3 vWorldDirection;
+void main() {
+  vec4 texColor = vec4(0.0);
+  for (int i = 0; i < n; i++) {
+    for (int dir = -1; dir < 2; dir += 2) {
+      if (i == 0 && dir == 1)
+        continue;
+      vec3 sampleDirection = vWorldDirection;
+      float xz = length(sampleDirection.xz);
+      float weight = weights[i];
+      if (latitudinal) {
+        float diTheta = dTheta * float(dir * i) / xz;
+        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+        sampleDirection.xz = R * sampleDirection.xz;
+        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+      } else {
+        float diTheta = dTheta * float(dir * i);
+        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+        vec2 xzY = R * vec2(xz, sampleDirection.y);
+        sampleDirection.xz *= xzY.x / xz;
+        sampleDirection.y = xzY.y;
+        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+      }
+    }
+  }
+  gl_FragColor = linearToOutputTexel(texColor);
+}
+      `,
+      side: BackSide,
+      depthTest: false,
+      depthWrite: false
+    });
+
+    blurScene.add(new Mesh(geometry, blurMaterial));
+
+    const blurCamera = new CubeCamera(0.1, 100, cubeResolution);
+    const tempTarget = blurCamera.renderTarget;
+    tempTarget.texture.type = UnsignedByteType;
+    tempTarget.texture.format = RGBEFormat;
+    tempTarget.texture.encoding = RGBEEncoding;
+    tempTarget.texture.magFilter = NearestFilter;
+    tempTarget.texture.minFilter = NearestFilter;
+    tempTarget.texture.generateMipmaps = false;
+
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
+
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
+
+    blurMaterial.uniforms.latitudinal.value = false;
+    blurMaterial.uniforms.tCube.value = cubeTarget.texture;
+    blurCamera.update(this.renderer, blurScene);
+
+    blurMaterial.uniforms.latitudinal.value = true;
+    blurMaterial.uniforms.tCube.value = tempTarget.texture;
+    blurCamera.renderTarget = cubeTarget;
+    blurCamera.update(this.renderer, blurScene);
+
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
+
+    tempTarget.dispose();
+  }
 
   /**
    * Takes a cube-ish (@see equirectangularToCubemap) texture and
@@ -328,18 +435,6 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   async dispose() {
-    // NOTE(cdata): In the case that the generators are invoked with
-    // an incorrect texture, the generators will throw when we attempt to
-    // dispose of them because the framebuffer has not been created yet but
-    // the implementation does not guard for this correctly:
-    try {
-      if (this[$cubeGenerator] != null) {
-        this[$cubeGenerator]!.dispose();
-        this[$cubeGenerator] = null;
-      }
-    } catch (_error) {
-    }
-
     for (const environmentMapLoads of this[$environmentMapCache].values()) {
       const environmentMap = await environmentMapLoads;
       if (environmentMap != null) {

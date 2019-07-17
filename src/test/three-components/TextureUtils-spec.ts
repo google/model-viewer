@@ -30,16 +30,19 @@ const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
 
 suite('TextureUtils', () => {
   let textureUtils: TextureUtils;
-  let renderer: WebGLRenderer;
+  // The renderer can retain state, so these tests have the possibility of
+  // getting different results in different orders. However, our use of the
+  // renderer *should* always return its state to what it was before to avoid
+  // this kind of problem (and many other headaches).
+  const renderer = new WebGLRenderer({canvas});
+  renderer.debug.checkShaderErrors = true;
 
   setup(() => {
-    renderer = new WebGLRenderer({canvas});
     // NOTE(cdata): We need to lower the samples here or else tests that use
     // PMREM have a tendency to time out on iOS Simulator
     textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
   });
   teardown(() => {
-    renderer.dispose();
     textureUtils.dispose();
   });
 
