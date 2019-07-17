@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BoxBufferGeometry, CubeCamera, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 export default class PMREMGenerator {
   private mipmapShader = this.getMipmapShader();
@@ -85,10 +85,9 @@ export default class PMREMGenerator {
       offset += 2 * sizePad;
     }
 
-
     if (numLods !== this.numLods) {
       this.numLods = numLods;
-      this.cubeUVRenderTarget = new WebGLRenderTargetCube(
+      this.cubeUVRenderTarget = new WebGLRenderTarget(
           3 * (Math.pow(2, numLods) + 2),
           4 * numLods + 2 * (Math.pow(2, numLods + 1) - 1),
           params);
@@ -195,15 +194,14 @@ export default class PMREMGenerator {
   getMipmapShader() {
     var shaderMaterial = new ShaderMaterial({
 
-      uniforms: {
-        'invMapSize': {value: 0.5},
-        'envMap': {value: null},
-      },
+      uniforms: {'invMapSize': {value: 0.5}, 'envMap': {value: null}},
 
       vertexShader: `
 varying vec2 vUv;
+varying vec3 vPosition;
 void main() {
     vUv = uv;
+    vPosition = position;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
 `,
@@ -211,6 +209,7 @@ void main() {
       fragmentShader: `
 #include <common>
 varying vec2 vUv;
+varying vec3 vPosition;
 uniform float invMapSize;
 uniform samplerCube envMap;
 int getFace(vec3 direction) {
@@ -248,8 +247,7 @@ vec3 getDirection(vec2 uv, int face) {
     return direction;
 }
 void main() {
-  vec3 direction = -vViewPosition;
-  int face = getFace(direction);
+  int face = getFace(vPosition);
   vec2 uv = vUv - 0.5 * invMapSize;
   vec3 texelDir = getDirection(uv, face);
   vec3 color = envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
@@ -281,6 +279,7 @@ void main() {
       uniforms: {
         'invMapSize': {value: 0.5},
         'envMap': {value: null},
+        'faceIndex': {value: 0},
       },
 
       vertexShader: `
@@ -296,20 +295,42 @@ varying vec2 vUv;
 uniform float invMapSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
+vec3 getDirection(vec2 uv, int face) {
+    uv = 2.0 * uv - 1.0;
+    vec3 direction;
+    if (face == 0) {
+      direction = vec3(1.0, uv);
+    } else if (face == 1) {
+      direction = vec3(uv.x, 1.0, uv.y);
+    } else if (face == 2) {
+      direction = vec3(uv, 1.0);
+    } else if (face == 3) {
+      direction = vec3(-1.0, uv);
+    } else if (face == 4) {
+      direction = vec3(uv.x, -1.0, uv.y);
+    } else {
+      direction = vec3(uv, -1.0);
+    }
+    return direction;
+}
 void main() {
-    if ((vUv.x > 0 && vUv.x < 1) || (vUv.y > 0 && vUv.y < 1)) {
-      gl_FragColor = textureCube(envMap, vUv);
+    if ((vUv.x >= 0.0 && vUv.x <= 1.0) || (vUv.y >= 0.0 && vUv.y <= 1.0)) {
+      vec3 direction = getDirection(vUv, faceIndex);
+      gl_FragColor = textureCube(envMap, direction);
     } else {
       vec2 uv = vUv;
-      uv.x += uv.x < 0 ? invMapSize : -invMapSize;
-      vec3 color = envMapTexelToLinear(textureCube(envMap, uv)).rgb;
-      uv.y += uv.y < 0 ? invMapSize : -invMapSize;
-      color += envMapTexelToLinear(textureCube(envMap, uv)).rgb;
-      uv.x += uv.x < 0 ? invMapSize : -invMapSize;
-      color += envMapTexelToLinear(textureCube(envMap, uv)).rgb;
+      uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
+      vec3 direction = getDirection(uv, faceIndex);
+      vec3 color = envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      uv.y += vUv.y < 0.0 ? invMapSize : -invMapSize;
+      direction = getDirection(uv, faceIndex);
+      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
+      direction = getDirection(uv, faceIndex);
+      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
       gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
     }
-  }
+}
 `,
 
       blending: NoBlending

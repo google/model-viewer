@@ -55,7 +55,7 @@ float defaultMipmap(vec3 direction) {
   return 0.5 * log2(deltaMaxSqrt);
 }
 
-vec4 fetchCube(vec2 uv, int face, float mipInt) {
+vec3 fetchCube(vec2 uv, int face, float mipInt) {
   uv += 1.0;
   uv.x += float(face % 3) * (faceSize + 2.0);
   if (face > 2) {
@@ -63,10 +63,10 @@ vec4 fetchCube(vec2 uv, int face, float mipInt) {
   }
   uv.y += getOffset(mipInt);
   uv *= cubeUV_scale;
-  return envMapTexelToLinear(texture2D(envMap, uv));
+  return envMapTexelToLinear(texture2D(envMap, uv)).rgb;
 }
 
-vec4 bilinearCubeUV(vec3 direction, float mipInt) {
+vec3 bilinearCubeUV(vec3 direction, float mipInt) {
   int face = getFace(direction);
   float faceSize = exp2(mipInt);
   vec2 faceUV = getUV(direction, face) * faceSize;
@@ -74,12 +74,12 @@ vec4 bilinearCubeUV(vec3 direction, float mipInt) {
   vec2 f = fract(faceUV);
   faceUV -= f + 0.5;
 
-  vec4 tl = fetchCube(faceUV, face, mipInt);
-  vec4 tr = fetchCube(faceUV + vec2(1.0, 0.0), face, mipInt);
-  vec4 bl = fetchCube(faceUV + vec2(0.0, 1.0), face, mipInt);
-  vec4 br = fetchCube(faceUV + vec2(1.0, 1.0), face, mipInt);
-  vec4 tm = mix(tl, tr, f.x);
-  vec4 bm = mix(bl, br, f.x);
+  vec3 tl = fetchCube(faceUV, face, mipInt);
+  vec3 tr = fetchCube(faceUV + vec2(1.0, 0.0), face, mipInt);
+  vec3 bl = fetchCube(faceUV + vec2(0.0, 1.0), face, mipInt);
+  vec3 br = fetchCube(faceUV + vec2(1.0, 1.0), face, mipInt);
+  vec3 tm = mix(tl, tr, f.x);
+  vec3 bm = mix(bl, br, f.x);
   return mix(tm, bm, f.y);
 }
 
@@ -88,12 +88,12 @@ vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipBias) {
   float f = fract(mip);
   float mipInt = floor(mip);
 
-  vec4 color0 = bilinearCubeUV(reflectedDirection, mipInt);
+  vec3 color0 = bilinearCubeUV(reflectedDirection, mipInt);
   if (f == 0.0) {
-    return vec4(color0.rgb, 1.0);
+    return vec4(color0, 1.0);
   } else {
-    vec4 color1 = bilinearCubeUV(reflectedDirection, mipInt + 1.0);
-    return vec4(mix(color0.rgb, color1.rgb, f), 1.0);
+    vec3 color1 = bilinearCubeUV(reflectedDirection, mipInt + 1.0);
+    return vec4(mix(color0, color1, f), 1.0);
   }
 }
 #endif

@@ -14,14 +14,13 @@
  */
 
 import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
-import {PMREMCubeUVPacker} from 'three/examples/jsm/pmrem/PMREMCubeUVPacker.js';
-import {PMREMGenerator} from 'three/examples/jsm/pmrem/PMREMGenerator.js';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
+import PMREMGenerator from './PMREMGenerator.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
@@ -43,6 +42,7 @@ const hdrLoader = new RGBELoader();
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
+const $PMREMGenerator = Symbol('PMREMGenerator');
 
 const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
 const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
@@ -77,6 +77,8 @@ export default class TextureUtils extends EventDispatcher {
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
   private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
+
+  private[$PMREMGenerator] = new PMREMGenerator;
 
   /**
    * @param {THREE.WebGLRenderer} renderer
@@ -236,7 +238,7 @@ export default class TextureUtils extends EventDispatcher {
           this.loadEquirectAsCubeMap(url, progressCallback)
               .then(interstitialEnvironmentMap => {
                 const environmentMap =
-                    this.pmremPass(interstitialEnvironmentMap.texture);
+                    this.pmremPass(interstitialEnvironmentMap);
                 // In this case, we don't care about the interstitial
                 // environment map because it will never be used for anything,
                 // so dispose of it right away:
@@ -261,7 +263,7 @@ export default class TextureUtils extends EventDispatcher {
     if (!this[$environmentMapCache].has(url)) {
       const skyboxLoads = this[$loadSkyboxFromUrl](url, progressTracker);
       const environmentMapLoads =
-          skyboxLoads.then(skybox => this.pmremPass(skybox.texture));
+          skyboxLoads.then(skybox => this.pmremPass(skybox));
 
       this[$environmentMapCache].set(url, environmentMapLoads);
     }
@@ -281,7 +283,7 @@ export default class TextureUtils extends EventDispatcher {
       this.gaussianBlur(interstitialEnvironmentMap);
 
       this[$generatedEnvironmentMap] =
-          this.pmremPass(interstitialEnvironmentMap.texture);
+          this.pmremPass(interstitialEnvironmentMap);
 
       // We should only ever generate this map once, and we will not be using
       // the environment map as a skybox, so go ahead and dispose of all
@@ -410,28 +412,20 @@ void main() {
    * returns a texture of the prefiltered mipmapped radiance environment map
    * to be used as environment maps in models.
    */
-  pmremPass(texture: Texture, samples?: number, size?: number):
-      WebGLRenderTarget {
-    const generator = new PMREMGenerator(texture, samples, size);
-    generator.update(this.renderer);
+  pmremPass(target: WebGLRenderTargetCube): WebGLRenderTarget {
+    const cubeUVTarget = this[$PMREMGenerator].update(target, this.renderer);
 
-    const packer = new PMREMCubeUVPacker(generator.cubeLods);
-    packer.update(this.renderer);
-
-    const renderTarget = packer.CubeUVRenderTarget;
-
-    generator.dispose();
-    packer.dispose();
-
-    (renderTarget.texture as any).userData = {
+    (cubeUVTarget.texture as any).userData = {
       ...userData,
       ...({
-        url: (texture as any).userData ? (texture as any).userData.url : null,
+        url: (target.texture as any).userData ?
+            (target.texture as any).userData.url :
+            null,
         mapping: 'PMREM',
       })
     };
 
-    return renderTarget;
+    return cubeUVTarget;
   }
 
   async dispose() {
