@@ -16,7 +16,8 @@
 import {Material, Shader} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import chunk from './cube_uv_reflection_fragment.glsl.js';
+import cubeUVChunk from './cube_uv_reflection_fragment.glsl.js';
+import envmapChunk from './envmap_physical_pars_fragment.glsl.js';
 import {cloneGltf, Gltf} from './ModelUtils.js';
 
 export type ProgressCallback = (progress: number) => void;
@@ -92,8 +93,10 @@ export class CachingGLTFLoader {
 
     // This is a patch to three's handling of PMREM environments.
     const updateShader = (shader: Shader) => {
-      shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <cube_uv_reflection_fragment>', chunk);
+      shader.fragmentShader =
+          shader.fragmentShader
+              .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
+              .replace('#include <envmap_physical_pars_fragment>', envmapChunk);
     };
 
     if (model != null) {

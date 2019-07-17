@@ -28,20 +28,12 @@ export default class PMREMGenerator {
   private cubeLods: Array<WebGLRenderTargetCube>;
   private cubeUVRenderTarget: WebGLRenderTarget|null = null;
   private objects: Array<Mesh>;
-  private faceOffsets: Array<Vector2>;
 
   constructor() {
     (this.boxMesh.material as Material).side = DoubleSide;
     this.mipmapScene.add(this.boxMesh);
     this.cubeLods = [];
     this.objects = [];
-    this.faceOffsets = [];
-    this.faceOffsets.push(new Vector2(0, 0));
-    this.faceOffsets.push(new Vector2(1, 0));
-    this.faceOffsets.push(new Vector2(2, 0));
-    this.faceOffsets.push(new Vector2(0, 1));
-    this.faceOffsets.push(new Vector2(1, 1));
-    this.faceOffsets.push(new Vector2(2, 1));
   }
 
   update(cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
@@ -70,32 +62,40 @@ export default class PMREMGenerator {
       encoding: cubeTarget.texture.encoding
     };
 
+    // Hard-coded to max faceSize = 256 until we can add a uniform.
+    const numLods = 8;
     // how many LODs fit in the given CubeUV Texture.
-    let numLods =
-        Math.log(size) / Math.log(2) - 2;  // IE11 doesn't support Math.log2
+    // Math.log(size) / Math.log(2) - 2;  // IE11 doesn't support Math.log2
 
     let offset = 0;
-    for (let i = 0; i < numLods; i++) {
+    for (let i = 0; i < numLods + 1; i++) {
       const sizeLod = Math.pow(2, i);
       const sizePad = sizeLod + 2;
       if (this.cubeLods.length <= i) {
-        let renderTarget = new WebGLRenderTargetCube(sizeLod, sizeLod, params);
-        renderTarget.texture.name = 'PMREMGenerator.cube' + i;
-        this.cubeLods.push(renderTarget);
-        this.addLodObjects(renderTarget, offset);
+        if (sizeLod === size) {
+          this.addLodObjects(cubeTarget, offset);
+        } else {
+          let renderTarget =
+              new WebGLRenderTargetCube(sizeLod, sizeLod, params);
+          renderTarget.texture.name = 'PMREMGenerator.cube' + i;
+          this.cubeLods.push(renderTarget);
+          this.addLodObjects(renderTarget, offset);
+        }
       }
       offset += 2 * sizePad;
     }
-    this.addLodObjects(cubeTarget, offset);
+
 
     if (numLods !== this.numLods) {
       this.numLods = numLods;
-      this.cubeUVRenderTarget =
-          new WebGLRenderTargetCube(4 * size, 4 * size, params);
-      this.flatCamera.left = -2 * size;
-      this.flatCamera.right = 2 * size;
-      this.flatCamera.top = 2 * size;
-      this.flatCamera.bottom = -2 * size;
+      this.cubeUVRenderTarget = new WebGLRenderTargetCube(
+          3 * (Math.pow(2, numLods) + 2),
+          4 * numLods + 2 * (Math.pow(2, numLods + 1) - 1),
+          params);
+      this.flatCamera.left = 0;
+      this.flatCamera.right = this.cubeUVRenderTarget.width;
+      this.flatCamera.top = 0;
+      this.flatCamera.bottom = this.cubeUVRenderTarget.height;
       this.flatCamera.near = 0;
       this.flatCamera.far = 1;
       this.flatCamera.updateProjectionMatrix();
@@ -125,8 +125,9 @@ export default class PMREMGenerator {
       material.uniforms['faceIndex'].value = k;
 
       let planeMesh = new Mesh(plane, material);
-      planeMesh.position.x = this.faceOffsets[k].x * sizePad;
-      planeMesh.position.y = this.faceOffsets[k].y * sizePad + offset;
+
+      planeMesh.position.x = (k % 3) * sizePad;
+      planeMesh.position.y = (k > 2 ? 1 : 0) * sizePad + offset;
       (planeMesh.material as Material).side = DoubleSide;
       planeMesh.scale.setScalar(sizePad);
       this.objects.push(planeMesh);

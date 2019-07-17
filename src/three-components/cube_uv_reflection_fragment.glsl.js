@@ -121,7 +121,7 @@ vec4 textureCubeUV( sampler2D envMap, vec3 reflectedDirection, float roughness )
 	vec2 uv_20 = getCubeUV(reflectedDirection, r2, level0);
 	vec4 color20 = envMapTexelToLinear(texture2D(envMap, uv_20));
 
-	vec4 result = vec4(1.0, 0.0, 0.0, 1.0);//mix(color10, color20, t);
+	vec4 result = mix(color10, color20, t);
 
 	return vec4(result.rgb, 1.0);
 }
