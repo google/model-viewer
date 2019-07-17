@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 export default class PMREMGenerator {
   private mipmapShader = this.getMipmapShader();
@@ -91,6 +91,8 @@ export default class PMREMGenerator {
           3 * (Math.pow(2, numLods) + 2),
           4 * numLods + 2 * (Math.pow(2, numLods + 1) - 1),
           params);
+      this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
+      this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
       this.flatCamera.left = 0;
       this.flatCamera.right = this.cubeUVRenderTarget.width;
       this.flatCamera.top = 0;
@@ -337,7 +339,7 @@ void main() {
 
     });
 
-    shaderMaterial.type = 'PMREMGenerator';
+    shaderMaterial.type = 'PMREMCubeUVPacker';
 
     return shaderMaterial;
   }

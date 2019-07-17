@@ -4,13 +4,6 @@ export default /* glsl */ `
 #define cubeUV_faceSize (256.0)
 #define cubeUV_maxMipLevel (8.0)
 
-float getOffset(float mipInt) {
-  return 4.0 * mipInt + 2.0 * (exp2(mipInt) - 1.0);
-}
-
-const vec2 cubeUV_scale =
-    1.0 / vec2(3.0 * (cubeUV_faceSize + 2.0), getOffset(cubeUV_maxMipLevel));
-
 int getFace(vec3 direction) {
   vec3 absDirection = abs(direction);
   int face = -1;
@@ -55,29 +48,31 @@ float defaultMipmap(vec3 direction) {
   return 0.5 * log2(deltaMaxSqrt);
 }
 
-vec3 fetchCube(vec2 uv, int face, float mipInt) {
-  uv += 1.0;
-  uv.x += float(face % 3) * (faceSize + 2.0);
-  if (face > 2) {
-    uv.y += faceSize + 2.0;
-  }
-  uv.y += getOffset(mipInt);
-  uv *= cubeUV_scale;
-  return envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-}
-
-vec3 bilinearCubeUV(vec3 direction, float mipInt) {
+vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   int face = getFace(direction);
   float faceSize = exp2(mipInt);
-  vec2 faceUV = getUV(direction, face) * faceSize;
+  vec2 texelSize =
+    1.0 / vec2(3.0 * (faceSize + 2.0), 
+               4.0 * cubeUV_maxMipLevel + 2.0 * (cubeUV_faceSize - 1.0));
 
-  vec2 f = fract(faceUV);
-  faceUV -= f + 0.5;
+  vec2 uv = getUV(direction, face) * faceSize;
+  vec2 f = fract(uv);
+  uv += 0.5 - f;
+  if (face > 2) {
+    uv.y += faceSize + 2.0;
+    face -=3;
+  }
+  uv.x += float(face) * (faceSize + 2.0);
+  uv.y += 4.0 * mipInt + 2.0 * (faceSize - 1.0);
+  uv *= texelSize;
 
-  vec3 tl = fetchCube(faceUV, face, mipInt);
-  vec3 tr = fetchCube(faceUV + vec2(1.0, 0.0), face, mipInt);
-  vec3 bl = fetchCube(faceUV + vec2(0.0, 1.0), face, mipInt);
-  vec3 br = fetchCube(faceUV + vec2(1.0, 1.0), face, mipInt);
+  vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+  uv.x += texelSize.x;
+  vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+  uv.y += texelSize.y;
+  vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+  uv.x -= texelSize.x;
+  vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
   return mix(tm, bm, f.y);
@@ -88,11 +83,11 @@ vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipBias) {
   float f = fract(mip);
   float mipInt = floor(mip);
 
-  vec3 color0 = bilinearCubeUV(reflectedDirection, mipInt);
+  vec3 color0 = bilinearCubeUV(envMap, reflectedDirection, mipInt);
   if (f == 0.0) {
     return vec4(color0, 1.0);
   } else {
-    vec3 color1 = bilinearCubeUV(reflectedDirection, mipInt + 1.0);
+    vec3 color1 = bilinearCubeUV(envMap, reflectedDirection, mipInt + 1.0);
     return vec4(mix(color0, color1, f), 1.0);
   }
 }
