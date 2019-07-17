@@ -1,4 +1,4 @@
-export default /* glsl */`
+export default /* glsl */ `
 #if defined( USE_ENVMAP ) && defined( PHYSICAL )
 
 	vec3 getLightProbeIndirectIrradiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in int maxMIPLevel ) {
@@ -28,7 +28,7 @@ export default /* glsl */`
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryVec, 1.0 );
+			vec4 envMapColor = textureCubeUV( envMap, queryVec, float( maxMIPLevel ) );
 
 		#else
 
@@ -89,7 +89,7 @@ export default /* glsl */`
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryReflectVec = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, BlinnExponentToGGXRoughness(blinnShininessExponent ));
+			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, specularMIPLevel );
 
 		#elif defined( ENVMAP_TYPE_EQUIREC )
 
