@@ -78,10 +78,6 @@ export default class TextureUtils extends EventDispatcher {
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
   private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
-  /**
-   * @param {THREE.WebGLRenderer} renderer
-   * @param {?number} config.cubemapSize
-   */
   constructor(renderer: WebGLRenderer, config: TextureUtilsConfig = {}) {
     super();
     this.config = {...defaultConfig, ...config};
@@ -381,9 +377,9 @@ void main() {
     tempTarget.texture.minFilter = NearestFilter;
     tempTarget.texture.generateMipmaps = false;
 
-    var gammaOutput = this.renderer.gammaOutput;
-    var toneMapping = this.renderer.toneMapping;
-    var toneMappingExposure = this.renderer.toneMappingExposure;
+    const gammaOutput = this.renderer.gammaOutput;
+    const toneMapping = this.renderer.toneMapping;
+    const toneMappingExposure = this.renderer.toneMappingExposure;
 
     this.renderer.toneMapping = LinearToneMapping;
     this.renderer.toneMappingExposure = 1.0;

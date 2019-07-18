@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {Texture, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {Texture, WebGLRenderer} from 'three';
 
-import TextureUtils from '../../three-components/TextureUtils.js';
+import TextureUtils, {EnvironmentMapAndSkybox} from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
 
 
@@ -103,15 +103,10 @@ suite('TextureUtils', () => {
   });
 
   suite('generating an environment map and skybox', () => {
-    let textures:
-        {environmentMap: WebGLRenderTarget, skybox: WebGLRenderTargetCube|null}|
-        null;
+    let textures: EnvironmentMapAndSkybox;
     teardown(() => {
-      if (textures) {
-        textures.environmentMap.dispose();
-        textures.skybox!.dispose();
-        textures = null;
-      }
+      textures.environmentMap.dispose();
+      textures.skybox!.dispose();
     });
 
     test('returns an environmentMap and skybox texture from url', async () => {
