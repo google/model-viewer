@@ -78,7 +78,7 @@ export default class TextureUtils extends EventDispatcher {
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
   private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
-  private[$PMREMGenerator] = new PMREMGenerator;
+  private[$PMREMGenerator]: PMREMGenerator;
 
   /**
    * @param {THREE.WebGLRenderer} renderer
@@ -88,6 +88,7 @@ export default class TextureUtils extends EventDispatcher {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
+    this[$PMREMGenerator] = new PMREMGenerator(renderer);
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
@@ -413,7 +414,7 @@ void main() {
    * to be used as environment maps in models.
    */
   pmremPass(target: WebGLRenderTargetCube): WebGLRenderTarget {
-    const cubeUVTarget = this[$PMREMGenerator].update(target, this.renderer);
+    const cubeUVTarget = this[$PMREMGenerator].update(target);
 
     (cubeUVTarget.texture as any).userData = {
       ...userData,

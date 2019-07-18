@@ -52,8 +52,8 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   int face = getFace(direction);
   float faceSize = exp2(mipInt);
   vec2 texelSize =
-    1.0 / vec2(3.0 * (faceSize + 2.0), 
-               4.0 * cubeUV_maxMipLevel + 2.0 * (cubeUV_faceSize - 1.0));
+    1.0 / vec2(3.0 * (cubeUV_faceSize + 2.0), 
+               4.0 * (cubeUV_maxMipLevel + cubeUV_faceSize) - 2.0);
 
   vec2 uv = getUV(direction, face) * faceSize;
   vec2 f = fract(uv);
@@ -65,6 +65,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   uv.x += float(face) * (faceSize + 2.0);
   uv.y += 4.0 * mipInt + 2.0 * (faceSize - 1.0);
   uv *= texelSize;
+  uv.y = 1.0 - uv.y;
 
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   uv.x += texelSize.x;
@@ -79,7 +80,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
 }
 
 vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipBias) {
-  float mip = cubeUV_maxMipLevel - defaultMipmap(reflectedDirection) - mipBias;
+  float mip = cubeUV_maxMipLevel - mipBias;//- defaultMipmap(reflectedDirection) 
   float f = fract(mip);
   float mipInt = floor(mip);
 

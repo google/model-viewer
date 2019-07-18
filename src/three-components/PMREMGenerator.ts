@@ -16,6 +16,7 @@
 import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 export default class PMREMGenerator {
+  private renderer: WebGLRenderer;
   private mipmapShader = this.getMipmapShader();
   private packingShader = this.getPackingShader();
   private cubeCamera = new CubeCamera(0.1, 100, 1);
@@ -29,18 +30,18 @@ export default class PMREMGenerator {
   private cubeUVRenderTarget: WebGLRenderTarget|null = null;
   private objects: Array<Mesh>;
 
-  constructor() {
+  constructor(renderer: WebGLRenderer) {
+    this.renderer = renderer;
     (this.boxMesh.material as Material).side = DoubleSide;
     this.mipmapScene.add(this.boxMesh);
     this.cubeLods = [];
     this.objects = [];
   }
 
-  update(cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
-      WebGLRenderTarget {
+  update(cubeTarget: WebGLRenderTargetCube): WebGLRenderTarget {
     this.setup(cubeTarget);
-    this.generateMipmaps(cubeTarget, renderer);
-    this.packMipmaps(renderer);
+    this.generateMipmaps(cubeTarget);
+    this.packMipmaps();
     return this.cubeUVRenderTarget!;
   }
 
@@ -63,7 +64,7 @@ export default class PMREMGenerator {
     // Math.log(size) / Math.log(2) - 2;  // IE11 doesn't support Math.log2
 
     let offset = 0;
-    for (let i = 0; i < numLods + 1; i++) {
+    for (let i = 0; i < numLods; i++) {
       const sizeLod = Math.pow(2, i);
       if (this.cubeLods.length <= i) {
         if (sizeLod === size) {
@@ -87,6 +88,8 @@ export default class PMREMGenerator {
           params);
       this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
       this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+      this.renderer.properties.get(this.cubeUVRenderTarget.texture)
+          .__maxMipLevel = this.numLods;
       this.flatCamera.left = 0;
       this.flatCamera.right = this.cubeUVRenderTarget.width;
       this.flatCamera.top = 0;
@@ -125,68 +128,68 @@ export default class PMREMGenerator {
 
       let planeMesh = new Mesh(plane, material);
 
-      planeMesh.position.x = (k % 3) * sizePad;
-      planeMesh.position.y = (k > 2 ? 1 : 0) * sizePad + offset;
+      planeMesh.position.x = (0.5 + (k % 3)) * sizePad;
+      planeMesh.position.y = (0.5 + (k > 2 ? 1 : 0)) * sizePad + offset;
       (planeMesh.material as Material).side = DoubleSide;
       planeMesh.scale.setScalar(sizePad);
       this.objects.push(planeMesh);
     }
   }
 
-  generateMipmaps(cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer) {
-    var gammaInput = renderer.gammaInput;
-    var gammaOutput = renderer.gammaOutput;
-    var toneMapping = renderer.toneMapping;
-    var toneMappingExposure = renderer.toneMappingExposure;
-    var currentRenderTarget = renderer.getRenderTarget();
+  generateMipmaps(cubeTarget: WebGLRenderTargetCube) {
+    var gammaInput = this.renderer.gammaInput;
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
+    var currentRenderTarget = this.renderer.getRenderTarget();
 
-    renderer.toneMapping = LinearToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.gammaInput = false;
-    renderer.gammaOutput = false;
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaInput = false;
+    this.renderer.gammaOutput = false;
 
     this.mipmapShader.uniforms['invMapSize'].value = 1.0 / cubeTarget.width;
     this.mipmapShader.uniforms['envMap'].value = cubeTarget.texture;
     (this.mipmapShader as any).envMap = cubeTarget.texture;
     for (let i = this.numLods - 1; i >= 0; i--) {
       this.cubeCamera.renderTarget = this.cubeLods[i];
-      this.cubeCamera.update(renderer, this.mipmapScene);
+      this.cubeCamera.update(this.renderer, this.mipmapScene);
       this.mipmapShader.uniforms['invMapSize'].value =
           1.0 / this.cubeLods[i].width;
       this.mipmapShader.uniforms['envMap'].value = this.cubeLods[i].texture;
       (this.mipmapShader as any).envMap = this.cubeLods[i].texture;
     }
 
-    renderer.setRenderTarget(currentRenderTarget);
-    renderer.toneMapping = toneMapping;
-    renderer.toneMappingExposure = toneMappingExposure;
-    renderer.gammaInput = gammaInput;
-    renderer.gammaOutput = gammaOutput;
+    this.renderer.setRenderTarget(currentRenderTarget);
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaInput = gammaInput;
+    this.renderer.gammaOutput = gammaOutput;
   }
 
-  packMipmaps(renderer: WebGLRenderer) {
+  packMipmaps() {
     for (let i = 0; i < 6 * this.numLods; i++) {
       this.packingScene.add(this.objects[i]);
     }
 
-    var gammaInput = renderer.gammaInput;
-    var gammaOutput = renderer.gammaOutput;
-    var toneMapping = renderer.toneMapping;
-    var toneMappingExposure = renderer.toneMappingExposure;
-    var currentRenderTarget = renderer.getRenderTarget();
+    var gammaInput = this.renderer.gammaInput;
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
+    var currentRenderTarget = this.renderer.getRenderTarget();
 
-    renderer.gammaInput = false;
-    renderer.gammaOutput = false;
-    renderer.toneMapping = LinearToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.setRenderTarget(this.cubeUVRenderTarget);
-    renderer.render(this.packingScene, this.flatCamera);
+    this.renderer.gammaInput = false;
+    this.renderer.gammaOutput = false;
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.setRenderTarget(this.cubeUVRenderTarget);
+    this.renderer.render(this.packingScene, this.flatCamera);
 
-    renderer.setRenderTarget(currentRenderTarget);
-    renderer.toneMapping = toneMapping;
-    renderer.toneMappingExposure = toneMappingExposure;
-    renderer.gammaInput = gammaInput;
-    renderer.gammaOutput = gammaOutput;
+    this.renderer.setRenderTarget(currentRenderTarget);
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaInput = gammaInput;
+    this.renderer.gammaOutput = gammaOutput;
 
     for (let i = 0; i < 6 * this.numLods; i++) {
       this.packingScene.remove(this.objects[i]);
@@ -316,9 +319,13 @@ vec3 getDirection(vec2 uv, int face) {
 }
 void main() {
     if ((vUv.x >= 0.0 && vUv.x <= 1.0) || (vUv.y >= 0.0 && vUv.y <= 1.0)) {
+      // By using UV coordinates that go past [0, 1], textureCube automatically 
+      // grabs our neighboring face values for our padded edge.
       vec3 direction = getDirection(vUv, faceIndex);
       gl_FragColor = textureCube(envMap, direction);
     } else {
+      // The corner pixels do not represent any one face, so to get consistent 
+      // interpolation, they must average the three neighboring face corners.
       vec2 uv = vUv;
       uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
       vec3 direction = getDirection(uv, faceIndex);
@@ -326,7 +333,7 @@ void main() {
       uv.y += vUv.y < 0.0 ? invMapSize : -invMapSize;
       direction = getDirection(uv, faceIndex);
       color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
-      uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
+      uv.x = vUv.x;
       direction = getDirection(uv, faceIndex);
       color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
       gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
