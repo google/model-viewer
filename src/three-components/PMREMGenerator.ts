@@ -65,16 +65,16 @@ export default class PMREMGenerator {
     let offset = 0;
     for (let i = 0; i <= numLods; i++) {
       const sizeLod = Math.pow(2, i);
-      if (this.cubeLods.length <= i) {
-        if (i == numLods) {
-          this.addLodObjects(cubeTarget, sizeLod, offset);
-        } else {
-          let renderTarget =
-              new WebGLRenderTargetCube(sizeLod, sizeLod, params);
-          renderTarget.texture.name = 'PMREMGenerator.cube' + i;
-          this.cubeLods.push(renderTarget);
-          this.addLodObjects(renderTarget, sizeLod, offset);
-        }
+      let renderTarget = new WebGLRenderTargetCube(sizeLod, sizeLod, params);
+      renderTarget.texture.name = 'PMREMGenerator.cube' + i;
+      const target = i == numLods ? cubeTarget : renderTarget;
+      if (i < numLods) {
+        this.cubeLods.push(renderTarget);
+      }
+      if (this.objects.length <= i * 6) {
+        this.addLodObjects(target, sizeLod, offset);
+      } else {
+        this.updateLodObjects(i, target);
       }
       offset += 2 * (sizeLod + 2);
     }
@@ -136,6 +136,14 @@ export default class PMREMGenerator {
     }
   }
 
+  updateLodObjects(index: number, target: WebGLRenderTargetCube) {
+    for (let k = index * 6; k < (index + 1) * 6; k++) {
+      const material = (this.objects[k].material as any);
+      material.uniforms['envMap'].value = target.texture;
+      material.envMap = target.texture;
+    }
+  }
+
   generateMipmaps(cubeTarget: WebGLRenderTargetCube) {
     var gammaInput = this.renderer.gammaInput;
     var gammaOutput = this.renderer.gammaOutput;
@@ -191,9 +199,13 @@ export default class PMREMGenerator {
     this.renderer.gammaInput = gammaInput;
     this.renderer.gammaOutput = gammaOutput;
 
-    for (let i = 0; i < 6 * this.numLods; i++) {
-      this.packingScene.remove(this.objects[i]);
-    }
+    this.objects.forEach((object) => {
+      this.packingScene.remove(object);
+    });
+    this.cubeLods.forEach((target) => {
+      target.dispose();
+    });
+    this.cubeLods = [];
   }
 
   getMipmapShader() {
