@@ -24,17 +24,17 @@ int getFace(vec3 direction) {
 vec2 getUV(vec3 direction, int face) {
   vec2 uv;
   if (face == 0) {
-    uv = direction.yz;
+    uv = vec2(-direction.z,direction.y);
   } else if (face == 1) {
-    uv = direction.xz;
+    uv = vec2(direction.x,-direction.z);
   } else if (face == 2) {
     uv = direction.xy;
   } else if (face == 3) {
-    uv = direction.yz;
+    uv = vec2(direction.z,direction.y);
   } else if (face == 4) {
     uv = direction.xz;
   } else {
-    uv = direction.xy;
+    uv = vec2(-direction.x,direction.y);
   }
   return 0.5 * (uv + 1.0);
 }

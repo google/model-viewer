@@ -86,7 +86,7 @@ export default class PMREMGenerator {
     this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
     this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
     this.renderer.properties.get(this.cubeUVRenderTarget.texture)
-        .__maxMipLevel = this.numLods;
+        .__maxMipLevel = numLods;
 
     if (numLods !== this.numLods) {
       this.numLods = numLods;
@@ -168,9 +168,9 @@ export default class PMREMGenerator {
   }
 
   packMipmaps() {
-    for (let i = 0; i < 6 * this.numLods; i++) {
-      this.packingScene.add(this.objects[i]);
-    }
+    this.objects.forEach((object) => {
+      this.packingScene.add(object);
+    });
 
     var gammaInput = this.renderer.gammaInput;
     var gammaOutput = this.renderer.gammaOutput;
@@ -303,17 +303,17 @@ vec3 getDirection(vec2 uv, int face) {
     uv = 2.0 * uv - 1.0;
     vec3 direction;
     if (face == 0) {
-      direction = vec3(1.0, uv);
+      direction = vec3(1.0, uv.y, -uv.x);
     } else if (face == 1) {
-      direction = vec3(uv.x, 1.0, uv.y);
+      direction = vec3(uv.x, 1.0, -uv.y);
     } else if (face == 2) {
       direction = vec3(uv, 1.0);
     } else if (face == 3) {
-      direction = vec3(-1.0, uv);
+      direction = vec3(-1.0, uv.y, uv.x);
     } else if (face == 4) {
       direction = vec3(uv.x, -1.0, uv.y);
     } else {
-      direction = vec3(uv, -1.0);
+      direction = vec3(-uv.x,uv.y, -1.0);
     }
     return direction;
 }
