@@ -46,8 +46,6 @@ export default class PMREMGenerator {
   }
 
   setup(cubeTarget: WebGLRenderTargetCube) {
-    const size = cubeTarget.width;
-
     const params = {
       format: cubeTarget.texture.format,
       magFilter: NearestFilter,
@@ -61,35 +59,37 @@ export default class PMREMGenerator {
     // Hard-coded to max faceSize = 256 until we can add a uniform.
     const numLods = 8;
     // how many LODs fit in the given CubeUV Texture.
-    // Math.log(size) / Math.log(2) - 2;  // IE11 doesn't support Math.log2
+    // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
+    // Math.log2
 
     let offset = 0;
-    for (let i = 0; i < numLods; i++) {
+    for (let i = 0; i <= numLods; i++) {
       const sizeLod = Math.pow(2, i);
       if (this.cubeLods.length <= i) {
-        if (sizeLod === size) {
-          this.addLodObjects(cubeTarget, offset);
+        if (i == numLods) {
+          this.addLodObjects(cubeTarget, sizeLod, offset);
         } else {
           let renderTarget =
               new WebGLRenderTargetCube(sizeLod, sizeLod, params);
           renderTarget.texture.name = 'PMREMGenerator.cube' + i;
           this.cubeLods.push(renderTarget);
-          this.addLodObjects(renderTarget, offset);
+          this.addLodObjects(renderTarget, sizeLod, offset);
         }
       }
       offset += 2 * (sizeLod + 2);
     }
 
+    this.cubeUVRenderTarget = new WebGLRenderTarget(
+        3 * (Math.pow(2, numLods) + 2),
+        4 * numLods + 2 * (Math.pow(2, numLods + 1) - 1),
+        params);
+    this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
+    this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+    this.renderer.properties.get(this.cubeUVRenderTarget.texture)
+        .__maxMipLevel = this.numLods;
+
     if (numLods !== this.numLods) {
       this.numLods = numLods;
-      this.cubeUVRenderTarget = new WebGLRenderTarget(
-          3 * (Math.pow(2, numLods) + 2),
-          4 * numLods + 2 * (Math.pow(2, numLods + 1) - 1),
-          params);
-      this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
-      this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
-      this.renderer.properties.get(this.cubeUVRenderTarget.texture)
-          .__maxMipLevel = this.numLods;
       this.flatCamera.left = 0;
       this.flatCamera.right = this.cubeUVRenderTarget.width;
       this.flatCamera.top = 0;
@@ -100,8 +100,8 @@ export default class PMREMGenerator {
     }
   }
 
-  addLodObjects(target: WebGLRenderTargetCube, offset: number) {
-    const sizeLod = target.width;
+  addLodObjects(
+      target: WebGLRenderTargetCube, sizeLod: number, offset: number) {
     const sizePad = sizeLod + 2;
     const invSize = 1.0 / sizeLod;
     const plane = this.plane.clone();
@@ -236,17 +236,17 @@ vec3 getDirection(vec2 uv, int face) {
     uv = 2.0 * uv - 1.0;
     vec3 direction;
     if (face == 0) {
-      direction = vec3(1.0, uv);
+      direction = vec3(1.0, uv.y, -uv.x);
     } else if (face == 1) {
-      direction = vec3(uv.x, 1.0, uv.y);
+      direction = vec3(uv.x, 1.0, -uv.y);
     } else if (face == 2) {
       direction = vec3(uv, 1.0);
     } else if (face == 3) {
-      direction = vec3(-1.0, uv);
+      direction = vec3(-1.0, uv.y, uv.x);
     } else if (face == 4) {
       direction = vec3(uv.x, -1.0, uv.y);
     } else {
-      direction = vec3(uv, -1.0);
+      direction = vec3(-uv.x,uv.y, -1.0);
     }
     return direction;
 }
