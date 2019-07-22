@@ -40,6 +40,7 @@ vec2 getUV(vec3 direction, int face) {
 }
 
 float defaultMipmap(vec3 direction) {
+  direction *= 0.5 * cubeUV_faceSize;
   vec3 dx = dFdx(direction);
   vec3 dy = dFdy(direction);
   float deltaMax2 = max(dot(dx, dx), dot(dy, dy));
@@ -78,8 +79,9 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   return mix(tm, bm, f.y);
 }
 
-vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipBias) {
-  float mip = clamp(cubeUV_maxMipLevel - mipBias, 0.0, cubeUV_maxMipLevel);//- defaultMipmap(reflectedDirection) 
+vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipLevel) {
+  float mip = max(mipLevel, defaultMipmap(reflectedDirection));
+  mip = clamp(cubeUV_maxMipLevel - mip, 0.0, cubeUV_maxMipLevel);
   float f = fract(mip);
   float mipInt = floor(mip);
 

@@ -145,11 +145,11 @@ export default class PMREMGenerator {
   }
 
   generateMipmaps(cubeTarget: WebGLRenderTargetCube) {
-    var gammaInput = this.renderer.gammaInput;
-    var gammaOutput = this.renderer.gammaOutput;
-    var toneMapping = this.renderer.toneMapping;
-    var toneMappingExposure = this.renderer.toneMappingExposure;
-    var currentRenderTarget = this.renderer.getRenderTarget();
+    const gammaInput = this.renderer.gammaInput;
+    const gammaOutput = this.renderer.gammaOutput;
+    const toneMapping = this.renderer.toneMapping;
+    const toneMappingExposure = this.renderer.toneMappingExposure;
+    const currentRenderTarget = this.renderer.getRenderTarget();
 
     this.renderer.toneMapping = LinearToneMapping;
     this.renderer.toneMappingExposure = 1.0;
@@ -180,11 +180,11 @@ export default class PMREMGenerator {
       this.packingScene.add(object);
     });
 
-    var gammaInput = this.renderer.gammaInput;
-    var gammaOutput = this.renderer.gammaOutput;
-    var toneMapping = this.renderer.toneMapping;
-    var toneMappingExposure = this.renderer.toneMappingExposure;
-    var currentRenderTarget = this.renderer.getRenderTarget();
+    const gammaInput = this.renderer.gammaInput;
+    const gammaOutput = this.renderer.gammaOutput;
+    const toneMapping = this.renderer.toneMapping;
+    const toneMappingExposure = this.renderer.toneMappingExposure;
+    const currentRenderTarget = this.renderer.getRenderTarget();
 
     this.renderer.gammaInput = false;
     this.renderer.gammaOutput = false;
