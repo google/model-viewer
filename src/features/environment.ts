@@ -36,7 +36,6 @@ const DEFAULT_ENVIRONMENT_INTENSITY = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $deallocateTextures = Symbol('deallocateTextures');
 const $updateLighting = Symbol('updateLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
@@ -141,8 +140,6 @@ export const EnvironmentMixin = (ModelViewerElement:
               resolve(await texturesLoad);
             });
 
-            this[$deallocateTextures]();
-
             if (skybox != null) {
               this[$scene].background = skybox;
             } else {
@@ -207,17 +204,6 @@ export const EnvironmentMixin = (ModelViewerElement:
           const scene = this[$scene];
           scene.configureStageLighting(this.stageLightIntensity);
           scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
-        }
-
-        private[$deallocateTextures]() {
-          const background = this[$scene].background;
-          if (background && (background as Texture).dispose) {
-            (background as Texture).dispose();
-          }
-          if (this[$currentEnvironmentMap]) {
-            this[$currentEnvironmentMap]!.dispose();
-            this[$currentEnvironmentMap] = null;
-          }
         }
       }
 
