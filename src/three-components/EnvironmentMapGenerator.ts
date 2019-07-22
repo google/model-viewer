@@ -13,20 +13,11 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, HalfFloatType, LinearMipMapLinearFilter, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, RGBAFormat, Scene, ShaderMaterial, Texture, WebGLRenderer, WebGLRenderTargetCube} from 'three';
-
-const rendererTextureCache = new Map<WebGLRenderer, Texture>();
+import {BackSide, BoxBufferGeometry, CubeCamera, EventDispatcher, LinearToneMapping, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, PointLight, RGBEEncoding, RGBEFormat, Scene, UnsignedByteType, WebGLRenderer, WebGLRenderTargetCube} from 'three';
 
 export default class EnvironmentMapGenerator extends EventDispatcher {
   protected scene: Scene = new Scene();
   protected camera: CubeCamera;
-
-  protected blurScene: Scene;
-  protected blurCamera: CubeCamera;
-  protected blurMaterial: ShaderMaterial;
-
-  protected blurRenderTarget1: WebGLRenderTargetCube;
-  protected blurRenderTarget2: WebGLRenderTargetCube;
 
   protected createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
@@ -95,132 +86,75 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     scene.add(box6);
 
 
-    // -z right
+    // -x right
     const light1 = new Mesh(geometry, this.createAreaLightMaterial(50));
     light1.position.set(-16.116, 14.37, 8.208);
     light1.scale.set(0.1, 2.428, 2.739);
     scene.add(light1);
 
-    // -z left
+    // -x left
     const light2 = new Mesh(geometry, this.createAreaLightMaterial(50));
     light2.position.set(-16.109, 18.021, -8.207);
     light2.scale.set(0.1, 2.425, 2.751);
     scene.add(light2);
 
-    // +z
+    // +x
     const light3 = new Mesh(geometry, this.createAreaLightMaterial(17));
     light3.position.set(14.904, 12.198, -1.832);
     light3.scale.set(0.15, 4.265, 6.331);
     scene.add(light3);
 
-    // +x
+    // +z
     const light4 = new Mesh(geometry, this.createAreaLightMaterial(43));
     light4.position.set(-0.462, 8.89, 14.520);
     light4.scale.set(4.38, 5.441, 0.088);
     scene.add(light4);
 
-    // -x
+    // -z
     const light5 = new Mesh(geometry, this.createAreaLightMaterial(20));
     light5.position.set(3.235, 11.486, -12.541);
     light5.scale.set(2.5, 2.0, 0.1);
     scene.add(light5);
 
+    // +y
+    const light6 = new Mesh(geometry, this.createAreaLightMaterial(100));
+    light6.position.set(0.0, 20.0, 0.0);
+    light6.scale.set(1.0, 0.1, 1.0);
+    scene.add(light6);
+
     this.camera = new CubeCamera(0.1, 100, 256);
-    this.camera.renderTarget.texture.type = HalfFloatType;
-    this.camera.renderTarget.texture.format = RGBAFormat;
-    this.camera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
-    this.camera.renderTarget.texture.generateMipmaps = true;
-
-    // Blur
-
-    this.blurScene = new Scene();
-
-    this.blurMaterial = new ShaderMaterial({
-      uniforms: {tCube: {value: null}},
-      vertexShader: `
-        varying vec3 vWorldDirection;
-        #include <common>
-        void main() {
-          vWorldDirection = transformDirection( position, modelMatrix );
-          #include <begin_vertex>
-          #include <project_vertex>
-          gl_Position.z = gl_Position.w;
-        }
-      `,
-      fragmentShader: `
-        uniform samplerCube tCube;
-        varying vec3 vWorldDirection;
-        void main() {
-          vec4 texColor = textureCube( tCube, vec3( - vWorldDirection.x, vWorldDirection.yz ), 2.0 );
-          gl_FragColor = mapTexelToLinear( texColor );
-        }
-      `,
-      side: BackSide,
-      depthTest: false,
-      depthWrite: false
-    });
-
-    this.blurScene.add(new Mesh(geometry, this.blurMaterial));
-
-    this.blurCamera = new CubeCamera(0.1, 100, 256);
-    this.blurCamera.renderTarget.texture.type = HalfFloatType;
-    this.blurCamera.renderTarget.texture.format = RGBAFormat;
-    this.blurCamera.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
-    this.blurCamera.renderTarget.texture.generateMipmaps = true;
-
-    //
-
-    this.blurRenderTarget1 = this.camera.renderTarget;
-    this.blurRenderTarget2 = this.blurCamera.renderTarget;
+    this.camera.renderTarget.texture.type = UnsignedByteType;
+    this.camera.renderTarget.texture.format = RGBEFormat;
+    this.camera.renderTarget.texture.encoding = RGBEEncoding;
+    this.camera.renderTarget.texture.magFilter = NearestFilter;
+    this.camera.renderTarget.texture.minFilter = NearestFilter;
+    this.camera.renderTarget.texture.generateMipmaps = false;
   }
 
   /**
    * Generate an environment map for a room.
    */
-  generate(): Texture {
-    if (!rendererTextureCache.has(this.renderer)) {
-      (this.camera as any).clear(this.renderer);
+  generate(): WebGLRenderTargetCube {
+    (this.camera as any).clear(this.renderer);
 
-      var gammaOutput = this.renderer.gammaOutput;
-      var toneMapping = this.renderer.toneMapping;
-      var toneMappingExposure = this.renderer.toneMappingExposure;
+    var gammaOutput = this.renderer.gammaOutput;
+    var toneMapping = this.renderer.toneMapping;
+    var toneMappingExposure = this.renderer.toneMappingExposure;
 
-      this.renderer.toneMapping = LinearToneMapping;
-      this.renderer.toneMappingExposure = 1.0;
-      this.renderer.gammaOutput = false;
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
 
-      this.camera.update(this.renderer, this.scene);
+    this.camera.update(this.renderer, this.scene);
 
-      // Blur
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
 
-      for (var i = 0; i < 16; i++) {
-        // Ping-Pong
-        if (i % 2 === 0) {
-          this.blurMaterial.uniforms.tCube.value =
-              this.blurRenderTarget1.texture;
-          this.blurCamera.renderTarget = this.blurRenderTarget2;
-        } else {
-          this.blurMaterial.uniforms.tCube.value =
-              this.blurRenderTarget2.texture;
-          this.blurCamera.renderTarget = this.blurRenderTarget1;
-        }
-        this.blurCamera.update(this.renderer, this.blurScene);
-      }
-
-      this.renderer.toneMapping = toneMapping;
-      this.renderer.toneMappingExposure = toneMappingExposure;
-      this.renderer.gammaOutput = gammaOutput;
-
-      rendererTextureCache.set(
-          this.renderer, this.blurCamera.renderTarget.texture);
-    }
-
-    return rendererTextureCache.get(this.renderer)!;
+    return this.camera.renderTarget;
   }
 
   dispose() {
     this.camera.renderTarget.dispose();
-    this.blurRenderTarget1.dispose();
-    this.blurRenderTarget2.dispose();
   }
 }

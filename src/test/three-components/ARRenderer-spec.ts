@@ -135,7 +135,6 @@ suite('ARRenderer', () => {
   });
 
   teardown(async () => {
-    renderer.dispose();
     await arRenderer.stopPresenting().catch(() => {});
   });
 

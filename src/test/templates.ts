@@ -15,7 +15,7 @@
 
 import {Cache} from 'three';
 
-import ModelViewerElementBase, {$resetRenderer} from '../model-viewer-base.js';
+import ModelViewerElementBase from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 
 import {timePasses} from './helpers.js';
@@ -30,8 +30,6 @@ export const BasicSpecTemplate =
     (ModelViewerElementAccessor: () => Constructor<ModelViewerElementBase>,
      tagNameAccessor: () => string) => {
       teardown(() => {
-        // Ensure that the renderer is disposed across every test run:
-        ModelViewerElementBase[$resetRenderer]();
         CachingGLTFLoader.clearCache();
         Cache.clear();
       });

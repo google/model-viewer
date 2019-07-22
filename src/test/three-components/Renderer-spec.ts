@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize, $renderer, $resetRenderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 
@@ -62,10 +62,6 @@ suite('Renderer', () => {
   setup(() => {
     scene = createScene();
     renderer = scene.renderer;
-  });
-
-  teardown(() => {
-    ModelViewerElementBase[$resetRenderer]();
   });
 
   suite('render', () => {

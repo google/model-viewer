@@ -1,4 +1,4 @@
-import {PixelFormat, Texture, TextureDataType, TextureFilter, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {PixelFormat, Texture, TextureDataType, TextureFilter, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 export interface CubemapGeneratorOptions {
   resolution?: number;
@@ -10,7 +10,8 @@ export interface CubemapGeneratorOptions {
 export class CubemapGenerator {
   constructor(renderer: WebGLRenderer);
   public fromEquirectangular(
-      texture: Texture, options?: CubemapGeneratorOptions): WebGLRenderTarget;
+      texture: Texture,
+      options?: CubemapGeneratorOptions): WebGLRenderTargetCube;
 }
 
 export interface EquirectangularToCubeGeneratorOptions {
@@ -20,7 +21,7 @@ export interface EquirectangularToCubeGeneratorOptions {
 }
 
 export class EquirectangularToCubeGenerator {
-  public renderTarget: WebGLRenderTarget;
+  public renderTarget: WebGLRenderTargetCube;
 
   constructor(
       sourceTexture: Texture, options: EquirectangularToCubeGeneratorOptions)
