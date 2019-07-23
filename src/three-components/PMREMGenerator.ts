@@ -85,6 +85,9 @@ export default class PMREMGenerator {
         params);
     this.cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
     this.cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+    // This hack in necessary for now because CubeUV is not really a first-class
+    // citizen within the Standard material yet, and it does not seem to be easy
+    // to add new uniforms to existing materials.
     this.renderer.properties.get(this.cubeUVRenderTarget.texture)
         .__maxMipLevel = numLods;
 
@@ -103,14 +106,14 @@ export default class PMREMGenerator {
   addLodObjects(
       target: WebGLRenderTargetCube, sizeLod: number, offset: number) {
     const sizePad = sizeLod + 2;
-    const invSize = 1.0 / sizeLod;
+    const texelSize = 1.0 / sizeLod;
     const plane = this.plane.clone();
     const uv = (plane.attributes.uv.array as Array<number>);
     for (let j = 0; j < uv.length; j++) {
       if (uv[j] === 0) {
-        uv[j] = -invSize;
+        uv[j] = -texelSize;
       } else if (uv[j] === 1) {
-        uv[j] = 1 + invSize;
+        uv[j] = 1 + texelSize;
       } else {
         console.error('unexpected UV coordiante ' + uv);
       }
@@ -118,7 +121,7 @@ export default class PMREMGenerator {
     for (let k = 0; k < 6; k++) {
       // 6 Cube Faces
       let material = this.packingShader.clone();
-      material.uniforms['invMapSize'].value = invSize;
+      material.uniforms['texelSize'].value = texelSize;
       material.uniforms['envMap'].value = target.texture;
       // This hack comes from the original PMREMGenerator; if you set envMap
       // (even though it doesn't exist on ShaderMaterial), the assembled
@@ -156,13 +159,13 @@ export default class PMREMGenerator {
     this.renderer.gammaInput = false;
     this.renderer.gammaOutput = false;
 
-    this.mipmapShader.uniforms['invMapSize'].value = 1.0 / cubeTarget.width;
+    this.mipmapShader.uniforms['texelSize'].value = 1.0 / cubeTarget.width;
     this.mipmapShader.uniforms['envMap'].value = cubeTarget.texture;
     (this.mipmapShader as any).envMap = cubeTarget.texture;
     for (let i = this.numLods - 1; i >= 0; i--) {
       this.cubeCamera.renderTarget = this.cubeLods[i];
       this.cubeCamera.update(this.renderer, this.mipmapScene);
-      this.mipmapShader.uniforms['invMapSize'].value =
+      this.mipmapShader.uniforms['texelSize'].value =
           1.0 / this.cubeLods[i].width;
       this.mipmapShader.uniforms['envMap'].value = this.cubeLods[i].texture;
       (this.mipmapShader as any).envMap = this.cubeLods[i].texture;
@@ -211,7 +214,7 @@ export default class PMREMGenerator {
   getMipmapShader() {
     var shaderMaterial = new ShaderMaterial({
 
-      uniforms: {'invMapSize': {value: 0.5}, 'envMap': {value: null}},
+      uniforms: {'texelSize': {value: 0.5}, 'envMap': {value: null}},
 
       vertexShader: `
 varying vec2 vUv;
@@ -226,7 +229,7 @@ void main() {
       fragmentShader: `
 varying vec2 vUv;
 varying vec3 vPosition;
-uniform float invMapSize;
+uniform float texelSize;
 uniform samplerCube envMap;
 int getFace(vec3 direction) {
     vec3 absDirection = abs(direction);
@@ -264,16 +267,16 @@ vec3 getDirection(vec2 uv, int face) {
 }
 void main() {
   int face = getFace(vPosition);
-  vec2 uv = vUv - 0.5 * invMapSize;
+  vec2 uv = vUv - 0.5 * texelSize;
   vec3 texelDir = getDirection(uv, face);
   vec3 color = envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
-  uv.x += invMapSize;
+  uv.x += texelSize;
   texelDir = getDirection(uv, face);
   color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
-  uv.y += invMapSize;
+  uv.y += texelSize;
   texelDir = getDirection(uv, face);
   color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
-  uv.x -= invMapSize;
+  uv.x -= texelSize;
   texelDir = getDirection(uv, face);
   color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
   gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0));
@@ -293,7 +296,7 @@ void main() {
     var shaderMaterial = new ShaderMaterial({
 
       uniforms: {
-        'invMapSize': {value: 0.5},
+        'texelSize': {value: 0.5},
         'envMap': {value: null},
         'faceIndex': {value: 0},
       },
@@ -308,7 +311,7 @@ void main() {
 
       fragmentShader: `
 varying vec2 vUv;
-uniform float invMapSize;
+uniform float texelSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
 vec3 getDirection(vec2 uv, int face) {
@@ -339,10 +342,10 @@ void main() {
       // The corner pixels do not represent any one face, so to get consistent 
       // interpolation, they must average the three neighboring face corners.
       vec2 uv = vUv;
-      uv.x += vUv.x < 0.0 ? invMapSize : -invMapSize;
+      uv.x += vUv.x < 0.0 ? texelSize : -texelSize;
       vec3 direction = getDirection(uv, faceIndex);
       vec3 color = envMapTexelToLinear(textureCube(envMap, direction)).rgb;
-      uv.y += vUv.y < 0.0 ? invMapSize : -invMapSize;
+      uv.y += vUv.y < 0.0 ? texelSize : -texelSize;
       direction = getDirection(uv, faceIndex);
       color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
       uv.x = vUv.x;
