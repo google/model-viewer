@@ -42,7 +42,7 @@ const hdrLoader = new RGBELoader();
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
-const $PMREMGenerator = Symbol('PMREMGenerator');
+const $pmremGenerator = Symbol('pmremGenerator');
 
 const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
 const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
@@ -78,13 +78,13 @@ export default class TextureUtils extends EventDispatcher {
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
   private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
-  private[$PMREMGenerator]: PMREMGenerator;
+  private[$pmremGenerator]: PMREMGenerator;
 
   constructor(renderer: WebGLRenderer, config: TextureUtilsConfig = {}) {
     super();
     this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
-    this[$PMREMGenerator] = new PMREMGenerator(renderer);
+    this[$pmremGenerator] = new PMREMGenerator(renderer);
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
@@ -410,7 +410,7 @@ void main() {
    * to be used as environment maps in models.
    */
   pmremPass(target: WebGLRenderTargetCube): WebGLRenderTarget {
-    const cubeUVTarget = this[$PMREMGenerator].update(target);
+    const cubeUVTarget = this[$pmremGenerator].update(target);
 
     (cubeUVTarget.texture as any).userData = {
       ...userData,
