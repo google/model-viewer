@@ -23,38 +23,16 @@ import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js'
 export type ProgressCallback = (progress: number) => void;
 
 export const loadWithLoader =
-    async (
-        url: string,
-        loader: any,
-        progressCallback: ProgressCallback = () => {}) => {
-  const onProgress = (event: ProgressEvent) => {
-    progressCallback!(event.loaded / event.total);
-  };
-  let gltf = await new Promise<Gltf>((resolve, reject) => {
-    loader.load(url, resolve, onProgress, reject);
-  });
-
-  if (gltf.scene != null) {
-    // This is a patch to three's handling of PMREM environments.
-    const updateShader = (shader: Shader) => {
-      shader.fragmentShader =
-          shader.fragmentShader
-              .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-              .replace('#include <envmap_physical_pars_fragment>', envmapChunk);
-    };
-
-    gltf.scene.traverse((node: any) => {
-      if (Array.isArray(node.material)) {
-        (node.material as Array<Material>).forEach(material => {
-          material.onBeforeCompile = updateShader;
-        });
-      } else if (node.material != null) {
-        node.material.onBeforeCompile = updateShader;
-      }
-    });
-  }
-  return gltf;
-}
+    (url: string,
+     loader: any,
+     progressCallback: ProgressCallback = () => {}) => {
+      const onProgress = (event: ProgressEvent) => {
+        progressCallback!(event.loaded / event.total);
+      };
+      return new Promise<Gltf>((resolve, reject) => {
+        loader.load(url, resolve, onProgress, reject);
+      });
+    }
 
 const cache = new Map<string, Promise<Gltf>>();
 const preloaded = new Map<string, boolean>();
@@ -115,6 +93,27 @@ export class CachingGLTFLoader {
 
     if (model != null) {
       model.userData.animations = gltf.animations;  // save animations
+
+      // This is a patch to three's handling of PMREM environments. This patch
+      // has to be applied after cloning because three does not seem to clone
+      // the onBeforeCompile method.
+      const updateShader = (shader: Shader) => {
+        shader.fragmentShader =
+            shader.fragmentShader
+                .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
+                .replace(
+                    '#include <envmap_physical_pars_fragment>', envmapChunk);
+      };
+
+      model.traverse((node: any) => {
+        if (Array.isArray(node.material)) {
+          (node.material as Array<Material>).forEach(material => {
+            material.onBeforeCompile = updateShader;
+          });
+        } else if (node.material != null) {
+          node.material.onBeforeCompile = updateShader;
+        }
+      });
     }
 
     return model;
