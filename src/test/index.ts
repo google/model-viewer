@@ -25,6 +25,8 @@ import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';
 import './three-components/ModelUtils-spec.js';
 import './utilities/progress-tracker-spec.js';
+import './utilities/timer-spec.js';
+import './utilities/focus-visible-spec.js';
 import './features/animation-spec.js';
 import './features/staging-spec.js';
 import './features/controls-spec.js';

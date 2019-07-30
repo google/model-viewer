@@ -7,7 +7,7 @@
   ],
   "clientOptions": {
     "mochaOptions": {
-      "timeout": 90000
+      "timeout": 180000
     }
   },
   "plugins": {

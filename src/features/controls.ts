@@ -17,9 +17,13 @@ import {property} from 'lit-element';
 import {Event, Spherical} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
-import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $onUserModelOrbit, $scene, $tick} from '../model-viewer-base.js';
-import {ChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
+
+export interface CameraChangeDetails {
+  source: ChangeSource;
+}
 
 export interface SphericalPosition {
   theta: number;  // equator angle around the y (up) axis.
@@ -28,11 +32,18 @@ export interface SphericalPosition {
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused';
+export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 
 const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
       WHEN_FOCUSED: 'when-focused'
+    };
+
+const InteractionPolicy:
+    {[index: string]: InteractionPolicy} = {
+      ALWAYS_ALLOW: 'always-allow',
+      WHEN_FOCUSED: 'allow-when-focused'
     };
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
@@ -83,6 +94,7 @@ export interface ControlsInterface {
   cameraOrbit: string;
   fieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
+  interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
   getFieldOfView(): number;
@@ -111,6 +123,10 @@ export const ControlsMixin = (ModelViewerElement:
         @property({type: String, attribute: 'interaction-prompt'})
         interactionPrompt: InteractionPromptStrategy =
             InteractionPromptStrategy.WHEN_FOCUSED;
+
+        @property({type: String, attribute: 'interaction-policy'})
+        interactionPolicy: InteractionPolicy =
+            InteractionPolicy.ALWAYS_ALLOW;
 
         protected[$promptElement]: Element;
 
@@ -201,6 +217,11 @@ export const ControlsMixin = (ModelViewerElement:
             if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
               this[$waitingToPromptUser] = true;
             }
+          }
+
+          if (changedProperties.has('interactionPolicy')) {
+            const interactionPolicy = this.interactionPolicy;
+            controls.applyOptions({interactionPolicy});
           }
 
           if (changedProperties.has('cameraOrbit')) {
@@ -430,12 +451,13 @@ export const ControlsMixin = (ModelViewerElement:
           this[$updateAria]();
           this[$needsRender]();
 
-          if (source === 'user-interaction') {
-            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
-              this[$deferInteractionPrompt]();
-            }
-            this[$onUserModelOrbit]();
+          if (source === ChangeSource.USER_INTERACTION &&
+              this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+            this[$deferInteractionPrompt]();
           }
+
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'camera-change', {detail: {source}}));
         }
       }
 

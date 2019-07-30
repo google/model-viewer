@@ -38,6 +38,9 @@
   <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
   <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 </head>
@@ -167,17 +170,18 @@
               environment entirely. Defaults to 1.</p>
             </li>
             <li>
-              <div>experimental-pmrem</div>
-              <p>Enables an experimental lighting mode that is more physically
-              realistic, and emphasizes light from the environment over light from
-              the built-in scene lights. Refer to <a href="https://wiki.jmonkeyengine.org/jme3/advanced/pbr_part3.html" target="_blank">this article</a>
-              for in-depth details related to this lighting mode.</p>
-            </li>
-            <li>
               <div>field-of-view</div>
               <p>Used to configure the field of view of the camera. Accepts values
               units in both degrees and radians (e.g., "30deg" or "0.5rad"). Accepts
               any value between 20 and 45 degrees. Defaults to "45deg".</p>
+            </li>
+            <li>
+              <div>interaction-policy</div>
+              <p>Allows you to change whether the viewer requires focus before interacting with it.
+              If set to "allow-when-focused", the user must focus on the viewer (click / tap)
+              before being able to control it. If set to "always-allow", the user can 
+              control it even if the viewer is not the focused element on the page. 
+              Defaults to "always-allow".</p>
             </li>
             <li>
               <div>interaction-prompt</div>
@@ -359,6 +363,13 @@
 
           <ul class="list-attribute">
             <li>
+              <div>camera-change</div>
+              <p>Fired when the camera position and/or field of view have
+              changed. If the change occurred due to user interaction, the
+              "event.detail.source" property will be set to
+              "user-interaction".</p>
+            </li>
+            <li>
               <div>environment-change</div>
               <p>Fired when the environment has changed. If the environment is
               derived from background-image or environment-image, the image will
@@ -439,7 +450,7 @@
             </tr>
           </table>
 
-          <p class="browser-support-desc">These browser features are <b>optional</b> and are only used if available for performance optimization:</p>
+          <p class="browser-support-desc">These browser features are <b>optional</b> and are only used if available for performance optimization or specific features:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -477,6 +488,16 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-check"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
+            </tr>
+            <tr>
+              <td>:focus-visible</td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>

@@ -50,7 +50,6 @@ export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
-export const $resetRenderer = Symbol('resetRenderer');
 export const $progressTracker = Symbol('progressTracker');
 
 /**
@@ -69,11 +68,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     return this[$template];
-  }
-
-  static[$resetRenderer]() {
-    renderer.dispose();
-    renderer = new Renderer();
   }
 
   @property({type: String}) alt: string|null = null;
@@ -321,9 +315,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
     this[$needsRender]();
-  }
-
-  [$onUserModelOrbit]() {
   }
 
   /**

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {SmoothControls} from '../../three-components/SmoothControls.js';
+import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
+import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -165,6 +165,29 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getFieldOfView()).to.be.equal(nextFov);
       });
 
+      test('causes camera-change event to fire', async () => {
+        const cameraChangeDispatches = waitForEvent(element, 'camera-change');
+        const cameraOrbit = element.getCameraOrbit();
+        element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${
+            cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
+
+        await cameraChangeDispatches;
+      });
+
+      test('sets an appropriate event source', async () => {
+        const cameraChangeDispatches =
+            waitForEvent<CustomEvent<CameraChangeDetails>>(
+                element, 'camera-change');
+
+        const cameraOrbit = element.getCameraOrbit();
+        element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${
+            cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
+
+        const event = await cameraChangeDispatches;
+        expect(event.detail.source).to.be.equal(ChangeSource.NONE);
+      });
+
+
       suite('getCameraOrbit', () => {
         setup(async () => {
           element.cameraOrbit = `1rad 1rad 1.5m`;
@@ -231,6 +254,18 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(controls).to.be.ok;
       });
 
+      test('requires focus to interact if policy is set to allow-when-focused', async  () => {
+        element.interactionPolicy = 'allow-when-focused';
+        await timePasses();
+        expect(controls.options.interactionPolicy).to.be.equal('allow-when-focused');
+      });
+
+      test('does not require focus to interact if policy is set to always-allow', async () => {
+        element.interactionPolicy = 'always-allow';
+        await timePasses();
+        expect(controls.options.interactionPolicy).to.be.equal('always-allow');
+      });
+
       test('sets max radius to the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
             element[$scene].model.position);
@@ -241,6 +276,21 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.cameraControls = false;
         await timePasses();
         expect(controls.interactionEnabled).to.be.false;
+      });
+
+      suite('when user is interacting', () => {
+        test('sets an appropriate camera-change event source', async () => {
+          const cameraChangeDispatches =
+              waitForEvent<CustomEvent<CameraChangeDetails>>(
+                  element, 'camera-change');
+
+          await rafPasses();
+          element[$canvas].focus();
+          interactWith(element[$canvas]);
+          const event = await cameraChangeDispatches;
+          expect(event.detail.source)
+              .to.be.equal(ChangeSource.USER_INTERACTION);
+        });
       });
 
       suite('interaction-prompt', () => {
