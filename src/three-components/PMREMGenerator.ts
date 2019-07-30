@@ -26,10 +26,7 @@ import {getDirectionChunk, getFaceChunk} from './shader-chunk/common.glsl.js';
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
-          const cubeLods: Array<WebGLRenderTargetCube> = [];
-          const meshes: Array<Mesh> = [];
-
-          const cubeUVRenderTarget = setup(cubeTarget, cubeLods, meshes);
+          const {cubeUVRenderTarget, cubeLods, meshes} = setup(cubeTarget);
           // This hack in necessary for now because CubeUV is not really a
           // first-class citizen within the Standard material yet, and it does
           // not seem to be easy to add new uniforms to existing materials.
@@ -61,55 +58,54 @@ export const generatePMREM =
           return cubeUVRenderTarget;
         };
 
-const setup =
-    (cubeTarget: WebGLRenderTargetCube,
-     cubeLods: Array<WebGLRenderTargetCube>,
-     meshes: Array<Mesh>) => {
-      const params = {
-        format: cubeTarget.texture.format,
-        magFilter: NearestFilter,
-        minFilter: NearestFilter,
-        type: cubeTarget.texture.type,
-        generateMipmaps: false,
-        anisotropy: cubeTarget.texture.anisotropy,
-        encoding: cubeTarget.texture.encoding
-      };
+const setup = (cubeTarget: WebGLRenderTargetCube) => {
+  const params = {
+    format: cubeTarget.texture.format,
+    magFilter: NearestFilter,
+    minFilter: NearestFilter,
+    type: cubeTarget.texture.type,
+    generateMipmaps: false,
+    anisotropy: cubeTarget.texture.anisotropy,
+    encoding: cubeTarget.texture.encoding
+  };
 
-      // Hard-coded to max faceSize = 256 until we can add a uniform.
-      const maxLods = 8;
-      // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
-      // Math.log2
+  // Hard-coded to max faceSize = 256 until we can add a uniform.
+  const maxLods = 8;
+  // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
+  // Math.log2
 
-      let offset = 0;
-      for (let i = 0; i <= maxLods; i++) {
-        const sizeLod = Math.pow(2, i);
-        let target = cubeTarget;
-        if (i < maxLods) {
-          const renderTarget =
-              new WebGLRenderTargetCube(sizeLod, sizeLod, params);
-          renderTarget.texture.name = 'PMREMGenerator.cube' + i;
-          cubeLods.push(renderTarget);
-          target = renderTarget;
-        }
-        addLodMeshes(target, sizeLod, offset, meshes);
-        offset += 2 * (sizeLod + 2);
-      }
+  const cubeLods: Array<WebGLRenderTargetCube> = [];
+  const meshes: Array<Mesh> = [];
 
-      const cubeUVRenderTarget = new WebGLRenderTarget(
-          3 * (Math.pow(2, maxLods) + 2),
-          4 * maxLods + 2 * (Math.pow(2, maxLods + 1) - 1),
-          params);
-      cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
-      cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+  let offset = 0;
+  for (let i = 0; i <= maxLods; i++) {
+    const sizeLod = Math.pow(2, i);
+    let target = cubeTarget;
+    if (i < maxLods) {
+      const renderTarget = new WebGLRenderTargetCube(sizeLod, sizeLod, params);
+      renderTarget.texture.name = 'PMREMGenerator.cube' + i;
+      cubeLods.push(renderTarget);
+      target = renderTarget;
+    }
+    appendLodMeshes(meshes, target, sizeLod, offset);
+    offset += 2 * (sizeLod + 2);
+  }
 
-      return cubeUVRenderTarget;
-    };
+  const cubeUVRenderTarget = new WebGLRenderTarget(
+      3 * (Math.pow(2, maxLods) + 2),
+      4 * maxLods + 2 * (Math.pow(2, maxLods + 1) - 1),
+      params);
+  cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
+  cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
-const addLodMeshes =
-    (target: WebGLRenderTargetCube,
+  return {cubeUVRenderTarget, cubeLods, meshes};
+};
+
+const appendLodMeshes =
+    (meshes: Array<Mesh>,
+     target: WebGLRenderTargetCube,
      sizeLod: number,
-     offset: number,
-     meshes: Array<Mesh>) => {
+     offset: number) => {
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
