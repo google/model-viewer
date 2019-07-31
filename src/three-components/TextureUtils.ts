@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearToneMapping, Mesh, NearestFilter, RGBEEncoding, RGBEFormat, Scene, ShaderMaterial, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
@@ -195,6 +195,10 @@ export default class TextureUtils extends EventDispatcher {
       const [environmentMap, skybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
 
+      if (skybox != null) {
+        this.gaussianBlur(skybox, 0.01);
+      }
+
       return {environmentMap, skybox};
     } finally {
       updateGenerationProgress(1.0);
@@ -309,6 +313,39 @@ export default class TextureUtils extends EventDispatcher {
       weights.push(inverseIntegral * Math.exp(-x * x / 2));
     }
 
+    // These two functions are stolen from three.js: WebGLProgram.js
+    const getEncodingComponents =
+        (encoding: TextureEncoding): Array<string> => {
+          switch (encoding) {
+            case LinearEncoding:
+              return ['Linear', '( value )'];
+            case sRGBEncoding:
+              return ['sRGB', '( value )'];
+            case RGBEEncoding:
+              return ['RGBE', '( value )'];
+            case RGBM7Encoding:
+              return ['RGBM', '( value, 7.0 )'];
+            case RGBM16Encoding:
+              return ['RGBM', '( value, 16.0 )'];
+            case RGBDEncoding:
+              return ['RGBD', '( value, 256.0 )'];
+            case GammaEncoding:
+              return ['Gamma', '( value, float( GAMMA_FACTOR ) )'];
+            default:
+              throw new Error('unsupported encoding: ' + encoding);
+          }
+        };
+
+    const getTexelDecodingFunction =
+        (functionName: string, encoding: TextureEncoding): string => {
+          const components = getEncodingComponents(encoding);
+          return 'vec4 ' + functionName + '( vec4 value ) { return ' +
+              components[0] + 'ToLinear' + components[1] + '; }';
+        };
+
+    const inputTexelToLinear = getTexelDecodingFunction(
+        'inputTexelToLinear', cubeTarget.texture.encoding);
+
     const blurMaterial = new ShaderMaterial({
       uniforms: {
         tCube: {value: null},
@@ -333,6 +370,7 @@ uniform samplerCube tCube;
 uniform bool latitudinal;
 uniform float dTheta;
 varying vec3 vWorldDirection;
+${inputTexelToLinear}
 void main() {
   vec4 texColor = vec4(0.0);
   for (int i = 0; i < n; i++) {
@@ -346,14 +384,14 @@ void main() {
         float diTheta = dTheta * float(dir * i) / xz;
         mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
         sampleDirection.xz = R * sampleDirection.xz;
-        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+        texColor += weight * inputTexelToLinear(textureCube(tCube, sampleDirection));
       } else {
         float diTheta = dTheta * float(dir * i);
         mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
         vec2 xzY = R * vec2(xz, sampleDirection.y);
         sampleDirection.xz *= xzY.x / xz;
         sampleDirection.y = xzY.y;
-        texColor += weight * RGBEToLinear(textureCube(tCube, sampleDirection));
+        texColor += weight * inputTexelToLinear(textureCube(tCube, sampleDirection));
       }
     }
   }
@@ -369,11 +407,12 @@ void main() {
 
     const blurCamera = new CubeCamera(0.1, 100, cubeResolution);
     const tempTarget = blurCamera.renderTarget;
-    tempTarget.texture.type = UnsignedByteType;
-    tempTarget.texture.format = RGBEFormat;
-    tempTarget.texture.encoding = RGBEEncoding;
-    tempTarget.texture.magFilter = NearestFilter;
-    tempTarget.texture.minFilter = NearestFilter;
+    const cubeTexture = cubeTarget.texture;
+    tempTarget.texture.type = cubeTexture.type;
+    tempTarget.texture.format = cubeTexture.format;
+    tempTarget.texture.encoding = cubeTexture.encoding;
+    tempTarget.texture.magFilter = cubeTexture.magFilter;
+    tempTarget.texture.minFilter = cubeTexture.minFilter;
     tempTarget.texture.generateMipmaps = false;
 
     const gammaOutput = this.renderer.gammaOutput;
