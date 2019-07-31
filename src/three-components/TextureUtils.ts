@@ -398,6 +398,7 @@ void main() {
     this.renderer.gammaOutput = gammaOutput;
 
     tempTarget.dispose();
+    blurMaterial.dispose();
   }
 
   /**

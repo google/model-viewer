@@ -27,7 +27,7 @@ export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
           const {cubeUVRenderTarget, cubeLods, meshes} = setup(cubeTarget);
-          // This hack in necessary for now because CubeUV is not really a
+          // This hack is necessary for now because CubeUV is not really a
           // first-class citizen within the Standard material yet, and it does
           // not seem to be easy to add new uniforms to existing materials.
           renderer.properties.get(cubeUVRenderTarget.texture).__maxMipLevel =
@@ -54,6 +54,9 @@ export const generatePMREM =
           cubeLods.forEach((target) => {
             target.dispose();
           });
+          meshes.forEach((mesh) => {
+            (mesh.material as Material).dispose();
+          })
 
           return cubeUVRenderTarget;
         };
@@ -152,6 +155,7 @@ const generateMipmaps =
       mipmapShader.uniforms.texelSize.value = 1.0 / cubeTarget.width;
       mipmapShader.uniforms.envMap.value = cubeTarget.texture;
       (mipmapShader as any).envMap = cubeTarget.texture;
+      cubeCamera.renderTarget.dispose();
       for (let i = cubeLods.length - 1; i >= 0; i--) {
         cubeCamera.renderTarget = cubeLods[i];
         cubeCamera.update(renderer, mipmapScene);
@@ -159,6 +163,8 @@ const generateMipmaps =
         mipmapShader.uniforms.envMap.value = cubeLods[i].texture;
         (mipmapShader as any).envMap = cubeLods[i].texture;
       }
+
+      mipmapShader.dispose();
     };
 
 const packMipmaps =
