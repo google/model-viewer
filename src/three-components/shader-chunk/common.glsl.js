@@ -1,3 +1,5 @@
+import {LinearEncoding, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding} from 'three';
+
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
 // sampling a textureCube (not generally normalized).
@@ -21,7 +23,7 @@ vec3 getDirection(vec2 uv, int face) {
     }
     return direction;
 }
-`
+`;
 
 export const getFaceChunk = /* glsl */ `
 int getFace(vec3 direction) {
@@ -40,7 +42,7 @@ int getFace(vec3 direction) {
     }
     return face;
 }
-`
+`;
 
 export const getUVChunk = /* glsl */ `
 vec2 getUV(vec3 direction, int face) {
@@ -60,4 +62,46 @@ vec2 getUV(vec3 direction, int face) {
     }
     return 0.5 * (uv + 1.0);
 }
-`
+`;
+
+export const encodings = {
+  [LinearEncoding]: 0,
+  [sRGBEncoding]: 1,
+  [RGBEEncoding]: 2,
+  [RGBM7Encoding]: 3,
+  [RGBM16Encoding]: 4,
+  [RGBDEncoding]: 5
+};
+
+export const texelIO = /* glsl */ `
+vec4 inputTexelToLinear(vec4 value, int encoding){
+    if(encoding == 0){
+        return value;
+    }else if(encoding == 1){
+        return sRGBToLinear(value);
+    }else if(encoding == 2){
+        return RGBEToLinear(value);
+    }else if(encoding == 3){
+        return RGBMToLinear(value, 7.0);
+    }else if(encoding == 4){
+        return RGBMToLinear(value, 16.0);
+    }else{
+        return RGBDToLinear(value, 256.0);
+    }
+}
+vec4 linearToOutputTexel(vec4 value, int encoding){
+    if(encoding == 0){
+        return value;
+    }else if(encoding == 1){
+        return LinearTosRGB(value);
+    }else if(encoding == 2){
+        return LinearToRGBE(value);
+    }else if(encoding == 3){
+        return LinearToRGBM(value, 7.0);
+    }else if(encoding == 4){
+        return LinearToRGBM(value, 16.0);
+    }else{
+        return LinearToRGBD(value, 256.0);
+    }
+}
+`;

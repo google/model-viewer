@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
-import {getDirectionChunk, getFaceChunk} from './shader-chunk/common.glsl.js';
+import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+
+import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chunk/common.glsl.js';
+import {texelConversions} from './shader-chunk/encodings_pars_framgment.glsl.js'
 
 /**
  * This class generates a Prefiltered, Mipmapped Radiance Environment Map
@@ -54,9 +56,6 @@ export const generatePMREM =
           cubeLods.forEach((target) => {
             target.dispose();
           });
-          meshes.forEach((mesh) => {
-            (mesh.material as Material).dispose();
-          })
 
           return cubeUVRenderTarget;
         };
@@ -125,10 +124,10 @@ const appendLodMeshes =
         const material = new PackingShader();
         material.uniforms.texelSize.value = texelSize;
         material.uniforms.envMap.value = target.texture;
-        // This hack comes from the original PMREMGenerator; if you set envMap
-        // (even though it doesn't exist on ShaderMaterial), the assembled
-        // shader will populate the correct function into envMapTexelToLinear().
-        (material as any).envMap = target.texture;
+        material.uniforms.inputEncoding.value =
+            encodings[target.texture.encoding];
+        material.uniforms.outputEncoding.value =
+            encodings[target.texture.encoding];
         material.uniforms.faceIndex.value = i;
 
         const planeMesh = new Mesh(plane, material);
@@ -154,17 +153,19 @@ const generateMipmaps =
 
       mipmapShader.uniforms.texelSize.value = 1.0 / cubeTarget.width;
       mipmapShader.uniforms.envMap.value = cubeTarget.texture;
-      (mipmapShader as any).envMap = cubeTarget.texture;
+      mipmapShader.uniforms.inputEncoding.value =
+          encodings[cubeTarget.texture.encoding];
       cubeCamera.renderTarget.dispose();
       for (let i = cubeLods.length - 1; i >= 0; i--) {
         cubeCamera.renderTarget = cubeLods[i];
+        mipmapShader.uniforms.outputEncoding.value =
+            encodings[cubeLods[i].texture.encoding];
         cubeCamera.update(renderer, mipmapScene);
         mipmapShader.uniforms.texelSize.value = 1.0 / cubeLods[i].width;
         mipmapShader.uniforms.envMap.value = cubeLods[i].texture;
-        (mipmapShader as any).envMap = cubeLods[i].texture;
+        mipmapShader.uniforms.inputEncoding.value =
+            encodings[cubeLods[i].texture.encoding];
       }
-
-      mipmapShader.dispose();
     };
 
 const packMipmaps =
@@ -182,13 +183,24 @@ const packMipmaps =
       renderer.render(packingScene, flatCamera);
     };
 
-class MipmapShader extends ShaderMaterial {
+class MipmapShader extends RawShaderMaterial {
   constructor() {
     super({
 
-      uniforms: {texelSize: {value: 0.5}, envMap: {value: null}},
+      uniforms: {
+        texelSize: {value: 0.5},
+        envMap: {value: null},
+        inputEncoding: {value: 2},
+        outputEncoding: {value: 2},
+      },
 
       vertexShader: `
+precision mediump float;
+precision mediump int;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+attribute vec3 position;
+attribute vec2 uv;
 varying vec2 vUv;
 varying vec3 vPosition;
 void main() {
@@ -199,27 +211,33 @@ void main() {
 `,
 
       fragmentShader: `
+precision mediump float;
+precision mediump int;
 varying vec2 vUv;
 varying vec3 vPosition;
 uniform float texelSize;
 uniform samplerCube envMap;
+uniform int inputEncoding;
+uniform int outputEncoding;
 ${getFaceChunk}
 ${getDirectionChunk}
+${texelConversions}
+${texelIO}
 void main() {
   int face = getFace(vPosition);
   vec2 uv = vUv - 0.5 * texelSize;
   vec3 texelDir = getDirection(uv, face);
-  vec3 color = envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  vec3 color = inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
   uv.x += texelSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
   uv.y += texelSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
   uv.x -= texelSize;
   texelDir = getDirection(uv, face);
-  color += envMapTexelToLinear(textureCube(envMap, texelDir)).rgb;
-  gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0));
+  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
+  gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0), outputEncoding);
 }
 `,
 
@@ -231,17 +249,25 @@ void main() {
   }
 }
 
-class PackingShader extends ShaderMaterial {
+class PackingShader extends RawShaderMaterial {
   constructor() {
     super({
 
       uniforms: {
         texelSize: {value: 0.5},
         envMap: {value: null},
+        inputEncoding: {value: 2},
+        outputEncoding: {value: 2},
         faceIndex: {value: 0},
       },
 
       vertexShader: `
+precision mediump float;
+precision mediump int;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+attribute vec3 position;
+attribute vec2 uv;
 varying vec2 vUv;
 void main() {
     vUv = uv;
@@ -250,11 +276,17 @@ void main() {
 `,
 
       fragmentShader: `
+precision mediump float;
+precision mediump int;
 varying vec2 vUv;
 uniform float texelSize;
 uniform samplerCube envMap;
+uniform int inputEncoding;
+uniform int outputEncoding;
 uniform int faceIndex;
 ${getDirectionChunk}
+${texelConversions}
+${texelIO}
 void main() {
     if ((vUv.x >= 0.0 && vUv.x <= 1.0) || (vUv.y >= 0.0 && vUv.y <= 1.0)) {
       // By using UV coordinates that go past [0, 1], textureCube automatically 
@@ -267,14 +299,14 @@ void main() {
       vec2 uv = vUv;
       uv.x += vUv.x < 0.0 ? texelSize : -texelSize;
       vec3 direction = getDirection(uv, faceIndex);
-      vec3 color = envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      vec3 color = inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
       uv.y += vUv.y < 0.0 ? texelSize : -texelSize;
       direction = getDirection(uv, faceIndex);
-      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
+      color += inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
       uv.x = vUv.x;
       direction = getDirection(uv, faceIndex);
-      color += envMapTexelToLinear(textureCube(envMap, direction)).rgb;
-      gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
+      color += inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
+      gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0), outputEncoding);
     }
 }
 `,
