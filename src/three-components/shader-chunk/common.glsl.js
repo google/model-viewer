@@ -1,4 +1,7 @@
-import {LinearEncoding, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding} from 'three';
+import {ACESFilmicToneMapping, CineonToneMapping, GammaEncoding, LinearEncoding, LinearToneMapping, ReinhardToneMapping, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding, Uncharted2ToneMapping} from 'three';
+
+import {texelConversions} from './encodings_pars_framgment.glsl.js'
+import {toneMappingChunk} from './tonemapping_pars_fragment.glsl.js'
 
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
@@ -70,38 +73,72 @@ export const encodings = {
   [RGBEEncoding]: 2,
   [RGBM7Encoding]: 3,
   [RGBM16Encoding]: 4,
-  [RGBDEncoding]: 5
+  [RGBDEncoding]: 5,
+  [GammaEncoding]: 6
 };
 
 export const texelIO = /* glsl */ `
-vec4 inputTexelToLinear(vec4 value, int encoding){
-    if(encoding == 0){
+uniform int inputEncoding;
+uniform int outputEncoding;
+${texelConversions}
+vec4 inputTexelToLinear(vec4 value){
+    if(inputEncoding == 0){
         return value;
-    }else if(encoding == 1){
+    }else if(inputEncoding == 1){
         return sRGBToLinear(value);
-    }else if(encoding == 2){
+    }else if(inputEncoding == 2){
         return RGBEToLinear(value);
-    }else if(encoding == 3){
+    }else if(inputEncoding == 3){
         return RGBMToLinear(value, 7.0);
-    }else if(encoding == 4){
+    }else if(inputEncoding == 4){
         return RGBMToLinear(value, 16.0);
-    }else{
+    }else if(inputEncoding == 5){
         return RGBDToLinear(value, 256.0);
-    }
-}
-vec4 linearToOutputTexel(vec4 value, int encoding){
-    if(encoding == 0){
-        return value;
-    }else if(encoding == 1){
-        return LinearTosRGB(value);
-    }else if(encoding == 2){
-        return LinearToRGBE(value);
-    }else if(encoding == 3){
-        return LinearToRGBM(value, 7.0);
-    }else if(encoding == 4){
-        return LinearToRGBM(value, 16.0);
     }else{
-        return LinearToRGBD(value, 256.0);
+        return GammaToLinear(value, 2.2);
     }
 }
+vec4 linearToOutputTexel(vec4 value){
+    if(outputEncoding == 0){
+        return value;
+    }else if(outputEncoding == 1){
+        return LinearTosRGB(value);
+    }else if(outputEncoding == 2){
+        return LinearToRGBE(value);
+    }else if(outputEncoding == 3){
+        return LinearToRGBM(value, 7.0);
+    }else if(outputEncoding == 4){
+        return LinearToRGBM(value, 16.0);
+    }else if(outputEncoding == 5){
+        return LinearToRGBD(value, 256.0);
+    }else{
+        return LinearToGamma(value, 2.2);
+    }
+}
+`;
+
+export const toneMappings = {
+  [LinearToneMapping]: 0,
+  [ReinhardToneMapping]: 1,
+  [Uncharted2ToneMapping]: 2,
+  [CineonToneMapping]: 3,
+  [ACESFilmicToneMapping]: 4
+};
+
+export const toneMap = /* glsl */ `
+${toneMappingChunk}
+uniform int toneMappingFunction;
+  vec3 toneMapping(vec3 value){
+      if(toneMappingFunction == 0){
+          return LinearToneMapping(value);
+      }else if(toneMappingFunction == 1){
+          return ReinhardToneMapping(value);
+      }else if(toneMappingFunction == 2){
+          return Uncharted2ToneMapping(value);
+      }else if(toneMappingFunction == 3){
+          return OptimizedCineonToneMapping(value);
+      }else{
+          return ACESFilmicToneMapping(value);
+      }
+  }
 `;

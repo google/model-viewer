@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {ACESFilmicToneMapping, BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearFilter, LinearMipMapLinearFilter, LinearToneMapping, Mesh, NearestFilter, RawShaderMaterial, RGBEEncoding, Scene, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
@@ -21,6 +21,7 @@ import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 import {generatePMREM} from './PMREMGenerator.js';
+import {encodings, texelIO, toneMap, toneMappings} from './shader-chunk/common.glsl.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
@@ -192,11 +193,11 @@ export default class TextureUtils extends EventDispatcher {
         environmentMapLoads = this[$loadGeneratedEnvironmentMap]();
       }
 
-      const [environmentMap, skybox] =
+      let [environmentMap, skybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
 
       if (skybox != null) {
-        this.gaussianBlur(skybox, 0.01);
+        skybox = this.gaussianBlur(skybox, 0.01, GammaEncoding);
       }
 
       return {environmentMap, skybox};
@@ -275,9 +276,10 @@ export default class TextureUtils extends EventDispatcher {
     if (this[$generatedEnvironmentMap] == null) {
       const environmentMapGenerator =
           new EnvironmentMapGenerator(this.renderer);
-      const interstitialEnvironmentMap = environmentMapGenerator.generate();
+      let interstitialEnvironmentMap = environmentMapGenerator.generate();
 
-      this.gaussianBlur(interstitialEnvironmentMap);
+      interstitialEnvironmentMap =
+          this.gaussianBlur(interstitialEnvironmentMap);
 
       this[$generatedEnvironmentMap] =
           this.pmremPass(interstitialEnvironmentMap);
@@ -294,7 +296,8 @@ export default class TextureUtils extends EventDispatcher {
 
   gaussianBlur(
       cubeTarget: WebGLRenderTargetCube,
-      standardDeviationRadians: number = 0.04) {
+      standardDeviationRadians: number = 0.04,
+      outputEncoding: TextureEncoding|null = null): WebGLRenderTargetCube {
     const blurScene = new Scene();
 
     const geometry = new BoxBufferGeometry();
@@ -313,71 +316,48 @@ export default class TextureUtils extends EventDispatcher {
       weights.push(inverseIntegral * Math.exp(-x * x / 2));
     }
 
-    // These two functions are stolen from three.js: WebGLProgram.js
-    const getEncodingComponents =
-        (encoding: TextureEncoding): Array<string> => {
-          switch (encoding) {
-            case LinearEncoding:
-              return ['Linear', '( value )'];
-            case sRGBEncoding:
-              return ['sRGB', '( value )'];
-            case RGBEEncoding:
-              return ['RGBE', '( value )'];
-            case RGBM7Encoding:
-              return ['RGBM', '( value, 7.0 )'];
-            case RGBM16Encoding:
-              return ['RGBM', '( value, 16.0 )'];
-            case RGBDEncoding:
-              return ['RGBD', '( value, 256.0 )'];
-            case GammaEncoding:
-              return ['Gamma', '( value, float( GAMMA_FACTOR ) )'];
-            default:
-              throw new Error('unsupported encoding: ' + encoding);
-          }
-        };
-
-    const getTexelDecodingFunction =
-        (functionName: string, encoding: TextureEncoding): string => {
-          const components = getEncodingComponents(encoding);
-          return 'vec4 ' + functionName + '( vec4 value ) { return ' +
-              components[0] + 'ToLinear' + components[1] + '; }';
-        };
-
-    const inputTexelToLinear = getTexelDecodingFunction(
-        'inputTexelToLinear', cubeTarget.texture.encoding);
-
-    const blurMaterial = new ShaderMaterial({
+    const blurMaterial = new RawShaderMaterial({
       uniforms: {
         tCube: {value: null},
         latitudinal: {value: false},
         weights: {value: weights},
-        dTheta: {value: standardDeviationRadians * standardDeviations / (n - 1)}
+        dTheta:
+            {value: standardDeviationRadians * standardDeviations / (n - 1)},
+        inputEncoding: {value: 2},
+        outputEncoding: {value: 2},
+        toneMappingFunction: {value: toneMappings[LinearToneMapping]},
+        toneMappingExposure: {value: 1}
       },
       vertexShader: `
-varying vec3 vWorldDirection;
-#include <common>
+precision mediump float;
+precision mediump int;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+attribute vec3 position;
+varying vec3 vPosition;
 void main() {
-  vWorldDirection = transformDirection( position, modelMatrix );
-  #include <begin_vertex>
-  #include <project_vertex>
-  gl_Position.z = gl_Position.w;
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
       `,
       fragmentShader: `
+precision mediump float;
+precision mediump int;
 const int n = ${n};
+varying vec3 vPosition;
 uniform float weights[${n}];
 uniform samplerCube tCube;
 uniform bool latitudinal;
 uniform float dTheta;
-varying vec3 vWorldDirection;
-${inputTexelToLinear}
+${texelIO}
+${toneMap}
 void main() {
   vec4 texColor = vec4(0.0);
   for (int i = 0; i < n; i++) {
     for (int dir = -1; dir < 2; dir += 2) {
       if (i == 0 && dir == 1)
         continue;
-      vec3 sampleDirection = vWorldDirection;
+      vec3 sampleDirection = vPosition;
       float xz = length(sampleDirection.xz);
       float weight = weights[i];
       if (latitudinal) {
@@ -395,7 +375,9 @@ void main() {
       }
     }
   }
-  gl_FragColor = linearToOutputTexel(texColor);
+  gl_FragColor = texColor;
+  gl_FragColor.rgb = toneMapping( gl_FragColor.rgb );
+  gl_FragColor = linearToOutputTexel(gl_FragColor);
 }
       `,
       side: BackSide,
@@ -404,40 +386,54 @@ void main() {
     });
 
     blurScene.add(new Mesh(geometry, blurMaterial));
+    const blurUniforms = blurMaterial.uniforms;
 
-    const blurCamera = new CubeCamera(0.1, 100, cubeResolution);
-    const tempTarget = blurCamera.renderTarget;
     const cubeTexture = cubeTarget.texture;
-    tempTarget.texture.type = cubeTexture.type;
-    tempTarget.texture.format = cubeTexture.format;
-    tempTarget.texture.encoding = cubeTexture.encoding;
-    tempTarget.texture.magFilter = cubeTexture.magFilter;
-    tempTarget.texture.minFilter = cubeTexture.minFilter;
-    tempTarget.texture.generateMipmaps = false;
+    const params = {
+      type: cubeTexture.type,
+      format: cubeTexture.format,
+      encoding: cubeTexture.encoding,
+      generateMipmaps: cubeTexture.generateMipmaps,
+      minFilter: cubeTexture.minFilter,
+      magFilter: cubeTexture.magFilter
+    };
 
-    const gammaOutput = this.renderer.gammaOutput;
-    const toneMapping = this.renderer.toneMapping;
-    const toneMappingExposure = this.renderer.toneMappingExposure;
+    // Three.js bug: CubeCamera.d.ts constructor is not up to date with
+    // CubeCamera.js
+    let blurCamera = new (CubeCamera as any)(0.1, 100, cubeResolution, params);
+    const tempTexture = blurCamera.renderTarget.texture;
 
-    this.renderer.toneMapping = LinearToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.gammaOutput = false;
-
-    blurMaterial.uniforms.latitudinal.value = false;
-    blurMaterial.uniforms.tCube.value = cubeTarget.texture;
+    blurUniforms.latitudinal.value = false;
+    blurUniforms.tCube.value = cubeTexture;
+    blurUniforms.inputEncoding.value = encodings[cubeTexture.encoding];
+    blurUniforms.outputEncoding.value = encodings[tempTexture.encoding];
     blurCamera.update(this.renderer, blurScene);
 
-    blurMaterial.uniforms.latitudinal.value = true;
-    blurMaterial.uniforms.tCube.value = tempTarget.texture;
-    blurCamera.renderTarget = cubeTarget;
+    if (outputEncoding != null && outputEncoding === GammaEncoding &&
+        cubeTexture.encoding !== GammaEncoding) {
+      cubeTarget.dispose();
+      const outParams = {
+        encoding: outputEncoding,
+        generateMipmaps: true,
+        minFilter: LinearMipMapLinearFilter,
+        magFilter: LinearFilter
+      };
+      blurCamera = new (CubeCamera as any)(0.1, 100, cubeResolution, outParams);
+      cubeTarget = blurCamera.renderTarget;
+      blurUniforms.toneMappingFunction.value =
+          toneMappings[ACESFilmicToneMapping];
+    } else {
+      blurCamera.renderTarget = cubeTarget;
+    }
+
+    blurUniforms.latitudinal.value = true;
+    blurUniforms.tCube.value = tempTexture;
+    blurUniforms.inputEncoding.value = encodings[tempTexture.encoding];
+    blurUniforms.outputEncoding.value = encodings[cubeTarget.texture.encoding];
     blurCamera.update(this.renderer, blurScene);
 
-    this.renderer.toneMapping = toneMapping;
-    this.renderer.toneMappingExposure = toneMappingExposure;
-    this.renderer.gammaOutput = gammaOutput;
-
-    tempTarget.dispose();
-    blurMaterial.dispose();
+    tempTexture.dispose();
+    return cubeTarget;
   }
 
   /**

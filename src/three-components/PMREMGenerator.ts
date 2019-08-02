@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, LinearToneMapping, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
 import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chunk/common.glsl.js';
-import {texelConversions} from './shader-chunk/encodings_pars_framgment.glsl.js'
 
 /**
  * This class generates a Prefiltered, Mipmapped Radiance Environment Map
@@ -35,23 +34,8 @@ export const generatePMREM =
           renderer.properties.get(cubeUVRenderTarget.texture).__maxMipLevel =
               cubeLods.length;
 
-          const {gammaInput, gammaOutput, toneMapping, toneMappingExposure} =
-              renderer;
-          const currentRenderTarget = renderer.getRenderTarget();
-
-          renderer.toneMapping = LinearToneMapping;
-          renderer.toneMappingExposure = 1.0;
-          renderer.gammaInput = false;
-          renderer.gammaOutput = false;
-
           generateMipmaps(cubeTarget, cubeLods, renderer);
           packMipmaps(cubeUVRenderTarget, meshes, renderer);
-
-          renderer.setRenderTarget(currentRenderTarget);
-          renderer.toneMapping = toneMapping;
-          renderer.toneMappingExposure = toneMappingExposure;
-          renderer.gammaInput = gammaInput;
-          renderer.gammaOutput = gammaOutput;
 
           cubeLods.forEach((target) => {
             target.dispose();
@@ -217,27 +201,24 @@ varying vec2 vUv;
 varying vec3 vPosition;
 uniform float texelSize;
 uniform samplerCube envMap;
-uniform int inputEncoding;
-uniform int outputEncoding;
 ${getFaceChunk}
 ${getDirectionChunk}
-${texelConversions}
 ${texelIO}
 void main() {
   int face = getFace(vPosition);
   vec2 uv = vUv - 0.5 * texelSize;
   vec3 texelDir = getDirection(uv, face);
-  vec3 color = inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
+  vec3 color = inputTexelToLinear(textureCube(envMap, texelDir)).rgb;
   uv.x += texelSize;
   texelDir = getDirection(uv, face);
-  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
+  color += inputTexelToLinear(textureCube(envMap, texelDir)).rgb;
   uv.y += texelSize;
   texelDir = getDirection(uv, face);
-  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
+  color += inputTexelToLinear(textureCube(envMap, texelDir)).rgb;
   uv.x -= texelSize;
   texelDir = getDirection(uv, face);
-  color += inputTexelToLinear(textureCube(envMap, texelDir), inputEncoding).rgb;
-  gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0), outputEncoding);
+  color += inputTexelToLinear(textureCube(envMap, texelDir)).rgb;
+  gl_FragColor = linearToOutputTexel(vec4(color * 0.25, 1.0));
 }
 `,
 
@@ -281,11 +262,8 @@ precision mediump int;
 varying vec2 vUv;
 uniform float texelSize;
 uniform samplerCube envMap;
-uniform int inputEncoding;
-uniform int outputEncoding;
 uniform int faceIndex;
 ${getDirectionChunk}
-${texelConversions}
 ${texelIO}
 void main() {
     if ((vUv.x >= 0.0 && vUv.x <= 1.0) || (vUv.y >= 0.0 && vUv.y <= 1.0)) {
@@ -299,14 +277,14 @@ void main() {
       vec2 uv = vUv;
       uv.x += vUv.x < 0.0 ? texelSize : -texelSize;
       vec3 direction = getDirection(uv, faceIndex);
-      vec3 color = inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
+      vec3 color = inputTexelToLinear(textureCube(envMap, direction)).rgb;
       uv.y += vUv.y < 0.0 ? texelSize : -texelSize;
       direction = getDirection(uv, faceIndex);
-      color += inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
+      color += inputTexelToLinear(textureCube(envMap, direction)).rgb;
       uv.x = vUv.x;
       direction = getDirection(uv, faceIndex);
-      color += inputTexelToLinear(textureCube(envMap, direction), inputEncoding).rgb;
-      gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0), outputEncoding);
+      color += inputTexelToLinear(textureCube(envMap, direction)).rgb;
+      gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
     }
 }
 `,
