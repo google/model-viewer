@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {Texture, WebGLRenderer} from 'three';
+import {Cache, Texture, WebGLRenderer} from 'three';
 
 import TextureUtils, {EnvironmentMapAndSkybox} from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
-
 
 
 const expect = chai.expect;
@@ -29,22 +28,35 @@ const EQUI_URL = assetPath('spruit_sunrise_2k.jpg');
 const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
 
 suite('TextureUtils', () => {
+  let renderer: WebGLRenderer;
+
+  suiteSetup(() => {
+    // The renderer can retain state, so these tests have the possibility of
+    // getting different results in different orders. However, our use of the
+    // renderer *should* always return its state to what it was before to avoid
+    // this kind of problem (and many other headaches).
+    renderer = new WebGLRenderer({canvas});
+    renderer.debug.checkShaderErrors = true;
+  });
+
+  suiteTeardown(() => {
+    // Ensure we free up memory from loading large environment maps:
+    Cache.clear();
+    renderer.dispose();
+  });
+
   let textureUtils: TextureUtils;
-  // The renderer can retain state, so these tests have the possibility of
-  // getting different results in different orders. However, our use of the
-  // renderer *should* always return its state to what it was before to avoid
-  // this kind of problem (and many other headaches).
-  const renderer = new WebGLRenderer({canvas});
-  renderer.debug.checkShaderErrors = true;
 
   setup(() => {
     // NOTE(cdata): We need to lower the samples here or else tests that use
     // PMREM have a tendency to time out on iOS Simulator
     textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
   });
-  teardown(() => {
-    textureUtils.dispose();
+
+  teardown(async () => {
+    await textureUtils.dispose();
   });
+
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
@@ -91,6 +103,7 @@ suite('TextureUtils', () => {
       expect(
           textureMatchesMeta(target.texture, {mapping: 'Cube', url: EQUI_URL}))
           .to.be.ok;
+      target.texture.dispose();
     });
     test('throws on invalid texture', async () => {
       try {

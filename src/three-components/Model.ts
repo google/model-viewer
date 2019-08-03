@@ -15,9 +15,11 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
 
-import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {moveChildren} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
+const $currentScene = Symbol('currentScene');
 
 
 /**
@@ -27,6 +29,7 @@ const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
  * @extends THREE.Object3D
  */
 export default class Model extends Object3D {
+  private[$currentScene]: CacheRetainedScene|null = null;
   private loader = new CachingGLTFLoader();
   private mixer: AnimationMixer = new AnimationMixer(null);
   private[$cancelPendingSourceChange]: (() => void)|null;
@@ -167,9 +170,10 @@ export default class Model extends Object3D {
     }
 
     this.clear();
+    this[$currentScene] = scene as CacheRetainedScene;
 
-    while (scene != null && scene.children.length) {
-      this.modelContainer.add(scene.children.shift()!);
+    if (scene != null) {
+      moveChildren(scene, this.modelContainer);
     }
 
     this.modelContainer.traverse(obj => {
@@ -177,6 +181,7 @@ export default class Model extends Object3D {
         obj.castShadow = true;
       }
     });
+
 
     const animations = scene ? scene.userData.animations : [];
     const animationsByName = new Map();
@@ -275,8 +280,10 @@ export default class Model extends Object3D {
     this.url = null;
     this.userData = {url: null};
     // Remove all current children
-    while (this.modelContainer.children.length) {
-      this.modelContainer.remove(this.modelContainer.children[0]);
+    if (this[$currentScene] != null) {
+      moveChildren(this.modelContainer, this[$currentScene]!);
+      this[$currentScene]![$releaseFromCache]();
+      this[$currentScene] = null;
     }
 
     if (this.currentAnimationAction != null) {

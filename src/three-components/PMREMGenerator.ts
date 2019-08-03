@@ -56,6 +56,10 @@ export const generatePMREM =
           cubeLods.forEach((target) => {
             target.dispose();
           });
+          meshes.forEach((mesh) => {
+            (mesh.material as Material).dispose();
+            mesh.geometry.dispose();
+          });
 
           return cubeUVRenderTarget;
         };
