@@ -424,18 +424,26 @@ void main() {
 
   async dispose() {
     for (const environmentMapLoads of this[$environmentMapCache].values()) {
-      const environmentMap = await environmentMapLoads;
-      if (environmentMap != null) {
-        environmentMap.dispose();
+      try {
+        const environmentMap = await environmentMapLoads;
+        if (environmentMap != null) {
+          environmentMap.dispose();
+        }
+      } catch (e) {
+        // Suppress errors
       }
     }
 
     this[$environmentMapCache].clear();
 
     for (const skyboxLoads of this[$skyboxCache].values()) {
-      const skybox = await skyboxLoads;
-      if (skybox != null) {
-        skybox.dispose();
+      try {
+        const skybox = await skyboxLoads;
+        if (skybox != null) {
+          skybox.dispose();
+        }
+      } catch (e) {
+        // Suppress errors
       }
     }
 

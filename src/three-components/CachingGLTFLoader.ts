@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import {Material, Shader} from 'three';
+import {Scene} from 'three';
+import {Mesh} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
+
 import {cloneGltf, Gltf} from './ModelUtils.js';
-import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js';
+
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -32,22 +34,62 @@ export const loadWithLoader =
       return new Promise<Gltf>((resolve, reject) => {
         loader.load(url, resolve, onProgress, reject);
       });
-    }
+    };
+
+export const $releaseFromCache = Symbol('releaseFromCache');
+export interface CacheRetainedScene extends Scene {
+  [$releaseFromCache]: () => void;
+}
 
 const cache = new Map<string, Promise<Gltf>>();
 const preloaded = new Map<string, boolean>();
 
+export const $evictionPolicy = Symbol('evictionPolicy');
+
 export class CachingGLTFLoader {
+  static[$evictionPolicy]: CacheEvictionPolicy =
+      new CacheEvictionPolicy(CachingGLTFLoader);
+
   static get cache() {
     return cache;
   }
+
   static clearCache() {
-    cache.clear();
-    preloaded.clear();
+    for (const url of cache.keys()) {
+      this.delete(url);
+    }
+    this[$evictionPolicy].reset();
   }
 
   static has(url: string) {
     return cache.has(url);
+  }
+
+  static async delete(url: string) {
+    if (!this.has(url)) {
+      return;
+    }
+
+    const gltfLoads = cache.get(url);
+    preloaded.delete(url);
+    cache.delete(url);
+
+    const gltf = await gltfLoads;
+    // Dispose of the cached glTF's materials and geometries:
+    gltf!.scenes.forEach(scene => {
+      scene.traverse(object3D => {
+        if (!(object3D as Mesh).isMesh) {
+          return;
+        }
+        const mesh = object3D as Mesh;
+        const materials =
+            Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(material => {
+          material.dispose();
+        });
+        mesh.geometry.dispose();
+      });
+    });
   }
 
   /**
@@ -59,6 +101,10 @@ export class CachingGLTFLoader {
   }
 
   protected loader: GLTFLoader = new GLTFLoader();
+
+  protected get[$evictionPolicy](): CacheEvictionPolicy {
+    return (this.constructor as typeof CachingGLTFLoader)[$evictionPolicy];
+  }
 
   /**
    * Preloads a glTF, populating the cache. Returns a promise that resolves
@@ -85,7 +131,8 @@ export class CachingGLTFLoader {
    * glTF. If the glTF has already been loaded, makes a clone of the cached
    * copy.
    */
-  async load(url: string, progressCallback: ProgressCallback = () => {}) {
+  async load(url: string, progressCallback: ProgressCallback = () => {}):
+      Promise<CacheRetainedScene|null> {
     await this.preload(url, progressCallback);
 
     const gltf = cloneGltf(await cache.get(url)!);
@@ -94,28 +141,42 @@ export class CachingGLTFLoader {
     if (model != null) {
       model.userData.animations = gltf.animations;  // save animations
 
-      // This is a patch to three's handling of PMREM environments. This patch
-      // has to be applied after cloning because three does not seem to clone
-      // the onBeforeCompile method.
-      const updateShader = (shader: Shader) => {
-        shader.fragmentShader =
-            shader.fragmentShader
-                .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-                .replace(
-                    '#include <envmap_physical_pars_fragment>', envmapChunk);
-      };
+      this[$evictionPolicy].retain(url);
 
-      model.traverse((node: any) => {
-        if (Array.isArray(node.material)) {
-          (node.material as Array<Material>).forEach(material => {
-            material.onBeforeCompile = updateShader;
-          });
-        } else if (node.material != null) {
-          node.material.onBeforeCompile = updateShader;
-        }
+      Object.defineProperty(model, $releaseFromCache, {
+        value: (() => {
+          let released = false;
+          return () => {
+            if (released) {
+              return;
+            }
+
+            // We manually dispose cloned materials because Three.js keeps
+            // an internal count of materials using the same program, so it's
+            // safe to dispose of them incrementally. Geometry clones are not
+            // accounted for, so they cannot be disposed of incrementally.
+            model.traverse((object3D) => {
+              if (!(object3D as Mesh).isMesh) {
+                return;
+              }
+              const mesh = object3D as Mesh;
+              const materials = Array.isArray(mesh.material) ? mesh.material :
+                                                               [mesh.material];
+              materials.forEach(material => {
+                material.dispose();
+              });
+            });
+
+            this[$evictionPolicy].release(url);
+            released = true;
+          };
+        })()
       });
     }
 
-    return model;
+    return model as CacheRetainedScene | null;
   }
 }
+
+(self as any).CachingGLTFLoader = CachingGLTFLoader;
+(self as any).$evictionPolicy = $evictionPolicy

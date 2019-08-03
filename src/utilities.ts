@@ -22,7 +22,7 @@ export {
 
 export type Constructor<T = object> = {
   new (...args: any[]): T,
-  prototype: T
+  prototype: T,
 };
 
 export const deserializeUrl = (url: string|null): string|null =>

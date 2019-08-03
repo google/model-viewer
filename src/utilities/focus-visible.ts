@@ -14,11 +14,14 @@
  */
 import {Constructor} from '../utilities.js';
 
-export interface OptionalConnnectedCallback {
+export interface OptionalLifecycleCallbacks {
   connectedCallback?(): void;
+  disconnectedCallback?(): void;
 }
 
-export type MixableBaseClass = HTMLElement&OptionalConnnectedCallback;
+export type MixableBaseClass = HTMLElement&OptionalLifecycleCallbacks;
+
+type EndPolyfillCoordinationCallback = () => void;
 
 /**
  * This mixin function is designed to be applied to a class that inherits
@@ -34,39 +37,67 @@ export type MixableBaseClass = HTMLElement&OptionalConnnectedCallback;
  */
 export const FocusVisiblePolyfillMixin =
     <T extends Constructor<MixableBaseClass>>(SuperClass: T): T => {
-      var coordinateWithPolyfill = function(instance: MixableBaseClass) {
-        // If there is no shadow root, there is no need to coordinate with
-        // the polyfill. If we already coordinated with the polyfill, we can
-        // skip subsequent invokcations:
-        if (instance.shadowRoot == null ||
-            instance.hasAttribute('data-js-focus-visible')) {
-          return;
-        }
+      const coordinateWithPolyfill =
+          (instance: MixableBaseClass): EndPolyfillCoordinationCallback => {
+            // If there is no shadow root, there is no need to coordinate with
+            // the polyfill. If we already coordinated with the polyfill, we can
+            // skip subsequent invokcations:
+            if (instance.shadowRoot == null ||
+                instance.hasAttribute('data-js-focus-visible')) {
+              return () => {};
+            }
 
-        // The polyfill might already be loaded. If so, we can apply it to
-        // the shadow root immediately:
-        if ((self as any).applyFocusVisiblePolyfill) {
-          (self as any).applyFocusVisiblePolyfill(instance.shadowRoot);
-        } else {
-          // Otherwise, wait for the polyfill to be loaded lazily. It might
-          // never be loaded, but if it is then we can apply it to the
-          // shadow root at the appropriate time by waiting for the ready
-          // event:
-          self.addEventListener('focus-visible-polyfill-ready', function() {
-            (self as any).applyFocusVisiblePolyfill(instance.shadowRoot);
-          }, {once: true});
-        }
-      };
+            // The polyfill might already be loaded. If so, we can apply it to
+            // the shadow root immediately:
+            if ((self as any).applyFocusVisiblePolyfill) {
+              (self as any).applyFocusVisiblePolyfill(instance.shadowRoot);
+            } else {
+              const coordinationHandler = () => {
+                (self as any).applyFocusVisiblePolyfill(instance.shadowRoot);
+              };
+              // Otherwise, wait for the polyfill to be loaded lazily. It might
+              // never be loaded, but if it is then we can apply it to the
+              // shadow root at the appropriate time by waiting for the ready
+              // event:
+              self.addEventListener(
+                  'focus-visible-polyfill-ready',
+                  coordinationHandler,
+                  {once: true});
+
+              return () => {
+                self.removeEventListener(
+                    'focus-visible-polyfill-ready', coordinationHandler);
+              };
+            }
+
+            return () => {};
+          };
+
+      const $endPolyfillCoordination = Symbol('endPolyfillCoordination');
 
       // IE11 doesn't natively support custom elements or JavaScript class
       // syntax The mixin implementation assumes that the user will take the
       // appropriate steps to support both:
       class FocusVisibleCoordinator extends SuperClass {
+        private[$endPolyfillCoordination]: EndPolyfillCoordinationCallback|
+            null = null;
         // Attempt to coordinate with the polyfill when connected to the
         // document:
         connectedCallback() {
           super.connectedCallback && super.connectedCallback();
-          coordinateWithPolyfill(this);
+          if (this[$endPolyfillCoordination] == null) {
+            this[$endPolyfillCoordination] = coordinateWithPolyfill(this);
+          }
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback && super.disconnectedCallback();
+          // It's important to remove the polyfill event listener when we
+          // disconnect, otherwise we will leak the whole element via window:
+          if (this[$endPolyfillCoordination] != null) {
+            this[$endPolyfillCoordination]!();
+            this[$endPolyfillCoordination] = null;
+          }
         }
       };
 
