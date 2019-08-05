@@ -64,11 +64,19 @@ suite('Renderer', () => {
     renderer = scene.renderer;
   });
 
+  teardown(() => {
+    renderer.unregisterScene(scene);
+  });
+
   suite('render', () => {
     let otherScene: ModelScene&TestScene;
 
     setup(() => {
       otherScene = createScene();
+    });
+
+    teardown(() => {
+      renderer.unregisterScene(otherScene);
     });
 
     test('renders only dirty scenes', async function() {
