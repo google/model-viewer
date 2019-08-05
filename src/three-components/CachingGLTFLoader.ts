@@ -143,35 +143,33 @@ export class CachingGLTFLoader {
 
       this[$evictionPolicy].retain(url);
 
-      Object.defineProperty(model, $releaseFromCache, {
-        value: (() => {
-          let released = false;
-          return () => {
-            if (released) {
+      (model as CacheRetainedScene)[$releaseFromCache] = (() => {
+        let released = false;
+        return () => {
+          if (released) {
+            return;
+          }
+
+          // We manually dispose cloned materials because Three.js keeps
+          // an internal count of materials using the same program, so it's
+          // safe to dispose of them incrementally. Geometry clones are not
+          // accounted for, so they cannot be disposed of incrementally.
+          model.traverse((object3D) => {
+            if (!(object3D as Mesh).isMesh) {
               return;
             }
-
-            // We manually dispose cloned materials because Three.js keeps
-            // an internal count of materials using the same program, so it's
-            // safe to dispose of them incrementally. Geometry clones are not
-            // accounted for, so they cannot be disposed of incrementally.
-            model.traverse((object3D) => {
-              if (!(object3D as Mesh).isMesh) {
-                return;
-              }
-              const mesh = object3D as Mesh;
-              const materials = Array.isArray(mesh.material) ? mesh.material :
-                                                               [mesh.material];
-              materials.forEach(material => {
-                material.dispose();
-              });
+            const mesh = object3D as Mesh;
+            const materials =
+                Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            materials.forEach(material => {
+              material.dispose();
             });
+          });
 
-            this[$evictionPolicy].release(url);
-            released = true;
-          };
-        })()
-      });
+          this[$evictionPolicy].release(url);
+          released = true;
+        };
+      })();
     }
 
     return model as CacheRetainedScene | null;
