@@ -55,9 +55,9 @@ export class CachingGLTFLoader {
   }
 
   static clearCache() {
-    for (const url of cache.keys()) {
+    cache.forEach((_value, url) => {
       this.delete(url);
-    }
+    });
     this[$evictionPolicy].reset();
   }
 
