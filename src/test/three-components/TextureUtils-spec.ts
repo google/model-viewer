@@ -15,7 +15,7 @@
 
 import {Cache, Texture, WebGLRenderer} from 'three';
 
-import TextureUtils, {EnvironmentMapAndSkybox} from '../../three-components/TextureUtils.js';
+import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
 
 
@@ -24,8 +24,8 @@ const expect = chai.expect;
 // Reuse the same canvas as to not stress the WebGL
 // context limit
 const canvas = document.createElement('canvas');
-const EQUI_URL = assetPath('spruit_sunrise_2k.jpg');
-const HDR_EQUI_URL = assetPath('spruit_sunrise_2k.hdr');
+const EQUI_URL = assetPath('small_hangar_01_1k.jpg');
+const HDR_EQUI_URL = assetPath('pillars_1k.hdr');
 
 suite('TextureUtils', () => {
   let renderer: WebGLRenderer;
@@ -116,14 +116,9 @@ suite('TextureUtils', () => {
   });
 
   suite('generating an environment map and skybox', () => {
-    let textures: EnvironmentMapAndSkybox;
-    teardown(() => {
-      textures.environmentMap.dispose();
-      textures.skybox!.dispose();
-    });
-
     test('returns an environmentMap and skybox texture from url', async () => {
-      textures = await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
+      const textures =
+          await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
       expect((textures.skybox!.texture as any).isTexture).to.be.ok;
       expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
 
@@ -140,7 +135,7 @@ suite('TextureUtils', () => {
     test(
         'returns an environmentMap and skybox texture from an HDR url',
         async () => {
-          textures =
+          const textures =
               await textureUtils.generateEnvironmentMapAndSkybox(HDR_EQUI_URL);
           expect((textures.skybox!.texture as any).isTexture).to.be.ok;
           expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
@@ -159,7 +154,7 @@ suite('TextureUtils', () => {
     test(
         'returns an environmentMap and skybox texture from two urls',
         async () => {
-          textures = await textureUtils.generateEnvironmentMapAndSkybox(
+          const textures = await textureUtils.generateEnvironmentMapAndSkybox(
               EQUI_URL, HDR_EQUI_URL);
 
           expect((textures.skybox!.texture as any).isTexture).to.be.ok;
