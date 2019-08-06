@@ -38,9 +38,7 @@ suite('TextureUtils', () => {
   renderer.debug.checkShaderErrors = true;
 
   setup(() => {
-    // NOTE(cdata): We need to lower the samples here or else tests that use
-    // PMREM have a tendency to time out on iOS Simulator
-    textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
+    textureUtils = new TextureUtils(renderer);
   });
   teardown(() => {
     textureUtils.dispose();

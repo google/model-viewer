@@ -1,7 +1,6 @@
 import {ACESFilmicToneMapping, CineonToneMapping, GammaEncoding, LinearEncoding, LinearToneMapping, ReinhardToneMapping, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding, Uncharted2ToneMapping} from 'three';
 
 import {texelConversions} from './encodings_pars_framgment.glsl.js'
-import {toneMappingChunk} from './tonemapping_pars_fragment.glsl.js'
 
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
@@ -115,30 +114,4 @@ vec4 linearToOutputTexel(vec4 value){
         return LinearToGamma(value, 2.2);
     }
 }
-`;
-
-export const toneMappings = {
-  [LinearToneMapping]: 0,
-  [ReinhardToneMapping]: 1,
-  [Uncharted2ToneMapping]: 2,
-  [CineonToneMapping]: 3,
-  [ACESFilmicToneMapping]: 4
-};
-
-export const toneMap = /* glsl */ `
-${toneMappingChunk}
-uniform int toneMappingFunction;
-  vec3 toneMapping(vec3 value){
-      if(toneMappingFunction == 0){
-          return LinearToneMapping(value);
-      }else if(toneMappingFunction == 1){
-          return ReinhardToneMapping(value);
-      }else if(toneMappingFunction == 2){
-          return Uncharted2ToneMapping(value);
-      }else if(toneMappingFunction == 3){
-          return OptimizedCineonToneMapping(value);
-      }else{
-          return ACESFilmicToneMapping(value);
-      }
-  }
 `;

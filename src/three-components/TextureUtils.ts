@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearFilter, LinearMipMapLinearFilter, LinearToneMapping, Mesh, NearestFilter, RawShaderMaterial, RGBEEncoding, Scene, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearFilter, LinearMipMapLinearFilter, Mesh, NearestFilter, RawShaderMaterial, RGBEEncoding, Scene, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 import {LinearEncoding} from 'three';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
@@ -22,7 +22,7 @@ import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 import {generatePMREM} from './PMREMGenerator.js';
-import {encodings, texelIO, toneMap, toneMappings} from './shader-chunk/common.glsl.js';
+import {encodings, texelIO} from './shader-chunk/common.glsl.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
@@ -40,6 +40,7 @@ Cache.enabled = true;
 const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
+const cubemapSize = 256;
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
@@ -50,15 +51,6 @@ const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
 const $loadEnvironmentMapFromSkyboxUrl =
     Symbol('loadEnvironmentMapFromSkyboxUrl');
 const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
-
-export interface TextureUtilsConfig {
-  cubemapSize?: number;
-  pmremSamples?: number;
-}
-
-const defaultConfig: TextureUtilsConfig = {
-  cubemapSize: 512,
-};
 
 // Attach a `userData` object for arbitrary data on textures that
 // originate from TextureUtils, similar to Object3D's userData,
@@ -71,7 +63,6 @@ const userData = {
 };
 
 export default class TextureUtils extends EventDispatcher {
-  private config: TextureUtilsConfig;
   private renderer: WebGLRenderer;
 
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
@@ -79,9 +70,8 @@ export default class TextureUtils extends EventDispatcher {
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
   private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
-  constructor(renderer: WebGLRenderer, config: TextureUtilsConfig = {}) {
+  constructor(renderer: WebGLRenderer) {
     super();
-    this.config = {...defaultConfig, ...config};
     this.renderer = renderer;
   }
 
@@ -89,7 +79,7 @@ export default class TextureUtils extends EventDispatcher {
     const generator = new CubemapGenerator(this.renderer);
 
     let target = generator.fromEquirectangular(texture, {
-      resolution: this.config.cubemapSize,
+      resolution: cubemapSize,
     });
 
     (target.texture as any).userData = {
@@ -198,7 +188,7 @@ export default class TextureUtils extends EventDispatcher {
           await Promise.all([environmentMapLoads, skyboxLoads]);
 
       if (skybox != null) {
-        skybox = this.gaussianBlur(skybox, 0.01, GammaEncoding);
+        skybox = this.gaussianBlur(skybox, 0.004, GammaEncoding);
       }
 
       return {environmentMap, skybox};
@@ -325,9 +315,7 @@ export default class TextureUtils extends EventDispatcher {
         dTheta:
             {value: standardDeviationRadians * standardDeviations / (n - 1)},
         inputEncoding: {value: encodings[LinearEncoding]},
-        outputEncoding: {value: encodings[LinearEncoding]},
-        toneMappingFunction: {value: toneMappings[LinearToneMapping]},
-        toneMappingExposure: {value: 1}
+        outputEncoding: {value: encodings[LinearEncoding]}
       },
       vertexShader: `
 precision mediump float;
@@ -351,7 +339,6 @@ uniform samplerCube tCube;
 uniform bool latitudinal;
 uniform float dTheta;
 ${texelIO}
-${toneMap}
 void main() {
   vec4 texColor = vec4(0.0);
   for (int i = 0; i < n; i++) {
@@ -377,7 +364,6 @@ void main() {
     }
   }
   gl_FragColor = texColor;
-  gl_FragColor.rgb = toneMapping( gl_FragColor.rgb );
   gl_FragColor = linearToOutputTexel(gl_FragColor);
 }
       `,
@@ -430,8 +416,6 @@ void main() {
           mapping: 'Cube',
         })
       };
-      blurUniforms.toneMappingFunction.value =
-          toneMappings[ACESFilmicToneMapping];
     } else {
       blurCamera.renderTarget = cubeTarget;
     }

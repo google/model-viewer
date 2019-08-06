@@ -91,9 +91,7 @@ export default class Renderer extends EventDispatcher {
     }
 
     this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
-    this.textureUtils = this.canRender ?
-        new TextureUtils(this.renderer, {pmremSamples: 128}) :
-        null;
+    this.textureUtils = this.canRender ? new TextureUtils(this.renderer) : null;
 
     this.setRendererSize(1, 1);
     this.lastTick = performance.now();
