@@ -14,6 +14,7 @@
  */
 
 import {ACESFilmicToneMapping, BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearFilter, LinearMipMapLinearFilter, LinearToneMapping, Mesh, NearestFilter, RawShaderMaterial, RGBEEncoding, Scene, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
+import {LinearEncoding} from 'three';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
@@ -308,6 +309,7 @@ export default class TextureUtils extends EventDispatcher {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * cubeResolution * 4 /
         Math.PI);
+    console.log('number of samples ', n);
     const inverseIntegral =
         standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
     let weights = [];
@@ -323,8 +325,8 @@ export default class TextureUtils extends EventDispatcher {
         weights: {value: weights},
         dTheta:
             {value: standardDeviationRadians * standardDeviations / (n - 1)},
-        inputEncoding: {value: 2},
-        outputEncoding: {value: 2},
+        inputEncoding: {value: encodings[LinearEncoding]},
+        outputEncoding: {value: encodings[LinearEncoding]},
         toneMappingFunction: {value: toneMappings[LinearToneMapping]},
         toneMappingExposure: {value: 1}
       },
