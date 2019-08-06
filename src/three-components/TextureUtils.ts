@@ -56,7 +56,7 @@ export interface TextureUtilsConfig {
 }
 
 const defaultConfig: TextureUtilsConfig = {
-  cubemapSize: 1024,
+  cubemapSize: 512,
 };
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -306,7 +306,7 @@ export default class TextureUtils extends EventDispatcher {
     const cubeResolution = cubeTarget.width;
     const standardDeviations = 3;
     const n = Math.ceil(
-        standardDeviations * standardDeviationRadians * cubeResolution * 2 /
+        standardDeviations * standardDeviationRadians * cubeResolution * 4 /
         Math.PI);
     const inverseIntegral =
         standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
