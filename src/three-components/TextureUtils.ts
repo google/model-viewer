@@ -309,7 +309,6 @@ export default class TextureUtils extends EventDispatcher {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * cubeResolution * 4 /
         Math.PI);
-    console.log('number of samples ', n);
     const inverseIntegral =
         standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
     let weights = [];
@@ -422,6 +421,15 @@ void main() {
       };
       blurCamera = new (CubeCamera as any)(0.1, 100, cubeResolution, outParams);
       cubeTarget = blurCamera.renderTarget;
+      (cubeTarget.texture as any).userData = {
+        ...userData,
+        ...({
+          url: (cubeTexture as any).userData ?
+              (cubeTexture as any).userData.url :
+              null,
+          mapping: 'Cube',
+        })
+      };
       blurUniforms.toneMappingFunction.value =
           toneMappings[ACESFilmicToneMapping];
     } else {
