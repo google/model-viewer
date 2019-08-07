@@ -47,26 +47,9 @@ export const IS_MOBILE = (() => {
   return check;
 })();
 
-export const HAS_OFFSCREENCANVAS = (() => {
-  try {
-    new OffscreenCanvas(0, 0).getContext('webgl');
-    return true;
-  } catch (ex) {
-    return false;
-  }
-})();
-
-export const OFFSCREENCANVAS_SUPPORT_BITMAP = (() => {
-  try {
-    let offscreenCanvas = new OffscreenCanvas(1, 1);
-    offscreenCanvas.getContext('webgl');
-    offscreenCanvas.transferToImageBitmap();
-    return true;
-  } catch (ex) {
-    return false;
-  }
-})();
-
+export const HAS_OFFSCREENCANVAS = Boolean((self as any).OffscreenCanvas);
+export const OFFSCREENCANVAS_SUPPORT_BITMAP = Boolean((self as any).OffscreenCanvas) && 
+    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap);
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
