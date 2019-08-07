@@ -40,7 +40,7 @@ Cache.enabled = true;
 const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
-const cubemapSize = 256;
+const CUBEMAP_SIZE = 256;
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
@@ -79,7 +79,7 @@ export default class TextureUtils extends EventDispatcher {
     const generator = new CubemapGenerator(this.renderer);
 
     let target = generator.fromEquirectangular(texture, {
-      resolution: cubemapSize,
+      resolution: CUBEMAP_SIZE,
     });
 
     (target.texture as any).userData = {
@@ -288,7 +288,7 @@ export default class TextureUtils extends EventDispatcher {
   gaussianBlur(
       cubeTarget: WebGLRenderTargetCube,
       standardDeviationRadians: number = 0.04,
-      outputEncoding: TextureEncoding|null = null): WebGLRenderTargetCube {
+      outputEncoding?: TextureEncoding): WebGLRenderTargetCube {
     const blurScene = new Scene();
 
     const geometry = new BoxBufferGeometry();
@@ -376,7 +376,7 @@ void main() {
     const blurUniforms = blurMaterial.uniforms;
 
     const cubeTexture = cubeTarget.texture;
-    const params = {
+    const blurTargetOptions = {
       type: cubeTexture.type,
       format: cubeTexture.format,
       encoding: cubeTexture.encoding,
@@ -387,7 +387,8 @@ void main() {
 
     // Three.js bug: CubeCamera.d.ts constructor is not up to date with
     // CubeCamera.js
-    let blurCamera = new (CubeCamera as any)(0.1, 100, cubeResolution, params);
+    let blurCamera =
+        new (CubeCamera as any)(0.1, 100, cubeResolution, blurTargetOptions);
     const tempTexture = blurCamera.renderTarget.texture;
 
     blurUniforms.latitudinal.value = false;
@@ -396,16 +397,17 @@ void main() {
     blurUniforms.outputEncoding.value = encodings[tempTexture.encoding];
     blurCamera.update(this.renderer, blurScene);
 
-    if (outputEncoding != null && outputEncoding === GammaEncoding &&
+    if (outputEncoding === GammaEncoding &&
         cubeTexture.encoding !== GammaEncoding) {
       cubeTarget.dispose();
-      const outParams = {
+      const outputTargetOptions = {
         encoding: outputEncoding,
         generateMipmaps: true,
         minFilter: LinearMipMapLinearFilter,
         magFilter: LinearFilter
       };
-      blurCamera = new (CubeCamera as any)(0.1, 100, cubeResolution, outParams);
+      blurCamera = new (CubeCamera as any)(
+          0.1, 100, cubeResolution, outputTargetOptions);
       cubeTarget = blurCamera.renderTarget;
       (cubeTarget.texture as any).userData = {
         ...userData,
