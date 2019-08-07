@@ -104,6 +104,10 @@ const $arMode = Symbol('arMode');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
+const $arButtonContainerFallbackClickHandler =
+    Symbol('arButtonContainerFallbackClickHandler');
+const $onARButtonContainerFallbackClick =
+    Symbol('onARButtonContainerFallbackClick');
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 
@@ -157,6 +161,16 @@ export const ARMixin = (ModelViewerElement:
             this.shadowRoot!.querySelector('#default-exit-fullscreen-button') as
             HTMLElement;
 
+        // NOTE(cdata): We use a second, separate "fallback" click handler in
+        // order to work around a regression in how Chrome on Android behaves
+        // when requesting fullscreen at the same time as triggering an intent.
+        // As of m76, intents could no longer be triggered successfully if they
+        // were dispatched in the same handler as the fullscreen request. The
+        // workaround is to split both effects into their own event handlers.
+        // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
+        protected[$arButtonContainerFallbackClickHandler] = (event: Event) =>
+            this[$onARButtonContainerFallbackClick](event);
+
         protected[$arButtonContainerClickHandler]: (event: Event) => void =
             (event) => this[$onARButtonContainerClick](event);
 
@@ -185,7 +199,6 @@ export const ARMixin = (ModelViewerElement:
               await this[$enterARWithWebXR]();
               break;
             case ARMode.AR_VIEWER:
-              this.requestFullscreen();
               openARViewer(this.src!, this.alt || '');
               break;
             default:
@@ -300,16 +313,31 @@ configuration or device capabilities');
 
           if (showArButton) {
             this[$arButtonContainer].classList.add('enabled');
+            // NOTE(cdata): The order of the two click handlers on the "ar
+            // button container" is important, vital to the workaround described
+            // earlier in this file. Reversing their order will cause our Scene
+            // Viewer integration to break.
+            // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
             this[$arButtonContainer].addEventListener(
                 'click', this[$arButtonContainerClickHandler]);
+            this[$arButtonContainer].addEventListener(
+                'click', this[$arButtonContainerFallbackClickHandler]);
             this[$exitFullscreenButtonContainer].addEventListener(
                 'click', this[$exitFullscreenButtonContainerClickHandler]);
           } else {
             this[$arButtonContainer].removeEventListener(
                 'click', this[$arButtonContainerClickHandler]);
+            this[$arButtonContainer].removeEventListener(
+                'click', this[$arButtonContainerFallbackClickHandler]);
             this[$exitFullscreenButtonContainer].removeEventListener(
                 'click', this[$exitFullscreenButtonContainerClickHandler]);
             this[$arButtonContainer].classList.remove('enabled');
+          }
+        }
+
+        [$onARButtonContainerFallbackClick](_event: Event) {
+          if (this[$arMode] === ARMode.AR_VIEWER) {
+            this.requestFullscreen();
           }
         }
 
