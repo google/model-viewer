@@ -161,6 +161,13 @@ export const ARMixin = (ModelViewerElement:
             this.shadowRoot!.querySelector('#default-exit-fullscreen-button') as
             HTMLElement;
 
+        // NOTE(cdata): We use a second, separate "fallback" click handler in
+        // order to work around a regression in how Chrome on Android behaves
+        // when requesting fullscreen at the same time as triggering an intent.
+        // As of m76, intents could no longer be triggered successfully if they
+        // were dispatched in the same handler as the fullscreen request. The
+        // workaround is to split both effects into their own event handlers.
+        // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
         protected[$arButtonContainerFallbackClickHandler] = (event: Event) =>
             this[$onARButtonContainerFallbackClick](event);
 
