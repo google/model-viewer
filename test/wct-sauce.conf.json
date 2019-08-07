@@ -52,6 +52,14 @@
           "platformVersion": "12.0",
           "deviceName": "iPhone XR Simulator",
           "deviceOrientation": "portrait"
+        },
+        {
+          "browserName": "Chrome",
+          "appiumVersion": "1.9.1",
+          "platformName": "Android",
+          "platformVersion": "7.1",
+          "deviceName": "Android GoogleAPI Emulator",
+          "deviceOrientation": "portrait"
         }
       ]
     }
