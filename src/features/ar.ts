@@ -104,6 +104,10 @@ const $arMode = Symbol('arMode');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
+const $arButtonContainerFallbackClickHandler =
+    Symbol('arButtonContainerFallbackClickHandler');
+const $onARButtonContainerFallbackClick =
+    Symbol('onARButtonContainerFallbackClick');
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 
@@ -157,6 +161,9 @@ export const ARMixin = (ModelViewerElement:
             this.shadowRoot!.querySelector('#default-exit-fullscreen-button') as
             HTMLElement;
 
+        protected[$arButtonContainerFallbackClickHandler] = (event: Event) =>
+            this[$onARButtonContainerFallbackClick](event);
+
         protected[$arButtonContainerClickHandler]: (event: Event) => void =
             (event) => this[$onARButtonContainerClick](event);
 
@@ -185,7 +192,6 @@ export const ARMixin = (ModelViewerElement:
               await this[$enterARWithWebXR]();
               break;
             case ARMode.AR_VIEWER:
-              this.requestFullscreen();
               openARViewer(this.src!, this.alt || '');
               break;
             default:
@@ -302,14 +308,24 @@ configuration or device capabilities');
             this[$arButtonContainer].classList.add('enabled');
             this[$arButtonContainer].addEventListener(
                 'click', this[$arButtonContainerClickHandler]);
+            this[$arButtonContainer].addEventListener(
+                'click', this[$arButtonContainerFallbackClickHandler]);
             this[$exitFullscreenButtonContainer].addEventListener(
                 'click', this[$exitFullscreenButtonContainerClickHandler]);
           } else {
             this[$arButtonContainer].removeEventListener(
                 'click', this[$arButtonContainerClickHandler]);
+            this[$arButtonContainer].removeEventListener(
+                'click', this[$arButtonContainerFallbackClickHandler]);
             this[$exitFullscreenButtonContainer].removeEventListener(
                 'click', this[$exitFullscreenButtonContainerClickHandler]);
             this[$arButtonContainer].classList.remove('enabled');
+          }
+        }
+
+        [$onARButtonContainerFallbackClick](_event: Event) {
+          if (this[$arMode] === ARMode.AR_VIEWER) {
+            this.requestFullscreen();
           }
         }
 
