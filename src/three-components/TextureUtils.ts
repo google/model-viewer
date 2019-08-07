@@ -15,6 +15,8 @@
 
 import {BackSide, BoxBufferGeometry, Cache, CubeCamera, DataTextureLoader, EventDispatcher, GammaEncoding, LinearFilter, LinearMipMapLinearFilter, Mesh, NearestFilter, RawShaderMaterial, RGBEEncoding, Scene, Texture, TextureEncoding, TextureLoader, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 import {LinearEncoding} from 'three';
+import {UnsignedByteType} from 'three';
+import {RGBFormat} from 'three';
 
 import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenerator.js';
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
@@ -41,6 +43,8 @@ const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 const CUBEMAP_SIZE = 256;
+const GENERATED_BLUR = 0.04;
+const SKYBOX_BLUR = 0.004;
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $skyboxCache = Symbol('skyboxCache');
@@ -184,12 +188,12 @@ export default class TextureUtils extends EventDispatcher {
         environmentMapLoads = this[$loadGeneratedEnvironmentMap]();
       }
 
-      let [environmentMap, skybox] =
+      let [environmentMap, rawSkybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
 
-      if (skybox != null) {
-        skybox = this.gaussianBlur(skybox, 0.004, GammaEncoding);
-      }
+      const skybox = rawSkybox == null ?
+          null :
+          this.gaussianBlur(rawSkybox, SKYBOX_BLUR, GammaEncoding);
 
       return {environmentMap, skybox};
     } finally {
@@ -267,18 +271,18 @@ export default class TextureUtils extends EventDispatcher {
     if (this[$generatedEnvironmentMap] == null) {
       const environmentMapGenerator =
           new EnvironmentMapGenerator(this.renderer);
-      let interstitialEnvironmentMap = environmentMapGenerator.generate();
+      const interstitialEnvironmentMap = environmentMapGenerator.generate();
 
-      interstitialEnvironmentMap =
-          this.gaussianBlur(interstitialEnvironmentMap);
+      const blurredEnvironmentMap =
+          this.gaussianBlur(interstitialEnvironmentMap, GENERATED_BLUR);
 
-      this[$generatedEnvironmentMap] =
-          this.pmremPass(interstitialEnvironmentMap);
+      this[$generatedEnvironmentMap] = this.pmremPass(blurredEnvironmentMap);
 
       // We should only ever generate this map once, and we will not be using
       // the environment map as a skybox, so go ahead and dispose of all
       // interstitial artifacts:
       interstitialEnvironmentMap.dispose();
+      blurredEnvironmentMap.dispose();
       environmentMapGenerator.dispose();
     }
 
@@ -286,8 +290,7 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   gaussianBlur(
-      cubeTarget: WebGLRenderTargetCube,
-      standardDeviationRadians: number = 0.04,
+      cubeTarget: WebGLRenderTargetCube, standardDeviationRadians: number,
       outputEncoding?: TextureEncoding): WebGLRenderTargetCube {
     const blurScene = new Scene();
 
@@ -376,7 +379,7 @@ void main() {
     const blurUniforms = blurMaterial.uniforms;
 
     const cubeTexture = cubeTarget.texture;
-    const blurTargetOptions = {
+    let blurTargetOptions = {
       type: cubeTexture.type,
       format: cubeTexture.format,
       encoding: cubeTexture.encoding,
@@ -399,37 +402,36 @@ void main() {
 
     if (outputEncoding === GammaEncoding &&
         cubeTexture.encoding !== GammaEncoding) {
-      cubeTarget.dispose();
-      const outputTargetOptions = {
+      blurTargetOptions = {
+        type: UnsignedByteType,
+        format: RGBFormat,
         encoding: outputEncoding,
         generateMipmaps: true,
         minFilter: LinearMipMapLinearFilter,
         magFilter: LinearFilter
       };
-      blurCamera = new (CubeCamera as any)(
-          0.1, 100, cubeResolution, outputTargetOptions);
-      cubeTarget = blurCamera.renderTarget;
-      (cubeTarget.texture as any).userData = {
-        ...userData,
-        ...({
-          url: (cubeTexture as any).userData ?
-              (cubeTexture as any).userData.url :
-              null,
-          mapping: 'Cube',
-        })
-      };
-    } else {
-      blurCamera.renderTarget = cubeTarget;
     }
+    const outputCamera =
+        new (CubeCamera as any)(0.1, 100, cubeResolution, blurTargetOptions);
+    const outputTarget = outputCamera.renderTarget;
+    (outputTarget.texture as any).userData = {
+      ...userData,
+      ...({
+        url: (cubeTexture as any).userData ? (cubeTexture as any).userData.url :
+                                             null,
+        mapping: 'Cube',
+      })
+    };
 
     blurUniforms.latitudinal.value = true;
     blurUniforms.tCube.value = tempTexture;
     blurUniforms.inputEncoding.value = encodings[tempTexture.encoding];
-    blurUniforms.outputEncoding.value = encodings[cubeTarget.texture.encoding];
-    blurCamera.update(this.renderer, blurScene);
+    blurUniforms.outputEncoding.value =
+        encodings[outputTarget.texture.encoding];
+    outputCamera.update(this.renderer, blurScene);
 
     tempTexture.dispose();
-    return cubeTarget;
+    return outputTarget;
   }
 
   /**
