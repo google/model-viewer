@@ -117,6 +117,6 @@ The steps to produce a new scenario are:
 
 Note that We have created an environment map that allows us to simulate the iOS
 Quick Look skybox in renderers that we wish to appear at least somewhat
-comparable to Quick Look: [quick_4k.png](../../examples/assets/quick_4k.png).
+comparable to Quick Look: [quick_1k.png](../../examples/assets/quick_1k.png).
 
 
