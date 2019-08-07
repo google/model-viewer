@@ -313,6 +313,11 @@ configuration or device capabilities');
 
           if (showArButton) {
             this[$arButtonContainer].classList.add('enabled');
+            // NOTE(cdata): The order of the two click handlers on the "ar
+            // button container" is important, vital to the workaround described
+            // earlier in this file. Reversing their order will cause our Scene
+            // Viewer integration to break.
+            // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
             this[$arButtonContainer].addEventListener(
                 'click', this[$arButtonContainerClickHandler]);
             this[$arButtonContainer].addEventListener(
