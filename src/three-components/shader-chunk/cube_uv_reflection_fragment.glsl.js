@@ -5,6 +5,9 @@ export const cubeUVChunk = /* glsl */ `
 
 #define cubeUV_faceSize (256.0)
 #define cubeUV_maxMipLevel (8.0)
+#define cubeUV_minMipLevel (2.0)
+#define cubeUV_extraLevels (3.0)
+#define cubeUV_totalLevels (10.0)
 
 ${getFaceChunk}
 ${getUVChunk}
@@ -19,10 +22,12 @@ float defaultMipmap(vec3 direction) {
 
 vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   int face = getFace(direction);
+  mipInt = cubeUV_maxMipLevel - mipInt;
+  float lodInt = max(mipInt, cubeUV_minMipLevel);
   float faceSize = exp2(mipInt);
   vec2 texelSize =
     1.0 / vec2(3.0 * (cubeUV_faceSize + 2.0), 
-               4.0 * (cubeUV_maxMipLevel + cubeUV_faceSize) - 2.0);
+               4.0 * (cubeUV_maxMipLevel + cubeUV_faceSize) - 2.0 - 14.0);
 
   vec2 uv = getUV(direction, face) * faceSize;
   uv += 0.5;
@@ -33,7 +38,11 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
     face -= 3;
   }
   uv.x += float(face) * (faceSize + 2.0);
-  uv.y += 4.0 * mipInt + 2.0 * (faceSize - 1.0);
+  if(lodInt == mipInt){
+    uv.y += 4.0 * mipInt + 2.0 * (faceSize - 1.0) - 14.0;
+  } else {
+    uv.x += (lodInt - mipInt) * 3.0 * (faceSize + 2.0);
+  }
   uv *= texelSize;
   uv.y = 1.0 - uv.y;
 
@@ -51,7 +60,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
 
 vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipLevel) {
   float mip = max(mipLevel, defaultMipmap(reflectedDirection));
-  mip = clamp(cubeUV_maxMipLevel - mip, 0.0, cubeUV_maxMipLevel);
+  mip = clamp(mip, 0.0, cubeUV_totalLevels - 1.0);
   float f = fract(mip);
   float mipInt = floor(mip);
 

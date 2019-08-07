@@ -28,7 +28,9 @@ import {texelConversions} from './shader-chunk/encodings_pars_framgment.glsl.js'
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
-          const {cubeUVRenderTarget, cubeLods, meshes} = setup(cubeTarget);
+          const roughnessExtra = [0.5, 0.7, 1.0];
+          const {cubeUVRenderTarget, cubeLods, meshes} =
+              setup(cubeTarget, roughnessExtra.length);
           // This hack is necessary for now because CubeUV is not really a
           // first-class citizen within the Standard material yet, and it does
           // not seem to be easy to add new uniforms to existing materials.
@@ -44,7 +46,7 @@ export const generatePMREM =
           renderer.gammaInput = false;
           renderer.gammaOutput = false;
 
-          generateMipmaps(cubeTarget, cubeLods, renderer);
+          generateMipmaps(cubeTarget, cubeLods, renderer, roughnessExtra);
           packMipmaps(cubeUVRenderTarget, meshes, renderer);
 
           renderer.setRenderTarget(currentRenderTarget);
@@ -60,7 +62,7 @@ export const generatePMREM =
           return cubeUVRenderTarget;
         };
 
-const setup = (cubeTarget: WebGLRenderTargetCube) => {
+const setup = (cubeTarget: WebGLRenderTargetCube, extraLods: number) => {
   const params = {
     format: cubeTarget.texture.format,
     magFilter: NearestFilter,
@@ -72,31 +74,36 @@ const setup = (cubeTarget: WebGLRenderTargetCube) => {
   };
 
   // Hard-coded to max faceSize = 256 until we can add a uniform.
-  const maxLods = 8;
+  const lodMin = 2;
+  const lodMax = 8;
+  const numLods = lodMax - lodMin + extraLods;
+
   // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
   // Math.log2
 
   const cubeLods: Array<WebGLRenderTargetCube> = [];
   const meshes: Array<Mesh> = [];
 
-  let offset = 0;
-  for (let i = 0; i <= maxLods; i++) {
-    const sizeLod = Math.pow(2, i);
+  let offsetY = 0;
+  for (let i = 0; i <= numLods; i++) {
+    const lod = i < extraLods ? lodMin : i + lodMin - extraLods;
+    const sizeLod = Math.pow(2, lod);
     let target = cubeTarget;
-    if (i < maxLods) {
+    if (i < numLods) {
       const renderTarget = new WebGLRenderTargetCube(sizeLod, sizeLod, params);
       renderTarget.texture.name = 'PMREMGenerator.cube' + i;
       cubeLods.push(renderTarget);
       target = renderTarget;
     }
-    appendLodMeshes(meshes, target, sizeLod, offset);
-    offset += 2 * (sizeLod + 2);
+    const offsetX = i < extraLods ? (extraLods - i) * 3 * (sizeLod + 2) : 0;
+    appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY);
+    if (i >= extraLods) {
+      offsetY += 2 * (sizeLod + 2);
+    }
   }
 
-  const cubeUVRenderTarget = new WebGLRenderTarget(
-      3 * (Math.pow(2, maxLods) + 2),
-      4 * maxLods + 2 * (Math.pow(2, maxLods + 1) - 1),
-      params);
+  const cubeUVRenderTarget =
+      new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
   cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
   cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
@@ -107,7 +114,8 @@ const appendLodMeshes =
     (meshes: Array<Mesh>,
      target: WebGLRenderTargetCube,
      sizeLod: number,
-     offset: number) => {
+     offsetX: number,
+     offsetY: number) => {
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
@@ -132,8 +140,8 @@ const appendLodMeshes =
 
         const planeMesh = new Mesh(plane, material);
 
-        planeMesh.position.x = (0.5 + (i % 3)) * sizePad;
-        planeMesh.position.y = (0.5 + (i > 2 ? 1 : 0)) * sizePad + offset;
+        planeMesh.position.x = (0.5 + (i % 3)) * sizePad + offsetX;
+        planeMesh.position.y = (0.5 + (i > 2 ? 1 : 0)) * sizePad + offsetY;
         (planeMesh.material as Material).side = DoubleSide;
         planeMesh.scale.setScalar(sizePad);
         meshes.push(planeMesh);
@@ -143,8 +151,9 @@ const appendLodMeshes =
 const generateMipmaps =
     (cubeTarget: WebGLRenderTargetCube,
      cubeLods: Array<WebGLRenderTargetCube>,
-     renderer: WebGLRenderer) => {
-      const mipmapShader = new MipmapShader();
+     renderer: WebGLRenderer,
+     roughnessExtra: Array<number>) => {
+      let mipmapShader = new MipmapShader();
       const cubeCamera = new CubeCamera(0.1, 100, 1);
       const mipmapScene = new Scene();
       const boxMesh = new Mesh(new BoxBufferGeometry(), mipmapShader);
@@ -157,14 +166,25 @@ const generateMipmaps =
           encodings[cubeTarget.texture.encoding];
       cubeCamera.renderTarget.dispose();
       for (let i = cubeLods.length - 1; i >= 0; i--) {
+        if (i == roughnessExtra.length - 1) {
+          mipmapShader = new BlurShader();
+          boxMesh.material = mipmapShader;
+        }
+        const {uniforms} = mipmapShader;
+        // if (i < roughnessExtra.length) {
+        //   const roughness = roughnessExtra[i];
+        //   const sigma = Math.PI * roughness * roughness / (1 + roughness);
+        //   uniforms.sigma.value=sigma;
+        // }
         cubeCamera.renderTarget = cubeLods[i];
-        mipmapShader.uniforms.outputEncoding.value =
-            encodings[cubeLods[i].texture.encoding];
+        uniforms.outputEncoding.value = encodings[cubeLods[i].texture.encoding];
         cubeCamera.update(renderer, mipmapScene);
-        mipmapShader.uniforms.texelSize.value = 1.0 / cubeLods[i].width;
-        mipmapShader.uniforms.envMap.value = cubeLods[i].texture;
-        mipmapShader.uniforms.inputEncoding.value =
-            encodings[cubeLods[i].texture.encoding];
+        if (i >= roughnessExtra.length) {
+          uniforms.texelSize.value = 1.0 / cubeLods[i].width;
+          uniforms.envMap.value = cubeLods[i].texture;
+          uniforms.inputEncoding.value =
+              encodings[cubeLods[i].texture.encoding];
+        }
       }
     };
 
@@ -246,6 +266,58 @@ void main() {
     });
 
     this.type = 'PMREMGenerator';
+  }
+}
+
+class BlurShader extends RawShaderMaterial {
+  constructor() {
+    super({
+
+      uniforms: {
+        texelSize: {value: 0.5},
+        envMap: {value: null},
+        inputEncoding: {value: 2},
+        outputEncoding: {value: 2},
+      },
+
+      vertexShader: `
+precision mediump float;
+precision mediump int;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+attribute vec3 position;
+attribute vec2 uv;
+varying vec2 vUv;
+varying vec3 vPosition;
+void main() {
+    vUv = uv;
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}
+`,
+
+      fragmentShader: `
+precision mediump float;
+precision mediump int;
+varying vec2 vUv;
+varying vec3 vPosition;
+uniform float texelSize;
+uniform samplerCube envMap;
+uniform int inputEncoding;
+uniform int outputEncoding;
+${texelConversions}
+${texelIO}
+void main() {
+  vec3 color = inputTexelToLinear(textureCube(envMap, vPosition), inputEncoding).rgb;
+  gl_FragColor = linearToOutputTexel(vec4(color, 1.0), outputEncoding);
+}
+`,
+
+      blending: NoBlending
+
+    });
+
+    this.type = 'PMREMGeneratorBlur';
   }
 }
 
