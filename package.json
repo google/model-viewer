@@ -46,7 +46,7 @@
     "install-renderers": "./scripts/install-third-party-renderers.sh",
     "update-screenshots": "node ./scripts/update-screenshots.js",
     "fetch-samples": "./scripts/fetch-khronos-gltf-samples.sh",
-    "serve": "ws --port 9000",
+    "serve": "ws",
     "dev": "concurrently \"npm run watch\" \"npm run serve\"",
     "watch": "cross-os x-watch",
     "watch:non-linux": "chokidar --initial src/*.js src/**/*.js src/*.ts src/**/*.ts -c \"npm run build:dev\"",
