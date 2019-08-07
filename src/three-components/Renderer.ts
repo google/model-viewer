@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP, HAS_OFFSCREEN_CANVAS} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
@@ -40,7 +40,7 @@ export const $arRenderer = Symbol('arRenderer');
 export default class Renderer extends EventDispatcher {
   public renderer!: WebGLRenderer;
   public context!: WebGLRenderingContext|null;
-  public canvas: HTMLCanvasElement;
+  public canvas: HTMLCanvasElement | OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -63,7 +63,11 @@ export default class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    this.canvas = document.createElement('canvas');
+    if (HAS_OFFSCREEN_CANVAS && OFFSCREEN_CANVAS_SUPPORT_BITMAP) {
+      this.canvas = new OffscreenCanvas(1000,1000);
+    } else {
+      this.canvas = document.createElement('canvas');
+    }
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
       this.context = WebGLUtils.getContext(this.canvas, webGlOptions);

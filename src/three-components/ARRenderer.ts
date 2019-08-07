@@ -28,7 +28,7 @@ const directionArray = new Float32Array(3);
 
 export class ARRenderer extends EventDispatcher {
   public renderer: WebGLRenderer|null;
-  public inputCanvas: HTMLCanvasElement;
+  public inputCanvas: HTMLCanvasElement | OffscreenCanvas;
   public inputContext: WebGLRenderingContext;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
@@ -55,7 +55,7 @@ export class ARRenderer extends EventDispatcher {
   }
 
   constructor(
-      inputCanvas: HTMLCanvasElement, inputContext: WebGLRenderingContext) {
+      inputCanvas: HTMLCanvasElement | OffscreenCanvas, inputContext: WebGLRenderingContext) {
     super();
 
     this.renderer = null;
