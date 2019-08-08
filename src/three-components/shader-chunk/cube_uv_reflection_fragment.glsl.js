@@ -15,14 +15,14 @@ ${getUVChunk}
 float adjustMipLevelCubeUV(float mipLevel, float roughness) {
   if(mipLevel < cubeUV_minMipLevel) {
 		if(roughness >= 0.7){
-      mipLevel = (1.0 - roughness) / (1.0 - 0.7);
+      mipLevel = -1.0 + (1.0 - roughness) / (1.0 - 0.7);
     } else if(roughness >= 0.5){
-      mipLevel = (0.7 - roughness) / (0.7 - 0.5);
+      mipLevel = 0.0 + (0.7 - roughness) / (0.7 - 0.5);
     } else {
-      mipLevel = (0.5 - roughness) / (0.5 - 0.32);
+      mipLevel = 1.0 + (0.5 - roughness) / (0.5 - 0.32);
     }
   }
-  mipLevel = cubeUV_lastLevel - mipLevel;
+  mipLevel = cubeUV_maxMipLevel - mipLevel;
   return clamp(mipLevel, 0.0, cubeUV_lastLevel);
 }
 
