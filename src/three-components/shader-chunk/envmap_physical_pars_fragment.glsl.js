@@ -28,7 +28,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryVec, float( maxMIPLevel ) );
+			vec4 envMapColor = vec4(0.0);//textureCubeUV( envMap, queryVec, float( maxMIPLevel ) );
 
 		#else
 

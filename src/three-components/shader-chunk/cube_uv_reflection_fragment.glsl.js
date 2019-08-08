@@ -24,7 +24,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   int face = getFace(direction);
   mipInt = cubeUV_maxMipLevel - mipInt;
   float lodInt = max(mipInt, cubeUV_minMipLevel);
-  float faceSize = exp2(mipInt);
+  float faceSize = exp2(lodInt);
   vec2 texelSize =
     1.0 / vec2(3.0 * (cubeUV_faceSize + 2.0), 
                4.0 * (cubeUV_maxMipLevel + cubeUV_faceSize) - 2.0 - 14.0);

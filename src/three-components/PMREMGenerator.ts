@@ -28,7 +28,7 @@ import {texelConversions} from './shader-chunk/encodings_pars_framgment.glsl.js'
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
-          const roughnessExtra = [0.5, 0.7, 1.0];
+          const roughnessExtra = [1.0, 0.7, 0.5];
           const {cubeUVRenderTarget, cubeLods, meshes} =
               setup(cubeTarget, roughnessExtra.length);
           // This hack is necessary for now because CubeUV is not really a
@@ -153,8 +153,9 @@ const generateMipmaps =
      cubeLods: Array<WebGLRenderTargetCube>,
      renderer: WebGLRenderer,
      roughnessExtra: Array<number>) => {
-      let mipmapShader = new MipmapShader();
       const cubeCamera = new CubeCamera(0.1, 100, 1);
+      cubeCamera.renderTarget.dispose();
+      let mipmapShader = new MipmapShader();
       const mipmapScene = new Scene();
       const boxMesh = new Mesh(new BoxBufferGeometry(), mipmapShader);
       (boxMesh.material as Material).side = DoubleSide;
@@ -164,18 +165,21 @@ const generateMipmaps =
       mipmapShader.uniforms.envMap.value = cubeTarget.texture;
       mipmapShader.uniforms.inputEncoding.value =
           encodings[cubeTarget.texture.encoding];
-      cubeCamera.renderTarget.dispose();
       for (let i = cubeLods.length - 1; i >= 0; i--) {
         if (i == roughnessExtra.length - 1) {
           mipmapShader = new BlurShader();
           boxMesh.material = mipmapShader;
+          (boxMesh.material as Material).side = DoubleSide;
+          mipmapShader.uniforms.envMap.value = cubeLods[i + 1].texture;
+          mipmapShader.uniforms.inputEncoding.value =
+              encodings[cubeLods[i + 1].texture.encoding];
         }
         const {uniforms} = mipmapShader;
-        // if (i < roughnessExtra.length) {
-        //   const roughness = roughnessExtra[i];
-        //   const sigma = Math.PI * roughness * roughness / (1 + roughness);
-        //   uniforms.sigma.value=sigma;
-        // }
+        if (i < roughnessExtra.length) {
+          const roughness = roughnessExtra[i];
+          const sigma = Math.PI * roughness * roughness / (1 + roughness);
+          uniforms.sigma.value = sigma;
+        }
         cubeCamera.renderTarget = cubeLods[i];
         uniforms.outputEncoding.value = encodings[cubeLods[i].texture.encoding];
         cubeCamera.update(renderer, mipmapScene);
@@ -274,7 +278,7 @@ class BlurShader extends RawShaderMaterial {
     super({
 
       uniforms: {
-        texelSize: {value: 0.5},
+        sigma: {value: 0.5},
         envMap: {value: null},
         inputEncoding: {value: 2},
         outputEncoding: {value: 2},
@@ -301,15 +305,47 @@ precision mediump float;
 precision mediump int;
 varying vec2 vUv;
 varying vec3 vPosition;
-uniform float texelSize;
+uniform float sigma;
 uniform samplerCube envMap;
+const float texelSize = 0.5;
+const float angleTolerance = atan(texelSize);
 uniform int inputEncoding;
 uniform int outputEncoding;
 ${texelConversions}
 ${texelIO}
+vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
+  float angle = acos(dot(sampleDir, outputDir));
+  float weight = 1.0 - smoothstep(sigma - angleTolerance, sigma + angleTolerance, angle);
+  if(weight > 0.0){
+    soFar += weight * inputTexelToLinear(textureCube(envMap, sampleDir), inputEncoding);
+  }
+  return soFar;
+}
+vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir){
+  soFar = accumulate(soFar, outputDir, sampleDir);
+  soFar = accumulate(soFar, outputDir, -sampleDir);
+  soFar = accumulate(soFar, outputDir, sampleDir.xzy);
+  soFar = accumulate(soFar, outputDir, -sampleDir.xzy);
+  soFar = accumulate(soFar, outputDir, sampleDir.zxy);
+  soFar = accumulate(soFar, outputDir, -sampleDir.zxy);
+  return soFar;
+}
 void main() {
-  vec3 color = inputTexelToLinear(textureCube(envMap, vPosition), inputEncoding).rgb;
-  gl_FragColor = linearToOutputTexel(vec4(color, 1.0), outputEncoding);
+  vec3 outputDir = normalize(vPosition);
+  vec4 color = vec4(0.0);
+  for(float x = 0.5 * texelSize; x < 1.0; x += texelSize){
+    for(float y = 0.5 * texelSize; y < 1.0; y += texelSize){
+      vec3 sampleDir = normalize(vec3(x, y, 1.0));
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.y *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+    }
+  }
+  gl_FragColor = linearToOutputTexel(color / color.a, outputEncoding);
 }
 `,
 
