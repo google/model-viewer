@@ -19,6 +19,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {cloneGltf, Gltf} from './ModelUtils.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js';
+import {lightsChunk} from './shader-chunk/lights_fragment_maps.glsl.js';
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -102,7 +103,8 @@ export class CachingGLTFLoader {
             shader.fragmentShader
                 .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
                 .replace(
-                    '#include <envmap_physical_pars_fragment>', envmapChunk);
+                    '#include <envmap_physical_pars_fragment>', envmapChunk)
+                .replace('#include <lights_fragment_maps>', lightsChunk);
       };
 
       model.traverse((node: any) => {

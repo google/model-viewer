@@ -28,7 +28,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = vec4(0.0);//textureCubeUV( envMap, queryVec, float( maxMIPLevel ) );
+			vec4 envMapColor = textureCubeUV( envMap, queryVec, cubeUV_lastLevel );
 
 		#else
 
@@ -40,21 +40,26 @@ export const envmapChunk = /* glsl */ `
 
 	}
 
-	// taken from here: http://casual-effects.blogspot.ca/2011/08/plausible-environment-lighting-in-two.html
-	float getSpecularMIPLevel( const in float blinnShininessExponent, const in int maxMIPLevel ) {
-
-		//float envMapWidth = pow( 2.0, maxMIPLevelScalar );
-		//float desiredMIPLevel = log2( envMapWidth * sqrt( 3.0 ) ) - 0.5 * log2( pow2( blinnShininessExponent ) + 1.0 );
+	float getSpecularMIPLevel( const in float roughness, const in int maxMIPLevel ) {
 
 		float maxMIPLevelScalar = float( maxMIPLevel );
-		float desiredMIPLevel = maxMIPLevelScalar + 0.79248 - 0.5 * log2( pow2( blinnShininessExponent ) + 1.0 );
+		float desiredMIPLevel = -log2( PI * roughness * roughness / ( 1.0 + roughness ) );
 
-		// clamp to allowable LOD ranges.
-		return clamp( desiredMIPLevel, 0.0, maxMIPLevelScalar );
+		#ifdef ENVMAP_TYPE_CUBE_UV
+
+			desiredMIPLevel = adjustMipLevelCubeUV( desiredMIPLevel, roughness );
+
+		#elif
+
+			desiredMIPLevel = clamp( maxMIPLevelScalar - desiredMIPLevel, 0.0, maxMIPLevelScalar );
+
+		#endif
+
+		return desiredMIPLevel;
 
 	}
 
-	vec3 getLightProbeIndirectRadiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in float blinnShininessExponent, const in int maxMIPLevel ) {
+	vec3 getLightProbeIndirectRadiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in float roughness, const in int maxMIPLevel ) {
 
 		#ifdef ENVMAP_MODE_REFLECTION
 
@@ -66,9 +71,11 @@ export const envmapChunk = /* glsl */ `
 
 		#endif
 
+		reflectVec = mix(reflectVec, geometry.normal, roughness * roughness);
+
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 
-		float specularMIPLevel = getSpecularMIPLevel( blinnShininessExponent, maxMIPLevel );
+		float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
 
 		#ifdef ENVMAP_TYPE_CUBE
 

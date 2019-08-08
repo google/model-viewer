@@ -7,10 +7,24 @@ export const cubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel (8.0)
 #define cubeUV_minMipLevel (2.0)
 #define cubeUV_extraLevels (3.0)
-#define cubeUV_totalLevels (10.0)
+#define cubeUV_lastLevel (9.0)
 
 ${getFaceChunk}
 ${getUVChunk}
+
+float adjustMipLevelCubeUV(float mipLevel, float roughness) {
+  if(mipLevel < cubeUV_minMipLevel) {
+		if(roughness >= 0.7){
+      mipLevel = (1.0 - roughness) / (1.0 - 0.7);
+    } else if(roughness >= 0.5){
+      mipLevel = (0.7 - roughness) / (0.7 - 0.5);
+    } else {
+      mipLevel = (0.5 - roughness) / (0.5 - 0.32);
+    }
+  }
+  mipLevel = cubeUV_lastLevel - mipLevel;
+  return clamp(mipLevel, 0.0, cubeUV_lastLevel);
+}
 
 float defaultMipmap(vec3 direction) {
   direction *= 0.5 * cubeUV_faceSize;
@@ -60,7 +74,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
 
 vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipLevel) {
   float mip = max(mipLevel, defaultMipmap(reflectedDirection));
-  mip = clamp(mip, 0.0, cubeUV_totalLevels - 1.0);
+  mip = clamp(mip, 0.0, cubeUV_lastLevel);
   float f = fract(mip);
   float mipInt = floor(mip);
 
