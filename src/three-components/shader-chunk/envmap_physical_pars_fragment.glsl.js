@@ -28,7 +28,11 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryVec, cubeUV_lastLevel );
+			// Add anti-aliasing mipmap contribution
+			vec3 dxy = max(abs(dFdx(queryVec)), abs(dFdy(queryVec)));
+			float sigma = PI_HALF + max(max(dxy.x, dxy.y), dxy.z);
+			float desiredMIPLevel = adjustMipLevelCubeUV( cubeUV_lastLevel - 1.0, sigma );
+			vec4 envMapColor = textureCubeUV( envMap, queryVec, desiredMIPLevel );
 
 		#else
 
@@ -53,7 +57,7 @@ export const envmapChunk = /* glsl */ `
 
 		#ifdef ENVMAP_TYPE_CUBE_UV
 
-			desiredMIPLevel = adjustMipLevelCubeUV( desiredMIPLevel, roughness );
+			desiredMIPLevel = adjustMipLevelCubeUV( desiredMIPLevel, sigma );
 
 		#elif
 

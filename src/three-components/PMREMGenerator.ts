@@ -101,6 +101,19 @@ const setup = (cubeTarget: WebGLRenderTargetCube, extraLods: number) => {
       offsetY += 2 * (sizeLod + 2);
     }
   }
+  const plane = new PlaneBufferGeometry(1, 1);
+  const material = new BlurShader();
+  material.side = DoubleSide;
+  material.uniforms.envMap.value = cubeLods[extraLods].texture;
+  material.uniforms.inputEncoding.value =
+      encodings[cubeLods[extraLods].texture.encoding];
+  material.uniforms.sigma.value = Math.PI;
+  material.uniforms.outputEncoding.value =
+      encodings[cubeTarget.texture.encoding];
+  const planeMesh = new Mesh(plane, material);
+  planeMesh.position.x = 0.5 + (extraLods + 1) * 3 * (Math.pow(2, lodMin) + 2);
+  planeMesh.position.y = 0.5;
+  meshes.push(planeMesh);
 
   const cubeUVRenderTarget =
       new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
