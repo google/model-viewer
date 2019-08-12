@@ -308,14 +308,14 @@ varying vec3 vPosition;
 uniform float sigma;
 uniform samplerCube envMap;
 const float texelSize = 0.5;
-const float angleTolerance = atan(texelSize);
+const float invAngleTolerance = 1.0 / (2.0 * atan(texelSize));
 uniform int inputEncoding;
 uniform int outputEncoding;
 ${texelConversions}
 ${texelIO}
 vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
-  float angle = acos(dot(sampleDir, outputDir));
-  float weight = 1.0 - smoothstep(sigma - angleTolerance, sigma + angleTolerance, angle);
+  float angle = sigma - acos(dot(sampleDir, outputDir));
+  float weight = clamp(angle * invAngleTolerance, 0.0, 1.0);
   if(weight > 0.0){
     soFar += weight * inputTexelToLinear(textureCube(envMap, sampleDir), inputEncoding);
   }

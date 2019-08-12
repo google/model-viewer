@@ -40,10 +40,16 @@ export const envmapChunk = /* glsl */ `
 
 	}
 
-	float getSpecularMIPLevel( const in float roughness, const in int maxMIPLevel ) {
+	float getSpecularMIPLevel( const in float roughness, const in vec3 sampleVec, const in int maxMIPLevel ) {
 
 		float maxMIPLevelScalar = float( maxMIPLevel );
-		float desiredMIPLevel = -log2( PI * roughness * roughness / ( 1.0 + roughness ) );
+		float sigma = PI * roughness * roughness / ( 1.0 + roughness );
+		
+		// Add anti-aliasing mipmap contribution
+		vec3 dxy = max(abs(dFdx(sampleVec)), abs(dFdy(sampleVec)));
+		sigma += max(max(dxy.x, dxy.y), dxy.z);
+		  
+		float desiredMIPLevel = -log2( sigma );
 
 		#ifdef ENVMAP_TYPE_CUBE_UV
 
@@ -75,7 +81,7 @@ export const envmapChunk = /* glsl */ `
 
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 
-		float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
+		float specularMIPLevel = getSpecularMIPLevel( roughness, reflectVec, maxMIPLevel );
 
 		#ifdef ENVMAP_TYPE_CUBE
 
