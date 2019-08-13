@@ -83,6 +83,7 @@ const setup =
 
       let offsetY = 0;
       const sizeMin = Math.pow(2, lodMin);
+      const sizeMax = Math.pow(2, lodMax);
       for (let lod = 0; lod <= lodMax; lod++) {
         const j = Math.max(lod - lodMin, 0);
         const target = lod == lodMax ? cubeTarget : cubeLods[j];
@@ -98,7 +99,7 @@ const setup =
       }
 
       const cubeUVRenderTarget =
-          new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
+          new WebGLRenderTarget(3 * (sizeMax + 2), offsetY, params);
       cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
       cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 

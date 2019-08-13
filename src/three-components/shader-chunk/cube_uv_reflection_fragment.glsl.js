@@ -63,16 +63,24 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   return mix(tm, bm, f.y);
 }
 
-vec4 textureCubeUV(sampler2D envMap, vec3 reflectedDirection, float mipLevel) {
+vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
+  float sigma = PI * roughness * roughness / ( 1.0 + roughness );
+		
+  // Add anti-aliasing mipmap contribution
+  vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
+  sigma += max(max(dxy.x, dxy.y), dxy.z);
+
+  float mipLevel = adjustMipLevelCubeUV(-log2(sigma), sigma);
+
   float mip = clamp(mipLevel, 0.0, cubeUV_lastLevel);
   float f = fract(mip);
   float mipInt = floor(mip);
 
-  vec3 color0 = bilinearCubeUV(envMap, reflectedDirection, mipInt);
+  vec3 color0 = bilinearCubeUV(envMap, sampleDir, mipInt);
   if (f == 0.0) {
     return vec4(color0, 1.0);
   } else {
-    vec3 color1 = bilinearCubeUV(envMap, reflectedDirection, mipInt + 1.0);
+    vec3 color1 = bilinearCubeUV(envMap, sampleDir, mipInt + 1.0);
     return vec4(mix(color0, color1, f), 1.0);
   }
 }

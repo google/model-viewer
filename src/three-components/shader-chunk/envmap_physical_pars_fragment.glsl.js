@@ -28,11 +28,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			// Add anti-aliasing mipmap contribution
-			vec3 dxy = max(abs(dFdx(queryVec)), abs(dFdy(queryVec)));
-			float sigma = PI_HALF + max(max(dxy.x, dxy.y), dxy.z);
-			float desiredMIPLevel = adjustMipLevelCubeUV( cubeUV_lastLevel - 1.0, sigma );
-			vec4 envMapColor = textureCubeUV( envMap, queryVec, desiredMIPLevel );
+			vec4 envMapColor = textureCubeUV( envMap, queryVec, 1.0 );
 
 		#else
 
@@ -52,18 +48,10 @@ export const envmapChunk = /* glsl */ `
 		// Add anti-aliasing mipmap contribution
 		vec3 dxy = max(abs(dFdx(sampleVec)), abs(dFdy(sampleVec)));
 		sigma += max(max(dxy.x, dxy.y), dxy.z);
-		  
+
 		float desiredMIPLevel = -log2( sigma );
 
-		#ifdef ENVMAP_TYPE_CUBE_UV
-
-			desiredMIPLevel = adjustMipLevelCubeUV( desiredMIPLevel, sigma );
-
-		#elif
-
-			desiredMIPLevel = clamp( maxMIPLevelScalar - desiredMIPLevel, 0.0, maxMIPLevelScalar );
-
-		#endif
+		desiredMIPLevel = clamp( maxMIPLevelScalar - desiredMIPLevel, 0.0, maxMIPLevelScalar );
 
 		return desiredMIPLevel;
 
@@ -85,7 +73,11 @@ export const envmapChunk = /* glsl */ `
 
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 
-		float specularMIPLevel = getSpecularMIPLevel( roughness, reflectVec, maxMIPLevel );
+		#ifndef ENVMAP_TYPE_CUBE_UV
+
+			float specularMIPLevel = getSpecularMIPLevel( roughness, reflectVec, maxMIPLevel );
+
+		#endif
 
 		#ifdef ENVMAP_TYPE_CUBE
 
@@ -106,7 +98,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryReflectVec = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, specularMIPLevel );
+			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, roughness );
 
 		#elif defined( ENVMAP_TYPE_EQUIREC )
 
