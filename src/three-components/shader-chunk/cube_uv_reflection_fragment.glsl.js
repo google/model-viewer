@@ -7,15 +7,13 @@ export const cubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel (8.0)
 #define cubeUV_minMipLevel (2.0)
 #define cubeUV_extraLevels (3.0)
-#define cubeUV_lastLevel (10.0)
+#define cubeUV_lastLevel (9.0)
 
 ${getFaceChunk}
 ${getUVChunk}
 
 float adjustMipLevelCubeUV(float mipLevel, float sigma) {
-  if(sigma >= PI_HALF){
-    mipLevel = -2.0 + (2.5 - sigma) / (2.5 - PI_HALF);
-  } else if(sigma >= 0.91){
+  if(sigma >= 0.91){
     mipLevel = -1.0 + (PI_HALF - sigma) / (PI_HALF - 0.91);
   } else if(sigma >= 0.52){
     mipLevel = 0.0 + (0.91 - sigma) / (0.91 - 0.52);
@@ -28,15 +26,7 @@ float adjustMipLevelCubeUV(float mipLevel, float sigma) {
 vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   vec2 texelSize =
     1.0 / vec2(3.0 * (cubeUV_faceSize + 2.0), 
-               4.0 * (cubeUV_maxMipLevel + 1.0 + cubeUV_faceSize) - 16.0);
-
-  if(mipInt == cubeUV_lastLevel){
-    vec2 uv = vec2(0.5);
-    uv.x += 4.0 * 3.0 * (4.0 + 2.0);
-    uv *= texelSize;
-    uv.y = 1.0 - uv.y;
-    return envMapTexelToLinear(texture2D(envMap, uv)).rgb;//vec3(1.0, 0.0, 0.0);//
-  } 
+               4.0 * (cubeUV_maxMipLevel + cubeUV_faceSize) + 2.0);
   
   int face = getFace(direction);
   mipInt = cubeUV_maxMipLevel - mipInt;
@@ -57,6 +47,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   } else {
     uv.x += (lodInt - mipInt) * 3.0 * (faceSize + 2.0);
   }
+  uv.y += 14.0;
   uv *= texelSize;
   uv.y = 1.0 - uv.y;
 

@@ -27,7 +27,7 @@ import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chun
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
-          const roughnessExtra = [1.0, 0.7, 0.5];
+          const roughnessExtra = [0.5, 0.7, 1.0];
           const {cubeUVRenderTarget, cubeLods, meshes} =
               setup(cubeTarget, roughnessExtra);
           // This hack is necessary for now because CubeUV is not really a
@@ -66,7 +66,6 @@ const setup =
       // Hard-coded to max faceSize = 256 until we can add a uniform.
       const lodMin = 2;
       const lodMax = 8;
-      const numLods = lodMax - lodMin + extraLods;
 
       // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
       // Math.log2
@@ -74,7 +73,7 @@ const setup =
       const cubeLods: Array<WebGLRenderTargetCube> = [];
       const meshes: Array<Mesh> = [];
 
-      for (let i = lodMin; i < numLods; i++) {
+      for (let i = lodMin; i < lodMax; i++) {
         const sizeLod = Math.pow(2, i);
         const renderTarget =
             new WebGLRenderTargetCube(sizeLod, sizeLod, params);
@@ -83,31 +82,20 @@ const setup =
       }
 
       let offsetY = 0;
-      for (let i = 0; i <= numLods; i++) {
-        const lod = Math.max(i + lodMin - extraLods, lodMin);
-        const target = i == numLods ? cubeTarget : cubeLods[lod - lodMin];
+      const sizeMin = Math.pow(2, lodMin);
+      for (let lod = 0; lod <= lodMax; lod++) {
+        const j = Math.max(lod - lodMin, 0);
+        const target = lod == lodMax ? cubeTarget : cubeLods[j];
         const sizeLod = Math.pow(2, lod);
-        const offsetX = i < extraLods ? (extraLods - i) * 3 * (sizeLod + 2) : 0;
-        const roughness = i < extraLods ? roughnessExtra[i] : 0;
-        appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
-        if (i >= extraLods) {
-          offsetY += 2 * (sizeLod + 2);
+        let offsetX = 0;
+        const nExtra = lod <= lodMin ? extraLods : 0;
+        for (let i = 0; i <= nExtra; ++i) {
+          const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
+          appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
+          offsetX += 3 * (sizeMin + 2);
         }
+        offsetY += 2 * (sizeLod + 2);
       }
-      const plane = new PlaneBufferGeometry(1, 1);
-      const material = new BlurShader();
-      material.side = DoubleSide;
-      material.uniforms.envMap.value = cubeLods[extraLods].texture;
-      material.uniforms.inputEncoding.value =
-          encodings[cubeLods[extraLods].texture.encoding];
-      material.uniforms.sigma.value = Math.PI;
-      material.uniforms.outputEncoding.value =
-          encodings[cubeTarget.texture.encoding];
-      const planeMesh = new Mesh(plane, material);
-      planeMesh.position.x =
-          0.5 + (extraLods + 1) * 3 * (Math.pow(2, lodMin) + 2);
-      planeMesh.position.y = 0.5;
-      meshes.push(planeMesh);
 
       const cubeUVRenderTarget =
           new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
