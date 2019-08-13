@@ -17,16 +17,16 @@ import {Color, Material, Mesh, Scene} from 'three';
 import {MeshStandardMaterial} from 'three';
 
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$resetRenderer, $scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ALT_BG_IMAGE_URL = assetPath('quick_4k.png');
-const BG_IMAGE_URL = assetPath('spruit_sunrise_2k.jpg');
-const HDR_BG_IMAGE_URL = assetPath('spruit_sunrise_2k.hdr');
+const ALT_BG_IMAGE_URL = assetPath('quick_1k.png');
+const BG_IMAGE_URL = assetPath('spruit_sunrise_1k.jpg');
+const HDR_BG_IMAGE_URL = assetPath('spruit_sunrise_1k.hdr');
 const MODEL_URL = assetPath('reflective-sphere.gltf');
 const UNLIT_MODEL_URL =
     assetPath('glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
@@ -122,6 +122,12 @@ const waitForLoadAndEnvMap =
     };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
+  suiteTeardown(() => {
+    // Reset the renderer once at the end of this spec, to clear out all
+    // of the heavy cached image buffers:
+    ModelViewerElementBase[$resetRenderer]();
+  });
+
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:

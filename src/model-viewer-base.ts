@@ -18,6 +18,7 @@ import {UpdatingElement} from 'lit-element/lib/updating-element';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
+import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import ModelScene from './three-components/ModelScene.js';
 import Renderer from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
@@ -25,6 +26,7 @@ import {ProgressTracker} from './utilities/progress-tracker.js';
 
 let renderer = new Renderer();
 
+const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
@@ -37,7 +39,9 @@ const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $lastDpr = Symbol('lastDpr');
+const $clearModelTimeout = Symbol('clearModelTimeout');
 
+export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
@@ -58,6 +62,11 @@ export const $progressTracker = Symbol('progressTracker');
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
 
+  static[$resetRenderer]() {
+    renderer.dispose();
+    renderer = new Renderer();
+  }
+
   static get is() {
     return 'model-viewer';
   }
@@ -68,6 +77,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     return this[$template];
+  }
+
+  static set modelCacheSize(value: number) {
+    CachingGLTFLoader[$evictionPolicy].evictionThreshold = value;
+  }
+
+  static get modelCacheSize(): number {
+    return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
 
   @property({type: String}) alt: string|null = null;
@@ -81,6 +98,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
   protected[$lastDpr]: number = resolveDpr();
+  protected[$clearModelTimeout]: number|null = null;
 
   protected[$fallbackResizeHandler] = debounce(() => {
     const boundingRect = this.getBoundingClientRect();
@@ -213,6 +231,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
+
+    if (this[$clearModelTimeout] != null) {
+      self.clearTimeout(this[$clearModelTimeout]!);
+      this[$clearModelTimeout] = null;
+      // Force an update in case the model has been evicted from our GLTF cache
+      // @see https://lit-element.polymer-project.org/guide/lifecycle#requestupdate
+      this.requestUpdate('src', null);
+    }
   }
 
   disconnectedCallback() {
@@ -228,6 +254,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     this[$renderer].unregisterScene(this[$scene]);
+
+    this[$clearModelTimeout] = self.setTimeout(() => {
+      this[$scene].model.clear();
+    }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
   updated(changedProperties: Map<string, any>) {

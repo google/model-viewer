@@ -1,4 +1,6 @@
-import {LinearEncoding, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding} from 'three';
+import {ACESFilmicToneMapping, CineonToneMapping, GammaEncoding, LinearEncoding, LinearToneMapping, ReinhardToneMapping, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding, Uncharted2ToneMapping} from 'three';
+
+import {texelConversions} from './encodings_pars_framgment.glsl.js'
 
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
@@ -70,38 +72,46 @@ export const encodings = {
   [RGBEEncoding]: 2,
   [RGBM7Encoding]: 3,
   [RGBM16Encoding]: 4,
-  [RGBDEncoding]: 5
+  [RGBDEncoding]: 5,
+  [GammaEncoding]: 6
 };
 
 export const texelIO = /* glsl */ `
-vec4 inputTexelToLinear(vec4 value, int encoding){
-    if(encoding == 0){
+uniform int inputEncoding;
+uniform int outputEncoding;
+${texelConversions}
+vec4 inputTexelToLinear(vec4 value){
+    if(inputEncoding == 0){
         return value;
-    }else if(encoding == 1){
+    }else if(inputEncoding == 1){
         return sRGBToLinear(value);
-    }else if(encoding == 2){
+    }else if(inputEncoding == 2){
         return RGBEToLinear(value);
-    }else if(encoding == 3){
+    }else if(inputEncoding == 3){
         return RGBMToLinear(value, 7.0);
-    }else if(encoding == 4){
+    }else if(inputEncoding == 4){
         return RGBMToLinear(value, 16.0);
-    }else{
+    }else if(inputEncoding == 5){
         return RGBDToLinear(value, 256.0);
+    }else{
+        return GammaToLinear(value, 2.2);
     }
 }
-vec4 linearToOutputTexel(vec4 value, int encoding){
-    if(encoding == 0){
+vec4 linearToOutputTexel(vec4 value){
+    if(outputEncoding == 0){
         return value;
-    }else if(encoding == 1){
+    }else if(outputEncoding == 1){
         return LinearTosRGB(value);
-    }else if(encoding == 2){
+    }else if(outputEncoding == 2){
         return LinearToRGBE(value);
-    }else if(encoding == 3){
+    }else if(outputEncoding == 3){
         return LinearToRGBM(value, 7.0);
-    }else if(encoding == 4){
+    }else if(outputEncoding == 4){
         return LinearToRGBM(value, 16.0);
-    }else{
+    }else if(outputEncoding == 5){
         return LinearToRGBD(value, 256.0);
+    }else{
+        return LinearToGamma(value, 2.2);
     }
 }
 `;
