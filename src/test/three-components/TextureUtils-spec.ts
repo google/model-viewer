@@ -24,8 +24,8 @@ const expect = chai.expect;
 // Reuse the same canvas as to not stress the WebGL
 // context limit
 const canvas = document.createElement('canvas');
-const EQUI_URL = assetPath('small_hangar_01_1k.jpg');
-const HDR_EQUI_URL = assetPath('pillars_1k.hdr');
+const EQUI_URL = assetPath('spruit_sunrise_1k.jpg');
+const HDR_EQUI_URL = assetPath('spruit_sunrise_1k.hdr');
 
 suite('TextureUtils', () => {
   let renderer: WebGLRenderer;
@@ -48,9 +48,7 @@ suite('TextureUtils', () => {
   let textureUtils: TextureUtils;
 
   setup(() => {
-    // NOTE(cdata): We need to lower the samples here or else tests that use
-    // PMREM have a tendency to time out on iOS Simulator
-    textureUtils = new TextureUtils(renderer, {pmremSamples: 4});
+    textureUtils = new TextureUtils(renderer);
   });
 
   teardown(async () => {

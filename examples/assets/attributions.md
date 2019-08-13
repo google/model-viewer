@@ -49,21 +49,21 @@ licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=small_hangar_01">source</a>)
 Originally in HDR format
 
-## spruit_sunrise_2k
+## spruit_sunrise_1k
 
-spruit_sunrise_2k.hdr, spruit_sunrise_2k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
+spruit_sunrise_1k.hdr, spruit_sunrise_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?c=outdoor&h=spruit_sunrise">source</a>)
 
-## aircraft_workshop_01_4k.hdr
+## aircraft_workshop_01_1k.hdr
 
-aircraft_workshop_01_4k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
+aircraft_workshop_01_1k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=aircraft_workshop_01">source</a>)
 
-## music_hall_01_4k.hdr
+## music_hall_01_1k.hdr
 
-music_hall_01_4k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
+music_hall_01_1k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=music_hall_01">source</a>)
 
