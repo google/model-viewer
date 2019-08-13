@@ -305,6 +305,17 @@
               always start paused, and remain so unless the autoplay attribute
               is set or the .play() method is invoked.</p>
             </li>
+            <li>
+              <div>ModelViewer.modelCacheSize</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s internal
+              glTF model cache size, controlling number of individual models that should
+              be cached. Note that any number of models may be cached at a given time.
+              This number just sets the maximum number of models that can be cached even
+              if they are not being used by a &lt;model-viewer&gt; element in the document.
+              Note also that the cache size is measured in number of glTF models, not bytes!
+              This is important to keep in mind, since any two models may have wildly
+              different byte sizes.</p>
+            </li>
           </ul>
 
         </div>

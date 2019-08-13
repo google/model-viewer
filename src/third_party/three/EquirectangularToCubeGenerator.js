@@ -109,6 +109,8 @@ THREE.CubemapGenerator.prototype.fromEquirectangular = function ( texture, optio
 
 	mesh.geometry.dispose();
 	mesh.material.dispose();
+	// NOTE(cdata): Remove reference to large texture so that it can be GC'd:
+	mesh.material.uniforms.tEquirect.value = null;
 
 	return camera.renderTarget;
 

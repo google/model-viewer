@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {Texture, WebGLRenderer} from 'three';
+import {Cache, Texture, WebGLRenderer} from 'three';
 
-import TextureUtils, {EnvironmentMapAndSkybox} from '../../three-components/TextureUtils.js';
+import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
-
 
 
 const expect = chai.expect;
@@ -29,20 +28,33 @@ const EQUI_URL = assetPath('spruit_sunrise_1k.jpg');
 const HDR_EQUI_URL = assetPath('spruit_sunrise_1k.hdr');
 
 suite('TextureUtils', () => {
+  let renderer: WebGLRenderer;
+
+  suiteSetup(() => {
+    // The renderer can retain state, so these tests have the possibility of
+    // getting different results in different orders. However, our use of the
+    // renderer *should* always return its state to what it was before to avoid
+    // this kind of problem (and many other headaches).
+    renderer = new WebGLRenderer({canvas});
+    renderer.debug.checkShaderErrors = true;
+  });
+
+  suiteTeardown(() => {
+    // Ensure we free up memory from loading large environment maps:
+    Cache.clear();
+    renderer.dispose();
+  });
+
   let textureUtils: TextureUtils;
-  // The renderer can retain state, so these tests have the possibility of
-  // getting different results in different orders. However, our use of the
-  // renderer *should* always return its state to what it was before to avoid
-  // this kind of problem (and many other headaches).
-  const renderer = new WebGLRenderer({canvas});
-  renderer.debug.checkShaderErrors = true;
 
   setup(() => {
     textureUtils = new TextureUtils(renderer);
   });
-  teardown(() => {
-    textureUtils.dispose();
+
+  teardown(async () => {
+    await textureUtils.dispose();
   });
+
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
@@ -89,6 +101,7 @@ suite('TextureUtils', () => {
       expect(
           textureMatchesMeta(target.texture, {mapping: 'Cube', url: EQUI_URL}))
           .to.be.ok;
+      target.texture.dispose();
     });
     test('throws on invalid texture', async () => {
       try {
@@ -101,14 +114,9 @@ suite('TextureUtils', () => {
   });
 
   suite('generating an environment map and skybox', () => {
-    let textures: EnvironmentMapAndSkybox;
-    teardown(() => {
-      textures.environmentMap.dispose();
-      textures.skybox!.dispose();
-    });
-
     test('returns an environmentMap and skybox texture from url', async () => {
-      textures = await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
+      const textures =
+          await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
       expect((textures.skybox!.texture as any).isTexture).to.be.ok;
       expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
 
@@ -125,7 +133,7 @@ suite('TextureUtils', () => {
     test(
         'returns an environmentMap and skybox texture from an HDR url',
         async () => {
-          textures =
+          const textures =
               await textureUtils.generateEnvironmentMapAndSkybox(HDR_EQUI_URL);
           expect((textures.skybox!.texture as any).isTexture).to.be.ok;
           expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
@@ -144,7 +152,7 @@ suite('TextureUtils', () => {
     test(
         'returns an environmentMap and skybox texture from two urls',
         async () => {
-          textures = await textureUtils.generateEnvironmentMapAndSkybox(
+          const textures = await textureUtils.generateEnvironmentMapAndSkybox(
               EQUI_URL, HDR_EQUI_URL);
 
           expect((textures.skybox!.texture as any).isTexture).to.be.ok;

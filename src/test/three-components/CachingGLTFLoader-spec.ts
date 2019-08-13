@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
+import {$evictionPolicy, $releaseFromCache, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
@@ -56,6 +56,27 @@ suite('CachingGLTFLoader', () => {
       const scene = await loader.load(ASTRONAUT_GLB_PATH);
       expect(scene).to.be.ok;
       expect(scene!.type).to.be.equal('Scene');
+    });
+
+    suite('with items outside of the eviction threshold', () => {
+      let naturalEvictionThreshold: number;
+
+      setup(() => {
+        naturalEvictionThreshold = loader[$evictionPolicy].evictionThreshold;
+        loader[$evictionPolicy].evictionThreshold = 0;
+      });
+
+      teardown(() => {
+        loader[$evictionPolicy].evictionThreshold = naturalEvictionThreshold;
+      });
+
+      test('deletinates them when they are fully released', async () => {
+        const scene = await loader.load(ASTRONAUT_GLB_PATH);
+
+        expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
+        scene![$releaseFromCache]();
+        expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.false;
+      });
     });
   });
 });

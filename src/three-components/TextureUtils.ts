@@ -456,23 +456,31 @@ void main() {
   }
 
   async dispose() {
-    for (const environmentMapLoads of this[$environmentMapCache].values()) {
-      const environmentMap = await environmentMapLoads;
-      if (environmentMap != null) {
-        environmentMap.dispose();
-      }
-    }
+    const allTargetsLoad: Array<Promise<WebGLRenderTarget>> = [];
+
+    // NOTE(cdata): We would use for-of iteration on the maps here, but
+    // IE11 doesn't have the necessary iterator-returning methods. So,
+    // disposal of these render targets is kind of convoluted as a result.
+
+    this[$environmentMapCache].forEach((targetLoads) => {
+      allTargetsLoad.push(targetLoads);
+    });
+
+    this[$skyboxCache].forEach((targetLoads) => {
+      allTargetsLoad.push(targetLoads);
+    });
 
     this[$environmentMapCache].clear();
+    this[$skyboxCache].clear();
 
-    for (const skyboxLoads of this[$skyboxCache].values()) {
-      const skybox = await skyboxLoads;
-      if (skybox != null) {
-        skybox.dispose();
+    for (const targetLoads of allTargetsLoad) {
+      try {
+        const target = await targetLoads;
+        target.dispose();
+      } catch (e) {
+        // Suppress errors, so that all render targets will be disposed
       }
     }
-
-    this[$skyboxCache].clear();
 
     if (this[$generatedEnvironmentMap] != null) {
       this[$generatedEnvironmentMap]!.dispose();
