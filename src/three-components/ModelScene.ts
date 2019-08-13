@@ -219,6 +219,20 @@ export default class ModelScene extends Scene {
       this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
       this.framedHeight = Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
     }
+
+    // Immediately queue a render to happen at microtask timing. This is
+    // necessary because setting the width and height of the canvas has the
+    // side-effect of clearing it, and also if we wait for the next rAF to
+    // render again we might get hit with yet-another-resize, or worse we
+    // may not actually be marked as dirty and so render will just not
+    // happen. Queuing a render to happen here means we will render twice on
+    // a resize frame, but it avoids most of the visual artifacts associated
+    // with other potential mitigations for this problem. See discussion in
+    // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
+    // additional considerations.
+    Promise.resolve().then(() => {
+      this.renderer.render(performance.now());
+    });
   }
 
   configureStageLighting(intensityScale: number) {
