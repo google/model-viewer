@@ -29,14 +29,14 @@ export const generatePMREM =
         WebGLRenderTarget => {
           const roughnessExtra = [1.0, 0.7, 0.5];
           const {cubeUVRenderTarget, cubeLods, meshes} =
-              setup(cubeTarget, roughnessExtra.length);
+              setup(cubeTarget, roughnessExtra);
           // This hack is necessary for now because CubeUV is not really a
           // first-class citizen within the Standard material yet, and it does
           // not seem to be easy to add new uniforms to existing materials.
           renderer.properties.get(cubeUVRenderTarget.texture).__maxMipLevel =
               cubeLods.length;
 
-          generateMipmaps(cubeTarget, cubeLods, renderer, roughnessExtra);
+          generateMipmaps(cubeTarget, cubeLods, renderer);
           packMipmaps(cubeUVRenderTarget, meshes, renderer);
 
           cubeLods.forEach((target) => {
@@ -50,73 +50,80 @@ export const generatePMREM =
           return cubeUVRenderTarget;
         };
 
-const setup = (cubeTarget: WebGLRenderTargetCube, extraLods: number) => {
-  const params = {
-    format: cubeTarget.texture.format,
-    magFilter: NearestFilter,
-    minFilter: NearestFilter,
-    type: cubeTarget.texture.type,
-    generateMipmaps: false,
-    anisotropy: cubeTarget.texture.anisotropy,
-    encoding: cubeTarget.texture.encoding
-  };
+const setup =
+    (cubeTarget: WebGLRenderTargetCube, roughnessExtra: Array<number>) => {
+      const extraLods = roughnessExtra.length;
+      const params = {
+        format: cubeTarget.texture.format,
+        magFilter: NearestFilter,
+        minFilter: NearestFilter,
+        type: cubeTarget.texture.type,
+        generateMipmaps: false,
+        anisotropy: cubeTarget.texture.anisotropy,
+        encoding: cubeTarget.texture.encoding
+      };
 
-  // Hard-coded to max faceSize = 256 until we can add a uniform.
-  const lodMin = 2;
-  const lodMax = 8;
-  const numLods = lodMax - lodMin + extraLods;
+      // Hard-coded to max faceSize = 256 until we can add a uniform.
+      const lodMin = 2;
+      const lodMax = 8;
+      const numLods = lodMax - lodMin + extraLods;
 
-  // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
-  // Math.log2
+      // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
+      // Math.log2
 
-  const cubeLods: Array<WebGLRenderTargetCube> = [];
-  const meshes: Array<Mesh> = [];
+      const cubeLods: Array<WebGLRenderTargetCube> = [];
+      const meshes: Array<Mesh> = [];
 
-  let offsetY = 0;
-  for (let i = 0; i <= numLods; i++) {
-    const lod = i < extraLods ? lodMin : i + lodMin - extraLods;
-    const sizeLod = Math.pow(2, lod);
-    let target = cubeTarget;
-    if (i < numLods) {
-      const renderTarget = new WebGLRenderTargetCube(sizeLod, sizeLod, params);
-      renderTarget.texture.name = 'PMREMGenerator.cube' + i;
-      cubeLods.push(renderTarget);
-      target = renderTarget;
-    }
-    const offsetX = i < extraLods ? (extraLods - i) * 3 * (sizeLod + 2) : 0;
-    appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY);
-    if (i >= extraLods) {
-      offsetY += 2 * (sizeLod + 2);
-    }
-  }
-  const plane = new PlaneBufferGeometry(1, 1);
-  const material = new BlurShader();
-  material.side = DoubleSide;
-  material.uniforms.envMap.value = cubeLods[extraLods].texture;
-  material.uniforms.inputEncoding.value =
-      encodings[cubeLods[extraLods].texture.encoding];
-  material.uniforms.sigma.value = Math.PI;
-  material.uniforms.outputEncoding.value =
-      encodings[cubeTarget.texture.encoding];
-  const planeMesh = new Mesh(plane, material);
-  planeMesh.position.x = 0.5 + (extraLods + 1) * 3 * (Math.pow(2, lodMin) + 2);
-  planeMesh.position.y = 0.5;
-  meshes.push(planeMesh);
+      for (let i = lodMin; i < numLods; i++) {
+        const sizeLod = Math.pow(2, i);
+        const renderTarget =
+            new WebGLRenderTargetCube(sizeLod, sizeLod, params);
+        renderTarget.texture.name = 'PMREMGenerator.cube' + i;
+        cubeLods.push(renderTarget);
+      }
 
-  const cubeUVRenderTarget =
-      new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
-  cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
-  cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+      let offsetY = 0;
+      for (let i = 0; i <= numLods; i++) {
+        const lod = Math.max(i + lodMin - extraLods, lodMin);
+        const target = i == numLods ? cubeTarget : cubeLods[lod - lodMin];
+        const sizeLod = Math.pow(2, lod);
+        const offsetX = i < extraLods ? (extraLods - i) * 3 * (sizeLod + 2) : 0;
+        const roughness = i < extraLods ? roughnessExtra[i] : 0;
+        appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
+        if (i >= extraLods) {
+          offsetY += 2 * (sizeLod + 2);
+        }
+      }
+      const plane = new PlaneBufferGeometry(1, 1);
+      const material = new BlurShader();
+      material.side = DoubleSide;
+      material.uniforms.envMap.value = cubeLods[extraLods].texture;
+      material.uniforms.inputEncoding.value =
+          encodings[cubeLods[extraLods].texture.encoding];
+      material.uniforms.sigma.value = Math.PI;
+      material.uniforms.outputEncoding.value =
+          encodings[cubeTarget.texture.encoding];
+      const planeMesh = new Mesh(plane, material);
+      planeMesh.position.x =
+          0.5 + (extraLods + 1) * 3 * (Math.pow(2, lodMin) + 2);
+      planeMesh.position.y = 0.5;
+      meshes.push(planeMesh);
 
-  return {cubeUVRenderTarget, cubeLods, meshes};
-};
+      const cubeUVRenderTarget =
+          new WebGLRenderTarget(3 * (Math.pow(2, lodMax) + 2), offsetY, params);
+      cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
+      cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+
+      return {cubeUVRenderTarget, cubeLods, meshes};
+    };
 
 const appendLodMeshes =
     (meshes: Array<Mesh>,
      target: WebGLRenderTargetCube,
      sizeLod: number,
      offsetX: number,
-     offsetY: number) => {
+     offsetY: number,
+     roughness: number) => {
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
@@ -130,8 +137,14 @@ const appendLodMeshes =
       }
       for (let i = 0; i < 6; i++) {
         // 6 Cube Faces
-        const material = new PackingShader();
-        material.uniforms.texelSize.value = texelSize;
+        const material =
+            roughness == 0 ? new PackingShader() : new BlurShader();
+        if (roughness == 0) {
+          material.uniforms.texelSize.value = texelSize;
+        } else {
+          material.uniforms.sigma.value =
+              Math.PI * roughness * roughness / (1 + roughness);
+        }
         material.uniforms.envMap.value = target.texture;
         material.uniforms.inputEncoding.value =
             encodings[target.texture.encoding];
@@ -152,8 +165,7 @@ const appendLodMeshes =
 const generateMipmaps =
     (cubeTarget: WebGLRenderTargetCube,
      cubeLods: Array<WebGLRenderTargetCube>,
-     renderer: WebGLRenderer,
-     roughnessExtra: Array<number>) => {
+     renderer: WebGLRenderer) => {
       const cubeCamera = new CubeCamera(0.1, 100, 1);
       cubeCamera.renderTarget.dispose();
       let mipmapShader = new MipmapShader();
@@ -167,29 +179,13 @@ const generateMipmaps =
       mipmapShader.uniforms.inputEncoding.value =
           encodings[cubeTarget.texture.encoding];
       for (let i = cubeLods.length - 1; i >= 0; i--) {
-        if (i == roughnessExtra.length - 1) {
-          mipmapShader = new BlurShader();
-          boxMesh.material = mipmapShader;
-          (boxMesh.material as Material).side = DoubleSide;
-          mipmapShader.uniforms.envMap.value = cubeLods[i + 1].texture;
-          mipmapShader.uniforms.inputEncoding.value =
-              encodings[cubeLods[i + 1].texture.encoding];
-        }
         const {uniforms} = mipmapShader;
-        if (i < roughnessExtra.length) {
-          const roughness = roughnessExtra[i];
-          const sigma = Math.PI * roughness * roughness / (1 + roughness);
-          uniforms.sigma.value = sigma;
-        }
         cubeCamera.renderTarget = cubeLods[i];
         uniforms.outputEncoding.value = encodings[cubeLods[i].texture.encoding];
         cubeCamera.update(renderer, mipmapScene);
-        if (i >= roughnessExtra.length) {
-          uniforms.texelSize.value = 1.0 / cubeLods[i].width;
-          uniforms.envMap.value = cubeLods[i].texture;
-          uniforms.inputEncoding.value =
-              encodings[cubeLods[i].texture.encoding];
-        }
+        uniforms.texelSize.value = 1.0 / cubeLods[i].width;
+        uniforms.envMap.value = cubeLods[i].texture;
+        uniforms.inputEncoding.value = encodings[cubeLods[i].texture.encoding];
       }
     };
 
@@ -208,18 +204,7 @@ const packMipmaps =
       renderer.render(packingScene, flatCamera);
     };
 
-class MipmapShader extends RawShaderMaterial {
-  constructor() {
-    super({
-
-      uniforms: {
-        texelSize: {value: 0.5},
-        envMap: {value: null},
-        inputEncoding: {value: 2},
-        outputEncoding: {value: 2},
-      },
-
-      vertexShader: `
+const commonVertexShader = `
 precision mediump float;
 precision mediump int;
 uniform mat4 modelViewMatrix;
@@ -233,7 +218,20 @@ void main() {
     vPosition = position;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
-`,
+`;
+
+class MipmapShader extends RawShaderMaterial {
+  constructor() {
+    super({
+
+      uniforms: {
+        texelSize: {value: 0.5},
+        envMap: {value: null},
+        inputEncoding: {value: 2},
+        outputEncoding: {value: 2},
+      },
+
+      vertexShader: commonVertexShader,
 
       fragmentShader: `
 precision mediump float;
@@ -278,25 +276,12 @@ class BlurShader extends RawShaderMaterial {
       uniforms: {
         sigma: {value: 0.5},
         envMap: {value: null},
+        faceIndex: {value: 0},
         inputEncoding: {value: 2},
         outputEncoding: {value: 2},
       },
 
-      vertexShader: `
-precision mediump float;
-precision mediump int;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-attribute vec3 position;
-attribute vec2 uv;
-varying vec2 vUv;
-varying vec3 vPosition;
-void main() {
-    vUv = uv;
-    vPosition = position;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-}
-`,
+      vertexShader: commonVertexShader,
 
       fragmentShader: `
 precision mediump float;
@@ -305,8 +290,10 @@ varying vec2 vUv;
 varying vec3 vPosition;
 uniform float sigma;
 uniform samplerCube envMap;
+uniform int faceIndex;
 const float texelSize = 0.5;
 const float invAngleTolerance = 1.0 / (2.0 * atan(texelSize));
+${getDirectionChunk}
 ${texelIO}
 vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
   float angle = sigma - acos(dot(sampleDir, outputDir));
@@ -326,7 +313,14 @@ vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir){
   return soFar;
 }
 void main() {
-  vec3 outputDir = normalize(vPosition);
+  vec2 uv = vUv;
+  if ((vUv.x < 0.0 || vUv.x > 1.0) && (vUv.y < 0.0 || vUv.y > 1.0)) {
+    // The corner pixels do not represent any one face, so to get consistent 
+    // interpolation, they must average the three neighboring face corner pixels, 
+    // here approximated by sampling exactly at the corner.
+    uv -= 0.25 * texelSize * sign(vUv);
+  }
+  vec3 outputDir = normalize(getDirection(uv, faceIndex));
   vec4 color = vec4(0.0);
   for(float x = 0.5 * texelSize; x < 1.0; x += texelSize){
     for(float y = 0.5 * texelSize; y < 1.0; y += texelSize){
@@ -359,24 +353,12 @@ class PackingShader extends RawShaderMaterial {
       uniforms: {
         texelSize: {value: 0.5},
         envMap: {value: null},
+        faceIndex: {value: 0},
         inputEncoding: {value: 2},
         outputEncoding: {value: 2},
-        faceIndex: {value: 0},
       },
 
-      vertexShader: `
-precision mediump float;
-precision mediump int;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-attribute vec3 position;
-attribute vec2 uv;
-varying vec2 vUv;
-void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-}
-`,
+      vertexShader: commonVertexShader,
 
       fragmentShader: `
 precision mediump float;
