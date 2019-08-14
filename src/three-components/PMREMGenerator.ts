@@ -82,8 +82,8 @@ const setup =
       }
 
       let offsetY = 0;
-      const sizeMin = Math.pow(2, lodMin);
-      const sizeMax = Math.pow(2, lodMax);
+      const sizeMin = Math.pow(2, lodMin) + 2;
+      const sizeMax = Math.pow(2, lodMax) + 2;
       for (let lod = 0; lod <= lodMax; lod++) {
         const j = Math.max(lod - lodMin, 0);
         const target = lod == lodMax ? cubeTarget : cubeLods[j];
@@ -92,14 +92,21 @@ const setup =
         const nExtra = lod <= lodMin ? extraLods : 0;
         for (let i = 0; i <= nExtra; ++i) {
           const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
-          appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
-          offsetX += 3 * (sizeMin + 2);
+          appendLodMeshes(
+              meshes,
+              target,
+              sizeLod,
+              offsetX,
+              offsetY,
+              roughness,
+              i > 0 || lod < lodMin);
+          offsetX += 3 * sizeMin;
         }
         offsetY += 2 * (sizeLod + 2);
       }
 
       const cubeUVRenderTarget =
-          new WebGLRenderTarget(3 * (sizeMax + 2), offsetY, params);
+          new WebGLRenderTarget(3 * sizeMax, offsetY, params);
       cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
       cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
@@ -112,7 +119,8 @@ const appendLodMeshes =
      sizeLod: number,
      offsetX: number,
      offsetY: number,
-     roughness: number) => {
+     roughness: number,
+     blur: boolean) => {
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
@@ -126,14 +134,14 @@ const appendLodMeshes =
       }
       for (let i = 0; i < 6; i++) {
         // 6 Cube Faces
-        const material =
-            roughness == 0 ? new PackingShader() : new BlurShader();
-        if (roughness == 0) {
-          material.uniforms.texelSize.value = texelSize;
-        } else {
-          material.uniforms.sigma.value =
-              Math.PI * roughness * roughness / (1 + roughness);
+        const material = blur ? new BlurShader() : new PackingShader();
+        if (blur) {
+          const sigma_r = Math.PI * roughness * roughness / (1 + roughness);
+          const sigma_m = 2 * Math.atan(texelSize);
+          material.uniforms.sigma.value = Math.max(sigma_r, sigma_m);
         }
+
+        material.uniforms.texelSize.value = texelSize;
         material.uniforms.envMap.value = target.texture;
         material.uniforms.inputEncoding.value =
             encodings[target.texture.encoding];
@@ -264,6 +272,7 @@ class BlurShader extends RawShaderMaterial {
 
       uniforms: {
         sigma: {value: 0.5},
+        texelSize: {value: 0.5},
         envMap: {value: null},
         faceIndex: {value: 0},
         inputEncoding: {value: 2},
@@ -278,10 +287,11 @@ precision mediump int;
 varying vec2 vUv;
 varying vec3 vPosition;
 uniform float sigma;
+uniform float texelSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
-const float texelSize = 0.5;
-const float invAngleTolerance = 1.0 / (2.0 * atan(texelSize));
+const float sourceTexelSize = 0.5;
+const float invAngleTolerance = 1.0 / (2.0 * atan(sourceTexelSize));
 ${getDirectionChunk}
 ${texelIO}
 vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
@@ -307,12 +317,12 @@ void main() {
     // The corner pixels do not represent any one face, so to get consistent 
     // interpolation, they must average the three neighboring face corner pixels, 
     // here approximated by sampling exactly at the corner.
-    uv -= 0.25 * texelSize * sign(vUv);
+    uv -= 0.5 * texelSize * sign(vUv);
   }
   vec3 outputDir = normalize(getDirection(uv, faceIndex));
   vec4 color = vec4(0.0);
-  for(float x = 0.5 * texelSize; x < 1.0; x += texelSize){
-    for(float y = 0.5 * texelSize; y < 1.0; y += texelSize){
+  for(float x = 0.5 * sourceTexelSize; x < 1.0; x += sourceTexelSize){
+    for(float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize){
       vec3 sampleDir = normalize(vec3(x, y, 1.0));
       color = accumulateFaces(color, outputDir, sampleDir);
       sampleDir.x *= -1.0;

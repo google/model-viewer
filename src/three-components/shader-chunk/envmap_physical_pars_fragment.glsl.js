@@ -69,7 +69,7 @@ export const envmapChunk = /* glsl */ `
 
 		#endif
 
-		reflectVec = mix(reflectVec, geometry.normal, roughness * roughness);
+		reflectVec = normalize( mix( reflectVec, geometry.normal, roughness * roughness) );
 
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 
