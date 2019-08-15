@@ -74,7 +74,7 @@ vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
   sigma += max(max(dxy.x, dxy.y), dxy.z);
 
-  float mip = clamp(-log2(sigma), 0.0, cubeUV_maxMipLevel);
+  float mip = clamp(-log2(sigma), 2.0, cubeUV_maxMipLevel);
   float mipF = fract(mip);
   float mipInt = floor(mip);
 
