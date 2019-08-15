@@ -63,9 +63,13 @@ const setup =
         encoding: cubeTarget.texture.encoding
       };
 
-      // Hard-coded to max faceSize = 256 until we can add a uniform.
+      // Hard-coded to lodMax = 8 until we can add a uniform.
       const lodMin = 3;
       const lodMax = 8;
+      // lodBase is the mip Level that is integrated to form all of the extra
+      // levels, but is not output directly into the PMREM texture. DO NOT
+      // CHANGE, as the Blur shader below is hard coded for this size.
+      const lodBase = 2;
 
       // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
       // Math.log2
@@ -73,7 +77,7 @@ const setup =
       const cubeLods: Array<WebGLRenderTargetCube> = [];
       const meshes: Array<Mesh> = [];
 
-      for (let i = lodMin - 1; i < lodMax; i++) {
+      for (let i = lodBase; i < lodMax; i++) {
         const sizeLod = Math.pow(2, i);
         const renderTarget =
             new WebGLRenderTargetCube(sizeLod, sizeLod, params);
@@ -91,7 +95,7 @@ const setup =
         for (let i = 0; i <= nExtra; ++i) {
           const target = lod == lodMax ?
               cubeTarget :
-              i > 0 ? cubeLods[0] : cubeLods[lod - lodMin + 1];
+              i > 0 ? cubeLods[0] : cubeLods[lod - lodBase];
           const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
           appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
           offsetX += 3 * sizeMin;
@@ -130,9 +134,8 @@ const appendLodMeshes =
         const material =
             roughness !== 0 ? new BlurShader() : new PackingShader();
         if (roughness !== 0) {
-          const sigma_r = Math.PI * roughness * roughness / (1 + roughness);
-          const sigma_m = 2 * Math.atan(texelSize);
-          material.uniforms.sigma.value = Math.max(sigma_r, sigma_m);
+          const sigma = Math.PI * roughness * roughness / (1 + roughness);
+          material.uniforms.sigma.value = sigma;
         }
 
         material.uniforms.texelSize.value = texelSize;
@@ -285,12 +288,10 @@ uniform float texelSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
 const float sourceTexelSize = 0.5;
-const float invAngleTolerance = 1.0 / (2.0 * atan(sourceTexelSize));
 ${getDirectionChunk}
 ${texelIO}
 vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
-  float angle = sigma - acos(dot(sampleDir, outputDir));
-  float weight = clamp(angle * invAngleTolerance, 0.0, 1.0);
+  float weight = 1.0 - smoothstep(0.0, sigma, acos(dot(sampleDir, outputDir)));
   if(weight > 0.0){
     soFar += weight * inputTexelToLinear(textureCube(envMap, sampleDir));
   }
