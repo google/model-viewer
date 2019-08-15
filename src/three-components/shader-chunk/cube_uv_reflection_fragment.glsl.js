@@ -4,7 +4,7 @@ export const cubeUVChunk = /* glsl */ `
 #ifdef ENVMAP_TYPE_CUBE_UV
 
 const float cubeUV_maxMipLevel = 8.0;
-const float cubeUV_minMipLevel = 2.0;
+const float cubeUV_minMipLevel = 3.0;
 #define cubeUV_sizeY(maxMip) (4.0 * (maxMip + exp2(maxMip)) + 2.0)
 const float cubeUV_margin = cubeUV_sizeY(cubeUV_minMipLevel - 1.0);
 

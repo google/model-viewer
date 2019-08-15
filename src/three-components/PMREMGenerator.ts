@@ -43,7 +43,7 @@ export const generatePMREM =
             target.dispose();
           });
           meshes.forEach((mesh) => {
-            (mesh.material as Material).dispose();
+            // (mesh.material as Material).dispose();
             mesh.geometry.dispose();
           });
 
@@ -64,7 +64,7 @@ const setup =
       };
 
       // Hard-coded to max faceSize = 256 until we can add a uniform.
-      const lodMin = 2;
+      const lodMin = 3;
       const lodMax = 8;
 
       // Math.log(cubeTarget.width) / Math.log(2) - 2;  // IE11 doesn't support
@@ -73,7 +73,7 @@ const setup =
       const cubeLods: Array<WebGLRenderTargetCube> = [];
       const meshes: Array<Mesh> = [];
 
-      for (let i = lodMin; i < lodMax; i++) {
+      for (let i = lodMin - 1; i < lodMax; i++) {
         const sizeLod = Math.pow(2, i);
         const renderTarget =
             new WebGLRenderTargetCube(sizeLod, sizeLod, params);
@@ -85,11 +85,13 @@ const setup =
       const sizeMin = Math.pow(2, lodMin) + 2;
       const sizeMax = Math.pow(2, lodMax) + 2;
       for (let lod = lodMin; lod <= lodMax; lod++) {
-        const target = lod == lodMax ? cubeTarget : cubeLods[lod - lodMin];
         const sizeLod = Math.pow(2, lod);
         let offsetX = 0;
         const nExtra = lod == lodMin ? extraLods : 0;
         for (let i = 0; i <= nExtra; ++i) {
+          const target = lod == lodMax ?
+              cubeTarget :
+              i > 0 ? cubeLods[0] : cubeLods[lod - lodMin + 1];
           const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
           appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
           offsetX += 3 * sizeMin;
