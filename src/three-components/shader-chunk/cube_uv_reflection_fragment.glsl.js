@@ -5,17 +5,20 @@ export const cubeUVChunk = /* glsl */ `
 
 const float cubeUV_maxMipLevel = 8.0;
 const float cubeUV_minMipLevel = 2.0;
-const float cubeUV_maxSize = exp2(cubeUV_maxMipLevel);
-const float cubeUV_minSize = exp2(cubeUV_minMipLevel);
-const vec2 texelSize =
-  1.0 / vec2(3.0 * (cubeUV_maxSize + 2.0), 
-             4.0 * (cubeUV_maxMipLevel + cubeUV_maxSize) + 2.0);
+#define cubeUV_sizeY(maxMip) (4.0 * (maxMip + exp2(maxMip)) + 2.0)
+const float cubeUV_margin = cubeUV_sizeY(cubeUV_minMipLevel - 1.0);
+
+const vec2 cubeUV_texelSize =
+  1.0 / vec2(3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
+             cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
 
 ${getFaceChunk}
 ${getUVChunk}
 
-vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float filterInt, float mipInt) {
+vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   int face = getFace(direction);
+  float filterInt = max(cubeUV_minMipLevel - mipInt, 0.0);
+  mipInt = max(mipInt, cubeUV_minMipLevel);
   float faceSize = exp2(mipInt);
 
   vec2 uv = getUV(direction, face) * faceSize;
@@ -27,44 +30,31 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float filterInt, float mip
     face -= 3;
   }
   uv.x += float(face) * (faceSize + 2.0);
-  uv.y += 4.0 * (mipInt - 1.0) + 2.0 * faceSize + 2.0;
-  uv.x += filterInt * 3.0 * (cubeUV_minSize + 2.0);
-  uv *= texelSize;
+  uv.y += cubeUV_sizeY(mipInt - 1.0) - cubeUV_margin;
+  uv.x += filterInt * 3.0 * (exp2(cubeUV_minMipLevel) + 2.0);
+  uv *= cubeUV_texelSize;
   uv.y = 1.0 - uv.y;
 
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x += texelSize.x;
+  uv.x += cubeUV_texelSize.x;
   vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.y -= texelSize.y;
+  uv.y -= cubeUV_texelSize.y;
   vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x -= texelSize.x;
+  uv.x -= cubeUV_texelSize.x;
   vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
   return mix(tm, bm, f.y);
 }
 
-vec3 trilinearCubeUV(sampler2D envMap, vec3 direction, float filterInt, float mipInt, float f){
-  vec3 color0 = bilinearCubeUV(envMap, direction, filterInt, mipInt);
-  if (f == 0.0) {
-    return color0;
-  } else {
-    vec3 color1 = bilinearCubeUV(envMap, direction, filterInt, mipInt + 1.0);
-    return mix(color0, color1, f);
-  }
-}
-
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {	
-  float filterF = 0.0;
-  float filterInt = 0.0;
+  float filterMip = 0.0;
   if(roughness >= 0.7){
-    filterF = (roughness - 0.7) / (1.0 - 0.7);
-    filterInt = 2.0;
+    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 3.0;
   } else if(roughness >= 0.5){
-    filterF = (roughness - 0.5) / (0.7 - 0.5);
-    filterInt = 1.0;
+    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 2.0;
   } else if(roughness >= 0.32){
-    filterF = (roughness - 0.32) / (0.5 - 0.32);
+    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 1.0;
   }
 
   roughness = min(roughness, 0.32);
@@ -74,16 +64,16 @@ vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
   sigma += max(max(dxy.x, dxy.y), dxy.z);
 
-  float mip = clamp(-log2(sigma), 2.0, cubeUV_maxMipLevel);
+  float mip = clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
   float mipF = fract(mip);
   float mipInt = floor(mip);
 
-  vec3 color0 = trilinearCubeUV(envMap, sampleDir, filterInt, mipInt, mipF);
-  if (filterF == 0.0) {
+  vec3 color0 = bilinearCubeUV(envMap, sampleDir, mipInt);
+  if (mipF == 0.0) {
     return vec4(color0, 1.0);
   } else {
-    vec3 color1 = trilinearCubeUV(envMap, sampleDir, filterInt + 1.0, mipInt, mipF);
-    return vec4(mix(color0, color1, filterF), 1.0);
+    vec3 color1 = bilinearCubeUV(envMap, sampleDir, mipInt + 1.0);
+    return vec4(mix(color0, color1, mipF), 1.0);
   }
 }
 #endif

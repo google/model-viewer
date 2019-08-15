@@ -84,22 +84,14 @@ const setup =
       let offsetY = 0;
       const sizeMin = Math.pow(2, lodMin) + 2;
       const sizeMax = Math.pow(2, lodMax) + 2;
-      for (let lod = 0; lod <= lodMax; lod++) {
-        const j = Math.max(lod - lodMin, 0);
-        const target = lod == lodMax ? cubeTarget : cubeLods[j];
+      for (let lod = lodMin; lod <= lodMax; lod++) {
+        const target = lod == lodMax ? cubeTarget : cubeLods[lod - lodMin];
         const sizeLod = Math.pow(2, lod);
         let offsetX = 0;
-        const nExtra = lod <= lodMin ? extraLods : 0;
+        const nExtra = lod == lodMin ? extraLods : 0;
         for (let i = 0; i <= nExtra; ++i) {
           const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
-          appendLodMeshes(
-              meshes,
-              target,
-              sizeLod,
-              offsetX,
-              offsetY,
-              roughness,
-              i > 0 || lod < lodMin);
+          appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
           offsetX += 3 * sizeMin;
         }
         offsetY += 2 * (sizeLod + 2);
@@ -119,8 +111,7 @@ const appendLodMeshes =
      sizeLod: number,
      offsetX: number,
      offsetY: number,
-     roughness: number,
-     blur: boolean) => {
+     roughness: number) => {
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
@@ -134,8 +125,9 @@ const appendLodMeshes =
       }
       for (let i = 0; i < 6; i++) {
         // 6 Cube Faces
-        const material = blur ? new BlurShader() : new PackingShader();
-        if (blur) {
+        const material =
+            roughness !== 0 ? new BlurShader() : new PackingShader();
+        if (roughness !== 0) {
           const sigma_r = Math.PI * roughness * roughness / (1 + roughness);
           const sigma_m = 2 * Math.atan(texelSize);
           material.uniforms.sigma.value = Math.max(sigma_r, sigma_m);
