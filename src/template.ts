@@ -252,7 +252,7 @@ template.innerHTML = `
 
     <div class="slot ar-button">
       <slot name="ar-button">
-        <a id="default-ar-button" class="fab" href="#"
+        <a id="default-ar-button" class="fab"
             tabindex="2"
             aria-label="View this 3D model up close">
           ${ARGlyph}
