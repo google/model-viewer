@@ -15,6 +15,8 @@
 
 import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
+import {IS_IE} from '../constants.js';
+
 import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chunk/common.glsl.js';
 
 /**
@@ -263,6 +265,32 @@ void main() {
   }
 }
 
+// This is a hack because IE claims that a shader which unrolls a loop to access
+// 96 texture lookups has "complexity which exceeds allowed limits", however 48
+// seems to be fine, so we subsample. This could be improved if someone cares a
+// lot about IE.
+const start = IS_IE ? `
+      vec3 sampleDir = normalize(vec3(x, x, 1.0));
+` :
+                      `
+    for(float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize){
+      vec3 sampleDir = normalize(vec3(x, y, 1.0));
+`;
+const end = IS_IE ? `` : `
+    }
+`;
+const sample4or8 = `
+${start}
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.y *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+${end}
+`;
+
 class BlurShader extends RawShaderMaterial {
   constructor() {
     super({
@@ -317,16 +345,7 @@ void main() {
   vec3 outputDir = normalize(getDirection(uv, faceIndex));
   vec4 color = vec4(0.0);
   for(float x = 0.5 * sourceTexelSize; x < 1.0; x += sourceTexelSize){
-    for(float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize){
-      vec3 sampleDir = normalize(vec3(x, y, 1.0));
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.x *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.y *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.x *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-    }
+${sample4or8}
   }
   gl_FragColor = linearToOutputTexel(color / color.a);
 }
