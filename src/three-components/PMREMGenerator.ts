@@ -15,7 +15,7 @@
 
 import {BoxBufferGeometry, CubeCamera, CubeUVReflectionMapping, DoubleSide, Material, Mesh, NearestFilter, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetCube} from 'three';
 
-import {IS_IE} from '../constants.js';
+import {IS_IE11} from '../constants.js';
 
 import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chunk/common.glsl.js';
 
@@ -29,9 +29,9 @@ import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chun
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
         WebGLRenderTarget => {
-          const roughnessExtra = [0.5, 0.7, 1.0];
+          const extraLodsRoughness = [0.5, 0.7, 1.0];
           const {cubeUVRenderTarget, cubeLods, meshes} =
-              setup(cubeTarget, roughnessExtra);
+              setup(cubeTarget, extraLodsRoughness);
           // This hack is necessary for now because CubeUV is not really a
           // first-class citizen within the Standard material yet, and it does
           // not seem to be easy to add new uniforms to existing materials.
@@ -53,8 +53,8 @@ export const generatePMREM =
         };
 
 const setup =
-    (cubeTarget: WebGLRenderTargetCube, roughnessExtra: Array<number>) => {
-      const extraLods = roughnessExtra.length;
+    (cubeTarget: WebGLRenderTargetCube, extraLodsRoughness: Array<number>) => {
+      const extraLods = extraLodsRoughness.length;
       const params = {
         format: cubeTarget.texture.format,
         magFilter: NearestFilter,
@@ -98,7 +98,7 @@ const setup =
           const target = lod == lodMax ?
               cubeTarget :
               i > 0 ? cubeLods[0] : cubeLods[lod - lodBase];
-          const roughness = i > 0 ? roughnessExtra[i - 1] : 0;
+          const roughness = i > 0 ? extraLodsRoughness[i - 1] : 0;
           appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
           offsetX += 3 * sizeMin;
         }
@@ -269,14 +269,14 @@ void main() {
 // 96 texture lookups has "complexity which exceeds allowed limits", however 48
 // seems to be fine, so we subsample. This could be improved if someone cares a
 // lot about IE.
-const start = IS_IE ? `
+const start = IS_IE11 ? `
       vec3 sampleDir = normalize(vec3(x, x, 1.0));
 ` :
-                      `
+                        `
     for(float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize){
       vec3 sampleDir = normalize(vec3(x, y, 1.0));
 `;
-const end = IS_IE ? `` : `
+const end = IS_IE11 ? `` : `
     }
 `;
 const sample4or8 = `

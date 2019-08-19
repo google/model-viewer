@@ -9,8 +9,9 @@ const float cubeUV_minMipLevel = 3.0;
 const float cubeUV_margin = cubeUV_sizeY(cubeUV_minMipLevel - 1.0);
 
 const vec2 cubeUV_texelSize =
-  1.0 / vec2(3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
-             cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
+    1.0 / vec2(
+              3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
+              cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
 
 ${getFaceChunk}
 ${getUVChunk}
@@ -47,24 +48,25 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   return mix(tm, bm, f.y);
 }
 
-vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {	
+vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   float filterMip = 0.0;
-  if(roughness >= 0.7){
+  if (roughness >= 0.7) {
     filterMip = (1.0 - roughness) / (1.0 - 0.7) - 3.0;
-  } else if(roughness >= 0.5){
+  } else if (roughness >= 0.5) {
     filterMip = (0.7 - roughness) / (0.7 - 0.5) - 2.0;
-  } else if(roughness >= 0.32){
+  } else if (roughness >= 0.32) {
     filterMip = (0.5 - roughness) / (0.5 - 0.32) - 1.0;
   }
 
   roughness = min(roughness, 0.32);
-  float sigma = PI * roughness * roughness / ( 1.0 + roughness );
+  float sigma = PI * roughness * roughness / (1.0 + roughness);
 
   // Add anti-aliasing mipmap contribution
   vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
   sigma += max(max(dxy.x, dxy.y), dxy.z);
 
-  float mip = clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
+  float mip =
+      clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
   float mipF = fract(mip);
   float mipInt = floor(mip);
 

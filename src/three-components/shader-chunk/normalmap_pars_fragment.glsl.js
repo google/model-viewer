@@ -29,6 +29,7 @@ export const normalmapChunk = /* glsl */ `
 			vec3 N = normalize( surf_norm );
 			mat3 tsn = mat3( S, T, N );
 
+            // (elalish) Biased the normal mip to anti-alias the normal's screen-space derivatives
 			vec3 mapN = texture2D( normalMap, vUv, 2.0 ).xyz * 2.0 - 1.0;
 
 			mapN.xy *= normalScale;

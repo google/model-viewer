@@ -40,6 +40,7 @@ export const envmapChunk = /* glsl */ `
 
 	}
 
+	// (elalish) Changed from Blinn-Phong to Trowbridge-Reitz distribution and added anti-aliasing.
 	float getSpecularMIPLevel( const in float roughness, const in vec3 sampleVec, const in int maxMIPLevel ) {
 
 		float maxMIPLevelScalar = float( maxMIPLevel );
@@ -57,6 +58,7 @@ export const envmapChunk = /* glsl */ `
 
 	}
 
+	// (elalish) Changed the input from blinnShininessExponent to roughness, so that we can use the Trowbridge-Reitz distribution instead.
 	vec3 getLightProbeIndirectRadiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in float roughness, const in int maxMIPLevel ) {
 
 		#ifdef ENVMAP_MODE_REFLECTION
@@ -69,6 +71,7 @@ export const envmapChunk = /* glsl */ `
 
 		#endif
 
+		// (elalish) Mixing the reflection with the normal is more accurate and keeps rough objects from gathering light from behind their tangent plane.
 		reflectVec = normalize( mix( reflectVec, geometry.normal, roughness * roughness) );
 
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
