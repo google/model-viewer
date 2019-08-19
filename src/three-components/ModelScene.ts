@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import {Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import Renderer from './Renderer.js';
+import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
 
 export interface ModelSceneConfig {
@@ -67,6 +69,7 @@ export default class ModelScene extends Scene {
   public exposure: number;
   public model: Model;
   public camera: PerspectiveCamera;
+  public skyboxMesh: Mesh;
   public activeCamera: Camera;
 
 
@@ -107,6 +110,43 @@ export default class ModelScene extends Scene {
     this.pivot = new Object3D();
     this.pivot.name = 'Pivot';
 
+    const geometry = new BoxBufferGeometry(1, 1, 1);
+    geometry.removeAttribute('normal');
+    geometry.removeAttribute('uv');
+    const material = new ShaderMaterial({
+      uniforms: {envMap: {value: null}, opacity: {value: 1.0}},
+      vertexShader: ShaderLib.cube.vertexShader,
+      fragmentShader: ShaderLib.cube.fragmentShader,
+      side: BackSide,
+      depthTest: false,
+      depthWrite: false,
+      fog: false,
+    });
+    material.extensions = {
+      derivatives: true,
+      fragDepth: false,
+      drawBuffers: false,
+      shaderTextureLOD: false
+    };
+    const samplerUV = `
+#define ENVMAP_TYPE_CUBE_UV
+${cubeUVChunk}
+uniform sampler2D envMap;
+    `;
+    material.onBeforeCompile = (shader: Shader) => {
+      shader.fragmentShader =
+          shader.fragmentShader.replace('uniform samplerCube tCube;', samplerUV)
+              .replace(
+                  'vec4 texColor = textureCube( tCube, vec3( tFlip * vWorldDirection.x, vWorldDirection.yz ) );',
+                  'gl_FragColor = textureCubeUV( envMap, vWorldDirection, 0.0 );')
+              .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
+    };
+    this.skyboxMesh = new Mesh(geometry, material);
+    this.skyboxMesh.onBeforeRender = function(_renderer, _scene, camera) {
+      this.matrixWorld.copyPosition(camera.matrixWorld);
+    };
+
+    this.add(this.skyboxMesh);
     this.add(this.pivot);
     this.add(this.shadowLight);
     this.pivot.add(this.model);

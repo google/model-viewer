@@ -14,7 +14,8 @@
  */
 
 import {property} from 'lit-element';
-import {Color, Texture} from 'three';
+import {Color, ShaderMaterial, Texture} from 'three';
+
 import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
@@ -141,7 +142,11 @@ export const EnvironmentMixin = (ModelViewerElement:
             });
 
             if (skybox != null) {
-              this[$scene].background = skybox;
+              const material =
+                  this[$scene].skyboxMesh.material as ShaderMaterial;
+              (material as any).envMap = environmentMap.texture;
+              material.uniforms.envMap.value = environmentMap.texture;
+              material.needsUpdate = true;
             } else {
               if (!backgroundColor) {
                 backgroundColor = DEFAULT_BACKGROUND_COLOR;
