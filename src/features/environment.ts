@@ -144,10 +144,12 @@ export const EnvironmentMixin = (ModelViewerElement:
             if (skybox != null) {
               const material =
                   this[$scene].skyboxMesh.material as ShaderMaterial;
-              (material as any).envMap = environmentMap.texture;
-              material.uniforms.envMap.value = environmentMap.texture;
+              (material as any).envMap = skybox.texture;
+              material.uniforms.envMap.value = skybox.texture;
               material.needsUpdate = true;
+              this[$scene].add(this[$scene].skyboxMesh);
             } else {
+              this[$scene].remove(this[$scene].skyboxMesh);
               if (!backgroundColor) {
                 backgroundColor = DEFAULT_BACKGROUND_COLOR;
               }
