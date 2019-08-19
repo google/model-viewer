@@ -369,4 +369,8 @@ uniform sampler2D envMap;
     };
     return skyboxMesh;
   }
+
+  skyboxMaterial(): ShaderMaterial {
+    return this.skyboxMesh.material as ShaderMaterial;
+  }
 }
