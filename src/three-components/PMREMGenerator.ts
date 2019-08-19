@@ -24,7 +24,12 @@ import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chun
  * (PMREM) from a cubeMap environment texture. This allows different levels of
  * blur to be quickly accessed based on material roughness. It is packed into a
  * special CubeUV format that allows us to perform custom interpolation so that
- * we can support nonlinear formats such as RGBE.
+ * we can support nonlinear formats such as RGBE. Unlike a traditional mipmap
+ * chain, it only goes down to the lodMin level (below), and then creates extra
+ * even more filtered mips at the same lodMin resolution, associated with higher
+ * roughness levels. These extra mips are stored at X rather than Y offsets to
+ * help distiguish them. In this way we maintain resolution to smoothly
+ * interpolate diffuse lighting while limiting sampling computation.
  */
 export const generatePMREM =
     (cubeTarget: WebGLRenderTargetCube, renderer: WebGLRenderer):
@@ -45,7 +50,7 @@ export const generatePMREM =
             target.dispose();
           });
           meshes.forEach((mesh) => {
-            // (mesh.material as Material).dispose();
+            (mesh.material as Material).dispose();
             mesh.geometry.dispose();
           });
 
@@ -120,6 +125,9 @@ const appendLodMeshes =
      offsetX: number,
      offsetY: number,
      roughness: number) => {
+      // We pad each face with a one pixel boarder. By duplicating these points
+      // from the neighboring faces we make the texture interpolation for the
+      // output renderer much simpler and more GPU cache-friendly.
       const sizePad = sizeLod + 2;
       const texelSize = 1.0 / sizeLod;
       const plane = new PlaneBufferGeometry(1, 1);
@@ -269,27 +277,7 @@ void main() {
 // 96 texture lookups has "complexity which exceeds allowed limits", however 48
 // seems to be fine, so we subsample. This could be improved if someone cares a
 // lot about IE.
-const start = IS_IE11 ? `
-      vec3 sampleDir = normalize(vec3(x, x, 1.0));
-` :
-                        `
-    for(float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize){
-      vec3 sampleDir = normalize(vec3(x, y, 1.0));
-`;
-const end = IS_IE11 ? `` : `
-    }
-`;
-const sample4or8 = `
-${start}
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.x *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.y *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-      sampleDir.x *= -1.0;
-      color = accumulateFaces(color, outputDir, sampleDir);
-${end}
-`;
+const IE11 = IS_IE11 ? '#define IE11' : '';
 
 class BlurShader extends RawShaderMaterial {
   constructor() {
@@ -315,17 +303,18 @@ uniform float sigma;
 uniform float texelSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
-#define sourceTexelSize 0.5
+const float sourceTexelSize = 0.5;
+${IE11}
 ${getDirectionChunk}
 ${texelIO}
-vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir){
+vec4 accumulate(vec4 soFar, vec3 outputDir, vec3 sampleDir) {
   float weight = 1.0 - smoothstep(0.0, sigma, acos(dot(sampleDir, outputDir)));
-  if(weight > 0.0){
+  if (weight > 0.0) {
     soFar += weight * inputTexelToLinear(textureCube(envMap, sampleDir));
   }
   return soFar;
 }
-vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir){
+vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir) {
   soFar = accumulate(soFar, outputDir, sampleDir);
   soFar = accumulate(soFar, outputDir, -sampleDir);
   soFar = accumulate(soFar, outputDir, sampleDir.xzy);
@@ -337,15 +326,30 @@ vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir){
 void main() {
   vec2 uv = vUv;
   if ((vUv.x < 0.0 || vUv.x > 1.0) && (vUv.y < 0.0 || vUv.y > 1.0)) {
-    // The corner pixels do not represent any one face, so to get consistent 
-    // interpolation, they must average the three neighboring face corner pixels, 
-    // here approximated by sampling exactly at the corner.
+    // The corner pixels do not represent any one face, so to get consistent
+    // interpolation, they must average the three neighboring face corner
+    // pixels, here approximated by sampling exactly at the corner.
     uv -= 0.5 * texelSize * sign(vUv);
   }
   vec3 outputDir = normalize(getDirection(uv, faceIndex));
   vec4 color = vec4(0.0);
-  for(float x = 0.5 * sourceTexelSize; x < 1.0; x += sourceTexelSize){
-${sample4or8}
+  for (float x = 0.5 * sourceTexelSize; x < 1.0; x += sourceTexelSize) {
+#ifndef IE11
+    for (float y = 0.5 * sourceTexelSize; y < 1.0; y += sourceTexelSize) {
+      vec3 sampleDir = normalize(vec3(x, y, 1.0));
+#else
+      vec3 sampleDir = normalize(vec3(x, x, 1.0));
+#endif
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.y *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+      sampleDir.x *= -1.0;
+      color = accumulateFaces(color, outputDir, sampleDir);
+#ifndef IE11
+    }
+#endif
   }
   gl_FragColor = linearToOutputTexel(color / color.a);
 }
