@@ -143,6 +143,8 @@ export const EnvironmentMixin = (ModelViewerElement:
 
             if (skybox != null) {
               const material = this[$scene].skyboxMaterial();
+              // This hack causes ShaderMaterial to populate the correct
+              // envMapTexelToLinear function.
               (material as any).envMap = skybox.texture;
               material.uniforms.envMap.value = skybox.texture;
               material.needsUpdate = true;

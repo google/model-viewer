@@ -340,6 +340,8 @@ export default class ModelScene extends Scene {
       vertexShader: ShaderLib.cube.vertexShader,
       fragmentShader: ShaderLib.cube.fragmentShader,
       side: BackSide,
+      // Turn off the depth buffer so that even a small box still ends up
+      // enclosing a scene of any size.
       depthTest: false,
       depthWrite: false,
       fog: false,
@@ -364,6 +366,8 @@ uniform sampler2D envMap;
               .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
     };
     const skyboxMesh = new Mesh(geometry, material);
+    // This centers the box on the camera, ensuring the view is not affected by
+    // the camera's motion, which makes it appear inifitely large, as it should.
     skyboxMesh.onBeforeRender = function(_renderer, _scene, camera) {
       this.matrixWorld.copyPosition(camera.matrixWorld);
     };
