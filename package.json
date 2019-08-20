@@ -25,7 +25,6 @@
     "dist/unit-tests.js",
     "dist/unit-tests-legacy.js",
     "test.html",
-    "test-legacy.html",
     "POLYFILLS.md",
     "wct.conf.json"
   ],
