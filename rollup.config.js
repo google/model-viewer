@@ -121,6 +121,32 @@ if (NODE_ENV !== 'development') {
         onwarn,
       },
       {
+        input: './lib/test/fidelity/components/renderer-harness.js',
+        output: {
+          file: './dist/renderer-harness.js',
+          sourcemap: true,
+          format: 'esm',
+        },
+        watch: {
+          include: '{lib/test/fidelity/**,lib/third_party/**}',
+        },
+        plugins,
+        onwarn
+      },
+      {
+        input: './lib/test/fidelity/components/renderers/filament-viewer.js',
+        output: {
+          file: './dist/filament-viewer.js',
+          sourcemap: true,
+          format: 'esm',
+        },
+        watch: {
+          include: '{lib/test/fidelity/**,lib/third_party/**}',
+        },
+        plugins,
+        onwarn
+      },
+      {
         input: './lib/test/fidelity/image-comparison-worker.js',
         output: {
           file: './dist/image-comparison-worker.js',

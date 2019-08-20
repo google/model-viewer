@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-require = require('esm')(module)
-const {ConfigReader} = require('../lib/test/fidelity/config-reader.js');
-const config = require('../test/fidelity/config.json');
-const configReader = new ConfigReader(config);
-
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
 const path = require('path');
@@ -28,25 +23,32 @@ const exit = (code = 0) => {
   process.exit(code);
 };
 
-const fidelityTestDirectory = path.resolve('./test/fidelity');
-const filamentIBLScript = path.resolve('./scripts/genIBL.sh');
-const backgroundImageRe = /background-image\="([^"]+)"/;
-const modelSourceRe = /src\="([^"]+)"/
+const configPath = path.resolve(process.argv[2]);
+const rootDirectory = path.resolve(path.dirname(configPath));
+const config = require(configPath);
+
+const {renderers} = config;
+const goldensDirectory = path.join(rootDirectory, 'goldens');
+const renderersDirectory = path.join(rootDirectory, 'renderers')
 
 let scenarioWhitelist = null;
 
-if (process.argv.length > 2) {
+if (process.argv.length > 3) {
   scenarioWhitelist = new Set();
 
-  for (let i = 2; i < process.argv.length; i++) {
+  for (let i = 3; i < process.argv.length; i++) {
     scenarioWhitelist.add(process.argv[i]);
   }
 }
 
-const run = async (command, args) => new Promise((resolve, reject) => {
+const run = async (
+    command,
+    args,
+    environmentVariables = {},
+    workingDirectory = process.cwd()) => new Promise((resolve, reject) => {
   const childProcess = spawn(command, args, {
-    cwd: process.cwd(),
-    env: process.env,
+    cwd: workingDirectory,
+    env: {...process.env, ...environmentVariables},
     stdio: ['ignore', 'inherit', 'inherit']
   });
 
@@ -68,135 +70,74 @@ const updateScreenshots = async (config) => {
 
   console.log(`🆙 Updating screenshots`);
 
+  try {
+    await fs.mkdir(goldensDirectory);
+  } catch (error) {
+    // Ignored...
+  }
+
   for (const scenario of scenarios) {
-    const {goldens, slug} = scenario;
-    const scenarioDirectory = path.join(fidelityTestDirectory, slug);
-    const dimensions = configReader.dimensionsForSlug(slug);
+    const {name: scenarioName, model, lighting, dimensions, exclude} = scenario;
+    const scenarioGoldensDirectory = path.join(goldensDirectory, scenarioName);
+    const {width, height} = dimensions;
 
-    for (const golden of goldens) {
-      const {name, file} = golden;
-      const filePath = path.resolve(scenarioDirectory, file);
+    try {
+      await fs.mkdir(scenarioGoldensDirectory);
+    } catch (error) {
+      // Ignored...
+    }
 
-      if (scenarioWhitelist != null && !scenarioWhitelist.has(slug)) {
-        console.log(`⏭  Skipping ${slug}...`);
+    for (const renderer of renderers) {
+      const {name: rendererName, description: rendererDescription, scripts} =
+          renderer;
+
+      if (exclude != null && exclude.includes(rendererName)) {
         continue;
       }
 
-      switch (name) {
-        default:
-          console.log(
-              `✋ Cannot automatically update ${name} screenshots (yet)`);
-          break;
-        case '<model-viewer> (master)':
-          try {
-            await run('node', [
-              './scripts/model-viewer-screenshot.js',
-              slug,
-              dimensions.width,
-              dimensions.height,
-              filePath
-            ]);
-          } catch (error) {
-            throw new Error(`Failed to capture <model-viewer> screenshot: ${
-                error.message}`);
-          }
+      const goldenFilename = `${rendererName}-golden.png`;
+      const rendererDirectory = path.join(renderersDirectory, rendererName);
+      const goldenPath = path.join(scenarioGoldensDirectory, goldenFilename);
 
-          break;
-        case 'Filament':
-          paths = await iblFromScript(
-              scenario, scenarioDirectory, name, filamentIBLScript);
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(rendererName)) {
+        console.log(`⏭  Skipping ${rendererName}...`);
+        continue;
+      }
 
-          const background = path.parse(paths.backgroundImage).name;
-          const url = `Filament/index.html?model=${
-              paths.modelSource}&background=${background}`;
+      if (scripts != null && scripts.setup != null) {
+        const setup = path.join(rendererDirectory, scripts.setup);
+        console.log(`🚧 Running setup script: ${scripts.setup}`);
+        await run(
+            setup,
+            [],
+            {
+              SCENARIO_NAME: scenarioName,
+              MODEL: path.resolve(rendererDirectory, model),
+              LIGHTING: path.resolve(rendererDirectory, lighting),
+              RENDER_WIDTH: width,
+              RENDER_HEIGHT: height
+            },
+            rendererDirectory);
+      }
 
-          try {
-            await run('node', [
-              './scripts/model-viewer-screenshot.js',
-              url,
-              dimensions.width,
-              dimensions.height,
-              filePath
-            ]);
-          } catch (error) {
-            throw new Error(`Failed to capture <model-viewer> screenshot: ${
-                error.message}`);
-          }
-
-          break;
+      try {
+        await run('node', [
+          './scripts/renderer-screenshot.js',
+          rendererName,
+          scenarioName,
+          width,
+          height,
+          goldenPath
+        ]);
+      } catch (error) {
+        throw new Error(`Failed to update ${rendererDescription} screenshot: ${
+            error.message}`);
       }
     }
   }
 };
 
-const iblFromScript = async (scenario, scenarioDirectory, name, script) => {
-  const testHtmlPath = path.join(scenarioDirectory, 'index.html');
-
-  const html = (await fs.readFile(testHtmlPath)).toString();
-
-  const backgroundImageMatch = html.match(backgroundImageRe);
-  let backgroundImage =
-      backgroundImageMatch != null ? backgroundImageMatch[1] : null;
-
-  const modelSourceMatch = html.match(modelSourceRe);
-  const modelSource = modelSourceMatch != null ? modelSourceMatch[1] : null;
-
-  if (modelSource == null) {
-    warn(`Could not determine model source for ${scenario.slug}; skipping...`);
-    return;
-  }
-
-  if (backgroundImage == null) {
-    warn(`Could not determine IBL for ${scenario.slug}; skipping...`);
-    return;
-  }
-
-  if (path.parse(backgroundImage).ext === '.jpg') {
-    // CMGEN doesn't read JPGs, so you must manually convert them to PNG. Here
-    // we assume that's been done and the name is the same.
-    backgroundImage = backgroundImage.replace('.jpg', '.png');
-  }
-
-  const backgroundImagePath =
-      path.resolve(path.dirname(testHtmlPath), backgroundImage);
-
-  await new Promise((resolve, reject) => {
-    console.log(
-        `🖌️  Rendering ${name} screenshot for ${scenario.slug}...`);
-
-    const childProcess = spawn(
-        script,
-        [
-          '-i',
-          backgroundImagePath,
-        ],
-        {
-          cwd: process.cwd(),
-          env: process.env,
-          stdio: ['ignore', 'inherit', 'inherit']
-        });
-
-    childProcess.once('error', (error) => {
-      warn(error);
-    });
-
-    childProcess.once('exit', (code) => {
-      if (code === 0) {
-        console.log(
-            `✅ Successfully captured screenshot for ${name} ${scenario.slug}`);
-        resolve();
-      } else {
-        reject(new Error(`Failed to capture ${name} screenshot`));
-      }
-    });
-  });
-
-  return {modelSource, backgroundImage};
-};
-
-updateScreenshots(require(path.join(fidelityTestDirectory, 'config.json')))
-    .then(() => exit(0))
-    .catch((error) => {
-      console.error(error);
-      exit(1);
-    });
+updateScreenshots(config).then(() => exit(0)).catch((error) => {
+  console.error(error);
+  exit(1);
+});

@@ -29,6 +29,8 @@ export class RenderingScenario extends LitElement {
 
   @property({type: Object}) dimensions: Dimensions = DEFAULT_DIMENSIONS;
 
+  @property({type: Array}) exclude: Array<string> = [];
+
   get basePath() {
     if (!this.slug) {
       return '';
@@ -41,12 +43,16 @@ export class RenderingScenario extends LitElement {
     const {basePath} = this;
     const {width} = this.dimensions;
 
-    const images = [{name: '<model-viewer>', file: 'model-viewer.png'}]
-                       .concat(this.goldens)
+    const images = [{
+                     name: 'model-viewer',
+                     description: '<model-viewer> (this version)',
+                     file: 'model-viewer.png'
+                   }].concat(this.goldens)
+                       .filter(golden => !this.exclude.includes(golden.name))
                        .map(golden => html`
 <div class="screenshot">
   <header>
-    <h2>${golden.name}</h2>
+    <h2>${golden.description}</h2>
   </header>
   <div class="check"></div>
   <img data-id="${this.slug} ${golden.name}"

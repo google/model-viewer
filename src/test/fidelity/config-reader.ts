@@ -13,17 +13,41 @@
  * limitations under the License.
  */
 
-import {Dimensions, ImageComparisonConfig} from './common.js';
+import {Dimensions, ImageComparisonConfig, RendererConfig, ScenarioConfig} from './common.js';
 
 export class ConfigReader {
-  constructor(public config: ImageComparisonConfig) {
+  constructor(readonly config: ImageComparisonConfig) {
   }
 
-  dimensionsForSlug(slug: string): Dimensions {
+  scenarioConfig(name: string): ScenarioConfig|null {
     const {scenarios} = this.config;
 
     for (const scenario of scenarios) {
-      if (scenario.slug === slug) {
+      if (scenario.name === name) {
+        return scenario;
+      }
+    }
+
+    return null;
+  }
+
+  rendererConfig(name: string): RendererConfig|null {
+    const {renderers} = this.config;
+
+    for (const renderer of renderers) {
+      if (renderer.name === name) {
+        return renderer;
+      }
+    }
+
+    return null;
+  }
+
+  dimensionsForScenario(name: string): Dimensions {
+    const {scenarios} = this.config;
+
+    for (const scenario of scenarios) {
+      if (scenario.name === name) {
         return scenario.dimensions;
       }
     }
