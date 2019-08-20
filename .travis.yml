@@ -1,6 +1,8 @@
 language: node_js
 sudo: false
 dist: trusty
+services:
+- xvfb
 before_script:
 - git checkout package-lock.json
 matrix:
@@ -28,7 +30,7 @@ cache:
   - examples/assets/glTF-Sample-Models
   - node_modules
 after_success:
-- ./scripts/run-fidelity-check.sh
+- xvfb-run ./scripts/run-fidelity-check.sh
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
 - touch .nojekyll
