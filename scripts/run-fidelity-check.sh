@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-if [ "${TEST_TYPE}" = "fidelity" ]; then
+if [ "${TEST_TYPE}" = "fidelity" ] || [ "${TRAVIS_BRANCH}" = "master" ]; then
   npm run build
   npm run check-fidelity
 fi

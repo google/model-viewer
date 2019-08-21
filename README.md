@@ -198,18 +198,17 @@ are placed in the `lib` and `dist` folders.
 
 The following npm scripts are available:
 
-* `npm run clean` - Deletes all build artifacts
+* `npm run clean` - Deletes all build artifacts.
 * `npm run build` - Builds the distributable from the `src/` directory.
 * `npm run watch` - Watches the `src/` directory, rebuilding when a file changes.
 * `npm run serve` - Serves a static server on port `8000` from the project root.
-* `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`.
+* `npm run dev` - Combination of `npm run watch` and `npm run serve` -- watches the `src/` directory, rebuilding when a file changes and opens a static server on port `8000`. Note: This does not rebuild everything, so if you made changes to tests or fidelity, you'll probably still need to 
+run build separately to pick up the changes.
 * `npm test` - Runs tests.
-* `npm run check-fidelity` - Compare rendering to third-party renderers
-* `npm run bootstrap-fidelity-dev` - Bootstrap the project for developing
-fidelity testing infrastructure or updating screenshots. NOTE: This will
-download hundreds of megabytes of data and spend a significant amount of
-time compiling renderers the first time you run it.
-* `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers
+* `npm run fetch-samples` - Pull the Khronos sample models for fidelity testing. 
+Note: This will download hundreds of megabytes of data the first time you run it.
+* `npm run check-fidelity` - Compare rendering to third-party renderers.
+* `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers.
 
 ## Examples
 

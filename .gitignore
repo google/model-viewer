@@ -10,3 +10,5 @@ examples/assets/glTF-Sample-Models
 .DS_Store
 .idea
 *.iml
+test/fidelity/renderers/filament/cmgen
+test/fidelity/renderers/filament/ktx

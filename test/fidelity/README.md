@@ -32,8 +32,6 @@ as:
 
  - iOS Quick Look is a closed-source binary that only works on real iOS devices
    (not the simulator).
- - Automatically screenshoting Filament requires building the viewer in CI,
-   which would add significant latency to our builds.
 
 ### iOS Quick Look
 
@@ -74,9 +72,7 @@ Screenshots of a Filament-based glTF viewer are automatically collected daily,
 and PRs are automatically created if there are any changes.
 
 Use `npm run update-screenshots` to run the script that produces the screenshots
-yourself. This script builds Filament the first time you run it, so please
-refer to [Filament's README](https://github.com/google/filament) to learn how
-to bootstrap the appropriate dev environment for building it.
+yourself. 
 
 ## Crafting new test scenarios
 

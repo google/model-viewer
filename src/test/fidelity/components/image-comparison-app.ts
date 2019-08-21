@@ -44,15 +44,19 @@ export class ImageComparisonApp extends LitElement {
   render() {
     const {config} = this;
 
-    if (this.config == null) {
+    if (config == null) {
       return this.src ? html`Loading...` : html`No config specified`;
     }
 
+    const goldens = config.renderers.map(
+        renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
+
     const scenarios = config!.scenarios.map((scenario) => html`
 <rendering-scenario
-    .slug="${scenario.slug}"
-    .goldens="${scenario.goldens}"
-    .dimensions="${scenario.dimensions}">
+    .name="${scenario.name}"
+    .goldens="${goldens}"
+    .dimensions="${scenario.dimensions}"
+    .exclude="${scenario.exclude || []}">
 </rendering-scenario>`);
 
     return html`

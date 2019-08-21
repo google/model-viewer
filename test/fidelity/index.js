@@ -16,18 +16,23 @@
 require = require('esm')(module)
 
 const rimraf = require('rimraf');
-const fs = require('fs').promises;
 const path = require('path');
 const LocalWebServer = require('local-web-server')
 const {ArtifactCreator} =
     require('../../lib/test/fidelity/artifact-creator.js');
-const config = require('./config.json');
 
-const {outputDirectory} = config;
-const screenshotCreator =
-    new ArtifactCreator(config, 'http://localhost:9030/test/fidelity/');
+const configPath = path.resolve(process.argv[2]);
+const rootDirectory = path.resolve(path.dirname(configPath));
+const config = require(configPath);
+
+const outputDirectory = path.join(rootDirectory, 'results');
+const screenshotCreator = new ArtifactCreator(
+    config,
+    rootDirectory,
+    `http://localhost:9030/test/fidelity/renderers/model-viewer/`);
 const localWebServer = new LocalWebServer()
 const server = localWebServer.listen({port: 9030, directory: './'});
+
 
 try {
   rimraf.sync(outputDirectory);
@@ -37,10 +42,10 @@ try {
 
 let scenarioWhitelist = null;
 
-if (process.argv.length > 2) {
+if (process.argv.length > 3) {
   scenarioWhitelist = new Set();
 
-  for (let i = 2; i < process.argv.length; i++) {
+  for (let i = 3; i < process.argv.length; i++) {
     scenarioWhitelist.add(process.argv[i]);
   }
 }

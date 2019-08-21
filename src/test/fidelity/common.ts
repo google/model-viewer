@@ -76,21 +76,27 @@ export interface Rect extends Dimensions {
   y: number;
 }
 
-export interface GoldenConfig {
+
+export interface ScenarioConfig {
   name: string;
+  model: string;
+  lighting: string;
+  dimensions: Dimensions;
+  exclude?: Array<string>;
+}
+
+export interface RendererConfig {
+  name: string, description: string, scripts?: {setup: string}
+}
+
+export interface GoldenConfig extends RendererConfig {
   file: string;
 }
 
-export interface ScenarioConfig {
-  slug: string;
-  goldens: Array<GoldenConfig>;
-  dimensions: Dimensions;
-}
-
 export interface ImageComparisonConfig {
-  outputDirectory: string;
-  scenarioDirectory: string;
+  rootDirectory: string;
   analysisThresholds: Array<number>;
+  renderers: Array<RendererConfig>;
   scenarios: Array<ScenarioConfig>;
 }
 

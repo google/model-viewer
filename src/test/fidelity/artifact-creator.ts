@@ -20,9 +20,9 @@ const {PNG} = require('pngjs');
 const makeDir = require('make-dir');
 
 import {ImageComparisonAnalysis, ImageComparator, ImageComparisonConfig, GoldenConfig, ScenarioConfig, Dimensions} from './common.js';
-import ModelViewerElementBase from '../../model-viewer-base.js';
+import {ConfigReader} from './config-reader.js';
 
-const DEVICE_PIXEL_RATIO = 2;
+const $configReader = Symbol('configReader');
 
 export type AnalysisResults = Array<Array<ImageComparisonAnalysis>>;
 
@@ -31,37 +31,56 @@ export interface ScenarioRecord extends ScenarioConfig {
 }
 
 export class ArtifactCreator {
+  private[$configReader]: ConfigReader = new ConfigReader(this.config);
+
   constructor(
-      protected config: ImageComparisonConfig, protected baseUrl: string) {
+      protected config: ImageComparisonConfig, protected rootDirectory: string,
+      protected baseUrl: string) {
     console.log('🌈 Preparing to capture screenshots for fidelity comparison');
+  }
+
+  protected get outputDirectory(): string {
+    return path.join(path.resolve(this.rootDirectory), 'results');
+  }
+
+  protected get goldens(): Array<GoldenConfig> {
+    return this.config.renderers.map(
+        renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
   }
 
   async captureAndAnalyzeScreenshots(
       scenarioWhitelist: Set<string>|null = null) {
-    const {outputDirectory, scenarios, analysisThresholds} = this.config
+    const {scenarios, analysisThresholds} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
+    const {goldens, outputDirectory} = this;
 
     for (const scenario of scenarios) {
-      const {slug, goldens, dimensions} = scenario;
+      const {name: scenarioName, dimensions} = scenario;
 
-      if (scenarioWhitelist != null && !scenarioWhitelist.has(slug)) {
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
         continue;
       }
 
-      console.log(`\n🎨 Scenario: ${slug}`);
+      console.log(`\n🎨 Scenario: ${scenarioName}`);
 
-      await makeDir(path.join(outputDirectory, slug));
+      const scenarioOutputDirectory = path.join(outputDirectory, scenarioName);
 
-      const screenshot = await this.captureScreenshot(slug, dimensions);
+      await makeDir(scenarioOutputDirectory);
+
+      const screenshot = await this.captureScreenshot(
+          'model-viewer',
+          scenarioName,
+          dimensions,
+          path.join(scenarioOutputDirectory, 'model-viewer.png'));
       const analysisResults = await this.analyze(
-          screenshot, goldens, slug, dimensions, analysisThresholds);
+          screenshot, goldens, scenario, dimensions, analysisThresholds);
 
       const scenarioRecord = Object.assign({analysisResults}, scenario);
 
       console.log(`\n💾 Recording analysis`);
 
       await fs.writeFile(
-          path.join(outputDirectory, slug, 'analysis.json'),
+          path.join(outputDirectory, scenarioName, 'analysis.json'),
           JSON.stringify(scenarioRecord));
 
       analyzedScenarios.push(scenario);
@@ -79,17 +98,27 @@ export class ArtifactCreator {
   }
 
   protected async analyze(
-      screenshot: Buffer, goldens: Array<GoldenConfig>, slug: string,
-      dimensions: Dimensions,
+      screenshot: Buffer, goldens: Array<GoldenConfig>,
+      scenario: ScenarioConfig, dimensions: Dimensions,
       analysisThresholds: Array<number>): Promise<AnalysisResults> {
     const analysisResults: AnalysisResults = [];
+    const {rootDirectory, outputDirectory} = this;
+    const {name: scenarioName, exclude} = scenario;
 
     for (const goldenConfig of goldens) {
-      console.log(`\n🔍 Comparing <model-viewer> to ${goldenConfig.name}`);
+      const {name: rendererName} = goldenConfig;
+
+      if (exclude != null && exclude.includes(rendererName)) {
+        continue;
+      }
+
+      console.log(
+          `\n🔍 Comparing <model-viewer> to ${goldenConfig.description}`);
 
       const thresholdResults: Array<ImageComparisonAnalysis> = [];
-      const golden = await fs.readFile(
-          path.join(this.config.scenarioDirectory, slug, goldenConfig.file));
+      const goldenPath =
+          path.join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
+      const golden = await fs.readFile(goldenPath);
 
       const screenshotImage = PNG.sync.read(screenshot).data;
       const goldenImage = PNG.sync.read(golden).data;
@@ -98,8 +127,7 @@ export class ArtifactCreator {
           new ImageComparator(screenshotImage, goldenImage, dimensions);
 
       await fs.writeFile(
-          path.join(this.config.outputDirectory, slug, goldenConfig.file),
-          golden);
+          path.join(outputDirectory, scenarioName, goldenConfig.file), golden);
 
       for (const threshold of analysisThresholds) {
         console.log(`\n  📏 Using threshold ${threshold.toFixed(1)}`);
@@ -126,13 +154,20 @@ export class ArtifactCreator {
     return analysisResults;
   }
 
-
   async captureScreenshot(
-      slug: string, dimensions: Dimensions,
-      outputPath: string =
-          path.join(this.config.outputDirectory, slug, 'model-viewer.png')) {
-    const scaledWidth = dimensions.width / DEVICE_PIXEL_RATIO;
-    const scaledHeight = dimensions.height / DEVICE_PIXEL_RATIO;
+      renderer: string, scenarioName: string, dimensions: Dimensions,
+      outputPath:
+          string = path.join(this.outputDirectory, 'model-viewer.png')) {
+    const devicePixelRatio = 2;
+    const scaledWidth = dimensions.width;
+    const scaledHeight = dimensions.height;
+    const rendererConfig = this[$configReader].rendererConfig(renderer);
+
+    if (rendererConfig == null) {
+      console.log(`⚠️ Renderer "${
+          renderer}" is not configured. Did you add it to the test config?`);
+      return;
+    }
 
     console.log(`🚀 Launching browser`);
 
@@ -140,12 +175,14 @@ export class ArtifactCreator {
       defaultViewport: {
         width: scaledWidth,
         height: scaledHeight,
-        deviceScaleFactor: DEVICE_PIXEL_RATIO
-      }
+        deviceScaleFactor: devicePixelRatio
+      },
+      headless: false
     });
 
     const page = await browser.newPage();
-    const url = `${this.baseUrl}${slug}/`;
+    const url = `${this.baseUrl}?hide-ui&config=../../config.json&scenario=${
+        encodeURIComponent(scenarioName)}`;
 
     page.on('error', (error: any) => {
       console.log(`🚨 ${error}`);
@@ -164,45 +201,33 @@ export class ArtifactCreator {
 
     await page.goto(url);
 
-    console.log(`🖌  Rendering ${slug} with <model-viewer>`);
+    console.log(
+        `🖌  Rendering ${scenarioName} with ${rendererConfig.description}`);
 
     await page.evaluate(async () => {
-      const modelViewer =
-          document.querySelector('model-viewer') as ModelViewerElementBase;
+      const modelBecomesReady = (self as any).modelLoaded ?
+          Promise.resolve() :
+          new Promise((resolve, reject) => {
+            const timeout = setTimeout(reject, 10000);
 
-      if (!modelViewer.loaded!) {
-        const modelLoads = new Promise((resolve, reject) => {
-          const timeout = setTimeout(reject, 10000);
-
-          modelViewer.addEventListener('load', () => {
-            clearTimeout(timeout);
-            resolve();
-          });
-        });
-
-        const modelVisible = new Promise((resolve, reject) => {
-          const timeout = setTimeout(reject, 10000);
-
-          modelViewer.addEventListener('model-visibility', (event) => {
-            clearTimeout(timeout);
-            if ((event as any).detail.visible) {
+            self.addEventListener('model-ready', () => {
+              clearTimeout(timeout);
               resolve();
-            } else {
-              reject();
-            }
+            }, {once: true});
           });
-        });
 
-        await Promise.all([modelLoads, modelVisible]);
-      }
+      await modelBecomesReady;
     });
 
     console.log(`🖼  Capturing screenshot`);
 
-    const screenshot = await page.screenshot({
-      path: outputPath,
-      clip: {x: 0, y: 0, width: scaledWidth, height: scaledHeight}
-    });
+    try {
+      await fs.mkdir(this.outputDirectory);
+    } catch (e) {
+      // Ignored...
+    }
+
+    const screenshot = await page.screenshot({path: outputPath});
 
     await browser.close();
 

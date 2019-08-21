@@ -48,7 +48,7 @@ for (let i = 0; i < candidateThresholds.length; ++i) {
     warn(`${goldenResultsDirectory} tests ${
         candidateThresholds.length -
         goldenThresholds.length} fewer thresholds than ${
-        candidateResultsRectory}`);
+        candidateResultsDirectory}`);
     exit();
   }
 
@@ -62,23 +62,23 @@ for (let i = 0; i < candidateThresholds.length; ++i) {
 }
 
 for (const goldenScenario of goldenScenarios) {
-  goldenScenarioMap.set(goldenScenario.slug, goldenScenario);
+  goldenScenarioMap.set(goldenScenario.name, goldenScenario);
 }
 
 for (const candidateScenario of candidateScenarios) {
-  const {slug} = candidateScenario;
+  const {name} = candidateScenario;
 
-  if (!goldenScenarioMap.has(slug)) {
+  if (!goldenScenarioMap.has(name)) {
     warn(`${goldenResultsDirectory} does not include scenario "${
-        slug}" found in ${candidateResultsDirectory}`);
+        name}" found in ${candidateResultsDirectory}`);
     continue;
   }
 
-  const goldenScenario = goldenScenarioMap.get(slug);
+  const goldenScenario = goldenScenarioMap.get(name);
   const candidateAnalysis = require(path.resolve(
-      path.join(candidateResultsDirectory, slug, 'analysis.json')));
+      path.join(candidateResultsDirectory, name, 'analysis.json')));
   const goldenAnalysis = require(
-      path.resolve(path.join(goldenResultsDirectory, slug, 'analysis.json')));
+      path.resolve(path.join(goldenResultsDirectory, name, 'analysis.json')));
 
   const goldenGoldenMap = new Map();
 
@@ -90,12 +90,10 @@ for (const candidateScenario of candidateScenarios) {
     const candidateGolden = candidateScenario.goldens[i];
     if (!goldenGoldenMap.has(candidateGolden.name)) {
       warn(`${goldenResultsDirectory} does not include an analysis of "${
-          candidateGolden.name}" for scenario "${slug}" found in ${
+          candidateGolden.name}" for scenario "${name}" found in ${
           candidateResultsDirectory}`);
       continue;
     }
-
-    const goldenGolden = goldenGoldenMap.get(candidateGolden.name);
 
     const candidateResults = candidateAnalysis.analysisResults[i];
     const goldenResults = goldenAnalysis.analysisResults[i];
@@ -109,7 +107,7 @@ for (const candidateScenario of candidateScenarios) {
       for (const key in candidateThresholdResult) {
         if (!(key in goldenThresholdResult)) {
           warn(`Golden analysis of "${candidateGolden.name}" in scenario "${
-              slug}" is missing metric "${key}"`);
+              name}" is missing metric "${key}"`);
           continue;
         }
 
@@ -119,7 +117,7 @@ for (const candidateScenario of candidateScenarios) {
         const comparisonDescription =
             `<model-viewer> <-> ${candidateGolden.name}`;
         const comparisonConstraints =
-            `"${slug}/${key}" @ threshold ${threshold}`;
+            `"${name}/${key}" @ threshold ${threshold}`;
         const percentage = `${(delta * 100).toFixed(2)}%`;
 
         if (delta > ALERT_THRESHOLD) {
@@ -137,7 +135,7 @@ for (const candidateScenario of candidateScenarios) {
     goldenGoldenMap.delete(candidateGolden.name);
   }
 
-  goldenScenarioMap.delete(slug);
+  goldenScenarioMap.delete(name);
 }
 
 exit();
