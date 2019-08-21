@@ -23,7 +23,7 @@ const DEFAULT_DIMENSIONS: Dimensions = {
 };
 
 export class RenderingScenario extends LitElement {
-  @property({type: String}) slug: string = '';
+  @property({type: String}) name: string = '';
 
   @property({type: Object}) goldens: Array<GoldenConfig> = [];
 
@@ -32,11 +32,11 @@ export class RenderingScenario extends LitElement {
   @property({type: Array}) exclude: Array<string> = [];
 
   get basePath() {
-    if (!this.slug) {
+    if (!this.name) {
       return '';
     }
 
-    return `./results/${this.slug}`;
+    return `./results/${this.name}`;
   }
 
   render() {
@@ -55,7 +55,7 @@ export class RenderingScenario extends LitElement {
     <h2>${golden.description}</h2>
   </header>
   <div class="check"></div>
-  <img data-id="${this.slug} ${golden.name}"
+  <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
 </div>`);
 
@@ -163,7 +163,7 @@ h2 {
   box-shadow: 0px 6px 12px rgba(100, 100, 100, 0.2);
 }
 </style>
-<h1>${this.slug}</h1>
+<h1>${this.name}</h1>
 <div id="screenshots">
   ${images}
 </div>`;

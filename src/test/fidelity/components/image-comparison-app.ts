@@ -53,7 +53,7 @@ export class ImageComparisonApp extends LitElement {
 
     const scenarios = config!.scenarios.map((scenario) => html`
 <rendering-scenario
-    .slug="${scenario.name}"
+    .name="${scenario.name}"
     .goldens="${goldens}"
     .dimensions="${scenario.dimensions}"
     .exclude="${scenario.exclude || []}">
