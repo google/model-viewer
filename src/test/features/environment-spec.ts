@@ -33,8 +33,9 @@ const UNLIT_MODEL_URL =
 const MULTI_MATERIAL_MODEL_URL = assetPath('Triangle.gltf');
 
 const backgroundHasMap =
-    (scene: Scene, url: string|null) => {
-      return textureMatchesMeta((scene.background as any).texture, {url: url});
+    (scene: ModelScene, url: string|null) => {
+      return textureMatchesMeta(
+          scene.skyboxMaterial().uniforms.envMap.value, {url: url});
     }
 
 const backgroundHasColor =
@@ -51,8 +52,6 @@ const backgroundHasColor =
  * environment map applied that matches the meta object.
  *
  * @see textureMatchesMeta
- * @param {THREE.Scene} scene
- * @param {Object} meta
  */
 const modelUsingEnvMap =
     (scene: ModelScene, meta: {[index: string]: any}): boolean => {
@@ -99,8 +98,6 @@ const modelHasEnvMap = (scene: ModelScene): boolean => {
  * the passed in `meta`.
  *
  * @see textureMatchesMeta
- * @param {Model} model
- * @param {Object} meta
  */
 const waitForEnvMap = (model: Model, meta: {[index: string]: any}) =>
     waitForEvent<{value: any}>(model, 'envmap-change', event => {
