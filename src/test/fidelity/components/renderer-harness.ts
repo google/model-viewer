@@ -126,7 +126,7 @@ export class RendererConfiguration extends LitElement {
   <h2><slot name="title"></slot></h2>
   ${widgets}
 </div>
-<div id="renderer">
+<div id="renderer" .style="${this.hideUi ? 'overflow: visible' : ''}">
   <slot name="renderer"></slot>
 </div>
 `;
