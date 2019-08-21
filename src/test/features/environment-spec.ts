@@ -25,8 +25,8 @@ import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('quick_1k.png');
-const BG_IMAGE_URL = assetPath('spruit_sunrise_1k.jpg');
-const HDR_BG_IMAGE_URL = assetPath('spruit_sunrise_1k.hdr');
+const BG_IMAGE_URL = assetPath('spruit_sunrise_1k_LDR.jpg');
+const HDR_BG_IMAGE_URL = assetPath('spruit_sunrise_1k_HDR.hdr');
 const MODEL_URL = assetPath('reflective-sphere.gltf');
 const UNLIT_MODEL_URL =
     assetPath('glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
