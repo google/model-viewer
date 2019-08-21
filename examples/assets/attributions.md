@@ -31,10 +31,9 @@ licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
 
 ## whipple_creek_regional_park_04
 
-whipple_creek_regional_park_04_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
+whipple_creek_regional_park_04_1k.hdr by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">source</a>)
-Originally in HDR format
 
 ## RobotExpressive
 

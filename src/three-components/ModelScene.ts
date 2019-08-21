@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import {Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import Renderer from './Renderer.js';
+import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
 
 export interface ModelSceneConfig {
@@ -67,16 +69,9 @@ export default class ModelScene extends Scene {
   public exposure: number;
   public model: Model;
   public camera: PerspectiveCamera;
+  public skyboxMesh: Mesh;
   public activeCamera: Camera;
 
-
-  /**
-   * @param {ModelViewerElementBase} options.element
-   * @param {CanvasHTMLElement} options.canvas
-   * @param {number} options.width
-   * @param {number} options.height
-   * @param {Renderer} options.renderer
-   */
   constructor({canvas, element, width, height, renderer}: ModelSceneConfig) {
     super();
 
@@ -106,6 +101,8 @@ export default class ModelScene extends Scene {
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
     this.pivot.name = 'Pivot';
+
+    this.skyboxMesh = this.createSkyboxMesh();
 
     this.add(this.pivot);
     this.add(this.shadowLight);
@@ -332,5 +329,53 @@ export default class ModelScene extends Scene {
     if (this[$modelAlignmentMask].y == 0) {
       this.shadow.position.y = modelPosition.y - this.model.size.y / 2;
     }
+  }
+
+  createSkyboxMesh(): Mesh {
+    const geometry = new BoxBufferGeometry(1, 1, 1);
+    geometry.removeAttribute('normal');
+    geometry.removeAttribute('uv');
+    const material = new ShaderMaterial({
+      uniforms: {envMap: {value: null}, opacity: {value: 1.0}},
+      vertexShader: ShaderLib.cube.vertexShader,
+      fragmentShader: ShaderLib.cube.fragmentShader,
+      side: BackSide,
+      // Turn off the depth buffer so that even a small box still ends up
+      // enclosing a scene of any size.
+      depthTest: false,
+      depthWrite: false,
+      fog: false,
+    });
+    material.extensions = {
+      derivatives: true,
+      fragDepth: false,
+      drawBuffers: false,
+      shaderTextureLOD: false
+    };
+    const samplerUV = `
+#define ENVMAP_TYPE_CUBE_UV
+${cubeUVChunk}
+uniform sampler2D envMap;
+    `;
+    material.onBeforeCompile = (shader: Shader) => {
+      shader.fragmentShader =
+          shader.fragmentShader.replace('uniform samplerCube tCube;', samplerUV)
+              .replace(
+                  'vec4 texColor = textureCube( tCube, vec3( tFlip * vWorldDirection.x, vWorldDirection.yz ) );',
+                  'gl_FragColor = textureCubeUV( envMap, vWorldDirection, 0.0 );')
+              .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
+    };
+    const skyboxMesh = new Mesh(geometry, material);
+    skyboxMesh.frustumCulled = false;
+    // This centers the box on the camera, ensuring the view is not affected by
+    // the camera's motion, which makes it appear inifitely large, as it should.
+    skyboxMesh.onBeforeRender = function(_renderer, _scene, camera) {
+      this.matrixWorld.copyPosition(camera.matrixWorld);
+    };
+    return skyboxMesh;
+  }
+
+  skyboxMaterial(): ShaderMaterial {
+    return this.skyboxMesh.material as ShaderMaterial;
   }
 }
