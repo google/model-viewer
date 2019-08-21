@@ -152,7 +152,7 @@
     {
       "name": "khronos-MetalRoughSpheres-HDR",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../../examples/assets/spruit_sunrise_1k.hdr",
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_HDR.hdr",
       "dimensions": {
         "width": 768,
         "height": 768
@@ -161,7 +161,7 @@
     {
       "name": "khronos-MetalRoughSpheres-LDR",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../../examples/assets/spruit_sunrise_1k.jpg",
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_LDR.jpg",
       "dimensions": {
         "width": 768,
         "height": 768
