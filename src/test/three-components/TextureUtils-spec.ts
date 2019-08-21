@@ -121,7 +121,7 @@ suite('TextureUtils', () => {
       expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
 
       expect(textureMatchesMeta(
-                 textures.skybox!.texture, {mapping: 'Cube', url: EQUI_URL}))
+                 textures.skybox!.texture, {mapping: 'PMREM', url: EQUI_URL}))
           .to.be.ok;
 
       expect(textureMatchesMeta(textures.environmentMap.texture, {
@@ -139,7 +139,7 @@ suite('TextureUtils', () => {
           expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
 
           expect(textureMatchesMeta(textures.skybox!.texture, {
-            mapping: 'Cube',
+            mapping: 'PMREM',
             url: HDR_EQUI_URL
           })).to.be.ok;
 
@@ -159,7 +159,7 @@ suite('TextureUtils', () => {
           expect((textures.environmentMap.texture as any).isTexture).to.be.ok;
 
           expect(textureMatchesMeta(textures.skybox!.texture, {
-            mapping: 'Cube',
+            mapping: 'PMREM',
             url: EQUI_URL
           })).to.be.ok;
 

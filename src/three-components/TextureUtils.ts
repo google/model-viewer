@@ -28,7 +28,7 @@ import {encodings, texelIO} from './shader-chunk/common.glsl.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
-  skybox: WebGLRenderTargetCube|null;
+  skybox: WebGLRenderTarget|null;
 }
 
 export interface EnvironmentGenerationConfig {
@@ -44,16 +44,11 @@ const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 const CUBEMAP_SIZE = 256;
 const GENERATED_BLUR = 0.04;
-const SKYBOX_BLUR = 0.004;
 
 const $environmentMapCache = Symbol('environmentMapCache');
-const $skyboxCache = Symbol('skyboxCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
 
-const $loadSkyboxFromUrl = Symbol('loadSkyboxFromUrl');
 const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
-const $loadEnvironmentMapFromSkyboxUrl =
-    Symbol('loadEnvironmentMapFromSkyboxUrl');
 const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
 
 // Attach a `userData` object for arbitrary data on textures that
@@ -72,7 +67,6 @@ export default class TextureUtils extends EventDispatcher {
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
-  private[$skyboxCache] = new Map<string, Promise<WebGLRenderTargetCube>>();
 
   constructor(renderer: WebGLRenderer) {
     super();
@@ -166,13 +160,13 @@ export default class TextureUtils extends EventDispatcher {
         progressTracker != null ? progressTracker.beginActivity() : () => {};
 
     try {
-      let skyboxLoads: Promise<WebGLRenderTargetCube|null> =
-          Promise.resolve(null);
+      let skyboxLoads: Promise<WebGLRenderTarget|null> = Promise.resolve(null);
       let environmentMapLoads: Promise<WebGLRenderTarget>;
 
       // If we have a skybox URL, attempt to load it as a cubemap
       if (!!skyboxUrl) {
-        skyboxLoads = this[$loadSkyboxFromUrl](skyboxUrl, progressTracker);
+        skyboxLoads =
+            this[$loadEnvironmentMapFromUrl](skyboxUrl, progressTracker);
       }
 
       if (!!environmentMapUrl) {
@@ -181,40 +175,19 @@ export default class TextureUtils extends EventDispatcher {
             environmentMapUrl, progressTracker);
       } else if (!!skyboxUrl) {
         // Fallback to deriving the environment map from an available skybox
-        environmentMapLoads =
-            this[$loadEnvironmentMapFromSkyboxUrl](skyboxUrl, progressTracker);
+        environmentMapLoads = skyboxLoads as Promise<WebGLRenderTarget>;
       } else {
         // Fallback to generating the environment map
         environmentMapLoads = this[$loadGeneratedEnvironmentMap]();
       }
 
-      let [environmentMap, rawSkybox] =
+      let [environmentMap, skybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
-
-      const skybox = rawSkybox == null ?
-          null :
-          this.gaussianBlur(rawSkybox, SKYBOX_BLUR, GammaEncoding);
 
       return {environmentMap, skybox};
     } finally {
       updateGenerationProgress(1.0);
     }
-  }
-
-  /**
-   * Loads a WebGLRenderTargetCube from a given URL. The render target in this
-   * case will be assumed to be used as a skybox.
-   */
-  private[$loadSkyboxFromUrl](url: string, progressTracker?: ProgressTracker):
-      Promise<WebGLRenderTargetCube> {
-    if (!this[$skyboxCache].has(url)) {
-      const progressCallback =
-          progressTracker ? progressTracker.beginActivity() : () => {};
-      this[$skyboxCache].set(
-          url, this.loadEquirectAsCubeMap(url, progressCallback));
-    }
-
-    return this[$skyboxCache].get(url)!;
   }
 
   /**
@@ -238,25 +211,6 @@ export default class TextureUtils extends EventDispatcher {
                 interstitialEnvironmentMap.dispose();
                 return environmentMap;
               });
-
-      this[$environmentMapCache].set(url, environmentMapLoads);
-    }
-
-    return this[$environmentMapCache].get(url)!;
-  }
-
-  /**
-   * Loads a skybox from a given URL, then PMREM is applied to the
-   * skybox texture and the resulting WebGLRenderTarget is returned,
-   * with the assumption that it will be used as an environment map.
-   */
-  private[$loadEnvironmentMapFromSkyboxUrl](
-      url: string,
-      progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
-    if (!this[$environmentMapCache].has(url)) {
-      const skyboxLoads = this[$loadSkyboxFromUrl](url, progressTracker);
-      const environmentMapLoads =
-          skyboxLoads.then(skybox => this.pmremPass(skybox));
 
       this[$environmentMapCache].set(url, environmentMapLoads);
     }
@@ -466,12 +420,7 @@ void main() {
       allTargetsLoad.push(targetLoads);
     });
 
-    this[$skyboxCache].forEach((targetLoads) => {
-      allTargetsLoad.push(targetLoads);
-    });
-
     this[$environmentMapCache].clear();
-    this[$skyboxCache].clear();
 
     for (const targetLoads of allTargetsLoad) {
       try {
