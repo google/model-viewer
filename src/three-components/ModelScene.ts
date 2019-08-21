@@ -366,6 +366,7 @@ uniform sampler2D envMap;
               .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
     };
     const skyboxMesh = new Mesh(geometry, material);
+    skyboxMesh.frustumCulled = false;
     // This centers the box on the camera, ensuring the view is not affected by
     // the camera's motion, which makes it appear inifitely large, as it should.
     skyboxMesh.onBeforeRender = function(_renderer, _scene, camera) {
