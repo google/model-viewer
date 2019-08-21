@@ -20,8 +20,7 @@
 #
 # This script is intended to be used in an Ubuntu 18.04 cloud VM with an NVIDIA
 # Tesla GPU. It is designed to run on startup, provision the VM if necessary,
-# build 3D renderers (currently only Filament), collect screenshots and create
-# a PR on Github if there are any changes.
+# collect screenshots and create a PR on Github if there are any changes.
 #
 # NOTE: In order to use this script as a startup script in your own VM,
 # uncomment the variables below and fill them in as appropriate, or else make
@@ -59,7 +58,6 @@ popd
 
 # Invoke relevant startup sub-scripts
 source $MODEL_VIEWER_CHECKOUT_DIRECTORY/scripts/provision-ubuntu-xenial-vm.sh
-source $MODEL_VIEWER_CHECKOUT_DIRECTORY/scripts/install-third-party-renderers.sh
 source $MODEL_VIEWER_CHECKOUT_DIRECTORY/scripts/create-screenshot-update-pr.sh
 
 sudo poweroff

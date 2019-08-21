@@ -1,437 +1,278 @@
 {
-  "scenarioDirectory": "./test/fidelity",
-  "outputDirectory": "./test/fidelity/results",
   "analysisThresholds": [0.0, 1.0, 10.0],
+  "renderers": [{
+    "name": "model-viewer",
+    "description": "<model-viewer>"
+  }, {
+    "name": "filament",
+    "description": "Filament",
+    "scripts": {
+      "setup": "prepare-ibl.sh"
+    }
+  }],
   "scenarios": [
     {
-      "slug": "damaged-helmet-hdr-pmrem",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-2CylinderEngine",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 2048,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-AntiqueCamera",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-2CylinderEngine",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb",
+      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
       "dimensions": {
         "width": 1024,
-        "height": 2048
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Avocado",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-AntiqueCamera",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 512,
+        "height": 1024
       }
     },
     {
-      "slug": "khronos-BoomBox",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-Avocado",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-BoxVertexColors",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-BoomBox",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Buggy",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-BoxVertexColors",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-CesiumMilkTruck",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-Buggy",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Corset",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-CesiumMilkTruck",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Cube",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-Corset",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Duck",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-Cube",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-EnvironmentTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-DamagedHelmet",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
       "dimensions": {
-        "width": 2048,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-GearboxAssy",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-Duck",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Duck/glTF/Duck.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "khronos-Lantern",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
+      "name": "khronos-EnvironmentTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-MetalRoughSpheres",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-MetalRoughSpheres-HDR",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-MetalRoughSpheres-LDR",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-MultiUVTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-NormalTangentMirrorTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-NormalTangentTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-OrientationTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-SciFiHelmet",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-Suzanne",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-TextureTransformTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-UnlitTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "khronos-VertexColorTest",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      }
-    },
-    {
-      "slug": "basic-astronaut",
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 1024,
+        "height": 768
       },
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }]
+      "exclude": [
+        "filament"
+      ]
     },
     {
-      "slug": "damaged-helmet-hdr-pmrem",
+      "name": "khronos-GearboxAssy",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
-      },
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }]
-    },
-    {
-      "slug": "damaged-helmet-solid-color-pmrem",
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
-      },
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }]
-    },
-    {
-      "slug": "pbr-spheres",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }, {
-        "name": "iOS 12 Quick Look",
-        "file": "quicklook-golden.png"
-      }],
-      "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
       }
     },
     {
-      "slug": "alpha-blend-litmus",
-      "goldens": [{
-        "name": "<model-viewer> (master)",
-        "file": "model-viewer-golden.png"
-      }, {
-        "name": "Filament",
-        "file": "filament-golden.png"
-      }, {
-        "name": "iOS 12 Quick Look",
-        "file": "quicklook-golden.png"
-      }],
+      "name": "khronos-Lantern",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Lantern/glTF/Lantern.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1536,
-        "height": 1536
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-MetalRoughSpheres",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-HDR",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_HDR.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-LDR",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_LDR.jpg",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-MultiUVTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MultiUVTest/glTF/MultiUVTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-NormalTangentMirrorTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-NormalTangentTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-OrientationTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/OrientationTest/glTF/OrientationTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-SciFiHelmet",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-Suzanne",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-TextureTransformTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureTransformTest/glTF/TextureTransformTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-UnlitTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-VertexColorTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/VertexColorTest/glTF/VertexColorTest.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "Astronaut",
+      "model": "../../../../examples/assets/Astronaut.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "PBR Spheres",
+      "model": "../../../../examples/assets/pbr-spheres.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "Alpha Blend Litmus Test",
+      "model": "../../../../examples/assets/alpha-blend-litmus.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
       }
     }
   ]

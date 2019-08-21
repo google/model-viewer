@@ -50,7 +50,7 @@ Originally in HDR format
 
 ## spruit_sunrise_1k
 
-spruit_sunrise_1k.hdr, spruit_sunrise_1k.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
+spruit_sunrise_1k_HDR.hdr, spruit_sunrise_1k_LDR.jpg by <a href="https://hdrihaven.com">HDRI Haven</a>
 licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>
 (<a href="https://hdrihaven.com/hdri/?c=outdoor&h=spruit_sunrise">source</a>)
 
