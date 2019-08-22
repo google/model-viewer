@@ -62,7 +62,7 @@ vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
 
   // Add anti-aliasing mipmap contribution
   vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
-  sigma += max(max(dxy.x, dxy.y), dxy.z);
+  sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
 
   float mip =
       clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;

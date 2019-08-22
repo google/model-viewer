@@ -303,7 +303,7 @@ uniform float sigma;
 uniform float texelSize;
 uniform samplerCube envMap;
 uniform int faceIndex;
-const float sourceTexelSize = 0.5;
+#define sourceTexelSize 0.5
 ${IE11}
 ${getDirectionChunk}
 ${texelIO}
