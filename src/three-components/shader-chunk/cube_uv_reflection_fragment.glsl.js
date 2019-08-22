@@ -3,15 +3,10 @@ import {getFaceChunk, getUVChunk} from './common.glsl.js';
 export const cubeUVChunk = /* glsl */ `
 #ifdef ENVMAP_TYPE_CUBE_UV
 
-const float cubeUV_maxMipLevel = 8.0;
-const float cubeUV_minMipLevel = 3.0;
+#define cubeUV_maxMipLevel 8.0
+#define cubeUV_minMipLevel 3.0
 #define cubeUV_sizeY(maxMip) (4.0 * (maxMip + exp2(maxMip)) + 2.0)
-const float cubeUV_margin = cubeUV_sizeY(cubeUV_minMipLevel - 1.0);
-
-const vec2 cubeUV_texelSize =
-    1.0 / vec2(
-              3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
-              cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
+#define cubeUV_margin cubeUV_sizeY(cubeUV_minMipLevel - 1.0)
 
 ${getFaceChunk}
 ${getUVChunk}
@@ -21,6 +16,10 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   float filterInt = max(cubeUV_minMipLevel - mipInt, 0.0);
   mipInt = max(mipInt, cubeUV_minMipLevel);
   float faceSize = exp2(mipInt);
+
+  vec2 texelSize = 1.0 / vec2(
+              3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
+              cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
 
   vec2 uv = getUV(direction, face) * faceSize;
   uv += 0.5;
@@ -33,15 +32,15 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   uv.x += float(face) * (faceSize + 2.0);
   uv.y += cubeUV_sizeY(mipInt - 1.0) - cubeUV_margin;
   uv.x += filterInt * 3.0 * (exp2(cubeUV_minMipLevel) + 2.0);
-  uv *= cubeUV_texelSize;
+  uv *= texelSize;
   uv.y = 1.0 - uv.y;
 
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x += cubeUV_texelSize.x;
+  uv.x += texelSize.x;
   vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.y -= cubeUV_texelSize.y;
+  uv.y -= texelSize.y;
   vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x -= cubeUV_texelSize.x;
+  uv.x -= texelSize.x;
   vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
