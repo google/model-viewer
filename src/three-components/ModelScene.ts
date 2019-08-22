@@ -354,6 +354,7 @@ export default class ModelScene extends Scene {
     };
     const samplerUV = `
 #define ENVMAP_TYPE_CUBE_UV
+#define PI 3.14159265359
 ${cubeUVChunk}
 uniform sampler2D envMap;
     `;

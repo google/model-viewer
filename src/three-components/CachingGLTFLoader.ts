@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-import {Scene} from 'three';
-import {Mesh} from 'three';
+import {Mesh, Scene} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
-
 
 export type ProgressCallback = (progress: number) => void;
 

@@ -28,7 +28,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryVec, float( maxMIPLevel ) );
+			vec4 envMapColor = textureCubeUV( envMap, queryVec, 1.0 );
 
 		#else
 
@@ -40,21 +40,26 @@ export const envmapChunk = /* glsl */ `
 
 	}
 
-	// taken from here: http://casual-effects.blogspot.ca/2011/08/plausible-environment-lighting-in-two.html
-	float getSpecularMIPLevel( const in float blinnShininessExponent, const in int maxMIPLevel ) {
-
-		//float envMapWidth = pow( 2.0, maxMIPLevelScalar );
-		//float desiredMIPLevel = log2( envMapWidth * sqrt( 3.0 ) ) - 0.5 * log2( pow2( blinnShininessExponent ) + 1.0 );
+	// (elalish) Changed from Blinn-Phong to Trowbridge-Reitz distribution and added anti-aliasing.
+	float getSpecularMIPLevel( const in float roughness, const in vec3 sampleVec, const in int maxMIPLevel ) {
 
 		float maxMIPLevelScalar = float( maxMIPLevel );
-		float desiredMIPLevel = maxMIPLevelScalar + 0.79248 - 0.5 * log2( pow2( blinnShininessExponent ) + 1.0 );
+		float sigma = PI * roughness * roughness / ( 1.0 + roughness );
+		
+		// Add anti-aliasing mipmap contribution
+		vec3 dxy = max(abs(dFdx(sampleVec)), abs(dFdy(sampleVec)));
+		sigma += max(max(dxy.x, dxy.y), dxy.z);
 
-		// clamp to allowable LOD ranges.
-		return clamp( desiredMIPLevel, 0.0, maxMIPLevelScalar );
+		float desiredMIPLevel = -log2( sigma );
+
+		desiredMIPLevel = clamp( maxMIPLevelScalar - desiredMIPLevel, 0.0, maxMIPLevelScalar );
+
+		return desiredMIPLevel;
 
 	}
 
-	vec3 getLightProbeIndirectRadiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in float blinnShininessExponent, const in int maxMIPLevel ) {
+	// (elalish) Changed the input from blinnShininessExponent to roughness, so that we can use the Trowbridge-Reitz distribution instead.
+	vec3 getLightProbeIndirectRadiance( /*const in SpecularLightProbe specularLightProbe,*/ const in GeometricContext geometry, const in float roughness, const in int maxMIPLevel ) {
 
 		#ifdef ENVMAP_MODE_REFLECTION
 
@@ -66,9 +71,16 @@ export const envmapChunk = /* glsl */ `
 
 		#endif
 
+		// (elalish) Mixing the reflection with the normal is more accurate and keeps rough objects from gathering light from behind their tangent plane.
+		reflectVec = normalize( mix( reflectVec, geometry.normal, roughness * roughness) );
+
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 
-		float specularMIPLevel = getSpecularMIPLevel( blinnShininessExponent, maxMIPLevel );
+		#ifndef ENVMAP_TYPE_CUBE_UV
+
+			float specularMIPLevel = getSpecularMIPLevel( roughness, reflectVec, maxMIPLevel );
+
+		#endif
 
 		#ifdef ENVMAP_TYPE_CUBE
 
@@ -89,7 +101,7 @@ export const envmapChunk = /* glsl */ `
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryReflectVec = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );
-			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, specularMIPLevel );
+			vec4 envMapColor = textureCubeUV( envMap, queryReflectVec, roughness );
 
 		#elif defined( ENVMAP_TYPE_EQUIREC )
 

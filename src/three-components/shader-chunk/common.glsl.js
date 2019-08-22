@@ -6,22 +6,30 @@ import {texelConversions} from './encodings_pars_framgment.glsl.js'
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
 // sampling a textureCube (not generally normalized).
 
+// getDirectionChunk handles uv coordinates that are beyond [0, 1] in either x
+// or y (not both) by wrapping around to the neighboring face.
+
 export const getDirectionChunk = /* glsl */ `
 vec3 getDirection(vec2 uv, int face) {
     uv = 2.0 * uv - 1.0;
-    vec3 direction;
+    vec3 direction = vec3(clamp(uv, -1.0, 1.0), 1.0);
+    uv = abs(uv);
+    float over = max(uv.x, uv.y) - 1.0;
+    if(over > 0.0) direction.z -= over;
     if (face == 0) {
-      direction = vec3(1.0, uv.y, -uv.x);
+      direction = direction.zyx;
+      direction.z *= -1.0;
     } else if (face == 1) {
-      direction = vec3(uv.x, 1.0, -uv.y);
-    } else if (face == 2) {
-      direction = vec3(uv, 1.0);
+      direction = direction.xzy;
+      direction.z *= -1.0;
     } else if (face == 3) {
-      direction = vec3(-1.0, uv.y, uv.x);
+      direction = direction.zyx;
+      direction.x *= -1.0;
     } else if (face == 4) {
-      direction = vec3(uv.x, -1.0, uv.y);
-    } else {
-      direction = vec3(-uv.x,uv.y, -1.0);
+      direction = direction.xzy;
+      direction.y *= -1.0;
+    } else if (face == 5) {
+      direction.xz *= -1.0;
     }
     return direction;
 }

@@ -21,6 +21,16 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>&lt;model-viewer&gt; Unit Tests</title>
 
+  <!-- Uncomment the following script in order to debug shader errors in Sauce Labs. When 
+       a shader fails to compile, it logs a console.error ("Shader failed to compile!") before it logs
+       the debug output from WebGL. Without this script, WCT bails out on the first error, so you 
+       never see the useful log, which tends to be especially critical for IE11. -->
+  <!-- <script>
+    WCT = {
+      trackConsoleError: false
+    };
+  </script> -->
+
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
 
   <!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->

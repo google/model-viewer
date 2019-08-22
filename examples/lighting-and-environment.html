@@ -55,12 +55,12 @@
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
         <h4 id="intro"><span class="font-medium">Lighting &amp; Environment. </span>Control the lighting and the environment surrounding &lt;model-viewer&gt;. This page showcases the background-image attribute, which links to an equirectangular projection image which is used as the skybox, and applied as an environment map to the model.</h4>
         <div class="heading">
-          <h2 class="demo-title">An equirectangular <span class="attribute">background-image</span></h2>
+          <h2 class="demo-title">An equirectangular HDR <span class="attribute">background-image</span></h2>
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer camera-controls background-image="assets/spruit_sunrise_1k.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="assets/radiance.glb"></model-viewer>
+  <model-viewer camera-controls background-image="assets/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet" src="assets/DamagedHelmet/DamagedHelmet.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -77,12 +77,29 @@
         </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-<model-viewer camera-controls background-image="assets/spruit_sunrise_1k.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="assets/radiance.glb"></model-viewer>
+<model-viewer camera-controls background-image="assets/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
     </div>
   </div>
+
+  <div class="sample">
+      <div id="demo-container-2.5" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular LDR <span class="attribute">background-image</span></h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-2.5" highlight-as="html">
+            <template>
+  <model-viewer camera-controls background-image="assets/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
   <div class="sample">
     <div id="demo-container-3" class="demo"></div>
@@ -162,7 +179,7 @@
         </div>
         <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
-<model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.hdr" environment-image="assets/spruit_sunrise_1k.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls background-image="assets/whipple_creek_regional_park_04_1k.hdr" environment-image="assets/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="assets/reflective-sphere.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -179,7 +196,7 @@
       </div>
       <example-snippet stamp-to="demo-container-7" highlight-as="html">
         <template>
-<model-viewer camera-controls id="exposure-demo" exposure="1" background-image="assets/spruit_sunrise_1k.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls id="exposure-demo" exposure="1" background-image="assets/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="assets/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#exposure-demo');
