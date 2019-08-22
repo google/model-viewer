@@ -265,6 +265,7 @@ export default class TextureUtils extends EventDispatcher {
     }
 
     const blurMaterial = new RawShaderMaterial({
+      defines: {n: n},
       uniforms: {
         tCube: {value: null},
         latitudinal: {value: false},
@@ -289,9 +290,8 @@ void main() {
       fragmentShader: `
 precision mediump float;
 precision mediump int;
-const int n = ${n};
 varying vec3 vPosition;
-uniform float weights[${n}];
+uniform float weights[n];
 uniform samplerCube tCube;
 uniform bool latitudinal;
 uniform float dTheta;
