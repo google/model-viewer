@@ -99,8 +99,8 @@ const updateScreenshots = async (config) => {
       const rendererDirectory = path.join(renderersDirectory, rendererName);
       const goldenPath = path.join(scenarioGoldensDirectory, goldenFilename);
 
-      if (scenarioWhitelist != null && !scenarioWhitelist.has(rendererName)) {
-        console.log(`⏭  Skipping ${rendererName}...`);
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
+        console.log(`⏭  Skipping ${scenarioName}...`);
         continue;
       }
 

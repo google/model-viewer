@@ -1,15 +1,22 @@
 {
-  "analysisThresholds": [0.0, 1.0, 10.0],
-  "renderers": [{
-    "name": "model-viewer",
-    "description": "<model-viewer>"
-  }, {
-    "name": "filament",
-    "description": "Filament",
-    "scripts": {
-      "setup": "prepare-ibl.sh"
+  "analysisThresholds": [
+    0.0,
+    1.0,
+    10.0
+  ],
+  "renderers": [
+    {
+      "name": "model-viewer",
+      "description": "<model-viewer>"
+    },
+    {
+      "name": "filament",
+      "description": "Filament",
+      "scripts": {
+        "setup": "prepare-ibl.sh"
+      }
     }
-  }],
+  ],
   "scenarios": [
     {
       "name": "khronos-2CylinderEngine",
@@ -258,16 +265,16 @@
       }
     },
     {
-      "name": "PBR Spheres",
+      "name": "FurnaceTest",
       "model": "../../../../examples/assets/pbr-spheres.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "lighting": "../../../../examples/assets/grey.png",
       "dimensions": {
         "width": 768,
         "height": 768
       }
     },
     {
-      "name": "Alpha Blend Litmus Test",
+      "name": "AlphaBlendLitmusTest",
       "model": "../../../../examples/assets/alpha-blend-litmus.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
