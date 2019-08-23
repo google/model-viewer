@@ -145,7 +145,7 @@ template.innerHTML = `
     }
 
     .slot.controls-prompt {
-      display: flex;
+      display: var(--interaction-prompt-display, flex);
       position: absolute;
       top: 0;
       left: 0;
@@ -177,6 +177,8 @@ template.innerHTML = `
       -moz-user-select: none;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+
+      display: var(--ar-button-display, block);
     }
 
     .slot.ar-button:not(.enabled),

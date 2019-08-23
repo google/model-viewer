@@ -263,6 +263,14 @@
 
           <ul class="list-attribute">
             <li>
+              <div>--ar-button-display</div>
+              <p>Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.</p>
+            </li>
+            <li>
+              <div>--interaction-prompt-display</div>
+              <p>Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden. Defaults to flex.</p>
+            </li>
+            <li>
               <div>--poster-color</div>
               <p>Sets the background-color of the poster. Falls back to --background-color if set. Defaults to #fff.</p>
             </li>
@@ -389,6 +397,16 @@
             <li>
               <div>load</div>
               <p>Fired when a model is loaded. Can fire multiple times per <span class="attribute">&lt;model-viewer&gt;</span> if the src attribute is changed.</p>
+            </li>
+            <li>
+              <div>model-visibility</div>
+              <p>This event is fired when the visibility of the model changes. When the
+              model is loaded, able to be rendered and fully visible (e.g., the poster is no longer
+              visible), this event will fire and <span class="attribute">event.detail.visible</span>
+              will be "true". Note that this event will fire regardless of whether the model is 
+              present in the viewport. This means that the model may not be rendered yet (as we
+              do not render models that are outside of the viewport) even though the event says
+              that the model is visible.</p>
             </li>
             <li>
               <div>poster-visibility</div>
