@@ -91,11 +91,20 @@
           <ul class="list-attribute">
             <li>
               <div>src<a href="#required-for-display">*</a></div>
-              <p>The URL to the 3D model. This parameter is required for <span class="attribute">&lt;model-viewer&gt;</span> to display. Only <a href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a> models are supported, see <a href="https://github.com/GoogleWebComponents/model-viewer#supported-formats">Supported Formats</a>.</p>
+              <p>The URL to the 3D model. This parameter is required for <span
+              class="attribute">&lt;model-viewer&gt;</span> to display. Only <a
+              href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+              href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+              models are supported, see <a
+              href="https://github.com/GoogleWebComponents/model-viewer#supported-formats">Supported
+              Formats</a>.</p>
             </li>
             <li>
               <div>alt</div>
-              <p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>
+              <p>Configures the model with custom text that will be used to
+              describe the model to viewers who use a screen reader or otherwise
+              depend on additional semantic context to understand what they are
+              viewing.</p>
             </li>
             <li>
               <div>animation-name</div>
@@ -127,15 +136,22 @@
               <p>If this is true and a model has animations, an animation will
               automatically begin to play when this attribute is set (or when the
               property is set to true). If no animation-name is specified, plays
-              the first animation.</p>
+              the first animation. Defaults to false.</p>
             </li>
             <li>
               <div>background-color</div>
-              <p>Sets the background color of the scene when viewed inline. Takes any valid CSS color string.</p>
+              <p>Sets the background color of the scene when viewed inline.
+              Takes any valid CSS color string.</p>
             </li>
             <li>
               <div>background-image</div>
-              <p>Sets the background image of the scene when viewed inline. Takes a URL to an <a href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Currently only supports traditional image formats (png, jpg), and does not yet support HDR (#65). Setting background-image supercedes background-color.</p>
+              <p>Sets the background image of the scene when viewed inline.
+              Takes a URL to an <a
+              href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular
+              projection image</a> that's used for the skybox, as well as
+              applied as an environment map on the model. Supports png, jpg and
+              hdr (recommended) images. Setting background-image supercedes
+              background-color.</p>
             </li>
             <li>
               <div>camera-controls</div>
@@ -168,6 +184,11 @@
               background-image or environment-image are not set. The one exception
               is for models with unlit materials. Set this value to 0 to hide the
               environment entirely. Defaults to 1.</p>
+            </li>
+            <li>
+              <div>exposure</div>
+              <p>Controls the exposure of both the model and skybox, for use
+              primarily with HDR environments. Defaults to 1.</p>
             </li>
             <li>
               <div>field-of-view</div>
@@ -204,19 +225,37 @@
             </li>
             <li>
               <div>ios-src</div>
-              <p>The url to a <a href="https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html">USDZ</a> model which will be used on <a href="https://www.apple.com/ios/augmented-reality/">supported iOS 12+ devices</a> via <a href="https://developer.apple.com/videos/play/wwdc2018/603/">AR Quick Look</a> on Safari. See <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented Reality</a>.</p>
+              <p>The url to a <a
+              href="https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html">USDZ</a>
+              model which will be used on <a
+              href="https://www.apple.com/ios/augmented-reality/">supported iOS
+              12+ devices</a> via <a
+              href="https://developer.apple.com/videos/play/wwdc2018/603/">AR
+              Quick Look</a> on Safari. See <a
+              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
+              Reality</a>.</p>
             </li>
             <li>
               <div>magic-leap</div>
-              <p>Enables the ability to view models in AR when viewing content on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a> browser, requires that src is a GLB model, and requires the inclusion of the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
+              <p>Enables the ability to view models in AR when viewing content
+              on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a>
+              browser, requires that src is a GLB model, and requires the
+              inclusion of the <a
+              href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
+              library.</p>
             </li>
             <li>
               <div>poster</div>
-              <p>Displays an image instead of the model. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+              <p>Displays an image instead of the model. See <a
+              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
+              Loading</a> for more information.</p>
             </li>
             <li>
               <div>preload</div>
-              <p>When poster is also enabled, the model will be downloaded before user action. See <a href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On Loading</a> for more information.</p>
+              <p>When poster is also enabled, the model will be downloaded
+              before user action. See <a
+              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
+              Loading</a> for more information.</p>
             </li>
             <li>
               <div>quick-look-browsers</div>
@@ -228,12 +267,12 @@
             <li>
               <div>reveal</div>
               <p>This attribute controls whether or not the model should be
-            automatically revealed when loaded. It currently supports two
-            values: "auto" and "interaction". If reveal is set to "interaction",
-            &lt;model-viewer&gt; will wait until the user interacts with the
-            poster before loading and revealing the model. Otherwise, the model
-            will be revealed as soon as it is done loading and rendering.
-            Defaults to "auto".</p>
+              automatically revealed when loaded. It currently supports two
+              values: "auto" and "interaction". If reveal is set to
+              "interaction", &lt;model-viewer&gt; will wait until the user
+              interacts with the poster before loading and revealing the model.
+              Otherwise, the model will be revealed as soon as it is done
+              loading and rendering. Defaults to "auto".</p>
             </li>
             <li>
               <div>shadow-intensity</div>
@@ -243,18 +282,27 @@
             <li>
               <div>stage-light-intensity</div>
               <p>Controls the intensity of the built-in scene lighting. Set to 0
-              to turn off the scene lighting entirely. Note that the weight of the
-              scene lighting is effected by whether or not PMREM is enabled.
-              Defaults to 1.</p>
+              to turn off the scene lighting entirely. Defaults to 0.</p>
             </li>
             <li>
               <div>unstable-webxr</div>
-              <p>Enables the ability to view the model in AR via the experimental <a href="https://github.com/immersive-web/webxr">WebXR Device API</a>, currently <a href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented only in Chrome Canary</a>. See <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented Reality</a>.</p>
+              <p>Enables the ability to view the model in AR via the
+              experimental <a
+              href="https://github.com/immersive-web/webxr">WebXR Device
+              API</a>, currently <a
+              href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented
+              only in Chrome Canary</a>. See <a
+              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
+              Reality</a>.</p>
             </li>
           </ul>
 
-          <p style="color:rgba(0,0,0,.54);" id="required-for-display">* Parameters that are required for display.</p>
-          <p style="color:rgba(0,0,0,.54);">Note: All attributes have a corresponding property in camel-case format. For example, the background-color attribute can also be configured using the backgroundColor property.</p>
+          <p style="color:rgba(0,0,0,.54);" id="required-for-display">*
+          Parameters that are required for display.</p>
+          <p style="color:rgba(0,0,0,.54);">Note: All attributes have a
+          corresponding property in camel-case format. For example, the
+          background-color attribute can also be configured using the
+          backgroundColor property.</p>
 
         </div>
 
@@ -264,23 +312,29 @@
           <ul class="list-attribute">
             <li>
               <div>--ar-button-display</div>
-              <p>Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.</p>
+              <p>Sets the display property of the AR button. Intended to be used
+              to force the button to be hidden. Defaults to block.</p>
             </li>
             <li>
               <div>--interaction-prompt-display</div>
-              <p>Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden. Defaults to flex.</p>
+              <p>Sets the display property of the interaction prompt. Intended
+              to be used to force the prompt to be hidden. Defaults to flex.</p>
             </li>
             <li>
               <div>--poster-color</div>
-              <p>Sets the background-color of the poster. Falls back to --background-color if set. Defaults to #fff.</p>
+              <p>Sets the background-color of the poster. Falls back to
+              --background-color if set. Defaults to #fff.</p>
             </li>
             <li>
               <div>--poster-image</div>
-              <p>Sets the background-image of the poster. This is currently overridden by the poster attribute if it is set. Defaults to none.</p>
+              <p>Sets the background-image of the poster. This is currently
+              overridden by the poster attribute if it is set. Defaults to
+              none.</p>
             </li>
             <li>
               <div>--progress-bar-color</div>
-              <p>Sets the background-color of the progress bar. Defaults to rgba(0, 0, 0, 0.4).</p>
+              <p>Sets the background-color of the progress bar. Defaults to
+              rgba(0, 0, 0, 0.4).</p>
             </li>
             <li>
               <div>--progress-bar-height</div>
@@ -396,7 +450,9 @@
             </li>
             <li>
               <div>load</div>
-              <p>Fired when a model is loaded. Can fire multiple times per <span class="attribute">&lt;model-viewer&gt;</span> if the src attribute is changed.</p>
+              <p>Fired when a model is loaded. Can fire multiple times per <span
+              class="attribute">&lt;model-viewer&gt;</span> if the src attribute
+              is changed.</p>
             </li>
             <li>
               <div>model-visibility</div>
@@ -445,7 +501,9 @@
 
           <div style="clear:both"></div>
 
-          <p class="browser-support-desc">These browser features are <b>required</b> for <span class="attribute">&lt;model-viewer&gt;</span> to work correctly:</p>
+          <p class="browser-support-desc">These browser features are
+          <b>required</b> for <span
+          class="attribute">&lt;model-viewer&gt;</span> to work correctly:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -479,7 +537,9 @@
             </tr>
           </table>
 
-          <p class="browser-support-desc">These browser features are <b>optional</b> and are only used if available for performance optimization or specific features:</p>
+          <p class="browser-support-desc">These browser features are
+          <b>optional</b> and are only used if available for performance
+          optimization or specific features:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -533,7 +593,9 @@
             </tr>
           </table>
 
-          <p class="browser-support-desc">These browser features are <b>optional</b> and are only needed if you wish to use the unstable-webxr feature:</p>
+          <p class="browser-support-desc">These browser features are
+          <b>optional</b> and are only needed if you wish to use the
+          unstable-webxr feature:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
