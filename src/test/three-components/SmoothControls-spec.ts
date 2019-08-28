@@ -280,13 +280,17 @@ suite('SmoothControls', () => {
           test('does not zoom when scrolling while blurred', () => {
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
           });
 
           test('does not orbit when pointing while blurred', () => {
@@ -301,17 +305,17 @@ suite('SmoothControls', () => {
           });
 
           test('does zoom when scrolling while focused', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
 
             element.focus();
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
           });
         });
 
@@ -336,15 +340,15 @@ suite('SmoothControls', () => {
           });
 
           test('zooms when scrolling, even while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
           });
         });
 

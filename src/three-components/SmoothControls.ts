@@ -426,7 +426,7 @@ export class SmoothControls extends EventDispatcher {
    */
   setFov(fov: number) {
     const {minimumLogFov, maximumLogFov} = this[$options];
-    this[$goalLogFov] = clamp(fov, minimumLogFov!, maximumLogFov!);
+    this[$goalLogFov] = clamp(Math.log(fov), minimumLogFov!, maximumLogFov!);
   }
 
   /**

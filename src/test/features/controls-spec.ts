@@ -149,7 +149,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults FOV correctly', async () => {
-        expect(element.getFieldOfView()).to.be.equal(DEFAULT_FOV);
+        expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {
@@ -162,7 +162,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        expect(element.getFieldOfView()).to.be.equal(nextFov);
+        expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
       });
 
       test('causes camera-change event to fire', async () => {
@@ -221,7 +221,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           await timePasses();
 
-          expect(element.getFieldOfView()).to.be.equal(fieldOfView);
+          expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
               .to.equal(cameraOrbit);
