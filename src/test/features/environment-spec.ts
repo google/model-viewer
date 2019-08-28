@@ -301,11 +301,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
             expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
           });
 
-      test('the directional light is not tinted', () => {
-        const lightColor = scene.shadowLight.color.getHexString().toLowerCase();
-        expect(lightColor).to.be.equal('ffffff');
-      });
-
       suite('on an unlit model', () => {
         setup(async () => {
           let onLoad = waitForLoadAndEnvMap(scene, element, {
@@ -345,26 +340,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
       expect(newToneMappingExposure)
           .to.be.greaterThan(originalToneMappingExposure);
-    });
-  });
-
-  suite('stage-light-intensity', () => {
-    setup(async () => {
-      element.src = MODEL_URL;
-      document.body.appendChild(element);
-      await waitForEvent(element, 'load');
-    });
-
-    teardown(() => {
-      document.body.removeChild(element);
-    });
-
-    test('changes model scene light intensity', async () => {
-      const originalLightIntensity = scene.shadowLight.intensity;
-      element.stageLightIntensity = 0.5;
-      await timePasses();
-      const newLightIntensity = scene.shadowLight.intensity;
-      expect(newLightIntensity).to.be.greaterThan(originalLightIntensity);
     });
   });
 

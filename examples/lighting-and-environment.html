@@ -217,42 +217,6 @@
   </div>
 
   <div class="sample">
-    <div id="demo-container-8" class="demo"></div>
-    <div class="content">
-      <div class="wrapper">
-        <div class="heading">
-          <h2 class="demo-title">Control stage lighting with <span class="attribute">stage-light-intensity</span></h2>
-          <h4></h4>
-        </div>
-        <example-snippet stamp-to="demo-container-8" highlight-as="html">
-          <template>
-<model-viewer id="stage-light-demo" camera-controls stage-light-intensity="1" background-image="assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a duck depicted within a forest with varying stage light intensity" src="assets/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></model-viewer>
-<script>
-(() => {
-  const modelViewer = $('#stage-light-demo');
-  const time = performance.now();
-
-  const animate = (now) => {
-    modelViewer.stageLightIntensity = oscillate(0, 2, 4000, now - time);
-    requestAnimationFrame(animate);
-  };
-
-  animate();
-})();
-</script>
-          </template>
-        </example-snippet>
-
-      </div>
-    </div>
-  </div>
-
-
-
-
-
-
-  <div class="sample">
     <div id="demo-container-9" class="demo"></div>
     <div class="content">
       <div class="wrapper">

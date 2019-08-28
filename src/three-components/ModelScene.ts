@@ -105,7 +105,6 @@ export default class ModelScene extends Scene {
     this.skyboxMesh = this.createSkyboxMesh();
 
     this.add(this.pivot);
-    this.add(this.shadowLight);
     this.pivot.add(this.model);
 
     this.setSize(width, height);
@@ -129,9 +128,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Sets the model via URL.
-   *
-   * @param {String?} source
-   * @param {Function?} progressCallback
    */
   async setModelSource(
       source: string|null, progressCallback?: (progress: number) => void) {
@@ -168,9 +164,6 @@ export default class ModelScene extends Scene {
   /**
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
-   *
-   * @param {number} width
-   * @param {number} height
    */
   setSize(width: number, height: number) {
     if (width !== this.width || height !== this.height) {
@@ -232,14 +225,8 @@ export default class ModelScene extends Scene {
     });
   }
 
-  configureStageLighting(intensityScale: number) {
-    this.shadowLight.intensity = intensityScale;
-    this.isDirty = true;
-  }
-
   /**
    * Returns the size of the corresponding canvas element.
-   * @return {Object}
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
@@ -275,7 +262,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Returns the current camera.
-   * @return {THREE.Camera}
    */
   getCamera(): Camera {
     return this.activeCamera;
