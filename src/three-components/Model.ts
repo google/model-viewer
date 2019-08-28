@@ -25,8 +25,6 @@ const $currentScene = Symbol('currentScene');
 /**
  * An Object3D that can swap out its underlying
  * model.
- *
- * @extends THREE.Object3D
  */
 export default class Model extends Object3D {
   private[$currentScene]: CacheRetainedScene|null = null;
@@ -59,8 +57,6 @@ export default class Model extends Object3D {
   /**
    * Returns a boolean indicating whether or not there is a
    * loaded model attached.
-   *
-   * @return {Boolean}
    */
   hasModel(): boolean {
     return !!this.modelContainer.children.length;
@@ -91,34 +87,9 @@ export default class Model extends Object3D {
     this.dispatchEvent({type: 'envmap-change', value: map});
   }
 
-  setEnvironmentMapIntensity(intensity: number) {
-    const intensityIsNumber =
-        typeof intensity === 'number' && !(self as any).isNaN(intensity);
-
-    if (!intensityIsNumber) {
-      intensity = 1.0;
-    }
-
-    this.modelContainer.traverse(object => {
-      if (object && (object as Mesh).isMesh && (object as Mesh).material) {
-        const {material} = object as Mesh;
-        if (Array.isArray(material)) {
-          material.forEach(
-              material => (material as MeshStandardMaterial).envMapIntensity =
-                  intensity);
-        } else {
-          ((object as Mesh).material as MeshStandardMaterial).envMapIntensity =
-              intensity;
-        }
-      }
-    });
-  }
-
   /**
    * Pass in a THREE.Object3D to be controlled
    * by this model.
-   *
-   * @param {THREE.Object3D}
    */
   setObject(model: Object3D) {
     this.clear();
@@ -127,10 +98,6 @@ export default class Model extends Object3D {
     this.dispatchEvent({type: 'model-load'});
   }
 
-  /**
-   * @param {String?} url
-   * @param {Function?} progressCallback
-   */
   async setSource(
       url: string|null, progressCallback?: (progress: number) => void) {
     if (!url || url === this.url) {

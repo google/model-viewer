@@ -21,23 +21,18 @@ import {Constructor, deserializeUrl} from '../utilities.js';
 
 export interface EnvironmentInterface {
   environmentImage: string|null;
-  environmentIntensity: number;
   backgroundImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
-  stageLightIntensity: number;
   exposure: number;
 }
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
-const DEFAULT_STAGE_LIGHT_INTENSITY = 0.0;
-const DEFAULT_ENVIRONMENT_INTENSITY = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateLighting = Symbol('updateLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
@@ -54,9 +49,6 @@ export const EnvironmentMixin = (ModelViewerElement:
         })
         environmentImage: string|null = null;
 
-        @property({type: Number, attribute: 'environment-intensity'})
-        environmentIntensity: number = DEFAULT_ENVIRONMENT_INTENSITY;
-
         @property({
           type: String,
           attribute: 'background-image',
@@ -69,9 +61,6 @@ export const EnvironmentMixin = (ModelViewerElement:
 
         @property({type: Number, attribute: 'shadow-intensity'})
         shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
-
-        @property({type: Number, attribute: 'stage-light-intensity'})
-        stageLightIntensity: number = DEFAULT_STAGE_LIGHT_INTENSITY;
 
         @property({
           type: Number,
@@ -92,11 +81,6 @@ export const EnvironmentMixin = (ModelViewerElement:
 
           if (changedProperties.has('exposure')) {
             this[$updateToneMapping]();
-          }
-
-          if (changedProperties.has('environmentIntensity') ||
-              changedProperties.has('stageLightIntensity')) {
-            this[$updateLighting]();
           }
 
           if (changedProperties.has('environmentImage') ||
@@ -194,7 +178,6 @@ export const EnvironmentMixin = (ModelViewerElement:
           this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
           this.dispatchEvent(new CustomEvent('environment-change'));
 
-          this[$updateLighting]();
           this[$needsRender]();
         }
 
@@ -206,12 +189,6 @@ export const EnvironmentMixin = (ModelViewerElement:
         private[$updateToneMapping]() {
           this[$scene].exposure = this.exposure;
           this[$needsRender]();
-        }
-
-        private[$updateLighting]() {
-          const scene = this[$scene];
-          scene.configureStageLighting(this.stageLightIntensity);
-          scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
         }
       }
 
