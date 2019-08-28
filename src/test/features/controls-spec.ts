@@ -204,7 +204,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('updates with current orbit after interaction', async () => {
-          controls.adjustOrbit(0, 0.5, 0);
+          controls.adjustOrbit(0, 0.5, 0, 0);
           settleControls(controls);
 
           const orbit = element.getCameraOrbit();
@@ -254,17 +254,23 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(controls).to.be.ok;
       });
 
-      test('requires focus to interact if policy is set to allow-when-focused', async  () => {
-        element.interactionPolicy = 'allow-when-focused';
-        await timePasses();
-        expect(controls.options.interactionPolicy).to.be.equal('allow-when-focused');
-      });
+      test(
+          'requires focus to interact if policy is set to allow-when-focused',
+          async () => {
+            element.interactionPolicy = 'allow-when-focused';
+            await timePasses();
+            expect(controls.options.interactionPolicy)
+                .to.be.equal('allow-when-focused');
+          });
 
-      test('does not require focus to interact if policy is set to always-allow', async () => {
-        element.interactionPolicy = 'always-allow';
-        await timePasses();
-        expect(controls.options.interactionPolicy).to.be.equal('always-allow');
-      });
+      test(
+          'does not require focus to interact if policy is set to always-allow',
+          async () => {
+            element.interactionPolicy = 'always-allow';
+            await timePasses();
+            expect(controls.options.interactionPolicy)
+                .to.be.equal('always-allow');
+          });
 
       test('sets max radius to the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
@@ -414,13 +420,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage right');
 
-              controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(-Math.PI / 2.0, 0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage back');
 
-              controls.adjustOrbit(Math.PI, 0, 0);
+              controls.adjustOrbit(Math.PI, 0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
@@ -443,13 +449,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage upper-front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))

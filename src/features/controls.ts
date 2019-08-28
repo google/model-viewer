@@ -40,11 +40,10 @@ const InteractionPromptStrategy:
       WHEN_FOCUSED: 'when-focused'
     };
 
-const InteractionPolicy:
-    {[index: string]: InteractionPolicy} = {
-      ALWAYS_ALLOW: 'always-allow',
-      WHEN_FOCUSED: 'allow-when-focused'
-    };
+const InteractionPolicy: {[index: string]: InteractionPolicy} = {
+  ALWAYS_ALLOW: 'always-allow',
+  WHEN_FOCUSED: 'allow-when-focused'
+};
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
@@ -125,8 +124,7 @@ export const ControlsMixin = (ModelViewerElement:
             InteractionPromptStrategy.WHEN_FOCUSED;
 
         @property({type: String, attribute: 'interaction-policy'})
-        interactionPolicy: InteractionPolicy =
-            InteractionPolicy.ALWAYS_ALLOW;
+        interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
         protected[$promptElement]: Element;
 
@@ -318,7 +316,7 @@ export const ControlsMixin = (ModelViewerElement:
           const framedHeight = scene.framedHeight;
 
           // Make zoom sensitivity scale with model size:
-          const zoomSensitivity = framedHeight / 10;
+          const zoomSensitivity = framedHeight;
           const framedDistance = (framedHeight / 2) /
               Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
           const near = framedHeight / 10.0;
