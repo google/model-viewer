@@ -315,8 +315,6 @@ export const ControlsMixin = (ModelViewerElement:
           const controls = this[$controls];
           const framedHeight = scene.framedHeight;
 
-          // Make zoom sensitivity scale with model size:
-          const zoomSensitivity = framedHeight;
           const framedDistance = (framedHeight / 2) /
               Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
           const near = framedHeight / 10.0;
@@ -331,7 +329,7 @@ export const ControlsMixin = (ModelViewerElement:
               1;
           this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
 
-          controls.updateIntrinsics(near, far, scene.aspect, zoomSensitivity);
+          controls.updateIntrinsics(near, far, scene.aspect);
 
           // Zooming out beyond the 'frame' doesn't serve much purpose
           // and will only end up showing the skysphere if zoomed out enough
