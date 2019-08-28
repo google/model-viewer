@@ -40,13 +40,13 @@ const InteractionPromptStrategy:
       WHEN_FOCUSED: 'when-focused'
     };
 
-const InteractionPolicy:
-    {[index: string]: InteractionPolicy} = {
-      ALWAYS_ALLOW: 'always-allow',
-      WHEN_FOCUSED: 'allow-when-focused'
-    };
+const InteractionPolicy: {[index: string]: InteractionPolicy} = {
+  ALWAYS_ALLOW: 'always-allow',
+  WHEN_FOCUSED: 'allow-when-focused'
+};
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+const DEFAULT_CAMERA_TARGET = 'auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
 
 const HALF_PI = Math.PI / 2.0;
@@ -69,6 +69,7 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
+const $updateCameraTarget = Symbol('updateCameraTarget');
 const $updateFieldOfView = Symbol('updateFieldOfView');
 
 const $blurHandler = Symbol('blurHandler');
@@ -92,6 +93,7 @@ const $jumpCamera = Symbol('jumpCamera');
 export interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
+  cameraTarget: string;
   fieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPolicy: InteractionPolicy;
@@ -113,6 +115,10 @@ export const ControlsMixin = (ModelViewerElement:
         cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
         @property(
+            {type: String, attribute: 'camera-target', hasChanged: () => true})
+        cameraTarget: string = DEFAULT_CAMERA_TARGET;
+
+        @property(
             {type: String, attribute: 'field-of-view', hasChanged: () => true})
         fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
 
@@ -125,8 +131,7 @@ export const ControlsMixin = (ModelViewerElement:
             InteractionPromptStrategy.WHEN_FOCUSED;
 
         @property({type: String, attribute: 'interaction-policy'})
-        interactionPolicy: InteractionPolicy =
-            InteractionPolicy.ALWAYS_ALLOW;
+        interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
         protected[$promptElement]: Element;
 
@@ -228,6 +233,10 @@ export const ControlsMixin = (ModelViewerElement:
             this[$updateCameraOrbit]();
           }
 
+          if (changedProperties.has('cameraTarget')) {
+            this[$updateCameraTarget]();
+          }
+
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
           }
@@ -264,6 +273,24 @@ export const ControlsMixin = (ModelViewerElement:
             }
           }
           this[$controls].setOrbit(theta, phi, radius as number);
+        }
+
+        [$updateCameraTarget]() {
+          let target = deserializeSpherical(this.cameraOrbit);
+
+          if (target == null) {
+            target = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
+          }
+
+          if (typeof radius === 'string') {
+            switch (radius) {
+              default:
+              case 'auto':
+                radius = this[$idealCameraDistance]!;
+                break;
+            }
+          }
+          this[$controls].setTarget(target);
         }
 
         [$tick](time: number, delta: number) {

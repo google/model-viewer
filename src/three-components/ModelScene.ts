@@ -40,7 +40,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 };
 
 const $paused = Symbol('paused');
-const $modelAlignmentMask = Symbol('modelAlignmentMask');
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -49,8 +48,7 @@ const $modelAlignmentMask = Symbol('modelAlignmentMask');
  */
 export default class ModelScene extends Scene {
   private[$paused]: boolean = false;
-  private[$modelAlignmentMask] = new Vector3(1, 1, 1);
-  private target = new Vector3();
+  private centerHeight: number;
   private aspect: number;
 
   public canvas: HTMLCanvasElement;
@@ -140,28 +138,6 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Configures the alignment of the model within the frame based on value
-   * "masks". By default, the model will be aligned so that the center of its
-   * bounding box volume is in the center of the frame on all axes. In order to
-   * center the model this way, the model is translated by the delta between
-   * the world center of the bounding volume and world center of the frame.
-   *
-   * The alignment mask allows this translation to be scaled or eliminated
-   * completely for each of the three axes. So, setModelAlignment(1, 1, 1) will
-   * center the model in the frame. setModelAlignment(0, 0, 0) will align the
-   * model so that its root node origin is at [0, 0, 0] in the scene.
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {number} z
-   */
-  setModelAlignmentMask(...alignmentMaskValues: [number, number, number]) {
-    this[$modelAlignmentMask].set(...alignmentMaskValues);
-    this.alignModel();
-    this.isDirty = true;
-  }
-
-  /**
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
    */
@@ -202,9 +178,8 @@ export default class ModelScene extends Scene {
 
       const modelMinY = Math.min(0, boundingBox.min.y + position.y);
       const modelMaxY = Math.max(0, boundingBox.max.y + position.y);
-      this.target.y = this[$modelAlignmentMask].y * (modelMaxY + modelMinY) / 2;
-      const boxHalfY =
-          Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
+      this.centerHeight = (modelMaxY + modelMinY) / 2;
+      const boxHalfY = (modelMaxY - modelMinY) / 2;
 
       this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
       this.framedHeight = Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
@@ -246,9 +221,7 @@ export default class ModelScene extends Scene {
 
     let centeredOrigin = this.model.boundingBox.getCenter(new Vector3());
     centeredOrigin.y -= this.model.size.y / 2;
-    this.model.position.copy(centeredOrigin)
-        .multiply(this[$modelAlignmentMask])
-        .multiplyScalar(-1);
+    this.model.position.copy(centeredOrigin).multiplyScalar(-1);
 
     this.updateFraming();
     this.updateStaticShadow();
@@ -309,12 +282,6 @@ export default class ModelScene extends Scene {
     // a generated texture.
     this.pivot.add(this.shadow);
     this.pivot.rotation.y = currentRotation;
-
-    // TODO(#453) When we add a configurable camera target we should put the
-    // floor back at y=0 for a consistent coordinate system.
-    if (this[$modelAlignmentMask].y == 0) {
-      this.shadow.position.y = modelPosition.y - this.model.size.y / 2;
-    }
   }
 
   createSkyboxMesh(): Mesh {
