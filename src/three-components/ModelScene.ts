@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
 import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -52,7 +52,6 @@ export default class ModelScene extends Scene {
 
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
-  public shadowLight: DirectionalLight;
   public shadow: StaticShadow;
   public pivot: Object3D;
   public width: number;
@@ -82,10 +81,6 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-
-    this.shadowLight = new DirectionalLight(0xffffff, 1.0);
-    this.shadowLight.position.set(0, 10, 0);
-    this.shadowLight.name = 'ShadowLight';
 
     this.width = width;
     this.height = height;
@@ -239,12 +234,7 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    this.model.boundingBox.getCenter(this.shadow.position);
-    this.shadow.position.y -= this.model.size.y / 2;
-    this.shadow.scale.x = this.model.size.x;
-    this.shadow.scale.z = this.model.size.z;
-
-    this.shadow.render(this.renderer.renderer, this, this.shadowLight);
+    this.shadow.render(this.renderer.renderer, this);
 
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
