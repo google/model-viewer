@@ -14,9 +14,9 @@
  */
 
 import {property} from 'lit-element';
-import {Event, Spherical} from 'three';
+import {Event, Spherical, Vector3} from 'three';
 
-import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
+import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
@@ -276,20 +276,12 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$updateCameraTarget]() {
-          let target = deserializeSpherical(this.cameraOrbit);
+          let target = deserializeVector3(this.cameraTarget);
 
-          if (target == null) {
-            target = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
+          if (target == null) {  // this happens in the default 'auto' case
+            target = this[$scene].model.boundingBox.getCenter(new Vector3);
           }
 
-          if (typeof radius === 'string') {
-            switch (radius) {
-              default:
-              case 'auto':
-                radius = this[$idealCameraDistance]!;
-                break;
-            }
-          }
           this[$controls].setTarget(target);
         }
 
@@ -370,7 +362,6 @@ export const ControlsMixin = (ModelViewerElement:
           controls.applyOptions({minimumRadius, maximumRadius});
 
           controls.setRadius(zoom * this[$idealCameraDistance]!);
-          controls.setTarget(scene.target);
           controls.jumpToGoal();
         }
 
@@ -438,6 +429,7 @@ export const ControlsMixin = (ModelViewerElement:
           super[$onModelLoad](event);
           this[$updateCamera]();
           this[$updateCameraOrbit]();
+          this[$updateCameraTarget]();
           this[$controls].jumpToGoal();
         }
 

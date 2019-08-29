@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
 import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -48,7 +48,6 @@ const $paused = Symbol('paused');
  */
 export default class ModelScene extends Scene {
   private[$paused]: boolean = false;
-  private centerHeight: number;
   private aspect: number;
 
   public canvas: HTMLCanvasElement;
@@ -167,22 +166,10 @@ export default class ModelScene extends Scene {
     this.canvas.style.height = `${this.height}px`;
     this.aspect = this.width / this.height;
 
-    const {boundingBox, position, size} = this.model;
+    const {size} = this.model;
     if (size.x != 0 || size.y != 0 || size.z != 0) {
-      const boxHalfX = Math.max(
-          Math.abs(boundingBox.min.x + position.x),
-          Math.abs(boundingBox.max.x + position.x));
-      const boxHalfZ = Math.max(
-          Math.abs(boundingBox.min.z + position.z),
-          Math.abs(boundingBox.max.z + position.z));
-
-      const modelMinY = Math.min(0, boundingBox.min.y + position.y);
-      const modelMaxY = Math.max(0, boundingBox.max.y + position.y);
-      this.centerHeight = (modelMaxY + modelMinY) / 2;
-      const boxHalfY = (modelMaxY - modelMinY) / 2;
-
-      this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
-      this.framedHeight = Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
+      this.modelDepth = Math.max(size.x, size.z);
+      this.framedHeight = Math.max(size.y, this.modelDepth / this.aspect);
     }
 
     // Immediately queue a render to happen at microtask timing. This is
@@ -205,26 +192,6 @@ export default class ModelScene extends Scene {
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  /**
-   * Moves the model to be centered at the XZ origin, with Y = 0 being the floor
-   * under the model, taking into account setModelAlignmentMask(), described
-   * above.
-   */
-  alignModel() {
-    if (!this.model.hasModel() || this.model.size.length() === 0) {
-      return;
-    }
-
-    this.resetModelPose();
-
-    let centeredOrigin = this.model.boundingBox.getCenter(new Vector3());
-    centeredOrigin.y -= this.model.size.y / 2;
-    this.model.position.copy(centeredOrigin).multiplyScalar(-1);
-
-    this.updateFraming();
-    this.updateStaticShadow();
   }
 
   resetModelPose() {
@@ -252,7 +219,8 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.alignModel();
+    this.updateFraming();
+    this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
@@ -271,10 +239,10 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    const modelPosition = this.model.boundingBox.getCenter(new Vector3())
-                              .add(this.model.position);
-    this.shadow.scale.x = 2 * Math.abs(modelPosition.x) + this.model.size.x;
-    this.shadow.scale.z = 2 * Math.abs(modelPosition.z) + this.model.size.z;
+    this.model.boundingBox.getCenter(this.shadow.position);
+    this.shadow.position.y -= this.model.size.y / 2;
+    this.shadow.scale.x = this.model.size.x;
+    this.shadow.scale.z = this.model.size.z;
 
     this.shadow.render(this.renderer.renderer, this, this.shadowLight);
 
