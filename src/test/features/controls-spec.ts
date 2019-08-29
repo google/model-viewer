@@ -254,17 +254,23 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(controls).to.be.ok;
       });
 
-      test('requires focus to interact if policy is set to allow-when-focused', async  () => {
-        element.interactionPolicy = 'allow-when-focused';
-        await timePasses();
-        expect(controls.options.interactionPolicy).to.be.equal('allow-when-focused');
-      });
+      test(
+          'requires focus to interact if policy is set to allow-when-focused',
+          async () => {
+            element.interactionPolicy = 'allow-when-focused';
+            await timePasses();
+            expect(controls.options.interactionPolicy)
+                .to.be.equal('allow-when-focused');
+          });
 
-      test('does not require focus to interact if policy is set to always-allow', async () => {
-        element.interactionPolicy = 'always-allow';
-        await timePasses();
-        expect(controls.options.interactionPolicy).to.be.equal('always-allow');
-      });
+      test(
+          'does not require focus to interact if policy is set to always-allow',
+          async () => {
+            element.interactionPolicy = 'always-allow';
+            await timePasses();
+            expect(controls.options.interactionPolicy)
+                .to.be.equal('always-allow');
+          });
 
       test('sets max radius to the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
@@ -280,14 +286,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('when user is interacting', () => {
         test('sets an appropriate camera-change event source', async () => {
-          const cameraChangeDispatches =
-              waitForEvent<CustomEvent<CameraChangeDetails>>(
-                  element, 'camera-change');
-
           await rafPasses();
           element[$canvas].focus();
           interactWith(element[$canvas]);
+
+          const cameraChangeDispatches =
+              waitForEvent<CustomEvent<CameraChangeDetails>>(
+                  element, 'camera-change');
           const event = await cameraChangeDispatches;
+
           expect(event.detail.source)
               .to.be.equal(ChangeSource.USER_INTERACTION);
         });

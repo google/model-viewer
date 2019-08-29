@@ -464,15 +464,10 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]({source}: ChangeEvent) {
-          if (this.interactionPrompt ===
-              InteractionPromptStrategy.WHEN_FOCUSED) {
-            this[$deferInteractionPrompt]();
-          }
           this[$updateAria]();
           this[$needsRender]();
 
-          if (source === ChangeSource.USER_INTERACTION &&
-              this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+          if (source === ChangeSource.USER_INTERACTION) {
             this[$deferInteractionPrompt]();
           }
 
