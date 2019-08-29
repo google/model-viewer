@@ -18,8 +18,6 @@ import {WebGLRenderer} from 'three';
 import ModelScene from './ModelScene';
 
 export interface ShadowGenerationConfig {
-  near?: number;
-  far?: number;
   textureWidth?: number;
   textureHeight?: number;
 }
@@ -30,8 +28,6 @@ const $renderTarget = Symbol('renderTarget');
 const BASE_SHADOW_OPACITY = 0.1;
 
 const DEFAULT_CONFIG: ShadowGenerationConfig = {
-  near: 0.01,
-  far: 100,
   textureWidth: 512,
   textureHeight: 512,
 };
@@ -134,8 +130,8 @@ export default class StaticShadow extends Mesh {
     this[$camera].bottom = size.z / -2;
     this[$camera].left = size.x / -2;
     this[$camera].right = size.x / 2;
-    this[$camera].near = config.near!;
-    this[$camera].far = config.far!;
+    this[$camera].near = 0;
+    this[$camera].far = size.y * 2;
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;

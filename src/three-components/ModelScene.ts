@@ -148,10 +148,9 @@ export default class ModelScene extends Scene {
   /**
    * To frame the scene, a box is fit around the model such that the X and Z
    * dimensions (modelDepth) are the same (for Y-rotation) and the X/Y ratio is
-   * the aspect ratio of the canvas (framedHeight is the Y dimension). For
-   * non-centered models, the box is fit symmetrically about the XZ origin to
-   * keep them in frame as they are rotated. At the ideal distance, the camera's
-   * fov exactly covers the front face of this box when looking down the Z-axis.
+   * the aspect ratio of the canvas (framedHeight is the Y dimension). At the
+   * ideal distance, the camera's fov exactly covers the front face of this box
+   * when looking down the Z-axis.
    */
   updateFraming() {
     const dpr = resolveDpr();
@@ -204,7 +203,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Sets the passed in camera to be used for rendering.
-   * @param {THREE.Camera}
    */
   setCamera(camera: Camera) {
     this.activeCamera = camera;
@@ -220,7 +218,7 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Called to update the shadow rendering when the room or model changes.
+   * Called to update the shadow rendering when the model changes.
    */
   updateStaticShadow() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
