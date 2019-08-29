@@ -35,9 +35,9 @@ export interface SmoothControlsOptions {
   // The maximum angle between model-forward and the camera azimuthal position
   maximumAzimuthalAngle?: number;
   // The minimum camera field of view in degrees
-  minimumLogFov?: number;
+  minimumFieldOfView?: number;
   // The maximum camera field of view in degrees
-  maximumLogFov?: number;
+  maximumFieldOfView?: number;
   // Controls when events will be cancelled (always, or only when handled)
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
@@ -51,8 +51,8 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
   maximumAzimuthalAngle: Infinity,
-  minimumLogFov: Math.log(10),
-  maximumLogFov: Math.log(45),
+  minimumFieldOfView: 10,
+  maximumFieldOfView: 45,
   eventHandlingBehavior: 'prevent-all',
   interactionPolicy: 'always-allow'
 });
@@ -376,17 +376,14 @@ export class SmoothControls extends EventDispatcher {
   setOrbit(
       goalTheta: number = this[$goalSpherical].theta,
       goalPhi: number = this[$goalSpherical].phi,
-      goalRadius: number = this[$goalSpherical].radius,
-      goalLogFov: number = this[$goalLogFov]): boolean {
+      goalRadius: number = this[$goalSpherical].radius): boolean {
     const {
       minimumAzimuthalAngle,
       maximumAzimuthalAngle,
       minimumPolarAngle,
       maximumPolarAngle,
       minimumRadius,
-      maximumRadius,
-      minimumLogFov,
-      maximumLogFov
+      maximumRadius
     } = this[$options];
 
     const {theta, phi, radius} = this[$goalSpherical];
@@ -395,10 +392,8 @@ export class SmoothControls extends EventDispatcher {
         clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
     const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
     const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
-    const nextFov = clamp(goalLogFov, minimumLogFov!, maximumLogFov!);
 
-    if (nextTheta === theta && nextPhi === phi && nextRadius === radius &&
-        nextFov === this[$goalLogFov]) {
+    if (nextTheta === theta && nextPhi === phi && nextRadius === radius) {
       return false;
     }
 
@@ -406,7 +401,6 @@ export class SmoothControls extends EventDispatcher {
     this[$goalSpherical].phi = nextPhi;
     this[$goalSpherical].radius = nextRadius;
     this[$goalSpherical].makeSafe();
-    this[$goalLogFov] = nextFov;
 
     this[$isUserChange] = false;
 
@@ -425,8 +419,9 @@ export class SmoothControls extends EventDispatcher {
    * Sets the goal field of view for the camera
    */
   setFov(fov: number) {
-    const {minimumLogFov, maximumLogFov} = this[$options];
-    this[$goalLogFov] = clamp(Math.log(fov), minimumLogFov!, maximumLogFov!);
+    const {minimumFieldOfView, maximumFieldOfView} = this[$options];
+    fov = clamp(fov, minimumFieldOfView!, maximumFieldOfView!);
+    this[$goalLogFov] = Math.log(fov);
   }
 
   /**
@@ -458,9 +453,15 @@ export class SmoothControls extends EventDispatcher {
     const goalTheta = theta - deltaTheta;
     const goalPhi = phi - deltaPhi;
     const goalRadius = radius + deltaRadius;
-    const goalLogFov = this[$goalLogFov] + deltaFov;
+    let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
 
-    return this.setOrbit(goalTheta, goalPhi, goalRadius, goalLogFov);
+    if (deltaFov !== 0) {
+      const goalLogFov = this[$goalLogFov] + deltaFov;
+      this.setFov(Math.exp(goalLogFov));
+      handled = true;
+    }
+
+    return handled;
   }
 
   /**
@@ -482,7 +483,8 @@ export class SmoothControls extends EventDispatcher {
     if (this[$isStationary]()) {
       return;
     }
-    const {maximumPolarAngle, maximumRadius, maximumLogFov} = this[$options];
+    const {maximumPolarAngle, maximumRadius, maximumFieldOfView} =
+        this[$options];
 
     this[$spherical].theta = this[$thetaDamper].update(
         this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
@@ -500,7 +502,7 @@ export class SmoothControls extends EventDispatcher {
         maximumRadius!);
 
     this[$logFov] = this[$fovDamper].update(
-        this[$logFov], this[$goalLogFov], delta, maximumLogFov!);
+        this[$logFov], this[$goalLogFov], delta, maximumFieldOfView!);
 
     this[$moveCamera]();
   }

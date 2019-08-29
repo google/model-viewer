@@ -237,6 +237,25 @@ suite('SmoothControls', () => {
         });
       });
 
+      suite('field of view', () => {
+        setup(() => {
+          controls.applyOptions(
+              {minimumFieldOfView: 15, maximumFieldOfView: 20});
+        });
+
+        test('prevents field of view from exceeding options', () => {
+          controls.setFov(5);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(15, 0.00001);
+
+          controls.setFov(30);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);
+        });
+      });
+
       suite('event handling', () => {
         suite('prevent-all', () => {
           setup(() => {
@@ -281,7 +300,7 @@ suite('SmoothControls', () => {
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
             expect(controls.getFieldOfView())
-                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
             dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
@@ -290,7 +309,7 @@ suite('SmoothControls', () => {
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
             expect(controls.getFieldOfView())
-                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
           });
 
           test('does not orbit when pointing while blurred', () => {
@@ -306,7 +325,7 @@ suite('SmoothControls', () => {
 
           test('does zoom when scrolling while focused', () => {
             expect(controls.getFieldOfView())
-                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
             element.focus();
 
@@ -315,7 +334,7 @@ suite('SmoothControls', () => {
             settleControls(controls);
 
             expect(controls.getFieldOfView())
-                .to.be.lessThan(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 
@@ -341,14 +360,14 @@ suite('SmoothControls', () => {
 
           test('zooms when scrolling, even while blurred', () => {
             expect(controls.getFieldOfView())
-                .to.be.equal(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
             dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
             expect(controls.getFieldOfView())
-                .to.be.lessThan(Math.exp(DEFAULT_OPTIONS.maximumLogFov!));
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 
