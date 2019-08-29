@@ -148,6 +148,19 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             element.getCameraOrbit(), {...orbit, radius: nextRadius});
       });
 
+      test('can independently adjust target', async () => {
+        const target = element.getCameraTarget();
+        target.addScalar(1);
+
+        element.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
+
+        await timePasses();
+
+        settleControls(controls);
+
+        expect(element.getCameraTarget()).to.be.eql(target);
+      });
+
       test('defaults FOV correctly', async () => {
         expect(element.getFieldOfView()).to.be.equal(DEFAULT_FOV);
       });

@@ -99,6 +99,7 @@ export interface ControlsInterface {
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
+  getCameraTarget(): Vector3;
   getFieldOfView(): number;
   jumpCameraToGoal(): void;
 }
@@ -170,6 +171,10 @@ export const ControlsMixin = (ModelViewerElement:
         getCameraOrbit(): SphericalPosition {
           const {theta, phi, radius} = this[$lastSpherical];
           return {theta, phi, radius};
+        }
+
+        getCameraTarget(): Vector3 {
+          return this[$controls].getTarget();
         }
 
         getFieldOfView(): number {
