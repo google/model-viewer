@@ -42,6 +42,8 @@ export interface SmoothControlsOptions {
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
   interactionPolicy?: InteractionPolicy;
+  // The approximate size of the model (m)
+  modelSize?: number;
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
@@ -54,7 +56,8 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumFov: 20,
   maximumFov: 45,
   eventHandlingBehavior: 'prevent-all',
-  interactionPolicy: 'always-allow'
+  interactionPolicy: 'always-allow',
+  modelSize: 1
 });
 
 const $velocity = Symbol('v');
@@ -69,6 +72,10 @@ const $fov = Symbol('fov');
 const $goalFov = Symbol('goalFov');
 const $fovDamper = Symbol('fovDamper');
 const $target = Symbol('target');
+const $goalTarget = Symbol('goalTarget');
+const $targetDamperX = Symbol('targetDamperX');
+const $targetDamperY = Symbol('targetDamperY');
+const $targetDamperZ = Symbol('targetDamperZ');
 
 const $options = Symbol('options');
 const $upQuaternion = Symbol('upQuaternion');
@@ -162,6 +169,9 @@ export class Damper {
     if (x == null) {
       return xGoal;
     }
+    if (x === xGoal && this[$velocity] === 0) {
+      return xGoal;
+    }
     if (timeStepMilliseconds < 0) {
       return x;
     }
@@ -224,6 +234,10 @@ export class SmoothControls extends EventDispatcher {
   private[$goalFov]: number;
   private[$fovDamper] = new Damper();
   private[$target] = new Vector3();
+  private[$goalTarget] = new Vector3();
+  private[$targetDamperX] = new Damper();
+  private[$targetDamperY] = new Damper();
+  private[$targetDamperZ] = new Damper();
 
   private[$pointerIsDown] = false;
   private[$lastPointerPosition] = new Vector2();
@@ -432,10 +446,7 @@ export class SmoothControls extends EventDispatcher {
    * Sets the target the camera is pointing toward
    */
   setTarget(target: Vector3) {
-    if (!this[$target].equals(target)) {
-      this[$target].copy(target);
-      this[$moveCamera]();
-    }
+    this[$goalTarget].copy(target);
   }
 
   /**
@@ -479,7 +490,8 @@ export class SmoothControls extends EventDispatcher {
     if (this[$isStationary]()) {
       return;
     }
-    const {maximumPolarAngle, maximumRadius, maximumFov} = this[$options];
+    const {maximumPolarAngle, maximumRadius, maximumFov, modelSize} =
+        this[$options];
 
     this[$spherical].theta = this[$thetaDamper].update(
         this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
@@ -499,6 +511,13 @@ export class SmoothControls extends EventDispatcher {
     this[$fov] =
         this[$fovDamper].update(this[$fov], this[$goalFov], delta, maximumFov!);
 
+    this[$target].x = this[$targetDamperX].update(
+        this[$target].x, this[$goalTarget].x, delta, modelSize!);
+    this[$target].y = this[$targetDamperY].update(
+        this[$target].y, this[$goalTarget].y, delta, modelSize!);
+    this[$target].z = this[$targetDamperZ].update(
+        this[$target].z, this[$goalTarget].z, delta, modelSize!);
+
     this[$moveCamera]();
   }
 
@@ -506,7 +525,7 @@ export class SmoothControls extends EventDispatcher {
     return this[$goalSpherical].theta === this[$spherical].theta &&
         this[$goalSpherical].phi === this[$spherical].phi &&
         this[$goalSpherical].radius === this[$spherical].radius &&
-        this[$goalFov] === this[$fov];
+        this[$goalFov] === this[$fov] && this[$goalTarget] === this[$target];
   }
 
   private[$moveCamera]() {

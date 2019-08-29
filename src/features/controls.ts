@@ -358,8 +358,9 @@ export const ControlsMixin = (ModelViewerElement:
           // and will only end up showing the skysphere if zoomed out enough
           const minimumRadius = near + framedHeight / 2.0;
           const maximumRadius = this[$idealCameraDistance]!;
+          const modelSize = scene.model.size.length();
 
-          controls.applyOptions({minimumRadius, maximumRadius});
+          controls.applyOptions({minimumRadius, maximumRadius, modelSize});
 
           controls.setRadius(zoom * this[$idealCameraDistance]!);
           controls.jumpToGoal();
