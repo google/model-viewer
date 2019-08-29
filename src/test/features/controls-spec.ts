@@ -79,6 +79,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
 
+        element.interactionPromptThreshold =
+            100;  // Fairly low, to keep the test time down
+
         await waitForEvent(element, 'load');
         // NOTE(cdata): Sometimes the load event dispatches quickly enough to
         // cause a race condition where property change occurs _after_ load.
