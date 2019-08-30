@@ -237,6 +237,25 @@ suite('SmoothControls', () => {
         });
       });
 
+      suite('field of view', () => {
+        setup(() => {
+          controls.applyOptions(
+              {minimumFieldOfView: 15, maximumFieldOfView: 20});
+        });
+
+        test('prevents field of view from exceeding options', () => {
+          controls.setFov(5);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(15, 0.00001);
+
+          controls.setFov(30);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);
+        });
+      });
+
       suite('event handling', () => {
         suite('prevent-all', () => {
           setup(() => {
@@ -280,13 +299,17 @@ suite('SmoothControls', () => {
           test('does not zoom when scrolling while blurred', () => {
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
             expect(controls.getCameraSpherical().radius)
                 .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
           });
 
           test('does not orbit when pointing while blurred', () => {
@@ -301,17 +324,17 @@ suite('SmoothControls', () => {
           });
 
           test('does zoom when scrolling while focused', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
             element.focus();
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 
@@ -336,15 +359,15 @@ suite('SmoothControls', () => {
           });
 
           test('zooms when scrolling, even while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 
