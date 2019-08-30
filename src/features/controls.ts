@@ -31,13 +31,14 @@ export interface SphericalPosition {
   radius: number;
 }
 
-export type InteractionPromptStrategy = 'auto'|'when-focused';
+export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 
 const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
-      WHEN_FOCUSED: 'when-focused'
+      WHEN_FOCUSED: 'when-focused',
+      NONE: 'none'
     };
 
 const InteractionPolicy: {[index: string]: InteractionPolicy} = {
@@ -129,7 +130,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         @property({type: String, attribute: 'interaction-prompt'})
         interactionPrompt: InteractionPromptStrategy =
-            InteractionPromptStrategy.WHEN_FOCUSED;
+            InteractionPromptStrategy.AUTO;
 
         @property({type: String, attribute: 'interaction-policy'})
         interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
@@ -293,7 +294,8 @@ export const ControlsMixin = (ModelViewerElement:
         [$tick](time: number, delta: number) {
           super[$tick](time, delta);
 
-          if (this[$waitingToPromptUser]) {
+          if (this[$waitingToPromptUser] &&
+              this.interactionPrompt !== InteractionPromptStrategy.NONE) {
             if (this.loaded) {
               this[$idleTime] += delta;
             }
@@ -341,8 +343,6 @@ export const ControlsMixin = (ModelViewerElement:
           const controls = this[$controls];
           const framedHeight = scene.framedHeight;
 
-          // Make zoom sensitivity scale with model size:
-          const zoomSensitivity = framedHeight / 10;
           const framedDistance = (framedHeight / 2) /
               Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
           const near = framedHeight / 10.0;
@@ -357,7 +357,7 @@ export const ControlsMixin = (ModelViewerElement:
               1;
           this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
 
-          controls.updateIntrinsics(near, far, scene.aspect, zoomSensitivity);
+          controls.updateIntrinsics(near, far, scene.aspect);
 
           // Zooming out beyond the 'frame' doesn't serve much purpose
           // and will only end up showing the skysphere if zoomed out enough

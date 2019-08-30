@@ -162,7 +162,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults FOV correctly', async () => {
-        expect(element.getFieldOfView()).to.be.equal(DEFAULT_FOV);
+        expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {
@@ -175,7 +175,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        expect(element.getFieldOfView()).to.be.equal(nextFov);
+        expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
       });
 
       test('causes camera-change event to fire', async () => {
@@ -217,7 +217,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('updates with current orbit after interaction', async () => {
-          controls.adjustOrbit(0, 0.5, 0);
+          controls.adjustOrbit(0, 0.5, 0, 0);
           settleControls(controls);
 
           const orbit = element.getCameraOrbit();
@@ -234,7 +234,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           await timePasses();
 
-          expect(element.getFieldOfView()).to.be.equal(fieldOfView);
+          expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
               .to.equal(cameraOrbit);
@@ -252,6 +252,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
         element.cameraControls = true;
+
+        element.interactionPromptThreshold =
+            100;  // Fairly low, to keep the test time down
 
         await waitForEvent(element, 'load');
       });
@@ -314,6 +317,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       suite('interaction-prompt', () => {
+        test('can be configured to never appear', async () => {
+          element.interactionPrompt = 'none';
+          await timePasses(element.interactionPromptThreshold + 100);
+
+          const promptElement: HTMLElement = (element as any)[$promptElement];
+          expect(promptElement.classList.contains('visible'))
+              .to.be.equal(false);
+        });
+
         test('can be configured to raise automatically', async () => {
           element.interactionPrompt = 'auto';
           await timePasses(element.interactionPromptThreshold + 100);
@@ -339,79 +351,87 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                   .to.be.equal(element.alt);
             });
 
-        test('prompts user to interact when focused', async () => {
-          const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+        suite('when configured for focus-based interaction prompting', () => {
+          setup(() => {
+            element.interactionPrompt = 'when-focused';
+          });
 
-          settleControls(controls);
+          test('prompts user to interact when focused', async () => {
+            const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+            const promptElement: HTMLElement = (element as any)[$promptElement];
 
-          // NOTE(cdata): This wait time was added in order to deflake tests on
-          // iOS Simulator and Android Emulator on Sauce Labs. These same test
-          // targets were tested manually locally and manually on Sauce, and do
-          // not fail. Only automated Sauce tests seem to fail consistently
-          // without this additional wait time:
-          await rafPasses();
+            settleControls(controls);
 
-          canvas.focus();
+            // NOTE(cdata): This wait time was added in order to deflake tests
+            // on iOS Simulator and Android Emulator on Sauce Labs. These same
+            // test targets were tested manually locally and manually on Sauce,
+            // and do not fail. Only automated Sauce tests seem to fail
+            // consistently without this additional wait time:
+            await rafPasses();
 
-          await until(
-              () => canvas.getAttribute('aria-label') === INTERACTION_PROMPT);
+            canvas.focus();
 
-          expect(promptElement.classList.contains('visible')).to.be.equal(true);
-        });
+            await until(
+                () => canvas.getAttribute('aria-label') === INTERACTION_PROMPT);
 
-        test(
-            'does not prompt users to interact before a model is loaded',
-            async () => {
-              Object.defineProperty(
-                  element, 'loaded', {value: false, configurable: true});
+            expect(promptElement.classList.contains('visible'))
+                .to.be.equal(true);
+          });
 
-              element.interactionPromptThreshold = 500;
+          test(
+              'does not prompt users to interact before a model is loaded',
+              async () => {
+                Object.defineProperty(
+                    element, 'loaded', {value: false, configurable: true});
 
-              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
-              const promptElement: HTMLElement =
-                  (element as any)[$promptElement];
+                element.interactionPromptThreshold = 500;
 
-              settleControls(controls);
+                const canvas: HTMLCanvasElement =
+                    (element[$scene] as any).canvas;
+                const promptElement: HTMLElement =
+                    (element as any)[$promptElement];
 
-              await rafPasses();
+                settleControls(controls);
 
-              canvas.focus();
+                await rafPasses();
 
-              await timePasses(element.interactionPromptThreshold + 100);
+                canvas.focus();
 
-              expect(promptElement.classList.contains('visible'))
-                  .to.be.equal(false);
+                await timePasses(element.interactionPromptThreshold + 100);
 
-              Object.defineProperty(
-                  element, 'loaded', {value: true, configurable: true});
+                expect(promptElement.classList.contains('visible'))
+                    .to.be.equal(false);
 
-              await timePasses(element.interactionPromptThreshold + 100);
+                Object.defineProperty(
+                    element, 'loaded', {value: true, configurable: true});
 
-              expect(promptElement.classList.contains('visible'))
-                  .to.be.equal(true);
-            });
+                await timePasses(element.interactionPromptThreshold + 100);
 
-        // TODO(#584)
-        test.skip('does not prompt if user already interacted', async () => {
-          const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
-          const promptElement = (element as any)[$promptElement];
-          const originalLabel = canvas.getAttribute('aria-label');
+                expect(promptElement.classList.contains('visible'))
+                    .to.be.equal(true);
+              });
 
-          expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
+          // TODO(#584)
+          test.skip('does not prompt if user already interacted', async () => {
+            const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+            const promptElement = (element as any)[$promptElement];
+            const originalLabel = canvas.getAttribute('aria-label');
 
-          canvas.focus();
+            expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
 
-          await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD / 2.0);
+            canvas.focus();
 
-          interactWith(canvas);
+            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD / 2.0);
 
-          await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD + 100);
+            interactWith(canvas);
 
-          expect(canvas.getAttribute('aria-label'))
-              .to.not.be.equal(INTERACTION_PROMPT);
-          expect(promptElement.classList.contains('visible'))
-              .to.be.equal(false);
+            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD + 100);
+
+            expect(canvas.getAttribute('aria-label'))
+                .to.not.be.equal(INTERACTION_PROMPT);
+            expect(promptElement.classList.contains('visible'))
+                .to.be.equal(false);
+          });
         });
 
         test(
@@ -434,13 +454,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage right');
 
-              controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(-Math.PI / 2.0, 0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage back');
 
-              controls.adjustOrbit(Math.PI, 0, 0);
+              controls.adjustOrbit(Math.PI, 0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
@@ -463,13 +483,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage upper-front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
