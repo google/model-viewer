@@ -31,20 +31,20 @@ export interface SphericalPosition {
   radius: number;
 }
 
-export type InteractionPromptStrategy = 'auto'|'when-focused';
+export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 
 const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
-      WHEN_FOCUSED: 'when-focused'
+      WHEN_FOCUSED: 'when-focused',
+      NONE: 'none'
     };
 
-const InteractionPolicy:
-    {[index: string]: InteractionPolicy} = {
-      ALWAYS_ALLOW: 'always-allow',
-      WHEN_FOCUSED: 'allow-when-focused'
-    };
+const InteractionPolicy: {[index: string]: InteractionPolicy} = {
+  ALWAYS_ALLOW: 'always-allow',
+  WHEN_FOCUSED: 'allow-when-focused'
+};
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
@@ -122,11 +122,10 @@ export const ControlsMixin = (ModelViewerElement:
 
         @property({type: String, attribute: 'interaction-prompt'})
         interactionPrompt: InteractionPromptStrategy =
-            InteractionPromptStrategy.WHEN_FOCUSED;
+            InteractionPromptStrategy.AUTO;
 
         @property({type: String, attribute: 'interaction-policy'})
-        interactionPolicy: InteractionPolicy =
-            InteractionPolicy.ALWAYS_ALLOW;
+        interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
         protected[$promptElement]: Element;
 
@@ -269,7 +268,8 @@ export const ControlsMixin = (ModelViewerElement:
         [$tick](time: number, delta: number) {
           super[$tick](time, delta);
 
-          if (this[$waitingToPromptUser]) {
+          if (this[$waitingToPromptUser] &&
+              this.interactionPrompt !== InteractionPromptStrategy.NONE) {
             if (this.loaded) {
               this[$idleTime] += delta;
             }
