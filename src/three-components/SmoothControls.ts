@@ -530,7 +530,7 @@ export class SmoothControls extends EventDispatcher {
         this[$goalSpherical].phi === this[$spherical].phi &&
         this[$goalSpherical].radius === this[$spherical].radius &&
         this[$goalLogFov] === this[$logFov] &&
-        this[$goalTarget] === this[$target];
+        this[$goalTarget].equals(this[$target]);
   }
 
   private[$moveCamera]() {
