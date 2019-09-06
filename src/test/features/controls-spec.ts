@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -411,8 +411,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                     .to.be.equal(true);
               });
 
-          // TODO(#584)
-          test.skip('does not prompt if user already interacted', async () => {
+          test('does not prompt if user already interacted', async () => {
             const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
             const promptElement = (element as any)[$promptElement];
             const originalLabel = canvas.getAttribute('aria-label');
@@ -421,11 +420,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
             canvas.focus();
 
-            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD / 2.0);
+            await timePasses(element.interactionPromptThreshold / 2.0);
 
             interactWith(canvas);
 
-            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD + 100);
+            await timePasses(element.interactionPromptThreshold + 100);
 
             expect(canvas.getAttribute('aria-label'))
                 .to.not.be.equal(INTERACTION_PROMPT);
