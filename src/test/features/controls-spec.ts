@@ -150,9 +150,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('can independently adjust target', async () => {
         const target = element.getCameraTarget();
-        target.addScalar(1);
+        target.x += 1;
+        target.z += 1;
 
-        element.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
+        element.cameraTarget = `${target.x}m auto ${target.z}m`;
 
         await timePasses();
 

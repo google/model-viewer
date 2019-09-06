@@ -14,7 +14,6 @@
  */
 
 import {Math as ThreeMath} from 'three';
-import {Vector3} from 'three';
 
 import {parseValues, ValueNode} from './parsers.js';
 
@@ -111,29 +110,33 @@ export const deserializeSpherical =
 /**
  * Vector String => Vector Values
  *
- * Converts a "vector string" to values suitable for assigning to a Three.js
- * Vector3 object. Position strings are of the form "$x $y $z".
- * Accepted units include meters (m), centimeters (cm) and millimeters (mm).
+ * Converts a "vector string" to 3 values, either numbers in meters or the
+ * string 'auto'. Position strings are of the form "$x $y $z". Accepted units
+ * include meters (m), centimeters (cm) and millimeters (mm).
  *
  * Returns null if the vector string cannot be parsed.
  */
-export const deserializeVector3 = (vectorString: string): Vector3|null => {
-  try {
-    const vectorValueNodes = parseValues(vectorString);
+export const deserializeVector3 =
+    (vectorString: string): (number|string)[]|null => {
+      try {
+        const vectorValueNodes = parseValues(vectorString);
 
-    if (vectorValueNodes.length === 3) {
-      const vector = new Vector3;
-      vector.x = lengthValueNodeToMeters(vectorValueNodes[0]);
-      vector.y = lengthValueNodeToMeters(vectorValueNodes[1]);
-      vector.z = lengthValueNodeToMeters(vectorValueNodes[2]);
+        const xyz = [];
+        if (vectorValueNodes.length === 3) {
+          for (let i = 0; i < 3; i++) {
+            xyz.push(
+                vectorValueNodes[i].value === 'auto' ?
+                    'auto' :
+                    lengthValueNodeToMeters(vectorValueNodes[i]));
+          }
 
-      return vector;
-    }
-  } catch (_error) {
-  }
+          return xyz;
+        }
+      } catch (_error) {
+      }
 
-  return null;
-};
+      return null;
+    };
 
 export const deserializeAngleToDeg = (angleString: string): number|null => {
   try {

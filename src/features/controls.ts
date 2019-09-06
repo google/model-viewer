@@ -280,10 +280,15 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$updateCameraTarget]() {
-          let target = deserializeVector3(this.cameraTarget);
+          const targetValues = deserializeVector3(this.cameraTarget);
+          let target = this[$scene].model.boundingBox.getCenter(new Vector3);
 
-          if (target == null) {  // this happens in the default 'auto' case
-            target = this[$scene].model.boundingBox.getCenter(new Vector3);
+          if (targetValues != null) {
+            for (let i = 0; i < 3; i++) {
+              if (targetValues[i] !== 'auto') {
+                target.setComponent(i, targetValues[i] as number);
+              }
+            }
           }
 
           this[$controls].setTarget(target);
