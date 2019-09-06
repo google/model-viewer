@@ -412,7 +412,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                     .to.be.equal(true);
               });
 
-          test('does not prompt if user already interacted', async () => {
+          // TODO(#584)
+          test.skip('does not prompt if user already interacted', async () => {
             const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
             const promptElement = (element as any)[$promptElement];
             const originalLabel = canvas.getAttribute('aria-label');
