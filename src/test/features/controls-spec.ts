@@ -420,8 +420,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
             canvas.focus();
 
-            await timePasses(element.interactionPromptThreshold / 2.0);
-
             interactWith(canvas);
 
             await timePasses(element.interactionPromptThreshold + 100);
