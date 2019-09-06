@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event, Spherical, Vector3} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
-import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 
@@ -295,7 +295,7 @@ export const ControlsMixin = (ModelViewerElement:
           if (this[$waitingToPromptUser] &&
               this.interactionPrompt !== InteractionPromptStrategy.NONE) {
             if (this.loaded &&
-                time > this.loadedTime + this.interactionPromptThreshold) {
+                time > this[$loadedTime] + this.interactionPromptThreshold) {
               (this as any)[$scene].canvas.setAttribute(
                   'aria-label', INTERACTION_PROMPT);
 
@@ -358,9 +358,8 @@ export const ControlsMixin = (ModelViewerElement:
           // and will only end up showing the skysphere if zoomed out enough
           const minimumRadius = near + framedHeight / 2.0;
           const maximumRadius = this[$idealCameraDistance]!;
-          const modelSize = scene.model.size.length();
 
-          controls.applyOptions({minimumRadius, maximumRadius, modelSize});
+          controls.applyOptions({minimumRadius, maximumRadius});
 
           controls.setRadius(zoom * this[$idealCameraDistance]!);
           controls.jumpToGoal();

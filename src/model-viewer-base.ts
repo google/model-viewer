@@ -33,7 +33,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
-const $loadedTime = Symbol('loadedTime');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
@@ -44,6 +43,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 
 export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
+export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
@@ -114,10 +114,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   get loaded() {
     return this[$loaded];
-  }
-
-  get loadedTime() {
-    return this[$loadedTime];
   }
 
   get[$renderer]() {

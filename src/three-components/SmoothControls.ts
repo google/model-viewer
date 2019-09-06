@@ -42,8 +42,6 @@ export interface SmoothControlsOptions {
   eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
   interactionPolicy?: InteractionPolicy;
-  // The approximate size of the model (m)
-  modelSize?: number;
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
@@ -56,8 +54,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
   eventHandlingBehavior: 'prevent-all',
-  interactionPolicy: 'always-allow',
-  modelSize: 1
+  interactionPolicy: 'always-allow'
 });
 
 const $velocity = Symbol('v');
@@ -494,7 +491,7 @@ export class SmoothControls extends EventDispatcher {
     if (this[$isStationary]()) {
       return;
     }
-    const {maximumPolarAngle, maximumRadius, maximumFieldOfView, modelSize} =
+    const {maximumPolarAngle, maximumRadius, maximumFieldOfView} =
         this[$options];
 
     this[$spherical].theta = this[$thetaDamper].update(
@@ -516,11 +513,11 @@ export class SmoothControls extends EventDispatcher {
         this[$logFov], this[$goalLogFov], delta, maximumFieldOfView!);
 
     this[$target].x = this[$targetDamperX].update(
-        this[$target].x, this[$goalTarget].x, delta, modelSize!);
+        this[$target].x, this[$goalTarget].x, delta, maximumRadius!);
     this[$target].y = this[$targetDamperY].update(
-        this[$target].y, this[$goalTarget].y, delta, modelSize!);
+        this[$target].y, this[$goalTarget].y, delta, maximumRadius!);
     this[$target].z = this[$targetDamperZ].update(
-        this[$target].z, this[$goalTarget].z, delta, modelSize!);
+        this[$target].z, this[$goalTarget].z, delta, maximumRadius!);
 
     this[$moveCamera]();
   }
