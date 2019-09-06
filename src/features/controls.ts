@@ -86,7 +86,6 @@ const $onPromptTransitionend = Symbol('onPromptTransitionend');
 const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
-const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
@@ -137,7 +136,6 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$promptElement]: Element;
 
-        protected[$idleTime] = 0;
         protected[$userPromptedOnce] = false;
         protected[$waitingToPromptUser] = false;
         protected[$shouldPromptUserToInteract] = true;
@@ -296,11 +294,8 @@ export const ControlsMixin = (ModelViewerElement:
 
           if (this[$waitingToPromptUser] &&
               this.interactionPrompt !== InteractionPromptStrategy.NONE) {
-            if (this.loaded) {
-              this[$idleTime] += delta;
-            }
-
-            if (this[$idleTime] > this.interactionPromptThreshold) {
+            if (this.loaded &&
+                time > this.loadedTime + this.interactionPromptThreshold) {
               (this as any)[$scene].canvas.setAttribute(
                   'aria-label', INTERACTION_PROMPT);
 
@@ -322,7 +317,7 @@ export const ControlsMixin = (ModelViewerElement:
         [$deferInteractionPrompt]() {
           // Effectively cancel the timer waiting for user interaction:
           this[$waitingToPromptUser] = false;
-          this[$promptElement]!.classList.remove('visible');
+          this[$promptElement].classList.remove('visible');
 
           // Implicitly there was some reason to defer the prompt. If the user
           // has been prompted at least once already, we no longer need to
@@ -459,7 +454,6 @@ export const ControlsMixin = (ModelViewerElement:
           // prompt threshold:
           if (this[$shouldPromptUserToInteract]) {
             this[$waitingToPromptUser] = true;
-            this[$idleTime] = 0;
           }
         }
 

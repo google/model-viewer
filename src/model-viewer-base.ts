@@ -33,6 +33,7 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
+const $loadedTime = Symbol('loadedTime');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
@@ -93,6 +94,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   src: string|null = null;
 
   protected[$loaded]: boolean = false;
+  protected[$loadedTime]: number = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
@@ -112,6 +114,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   get loaded() {
     return this[$loaded];
+  }
+
+  get loadedTime() {
+    return this[$loadedTime];
   }
 
   get[$renderer]() {
@@ -269,6 +275,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
       this[$loaded] = false;
+      this[$loadedTime] = 0;
       (async () => {
         const updateSourceProgress = this[$progressTracker].beginActivity();
         await this[$updateSource](
@@ -330,6 +337,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     this[$loaded] = true;
+    this[$loadedTime] = performance.now();
     // Asynchronously invoke `update`:
     this.requestUpdate();
   }
