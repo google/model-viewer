@@ -27,8 +27,7 @@ import {encodings, getDirectionChunk, getFaceChunk, texelIO} from './shader-chun
  * we can support nonlinear formats such as RGBE. Unlike a traditional mipmap
  * chain, it only goes down to the lodMin level (below), and then creates extra
  * even more filtered mips at the same lodMin resolution, associated with higher
- * roughness levels. These extra mips are stored at X rather than Y offsets to
- * help distiguish them. In this way we maintain resolution to smoothly
+ * roughness levels. In this way we maintain resolution to smoothly
  * interpolate diffuse lighting while limiting sampling computation.
  */
 export const generatePMREM =
@@ -92,12 +91,12 @@ const setup =
         cubeLods.push(renderTarget);
       }
 
-      let offsetY = 0;
-      const sizeMin = Math.pow(2, lodMin) + 2;
-      const sizeMax = Math.pow(2, lodMax) + 2;
+      const sizeMin = Math.pow(2, lodMin);
+      const sizeMax = Math.pow(2, lodMax);
       for (let lod = lodMin; lod <= lodMax; lod++) {
         const sizeLod = Math.pow(2, lod);
-        let offsetX = 0;
+        let offsetY = lod === lodMax ? 0 : 2 * sizeMax;
+        const offsetX = 3 * Math.max(0, sizeMax - 2 * sizeLod);
         const nExtra = lod == lodMin ? extraLods : 0;
         for (let i = 0; i <= nExtra; ++i) {
           const target = lod == lodMax ?
@@ -105,13 +104,12 @@ const setup =
               i > 0 ? cubeLods[0] : cubeLods[lod - lodBase];
           const roughness = i > 0 ? extraLodsRoughness[i - 1] : 0;
           appendLodMeshes(meshes, target, sizeLod, offsetX, offsetY, roughness);
-          offsetX += 3 * sizeMin;
+          offsetY += 2 * sizeMin;
         }
-        offsetY += 2 * (sizeLod + 2);
       }
 
       const cubeUVRenderTarget =
-          new WebGLRenderTarget(3 * sizeMax, offsetY, params);
+          new WebGLRenderTarget(3 * sizeMax, 3 * sizeMax, params);
       cubeUVRenderTarget.texture.name = 'PMREMCubeUVPacker.cubeUv';
       cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
@@ -125,18 +123,14 @@ const appendLodMeshes =
      offsetX: number,
      offsetY: number,
      roughness: number) => {
-      // We pad each face with a one pixel boarder. By duplicating these points
-      // from the neighboring faces we make the texture interpolation for the
-      // output renderer much simpler and more GPU cache-friendly.
-      const sizePad = sizeLod + 2;
-      const texelSize = 1.0 / sizeLod;
+      const texelSize = 1.0 / (sizeLod - 1);
       const plane = new PlaneBufferGeometry(1, 1);
       const uv = (plane.attributes.uv.array as Array<number>);
       for (let i = 0; i < uv.length; i++) {
         if (uv[i] === 0) {
-          uv[i] = -texelSize;
+          uv[i] = -texelSize / 2;
         } else {  // == 1
-          uv[i] = 1 + texelSize;
+          uv[i] = 1 + texelSize / 2;
         }
       }
       for (let i = 0; i < 6; i++) {
@@ -158,10 +152,10 @@ const appendLodMeshes =
 
         const planeMesh = new Mesh(plane, material);
 
-        planeMesh.position.x = (0.5 + (i % 3)) * sizePad + offsetX;
-        planeMesh.position.y = (0.5 + (i > 2 ? 1 : 0)) * sizePad + offsetY;
+        planeMesh.position.x = (0.5 + (i % 3)) * sizeLod + offsetX;
+        planeMesh.position.y = (0.5 + (i > 2 ? 1 : 0)) * sizeLod + offsetY;
         (planeMesh.material as Material).side = DoubleSide;
-        planeMesh.scale.setScalar(sizePad);
+        planeMesh.scale.setScalar(sizeLod);
         meshes.push(planeMesh);
       }
     };
@@ -325,12 +319,6 @@ vec4 accumulateFaces(vec4 soFar, vec3 outputDir, vec3 sampleDir) {
 }
 void main() {
   vec2 uv = vUv;
-  if ((vUv.x < 0.0 || vUv.x > 1.0) && (vUv.y < 0.0 || vUv.y > 1.0)) {
-    // The corner pixels do not represent any one face, so to get consistent
-    // interpolation, they must average the three neighboring face corner
-    // pixels, here approximated by sampling exactly at the corner.
-    uv -= 0.5 * texelSize * sign(vUv);
-  }
   vec3 outputDir = normalize(getDirection(uv, faceIndex));
   vec4 color = vec4(0.0);
   for (float x = 0.5 * sourceTexelSize; x < 1.0; x += sourceTexelSize) {
@@ -387,26 +375,8 @@ uniform int faceIndex;
 ${getDirectionChunk}
 ${texelIO}
 void main() {
-    if ((vUv.x >= 0.0 && vUv.x <= 1.0) || (vUv.y >= 0.0 && vUv.y <= 1.0)) {
-      // By using UV coordinates that go past [0, 1], textureCube automatically 
-      // grabs our neighboring face values for our padded edge.
       vec3 direction = getDirection(vUv, faceIndex);
       gl_FragColor = textureCube(envMap, direction);
-    } else {
-      // The corner pixels do not represent any one face, so to get consistent 
-      // interpolation, they must average the three neighboring face corners.
-      vec2 uv = vUv;
-      uv.x += vUv.x < 0.0 ? texelSize : -texelSize;
-      vec3 direction = getDirection(uv, faceIndex);
-      vec3 color = inputTexelToLinear(textureCube(envMap, direction)).rgb;
-      uv.y += vUv.y < 0.0 ? texelSize : -texelSize;
-      direction = getDirection(uv, faceIndex);
-      color += inputTexelToLinear(textureCube(envMap, direction)).rgb;
-      uv.x = vUv.x;
-      direction = getDirection(uv, faceIndex);
-      color += inputTexelToLinear(textureCube(envMap, direction)).rgb;
-      gl_FragColor = linearToOutputTexel(vec4(color / 3.0, 1.0));
-    }
 }
 `,
 

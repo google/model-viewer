@@ -5,8 +5,8 @@ export const cubeUVChunk = /* glsl */ `
 
 #define cubeUV_maxMipLevel 8.0
 #define cubeUV_minMipLevel 3.0
-#define cubeUV_sizeY(maxMip) (4.0 * (maxMip + exp2(maxMip)) + 2.0)
-#define cubeUV_margin cubeUV_sizeY(cubeUV_minMipLevel - 1.0)
+#define cubeUV_maxTileSize 256.0
+#define cubeUV_minTileSize 8.0
 
 ${getFaceChunk}
 ${getUVChunk}
@@ -17,30 +17,30 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   mipInt = max(mipInt, cubeUV_minMipLevel);
   float faceSize = exp2(mipInt);
 
-  vec2 texelSize = 1.0 / vec2(
-              3.0 * (exp2(cubeUV_maxMipLevel) + 2.0),
-              cubeUV_sizeY(cubeUV_maxMipLevel) - cubeUV_margin);
+  float texelSize = 1.0 / (3.0 * cubeUV_maxTileSize);
 
-  vec2 uv = getUV(direction, face) * faceSize;
-  uv += 0.5;
+  vec2 uv = getUV(direction, face) * (faceSize - 1.0);
   vec2 f = fract(uv);
   uv += 0.5 - f;
   if (face > 2) {
-    uv.y += faceSize + 2.0;
+    uv.y += faceSize;
     face -= 3;
   }
-  uv.x += float(face) * (faceSize + 2.0);
-  uv.y += cubeUV_sizeY(mipInt - 1.0) - cubeUV_margin;
-  uv.x += filterInt * 3.0 * (exp2(cubeUV_minMipLevel) + 2.0);
+  uv.x += float(face) * faceSize;
+  if(mipInt < cubeUV_maxMipLevel){
+    uv.y += 2.0 * cubeUV_maxTileSize;
+  }
+  uv.y += filterInt * 2.0 * cubeUV_minTileSize;
+  uv.x += 3.0 * max(0.0, cubeUV_maxTileSize - 2.0 * faceSize);
   uv *= texelSize;
   uv.y = 1.0 - uv.y;
 
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x += texelSize.x;
+  uv.x += texelSize;
   vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.y -= texelSize.y;
+  uv.y -= texelSize;
   vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.x -= texelSize.x;
+  uv.x -= texelSize;
   vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
