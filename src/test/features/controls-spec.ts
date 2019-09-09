@@ -382,10 +382,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           test(
               'does not prompt users to interact before a model is loaded',
               async () => {
+                element.src = null;
+
                 Object.defineProperty(
                     element, 'loaded', {value: false, configurable: true});
-
-                element.interactionPromptThreshold = 500;
 
                 const canvas: HTMLCanvasElement =
                     (element[$scene] as any).canvas;
