@@ -47,7 +47,7 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 };
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
-const DEFAULT_CAMERA_TARGET = 'auto';
+const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
 
 const HALF_PI = Math.PI / 2.0;

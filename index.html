@@ -170,7 +170,19 @@
               changes from its initially configured value, the camera will
               interpolate from its current position to the new value. Defaults to
               "0deg 75deg auto".</p>
-            </li><li>
+            </li>
+            <li>
+              <div>camera-target</div>
+              <p>Set the starting and/or subsequent point the camera orbits
+              around. Accepts values of the form "$X $Y $Z", like "0m 1.5m
+              -0.5m". Also supports units in centimeters ("cm") or millimeters
+              ("mm"). A special value "auto" can be used, which sets the target
+              to the center of the model's bounding box in that dimension. Any
+              time this value changes from its initially configured value, the
+              camera will interpolate from its current position to the new
+              value. Defaults to "auto auto auto".</p>
+            </li>
+            <li>
               <div>environment-image</div>
               <p>Controls the environmental reflection of the model. Normally if
               background-image is set, that image will also be used for the
