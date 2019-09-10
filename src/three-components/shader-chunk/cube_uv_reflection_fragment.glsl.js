@@ -1,18 +1,14 @@
 import {getFaceChunk, getUVChunk} from './common.glsl.js';
 
-export const cubeUVChunk = /* glsl */ `
-#ifdef ENVMAP_TYPE_CUBE_UV
-
+export const bilinearCubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel 8.0
 #define cubeUV_minMipLevel 3.0
 #define cubeUV_maxTileSize 256.0
 #define cubeUV_minTileSize 8.0
-
 ${getFaceChunk}
 ${getUVChunk}
-
 vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
-  int face = getFace(direction);
+  float face = getFace(direction);
   float filterInt = max(cubeUV_minMipLevel - mipInt, 0.0);
   mipInt = max(mipInt, cubeUV_minMipLevel);
   float faceSize = exp2(mipInt);
@@ -22,11 +18,11 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   vec2 uv = getUV(direction, face) * (faceSize - 1.0);
   vec2 f = fract(uv);
   uv += 0.5 - f;
-  if (face > 2) {
+  if (face > 2.0) {
     uv.y += faceSize;
-    face -= 3;
+    face -= 3.0;
   }
-  uv.x += float(face) * faceSize;
+  uv.x += face * faceSize;
   if(mipInt < cubeUV_maxMipLevel){
     uv.y += 2.0 * cubeUV_maxTileSize;
   }
@@ -46,6 +42,12 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   vec3 bm = mix(bl, br, f.x);
   return mix(tm, bm, f.y);
 }
+`;
+
+export const cubeUVChunk = /* glsl */ `
+#ifdef ENVMAP_TYPE_CUBE_UV
+
+${bilinearCubeUVChunk}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   float filterMip = 0.0;

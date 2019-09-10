@@ -242,7 +242,7 @@ ${getFaceChunk}
 ${getDirectionChunk}
 ${texelIO}
 void main() {
-  int face = getFace(vPosition);
+  float face = getFace(vPosition);
   vec2 uv = vUv - 0.5 * texelSize;
   vec3 texelDir = getDirection(uv, face);
   vec3 color = inputTexelToLinear(textureCube(envMap, texelDir)).rgb;
@@ -296,7 +296,7 @@ varying vec3 vPosition;
 uniform float sigma;
 uniform float texelSize;
 uniform samplerCube envMap;
-uniform int faceIndex;
+uniform float faceIndex;
 #define sourceTexelSize 0.5
 ${IE11}
 ${getDirectionChunk}
@@ -371,7 +371,7 @@ precision mediump int;
 varying vec2 vUv;
 uniform float texelSize;
 uniform samplerCube envMap;
-uniform int faceIndex;
+uniform float faceIndex;
 ${getDirectionChunk}
 ${texelIO}
 void main() {

@@ -23,6 +23,7 @@ import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
+import {PMREMGenerator} from './NewPMREMGenerator.js';
 import {generatePMREM} from './PMREMGenerator.js';
 import {encodings, texelIO} from './shader-chunk/common.glsl.js';
 
@@ -47,6 +48,7 @@ const GENERATED_BLUR = 0.04;
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
+const $PMREMGenerator = Symbol('PMREMGenerator');
 
 const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
 const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
@@ -65,12 +67,14 @@ export default class TextureUtils extends EventDispatcher {
   private renderer: WebGLRenderer;
 
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
+  private[$PMREMGenerator]: PMREMGenerator;
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
 
   constructor(renderer: WebGLRenderer) {
     super();
     this.renderer = renderer;
+    this[$PMREMGenerator] = new PMREMGenerator(this.renderer);
   }
 
   equirectangularToCubemap(texture: Texture): WebGLRenderTargetCube {
@@ -131,14 +135,14 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  async loadEquirectAsCubeMap(
+  async loadEquirectAsCubeUV(
       url: string, progressCallback: (progress: number) => void = () => {}):
-      Promise<WebGLRenderTargetCube> {
+      Promise<WebGLRenderTarget> {
     let equirect = null;
 
     try {
       equirect = await this.load(url, progressCallback);
-      return await this.equirectangularToCubemap(equirect);
+      return this[$PMREMGenerator].equirectangularToPMREM(equirect);
     } finally {
       if (equirect != null) {
         (equirect as any).dispose();
@@ -201,16 +205,7 @@ export default class TextureUtils extends EventDispatcher {
       const progressCallback =
           progressTracker ? progressTracker.beginActivity() : () => {};
       const environmentMapLoads =
-          this.loadEquirectAsCubeMap(url, progressCallback)
-              .then(interstitialEnvironmentMap => {
-                const environmentMap =
-                    this.pmremPass(interstitialEnvironmentMap);
-                // In this case, we don't care about the interstitial
-                // environment map because it will never be used for anything,
-                // so dispose of it right away:
-                interstitialEnvironmentMap.dispose();
-                return environmentMap;
-              });
+          this.loadEquirectAsCubeUV(url, progressCallback);
 
       this[$environmentMapCache].set(url, environmentMapLoads);
     }

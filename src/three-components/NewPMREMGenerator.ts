@@ -16,7 +16,7 @@
 import {BufferAttribute, BufferGeometry, LinearEncoding, Mesh, NearestFilter, NoBlending, OrthographicCamera, RawShaderMaterial, Scene, Texture, WebGLRenderer, WebGLRenderTarget} from 'three';
 
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
-import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
+import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 
 const LOD_MIN = 3;
 const LOD_MAX = 8;
@@ -47,10 +47,10 @@ const $gaussianBlur = Symbol('gaussianBlur');
  * interpolate diffuse lighting while limiting sampling computation.
  */
 export class PMREMGenerator {
-  private[$roughness]: Array<number>;
-  private[$sigma]: Array<number>;
-  private[$lodSize]: Array<number>;
-  private[$lodPlanes]: Array<BufferGeometry>;
+  private[$roughness]: Array < number >= [];
+  private[$sigma]: Array < number >= [];
+  private[$lodSize]: Array < number >= [];
+  private[$lodPlanes]: Array < BufferGeometry >= [];
   private[$blurShader] = new BlurShader(MAX_SAMPLES);
   private[$flatCamera] = new OrthographicCamera(0, 3, 0, 2, 0, 1);
 
@@ -195,6 +195,7 @@ export class PMREMGenerator {
 
     blurUniforms.latitudinal.value = false;
     blurUniforms.envMap.value = cubeUVRenderTarget.texture;
+    blurUniforms.mipInt.value = lodIn;
 
     const outputSize = this[$lodSize][lodOut];
     const x = 3 * Math.max(0, SIZE_MAX - 2 * outputSize);
@@ -208,6 +209,7 @@ export class PMREMGenerator {
 
     blurUniforms.latitudinal.value = true;
     blurUniforms.envMap.value = pingPongRenderTarget.texture;
+    blurUniforms.mipInt.value = lodOut;
 
     this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.render(blurScene, this[$flatCamera]);
@@ -262,7 +264,7 @@ uniform float mipInt;
 #define RECIPROCAL_PI2 0.15915494
 ${texelIO}
 vec4 envMapTexelToLinear(vec4 color){return inputTexelToLinear(color);}
-${cubeUVChunk}
+${bilinearCubeUVChunk}
 void main() {
   if(copyEquirectangular){
     vec3 direction = normalize(vOutputDirection);
