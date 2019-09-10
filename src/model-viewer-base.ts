@@ -43,6 +43,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 
 export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
+export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
@@ -93,6 +94,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   src: string|null = null;
 
   protected[$loaded]: boolean = false;
+  protected[$loadedTime]: number = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
@@ -269,6 +271,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
       this[$loaded] = false;
+      this[$loadedTime] = 0;
       (async () => {
         const updateSourceProgress = this[$progressTracker].beginActivity();
         await this[$updateSource](
@@ -330,6 +333,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     this[$loaded] = true;
+    this[$loadedTime] = performance.now();
     // Asynchronously invoke `update`:
     this.requestUpdate();
   }

@@ -69,6 +69,10 @@ const $logFov = Symbol('fov');
 const $goalLogFov = Symbol('goalLogFov');
 const $fovDamper = Symbol('fovDamper');
 const $target = Symbol('target');
+const $goalTarget = Symbol('goalTarget');
+const $targetDamperX = Symbol('targetDamperX');
+const $targetDamperY = Symbol('targetDamperY');
+const $targetDamperZ = Symbol('targetDamperZ');
 
 const $options = Symbol('options');
 const $upQuaternion = Symbol('upQuaternion');
@@ -162,6 +166,9 @@ export class Damper {
     if (x == null) {
       return xGoal;
     }
+    if (x === xGoal && this[$velocity] === 0) {
+      return xGoal;
+    }
     if (timeStepMilliseconds < 0) {
       return x;
     }
@@ -224,6 +231,10 @@ export class SmoothControls extends EventDispatcher {
   private[$goalLogFov]: number;
   private[$fovDamper] = new Damper();
   private[$target] = new Vector3();
+  private[$goalTarget] = new Vector3();
+  private[$targetDamperX] = new Damper();
+  private[$targetDamperY] = new Damper();
+  private[$targetDamperZ] = new Damper();
 
   private[$pointerIsDown] = false;
   private[$lastPointerPosition] = new Vector2();
@@ -428,10 +439,7 @@ export class SmoothControls extends EventDispatcher {
    * Sets the target the camera is pointing toward
    */
   setTarget(target: Vector3) {
-    if (!this[$target].equals(target)) {
-      this[$target].copy(target);
-      this[$moveCamera]();
-    }
+    this[$goalTarget].copy(target);
   }
 
   /**
@@ -504,6 +512,13 @@ export class SmoothControls extends EventDispatcher {
     this[$logFov] = this[$fovDamper].update(
         this[$logFov], this[$goalLogFov], delta, maximumFieldOfView!);
 
+    this[$target].x = this[$targetDamperX].update(
+        this[$target].x, this[$goalTarget].x, delta, maximumRadius!);
+    this[$target].y = this[$targetDamperY].update(
+        this[$target].y, this[$goalTarget].y, delta, maximumRadius!);
+    this[$target].z = this[$targetDamperZ].update(
+        this[$target].z, this[$goalTarget].z, delta, maximumRadius!);
+
     this[$moveCamera]();
   }
 
@@ -511,7 +526,8 @@ export class SmoothControls extends EventDispatcher {
     return this[$goalSpherical].theta === this[$spherical].theta &&
         this[$goalSpherical].phi === this[$spherical].phi &&
         this[$goalSpherical].radius === this[$spherical].radius &&
-        this[$goalLogFov] === this[$logFov];
+        this[$goalLogFov] === this[$logFov] &&
+        this[$goalTarget].equals(this[$target]);
   }
 
   private[$moveCamera]() {

@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
-
 import {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION, StagingMixin} from '../../features/staging.js';
-import ModelViewerElementBase, {$onUserModelOrbit, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$onUserModelOrbit} from '../../model-viewer-base.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
-const CENTER_OFFSET = new Vector3(0.5, 1.0, 0.5);
-const ORIGIN_OFFSET = new Vector3();
-const FRAMED_SIZE = new Vector3(5, 4.5, 5);
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;
@@ -57,57 +52,6 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
     teardown(() => {
       document.body.removeChild(element);
-    });
-
-    suite('align-model', () => {
-      test('centers the model in the frame by default', () => {
-        const offset = (element as any)[$scene].model.position;
-        expect(offset).to.be.deep.equal(CENTER_OFFSET);
-      });
-
-      suite('origin alignment', () => {
-        setup(async () => {
-          element.alignModel = 'origin';
-          await timePasses();
-        });
-
-        test('aligns model origin with the scene origin', () => {
-          // NOTE(cdata): We clone the offset as a cheap way of normalizing
-          // -0 values as 0
-          const offset = (element as any)[$scene].model.position.clone();
-          expect(offset).to.be.deep.equal(ORIGIN_OFFSET);
-        });
-
-        test('places shadow under a non-centered model', () => {
-          const shadowSize = (element as any)[$scene].shadow.scale;
-          expect(shadowSize.x).to.be.equal(FRAMED_SIZE.x);
-          expect(shadowSize.z).to.be.equal(FRAMED_SIZE.z);
-        });
-      });
-
-      suite('mixed values', () => {
-        suite('two values', () => {
-          test('aligns x and y axes accordingly', async () => {
-            element.alignModel = 'center origin';
-            await timePasses();
-
-            const offset = (element as any)[$scene].model.position.clone();
-            expect(offset).to.be.deep.equal(
-                new Vector3(CENTER_OFFSET.x, ORIGIN_OFFSET.y, CENTER_OFFSET.z));
-          });
-        });
-
-        suite('three values', () => {
-          test('aligns x, y and z axes accordingly', async () => {
-            element.alignModel = 'origin center origin';
-            await timePasses();
-
-            const offset = (element as any)[$scene].model.position.clone();
-            expect(offset).to.be.deep.equal(
-                new Vector3(ORIGIN_OFFSET.x, CENTER_OFFSET.y, ORIGIN_OFFSET.z));
-          });
-        });
-      });
     });
 
     suite('auto-rotate', () => {
