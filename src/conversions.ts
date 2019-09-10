@@ -14,6 +14,7 @@
  */
 
 import {Math as ThreeMath} from 'three';
+
 import {parseValues, ValueNode} from './parsers.js';
 
 
@@ -99,6 +100,37 @@ export const deserializeSpherical =
               lengthValueNodeToMeters(radiusNode);
 
           return [theta, phi, radius];
+        }
+      } catch (_error) {
+      }
+
+      return null;
+    };
+
+/**
+ * Vector String => Vector Values
+ *
+ * Converts a "vector string" to 3 values, either numbers in meters or the
+ * string 'auto'. Position strings are of the form "$x $y $z". Accepted units
+ * include meters (m), centimeters (cm) and millimeters (mm).
+ *
+ * Returns null if the vector string cannot be parsed.
+ */
+export const deserializeVector3 =
+    (vectorString: string): (number|string)[]|null => {
+      try {
+        const vectorValueNodes = parseValues(vectorString);
+
+        const xyz = [];
+        if (vectorValueNodes.length === 3) {
+          for (let i = 0; i < 3; i++) {
+            xyz.push(
+                vectorValueNodes[i].value === 'auto' ?
+                    'auto' :
+                    lengthValueNodeToMeters(vectorValueNodes[i]));
+          }
+
+          return xyz;
         }
       } catch (_error) {
       }

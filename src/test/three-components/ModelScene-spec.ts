@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Mesh, Object3D, SphereBufferGeometry, Vector3} from 'three';
+import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import ModelScene from '../../three-components/ModelScene.js';
@@ -116,30 +116,6 @@ suite('ModelScene', () => {
       scene.setSize(0, 0);
       expect(scene.width).to.be.equal(1);
       expect(scene.height).to.be.equal(1);
-    });
-  });
-
-  suite('alignModel', () => {
-    test('does not throw if model has no volume', () => {
-      scene.model.setObject(new Object3D());
-      scene.alignModel();
-    });
-
-    test('does not throw if model not loaded', () => {
-      scene.model.modelContainer.add(dummyMesh);
-      scene.model.updateBoundingBox();
-      scene.alignModel();
-    });
-
-    test('updates object position to center it on the floor', () => {
-      scene.setSize(1000, 500);
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeTranslation(5, 10, 20));
-      scene.model.setObject(dummyMesh);
-
-      scene.alignModel();
-
-      expect(scene.model.position)
-          .to.be.eql(new Vector3(-5, dummyRadius - 10, -20));
     });
   });
 });

@@ -20,129 +20,81 @@ import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-view
 import {Constructor, Timer} from '../utilities.js';
 import {CameraChangeDetails} from './controls.js';
 
-const Alignment = {
-  CENTER: 'center',
-  ORIGIN: 'origin'
-};
-
 // How much the model will rotate per
 // second in radians:
 const ROTATION_SPEED = Math.PI / 32;
 const AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION = 3000;
 
-const UNBOUNDED_WHITESPACE_RE = /\s+/;
-
-const alignmentToMaskValues = (alignmentString: string) => {
-  const alignments = alignmentString.split(UNBOUNDED_WHITESPACE_RE);
-  const maskValues = [];
-  let firstAlignment;
-
-  for (let i = 0; i < 3; ++i) {
-    const alignment = alignments[i];
-
-    if (alignment != null && firstAlignment == null) {
-      firstAlignment = alignment;
-    }
-
-    switch (alignment || firstAlignment) {
-      default:
-      case Alignment.CENTER:
-        maskValues.push(1.0);
-        break;
-      case Alignment.ORIGIN:
-        maskValues.push(0.0);
-        break;
-    }
-  }
-
-  return maskValues;
-};
-
 const $autoRotateTimer = Symbol('autoRotateTimer');
-const $updateAlignment = Symbol('updateAlignment');
 const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
 
 export {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION};
 
-export const StagingMixin = (ModelViewerElement:
-                                 Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase> => {
-      class StagingModelViewerElement extends ModelViewerElement {
-        @property({type: Boolean, attribute: 'auto-rotate'})
-        autoRotate: boolean = false;
+export const StagingMixin =
+    (ModelViewerElement: Constructor<ModelViewerElementBase>):
+        Constructor<ModelViewerElementBase> => {
+          class StagingModelViewerElement extends ModelViewerElement {
+            @property({type: Boolean, attribute: 'auto-rotate'})
+            autoRotate: boolean = false;
 
-        @property({type: String, attribute: 'align-model'})
-        alignModel: string = 'center';
+            private[$autoRotateTimer]: Timer =
+                new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+            private[$cameraChangeHandler] =
+                (event: CustomEvent<CameraChangeDetails>) =>
+                    this[$onCameraChange](event);
 
-        private[$autoRotateTimer]: Timer =
-            new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
-        private[$cameraChangeHandler] =
-            (event: CustomEvent<CameraChangeDetails>) =>
-                this[$onCameraChange](event);
+            connectedCallback() {
+              super.connectedCallback();
+              this.addEventListener(
+                  'camera-change', this[$cameraChangeHandler] as EventListener);
+              this[$autoRotateTimer].stop();
+            }
 
-        connectedCallback() {
-          super.connectedCallback();
-          this.addEventListener(
-              'camera-change', this[$cameraChangeHandler] as EventListener);
-          this[$autoRotateTimer].stop();
-        }
+            disconnectedCallback() {
+              super.disconnectedCallback();
+              this.removeEventListener(
+                  'camera-change', this[$cameraChangeHandler] as EventListener);
+              this[$autoRotateTimer].stop();
+            }
 
-        disconnectedCallback() {
-          super.disconnectedCallback();
-          this.removeEventListener(
-              'camera-change', this[$cameraChangeHandler] as EventListener);
-          this[$autoRotateTimer].stop();
-        }
+            updated(changedProperties: Map<string, any>) {
+              super.updated(changedProperties);
 
-        updated(changedProperties: Map<string, any>) {
-          super.updated(changedProperties);
+              if (changedProperties.has('autoRotate')) {
+                (this as any)[$scene].pivot.rotation.set(0, 0, 0);
+                this[$needsRender]();
+              }
+            }
 
-          if (changedProperties.has('alignModel')) {
-            this[$updateAlignment]();
+            [$tick](time: number, delta: number) {
+              super[$tick](time, delta);
+
+              if (!this.autoRotate || !this.modelIsVisible) {
+                return;
+              }
+
+              this[$autoRotateTimer].tick(delta);
+
+              if (this[$autoRotateTimer].hasStopped) {
+                (this as any)[$scene].pivot.rotation.y +=
+                    ROTATION_SPEED * delta * 0.001;
+                this[$needsRender]();
+              }
+            }
+
+            [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
+              if (!this.autoRotate) {
+                return;
+              }
+
+              this[$autoRotateTimer].reset();
+            }
+
+            get turntableRotation(): number {
+              return (this as any)[$scene].pivot.rotation.y;
+            }
           }
 
-          if (changedProperties.has('autoRotate')) {
-            (this as any)[$scene].pivot.rotation.set(0, 0, 0);
-            this[$needsRender]();
-          }
-        }
-
-        [$tick](time: number, delta: number) {
-          super[$tick](time, delta);
-
-          if (!this.autoRotate || !this.modelIsVisible) {
-            return;
-          }
-
-          this[$autoRotateTimer].tick(delta);
-
-          if (this[$autoRotateTimer].hasStopped) {
-            (this as any)[$scene].pivot.rotation.y +=
-                ROTATION_SPEED * delta * 0.001;
-            this[$needsRender]();
-          }
-        }
-
-        [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
-          if (!this.autoRotate) {
-            return;
-          }
-
-          this[$autoRotateTimer].reset();
-        }
-
-        [$updateAlignment]() {
-          const {alignModel} = this;
-          const alignmentMaskValues = alignmentToMaskValues(alignModel);
-
-          (this as any)[$scene].setModelAlignmentMask(...alignmentMaskValues);
-        }
-
-        get turntableRotation(): number {
-          return (this as any)[$scene].pivot.rotation.y;
-        }
-      }
-
-      return StagingModelViewerElement;
-    };
+          return StagingModelViewerElement;
+        };

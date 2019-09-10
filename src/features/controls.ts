@@ -14,10 +14,10 @@
  */
 
 import {property} from 'lit-element';
-import {Event, Spherical} from 'three';
+import {Event, Spherical, Vector3} from 'three';
 
-import {deserializeAngleToDeg, deserializeSpherical} from '../conversions.js';
-import ModelViewerElementBase, {$ariaLabel, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
+import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 
@@ -47,6 +47,7 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 };
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = '45deg';
 
 const HALF_PI = Math.PI / 2.0;
@@ -69,6 +70,7 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
+const $updateCameraTarget = Symbol('updateCameraTarget');
 const $updateFieldOfView = Symbol('updateFieldOfView');
 
 const $blurHandler = Symbol('blurHandler');
@@ -84,7 +86,6 @@ const $onPromptTransitionend = Symbol('onPromptTransitionend');
 const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
-const $idleTime = Symbol('idleTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
@@ -92,11 +93,13 @@ const $jumpCamera = Symbol('jumpCamera');
 export interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
+  cameraTarget: string;
   fieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
+  getCameraTarget(): Vector3;
   getFieldOfView(): number;
   jumpCameraToGoal(): void;
 }
@@ -111,6 +114,10 @@ export const ControlsMixin = (ModelViewerElement:
         @property(
             {type: String, attribute: 'camera-orbit', hasChanged: () => true})
         cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
+
+        @property(
+            {type: String, attribute: 'camera-target', hasChanged: () => true})
+        cameraTarget: string = DEFAULT_CAMERA_TARGET;
 
         @property(
             {type: String, attribute: 'field-of-view', hasChanged: () => true})
@@ -129,7 +136,6 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$promptElement]: Element;
 
-        protected[$idleTime] = 0;
         protected[$userPromptedOnce] = false;
         protected[$waitingToPromptUser] = false;
         protected[$shouldPromptUserToInteract] = true;
@@ -164,6 +170,10 @@ export const ControlsMixin = (ModelViewerElement:
         getCameraOrbit(): SphericalPosition {
           const {theta, phi, radius} = this[$lastSpherical];
           return {theta, phi, radius};
+        }
+
+        getCameraTarget(): Vector3 {
+          return this[$controls].getTarget();
         }
 
         getFieldOfView(): number {
@@ -227,6 +237,10 @@ export const ControlsMixin = (ModelViewerElement:
             this[$updateCameraOrbit]();
           }
 
+          if (changedProperties.has('cameraTarget')) {
+            this[$updateCameraTarget]();
+          }
+
           if (changedProperties.has('fieldOfView')) {
             this[$updateFieldOfView]();
           }
@@ -265,16 +279,28 @@ export const ControlsMixin = (ModelViewerElement:
           this[$controls].setOrbit(theta, phi, radius as number);
         }
 
+        [$updateCameraTarget]() {
+          const targetValues = deserializeVector3(this.cameraTarget);
+          let target = this[$scene].model.boundingBox.getCenter(new Vector3);
+
+          if (targetValues != null) {
+            for (let i = 0; i < 3; i++) {
+              if (targetValues[i] !== 'auto') {
+                target.setComponent(i, targetValues[i] as number);
+              }
+            }
+          }
+
+          this[$controls].setTarget(target);
+        }
+
         [$tick](time: number, delta: number) {
           super[$tick](time, delta);
 
           if (this[$waitingToPromptUser] &&
               this.interactionPrompt !== InteractionPromptStrategy.NONE) {
-            if (this.loaded) {
-              this[$idleTime] += delta;
-            }
-
-            if (this[$idleTime] > this.interactionPromptThreshold) {
+            if (this.loaded &&
+                time > this[$loadedTime] + this.interactionPromptThreshold) {
               (this as any)[$scene].canvas.setAttribute(
                   'aria-label', INTERACTION_PROMPT);
 
@@ -296,7 +322,7 @@ export const ControlsMixin = (ModelViewerElement:
         [$deferInteractionPrompt]() {
           // Effectively cancel the timer waiting for user interaction:
           this[$waitingToPromptUser] = false;
-          this[$promptElement]!.classList.remove('visible');
+          this[$promptElement].classList.remove('visible');
 
           // Implicitly there was some reason to defer the prompt. If the user
           // has been prompted at least once already, we no longer need to
@@ -341,7 +367,6 @@ export const ControlsMixin = (ModelViewerElement:
           controls.applyOptions({minimumRadius, maximumRadius});
 
           controls.setRadius(zoom * this[$idealCameraDistance]!);
-          controls.setTarget(scene.target);
           controls.jumpToGoal();
         }
 
@@ -409,6 +434,7 @@ export const ControlsMixin = (ModelViewerElement:
           super[$onModelLoad](event);
           this[$updateCamera]();
           this[$updateCameraOrbit]();
+          this[$updateCameraTarget]();
           this[$controls].jumpToGoal();
         }
 
@@ -432,7 +458,6 @@ export const ControlsMixin = (ModelViewerElement:
           // prompt threshold:
           if (this[$shouldPromptUserToInteract]) {
             this[$waitingToPromptUser] = true;
-            this[$idleTime] = 0;
           }
         }
 
@@ -442,15 +467,10 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$onChange]({source}: ChangeEvent) {
-          if (this.interactionPrompt ===
-              InteractionPromptStrategy.WHEN_FOCUSED) {
-            this[$deferInteractionPrompt]();
-          }
           this[$updateAria]();
           this[$needsRender]();
 
-          if (source === ChangeSource.USER_INTERACTION &&
-              this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+          if (source === ChangeSource.USER_INTERACTION) {
             this[$deferInteractionPrompt]();
           }
 
