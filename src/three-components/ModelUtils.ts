@@ -15,8 +15,6 @@
 import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} from 'three';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js';
-import {lightsChunk} from './shader-chunk/lights_fragment_maps.glsl.js';
 import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
@@ -49,8 +47,6 @@ const updateShader = (shader: Shader) => {
   shader.fragmentShader =
       shader.fragmentShader
           .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-          .replace('#include <envmap_physical_pars_fragment>', envmapChunk)
-          .replace('#include <lights_fragment_maps>', lightsChunk)
           .replace('#include <normalmap_pars_fragment>', normalmapChunk);
 };
 
