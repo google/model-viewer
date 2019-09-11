@@ -18,11 +18,11 @@ import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 
-const LOD_MIN = 3;
+const LOD_MIN = 4;
 const LOD_MAX = 8;
 const SIZE_MAX = Math.pow(2, LOD_MAX);
-const EXTRA_LOD_ROUGHNESS = [0.32, 0.5, 0.7, 1.0];
-const EXTRA_LOD_SIGMA = [0.25, 0.35, 0.43, 0.5];
+const EXTRA_LOD_ROUGHNESS = [0.22, 0.32, 0.5, 0.7, 1.0];
+const EXTRA_LOD_SIGMA = [0.12, 0.25, 0.35, 0.43, 0.5];
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 const MAX_SAMPLES = 20;
 

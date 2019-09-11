@@ -2,9 +2,9 @@ import {getFaceChunk, getUVChunk} from './common.glsl.js';
 
 export const bilinearCubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel 8.0
-#define cubeUV_minMipLevel 3.0
+#define cubeUV_minMipLevel 4.0
 #define cubeUV_maxTileSize 256.0
-#define cubeUV_minTileSize 8.0
+#define cubeUV_minTileSize 16.0
 ${getFaceChunk}
 ${getUVChunk}
 vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
@@ -51,13 +51,15 @@ ${bilinearCubeUVChunk}
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   float filterMip = 0.0;
   if (roughness >= 0.7) {
-    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 4.0;
+    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 5.0;
   } else if (roughness >= 0.5) {
-    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 3.0;
+    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 4.0;
   } else if (roughness >= 0.32) {
-    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 2.0;
+    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 3.0;
   } else if (roughness >= 0.22) {
-    filterMip = (0.32 - roughness) / (0.32 - 0.22) - 1.0;
+    filterMip = (0.32 - roughness) / (0.32 - 0.22) - 2.0;
+  } else if (roughness >= 0.15) {
+    filterMip = (0.22 - roughness) / (0.22 - 0.15) - 1.0;
   }
 
   roughness = min(roughness, 0.32);
