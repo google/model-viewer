@@ -14,6 +14,7 @@
  */
 
 import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, Mesh, NearestFilter, NoBlending, OrthographicCamera, RawShaderMaterial, Scene, Texture, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {Vector2} from 'three';
 
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
@@ -148,8 +149,12 @@ export class PMREMGenerator {
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurShader]));
     const uniforms = this[$blurShader].uniforms;
 
-    uniforms.copyEquirectangular.value = true;
     uniforms.envMap.value = equirectangular;
+    uniforms.copyEquirectangular.value = true;
+    uniforms.texelSize.value = new Vector2(
+        1.0 / equirectangular.image.width, 1.0 / equirectangular.image.height);
+    uniforms.inputEncoding.value = encodings[equirectangular.encoding];
+    uniforms.outputEncoding.value = encodings[equirectangular.encoding];
 
     this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
@@ -255,6 +260,7 @@ export class PMREMGenerator {
 class BlurShader extends RawShaderMaterial {
   constructor(maxSamples: number) {
     const weights = new Float32Array(maxSamples);
+    const texelSize = new Vector2(1, 1);
 
     super({
 
@@ -263,6 +269,7 @@ class BlurShader extends RawShaderMaterial {
       uniforms: {
         envMap: {value: null},
         copyEquirectangular: {value: false},
+        texelSize: {value: texelSize},
         samples: {value: 1},
         weights: {value: weights},
         latitudinal: {value: false},
@@ -292,6 +299,7 @@ precision mediump int;
 varying vec3 vOutputDirection;
 uniform sampler2D envMap;
 uniform bool copyEquirectangular;
+uniform vec2 texelSize;
 uniform int samples;
 uniform float weights[n];
 uniform bool latitudinal;
@@ -299,39 +307,55 @@ uniform float dTheta;
 uniform float mipInt;
 #define RECIPROCAL_PI 0.31830988618
 #define RECIPROCAL_PI2 0.15915494
-${texelIO}
-vec4 envMapTexelToLinear(vec4 color){return inputTexelToLinear(color);}
+${texelIO} 
+vec4 envMapTexelToLinear(vec4 color) {
+  return inputTexelToLinear(color);
+}
 ${bilinearCubeUVChunk}
 void main() {
-  if(copyEquirectangular){
-    vec3 direction = normalize(vOutputDirection);
-    vec2 sampleUV;
-    sampleUV.y = asin( clamp( direction.y, - 1.0, 1.0 ) ) * RECIPROCAL_PI + 0.5;
-    sampleUV.x = atan( direction.z, direction.x ) * RECIPROCAL_PI2 + 0.5;
-    gl_FragColor = texture2D( envMap, sampleUV );
-    return;
-  }
   gl_FragColor = vec4(0.0);
-  float xz = length(vOutputDirection.xz);
-  for (int i = 0; i < n; i++) {
-    if (i >= samples)
+  if (copyEquirectangular) {
+    vec3 direction = normalize(vOutputDirection);
+    vec2 uv;
+    uv.y = asin(clamp(direction.y, -1.0, 1.0)) * RECIPROCAL_PI + 0.5;
+    uv.x = atan(direction.z, direction.x) * RECIPROCAL_PI2 + 0.5;
+    vec2 f = fract(uv / texelSize - 0.5);
+    uv -= f * texelSize;
+    vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+    uv.x += texelSize.x;
+    vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+    uv.y += texelSize.y;
+    vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+    uv.x -= texelSize.x;
+    vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
+    vec3 tm = mix(tl, tr, f.x);
+    vec3 bm = mix(bl, br, f.x);
+    gl_FragColor.rgb = mix(tm, bm, f.y);
+  } else {
+    float xz = length(vOutputDirection.xz);
+    for (int i = 0; i < n; i++) {
+      if (i >= samples)
         break;
-    for (int dir = -1; dir < 2; dir += 2) {
-      if (i == 0 && dir == 1)
-        continue;
-      vec3 sampleDirection = vOutputDirection;
-      if (latitudinal) {
-        float diTheta = dTheta * float(dir * i) / xz;
-        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-        sampleDirection.xz = R * sampleDirection.xz;
-      } else {
-        float diTheta = dTheta * float(dir * i);
-        mat2 R = mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-        vec2 xzY = R * vec2(xz, sampleDirection.y);
-        sampleDirection.xz *= xzY.x / xz;
-        sampleDirection.y = xzY.y;
+      for (int dir = -1; dir < 2; dir += 2) {
+        if (i == 0 && dir == 1)
+          continue;
+        vec3 sampleDirection = vOutputDirection;
+        if (latitudinal) {
+          float diTheta = dTheta * float(dir * i) / xz;
+          mat2 R =
+              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+          sampleDirection.xz = R * sampleDirection.xz;
+        } else {
+          float diTheta = dTheta * float(dir * i);
+          mat2 R =
+              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
+          vec2 xzY = R * vec2(xz, sampleDirection.y);
+          sampleDirection.xz *= xzY.x / xz;
+          sampleDirection.y = xzY.y;
+        }
+        gl_FragColor.rgb +=
+            weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
       }
-      gl_FragColor.rgb += weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
     }
   }
   gl_FragColor = linearToOutputTexel(gl_FragColor);
