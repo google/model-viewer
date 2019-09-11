@@ -21,7 +21,8 @@ import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.gl
 const LOD_MIN = 3;
 const LOD_MAX = 8;
 const SIZE_MAX = Math.pow(2, LOD_MAX);
-const EXTRA_LOD_ROUGHNESS = [0.5, 0.7, 1.0];
+const EXTRA_LOD_ROUGHNESS = [0.32, 0.5, 0.7, 1.0];
+const EXTRA_LOD_SIGMA = [0.25, 0.35, 0.43, 0.5];
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 const MAX_SAMPLES = 20;
 
@@ -66,7 +67,7 @@ export class PMREMGenerator {
           (1 + Math.sqrt(1 + 4 * Math.PI * sizeLod)) / (2 * Math.PI * sizeLod);
       if (i > LOD_MAX - LOD_MIN) {
         roughness = EXTRA_LOD_ROUGHNESS[i - LOD_MAX + LOD_MIN - 1];
-        sigma = Math.PI * roughness * roughness / (1 + roughness);
+        sigma = EXTRA_LOD_SIGMA[i - LOD_MAX + LOD_MIN - 1];
       }
       this[$sigma].push(sigma);
       this[$roughness].push(roughness);
@@ -203,22 +204,28 @@ export class PMREMGenerator {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * inputSize * 2 /
         Math.PI);
-    // if (n > MAX_SAMPLES) {
-    console.log(
-        'StandardDeviationRadians, ',
-        standardDeviationRadians,
-        ', is too large and will clip, as it requested ',
-        n,
-        ' samples when the maximum is set to ',
-        MAX_SAMPLES);
-    // }
-    const inverseIntegral =
-        standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
+    if (n > MAX_SAMPLES) {
+      console.log(
+          'StandardDeviationRadians, ',
+          standardDeviationRadians,
+          ', is too large and will clip, as it requested ',
+          n,
+          ' samples when the maximum is set to ',
+          MAX_SAMPLES);
+    }
     let weights = [];
+    let sum = 0;
     for (let i = 0; i < MAX_SAMPLES; ++i) {
       const x = standardDeviations * i / (n - 1);
-      weights.push(inverseIntegral * Math.exp(-x * x / 2));
+      const weight = Math.exp(-x * x / 2);
+      weights.push(weight);
+      if (i == 0) {
+        sum += weight;
+      } else if (i < n) {
+        sum += 2 * weight;
+      }
     }
+    weights = weights.map(w => w / sum);
 
     blurUniforms.envMap.value = targetIn.texture;
     blurUniforms.copyEquirectangular.value = false;
@@ -327,7 +334,6 @@ void main() {
       gl_FragColor.rgb += weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
     }
   }
-  gl_FragColor.rgb = bilinearCubeUV(envMap, vOutputDirection, mipInt);
   gl_FragColor = linearToOutputTexel(gl_FragColor);
 }
       `,

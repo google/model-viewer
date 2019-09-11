@@ -33,13 +33,13 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   uv.x += texelSize;
   vec3 tr = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
-  uv.y -= texelSize;
+  uv.y += texelSize;
   vec3 br = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   uv.x -= texelSize;
   vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
-  return mix(tm, bm, 1.0 - f.y);
+  return mix(tm, bm, f.y);
 }
 `;
 
@@ -51,11 +51,13 @@ ${bilinearCubeUVChunk}
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   float filterMip = 0.0;
   if (roughness >= 0.7) {
-    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 3.0;
+    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 4.0;
   } else if (roughness >= 0.5) {
-    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 2.0;
+    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 3.0;
   } else if (roughness >= 0.32) {
-    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 1.0;
+    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 2.0;
+  } else if (roughness >= 0.22) {
+    filterMip = (0.32 - roughness) / (0.32 - 0.22) - 1.0;
   }
 
   roughness = min(roughness, 0.32);
