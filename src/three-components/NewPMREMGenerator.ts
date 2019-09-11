@@ -350,8 +350,12 @@ void main() {
           mat2 R =
               mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
           vec2 xzY = R * vec2(xz, sampleDirection.y);
-          sampleDirection.xz *= xzY.x / xz;
-          sampleDirection.y = xzY.y;
+          if (xzY.x < 0.0) {
+            sampleDirection = vec3(0.0, sign(sampleDirection.y), 0.0);
+          } else {
+            sampleDirection.xz *= xzY.x / xz;
+            sampleDirection.y = xzY.y;
+          }
         }
         gl_FragColor.rgb +=
             weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
