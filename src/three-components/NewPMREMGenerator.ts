@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferAttribute, BufferGeometry, LinearEncoding, Mesh, NearestFilter, NoBlending, OrthographicCamera, RawShaderMaterial, Scene, Texture, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, Mesh, NearestFilter, NoBlending, OrthographicCamera, RawShaderMaterial, Scene, Texture, WebGLRenderer, WebGLRenderTarget} from 'three';
 
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
@@ -31,9 +31,10 @@ const $lodSize = Symbol('lodSize');
 const $lodPlanes = Symbol('lodPlanes');
 const $blurShader = Symbol('blurShader');
 const $flatCamera = Symbol('flatCamera');
+const $targetParams = Symbol('targetParams');
 const $equirectangularToCubeUV = Symbol('equirectangularToCubeUV');
 const $applyPMREM = Symbol('applyPMREM');
-const $gaussianBlur = Symbol('gaussianBlur');
+const $halfBlur = Symbol('halfBlur');
 
 /**
  * This class generates a Prefiltered, Mipmapped Radiance Environment Map
@@ -52,7 +53,8 @@ export class PMREMGenerator {
   private[$lodSize]: Array < number >= [];
   private[$lodPlanes]: Array < BufferGeometry >= [];
   private[$blurShader] = new BlurShader(MAX_SAMPLES);
-  private[$flatCamera] = new OrthographicCamera(0, 3, 0, 2, 0, 1);
+  private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
+  private[$targetParams]: Object;
 
   constructor(private renderer: WebGLRenderer) {
     let lod = LOD_MAX;
@@ -72,28 +74,43 @@ export class PMREMGenerator {
       const texelSize = 1.0 / (sizeLod - 1);
       const min = -texelSize / 2;
       const max = 1 + texelSize / 2;
-      const uv = new Float32Array(
-          [min, min, max, min, max, max, min, min, max, max, min, max]);
+      const uv1 = [min, min, max, min, max, max, min, min, max, max, min, max];
+      const position = new Float32Array(3 * 3 * 2 * 6);
+      const uv = new Float32Array(2 * 3 * 2 * 6);
+      const faceIndex = new Float32Array(1 * 3 * 2 * 6);
 
-      const planes = new BufferGeometry();
-      let offset = 0;
       for (let face = 0; face < 6; face++) {
-        const plane = new BufferGeometry();
-
-        const x = (face % 3);
-        const y = i > 2 ? 1 : 0;
-        const position = new Float32Array(
-            [x, y, x + 1, y, x + 1, y + 1, x, y, x + 1, y + 1, x, y + 1]);
-        plane.addAttribute('position', new BufferAttribute(position, 2));
-        plane.addAttribute('uv', new BufferAttribute(uv, 2));
-
-        const faceIndex = new Float32Array(6);
-        faceIndex.fill(face);
-        plane.addAttribute('faceIndex', new BufferAttribute(faceIndex, 1));
-
-        planes.merge(plane, offset);
-        offset += 6;
+        const x = (face % 3) * 2 / 3 - 1;
+        const y = face > 2 ? 0 : -1;
+        position.set(
+            [
+              x,
+              y,
+              0,
+              x + 2 / 3,
+              y,
+              0,
+              x + 2 / 3,
+              y + 1,
+              0,
+              x,
+              y,
+              0,
+              x + 2 / 3,
+              y + 1,
+              0,
+              x,
+              y + 1,
+              0
+            ],
+            3 * 3 * 2 * face);
+        uv.set(uv1, 2 * 3 * 2 * face);
+        faceIndex.fill(face, 3 * 2 * face, 3 * 2 * (face + 1));
       }
+      const planes = new BufferGeometry();
+      planes.addAttribute('position', new BufferAttribute(position, 3));
+      planes.addAttribute('uv', new BufferAttribute(uv, 2));
+      planes.addAttribute('faceIndex', new BufferAttribute(faceIndex, 1));
       this[$lodPlanes].push(planes);
 
       if (lod > LOD_MIN) {
@@ -112,7 +129,7 @@ export class PMREMGenerator {
 
   private[$equirectangularToCubeUV](equirectangular: Texture):
       WebGLRenderTarget {
-    const params = {
+    this[$targetParams] = {
       format: equirectangular.format,
       magFilter: NearestFilter,
       minFilter: NearestFilter,
@@ -122,7 +139,9 @@ export class PMREMGenerator {
       encoding: equirectangular.encoding
     };
     const cubeUVRenderTarget =
-        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, params);
+        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, this[$targetParams]);
+    cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
+    cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
     const scene = new Scene();
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurShader]));
@@ -131,32 +150,50 @@ export class PMREMGenerator {
     uniforms.copyEquirectangular.value = true;
     uniforms.envMap.value = equirectangular;
 
-    this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
-
     this.renderer.setRenderTarget(cubeUVRenderTarget);
+    this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
     this.renderer.render(scene, this[$flatCamera]);
 
     return cubeUVRenderTarget;
   }
 
   private[$applyPMREM](cubeUVRenderTarget: WebGLRenderTarget) {
-    const pingPongRenderTarget = cubeUVRenderTarget.clone();
+    const pingPongRenderTarget =
+        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, this[$targetParams]);
+    pingPongRenderTarget.texture.name = 'PMREM.cubeUv';
+    pingPongRenderTarget.texture.mapping = CubeUVReflectionMapping;
 
     for (let i = 1; i < TOTAL_LODS; i++) {
       const sigma = Math.sqrt(
           this[$sigma][i] * this[$sigma][i] -
           this[$sigma][i - 1] * this[$sigma][i - 1]);
-      this[$gaussianBlur](
-          cubeUVRenderTarget, pingPongRenderTarget, i - 1, i, sigma);
+      this[$halfBlur](
+          cubeUVRenderTarget,
+          pingPongRenderTarget,
+          i - 1,
+          i,
+          sigma,
+          'latitudinal');
+      this[$halfBlur](
+          pingPongRenderTarget,
+          cubeUVRenderTarget,
+          i,
+          i,
+          sigma,
+          'longitudinal');
     }
 
     pingPongRenderTarget.dispose();
   }
 
-  private[$gaussianBlur](
-      cubeUVRenderTarget: WebGLRenderTarget,
-      pingPongRenderTarget: WebGLRenderTarget, lodIn: number, lodOut: number,
-      standardDeviationRadians: number) {
+  private[$halfBlur](
+      targetIn: WebGLRenderTarget, targetOut: WebGLRenderTarget, lodIn: number,
+      lodOut: number, standardDeviationRadians: number, direction: string) {
+    if (direction !== 'latitudinal' && direction !== 'longitudinal') {
+      console.error(
+          'blur direction must be either latitudinal or longitudinal!');
+    }
+
     const blurScene = new Scene();
     blurScene.add(new Mesh(this[$lodPlanes][lodOut], this[$blurShader]));
     const blurUniforms = this[$blurShader].uniforms;
@@ -166,15 +203,15 @@ export class PMREMGenerator {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * inputSize * 2 /
         Math.PI);
-    if (n > MAX_SAMPLES) {
-      console.log(
-          'StandardDeviationRadians, ',
-          standardDeviationRadians,
-          ', is too large and will clip, as it requested ',
-          n,
-          ' samples when the maximum is set to ',
-          MAX_SAMPLES);
-    }
+    // if (n > MAX_SAMPLES) {
+    console.log(
+        'StandardDeviationRadians, ',
+        standardDeviationRadians,
+        ', is too large and will clip, as it requested ',
+        n,
+        ' samples when the maximum is set to ',
+        MAX_SAMPLES);
+    // }
     const inverseIntegral =
         standardDeviations / ((n - 1) * Math.sqrt(2 * Math.PI));
     let weights = [];
@@ -183,35 +220,26 @@ export class PMREMGenerator {
       weights.push(inverseIntegral * Math.exp(-x * x / 2));
     }
 
+    blurUniforms.envMap.value = targetIn.texture;
     blurUniforms.copyEquirectangular.value = false;
     blurUniforms.samples.value = n;
     blurUniforms.weights.value = weights;
+    blurUniforms.latitudinal.value = direction === 'latitudinal';
     blurUniforms.dTheta.value =
         standardDeviationRadians * standardDeviations / (n - 1);
-    blurUniforms.inputEncoding.value =
-        encodings[cubeUVRenderTarget.texture.encoding];
-    blurUniforms.outputEncoding.value =
-        encodings[cubeUVRenderTarget.texture.encoding];
-
-    blurUniforms.latitudinal.value = false;
-    blurUniforms.envMap.value = cubeUVRenderTarget.texture;
-    blurUniforms.mipInt.value = lodIn;
+    blurUniforms.mipInt.value = LOD_MAX - lodIn;
+    blurUniforms.inputEncoding.value = encodings[targetIn.texture.encoding];
+    blurUniforms.outputEncoding.value = encodings[targetIn.texture.encoding];
 
     const outputSize = this[$lodSize][lodOut];
     const x = 3 * Math.max(0, SIZE_MAX - 2 * outputSize);
-    const y = (lodOut === 0 ? 0 : SIZE_MAX) +
-        outputSize *
+    const y = (lodOut === 0 ? 0 : 2 * SIZE_MAX) +
+        2 * outputSize *
             (lodOut > LOD_MAX - LOD_MIN ? lodOut - LOD_MAX + LOD_MIN : 0);
+    this.renderer.autoClear = false;
+
+    this.renderer.setRenderTarget(targetOut);
     this.renderer.setViewport(x, y, 3 * outputSize, 2 * outputSize);
-
-    this.renderer.setRenderTarget(pingPongRenderTarget);
-    this.renderer.render(blurScene, this[$flatCamera]);
-
-    blurUniforms.latitudinal.value = true;
-    blurUniforms.envMap.value = pingPongRenderTarget.texture;
-    blurUniforms.mipInt.value = lodOut;
-
-    this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.render(blurScene, this[$flatCamera]);
   }
 };
@@ -219,6 +247,8 @@ export class PMREMGenerator {
 
 class BlurShader extends RawShaderMaterial {
   constructor(maxSamples: number) {
+    const weights = new Float32Array(maxSamples);
+
     super({
 
       defines: {n: maxSamples},
@@ -227,7 +257,7 @@ class BlurShader extends RawShaderMaterial {
         envMap: {value: null},
         copyEquirectangular: {value: false},
         samples: {value: 1},
-        weights: {value: null},
+        weights: {value: weights},
         latitudinal: {value: false},
         dTheta: {value: 0},
         mipInt: {value: 0},
@@ -238,14 +268,14 @@ class BlurShader extends RawShaderMaterial {
       vertexShader: `
 precision mediump float;
 precision mediump int;
-attribute vec2 position;
+attribute vec3 position;
 attribute vec2 uv;
 attribute float faceIndex;
 varying vec3 vOutputDirection;
 ${getDirectionChunk}
 void main() {
     vOutputDirection = getDirection(uv, faceIndex);
-    gl_Position = vec4( position, 0.0, 1.0 );
+    gl_Position = vec4( position, 1.0 );
 }
       `,
 
@@ -297,6 +327,7 @@ void main() {
       gl_FragColor.rgb += weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
     }
   }
+  gl_FragColor.rgb = bilinearCubeUV(envMap, vOutputDirection, mipInt);
   gl_FragColor = linearToOutputTexel(gl_FragColor);
 }
       `,

@@ -29,7 +29,6 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   uv.y += filterInt * 2.0 * cubeUV_minTileSize;
   uv.x += 3.0 * max(0.0, cubeUV_maxTileSize - 2.0 * faceSize);
   uv *= texelSize;
-  uv.y = 1.0 - uv.y;
 
   vec3 tl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   uv.x += texelSize;
@@ -40,7 +39,7 @@ vec3 bilinearCubeUV(sampler2D envMap, vec3 direction, float mipInt) {
   vec3 bl = envMapTexelToLinear(texture2D(envMap, uv)).rgb;
   vec3 tm = mix(tl, tr, f.x);
   vec3 bm = mix(bl, br, f.x);
-  return mix(tm, bm, f.y);
+  return mix(tm, bm, 1.0 - f.y);
 }
 `;
 
