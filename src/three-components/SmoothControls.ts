@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Event, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector2, Vector3} from 'three';
+import {Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector2, Vector3} from 'three';
 
 import {clamp} from '../utilities.js';
 
@@ -140,7 +140,7 @@ export const ChangeSource: {[index: string]: ChangeSource} = {
  * ChangEvents are dispatched whenever the camera position or orientation has
  * changed
  */
-export interface ChangeEvent extends Event {
+export interface ChangeEvent extends ThreeEvent {
   /**
    * determines what was the originating reason for the change event eg user or
    * none
