@@ -41,6 +41,7 @@ const $environmentMapCache = Symbol('environmentMapCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
 const $PMREMGenerator = Symbol('PMREMGenerator');
 
+const $addMetadata = Symbol('addMetadata');
 const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
 const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
 
@@ -50,7 +51,7 @@ const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
 // describe the type of texture within the context of this application.
 const userData = {
   url: null,
-  // 'Equirectangular', 'PMREM'
+  // 'Equirectangular', 'CubeUV', 'PMREM'
   mapping: null,
 };
 
@@ -82,13 +83,7 @@ export default class TextureUtils extends EventDispatcher {
 
       progressCallback(1.0);
 
-      (texture as any).userData = {
-        ...userData,
-        ...({
-          url: url,
-          mapping: 'Equirectangular',
-        })
-      };
+      this[$addMetadata](texture, url, 'Equirectangular');
 
       if (isHDR) {
         texture.encoding = RGBEEncoding;
@@ -115,7 +110,9 @@ export default class TextureUtils extends EventDispatcher {
 
     try {
       equirect = await this.load(url, progressCallback);
-      return this[$PMREMGenerator].fromEquirectangular(equirect);
+      const cubeUV = this[$PMREMGenerator].fromEquirectangular(equirect);
+      this[$addMetadata](cubeUV.texture, url, 'CubeUV');
+      return cubeUV;
     } finally {
       if (equirect != null) {
         (equirect as any).dispose();
@@ -160,11 +157,25 @@ export default class TextureUtils extends EventDispatcher {
 
       let [environmentMap, skybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
+      this[$addMetadata](environmentMap.texture, environmentMapUrl, 'PMREM');
+      if (skybox != null) {
+        this[$addMetadata](skybox.texture, skyboxUrl, 'PMREM');
+      }
 
       return {environmentMap, skybox};
     } finally {
       updateGenerationProgress(1.0);
     }
+  }
+
+  private[$addMetadata](texture: Texture, url: string|null, mapping: string) {
+    (texture as any).userData = {
+      ...userData,
+      ...({
+        url: url,
+        mapping: mapping,
+      })
+    };
   }
 
   /**

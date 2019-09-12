@@ -96,8 +96,8 @@ suite('TextureUtils', () => {
       const target = await textureUtils.loadEquirectAsCubeUV(EQUI_URL);
       target.dispose();
       expect((target.texture as any).isTexture).to.be.ok;
-      expect(
-          textureMatchesMeta(target.texture, {mapping: 'Cube', url: EQUI_URL}))
+      expect(textureMatchesMeta(
+                 target.texture, {mapping: 'CubeUV', url: EQUI_URL}))
           .to.be.ok;
       target.texture.dispose();
     });
