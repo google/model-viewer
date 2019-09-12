@@ -114,13 +114,13 @@ export const AnimationMixin =
             }
 
             async[$updateSource]() {
-              super[$updateSource]();
-
               // If we are loading a new model, we need to stop the animation of
               // the current one (if any is playing). Otherwise, we might lose
               // the reference to the scene root and running actions start to
               // throw exceptions and/or behave in unexpected ways:
               (this as any)[$scene].model.stopAnimation();
+
+              return super[$updateSource]();
             }
 
             [$changeAnimation]() {
