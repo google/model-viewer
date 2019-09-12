@@ -57,6 +57,7 @@ export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
+export const $getModelIsVisible = Symbol('getModelIsVisible');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -122,7 +123,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get modelIsVisible() {
-    return true;
+    return this[$getModelIsVisible]();
   }
 
   /**
@@ -303,6 +304,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
   // @see https://github.com/microsoft/TypeScript/issues/338
   [$getLoaded](): boolean {
     return this[$loaded];
+  }
+
+  // @see [$getLoaded]
+  [$getModelIsVisible](): boolean {
+    return true;
   }
 
   /**

@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $progressTracker, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
@@ -117,15 +117,6 @@ export const LoadingMixin = (ModelViewerElement:
          * the <model-viewer> is only configured to reveal upon interaction.
          */
         @property({type: Boolean}) preload: boolean = false;
-
-        /**
-         * True if the model is visible. Visibility implies that a model has
-         * finished loading, that it has rendered at least once and that the
-         * poster is no longer obscuring it.
-         */
-        get modelIsVisible(): boolean {
-          return super.modelIsVisible && this[$modelIsVisible];
-        }
 
         /**
          * Dismisses the poster, causing the model to load and render if
@@ -397,6 +388,10 @@ export const LoadingMixin = (ModelViewerElement:
               });
             }, {once: true});
           }
+        }
+
+        [$getModelIsVisible]() {
+          return super[$getModelIsVisible]() || this[$modelIsVisible];
         }
 
         [$getLoaded]() {
