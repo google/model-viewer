@@ -220,7 +220,6 @@ export class ARRenderer extends EventDispatcher {
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]!);
       this[$presentedScene]!.updateFraming();
-      this[$presentedScene]!.alignModel();
     }
 
     this[$refSpace] = null;

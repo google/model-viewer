@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, DEFAULT_INTERACTION_PROMPT_THRESHOLD, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -78,9 +78,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         controls = (element as any)[$controls];
         document.body.appendChild(element);
         element.src = assetPath('cube.gltf');
-
-        element.interactionPromptThreshold =
-            100;  // Fairly low, to keep the test time down
 
         await waitForEvent(element, 'load');
         // NOTE(cdata): Sometimes the load event dispatches quickly enough to
@@ -149,6 +146,20 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, radius: nextRadius});
+      });
+
+      test('can independently adjust target', async () => {
+        const target = element.getCameraTarget();
+        target.x += 1;
+        target.z += 1;
+
+        element.cameraTarget = `${target.x}m auto ${target.z}m`;
+
+        await timePasses();
+
+        settleControls(controls);
+
+        expect(element.getCameraTarget()).to.be.eql(target);
       });
 
       test('defaults FOV correctly', async () => {
@@ -243,6 +254,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.src = assetPath('cube.gltf');
         element.cameraControls = true;
 
+        element.interactionPromptThreshold =
+            100;  // Fairly low, to keep the test time down
+
         await waitForEvent(element, 'load');
       });
 
@@ -289,14 +303,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('when user is interacting', () => {
         test('sets an appropriate camera-change event source', async () => {
-          const cameraChangeDispatches =
-              waitForEvent<CustomEvent<CameraChangeDetails>>(
-                  element, 'camera-change');
-
           await rafPasses();
           element[$canvas].focus();
           interactWith(element[$canvas]);
+
+          const cameraChangeDispatches =
+              waitForEvent<CustomEvent<CameraChangeDetails>>(
+                  element, 'camera-change');
           const event = await cameraChangeDispatches;
+
           expect(event.detail.source)
               .to.be.equal(ChangeSource.USER_INTERACTION);
         });
@@ -367,10 +382,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           test(
               'does not prompt users to interact before a model is loaded',
               async () => {
+                element.src = null;
+
                 Object.defineProperty(
                     element, 'loaded', {value: false, configurable: true});
-
-                element.interactionPromptThreshold = 500;
 
                 const canvas: HTMLCanvasElement =
                     (element[$scene] as any).canvas;
@@ -407,11 +422,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
             canvas.focus();
 
-            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD / 2.0);
-
             interactWith(canvas);
 
-            await timePasses(DEFAULT_INTERACTION_PROMPT_THRESHOLD + 100);
+            await timePasses(element.interactionPromptThreshold + 100);
 
             expect(canvas.getAttribute('aria-label'))
                 .to.not.be.equal(INTERACTION_PROMPT);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, DirectionalLight, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
 import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -40,7 +40,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 };
 
 const $paused = Symbol('paused');
-const $modelAlignmentMask = Symbol('modelAlignmentMask');
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -49,13 +48,10 @@ const $modelAlignmentMask = Symbol('modelAlignmentMask');
  */
 export default class ModelScene extends Scene {
   private[$paused]: boolean = false;
-  private[$modelAlignmentMask] = new Vector3(1, 1, 1);
-  private target = new Vector3();
   private aspect: number;
 
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
-  public shadowLight: DirectionalLight;
   public shadow: StaticShadow;
   public pivot: Object3D;
   public width: number;
@@ -85,10 +81,6 @@ export default class ModelScene extends Scene {
 
     this.model = new Model();
     this.shadow = new StaticShadow();
-
-    this.shadowLight = new DirectionalLight(0xffffff, 1.0);
-    this.shadowLight.position.set(0, 10, 0);
-    this.shadowLight.name = 'ShadowLight';
 
     this.width = width;
     this.height = height;
@@ -140,28 +132,6 @@ export default class ModelScene extends Scene {
   }
 
   /**
-   * Configures the alignment of the model within the frame based on value
-   * "masks". By default, the model will be aligned so that the center of its
-   * bounding box volume is in the center of the frame on all axes. In order to
-   * center the model this way, the model is translated by the delta between
-   * the world center of the bounding volume and world center of the frame.
-   *
-   * The alignment mask allows this translation to be scaled or eliminated
-   * completely for each of the three axes. So, setModelAlignment(1, 1, 1) will
-   * center the model in the frame. setModelAlignment(0, 0, 0) will align the
-   * model so that its root node origin is at [0, 0, 0] in the scene.
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {number} z
-   */
-  setModelAlignmentMask(...alignmentMaskValues: [number, number, number]) {
-    this[$modelAlignmentMask].set(...alignmentMaskValues);
-    this.alignModel();
-    this.isDirty = true;
-  }
-
-  /**
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
    */
@@ -178,10 +148,9 @@ export default class ModelScene extends Scene {
   /**
    * To frame the scene, a box is fit around the model such that the X and Z
    * dimensions (modelDepth) are the same (for Y-rotation) and the X/Y ratio is
-   * the aspect ratio of the canvas (framedHeight is the Y dimension). For
-   * non-centered models, the box is fit symmetrically about the XZ origin to
-   * keep them in frame as they are rotated. At the ideal distance, the camera's
-   * fov exactly covers the front face of this box when looking down the Z-axis.
+   * the aspect ratio of the canvas (framedHeight is the Y dimension). At the
+   * ideal distance, the camera's fov exactly covers the front face of this box
+   * when looking down the Z-axis.
    */
   updateFraming() {
     const dpr = resolveDpr();
@@ -191,23 +160,10 @@ export default class ModelScene extends Scene {
     this.canvas.style.height = `${this.height}px`;
     this.aspect = this.width / this.height;
 
-    const {boundingBox, position, size} = this.model;
+    const {size} = this.model;
     if (size.x != 0 || size.y != 0 || size.z != 0) {
-      const boxHalfX = Math.max(
-          Math.abs(boundingBox.min.x + position.x),
-          Math.abs(boundingBox.max.x + position.x));
-      const boxHalfZ = Math.max(
-          Math.abs(boundingBox.min.z + position.z),
-          Math.abs(boundingBox.max.z + position.z));
-
-      const modelMinY = Math.min(0, boundingBox.min.y + position.y);
-      const modelMaxY = Math.max(0, boundingBox.max.y + position.y);
-      this.target.y = this[$modelAlignmentMask].y * (modelMaxY + modelMinY) / 2;
-      const boxHalfY =
-          Math.max(modelMaxY - this.target.y, this.target.y - modelMinY);
-
-      this.modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
-      this.framedHeight = Math.max(2 * boxHalfY, this.modelDepth / this.aspect);
+      this.modelDepth = Math.max(size.x, size.z);
+      this.framedHeight = Math.max(size.y, this.modelDepth / this.aspect);
     }
 
     // Immediately queue a render to happen at microtask timing. This is
@@ -232,28 +188,6 @@ export default class ModelScene extends Scene {
     return {width: this.width, height: this.height};
   }
 
-  /**
-   * Moves the model to be centered at the XZ origin, with Y = 0 being the floor
-   * under the model, taking into account setModelAlignmentMask(), described
-   * above.
-   */
-  alignModel() {
-    if (!this.model.hasModel() || this.model.size.length() === 0) {
-      return;
-    }
-
-    this.resetModelPose();
-
-    let centeredOrigin = this.model.boundingBox.getCenter(new Vector3());
-    centeredOrigin.y -= this.model.size.y / 2;
-    this.model.position.copy(centeredOrigin)
-        .multiply(this[$modelAlignmentMask])
-        .multiplyScalar(-1);
-
-    this.updateFraming();
-    this.updateStaticShadow();
-  }
-
   resetModelPose() {
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
@@ -269,7 +203,6 @@ export default class ModelScene extends Scene {
 
   /**
    * Sets the passed in camera to be used for rendering.
-   * @param {THREE.Camera}
    */
   setCamera(camera: Camera) {
     this.activeCamera = camera;
@@ -279,12 +212,13 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.alignModel();
+    this.updateFraming();
+    this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
   /**
-   * Called to update the shadow rendering when the room or model changes.
+   * Called to update the shadow rendering when the model changes.
    */
   updateStaticShadow() {
     if (!this.model.hasModel() || this.model.size.length() === 0) {
@@ -298,23 +232,12 @@ export default class ModelScene extends Scene {
     const currentRotation = this.pivot.rotation.y;
     this.pivot.rotation.y = 0;
 
-    const modelPosition = this.model.boundingBox.getCenter(new Vector3())
-                              .add(this.model.position);
-    this.shadow.scale.x = 2 * Math.abs(modelPosition.x) + this.model.size.x;
-    this.shadow.scale.z = 2 * Math.abs(modelPosition.z) + this.model.size.z;
-
-    this.shadow.render(this.renderer.renderer, this, this.shadowLight);
+    this.shadow.render(this.renderer.renderer, this);
 
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
     this.pivot.add(this.shadow);
     this.pivot.rotation.y = currentRotation;
-
-    // TODO(#453) When we add a configurable camera target we should put the
-    // floor back at y=0 for a consistent coordinate system.
-    if (this[$modelAlignmentMask].y == 0) {
-      this.shadow.position.y = modelPosition.y - this.model.size.y / 2;
-    }
   }
 
   createSkyboxMesh(): Mesh {

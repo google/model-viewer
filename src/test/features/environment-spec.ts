@@ -227,12 +227,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
           element.backgroundColor = '#ff0077';
           await timePasses();
         });
-
-        test('the directional light is white', () => {
-          const lightColor =
-              scene.shadowLight.color.getHexString().toLowerCase();
-          expect(lightColor).to.be.equal('ffffff');
-        });
       });
 
       suite('on an unlit model', () => {

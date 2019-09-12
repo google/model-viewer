@@ -123,12 +123,12 @@
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">By default, models are aligned by the center of their bounding box</h2>
+          <h2 class="demo-title">By default, the camera targets the center of the model's bounding box</h2>
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
-<model-viewer camera-controls src="assets/odd-shape-labeled.glb" background-color="#eee" alt="An abstract 3D model with labeled origin and center"></model-viewer>
+<model-viewer camera-controls src="assets/odd-shape-labeled.glb" background-color="#eee" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -140,12 +140,12 @@
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Use the <span class="attribute">align-model</span> attribute to center the model at its origin</h2>
+          <h2 class="demo-title">Use the <span class="attribute">camera-target</span> attribute to orbit a different coordinate</h2>
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-<model-viewer camera-controls align-model="origin" src="assets/odd-shape-labeled.glb" background-color="#eee" alt="An abstract 3D model with labeled origin and center"></model-viewer>
+<model-viewer camera-controls camera-target="0m 0m 0m" src="assets/odd-shape-labeled.glb" background-color="#eee" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1"></model-viewer>
           </template>
         </example-snippet>
       </div>
