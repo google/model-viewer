@@ -56,6 +56,7 @@ export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
+export const $getLoaded = Symbol('getLoaded');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -113,7 +114,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
 
   get loaded() {
-    return this[$loaded];
+    return this[$getLoaded]();
   }
 
   get[$renderer]() {
@@ -294,6 +295,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
   get[$ariaLabel]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
                                                        this.alt;
+  }
+
+  // NOTE(cdata): Although this may seem extremely redundant, it is required in
+  // order to support overloading when TypeScript is compiled to ES5
+  // @see https://github.com/Polymer/lit-element/pull/745
+  // @see https://github.com/microsoft/TypeScript/issues/338
+  [$getLoaded](): boolean {
+    return this[$loaded];
   }
 
   /**

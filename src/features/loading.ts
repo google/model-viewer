@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$ariaLabel, $canvas, $progressTracker, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
@@ -117,16 +117,6 @@ export const LoadingMixin = (ModelViewerElement:
          * the <model-viewer> is only configured to reveal upon interaction.
          */
         @property({type: Boolean}) preload: boolean = false;
-
-        /**
-         * True if the model has finished loading. Note that a model can be
-         * loaded, but not yet be rendered.
-         */
-        get loaded(): boolean {
-          const src = this.src;
-          return super.loaded ||
-              !!(src && CachingGLTFLoader.hasFinishedLoading(src));
-        }
 
         /**
          * True if the model is visible. Visibility implies that a model has
@@ -407,6 +397,12 @@ export const LoadingMixin = (ModelViewerElement:
               });
             }, {once: true});
           }
+        }
+
+        [$getLoaded]() {
+          const src = this.src;
+          return super[$getLoaded]() ||
+              !!(src && CachingGLTFLoader.hasFinishedLoading(src));
         }
 
         async[$updateSource]() {
