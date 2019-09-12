@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
 import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -23,6 +23,10 @@ import Model from './Model.js';
 import Renderer from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
+
+export interface ModelLoadEvent extends ThreeEvent {
+  url: string
+}
 
 export interface ModelSceneConfig {
   element: ModelViewerElementBase;

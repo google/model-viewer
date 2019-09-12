@@ -172,7 +172,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$markLoaded]();
       this[$onModelLoad](event);
 
-      this.dispatchEvent(new CustomEvent('load', {detail: {url: event.url}}));
+      this.dispatchEvent(
+          new CustomEvent('load', {detail: {url: (event as any).url}}));
     });
 
     // Update initial size on microtask timing so that subclasses have a
