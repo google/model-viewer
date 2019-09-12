@@ -17,7 +17,8 @@
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
-import {Constructor, Timer} from '../utilities.js';
+import {Constructor} from '../utilities.js';
+import {Timer} from '../utilities/timer.js';
 import {CameraChangeDetails} from './controls.js';
 
 // How much the model will rotate per
