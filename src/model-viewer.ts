@@ -24,8 +24,9 @@ import ModelViewerElementBase from './model-viewer-base.js';
 import {Constructor} from './utilities.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
-export {default as TextureUtils} from './three-components/TextureUtils';
-export * from 'three';
+// Uncomment these lines to export PMREM textures in Glitch:
+// export {default as TextureUtils} from './three-components/TextureUtils';
+// export * from 'three';
 
 type ModelViewerMixin =
     (ModelViewerElement: Constructor<ModelViewerElementBase>) =>
