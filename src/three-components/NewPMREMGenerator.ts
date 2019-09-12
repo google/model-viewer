@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, Mesh, NearestFilter, NoBlending, OrthographicCamera, RawShaderMaterial, Scene, Texture, WebGLRenderer, WebGLRenderTarget} from 'three';
-import {Vector2} from 'three';
+import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 
+import {environmentScene} from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 
@@ -26,6 +26,9 @@ const EXTRA_LOD_ROUGHNESS = [0.22, 0.32, 0.5, 0.7, 1.0];
 const EXTRA_LOD_SIGMA = [0.12, 0.25, 0.35, 0.43, 0.5];
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 const MAX_SAMPLES = 20;
+const DEFAULT_NEAR = 0.1;
+const DEFAULT_FAR = 100;
+const GENERATED_BLUR = 0.04;
 
 const $roughness = Symbol('roughness');
 const $sigma = Symbol('sigma');
@@ -33,9 +36,12 @@ const $lodSize = Symbol('lodSize');
 const $lodPlanes = Symbol('lodPlanes');
 const $blurShader = Symbol('blurShader');
 const $flatCamera = Symbol('flatCamera');
-const $targetParams = Symbol('targetParams');
+const $pingPongRenderTarget = Symbol('pingP$pingPongRenderTarget');
+const $sceneToCubeUV = Symbol('sceneToCubeUV');
 const $equirectangularToCubeUV = Symbol('equirectangularToCubeUV');
+const $createRenderTarget = Symbol('createRenderTarget');
 const $applyPMREM = Symbol('applyPMREM');
+const $blur = Symbol('blur');
 const $halfBlur = Symbol('halfBlur');
 
 /**
@@ -56,7 +62,7 @@ export class PMREMGenerator {
   private[$lodPlanes]: Array < BufferGeometry >= [];
   private[$blurShader] = new BlurShader(MAX_SAMPLES);
   private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
-  private[$targetParams]: Object;
+  private[$pingPongRenderTarget]: WebGLRenderTarget;
 
   constructor(private renderer: WebGLRenderer) {
     let lod = LOD_MAX;
@@ -69,6 +75,8 @@ export class PMREMGenerator {
       if (i > LOD_MAX - LOD_MIN) {
         roughness = EXTRA_LOD_ROUGHNESS[i - LOD_MAX + LOD_MIN - 1];
         sigma = EXTRA_LOD_SIGMA[i - LOD_MAX + LOD_MIN - 1];
+      } else if (i == 0) {
+        sigma = 0;
       }
       this[$sigma].push(sigma);
       this[$roughness].push(roughness);
@@ -121,29 +129,104 @@ export class PMREMGenerator {
     }
   }
 
-  // generatePMREM():WebGLRenderTarget{}
+  fromDefault(): WebGLRenderTarget {
+    const defaultScene = environmentScene();
 
-  equirectangularToPMREM(equirectangular: Texture): WebGLRenderTarget {
+    const cubeUVRenderTarget =
+        this[$sceneToCubeUV](defaultScene, DEFAULT_NEAR, DEFAULT_FAR);
+    this[$blur](cubeUVRenderTarget, 0, 0, GENERATED_BLUR);
+    this[$applyPMREM](cubeUVRenderTarget);
+
+    defaultScene.dispose();
+    return cubeUVRenderTarget;
+  }
+
+  fromScene(
+      scene: Scene, near: number = DEFAULT_NEAR,
+      far: number = DEFAULT_FAR): WebGLRenderTarget {
+    const cubeUVRenderTarget = this[$sceneToCubeUV](scene, near, far);
+    this[$applyPMREM](cubeUVRenderTarget);
+
+    return cubeUVRenderTarget;
+  }
+
+  fromEquirectangular(equirectangular: Texture): WebGLRenderTarget {
+    equirectangular.magFilter = NearestFilter;
+    equirectangular.minFilter = NearestFilter;
+    equirectangular.generateMipmaps = false;
+
     const cubeUVRenderTarget = this[$equirectangularToCubeUV](equirectangular);
     this[$applyPMREM](cubeUVRenderTarget);
+
+    return cubeUVRenderTarget;
+  }
+
+  private[$sceneToCubeUV](scene: Scene, near: number, far: number):
+      WebGLRenderTarget {
+    const params = {
+      magFilter: NearestFilter,
+      minFilter: NearestFilter,
+      generateMipmaps: false,
+      type: UnsignedByteType,
+      format: RGBEFormat,
+      encoding: RGBEEncoding
+    };
+    const cubeUVRenderTarget = this[$createRenderTarget](params);
+    this[$pingPongRenderTarget] = this[$createRenderTarget](params);
+
+    const fov = 90;
+    const aspect = 1;
+    const cubeCamera = new PerspectiveCamera(fov, aspect, near, far);
+    const upSign = [1, 1, 1, 1, -1, 1];
+    const forwardSign = [1, 1, -1, -1, -1, 1];
+
+    const gammaOutput = this.renderer.gammaOutput;
+    const toneMapping = this.renderer.toneMapping;
+    const toneMappingExposure = this.renderer.toneMappingExposure;
+
+    this.renderer.toneMapping = LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.gammaOutput = false;
+    scene.scale.z *= -1;
+
+    this.renderer.setRenderTarget(cubeUVRenderTarget);
+    for (let i = 0; i < 6; i++) {
+      const col = i % 3;
+      if (col == 0) {
+        cubeCamera.up.set(0, upSign[i], 0);
+        cubeCamera.lookAt(forwardSign[i], 0, 0);
+      } else if (col == 1) {
+        cubeCamera.up.set(0, 0, upSign[i]);
+        cubeCamera.lookAt(0, forwardSign[i], 0);
+      } else {
+        cubeCamera.up.set(0, upSign[i], 0);
+        cubeCamera.lookAt(0, 0, forwardSign[i]);
+      }
+      this.renderer.setViewport(
+          col * SIZE_MAX, i > 2 ? SIZE_MAX : 0, SIZE_MAX, SIZE_MAX);
+      this.renderer.render(scene, cubeCamera);
+    }
+
+    this.renderer.toneMapping = toneMapping;
+    this.renderer.toneMappingExposure = toneMappingExposure;
+    this.renderer.gammaOutput = gammaOutput;
+    scene.scale.z *= -1;
+
     return cubeUVRenderTarget;
   }
 
   private[$equirectangularToCubeUV](equirectangular: Texture):
       WebGLRenderTarget {
-    this[$targetParams] = {
-      format: equirectangular.format,
+    const params = {
       magFilter: NearestFilter,
       minFilter: NearestFilter,
-      type: equirectangular.type,
       generateMipmaps: false,
-      anisotropy: equirectangular.anisotropy,
+      type: equirectangular.type,
+      format: equirectangular.format,
       encoding: equirectangular.encoding
     };
-    const cubeUVRenderTarget =
-        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, this[$targetParams]);
-    cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
-    cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+    const cubeUVRenderTarget = this[$createRenderTarget](params);
+    this[$pingPongRenderTarget] = this[$createRenderTarget](params);
 
     const scene = new Scene();
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurShader]));
@@ -163,33 +246,42 @@ export class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
-  private[$applyPMREM](cubeUVRenderTarget: WebGLRenderTarget) {
-    const pingPongRenderTarget =
-        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, this[$targetParams]);
-    pingPongRenderTarget.texture.name = 'PMREM.cubeUv';
-    pingPongRenderTarget.texture.mapping = CubeUVReflectionMapping;
+  private[$createRenderTarget](params: Object): WebGLRenderTarget {
+    const cubeUVRenderTarget =
+        new WebGLRenderTarget(3 * SIZE_MAX, 3 * SIZE_MAX, params);
+    cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
+    cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
+    return cubeUVRenderTarget;
+  }
 
+  private[$applyPMREM](cubeUVRenderTarget: WebGLRenderTarget) {
     for (let i = 1; i < TOTAL_LODS; i++) {
       const sigma = Math.sqrt(
           this[$sigma][i] * this[$sigma][i] -
           this[$sigma][i - 1] * this[$sigma][i - 1]);
-      this[$halfBlur](
-          cubeUVRenderTarget,
-          pingPongRenderTarget,
-          i - 1,
-          i,
-          sigma,
-          'latitudinal');
-      this[$halfBlur](
-          pingPongRenderTarget,
-          cubeUVRenderTarget,
-          i,
-          i,
-          sigma,
-          'longitudinal');
+      this[$blur](cubeUVRenderTarget, i - 1, i, sigma);
     }
 
-    pingPongRenderTarget.dispose();
+    this[$pingPongRenderTarget].dispose();
+  }
+
+  private[$blur](
+      cubeUVRenderTarget: WebGLRenderTarget, lodIn: number, lodOut: number,
+      sigma: number) {
+    this[$halfBlur](
+        cubeUVRenderTarget,
+        this[$pingPongRenderTarget],
+        lodIn,
+        lodOut,
+        sigma,
+        'latitudinal');
+    this[$halfBlur](
+        this[$pingPongRenderTarget],
+        cubeUVRenderTarget,
+        lodOut,
+        lodOut,
+        sigma,
+        'longitudinal');
   }
 
   private[$halfBlur](
@@ -209,15 +301,15 @@ export class PMREMGenerator {
     const n = Math.ceil(
         standardDeviations * standardDeviationRadians * inputSize * 2 /
         Math.PI);
-    if (n > MAX_SAMPLES) {
-      console.log(
-          'StandardDeviationRadians, ',
-          standardDeviationRadians,
-          ', is too large and will clip, as it requested ',
-          n,
-          ' samples when the maximum is set to ',
-          MAX_SAMPLES);
-    }
+    // if (n > MAX_SAMPLES) {
+    console.log(
+        'StandardDeviationRadians, ',
+        standardDeviationRadians,
+        ', is too large and will clip, as it requested ',
+        n,
+        ' samples when the maximum is set to ',
+        MAX_SAMPLES);
+    // }
     let weights = [];
     let sum = 0;
     for (let i = 0; i < MAX_SAMPLES; ++i) {
@@ -231,6 +323,7 @@ export class PMREMGenerator {
       }
     }
     weights = weights.map(w => w / sum);
+    console.log(weights);
 
     blurUniforms.envMap.value = targetIn.texture;
     blurUniforms.copyEquirectangular.value = false;

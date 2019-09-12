@@ -22,7 +22,7 @@ import {CubemapGenerator} from '../third_party/three/EquirectangularToCubeGenera
 import {RGBELoader} from '../third_party/three/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
-import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
+// import EnvironmentMapGenerator from './EnvironmentMapGenerator.js';
 import {PMREMGenerator} from './NewPMREMGenerator.js';
 import {generatePMREM} from './PMREMGenerator.js';
 import {encodings, texelIO} from './shader-chunk/common.glsl.js';
@@ -44,7 +44,7 @@ const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 const CUBEMAP_SIZE = 256;
-const GENERATED_BLUR = 0.04;
+// const GENERATED_BLUR = 0.04;
 
 const $environmentMapCache = Symbol('environmentMapCache');
 const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
@@ -142,7 +142,7 @@ export default class TextureUtils extends EventDispatcher {
 
     try {
       equirect = await this.load(url, progressCallback);
-      return this[$PMREMGenerator].equirectangularToPMREM(equirect);
+      return this[$PMREMGenerator].fromEquirectangular(equirect);
     } finally {
       if (equirect != null) {
         (equirect as any).dispose();
@@ -218,21 +218,23 @@ export default class TextureUtils extends EventDispatcher {
    */
   private[$loadGeneratedEnvironmentMap](): Promise<WebGLRenderTarget> {
     if (this[$generatedEnvironmentMap] == null) {
-      const environmentMapGenerator =
-          new EnvironmentMapGenerator(this.renderer);
-      const interstitialEnvironmentMap = environmentMapGenerator.generate();
+      // const environmentMapGenerator =
+      //     new EnvironmentMapGenerator(this.renderer);
+      // const interstitialEnvironmentMap = environmentMapGenerator.generate();
 
-      const blurredEnvironmentMap =
-          this.gaussianBlur(interstitialEnvironmentMap, GENERATED_BLUR);
+      // const blurredEnvironmentMap =
+      //     this.gaussianBlur(interstitialEnvironmentMap, GENERATED_BLUR);
 
-      this[$generatedEnvironmentMap] = this.pmremPass(blurredEnvironmentMap);
+      // this[$generatedEnvironmentMap] = this.pmremPass(blurredEnvironmentMap);
 
-      // We should only ever generate this map once, and we will not be using
-      // the environment map as a skybox, so go ahead and dispose of all
-      // interstitial artifacts:
-      interstitialEnvironmentMap.dispose();
-      blurredEnvironmentMap.dispose();
-      environmentMapGenerator.dispose();
+      // // We should only ever generate this map once, and we will not be using
+      // // the environment map as a skybox, so go ahead and dispose of all
+      // // interstitial artifacts:
+      // interstitialEnvironmentMap.dispose();
+      // blurredEnvironmentMap.dispose();
+      // environmentMapGenerator.dispose();
+
+      this[$generatedEnvironmentMap] = this[$PMREMGenerator].fromDefault();
     }
 
     return Promise.resolve(this[$generatedEnvironmentMap]!);
