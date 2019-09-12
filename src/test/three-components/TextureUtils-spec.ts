@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, Texture, WebGLRenderer} from 'three';
+import {Cache, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
@@ -93,9 +93,7 @@ suite('TextureUtils', () => {
 
   suite('equirectangularToCubemap', () => {
     test('creates a cubemap render target from texture', async () => {
-      const texture = await textureUtils.load(EQUI_URL);
-      const target = textureUtils.equirectangularToCubemap(texture);
-      texture.dispose();
+      const target = await textureUtils.loadEquirectAsCubeUV(EQUI_URL);
       target.dispose();
       expect((target.texture as any).isTexture).to.be.ok;
       expect(
@@ -105,7 +103,7 @@ suite('TextureUtils', () => {
     });
     test('throws on invalid texture', async () => {
       try {
-        await textureUtils.equirectangularToCubemap({} as Texture);
+        await textureUtils.loadEquirectAsCubeUV('');
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
