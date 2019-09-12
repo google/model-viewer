@@ -132,7 +132,7 @@ export default class Renderer extends EventDispatcher {
     try {
       return await this[$arRenderer].present(scene);
     } catch (error) {
-      this[$arRenderer].stopPresenting();
+      await this[$arRenderer].stopPresenting();
       throw error;
     } finally {
       // NOTE(cdata): Setting width and height to 0 will have the effect of
