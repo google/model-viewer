@@ -369,7 +369,9 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Sets the non-interpolated camera parameters
    */
-  updateIntrinsics(nearPlane: number, farPlane: number, aspect: number) {
+  updateIntrinsics(
+      aspect: number, nearPlane = this.camera.near,
+      farPlane = this.camera.far) {
     this.camera.near = nearPlane;
     this.camera.far = farPlane;
     this.camera.aspect = aspect;

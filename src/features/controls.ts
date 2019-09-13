@@ -142,7 +142,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         protected[$controls]: SmoothControls;
 
-        protected[$idealCameraDistance]: number|null = null;
+        protected[$idealCameraDistance] = 1;
         protected[$lastSpherical] = new Spherical();
         protected[$jumpCamera] = false;
 
@@ -272,7 +272,7 @@ export const ControlsMixin = (ModelViewerElement:
             switch (radius) {
               default:
               case 'auto':
-                radius = this[$idealCameraDistance]!;
+                radius = this[$idealCameraDistance];
                 break;
             }
           }
@@ -339,34 +339,30 @@ export const ControlsMixin = (ModelViewerElement:
          * state.
          */
         [$updateCamera]() {
-          const scene = (this as any)[$scene];
           const controls = this[$controls];
-          const framedHeight = scene.framedHeight;
+          const {size} = this[$scene].model;
+          const halfFov = deserializeAngleToDeg(DEFAULT_FIELD_OF_VIEW)! / 2;
 
-          const framedDistance = (framedHeight / 2) /
-              Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
-          const near = framedHeight / 10.0;
-          const far = framedHeight * 10.0;
+          // const framingRadius = Math.max(size.x, size.y, size.z) / 2;
+          const safeRadius = size.length() / 2;
 
-          // When we update the idealCameraDistance due to reframing, we want to
-          // maintain the user's zoom level (how they have changed the camera
-          // radius), which we represent here as a ratio.
-          const zoom = (this[$idealCameraDistance] != null) ?
-              controls.getCameraSpherical().radius /
-                  this[$idealCameraDistance]! :
-              1;
-          this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
+          this[$idealCameraDistance] =
+              safeRadius / Math.sin(halfFov * Math.PI / 180);
+          const near = this[$idealCameraDistance] - safeRadius;
+          const far = this[$idealCameraDistance] + safeRadius;
 
-          controls.updateIntrinsics(near, far, scene.aspect);
+          controls.updateIntrinsics(this[$scene].aspect, near, far);
 
-          // Zooming out beyond the 'frame' doesn't serve much purpose
-          // and will only end up showing the skysphere if zoomed out enough
-          const minimumRadius = near + framedHeight / 2.0;
-          const maximumRadius = this[$idealCameraDistance]!;
+          const maximumFieldOfView =
+              Math.asin(safeRadius / this[$idealCameraDistance]) * 2 * 180 /
+              Math.PI;
 
-          controls.applyOptions({minimumRadius, maximumRadius});
+          const minimumRadius = this[$idealCameraDistance] / 2;
+          const maximumRadius = safeRadius / Math.sin(halfFov * Math.PI / 180);
+          controls.applyOptions(
+              {minimumRadius, maximumRadius, maximumFieldOfView});
 
-          controls.setRadius(zoom * this[$idealCameraDistance]!);
+          controls.setRadius(this[$idealCameraDistance]);
           controls.jumpToGoal();
         }
 
@@ -427,7 +423,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$onResize](event: any) {
           super[$onResize](event);
-          this[$updateCamera]();
+          this[$controls].updateIntrinsics(this[$scene].aspect);
         }
 
         [$onModelLoad](event: any) {
