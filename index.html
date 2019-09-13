@@ -196,17 +196,23 @@
             </li>
             <li>
               <div>field-of-view</div>
-              <p>Used to configure the field of view of the camera. Accepts values
-              units in both degrees and radians (e.g., "30deg" or "0.5rad"). Accepts
-              any value between 20 and 45 degrees. Defaults to "45deg".</p>
+              <p>Used to configure the vertical field of view of the camera.
+              Accepts values units in both degrees and radians (e.g., "30deg" or
+              "0.5rad"). Accepts any value between 10 and 45 degrees. Any time
+              this value changes from its initially configured value, the camera
+              will interpolate from its current value to the new value. Defaults
+              to "auto", which sets either the vertical or horizontal field of
+              view to 45 degrees depending on the dimenions of the model and the
+              aspect ratio of the canvas.</p>
             </li>
             <li>
               <div>interaction-policy</div>
-              <p>Allows you to change whether the viewer requires focus before interacting with it.
-              If set to "allow-when-focused", the user must focus on the viewer (click / tap)
-              before being able to control it. If set to "always-allow", the user can 
-              control it even if the viewer is not the focused element on the page. 
-              Defaults to "always-allow".</p>
+              <p>Allows you to change whether the viewer requires focus before
+              interacting with it. If set to "allow-when-focused", the user must
+              focus on the viewer (click / tap) before being able to control it.
+              If set to "always-allow", the user can control it even if the
+              viewer is not the focused element on the page. Defaults to
+              "always-allow".</p>
             </li>
             <li>
               <div>interaction-prompt</div>

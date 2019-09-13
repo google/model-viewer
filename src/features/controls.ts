@@ -49,8 +49,9 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
-const DEFAULT_FIELD_OF_VIEW = '45deg';
+const DEFAULT_FIELD_OF_VIEW = 'auto';
 
+const HALF_FOV_RAD = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
@@ -255,8 +256,8 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$updateFieldOfView]() {
           let fov = deserializeAngleToDeg(this.fieldOfView);
-          if (fov == null) {
-            fov = deserializeAngleToDeg(DEFAULT_FIELD_OF_VIEW);
+          if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW || fov == null) {
+            fov = DEFAULT_FOV_DEG;
           }
           this[$controls].setFieldOfView(fov!);
         }
@@ -344,8 +345,7 @@ export const ControlsMixin = (ModelViewerElement:
           const controls = this[$controls];
           const {idealCameraDistance} = this[$scene];
 
-          const modelRadius = idealCameraDistance *
-              Math.sin((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
+          const modelRadius = idealCameraDistance * Math.sin(HALF_FOV_RAD);
           const near = idealCameraDistance / 2 - modelRadius;
           const far = idealCameraDistance + modelRadius;
 
@@ -360,6 +360,10 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         [$updateCameraAspect]() {
+          if (this.fieldOfView !== DEFAULT_FIELD_OF_VIEW) {
+            return;
+          }
+
           const controls = this[$controls];
           const {aspect, fovAspect} = this[$scene];
 
@@ -367,8 +371,8 @@ export const ControlsMixin = (ModelViewerElement:
               controls.getFieldOfView() / this[$framedFov]! :
               1;
 
-          const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
-          const vertical = Math.tan(halfFov) * Math.max(1, fovAspect / aspect);
+          const vertical =
+              Math.tan(HALF_FOV_RAD) * Math.max(1, fovAspect / aspect);
           this[$framedFov] = 2 * Math.atan(vertical) * 180 / Math.PI;
 
           const maximumFieldOfView = this[$framedFov]!;

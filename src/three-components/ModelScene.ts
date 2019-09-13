@@ -168,8 +168,10 @@ export default class ModelScene extends Scene {
     const {size} = this.model;
     const framedRadius = Math.sqrt(size.x * size.x + size.z * size.z) / 2;
     const framedHalfHeight = size.length() / 2;
+
     const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
     this.idealCameraDistance = framedHalfHeight / Math.sin(halfFov);
+
     const vertical = Math.tan(halfFov);
     const horizontal = framedRadius / (this.idealCameraDistance - size.y / 2);
     this.fovAspect = horizontal / vertical;
