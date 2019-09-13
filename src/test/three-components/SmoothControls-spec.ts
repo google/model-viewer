@@ -244,12 +244,12 @@ suite('SmoothControls', () => {
         });
 
         test('prevents field of view from exceeding options', () => {
-          controls.setFov(5);
+          controls.setFieldOfView(5);
           settleControls(controls);
 
           expect(controls.getFieldOfView()).to.be.closeTo(15, 0.00001);
 
-          controls.setFov(30);
+          controls.setFieldOfView(30);
           settleControls(controls);
 
           expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);

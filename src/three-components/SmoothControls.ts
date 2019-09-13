@@ -47,8 +47,8 @@ export interface SmoothControlsOptions {
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumRadius: 1,
   maximumRadius: 2,
-  minimumPolarAngle: Math.PI / 8,
-  maximumPolarAngle: Math.PI - Math.PI / 8,
+  minimumPolarAngle: 0,        // Math.PI / 8,
+  maximumPolarAngle: Math.PI,  // - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
@@ -277,7 +277,7 @@ export class SmoothControls extends EventDispatcher {
     this[$options] = Object.assign({}, DEFAULT_OPTIONS);
 
     this.setOrbit(0, Math.PI / 2, 1);
-    this.setFov(100);
+    this.setFieldOfView(100);
     this.jumpToGoal();
   }
 
@@ -431,7 +431,7 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Sets the goal field of view for the camera
    */
-  setFov(fov: number) {
+  setFieldOfView(fov: number) {
     const {minimumFieldOfView, maximumFieldOfView} = this[$options];
     fov = clamp(fov, minimumFieldOfView!, maximumFieldOfView!);
     this[$goalLogFov] = Math.log(fov);
@@ -467,7 +467,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (deltaFov !== 0) {
       const goalLogFov = this[$goalLogFov] + deltaFov;
-      this.setFov(Math.exp(goalLogFov));
+      this.setFieldOfView(Math.exp(goalLogFov));
       handled = true;
     }
 

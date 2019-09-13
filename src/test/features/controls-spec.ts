@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $idealCameraDistance, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -95,11 +95,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         if (element.parentNode != null) {
           element.parentNode.removeChild(element);
         }
-      });
-
-      test('defaults radius to ideal camera distance', () => {
-        expect((element as any).getCameraOrbit().radius)
-            .to.be.equal((element as any)[$idealCameraDistance]);
       });
 
       // TODO(#583)
