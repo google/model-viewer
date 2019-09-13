@@ -310,7 +310,7 @@ export class PMREMGenerator {
 
   private[$halfBlur](
       targetIn: WebGLRenderTarget, targetOut: WebGLRenderTarget, lodIn: number,
-      lodOut: number, standardDeviationRadians: number, direction: string) {
+      lodOut: number, sigmaRadians: number, direction: string) {
     if (direction !== 'latitudinal' && direction !== 'longitudinal') {
       console.error(
           'blur direction must be either latitudinal or longitudinal!');
@@ -320,15 +320,15 @@ export class PMREMGenerator {
     blurScene.add(new Mesh(this[$lodPlanes][lodOut], this[$blurMaterial]));
     const blurUniforms = this[$blurMaterial].uniforms;
 
-    const inputSize = this[$sizeLod][lodIn];
-    const samples = Math.ceil(
-        STANDARD_DEVIATIONS * standardDeviationRadians * inputSize * 2 /
-        Math.PI);
+    const pixels = this[$sizeLod][lodIn] - 1;
+    const radiansPerPixel = Math.PI / (2 * pixels);
+    const sigmaPixels = sigmaRadians / radiansPerPixel;
+    const samples = 1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels);
 
     if (samples > MAX_SAMPLES) {
       console.log(
-          'StandardDeviationRadians, ',
-          standardDeviationRadians,
+          'sigmaRadians, ',
+          sigmaRadians,
           ', is too large and will clip, as it requested ',
           samples,
           ' samples when the maximum is set to ',
@@ -338,7 +338,7 @@ export class PMREMGenerator {
     let weights = [];
     let sum = 0;
     for (let i = 0; i < MAX_SAMPLES; ++i) {
-      const x = STANDARD_DEVIATIONS * i / (samples - 1);
+      const x = i / sigmaPixels;
       const weight = Math.exp(-x * x / 2);
       weights.push(weight);
       if (i == 0) {
@@ -354,8 +354,7 @@ export class PMREMGenerator {
     blurUniforms.samples.value = samples;
     blurUniforms.weights.value = weights;
     blurUniforms.latitudinal.value = direction === 'latitudinal';
-    blurUniforms.dTheta.value =
-        standardDeviationRadians * STANDARD_DEVIATIONS / (samples - 1);
+    blurUniforms.dTheta.value = radiansPerPixel;
     blurUniforms.mipInt.value = LOD_MAX - lodIn;
     blurUniforms.inputEncoding.value = encodings[targetIn.texture.encoding];
     blurUniforms.outputEncoding.value = encodings[targetIn.texture.encoding];

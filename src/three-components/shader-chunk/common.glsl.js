@@ -12,10 +12,7 @@ import {texelConversions} from './encodings_pars_framgment.glsl.js'
 export const getDirectionChunk = /* glsl */ `
 vec3 getDirection(vec2 uv, float face) {
     uv = 2.0 * uv - 1.0;
-    vec3 direction = vec3(clamp(uv, -1.0, 1.0), 1.0);
-    uv = abs(uv);
-    float over = max(uv.x, uv.y) - 1.0;
-    if(over > 0.0) direction.z -= over;
+    vec3 direction = vec3(uv, 1.0);
     if (face == 0.0) {
       direction = direction.zyx;
       direction.z *= -1.0;

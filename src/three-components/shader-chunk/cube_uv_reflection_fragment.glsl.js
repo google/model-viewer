@@ -62,7 +62,7 @@ vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
     filterMip = (0.22 - roughness) / (0.22 - 0.15) - 1.0;
   }
 
-  roughness = min(roughness, 0.32);
+  roughness = min(roughness, 0.15);
   float sigma = PI * roughness * roughness / (1.0 + roughness);
 
   // Add anti-aliasing mipmap contribution
