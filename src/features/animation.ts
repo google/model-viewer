@@ -23,9 +23,20 @@ const MILLISECONDS_PER_SECOND = 1000.0
 const $changeAnimation = Symbol('changeAnimation');
 const $paused = Symbol('paused');
 
+export interface AnimationInterface {
+  autoplay: boolean;
+  animationName: string|void;
+  animationCrossfadeDuration: number;
+  readonly availableAnimations: Array<string>;
+  readonly paused: boolean;
+  currentTime: number;
+  pause(): void;
+  play(): void;
+}
+
 export const AnimationMixin =
     (ModelViewerElement: Constructor<ModelViewerElementBase>):
-        Constructor<ModelViewerElementBase> => {
+        Constructor<ModelViewerElementBase&AnimationInterface> => {
           class AnimationModelViewerElement extends ModelViewerElement {
             @property({type: Boolean}) autoplay: boolean = false;
             @property({type: String, attribute: 'animation-name'})
