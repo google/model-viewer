@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {enumerationDeserializer} from '../conversions.js';
-import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
@@ -95,28 +95,15 @@ const ARMode: {[index: string]: ARMode} = {
   NONE: 'none'
 };
 
-const $exitFullscreenButtonContainer = Symbol('exitFullscreenButtonContainer');
 const $arButtonContainer = Symbol('arButtonContainer');
-const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
-const $arButtonContainerFallbackClickHandler =
-    Symbol('arButtonContainerFallbackClickHandler');
-const $onARButtonContainerFallbackClick =
-    Symbol('onARButtonContainerFallbackClick');
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
-
-const $exitFullscreenButtonContainerClickHandler =
-    Symbol('exitFullscreenButtonContainerClickHandler');
-const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
-
-const $fullscreenchangeHandler = Symbol('fullscreenHandler');
-const $onFullscreenchange = Symbol('onFullscreen');
 
 export interface ARInterface {
   ar: boolean;
@@ -153,31 +140,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arButtonContainer]: HTMLElement =
         this.shadowRoot!.querySelector('.ar-button') as HTMLElement;
 
-    protected[$exitFullscreenButtonContainer]: HTMLElement =
-        this.shadowRoot!.querySelector('.slot.exit-fullscreen-button') as
-        HTMLElement;
-    protected[$defaultExitFullscreenButton]: HTMLElement =
-        this.shadowRoot!.querySelector('#default-exit-fullscreen-button') as
-        HTMLElement;
-
-    // NOTE(cdata): We use a second, separate "fallback" click handler in
-    // order to work around a regression in how Chrome on Android behaves
-    // when requesting fullscreen at the same time as triggering an intent.
-    // As of m76, intents could no longer be triggered successfully if they
-    // were dispatched in the same handler as the fullscreen request. The
-    // workaround is to split both effects into their own event handlers.
-    // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
-    protected[$arButtonContainerFallbackClickHandler] = (event: Event) =>
-        this[$onARButtonContainerFallbackClick](event);
-
     protected[$arButtonContainerClickHandler]: (event: Event) => void =
         (event) => this[$onARButtonContainerClick](event);
-
-    protected[$exitFullscreenButtonContainerClickHandler]:
-        () => void = () => this[$onExitFullscreenButtonClick]();
-
-    protected[$fullscreenchangeHandler]:
-        () => void = () => this[$onFullscreenchange]();
 
     protected[$arMode]: ARMode = ARMode.NONE;
 
@@ -208,70 +172,15 @@ configuration or device capabilities');
       }
     }
 
-    connectedCallback() {
-      super.connectedCallback();
-      document.addEventListener(
-          'fullscreenchange', this[$fullscreenchangeHandler]);
-    }
-
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      document.removeEventListener(
-          'fullscreenchange', this[$fullscreenchangeHandler]);
-    }
-
-    [$onExitFullscreenButtonClick]() {
-      if (document.fullscreenElement === this) {
-        document.exitFullscreen();
-      }
-    }
-
-    [$onFullscreenchange]() {
-      const renderer = this[$renderer];
-      const scene = this[$scene];
-      const isFullscreen = document.fullscreenElement === this;
-
-      if (isFullscreen) {
-        this[$container].classList.add('fullscreen');
-      } else {
-        this[$container].classList.remove('fullscreen');
-      }
-
-      if (document.fullscreenElement !== this &&
-          renderer.presentedScene === scene) {
-        try {
-          renderer.stopPresenting();
-        } catch (error) {
-          console.warn('Unexpected error while stopping AR presentation');
-          console.error(error);
-        }
-      }
-    }
-
     protected async[$enterARWithWebXR]() {
       const renderer = this[$renderer];
-
-      console.log('Attempting to enter fullscreen and present in AR...');
+      console.log('Attempting to present in AR...');
 
       try {
-        const enterFullscreen = this.requestFullscreen();
-
-        try {
-          const outputElement = await renderer.present(this[$scene]);
-          this.shadowRoot!.appendChild(outputElement);
-          await enterFullscreen;
-        } catch (error) {
-          console.warn('Error while trying to present to AR');
-          console.error(error);
-          await enterFullscreen;
-          if (document.fullscreenElement === this) {
-            console.warn('Exiting fullscreen under dire circumstances');
-            document.exitFullscreen();
-          }
-        }
+        await renderer.present(this[$scene]);
       } catch (error) {
+        console.warn('Error while trying to present to AR');
         console.error(error);
-        console.warn('AR will not activate without fullscreen permission');
       }
     }
 
@@ -311,31 +220,12 @@ configuration or device capabilities');
 
       if (showArButton) {
         this[$arButtonContainer].classList.add('enabled');
-        // NOTE(cdata): The order of the two click handlers on the "ar
-        // button container" is important, vital to the workaround described
-        // earlier in this file. Reversing their order will cause our Scene
-        // Viewer integration to break.
-        // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
         this[$arButtonContainer].addEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        this[$arButtonContainer].addEventListener(
-            'click', this[$arButtonContainerFallbackClickHandler]);
-        this[$exitFullscreenButtonContainer].addEventListener(
-            'click', this[$exitFullscreenButtonContainerClickHandler]);
       } else {
         this[$arButtonContainer].removeEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        this[$arButtonContainer].removeEventListener(
-            'click', this[$arButtonContainerFallbackClickHandler]);
-        this[$exitFullscreenButtonContainer].removeEventListener(
-            'click', this[$exitFullscreenButtonContainerClickHandler]);
         this[$arButtonContainer].classList.remove('enabled');
-      }
-    }
-
-    [$onARButtonContainerFallbackClick](_event: Event) {
-      if (this[$arMode] === ARMode.AR_VIEWER) {
-        this.requestFullscreen();
       }
     }
 

@@ -128,7 +128,7 @@ export default class Renderer extends EventDispatcher {
     return this[$arRenderer].presentedScene;
   }
 
-  async present(scene: ModelScene): Promise<HTMLCanvasElement> {
+  async present(scene: ModelScene): Promise<void> {
     try {
       return await this[$arRenderer].present(scene);
     } catch (error) {

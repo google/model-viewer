@@ -18,7 +18,7 @@ type Constructor<T = object> = {
   prototype: T
 };
 
-type XRFrameOfReferenceType = 'head-model'|'eye-level'|'stage';
+type XRReferenceSpaceType = 'local'|'local-floor'|'bounded-floor'|'unbounded';
 
 interface XRFrameOfReferenceOptions {
   disableStageEmulation?: boolean;
@@ -55,6 +55,8 @@ interface XRHitResult {
 
 interface XR extends EventTarget {
   requestDevice(): Promise<XRDevice>;
+  requestSession(mode: any, options?: any): any;
+  supportsSession(mode: any): Promise<XRSession>;
 }
 
 interface XRRigidTransform {
@@ -65,12 +67,6 @@ interface XRRigidTransform {
 
 interface XRSpace extends EventTarget {
   getTransformTo(other: XRSpace): XRRigidTransform;
-}
-
-type XRReferenceSpaceType = 'stationary'|'bounded'|'unbounded';
-
-interface XRReferenceSpaceOptions {
-  type: XRReferenceSpaceType;
 }
 
 interface XRReferenceSpace extends XRSpace {
@@ -91,16 +87,17 @@ interface XRViewerPose {
   readonly views: Array<XRView>
 }
 
-interface XRRay {
+declare class XRRay {
   readonly origin: DOMPointReadOnly;
   readonly direction: DOMPointReadOnly;
   matrix: Float32Array;
+
+  constructor(origin: DOMPointInit, direction: DOMPointInit)
 }
 
-interface XRInputPose {
+interface XRPose {
   readonly emulatedPosition: boolean;
-  readonly targetRay: XRRay;
-  readonly gripTransform: XRRigidTransform;
+  readonly transform: XRRigidTransform;
 }
 
 type XRHandedness = ''|'left'|'right';
@@ -109,25 +106,30 @@ type XRTargetRayMode = 'gaze'|'tracked-pointer'|'screen';
 interface XRInputSource {
   readonly handedness: XRHandedness;
   readonly targetRayMode: XRTargetRayMode;
+  readonly targetRaySpace: XRSpace;
+  readonly gripSpace?: XRSpace;
+  readonly profiles: Array<String>;
 }
 
 interface XRFrame {
   readonly session: XRSession;
   getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose;
-  getInputPose(inputSource: XRInputSource, referenceSpace?: XRReferenceSpace):
-      XRInputPose;
+  getPose(space: XRSpace, referenceSpace: XRReferenceSpace): XRPose;
 }
 
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
 
-interface XRSession extends EventTarget {
+interface XRRenderState {
   baseLayer: XRLayer;
-  requestReferenceSpace(options: XRReferenceSpaceOptions):
-      Promise<XRReferenceSpace>;
-  requestHitTest(
-      origin: Float32Array, direction: Float32Array,
-      frameOfReference: XRFrameOfReference): Promise<XRHitResult[]>;
-  getInputSources(): Array<XRInputSource>;
+}
+
+interface XRSession extends EventTarget {
+  renderState: XRRenderState;
+  updateRenderState(obj: any): any;
+  requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
+  requestHitTest(ray: XRRay, frameOfReference: XRFrameOfReference):
+      Promise<XRHitResult[]>;
+  inputSources: Array<XRInputSource>;
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;
   end(): Promise<void>;
@@ -170,4 +172,5 @@ interface Navigator {
 
 interface WebGLRenderingContext {
   setCompatibleXRDevice(device: XRDevice): void;
+  makeXRCompatible(): Promise<void>;
 }
