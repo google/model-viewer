@@ -32,6 +32,10 @@ const $onCameraChange = Symbol('onCameraChange');
 
 export {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION};
 
+export interface StagingInterface {
+  autoRotate: boolean;
+}
+
 export const StagingMixin =
     (ModelViewerElement: Constructor<ModelViewerElementBase>):
         Constructor<ModelViewerElementBase> => {
