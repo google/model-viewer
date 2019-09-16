@@ -336,9 +336,9 @@ export const ControlsMixin = (ModelViewerElement:
         }
 
         /**
-         * Changes the camera's radius to properly frame the scene based on
-         * changes to framedHeight or fov, and maintains relative camera zoom
-         * state.
+         * Set the camera's radius and field of view to properly frame the scene
+         * based on changes to the model or aspect ratio, and maintains the
+         * relative camera zoom state.
          */
         [$updateCamera]() {
           const controls = this[$controls];
