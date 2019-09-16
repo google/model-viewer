@@ -36,7 +36,6 @@ script:
 cache:
   directories:
   - examples/assets/glTF-Sample-Models
-  - node_modules
 after_success:
 - ./scripts/run-fidelity-check.sh
 before_deploy:
