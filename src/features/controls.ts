@@ -71,7 +71,6 @@ const $framedFov = Symbol('framedFov');
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
-const $updateCameraAspect = Symbol('updateCameraAspect');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
 const $updateCameraTarget = Symbol('updateCameraTarget');
 const $updateFieldOfView = Symbol('updateFieldOfView');
@@ -343,7 +342,8 @@ export const ControlsMixin = (ModelViewerElement:
          */
         [$updateCamera]() {
           const controls = this[$controls];
-          const {idealCameraDistance} = this[$scene].model;
+          const {aspect} = this[$scene];
+          const {idealCameraDistance, fovAspect} = this[$scene].model;
 
           const minimumRadius = idealCameraDistance / 2;
           const maximumRadius = idealCameraDistance;
@@ -353,33 +353,23 @@ export const ControlsMixin = (ModelViewerElement:
           const near = minimumRadius - modelRadius;
           const far = maximumRadius + modelRadius;
 
-          controls.updateIntrinsics(this[$scene].aspect, near, far);
-
+          controls.updateIntrinsics(near, far, aspect);
           controls.setRadius(idealCameraDistance);
-          this[$updateCameraAspect]();
-        }
 
-        [$updateCameraAspect]() {
-          if (this.fieldOfView !== DEFAULT_FIELD_OF_VIEW) {
-            return;
+          if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW) {
+            const zoom = (this[$framedFov] != null) ?
+                controls.getFieldOfView() / this[$framedFov]! :
+                1;
+
+            const vertical =
+                Math.tan(HALF_FOV_RAD) * Math.max(1, fovAspect / aspect);
+            this[$framedFov] = 2 * Math.atan(vertical) * 180 / Math.PI;
+
+            const maximumFieldOfView = this[$framedFov]!;
+            controls.applyOptions({maximumFieldOfView});
+            controls.setFieldOfView(zoom * this[$framedFov]!);
           }
 
-          const controls = this[$controls];
-          const {aspect} = this[$scene];
-
-          const zoom = (this[$framedFov] != null) ?
-              controls.getFieldOfView() / this[$framedFov]! :
-              1;
-
-          const vertical = Math.tan(HALF_FOV_RAD) *
-              Math.max(1, this[$scene].model.fovAspect / aspect);
-          this[$framedFov] = 2 * Math.atan(vertical) * 180 / Math.PI;
-
-          const maximumFieldOfView = this[$framedFov]!;
-          controls.applyOptions({maximumFieldOfView});
-          controls.setFieldOfView(zoom * this[$framedFov]!);
-
-          controls.updateIntrinsics(aspect);
           controls.jumpToGoal();
         }
 
@@ -440,7 +430,7 @@ export const ControlsMixin = (ModelViewerElement:
 
         [$onResize](event: any) {
           super[$onResize](event);
-          this[$updateCameraAspect]();
+          this[$updateCamera]();
         }
 
         [$onModelLoad](event: any) {
