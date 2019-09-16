@@ -40,8 +40,8 @@ export default class Model extends Object3D {
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
-  public idealCameraDistance = 1;
-  public fovAspect = 1;
+  public idealCameraDistance = 0;
+  public fovAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
 
