@@ -18,7 +18,7 @@ import {Event, Spherical, Vector3} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
-import {DEFAULT_FOV_DEG} from '../three-components/ModelScene.js';
+import {DEFAULT_FOV_DEG} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 
@@ -275,7 +275,7 @@ export const ControlsMixin = (ModelViewerElement:
             switch (radius) {
               default:
               case 'auto':
-                radius = this[$scene].idealCameraDistance;
+                radius = this[$scene].model.idealCameraDistance;
                 break;
             }
           }
@@ -343,7 +343,7 @@ export const ControlsMixin = (ModelViewerElement:
          */
         [$updateCamera]() {
           const controls = this[$controls];
-          const {idealCameraDistance} = this[$scene];
+          const {idealCameraDistance} = this[$scene].model;
 
           const modelRadius = idealCameraDistance * Math.sin(HALF_FOV_RAD);
           const near = idealCameraDistance / 2 - modelRadius;
@@ -365,14 +365,14 @@ export const ControlsMixin = (ModelViewerElement:
           }
 
           const controls = this[$controls];
-          const {aspect, fovAspect} = this[$scene];
+          const {aspect} = this[$scene];
 
           const zoom = (this[$framedFov] != null) ?
               controls.getFieldOfView() / this[$framedFov]! :
               1;
 
-          const vertical =
-              Math.tan(HALF_FOV_RAD) * Math.max(1, fovAspect / aspect);
+          const vertical = Math.tan(HALF_FOV_RAD) *
+              Math.max(1, this[$scene].model.fovAspect / aspect);
           this[$framedFov] = 2 * Math.atan(vertical) * 180 / Math.PI;
 
           const maximumFieldOfView = this[$framedFov]!;

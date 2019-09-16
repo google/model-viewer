@@ -16,11 +16,12 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
 
 import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {moveChildren} from './ModelUtils.js';
+import {calculateBoundingRadius, calculateFovAspect, moveChildren} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 const $currentScene = Symbol('currentScene');
 
+export const DEFAULT_FOV_DEG = 45;
 
 /**
  * An Object3D that can swap out its underlying
@@ -39,6 +40,8 @@ export default class Model extends Object3D {
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
+  public idealCameraDistance = 1;
+  public fovAspect = 1;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
 
@@ -94,7 +97,7 @@ export default class Model extends Object3D {
   setObject(model: Object3D) {
     this.clear();
     this.modelContainer.add(model);
-    this.updateBoundingBox();
+    this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
   }
 
@@ -165,7 +168,7 @@ export default class Model extends Object3D {
 
     this.userData.url = url;
 
-    this.updateBoundingBox();
+    this.updateFraming();
 
     this.dispatchEvent({type: 'model-load', url});
   }
@@ -262,10 +265,16 @@ export default class Model extends Object3D {
     this.mixer.uncacheRoot(this);
   }
 
-  updateBoundingBox() {
+  updateFraming() {
     this.remove(this.modelContainer);
     this.boundingBox.setFromObject(this.modelContainer);
     this.boundingBox.getSize(this.size);
+    const center = this.boundingBox.getCenter(new Vector3);
+    const framedRadius = calculateBoundingRadius(this.modelContainer, center);
+    const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+    this.idealCameraDistance = framedRadius / Math.sin(halfFov);
+    this.fovAspect = calculateFovAspect(
+        this.modelContainer, center, this.idealCameraDistance, DEFAULT_FOV_DEG);
     this.add(this.modelContainer);
   }
 }

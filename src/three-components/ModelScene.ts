@@ -24,8 +24,6 @@ import Renderer from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
 
-export const DEFAULT_FOV_DEG = 45;
-
 export interface ModelSceneConfig {
   element: ModelViewerElementBase;
   canvas: HTMLCanvasElement;
@@ -64,8 +62,6 @@ export default class ModelScene extends Scene {
   public context: CanvasRenderingContext2D;
   public exposure = 1;
   public model: Model;
-  public idealCameraDistance = 1;
-  public fovAspect = 1;
   public skyboxMesh: Mesh;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
@@ -164,19 +160,6 @@ export default class ModelScene extends Scene {
     }
   }
 
-  updateFraming() {
-    const {size} = this.model;
-    const framedRadius = Math.sqrt(size.x * size.x + size.z * size.z) / 2;
-    const framedHalfHeight = size.length() / 2;
-
-    const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
-    this.idealCameraDistance = framedHalfHeight / Math.sin(halfFov);
-
-    const vertical = Math.tan(halfFov);
-    const horizontal = framedRadius / (this.idealCameraDistance - size.y / 2);
-    this.fovAspect = horizontal / vertical;
-  }
-
   /**
    * Returns the size of the corresponding canvas element.
    */
@@ -208,7 +191,6 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.updateFraming();
     this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }

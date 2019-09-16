@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} from 'three';
+import {Vector3} from 'three';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
@@ -146,3 +147,95 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
     to.add(from.children.shift()!);
   }
 };
+
+export const calculateBoundingRadius =
+    (model: Object3D, center: Vector3): number => {
+      let radiusSquared = 0;
+      const vector = new Vector3();
+      model.traverse((object: any) => {
+        let i, l;
+
+        object.updateWorldMatrix(false, false);
+
+        let geometry = object.geometry;
+
+        if (geometry !== undefined) {
+          if (geometry.isGeometry) {
+            let vertices = geometry.vertices;
+
+            for (i = 0, l = vertices.length; i < l; i++) {
+              vector.copy(vertices[i]);
+              vector.applyMatrix4(object.matrixWorld);
+
+              radiusSquared =
+                  Math.max(radiusSquared, center.distanceToSquared(vector));
+            }
+
+          } else if (geometry.isBufferGeometry) {
+            let attribute = geometry.attributes.position;
+
+            if (attribute !== undefined) {
+              for (i = 0, l = attribute.count; i < l; i++) {
+                vector.fromBufferAttribute(attribute, i)
+                    .applyMatrix4(object.matrixWorld);
+
+                radiusSquared =
+                    Math.max(radiusSquared, center.distanceToSquared(vector));
+              }
+            }
+          }
+        }
+      });
+      return Math.sqrt(radiusSquared);
+    };
+
+export const calculateFovAspect =
+    (model: Object3D,
+     center: Vector3,
+     viewDistance: number,
+     verticalFov: number): number => {
+      const vertical = Math.tan((verticalFov / 2) * Math.PI / 180);
+      let horizontal = 0;
+      const vector = new Vector3();
+      model.traverse((object: any) => {
+        let i, l;
+
+        object.updateWorldMatrix(false, false);
+
+        let geometry = object.geometry;
+
+        if (geometry !== undefined) {
+          if (geometry.isGeometry) {
+            let vertices = geometry.vertices;
+
+            for (i = 0, l = vertices.length; i < l; i++) {
+              vector.copy(vertices[i]);
+              vector.applyMatrix4(object.matrixWorld);
+
+              vector.sub(center);
+              const radiusXZ =
+                  Math.sqrt(vector.x * vector.x + vector.z * vector.z);
+              horizontal = Math.max(
+                  horizontal, radiusXZ / (viewDistance - Math.abs(vector.y)));
+            }
+
+          } else if (geometry.isBufferGeometry) {
+            let attribute = geometry.attributes.position;
+
+            if (attribute !== undefined) {
+              for (i = 0, l = attribute.count; i < l; i++) {
+                vector.fromBufferAttribute(attribute, i)
+                    .applyMatrix4(object.matrixWorld);
+
+                vector.sub(center);
+                const radiusXZ =
+                    Math.sqrt(vector.x * vector.x + vector.z * vector.z);
+                horizontal = Math.max(
+                    horizontal, radiusXZ / (viewDistance - Math.abs(vector.y)));
+              }
+            }
+          }
+        }
+      });
+      return horizontal / vertical;
+    };
