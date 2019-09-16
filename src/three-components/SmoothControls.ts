@@ -400,10 +400,8 @@ export class SmoothControls extends EventDispatcher {
 
     const {theta, phi, radius} = this[$goalSpherical];
 
-    const nextTheta = clamp(
-        this[$wrapAngle](goalTheta),
-        minimumAzimuthalAngle!,
-        maximumAzimuthalAngle!);
+    const nextTheta = this[$wrapAngle](
+        clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!));
     const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
     const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
 
