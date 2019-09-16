@@ -28,7 +28,7 @@ class ImageComparisonWorker {
   protected deltaContext: CanvasRenderingContext2D|null = null;
 
   constructor() {
-    self.onmessage = (event) => this.onGlobalMessage(event);
+    self.onmessage = (event: MessageEvent) => this.onGlobalMessage(event);
   }
 
   onMessage(event: MessageEvent, port: MessagePort): void {

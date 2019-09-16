@@ -25,7 +25,9 @@ export const getContext =
     (canvas: HTMLCanvasElement, options: WebGLContextAttributes):
         WebGLRenderingContext => assertContext(
             canvas.getContext('webgl', options) ||
-            canvas.getContext('experimental-webgl', options));
+            canvas.getContext('experimental-webgl', options) as
+                    WebGLRenderingContext |
+                null);
 
 /**
  * Patch the values reported by WebGLRenderingContext's
