@@ -99,8 +99,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('defaults radius to ideal camera distance', () => {
         expect((element as any).getCameraOrbit().radius)
-            .to.be.equal(
-                (element as any)[element[$scene].model.idealCameraDistance]);
+            .to.be.equal((element as any)[$scene].model.idealCameraDistance);
       });
 
       // TODO(#583)
