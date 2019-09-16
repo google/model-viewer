@@ -94,6 +94,7 @@ const $lastTouches = Symbol('lastTouches');
 const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
 const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
+const $wrapAngle = Symbol('wrapAngle');
 
 // Event handlers
 const $onMouseMove = Symbol('onMouseMove');
@@ -399,8 +400,10 @@ export class SmoothControls extends EventDispatcher {
 
     const {theta, phi, radius} = this[$goalSpherical];
 
-    const nextTheta =
-        clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
+    const nextTheta = clamp(
+        this[$wrapAngle](goalTheta),
+        minimumAzimuthalAngle!,
+        maximumAzimuthalAngle!);
     const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
     const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
 
@@ -494,6 +497,13 @@ export class SmoothControls extends EventDispatcher {
     const {maximumPolarAngle, maximumRadius, maximumFieldOfView} =
         this[$options];
 
+    const dTheta = this[$spherical].theta - this[$goalSpherical].theta;
+    if (Math.abs(dTheta) > Math.PI &&
+        !isFinite(this[$options].minimumAzimuthalAngle!) &&
+        !isFinite(this[$options].maximumAzimuthalAngle!)) {
+      this[$spherical].theta -= Math.sign(dTheta) * 2 * Math.PI;
+    }
+
     this[$spherical].theta = this[$thetaDamper].update(
         this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
 
@@ -565,6 +575,11 @@ export class SmoothControls extends EventDispatcher {
     this[$isUserChange] = true;
 
     return handled;
+  }
+
+  // Wraps to bewteen -pi and pi
+  private[$wrapAngle](radians: number): number {
+    return (radians + Math.PI) % (2 * Math.PI) - Math.PI;
   }
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
