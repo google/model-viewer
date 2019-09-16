@@ -1,6 +1,6 @@
 language: node_js
 sudo: false
-dist: trusty
+dist: xenial
 services:
 - xvfb
 before_script:
@@ -9,7 +9,11 @@ matrix:
   include:
   - env: TEST_TYPE=unit
     addons:
-      chrome: stable
+      apt:
+        sources:
+          - google-chrome
+        packages:
+          - google-chrome-stable
       sauce_connect:
         username:
           secure: T6i5WwsonrYsgiKE+F0p8oigYsMk92bv2NC/zjtqTMxFymJEcIGLcLsZwR1lD74cJgUwB8KueFlnIZERvhNCjY1iHflekXtcddA5aN3XGsOgjM4yQ+ZKm6EsWsGCeUGoGSqtaeHp/QE3N4IoMtvhVaQrrf7rrqVRUaShML38JEfkFS+LfprIykd+8QfODX855yjJV8w8/Y7KVI79pEs7jjTsFtjkZiWb4tcbeZ5N54Ju1P+D2BXoJ0AmreBZSYS12fqUNl/fezAnEt3JFDpgvxGDXIhbY2MostBaCCIj5w1ua0VGP5vgH8A67p9AJarz0aXHdepNDsFs4ubBOpqQclOF/1l2gKNyAxnqEf/78awzF05cFQAQkbc7c0hpNAwk708bCo5ERQz43kYDcuCDYfagn1XOSfKAjKhRXgO1J2eSxERM4SwRx67ntSBEmsUfpGy97ISI4R17Yv5DLbGT5rB+ZIX+ttIbXGr3Y0uHFGGdsqb/BiViCTFjIGYRMvj4Vu1sOb+5LhBSwzfNJQg+19Zt8SNTEBbcM07gon+bb75uAeUZY1TUyItoKJ65Na9EXPPOY93BjSfXwnUrtOATV7/cziwLRj30nCd0KF/Jg6OTiOcCJsamWIj3NSh+PMO58zpyOvwXXOPhqWn6t22VGmylS6Stta28F08KJHIfNAY=
@@ -17,7 +21,11 @@ matrix:
           secure: X0YszDekxheiWAATTA74tQda4N9Kgmu8yHZB/OnJ295E2n+bklTLYaVNB4aJxYp2q1d2cidOz5LOPJsetP9dWxeh4tarXjHFN4nYy9QiLqPaRdk75yLqc19MERu9elsMUc4KrJ6mhemF4pBgdNzNv1ioaHjl/3QFXIvo8nD610W7qnTDn/bHM6u2NNvDPUS9IpqYyK2Xj0DRLPm7fJS/cWbFuRr/NSKmKxSPUEaXKvlDJNEHnu0BOjSs0AZArrtekgN4YDq7BoEeCqYVf6cVUW4YclNLGa8mdXB419Czy1GDOl81ZETUYQS/6i3SNCzxwNZWpt8fB7q4BEWn0ljBoKZ6qRJRP0jHWOtZ/qeLovgaawGJIgd83bTcgPyLd2TUQeP8sFQgIw+TP1EUkNoAFR8wGxAw0chCdvzxNJvvlf28oaZ9vJdhj0jkJKrts/59Vd+dNkkoHSqj7RVfSu72kqxVblVI2kpr9oTVS2cPzDw2DXaDMmnM0ClVIjOta1QuXxaW1AUGZNOnlDbqmBTlfFThH0bRkPSinv/Laa5vvWG85k7pJ8jtCi1acOliNYFNb+hpDINqakDgTxYO6y4b+haAHycHsg3lIMsZ5Xc/8Y/dx328ymRQ6jROeyAyYmy9wt4SThfkKuHcSYqmUMLrIA1ixUcJxTaUCeUxEUx+tn0=
   - env: TEST_TYPE=fidelity
     addons:
-      chrome: stable
+      apt:
+        sources:
+          - google-chrome
+        packages:
+          - google-chrome-stable
 env:
   global:
     - secure: wmSM5h6HpDL7+rnd3KqaMNUtU7Rp5jv6P0/5wLJDb3lAtkersEaTrnFa4r8bWmhPq0KOXHcktmHQepatPn+1Ib9iP9RFzwMhM76OiLmV1M+cl8MNfNGRAMljbR9IzyzHzX0UwepPQpMxmc8O3RkF27wm8mCIUmbv9AJWh9adzfZrsErcngc8egrXAJuqiADENCkXUYj7mOP122c2SRD5G8oWA2dgrn6Vqw4vDqikUTxJsGFt/udU7E3xMT/tYPcPiGKKm+xULHZkTkL0l3sObletlI+CNssSE66ygKsYuFiBXVMPh0QbPQo/v3YSYHISszeHPKXMkvZu7x30CYCg6jLHX9mCfjXbd4Al4nu5n58U6Lp+h5ZI/c0iwFqQE9uFwc4/RivQXQAtBUU8vnSoKDtD8bFql8Y9Ki1PX3eTXdRGSARmE9gCOx4rmNT/42GbzXA+vzNRyXWo3IL6sFRjgl7xdsV/Twtl0I+GmUJV0x7LYgQm+P01kT3NmbnYyWe2oHGJGSL/pDqusjT+9oxzniF60qBLSsIlYaC69uY4pklaTCrFdm4eeFFCb8kExA5oDRu42PTd8Ws8tkGVQOi9ZjCK0p9HU5Mi11JfiZd9n2WZ9vSV852V6HE/CMmFvctgIEaBRoHmgLGjvAb7o1JK99MovCT8GSyIBob9NIEhGgA=
@@ -30,7 +38,7 @@ cache:
   - examples/assets/glTF-Sample-Models
   - node_modules
 after_success:
-- xvfb-run ./scripts/run-fidelity-check.sh
+- ./scripts/run-fidelity-check.sh
 before_deploy:
 - cd ${TRAVIS_BUILD_DIR}
 - touch .nojekyll
