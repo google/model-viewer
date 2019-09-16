@@ -97,6 +97,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         }
       });
 
+      test('defaults radius to ideal camera distance', () => {
+        expect((element as any).getCameraOrbit().radius)
+            .to.be.equal(
+                (element as any)[element[$scene].model.idealCameraDistance]);
+      });
+
       // TODO(#583)
       test.skip('can independently adjust azimuth', async () => {
         const orbit = element.getCameraOrbit();

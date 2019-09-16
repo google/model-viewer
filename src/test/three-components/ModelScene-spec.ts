@@ -69,41 +69,6 @@ suite('ModelScene', () => {
       expect(scene.canvas.style.height).to.be.equal('200px');
     });
 
-    // test('scales when X-bound', () => {
-    //   dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(10, 3, 1));
-    //   scene.model.setObject(dummyMesh);
-
-    //   const width = 2000;
-    //   const height = 1000;
-    //   const aspect = width / height;
-    //   scene.setSize(width, height);
-
-    //   expect(scene.framedHeight).to.be.equal(10 / aspect);
-    // });
-
-    // test('scales when Z-bound', () => {
-    //   dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
-    //   scene.model.setObject(dummyMesh);
-
-    //   const width = 2000;
-    //   const height = 1000;
-    //   const aspect = width / height;
-    //   scene.setSize(width, height);
-
-    //   expect(scene.framedHeight).to.be.equal(10 / aspect);
-    // });
-
-    // test('scales when Y-bound', () => {
-    //   dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(3, 10, 1));
-    //   scene.model.setObject(dummyMesh);
-
-    //   const width = 2000;
-    //   const height = 1000;
-    //   scene.setSize(width, height);
-
-    //   expect(scene.framedHeight).to.be.equal(10);
-    // });
-
     test('model is not scaled', () => {
       dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
       scene.model.setObject(dummyMesh);

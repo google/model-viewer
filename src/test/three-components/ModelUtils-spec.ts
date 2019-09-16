@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material, Scene} from 'three';
-
+import {Box3, Material, Scene, Vector3} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 import {loadWithLoader} from '../../three-components/CachingGLTFLoader.js';
-import {cloneGltf, Gltf} from '../../three-components/ModelUtils.js';
+import {cloneGltf, Gltf, reduceVertices} from '../../three-components/ModelUtils.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
@@ -60,6 +60,17 @@ suite('ModelUtils', () => {
       sourceMaterials.forEach((material, index) => {
         expect(clonedMaterials[index]).to.not.be.eql(material);
       });
+    });
+
+    test('reduceVertices matches boundingBox', () => {
+      const maxX = (value: number, vertex: Vector3): number => {
+        return Math.max(value, vertex.x);
+      };
+      const rightSide = reduceVertices(gltf.scene!, maxX);
+
+      const boundingBox = new Box3();
+      boundingBox.setFromObject(gltf.scene!);
+      expect(rightSide).to.be.equal(boundingBox.max.x);
     });
   });
 });
