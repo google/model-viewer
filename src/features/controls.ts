@@ -345,15 +345,15 @@ export const ControlsMixin = (ModelViewerElement:
           const controls = this[$controls];
           const {idealCameraDistance} = this[$scene].model;
 
-          const modelRadius = idealCameraDistance * Math.sin(HALF_FOV_RAD);
-          const near = idealCameraDistance / 2 - modelRadius;
-          const far = idealCameraDistance + modelRadius;
-
-          controls.updateIntrinsics(this[$scene].aspect, near, far);
-
           const minimumRadius = idealCameraDistance / 2;
           const maximumRadius = idealCameraDistance;
           controls.applyOptions({minimumRadius, maximumRadius});
+
+          const modelRadius = idealCameraDistance * Math.sin(HALF_FOV_RAD);
+          const near = minimumRadius - modelRadius;
+          const far = maximumRadius + modelRadius;
+
+          controls.updateIntrinsics(this[$scene].aspect, near, far);
 
           controls.setRadius(idealCameraDistance);
           this[$updateCameraAspect]();

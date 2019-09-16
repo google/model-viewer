@@ -16,7 +16,7 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
 
 import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {calculateBoundingRadius, calculateFovAspect, moveChildren} from './ModelUtils.js';
+import {moveChildren, reduceVertices} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 const $currentScene = Symbol('currentScene');
@@ -265,16 +265,44 @@ export default class Model extends Object3D {
     this.mixer.uncacheRoot(this);
   }
 
-  updateFraming() {
+  /**
+   * Calculates the idealCameraDistance and fovAspect that allows the 3D object
+   * to be framed tightly in a 2D window of any aspect ratio without clipping at
+   * any camera orbit. The camera's center target point can be optionally
+   * specified, as can a margin, where margin = 0.2 would add 20% margin on all
+   * sides (defaults to 0). If no center is specified, it defaults to the center
+   * of the bounding box, which means asymmetric models will tend to be tight on
+   * one side instead of both. Proper choice of center can correct this.
+   */
+  updateFraming(margin: number = 0, center: Vector3|null = null) {
     this.remove(this.modelContainer);
-    this.boundingBox.setFromObject(this.modelContainer);
-    this.boundingBox.getSize(this.size);
-    const center = this.boundingBox.getCenter(new Vector3);
-    const framedRadius = calculateBoundingRadius(this.modelContainer, center);
+
+    if (center == null) {
+      this.boundingBox.setFromObject(this.modelContainer);
+      this.boundingBox.getSize(this.size);
+      center = this.boundingBox.getCenter(new Vector3);
+    }
+
+    const radiusSquared = (value: number, vertex: Vector3): number => {
+      return Math.max(value, center!.distanceToSquared(vertex));
+    };
+    const framedRadius =
+        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared));
+
     const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
     this.idealCameraDistance = framedRadius / Math.sin(halfFov);
-    this.fovAspect = calculateFovAspect(
-        this.modelContainer, center, this.idealCameraDistance, DEFAULT_FOV_DEG);
+    const verticalFov = Math.tan(halfFov);
+
+    const horizontalFov = (value: number, vertex: Vector3): number => {
+      vertex.sub(center!);
+      const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
+      return Math.max(
+          value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
+    };
+    this.fovAspect =
+        reduceVertices(this.modelContainer, horizontalFov) / verticalFov;
+
+    this.idealCameraDistance *= 1 + margin;
     this.add(this.modelContainer);
   }
 }

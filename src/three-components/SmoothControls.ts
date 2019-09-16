@@ -372,7 +372,7 @@ export class SmoothControls extends EventDispatcher {
   updateIntrinsics(
       aspect: number, nearPlane = this.camera.near,
       farPlane = this.camera.far) {
-    this.camera.near = nearPlane;
+    this.camera.near = Math.max(nearPlane, farPlane / 1000);
     this.camera.far = farPlane;
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();

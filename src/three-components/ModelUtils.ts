@@ -148,94 +148,47 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
   }
 };
 
-export const calculateBoundingRadius =
-    (model: Object3D, center: Vector3): number => {
-      let radiusSquared = 0;
-      const vector = new Vector3();
-      model.traverse((object: any) => {
-        let i, l;
+/**
+ * Performs a reduction across all the vertices of the input model and all its
+ * children. The supplied function takes the reduced value and a vertex and
+ * returns the newly reduced value. The value is initialized as zero.
+ */
+export const reduceVertices =
+    (model: Object3D, func: (value: number, vertex: Vector3) => number):
+        number => {
+          let value = 0;
+          const vector = new Vector3();
+          model.traverse((object: any) => {
+            let i, l;
 
-        object.updateWorldMatrix(false, false);
+            object.updateWorldMatrix(false, false);
 
-        let geometry = object.geometry;
+            let geometry = object.geometry;
 
-        if (geometry !== undefined) {
-          if (geometry.isGeometry) {
-            let vertices = geometry.vertices;
+            if (geometry !== undefined) {
+              if (geometry.isGeometry) {
+                let vertices = geometry.vertices;
 
-            for (i = 0, l = vertices.length; i < l; i++) {
-              vector.copy(vertices[i]);
-              vector.applyMatrix4(object.matrixWorld);
+                for (i = 0, l = vertices.length; i < l; i++) {
+                  vector.copy(vertices[i]);
+                  vector.applyMatrix4(object.matrixWorld);
 
-              radiusSquared =
-                  Math.max(radiusSquared, center.distanceToSquared(vector));
-            }
+                  value = func(value, vector);
+                }
 
-          } else if (geometry.isBufferGeometry) {
-            let attribute = geometry.attributes.position;
+              } else if (geometry.isBufferGeometry) {
+                let attribute = geometry.attributes.position;
 
-            if (attribute !== undefined) {
-              for (i = 0, l = attribute.count; i < l; i++) {
-                vector.fromBufferAttribute(attribute, i)
-                    .applyMatrix4(object.matrixWorld);
+                if (attribute !== undefined) {
+                  for (i = 0, l = attribute.count; i < l; i++) {
+                    vector.fromBufferAttribute(attribute, i)
+                        .applyMatrix4(object.matrixWorld);
 
-                radiusSquared =
-                    Math.max(radiusSquared, center.distanceToSquared(vector));
+                    value = func(value, vector);
+                  }
+                }
               }
             }
-          }
-        }
-      });
-      return Math.sqrt(radiusSquared);
-    };
-
-export const calculateFovAspect =
-    (model: Object3D,
-     center: Vector3,
-     viewDistance: number,
-     verticalFov: number): number => {
-      const vertical = Math.tan((verticalFov / 2) * Math.PI / 180);
-      let horizontal = 0;
-      const vector = new Vector3();
-      model.traverse((object: any) => {
-        let i, l;
-
-        object.updateWorldMatrix(false, false);
-
-        let geometry = object.geometry;
-
-        if (geometry !== undefined) {
-          if (geometry.isGeometry) {
-            let vertices = geometry.vertices;
-
-            for (i = 0, l = vertices.length; i < l; i++) {
-              vector.copy(vertices[i]);
-              vector.applyMatrix4(object.matrixWorld);
-
-              vector.sub(center);
-              const radiusXZ =
-                  Math.sqrt(vector.x * vector.x + vector.z * vector.z);
-              horizontal = Math.max(
-                  horizontal, radiusXZ / (viewDistance - Math.abs(vector.y)));
-            }
-
-          } else if (geometry.isBufferGeometry) {
-            let attribute = geometry.attributes.position;
-
-            if (attribute !== undefined) {
-              for (i = 0, l = attribute.count; i < l; i++) {
-                vector.fromBufferAttribute(attribute, i)
-                    .applyMatrix4(object.matrixWorld);
-
-                vector.sub(center);
-                const radiusXZ =
-                    Math.sqrt(vector.x * vector.x + vector.z * vector.z);
-                horizontal = Math.max(
-                    horizontal, radiusXZ / (viewDistance - Math.abs(vector.y)));
-              }
-            }
-          }
-        }
-      });
-      return horizontal / vertical;
-    };
+          });
+          return value;
+        };
