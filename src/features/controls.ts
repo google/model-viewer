@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Event, Spherical, Vector3} from 'three';
+import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
@@ -117,13 +117,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'interaction-policy'})
     interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
-    protected[$promptElement]: Element;
+    protected[$promptElement] =
+        this.shadowRoot!.querySelector('.controls-prompt')!;
 
     protected[$userPromptedOnce] = false;
     protected[$waitingToPromptUser] = false;
     protected[$shouldPromptUserToInteract] = true;
 
-    protected[$controls]: SmoothControls;
+    protected[$controls] = new SmoothControls(
+        this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
     protected[$idealCameraDistance]: number|null = null;
     protected[$lastSpherical] = new Spherical();
@@ -137,18 +139,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$promptTransitionendHandler] = () =>
         this[$onPromptTransitionend]();
-
-    constructor(...args: any[]) {
-      super(...args);
-      const scene = (this as any)[$scene];
-
-      this[$promptElement] =
-          this.shadowRoot!.querySelector('.controls-prompt')!;
-
-      this[$controls] = new SmoothControls(scene.getCamera(), scene.canvas);
-      this[$updateCameraOrbit]();
-      this[$updateFieldOfView]();
-    }
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
@@ -169,6 +159,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     connectedCallback() {
       super.connectedCallback();
+
+      this[$updateCameraOrbit]();
+      this[$updateFieldOfView]();
 
       this[$promptTransitionendHandler]();
       this[$promptElement].addEventListener(
