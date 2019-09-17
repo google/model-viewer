@@ -79,24 +79,24 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
     });
   }
 
-  const specularGlossiness =
-      gltf.parser.extensions['KHR_materials_pbrSpecularGlossiness'];
-  /**
-   * Creates a clone of the given material, and applies a patch to the
-   * shader program.
-   */
-  const cloneAndPatchMaterial = (material: Material): Material => {
-    const clone = (material as any).isGLTFSpecularGlossinessMaterial ?
-        specularGlossiness.cloneMaterial(material) :
-        material.clone();
-    clone.onBeforeCompile = updateShader;
-    return clone;
-  };
-
   const cloneBones: BoneMap = {};
   const cloneSkinnedMeshes: SkinnedMeshMap = {};
 
   if (hasScene) {
+    const specularGlossiness =
+        gltf.parser.extensions['KHR_materials_pbrSpecularGlossiness'];
+    /**
+     * Creates a clone of the given material, and applies a patch to the
+     * shader program.
+     */
+    const cloneAndPatchMaterial = (material: Material): Material => {
+      const clone = (material as any).isGLTFSpecularGlossinessMaterial ?
+          specularGlossiness.cloneMaterial(material) :
+          material.clone();
+      clone.onBeforeCompile = updateShader;
+      return clone;
+    };
+
     clone.scene!.traverse((node: any) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
