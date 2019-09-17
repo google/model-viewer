@@ -28,6 +28,15 @@
       }
     },
     {
+      "name": "khronos-AlphaBlendModeTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      }
+    },
+    {
       "name": "khronos-AntiqueCamera",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
@@ -46,8 +55,53 @@
       }
     },
     {
-      "name": "khronos-BoomBox",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
+      "name": "khronos-BarramundiFish",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-BoomBoxWithAxes",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "khronos-Box",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-BoxInterleaved",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-BoxTextured",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-BoxTexturedNonPowerOfTwo",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTexturedNonPowerOfTwo/glTF-Binary/BoxTexturedNonPowerOfTwo.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
@@ -87,7 +141,7 @@
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
-        "height": 768
+        "height": 1024
       }
     },
     {
@@ -130,12 +184,21 @@
       ]
     },
     {
+      "name": "khronos-FlightHelmet",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 512,
+        "height": 1024
+      }
+    },
+    {
       "name": "khronos-GearboxAssy",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
-        "height": 768
+        "width": 1024,
+        "height": 512
       }
     },
     {
@@ -144,7 +207,7 @@
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
-        "height": 768
+        "height": 1024
       }
     },
     {
@@ -172,6 +235,15 @@
       "dimensions": {
         "width": 768,
         "height": 768
+      }
+    },
+    {
+      "name": "khronos-MorphPrimitivesTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MorphPrimitivesTest/glTF-Binary/MorphPrimitivesTest.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
       }
     },
     {
@@ -211,8 +283,38 @@
       }
     },
     {
+      "name": "khronos-ReciprocatingSaw",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      }
+    },
+    {
       "name": "khronos-SciFiHelmet",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "khronos-SimpleSparseAccessor",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SimpleSparseAccessor/glTF/SimpleSparseAccessor.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      },
+      "exclude": [
+        "filament"
+      ]
+    },
+    {
+      "name": "khronos-SpecGlossVsMetalRough",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
@@ -222,6 +324,24 @@
     {
       "name": "khronos-Suzanne",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-TextureCoordinateTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-TextureSettingsTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
@@ -261,7 +381,7 @@
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
-        "height": 768
+        "height": 1024
       }
     },
     {
