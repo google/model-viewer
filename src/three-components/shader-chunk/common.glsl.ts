@@ -1,6 +1,6 @@
-import {ACESFilmicToneMapping, CineonToneMapping, GammaEncoding, LinearEncoding, LinearToneMapping, ReinhardToneMapping, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding, Uncharted2ToneMapping} from 'three';
+import {GammaEncoding, LinearEncoding, RGBDEncoding, RGBEEncoding, RGBM16Encoding, RGBM7Encoding, sRGBEncoding} from 'three';
 
-import {texelConversions} from './encodings_pars_framgment.glsl.js'
+import {texelConversions} from './encodings_pars_fragment.glsl.js'
 
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
