@@ -26,7 +26,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName: string;
-    let ModelViewerElement: Constructor<ModelViewerElementBase&ARInterface>;
+    let ModelViewerElement: Constructor<ARInterface>;
 
     setup(() => {
       tagName = `model-viewer-ar-${nextId++}`;
@@ -49,7 +49,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
     });
 
     suite('with unstable-webxr', () => {
-      let element: ModelViewerElementBase&ARInterface;
+      let element: ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
@@ -75,7 +75,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
     });
 
     suite('ios-src', () => {
-      let element: ModelViewerElementBase&ARInterface;
+      let element: ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
