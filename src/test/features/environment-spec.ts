@@ -127,9 +127,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   let nextId = 0;
   let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&EnvironmentInterface>;
-  let element: ModelViewerElementBase&EnvironmentInterface;
+  let ModelViewerElement: Constructor<EnvironmentInterface>;
+  let element: EnvironmentInterface;
   let scene: ModelScene;
 
   setup(() => {
