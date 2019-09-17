@@ -32,72 +32,71 @@ const $onCameraChange = Symbol('onCameraChange');
 
 export {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION};
 
-export interface StagingInterface {
-  autoRotate: boolean;
-}
+export const StagingMixin =
+    <T extends Constructor<ModelViewerElementBase>>(ModelViewerElement: T) => {
+      class StagingModelViewerElement extends ModelViewerElement {
+        @property({type: Boolean, attribute: 'auto-rotate'})
+        autoRotate: boolean = false;
 
-export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T): Constructor<StagingInterface>&T => {
-  class StagingModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean, attribute: 'auto-rotate'})
-    autoRotate: boolean = false;
+        private[$autoRotateTimer]: Timer =
+            new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+        private[$cameraChangeHandler] =
+            (event: CustomEvent<CameraChangeDetails>) =>
+                this[$onCameraChange](event);
 
-    private[$autoRotateTimer]: Timer =
-        new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
-    private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
-        this[$onCameraChange](event);
+        connectedCallback() {
+          super.connectedCallback();
+          this.addEventListener(
+              'camera-change', this[$cameraChangeHandler] as EventListener);
+          this[$autoRotateTimer].stop();
+        }
 
-    connectedCallback() {
-      super.connectedCallback();
-      this.addEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
-    }
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          this.removeEventListener(
+              'camera-change', this[$cameraChangeHandler] as EventListener);
+          this[$autoRotateTimer].stop();
+        }
 
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      this.removeEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
-    }
+        updated(changedProperties: Map<string, any>) {
+          super.updated(changedProperties);
 
-    updated(changedProperties: Map<string, any>) {
-      super.updated(changedProperties);
+          if (changedProperties.has('autoRotate')) {
+            (this as any)[$scene].pivot.rotation.set(0, 0, 0);
+            this[$needsRender]();
+          }
+        }
 
-      if (changedProperties.has('autoRotate')) {
-        (this as any)[$scene].pivot.rotation.set(0, 0, 0);
-        this[$needsRender]();
+        [$tick](time: number, delta: number) {
+          super[$tick](time, delta);
+
+          if (!this.autoRotate || !this.modelIsVisible) {
+            return;
+          }
+
+          this[$autoRotateTimer].tick(delta);
+
+          if (this[$autoRotateTimer].hasStopped) {
+            (this as any)[$scene].pivot.rotation.y +=
+                ROTATION_SPEED * delta * 0.001;
+            this[$needsRender]();
+          }
+        }
+
+        [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
+          if (!this.autoRotate) {
+            return;
+          }
+
+          this[$autoRotateTimer].reset();
+        }
+
+        get turntableRotation(): number {
+          return (this as any)[$scene].pivot.rotation.y;
+        }
       }
-    }
 
-    [$tick](time: number, delta: number) {
-      super[$tick](time, delta);
+      return StagingModelViewerElement;
+    };
 
-      if (!this.autoRotate || !this.modelIsVisible) {
-        return;
-      }
-
-      this[$autoRotateTimer].tick(delta);
-
-      if (this[$autoRotateTimer].hasStopped) {
-        (this as any)[$scene].pivot.rotation.y +=
-            ROTATION_SPEED * delta * 0.001;
-        this[$needsRender]();
-      }
-    }
-
-    [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
-      if (!this.autoRotate) {
-        return;
-      }
-
-      this[$autoRotateTimer].reset();
-    }
-
-    get turntableRotation(): number {
-      return (this as any)[$scene].pivot.rotation.y;
-    }
-  }
-
-  return StagingModelViewerElement;
-};
+export type StagingInterface = InstanceType<ReturnType<typeof StagingMixin>>;

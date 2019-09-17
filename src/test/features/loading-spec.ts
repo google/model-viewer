@@ -27,8 +27,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName: string;
-    let ModelViewerElement:
-        Constructor<ModelViewerElementBase&LoadingInterface>;
+    let ModelViewerElement: Constructor<LoadingInterface>;
 
     setup(() => {
       tagName = `model-viewer-loading-${nextId++}`;
@@ -46,7 +45,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
     // TODO: Elements must have loaded to hide poster...
 
     suite('loading', () => {
-      let element: ModelViewerElementBase&LoadingInterface;
+      let element: LoadingInterface;
 
       setup(async () => {
         element = new ModelViewerElement();

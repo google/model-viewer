@@ -90,22 +90,8 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 
-export interface ControlsInterface {
-  cameraControls: boolean;
-  cameraOrbit: string;
-  cameraTarget: string;
-  fieldOfView: string;
-  interactionPrompt: InteractionPromptStrategy;
-  interactionPolicy: InteractionPolicy;
-  interactionPromptThreshold: number;
-  getCameraOrbit(): SphericalPosition;
-  getCameraTarget(): Vector3;
-  getFieldOfView(): number;
-  jumpCameraToGoal(): void;
-}
-
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T): Constructor<ControlsInterface>&T => {
+    ModelViewerElement: T) => {
   class ControlsModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'camera-controls'})
     cameraControls: boolean = false;
@@ -476,3 +462,5 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
   return ControlsModelViewerElement;
 };
+
+export type ControlsInterface = InstanceType<ReturnType<typeof ControlsMixin>>;

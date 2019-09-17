@@ -34,101 +34,101 @@ const DEFAULT_HOLOGRAM_INLINE_SCALE = 0.65;
 // should work:
 const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
 
-export interface MagicLeapInterface {
-  magicLeap: boolean;
-}
-
 /**
  * In order to use Magic Leap support, please include prismatic.js in your
  * page. If you do not include prismatic.js, Magic Leap support will not work.
  *
  * @see https://www.npmjs.com/package/@magicleap/prismatic
  */
-export const MagicLeapMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T): Constructor<MagicLeapInterface>&T => {
-  class MagicLeapModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean, attribute: 'magic-leap'})
-    magicLeap: boolean = false;
+export const MagicLeapMixin =
+    <T extends Constructor<ModelViewerElementBase>>(ModelViewerElement: T) => {
+      class MagicLeapModelViewerElement extends ModelViewerElement {
+        @property({type: Boolean, attribute: 'magic-leap'})
+        magicLeap: boolean = false;
 
-    // NOTE(cdata): Check at construction time because the check is cheap
-    // and it makes testing easier
-    private[$isHeliosBrowser]: boolean = self.mlWorld != null;
+        // NOTE(cdata): Check at construction time because the check is cheap
+        // and it makes testing easier
+        private[$isHeliosBrowser]: boolean = self.mlWorld != null;
 
-    private[$mlModel]: HTMLElement|null = null;
+        private[$mlModel]: HTMLElement|null = null;
 
-    updated(changedProperties: Map<string, any>) {
-      super.updated(changedProperties);
+        updated(changedProperties: Map<string, any>) {
+          super.updated(changedProperties);
 
-      if (!this[$isHeliosBrowser]) {
-        return;
-      }
+          if (!this[$isHeliosBrowser]) {
+            return;
+          }
 
-      if (!(changedProperties.has('magicLeap') ||
-            changedProperties.has('src'))) {
-        return;
-      }
+          if (!(changedProperties.has('magicLeap') ||
+                changedProperties.has('src'))) {
+            return;
+          }
 
-      const scene = this[$scene];
+          const scene = this[$scene];
 
-      if (this.magicLeap) {
-        const hasMlModel = !!customElements.get('ml-model');
+          if (this.magicLeap) {
+            const hasMlModel = !!customElements.get('ml-model');
 
-        if (!hasMlModel) {
-          console.warn('<ml-model> is not registered. Is prismatic.js loaded?');
+            if (!hasMlModel) {
+              console.warn(
+                  '<ml-model> is not registered. Is prismatic.js loaded?');
+            }
+
+            scene.pause();
+            this[$container].setAttribute('style', 'display: none;');
+            this[$showMlModel]();
+
+            if (changedProperties.has('src') && this.src &&
+                this.src !== this[$mlModel]!.getAttribute('src')) {
+              this[$mlModel]!.setAttribute('src', this.src);
+            }
+          } else {
+            this[$hideMlModel]();
+            scene.resume();
+            this[$container].removeAttribute('style');
+          }
         }
 
-        scene.pause();
-        this[$container].setAttribute('style', 'display: none;');
-        this[$showMlModel]();
+        private[$showMlModel]() {
+          if (this[$mlModel] == null) {
+            this[$mlModel] = document.createElement('ml-model');
+            this[$mlModel]!.setAttribute(
+                'style',
+                'display: block; top: 0; left: 0; width: 100%; height: 100%');
+            // @see https://creator.magicleap.com/learn/guides/prismatic-getting-started
+            this[$mlModel]!.setAttribute(
+                'model-scale',
+                `${DEFAULT_HOLOGRAM_INLINE_SCALE} ${
+                    DEFAULT_HOLOGRAM_INLINE_SCALE} ${
+                    DEFAULT_HOLOGRAM_INLINE_SCALE}`);
+            this[$mlModel]!.setAttribute('scrollable', 'true');
+            this[$mlModel]!.setAttribute('z-offset', DEFAULT_HOLOGRAM_Z_OFFSET);
+            this[$mlModel]!.setAttribute('extractable', 'true');
+            this[$mlModel]!.setAttribute('extracted-scale', '1');
+            this[$mlModel]!.setAttribute(
+                'environment-lighting', 'color-intensity: 2;');
 
-        if (changedProperties.has('src') && this.src &&
-            this.src !== this[$mlModel]!.getAttribute('src')) {
-          this[$mlModel]!.setAttribute('src', this.src);
+            if (this.src != null) {
+              this[$mlModel]!.setAttribute('src', this.src);
+            }
+          }
+
+          this.shadowRoot!.appendChild(this[$mlModel]!);
         }
-      } else {
-        this[$hideMlModel]();
-        scene.resume();
-        this[$container].removeAttribute('style');
-      }
-    }
 
-    private[$showMlModel]() {
-      if (this[$mlModel] == null) {
-        this[$mlModel] = document.createElement('ml-model');
-        this[$mlModel]!.setAttribute(
-            'style',
-            'display: block; top: 0; left: 0; width: 100%; height: 100%');
-        // @see https://creator.magicleap.com/learn/guides/prismatic-getting-started
-        this[$mlModel]!.setAttribute(
-            'model-scale',
-            `${DEFAULT_HOLOGRAM_INLINE_SCALE} ${
-                DEFAULT_HOLOGRAM_INLINE_SCALE} ${
-                DEFAULT_HOLOGRAM_INLINE_SCALE}`);
-        this[$mlModel]!.setAttribute('scrollable', 'true');
-        this[$mlModel]!.setAttribute('z-offset', DEFAULT_HOLOGRAM_Z_OFFSET);
-        this[$mlModel]!.setAttribute('extractable', 'true');
-        this[$mlModel]!.setAttribute('extracted-scale', '1');
-        this[$mlModel]!.setAttribute(
-            'environment-lighting', 'color-intensity: 2;');
+        private[$hideMlModel]() {
+          if (this[$mlModel] == null) {
+            return;
+          }
 
-        if (this.src != null) {
-          this[$mlModel]!.setAttribute('src', this.src);
+          if (this[$mlModel]!.parentNode != null) {
+            this[$mlModel]!.parentNode!.removeChild(this[$mlModel]!);
+          }
         }
       }
 
-      this.shadowRoot!.appendChild(this[$mlModel]!);
+      return MagicLeapModelViewerElement;
     }
 
-    private[$hideMlModel]() {
-      if (this[$mlModel] == null) {
-        return;
-      }
-
-      if (this[$mlModel]!.parentNode != null) {
-        this[$mlModel]!.parentNode!.removeChild(this[$mlModel]!);
-      }
-    }
-  }
-
-  return MagicLeapModelViewerElement;
-}
+export type MagicLeapInterface =
+    InstanceType<ReturnType<typeof MagicLeapMixin>>;

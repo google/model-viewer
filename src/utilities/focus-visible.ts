@@ -36,7 +36,7 @@ type EndPolyfillCoordinationCallback = () => void;
  * implementation that coordinates with the :focus-visible polyfill
  */
 export const FocusVisiblePolyfillMixin =
-    <T extends Constructor<MixableBaseClass>>(SuperClass: T): T => {
+    <T extends Constructor<MixableBaseClass>>(SuperClass: T) => {
       const coordinateWithPolyfill =
           (instance: MixableBaseClass): EndPolyfillCoordinationCallback => {
             // If there is no shadow root, there is no need to coordinate with
