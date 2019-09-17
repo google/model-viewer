@@ -37,6 +37,24 @@
       }
     },
     {
+      "name": "khronos-AnimatedMorphCube",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      }
+    },
+    {
+      "name": "khronos-AnimatedMorphSphere",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      }
+    },
+    {
       "name": "khronos-AntiqueCamera",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
@@ -82,6 +100,15 @@
       }
     },
     {
+      "name": "khronos-BoxAnimated",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
       "name": "khronos-BoxInterleaved",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
@@ -111,6 +138,15 @@
     {
       "name": "khronos-BoxVertexColors",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
+      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-BrainStem",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 768,
@@ -202,6 +238,15 @@
       }
     },
     {
+      "name": "khronos-InterpolationTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/InterpolationTest/glTF-Binary/InterpolationTest.glb",
+      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
       "name": "khronos-Lantern",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Lantern/glTF/Lantern.gltf",
       "lighting": "../../../../examples/assets/lightroom_14b.hdr",
@@ -232,6 +277,15 @@
       "name": "khronos-MetalRoughSpheres-LDR",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
       "lighting": "../../../../examples/assets/spruit_sunrise_1k_LDR.jpg",
+      "dimensions": {
+        "width": 768,
+        "height": 768
+      }
+    },
+    {
+      "name": "khronos-Monster",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Monster/glTF-Binary/Monster.glb",
+      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
       "dimensions": {
         "width": 768,
         "height": 768
