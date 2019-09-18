@@ -311,6 +311,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$controls].update(time, delta);
     }
 
+    [$deferInteractionPrompt]() {
+      // Effectively cancel the timer waiting for user interaction:
+      this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.remove('visible');
+
+      // Implicitly there was some reason to defer the prompt. If the user
+      // has been prompted at least once already, we no longer need to
+      // prompt the user, although if they have never been prompted we
+      // should probably prompt them at least once just in case.
+      if (this[$userPromptedOnce]) {
+        this[$shouldPromptUserToInteract] = false;
+      }
+    }
+
     /**
      * Set the camera's radius and field of view to properly frame the scene
      * based on changes to the model or aspect ratio, and maintains the
@@ -383,20 +397,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
           canvas.setAttribute('aria-label', ariaLabel);
         }
-      }
-    }
-
-    [$deferInteractionPrompt]() {
-      // Effectively cancel the timer waiting for user interaction:
-      this[$waitingToPromptUser] = false;
-      this[$promptElement].classList.remove('visible');
-
-      // Implicitly there was some reason to defer the prompt. If the user
-      // has been prompted at least once already, we no longer need to
-      // prompt the user, although if they have never been prompted we
-      // should probably prompt them at least once just in case.
-      if (this[$userPromptedOnce]) {
-        this[$shouldPromptUserToInteract] = false;
       }
     }
 
