@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
+export const $getLoaded = Symbol('getLoaded');
+export const $getModelIsVisible = Symbol('getModelIsVisible');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -113,7 +115,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
 
   get loaded() {
-    return this[$loaded];
+    return this[$getLoaded]();
   }
 
   get[$renderer]() {
@@ -121,7 +123,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get modelIsVisible() {
-    return true;
+    return this[$getModelIsVisible]();
   }
 
   /**
@@ -172,7 +174,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$markLoaded]();
       this[$onModelLoad](event);
 
-      this.dispatchEvent(new CustomEvent('load', {detail: {url: event.url}}));
+      this.dispatchEvent(
+          new CustomEvent('load', {detail: {url: (event as any).url}}));
     });
 
     // Update initial size on microtask timing so that subclasses have a
@@ -293,6 +296,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
   get[$ariaLabel]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
                                                        this.alt;
+  }
+
+  // NOTE(cdata): Although this may seem extremely redundant, it is required in
+  // order to support overloading when TypeScript is compiled to ES5
+  // @see https://github.com/Polymer/lit-element/pull/745
+  // @see https://github.com/microsoft/TypeScript/issues/338
+  [$getLoaded](): boolean {
+    return this[$loaded];
+  }
+
+  // @see [$getLoaded]
+  [$getModelIsVisible](): boolean {
+    return true;
   }
 
   /**

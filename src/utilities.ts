@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
  */
 
 import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
-import Timer from './utilities/timer';
-
-export {
-  Timer,
-};
 
 export type Constructor<T = object> = {
   new (...args: any[]): T,

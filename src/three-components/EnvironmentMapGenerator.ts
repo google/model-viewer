@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ export default class EnvironmentMapGenerator extends EventDispatcher {
     const {scene} = this;
     scene.position.y = -3.5;
 
-    const geometry = new BoxBufferGeometry();
+    // NOTE: BoxBufferGeometry does not technically have default parameter values
+    // @see https://github.com/mrdoob/three.js/blob/93e72ba7b24958ddb0652bd33171edd14ed2d693/src/geometries/BoxGeometry.js#L38-L63
+    const geometry = new BoxBufferGeometry(1, 1, 1, 1, 1, 1);
     geometry.removeAttribute('uv');
 
     const roomMaterial =

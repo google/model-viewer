@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ export const getContext =
     (canvas: HTMLCanvasElement, options: WebGLContextAttributes):
         WebGLRenderingContext => assertContext(
             canvas.getContext('webgl', options) ||
-            canvas.getContext('experimental-webgl', options));
+            canvas.getContext('experimental-webgl', options) as
+                    WebGLRenderingContext |
+                null);
 
 /**
  * Patch the values reported by WebGLRenderingContext's

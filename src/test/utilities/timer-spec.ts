@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import Timer from '../../utilities/timer';
+import {Timer} from '../../utilities/timer.js';
 
 const expect = chai.expect;
 
@@ -31,21 +31,21 @@ export default () => {
       expect(timer.hasStopped).to.be.false;
 
       timer.tick(30);
-  
+
       expect(timer.hasStopped).to.be.true;
     });
-  
+
     test('can reset', () => {
       const timer = new Timer(20);
 
       expect(timer.hasStopped).to.be.false;
 
       timer.tick(30);
-  
+
       expect(timer.hasStopped).to.be.true;
-  
+
       timer.reset();
-  
+
       expect(timer.hasStopped).to.be.false;
     });
 

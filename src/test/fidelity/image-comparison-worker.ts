@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class ImageComparisonWorker {
   protected deltaContext: CanvasRenderingContext2D|null = null;
 
   constructor() {
-    self.onmessage = (event) => this.onGlobalMessage(event);
+    self.onmessage = (event: MessageEvent) => this.onGlobalMessage(event);
   }
 
   onMessage(event: MessageEvent, port: MessagePort): void {
