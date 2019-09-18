@@ -76,13 +76,22 @@ const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
 
+export interface LoadingInterface {
+  poster: string|null;
+  reveal: RevealAttributeValue;
+  preload: boolean;
+  readonly loaded: boolean;
+  readonly modelIsVisible: boolean;
+  dismissPoster(): void;
+}
+
 /**
  * LoadingMixin implements features related to lazy loading, as well as
  * presentation details related to the pre-load / pre-render presentation of a
  * <model-viewer>
  */
 export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T) => {
+    ModelViewerElement: T): Constructor<LoadingInterface>&T => {
   class LoadingModelViewerElement extends ModelViewerElement {
     /**
      * A URL pointing to the image to use as a poster in scenarios where the
@@ -397,5 +406,3 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
   return LoadingModelViewerElement;
 };
-
-export type LoadingInterface = InstanceType<ReturnType<typeof LoadingMixin>>;

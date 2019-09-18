@@ -30,8 +30,16 @@ const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
+export interface EnvironmentInterface {
+  environmentImage: string|null;
+  backgroundImage: string|null;
+  backgroundColor: string;
+  shadowIntensity: number;
+  exposure: number;
+}
+
 export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T) => {
+    ModelViewerElement: T): Constructor<EnvironmentInterface>&T => {
   class EnvironmentModelViewerElement extends ModelViewerElement {
     @property({
       type: String,
@@ -184,6 +192,3 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
   return EnvironmentModelViewerElement;
 };
-
-export type EnvironmentInterface =
-    InstanceType<ReturnType<typeof EnvironmentMixin>>;

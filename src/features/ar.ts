@@ -118,8 +118,17 @@ const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
 const $fullscreenchangeHandler = Symbol('fullscreenHandler');
 const $onFullscreenchange = Symbol('onFullscreen');
 
+export interface ARInterface {
+  ar: boolean;
+  unstableWebxr: boolean;
+  iosSrc: string|null;
+  quickLookBrowsers: string;
+  readonly canActivateAR: boolean;
+  activateAR(): Promise<void>;
+}
+
 export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T) => {
+    ModelViewerElement: T): Constructor<ARInterface>&T => {
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
 
@@ -348,5 +357,3 @@ configuration or device capabilities');
 
   return ARModelViewerElement;
 };
-
-export type ARInterface = InstanceType<ReturnType<typeof ARMixin>>;
