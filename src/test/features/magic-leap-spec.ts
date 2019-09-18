@@ -25,8 +25,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName: string;
-    let ModelViewerElement:
-        Constructor<ModelViewerElementBase&MagicLeapInterface>;
+    let ModelViewerElement: Constructor<MagicLeapInterface>;
 
     setup(() => {
       tagName = `model-viewer-magic-leap-${nextId++}`;
@@ -43,7 +42,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
     suite('magic-leap', () => {
       suite('in standard browser environments', () => {
-        let element: ModelViewerElementBase&MagicLeapInterface;
+        let element: MagicLeapInterface;
 
         setup(async () => {
           element = new ModelViewerElement();
@@ -69,7 +68,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
       });
 
       suite('in the Helios browser environment', () => {
-        let element: ModelViewerElementBase&MagicLeapInterface;
+        let element: MagicLeapInterface;
 
         setup(async () => {
           self.mlWorld = {};

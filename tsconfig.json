@@ -13,7 +13,8 @@
     "noFallthroughCasesInSwitch": true,
     "outDir": "./lib",
     "allowJs": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "noErrorTruncation": true
   },
   "include": [
     "./src/**/*.ts",

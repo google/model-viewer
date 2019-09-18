@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Event, Spherical, Vector3} from 'three';
+import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
@@ -90,394 +90,370 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 
-export interface ControlsInterface {
-  cameraControls: boolean;
-  cameraOrbit: string;
-  cameraTarget: string;
-  fieldOfView: string;
-  interactionPrompt: InteractionPromptStrategy;
-  interactionPolicy: InteractionPolicy;
-  interactionPromptThreshold: number;
-  getCameraOrbit(): SphericalPosition;
-  getCameraTarget(): Vector3;
-  getFieldOfView(): number;
-  jumpCameraToGoal(): void;
-}
-
-export const ControlsMixin = (ModelViewerElement:
-                                  Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase&ControlsInterface> => {
-      class ControlsModelViewerElement extends ModelViewerElement {
-        @property({type: Boolean, attribute: 'camera-controls'})
-        cameraControls: boolean = false;
-
-        @property(
-            {type: String, attribute: 'camera-orbit', hasChanged: () => true})
-        cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
-
-        @property(
-            {type: String, attribute: 'camera-target', hasChanged: () => true})
-        cameraTarget: string = DEFAULT_CAMERA_TARGET;
-
-        @property(
-            {type: String, attribute: 'field-of-view', hasChanged: () => true})
-        fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
-
-        @property({type: Number, attribute: 'interaction-prompt-threshold'})
-        interactionPromptThreshold: number =
-            DEFAULT_INTERACTION_PROMPT_THRESHOLD;
-
-        @property({type: String, attribute: 'interaction-prompt'})
-        interactionPrompt: InteractionPromptStrategy =
-            InteractionPromptStrategy.AUTO;
-
-        @property({type: String, attribute: 'interaction-policy'})
-        interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
-
-        protected[$promptElement]: Element;
-
-        protected[$userPromptedOnce] = false;
-        protected[$waitingToPromptUser] = false;
-        protected[$shouldPromptUserToInteract] = true;
-
-        protected[$controls]: SmoothControls;
-
-        protected[$idealCameraDistance]: number|null = null;
-        protected[$lastSpherical] = new Spherical();
-        protected[$jumpCamera] = false;
-
-        protected[$changeHandler] = (event: Event) =>
-            this[$onChange](event as ChangeEvent);
-
-        protected[$focusHandler] = () => this[$onFocus]();
-        protected[$blurHandler] = () => this[$onBlur]();
-
-        protected[$promptTransitionendHandler] = () =>
-            this[$onPromptTransitionend]();
-
-        constructor() {
-          super();
-          const scene = (this as any)[$scene];
-
-          this[$promptElement] =
-              this.shadowRoot!.querySelector('.controls-prompt')!;
-
-          this[$controls] = new SmoothControls(scene.getCamera(), scene.canvas);
-          this[$updateCameraOrbit]();
-          this[$updateFieldOfView]();
-        }
-
-        getCameraOrbit(): SphericalPosition {
-          const {theta, phi, radius} = this[$lastSpherical];
-          return {theta, phi, radius};
-        }
-
-        getCameraTarget(): Vector3 {
-          return this[$controls].getTarget();
-        }
-
-        getFieldOfView(): number {
-          return this[$controls].getFieldOfView();
-        }
-
-        jumpCameraToGoal() {
-          this[$jumpCamera] = true;
-        }
-
-        connectedCallback() {
-          super.connectedCallback();
-
-          this[$promptTransitionendHandler]();
-          this[$promptElement].addEventListener(
-              'transitionend', this[$promptTransitionendHandler]);
-
-          this[$controls].addEventListener('change', this[$changeHandler]);
-        }
-
-        disconnectedCallback() {
-          super.disconnectedCallback();
-
-          this[$promptElement].removeEventListener(
-              'transitionend', this[$promptTransitionendHandler]);
-          this[$controls].removeEventListener('change', this[$changeHandler]);
-        }
-
-        updated(changedProperties: Map<string, any>) {
-          super.updated(changedProperties);
-
-          const controls = this[$controls];
-          const scene = (this as any)[$scene];
-
-          if (changedProperties.has('cameraControls')) {
-            if (this.cameraControls) {
-              controls.enableInteraction();
-
-              scene.canvas.addEventListener('focus', this[$focusHandler]);
-              scene.canvas.addEventListener('blur', this[$blurHandler]);
-            } else {
-              scene.canvas.removeEventListener('focus', this[$focusHandler]);
-              scene.canvas.removeEventListener('blur', this[$blurHandler]);
-
-              controls.disableInteraction();
-            }
-          }
-
-          if (changedProperties.has('interactionPrompt')) {
-            if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
-              this[$waitingToPromptUser] = true;
-            }
-          }
-
-          if (changedProperties.has('interactionPolicy')) {
-            const interactionPolicy = this.interactionPolicy;
-            controls.applyOptions({interactionPolicy});
-          }
-
-          if (changedProperties.has('cameraOrbit')) {
-            this[$updateCameraOrbit]();
-          }
-
-          if (changedProperties.has('cameraTarget')) {
-            this[$updateCameraTarget]();
-          }
-
-          if (changedProperties.has('fieldOfView')) {
-            this[$updateFieldOfView]();
-          }
-
-          if (this[$jumpCamera] === true) {
-            this[$controls].jumpToGoal();
-            this[$jumpCamera] = false;
-          }
-        }
-
-        [$updateFieldOfView]() {
-          let fov = deserializeAngleToDeg(this.fieldOfView);
-          if (fov == null) {
-            fov = deserializeAngleToDeg(DEFAULT_FIELD_OF_VIEW);
-          }
-          this[$controls].setFov(fov!);
-        }
-
-        [$updateCameraOrbit]() {
-          let sphericalValues = deserializeSpherical(this.cameraOrbit);
-
-          if (sphericalValues == null) {
-            sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
-          }
-
-          let [theta, phi, radius] = sphericalValues;
-
-          if (typeof radius === 'string') {
-            switch (radius) {
-              default:
-              case 'auto':
-                radius = this[$idealCameraDistance]!;
-                break;
-            }
-          }
-          this[$controls].setOrbit(theta, phi, radius as number);
-        }
-
-        [$updateCameraTarget]() {
-          const targetValues = deserializeVector3(this.cameraTarget);
-          let target = this[$scene].model.boundingBox.getCenter(new Vector3);
-
-          if (targetValues != null) {
-            for (let i = 0; i < 3; i++) {
-              if (targetValues[i] !== 'auto') {
-                target.setComponent(i, targetValues[i] as number);
-              }
-            }
-          }
-
-          this[$controls].setTarget(target);
-        }
-
-        [$tick](time: number, delta: number) {
-          super[$tick](time, delta);
-
-          if (this[$waitingToPromptUser] &&
-              this.interactionPrompt !== InteractionPromptStrategy.NONE) {
-            if (this.loaded &&
-                time > this[$loadedTime] + this.interactionPromptThreshold) {
-              (this as any)[$scene].canvas.setAttribute(
-                  'aria-label', INTERACTION_PROMPT);
-
-              // NOTE(cdata): After notifying users that the controls are
-              // available, we flag that the user has been prompted at least
-              // once, and then effectively stop the idle timer. If the camera
-              // orbit changes after this point, the user will never be prompted
-              // again for this particular <model-element> instance:
-              this[$userPromptedOnce] = true;
-              this[$waitingToPromptUser] = false;
-
-              this[$promptElement].classList.add('visible');
-            }
-          }
-
-          this[$controls].update(time, delta);
-        }
-
-        [$deferInteractionPrompt]() {
-          // Effectively cancel the timer waiting for user interaction:
-          this[$waitingToPromptUser] = false;
-          this[$promptElement].classList.remove('visible');
-
-          // Implicitly there was some reason to defer the prompt. If the user
-          // has been prompted at least once already, we no longer need to
-          // prompt the user, although if they have never been prompted we
-          // should probably prompt them at least once just in case.
-          if (this[$userPromptedOnce]) {
-            this[$shouldPromptUserToInteract] = false;
-          }
-        }
-
-        /**
-         * Changes the camera's radius to properly frame the scene based on
-         * changes to framedHeight or fov, and maintains relative camera zoom
-         * state.
-         */
-        [$updateCamera]() {
-          const scene = (this as any)[$scene];
-          const controls = this[$controls];
-          const framedHeight = scene.framedHeight;
-
-          const framedDistance = (framedHeight / 2) /
-              Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
-          const near = framedHeight / 10.0;
-          const far = framedHeight * 10.0;
-
-          // When we update the idealCameraDistance due to reframing, we want to
-          // maintain the user's zoom level (how they have changed the camera
-          // radius), which we represent here as a ratio.
-          const zoom = (this[$idealCameraDistance] != null) ?
-              controls.getCameraSpherical().radius /
-                  this[$idealCameraDistance]! :
-              1;
-          this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
-
-          controls.updateIntrinsics(near, far, scene.aspect);
-
-          // Zooming out beyond the 'frame' doesn't serve much purpose
-          // and will only end up showing the skysphere if zoomed out enough
-          const minimumRadius = near + framedHeight / 2.0;
-          const maximumRadius = this[$idealCameraDistance]!;
-
-          controls.applyOptions({minimumRadius, maximumRadius});
-
-          controls.setRadius(zoom * this[$idealCameraDistance]!);
-          controls.jumpToGoal();
-        }
-
-        [$updateAria]() {
-          // NOTE(cdata): It is possible that we might want to record the
-          // last spherical when the label actually changed. Right now, the
-          // side-effect the current implementation is that we will only
-          // announce the first view change that occurs after the element
-          // becomes focused.
-          const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
-          const {theta, phi} =
-              this[$controls]!.getCameraSpherical(this[$lastSpherical]);
-
-          const rootNode = this.getRootNode() as Document | ShadowRoot | null;
-
-          // Only change the aria-label if <model-viewer> is currently focused:
-          if (rootNode != null && rootNode.activeElement === this) {
-            const lastAzimuthalQuadrant =
-                (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) %
-                4;
-            const azimuthalQuadrant =
-                (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
-
-            const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
-            const polarTrient = Math.floor(phi / THIRD_PI);
-
-            if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
-                polarTrient !== lastPolarTrient) {
-              const {canvas} = (this as any)[$scene];
-              const azimuthalQuadrantLabel =
-                  AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
-              const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
-
-              const ariaLabel = `View from stage ${polarTrientLabel}${
-                  azimuthalQuadrantLabel}`;
-
-              canvas.setAttribute('aria-label', ariaLabel);
-            }
-          }
-        }
-
-        [$onPromptTransitionend]() {
-          const svg = this[$promptElement].querySelector('svg');
-
-          if (svg == null) {
-            return;
-          }
-
-          // NOTE(cdata): We need to make sure that SVG animations are paused
-          // when the prompt is not visible, otherwise we may a significant
-          // compositing cost even while the prompt is at opacity 0.
-          if (this[$promptElement].classList.contains('visible')) {
-            svg.unpauseAnimations();
-          } else {
-            svg.pauseAnimations();
-          }
-        }
-
-        [$onResize](event: any) {
-          super[$onResize](event);
-          this[$updateCamera]();
-        }
-
-        [$onModelLoad](event: any) {
-          super[$onModelLoad](event);
-          this[$updateCamera]();
-          this[$updateCameraOrbit]();
-          this[$updateCameraTarget]();
-          this[$controls].jumpToGoal();
-        }
-
-        [$onFocus]() {
-          const {canvas} = (this as any)[$scene];
-
-          // NOTE(cdata): On every re-focus, we switch the aria-label back to
-          // the original, non-prompt label if appropriate. If the user has
-          // already interacted, they no longer need to hear the prompt.
-          // Otherwise, they will hear it again after the idle prompt threshold
-          // has been crossed.
-          const ariaLabel = this[$ariaLabel];
-
-          if (canvas.getAttribute('aria-label') !== ariaLabel) {
-            canvas.setAttribute('aria-label', ariaLabel);
-          }
-
-          // NOTE(cdata): When focused, if the user has yet to interact with the
-          // camera controls (that is, we "should" prompt the user), we begin
-          // the idle timer and indicate that we are waiting for it to cross the
-          // prompt threshold:
-          if (this[$shouldPromptUserToInteract]) {
-            this[$waitingToPromptUser] = true;
-          }
-        }
-
-        [$onBlur]() {
-          this[$waitingToPromptUser] = false;
-          this[$promptElement].classList.remove('visible');
-        }
-
-        [$onChange]({source}: ChangeEvent) {
-          this[$updateAria]();
-          this[$needsRender]();
-
-          if (source === ChangeSource.USER_INTERACTION) {
-            this[$deferInteractionPrompt]();
-          }
-
-          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-              'camera-change', {detail: {source}}));
+export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
+    ModelViewerElement: T) => {
+  class ControlsModelViewerElement extends ModelViewerElement {
+    @property({type: Boolean, attribute: 'camera-controls'})
+    cameraControls: boolean = false;
+
+    @property({type: String, attribute: 'camera-orbit', hasChanged: () => true})
+    cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
+
+    @property(
+        {type: String, attribute: 'camera-target', hasChanged: () => true})
+    cameraTarget: string = DEFAULT_CAMERA_TARGET;
+
+    @property(
+        {type: String, attribute: 'field-of-view', hasChanged: () => true})
+    fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
+
+    @property({type: Number, attribute: 'interaction-prompt-threshold'})
+    interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
+
+    @property({type: String, attribute: 'interaction-prompt'})
+    interactionPrompt: InteractionPromptStrategy =
+        InteractionPromptStrategy.AUTO;
+
+    @property({type: String, attribute: 'interaction-policy'})
+    interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
+
+    protected[$promptElement] =
+        this.shadowRoot!.querySelector('.controls-prompt')!;
+
+    protected[$userPromptedOnce] = false;
+    protected[$waitingToPromptUser] = false;
+    protected[$shouldPromptUserToInteract] = true;
+
+    protected[$controls] = new SmoothControls(
+        this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
+
+    protected[$idealCameraDistance]: number|null = null;
+    protected[$lastSpherical] = new Spherical();
+    protected[$jumpCamera] = false;
+
+    protected[$changeHandler] = (event: Event) =>
+        this[$onChange](event as ChangeEvent);
+
+    protected[$focusHandler] = () => this[$onFocus]();
+    protected[$blurHandler] = () => this[$onBlur]();
+
+    protected[$promptTransitionendHandler] = () =>
+        this[$onPromptTransitionend]();
+
+    getCameraOrbit(): SphericalPosition {
+      const {theta, phi, radius} = this[$lastSpherical];
+      return {theta, phi, radius};
+    }
+
+    getCameraTarget(): Vector3 {
+      return this[$controls].getTarget();
+    }
+
+    getFieldOfView(): number {
+      return this[$controls].getFieldOfView();
+    }
+
+    jumpCameraToGoal() {
+      this[$jumpCamera] = true;
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+
+      this[$updateCameraOrbit]();
+      this[$updateFieldOfView]();
+
+      this[$promptTransitionendHandler]();
+      this[$promptElement].addEventListener(
+          'transitionend', this[$promptTransitionendHandler]);
+
+      this[$controls].addEventListener('change', this[$changeHandler]);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+
+      this[$promptElement].removeEventListener(
+          'transitionend', this[$promptTransitionendHandler]);
+      this[$controls].removeEventListener('change', this[$changeHandler]);
+    }
+
+    updated(changedProperties: Map<string, any>) {
+      super.updated(changedProperties);
+
+      const controls = this[$controls];
+      const scene = (this as any)[$scene];
+
+      if (changedProperties.has('cameraControls')) {
+        if (this.cameraControls) {
+          controls.enableInteraction();
+
+          scene.canvas.addEventListener('focus', this[$focusHandler]);
+          scene.canvas.addEventListener('blur', this[$blurHandler]);
+        } else {
+          scene.canvas.removeEventListener('focus', this[$focusHandler]);
+          scene.canvas.removeEventListener('blur', this[$blurHandler]);
+
+          controls.disableInteraction();
         }
       }
 
-      return ControlsModelViewerElement;
-    };
+      if (changedProperties.has('interactionPrompt')) {
+        if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+          this[$waitingToPromptUser] = true;
+        }
+      }
+
+      if (changedProperties.has('interactionPolicy')) {
+        const interactionPolicy = this.interactionPolicy;
+        controls.applyOptions({interactionPolicy});
+      }
+
+      if (changedProperties.has('cameraOrbit')) {
+        this[$updateCameraOrbit]();
+      }
+
+      if (changedProperties.has('cameraTarget')) {
+        this[$updateCameraTarget]();
+      }
+
+      if (changedProperties.has('fieldOfView')) {
+        this[$updateFieldOfView]();
+      }
+
+      if (this[$jumpCamera] === true) {
+        this[$controls].jumpToGoal();
+        this[$jumpCamera] = false;
+      }
+    }
+
+    [$updateFieldOfView]() {
+      let fov = deserializeAngleToDeg(this.fieldOfView);
+      if (fov == null) {
+        fov = deserializeAngleToDeg(DEFAULT_FIELD_OF_VIEW);
+      }
+      this[$controls].setFov(fov!);
+    }
+
+    [$updateCameraOrbit]() {
+      let sphericalValues = deserializeSpherical(this.cameraOrbit);
+
+      if (sphericalValues == null) {
+        sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
+      }
+
+      let [theta, phi, radius] = sphericalValues;
+
+      if (typeof radius === 'string') {
+        switch (radius) {
+          default:
+          case 'auto':
+            radius = this[$idealCameraDistance]!;
+            break;
+        }
+      }
+      this[$controls].setOrbit(theta, phi, radius as number);
+    }
+
+    [$updateCameraTarget]() {
+      const targetValues = deserializeVector3(this.cameraTarget);
+      let target = this[$scene].model.boundingBox.getCenter(new Vector3);
+
+      if (targetValues != null) {
+        for (let i = 0; i < 3; i++) {
+          if (targetValues[i] !== 'auto') {
+            target.setComponent(i, targetValues[i] as number);
+          }
+        }
+      }
+
+      this[$controls].setTarget(target);
+    }
+
+    [$tick](time: number, delta: number) {
+      super[$tick](time, delta);
+
+      if (this[$waitingToPromptUser] &&
+          this.interactionPrompt !== InteractionPromptStrategy.NONE) {
+        if (this.loaded &&
+            time > this[$loadedTime] + this.interactionPromptThreshold) {
+          (this as any)[$scene].canvas.setAttribute(
+              'aria-label', INTERACTION_PROMPT);
+
+          // NOTE(cdata): After notifying users that the controls are
+          // available, we flag that the user has been prompted at least
+          // once, and then effectively stop the idle timer. If the camera
+          // orbit changes after this point, the user will never be prompted
+          // again for this particular <model-element> instance:
+          this[$userPromptedOnce] = true;
+          this[$waitingToPromptUser] = false;
+
+          this[$promptElement].classList.add('visible');
+        }
+      }
+
+      this[$controls].update(time, delta);
+    }
+
+    [$deferInteractionPrompt]() {
+      // Effectively cancel the timer waiting for user interaction:
+      this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.remove('visible');
+
+      // Implicitly there was some reason to defer the prompt. If the user
+      // has been prompted at least once already, we no longer need to
+      // prompt the user, although if they have never been prompted we
+      // should probably prompt them at least once just in case.
+      if (this[$userPromptedOnce]) {
+        this[$shouldPromptUserToInteract] = false;
+      }
+    }
+
+    /**
+     * Changes the camera's radius to properly frame the scene based on
+     * changes to framedHeight or fov, and maintains relative camera zoom
+     * state.
+     */
+    [$updateCamera]() {
+      const scene = (this as any)[$scene];
+      const controls = this[$controls];
+      const framedHeight = scene.framedHeight;
+
+      const framedDistance = (framedHeight / 2) /
+          Math.tan((controls.getFieldOfView() / 2) * Math.PI / 180);
+      const near = framedHeight / 10.0;
+      const far = framedHeight * 10.0;
+
+      // When we update the idealCameraDistance due to reframing, we want to
+      // maintain the user's zoom level (how they have changed the camera
+      // radius), which we represent here as a ratio.
+      const zoom = (this[$idealCameraDistance] != null) ?
+          controls.getCameraSpherical().radius / this[$idealCameraDistance]! :
+          1;
+      this[$idealCameraDistance] = framedDistance + scene.modelDepth / 2;
+
+      controls.updateIntrinsics(near, far, scene.aspect);
+
+      // Zooming out beyond the 'frame' doesn't serve much purpose
+      // and will only end up showing the skysphere if zoomed out enough
+      const minimumRadius = near + framedHeight / 2.0;
+      const maximumRadius = this[$idealCameraDistance]!;
+
+      controls.applyOptions({minimumRadius, maximumRadius});
+
+      controls.setRadius(zoom * this[$idealCameraDistance]!);
+      controls.jumpToGoal();
+    }
+
+    [$updateAria]() {
+      // NOTE(cdata): It is possible that we might want to record the
+      // last spherical when the label actually changed. Right now, the
+      // side-effect the current implementation is that we will only
+      // announce the first view change that occurs after the element
+      // becomes focused.
+      const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
+      const {theta, phi} =
+          this[$controls]!.getCameraSpherical(this[$lastSpherical]);
+
+      const rootNode = this.getRootNode() as Document | ShadowRoot | null;
+
+      // Only change the aria-label if <model-viewer> is currently focused:
+      if (rootNode != null && rootNode.activeElement === this) {
+        const lastAzimuthalQuadrant =
+            (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+        const azimuthalQuadrant =
+            (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+
+        const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
+        const polarTrient = Math.floor(phi / THIRD_PI);
+
+        if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
+            polarTrient !== lastPolarTrient) {
+          const {canvas} = (this as any)[$scene];
+          const azimuthalQuadrantLabel =
+              AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
+          const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
+
+          const ariaLabel =
+              `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
+
+          canvas.setAttribute('aria-label', ariaLabel);
+        }
+      }
+    }
+
+    [$onPromptTransitionend]() {
+      const svg = this[$promptElement].querySelector('svg');
+
+      if (svg == null) {
+        return;
+      }
+
+      // NOTE(cdata): We need to make sure that SVG animations are paused
+      // when the prompt is not visible, otherwise we may a significant
+      // compositing cost even while the prompt is at opacity 0.
+      if (this[$promptElement].classList.contains('visible')) {
+        svg.unpauseAnimations();
+      } else {
+        svg.pauseAnimations();
+      }
+    }
+
+    [$onResize](event: any) {
+      super[$onResize](event);
+      this[$updateCamera]();
+    }
+
+    [$onModelLoad](event: any) {
+      super[$onModelLoad](event);
+      this[$updateCamera]();
+      this[$updateCameraOrbit]();
+      this[$updateCameraTarget]();
+      this[$controls].jumpToGoal();
+    }
+
+    [$onFocus]() {
+      const {canvas} = (this as any)[$scene];
+
+      // NOTE(cdata): On every re-focus, we switch the aria-label back to
+      // the original, non-prompt label if appropriate. If the user has
+      // already interacted, they no longer need to hear the prompt.
+      // Otherwise, they will hear it again after the idle prompt threshold
+      // has been crossed.
+      const ariaLabel = this[$ariaLabel];
+
+      if (canvas.getAttribute('aria-label') !== ariaLabel) {
+        canvas.setAttribute('aria-label', ariaLabel);
+      }
+
+      // NOTE(cdata): When focused, if the user has yet to interact with the
+      // camera controls (that is, we "should" prompt the user), we begin
+      // the idle timer and indicate that we are waiting for it to cross the
+      // prompt threshold:
+      if (this[$shouldPromptUserToInteract]) {
+        this[$waitingToPromptUser] = true;
+      }
+    }
+
+    [$onBlur]() {
+      this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.remove('visible');
+    }
+
+    [$onChange]({source}: ChangeEvent) {
+      this[$updateAria]();
+      this[$needsRender]();
+
+      if (source === ChangeSource.USER_INTERACTION) {
+        this[$deferInteractionPrompt]();
+      }
+
+      this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+          'camera-change', {detail: {source}}));
+    }
+  }
+
+  return ControlsModelViewerElement;
+};
+
+export type ControlsInterface = InstanceType<ReturnType<typeof ControlsMixin>>;
