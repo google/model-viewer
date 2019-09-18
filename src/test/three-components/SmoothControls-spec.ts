@@ -142,6 +142,23 @@ suite('SmoothControls', () => {
           expect(camera.position.length()).to.be.equal(1.5);
         });
       });
+
+      suite('azimuth', () => {
+        test('wraps and takes the shortest path', () => {
+          controls.setOrbit(QUARTER_PI);
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta).to.be.equal(QUARTER_PI);
+
+          controls.setOrbit(4 * Math.PI - QUARTER_PI);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(QUARTER_PI);
+
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(-QUARTER_PI, 0.0001);
+        });
+      });
     });
 
     suite('keyboard input', () => {
@@ -179,21 +196,25 @@ suite('SmoothControls', () => {
       suite('azimuth', () => {
         setup(() => {
           controls.applyOptions({
-            minimumAzimuthalAngle: -1 * HALF_PI,
-            maximumAzimuthalAngle: HALF_PI
+            minimumAzimuthalAngle: -1 * THREE_QUARTERS_PI,
+            maximumAzimuthalAngle: THREE_QUARTERS_PI
           });
         });
 
         test('prevents camera azimuth from exceeding options', () => {
           controls.setOrbit(-Math.PI, 0, 0);
           settleControls(controls);
-
-          expect(controls.getCameraSpherical().theta).to.be.equal(-1 * HALF_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.equal(-1 * THREE_QUARTERS_PI);
 
           controls.setOrbit(Math.PI, 0, 0);
-          settleControls(controls);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(THREE_QUARTERS_PI);
 
-          expect(controls.getCameraSpherical().theta).to.be.equal(HALF_PI);
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.equal(THREE_QUARTERS_PI);
         });
       });
 

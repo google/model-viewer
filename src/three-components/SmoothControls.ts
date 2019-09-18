@@ -118,7 +118,6 @@ const ZOOM_SENSITIVITY = 0.1;
 const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
 const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
-const TAU = 2 * Math.PI;
 const UP = new Vector3(0, 1, 0);
 
 export const KeyCode = {
@@ -581,7 +580,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
-    return TAU * pixelLength / this.element.clientHeight;
+    return 2 * Math.PI * pixelLength / this.element.clientHeight;
   }
 
   private[$sphericalToPosition](spherical: Spherical, position: Vector3) {
