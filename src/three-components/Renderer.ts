@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ export default class Renderer extends EventDispatcher {
     try {
       return await this[$arRenderer].present(scene);
     } catch (error) {
-      this[$arRenderer].stopPresenting();
+      await this[$arRenderer].stopPresenting();
       throw error;
     } finally {
       // NOTE(cdata): Setting width and height to 0 will have the effect of

@@ -15,8 +15,10 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "outDir": "./lib",
-    "allowJs": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "noErrorTruncation": true,
+    "allowJs": true
+    // "declaration": true
   },
   "include": [
     "./src/**/*.ts",

@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -23,121 +23,131 @@ const MILLISECONDS_PER_SECOND = 1000.0
 const $changeAnimation = Symbol('changeAnimation');
 const $paused = Symbol('paused');
 
-export const AnimationMixin =
-    (ModelViewerElement: Constructor<ModelViewerElementBase>):
-        Constructor<ModelViewerElementBase> => {
-          class AnimationModelViewerElement extends ModelViewerElement {
-            @property({type: Boolean}) autoplay: boolean = false;
-            @property({type: String, attribute: 'animation-name'})
-            animationName: string|void = undefined;
-            @property({type: Number, attribute: 'animation-crossfade-duration'})
-            animationCrossfadeDuration: number = 300;
+export interface AnimationInterface {
+  autoplay: boolean;
+  animationName: string|void;
+  animationCrossfadeDuration: number;
+  readonly availableAnimations: Array<string>;
+  readonly paused: boolean;
+  currentTime: number;
+  pause(): void;
+  play(): void;
+}
 
-            protected[$paused]: boolean = true;
+export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
+    ModelViewerElement: T): Constructor<AnimationInterface>&T => {
+  class AnimationModelViewerElement extends ModelViewerElement {
+    @property({type: Boolean}) autoplay: boolean = false;
+    @property({type: String, attribute: 'animation-name'})
+    animationName: string|void = undefined;
+    @property({type: Number, attribute: 'animation-crossfade-duration'})
+    animationCrossfadeDuration: number = 300;
 
-            /**
-             * Returns an array
-             */
-            get availableAnimations(): Array<string> {
-              if (this.loaded) {
-                return (this as any)[$scene].model.animationNames;
-              }
+    protected[$paused]: boolean = true;
 
-              return [];
-            }
+    /**
+     * Returns an array
+     */
+    get availableAnimations(): Array<string> {
+      if (this.loaded) {
+        return (this as any)[$scene].model.animationNames;
+      }
 
-            get paused(): boolean {
-              return this[$paused];
-            }
+      return [];
+    }
 
-            get currentTime(): number {
-              return (this as any)[$scene].model.animationTime;
-            }
+    get paused(): boolean {
+      return this[$paused];
+    }
 
-            set currentTime(value: number) {
-              (this as any)[$scene].model.animationTime = value;
-            }
+    get currentTime(): number {
+      return (this as any)[$scene].model.animationTime;
+    }
 
-            pause() {
-              if (this[$paused]) {
-                return;
-              }
+    set currentTime(value: number) {
+      (this as any)[$scene].model.animationTime = value;
+    }
 
-              this[$paused] = true;
-              this.dispatchEvent(new CustomEvent('pause'));
-            }
+    pause() {
+      if (this[$paused]) {
+        return;
+      }
 
-            play() {
-              if (this[$paused] && this.availableAnimations.length > 0) {
-                this[$paused] = false;
+      this[$paused] = true;
+      this.dispatchEvent(new CustomEvent('pause'));
+    }
 
-                if (!(this as any)[$scene].model.hasActiveAnimation) {
-                  this[$changeAnimation]();
-                }
+    play() {
+      if (this[$paused] && this.availableAnimations.length > 0) {
+        this[$paused] = false;
 
-                this.dispatchEvent(new CustomEvent('play'));
-              }
-            }
+        if (!(this as any)[$scene].model.hasActiveAnimation) {
+          this[$changeAnimation]();
+        }
 
-            [$onModelLoad]() {
-              this[$paused] = true;
+        this.dispatchEvent(new CustomEvent('play'));
+      }
+    }
 
-              if (this.autoplay) {
-                this[$changeAnimation]();
-                this.play();
-              }
-            }
+    [$onModelLoad]() {
+      this[$paused] = true;
 
-            [$tick](_time: number, delta: number) {
-              super[$tick](_time, delta);
+      if (this.autoplay) {
+        this[$changeAnimation]();
+        this.play();
+      }
+    }
 
-              if (this[$paused]) {
-                return;
-              }
+    [$tick](_time: number, delta: number) {
+      super[$tick](_time, delta);
 
-              const {model} = (this as any)[$scene];
-              model.updateAnimation(delta / MILLISECONDS_PER_SECOND);
+      if (this[$paused]) {
+        return;
+      }
 
-              this[$needsRender]();
-            }
+      const {model} = (this as any)[$scene];
+      model.updateAnimation(delta / MILLISECONDS_PER_SECOND);
 
-            updated(changedProperties: Map<string, any>) {
-              super.updated(changedProperties);
+      this[$needsRender]();
+    }
 
-              if (changedProperties.has('autoplay') && this.autoplay) {
-                this.play();
-              }
+    updated(changedProperties: Map<string, any>) {
+      super.updated(changedProperties);
 
-              if (changedProperties.has('animationName')) {
-                this[$changeAnimation]();
-              }
-            }
+      if (changedProperties.has('autoplay') && this.autoplay) {
+        this.play();
+      }
 
-            async[$updateSource]() {
-              super[$updateSource]();
+      if (changedProperties.has('animationName')) {
+        this[$changeAnimation]();
+      }
+    }
 
-              // If we are loading a new model, we need to stop the animation of
-              // the current one (if any is playing). Otherwise, we might lose
-              // the reference to the scene root and running actions start to
-              // throw exceptions and/or behave in unexpected ways:
-              (this as any)[$scene].model.stopAnimation();
-            }
+    async[$updateSource]() {
+      // If we are loading a new model, we need to stop the animation of
+      // the current one (if any is playing). Otherwise, we might lose
+      // the reference to the scene root and running actions start to
+      // throw exceptions and/or behave in unexpected ways:
+      (this as any)[$scene].model.stopAnimation();
 
-            [$changeAnimation]() {
-              const {model} = (this as any)[$scene];
+      return super[$updateSource]();
+    }
 
-              model.playAnimation(
-                  this.animationName,
-                  this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
+    [$changeAnimation]() {
+      const {model} = (this as any)[$scene];
 
-              // If we are currently paused, we need to force a render so that
-              // the model updates to the first frame of the new animation
-              if (this[$paused]) {
-                model.updateAnimation(0);
-                this[$needsRender]();
-              }
-            }
-          }
+      model.playAnimation(
+          this.animationName,
+          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
 
-          return AnimationModelViewerElement;
-        };
+      // If we are currently paused, we need to force a render so that
+      // the model updates to the first frame of the new animation
+      if (this[$paused]) {
+        model.updateAnimation(0);
+        this[$needsRender]();
+      }
+    }
+  }
+
+  return AnimationModelViewerElement;
+};

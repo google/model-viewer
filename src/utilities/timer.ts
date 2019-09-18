@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ const $duration = Symbol('duration');
 /**
  * The Timer class can be used power delays and animations
  */
-class Timer {
+export class Timer {
   /**
    * total time incremented by the tick method. time is initialized to 0
    */
@@ -48,12 +48,12 @@ class Timer {
     return this[$time] >= this[$duration];
   }
 
-  private [$time]: number;
-  private [$duration]: number;
+  private[$time]: number;
+  private[$duration]: number;
 
   /**
    * Creates a new timer
-   * 
+   *
    * @param duration the total duration for the timer
    */
   constructor(duration: number) {
@@ -69,7 +69,8 @@ class Timer {
   }
 
   /**
-   * sets time to duration meaning the timer has completed and hasStopped will return true
+   * sets time to duration meaning the timer has completed and hasStopped will
+   * return true
    */
   stop(): void {
     this[$time] = this[$duration];
@@ -77,7 +78,7 @@ class Timer {
 
   /**
    * pass deltaTime to the tick method to tick/increment the timer forward
-   * 
+   *
    * @param deltaTime delta time since last tick was called
    */
   tick(deltaTime: number) {
@@ -88,5 +89,3 @@ class Timer {
     }
   }
 }
-
-export default Timer;

@@ -1,3 +1,6 @@
+/* @license ISC
+ * @see LICENSE
+ */
 // NOTE(cdata): This is an adapted subset of the original pixelmatch library.
 // The top-level API of the original library has been omitted, as we only make
 // use of the lower-level features that aren't actually exported by the upstream

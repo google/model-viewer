@@ -1,5 +1,5 @@
 
-/*
+/* @license
  * Copyright 2019 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
-import {Constructor, Timer} from '../utilities.js';
+import {Constructor} from '../utilities.js';
+import {Timer} from '../utilities/timer.js';
 import {CameraChangeDetails} from './controls.js';
 
 // How much the model will rotate per
@@ -31,70 +32,72 @@ const $onCameraChange = Symbol('onCameraChange');
 
 export {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION};
 
-export const StagingMixin =
-    (ModelViewerElement: Constructor<ModelViewerElementBase>):
-        Constructor<ModelViewerElementBase> => {
-          class StagingModelViewerElement extends ModelViewerElement {
-            @property({type: Boolean, attribute: 'auto-rotate'})
-            autoRotate: boolean = false;
+export interface StagingInterface {
+  autoRotate: boolean;
+}
 
-            private[$autoRotateTimer]: Timer =
-                new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
-            private[$cameraChangeHandler] =
-                (event: CustomEvent<CameraChangeDetails>) =>
-                    this[$onCameraChange](event);
+export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
+    ModelViewerElement: T): Constructor<StagingInterface>&T => {
+  class StagingModelViewerElement extends ModelViewerElement {
+    @property({type: Boolean, attribute: 'auto-rotate'})
+    autoRotate: boolean = false;
 
-            connectedCallback() {
-              super.connectedCallback();
-              this.addEventListener(
-                  'camera-change', this[$cameraChangeHandler] as EventListener);
-              this[$autoRotateTimer].stop();
-            }
+    private[$autoRotateTimer]: Timer =
+        new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+    private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
+        this[$onCameraChange](event);
 
-            disconnectedCallback() {
-              super.disconnectedCallback();
-              this.removeEventListener(
-                  'camera-change', this[$cameraChangeHandler] as EventListener);
-              this[$autoRotateTimer].stop();
-            }
+    connectedCallback() {
+      super.connectedCallback();
+      this.addEventListener(
+          'camera-change', this[$cameraChangeHandler] as EventListener);
+      this[$autoRotateTimer].stop();
+    }
 
-            updated(changedProperties: Map<string, any>) {
-              super.updated(changedProperties);
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.removeEventListener(
+          'camera-change', this[$cameraChangeHandler] as EventListener);
+      this[$autoRotateTimer].stop();
+    }
 
-              if (changedProperties.has('autoRotate')) {
-                (this as any)[$scene].pivot.rotation.set(0, 0, 0);
-                this[$needsRender]();
-              }
-            }
+    updated(changedProperties: Map<string, any>) {
+      super.updated(changedProperties);
 
-            [$tick](time: number, delta: number) {
-              super[$tick](time, delta);
+      if (changedProperties.has('autoRotate')) {
+        (this as any)[$scene].pivot.rotation.set(0, 0, 0);
+        this[$needsRender]();
+      }
+    }
 
-              if (!this.autoRotate || !this.modelIsVisible) {
-                return;
-              }
+    [$tick](time: number, delta: number) {
+      super[$tick](time, delta);
 
-              this[$autoRotateTimer].tick(delta);
+      if (!this.autoRotate || !this.modelIsVisible) {
+        return;
+      }
 
-              if (this[$autoRotateTimer].hasStopped) {
-                (this as any)[$scene].pivot.rotation.y +=
-                    ROTATION_SPEED * delta * 0.001;
-                this[$needsRender]();
-              }
-            }
+      this[$autoRotateTimer].tick(delta);
 
-            [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
-              if (!this.autoRotate) {
-                return;
-              }
+      if (this[$autoRotateTimer].hasStopped) {
+        (this as any)[$scene].pivot.rotation.y +=
+            ROTATION_SPEED * delta * 0.001;
+        this[$needsRender]();
+      }
+    }
 
-              this[$autoRotateTimer].reset();
-            }
+    [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
+      if (!this.autoRotate) {
+        return;
+      }
 
-            get turntableRotation(): number {
-              return (this as any)[$scene].pivot.rotation.y;
-            }
-          }
+      this[$autoRotateTimer].reset();
+    }
 
-          return StagingModelViewerElement;
-        };
+    get turntableRotation(): number {
+      return (this as any)[$scene].pivot.rotation.y;
+    }
+  }
+
+  return StagingModelViewerElement;
+};
