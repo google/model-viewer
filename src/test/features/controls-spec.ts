@@ -53,7 +53,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
     let tagName: string;
-    let ModelViewerElement: Constructor<ControlsInterface>;
+    let ModelViewerElement:
+        Constructor<ModelViewerElementBase&ControlsInterface>;
 
     setup(() => {
       tagName = `model-viewer-controls-${nextId++}`;
@@ -69,7 +70,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('camera-orbit', () => {
-      let element: ControlsInterface;
+      let element: ModelViewerElementBase&ControlsInterface;
       let controls: SmoothControls;
 
       setup(async () => {
@@ -243,7 +244,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
     });
 
     suite('camera-controls', () => {
-      let element: ControlsInterface;
+      let element: ModelViewerElementBase&ControlsInterface;
       let controls: SmoothControls;
 
       setup(async () => {

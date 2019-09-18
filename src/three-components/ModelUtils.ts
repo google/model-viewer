@@ -50,15 +50,7 @@ const updateShader = (shader: Shader) => {
           .replace('#include <normalmap_pars_fragment>', normalmapChunk);
 };
 
-/**
- * Creates a clone of the given material, and applies a patch to the
- * shader program.
- */
-const cloneAndPatchMaterial = (material: Material): Material => {
-  const clone = material.clone();
-  clone.onBeforeCompile = updateShader;
-  return clone;
-};
+
 
 /**
  * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
@@ -91,10 +83,28 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
   const cloneSkinnedMeshes: SkinnedMeshMap = {};
 
   if (hasScene) {
+    const specularGlossiness =
+        gltf.parser.extensions['KHR_materials_pbrSpecularGlossiness'];
+    /**
+     * Creates a clone of the given material, and applies a patch to the
+     * shader program.
+     */
+    const cloneAndPatchMaterial = (material: Material): Material => {
+      const clone = (material as any).isGLTFSpecularGlossinessMaterial ?
+          specularGlossiness.cloneMaterial(material) :
+          material.clone();
+      clone.onBeforeCompile = updateShader;
+      return clone;
+    };
+
     clone.scene!.traverse((node: any) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
       node.renderOrder = 1000;
+
+      if (specularGlossiness != null && node.isMesh) {
+        node.onBeforeRender = specularGlossiness.refreshUniforms;
+      }
 
       // Materials aren't cloned when cloning meshes; geometry
       // and materials are copied by reference. This is necessary
