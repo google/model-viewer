@@ -1,3 +1,8 @@
+/**
+ * @license MIT
+ * @see https://github.com/mrdoob/three.js/blob/dev/LICENSE
+ */
+
 export const normalmapChunk = /* glsl */ `
 #ifdef USE_NORMALMAP
 
