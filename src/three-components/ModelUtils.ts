@@ -162,6 +162,8 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
  * Performs a reduction across all the vertices of the input model and all its
  * children. The supplied function takes the reduced value and a vertex and
  * returns the newly reduced value. The value is initialized as zero.
+ *
+ * Adapted from Three.js, @see https://github.com/mrdoob/three.js/blob/7e0a78beb9317e580d7fa4da9b5b12be051c6feb/src/math/Box3.js#L241
  */
 export const reduceVertices =
     (model: Object3D, func: (value: number, vertex: Vector3) => number):
