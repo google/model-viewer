@@ -57,42 +57,45 @@ export class RGBELoader extends DataTextureLoader {
         NEWLINE = '\n',
 
         fgets = function(
-            buffer: Uint8Array,
+            buffer: BufferPos,
             lineLimit: number|null = null,
             consume: boolean = false):
-            string|null {
-              lineLimit = !lineLimit ? 1024 : lineLimit;
-              var p = buffer.pos, i = -1, len = 0, s = '', chunkSize = 128,
-                  chunk = String.fromCharCode.apply(
-                      null, new Uint16Array(buffer.subarray(p, p + chunkSize)));
-              while ((0 > (i = chunk.indexOf(NEWLINE))) && (len < lineLimit) &&
-                     (p < buffer.byteLength)) {
-                s += chunk;
-                len += chunk.length;
-                p += chunkSize;
-                chunk += String.fromCharCode.apply(
-                    null, new Uint16Array(buffer.subarray(p, p + chunkSize)));
-              }
+            string|
+        null {
+          lineLimit = !lineLimit ? 1024 : lineLimit;
+          var p = buffer.pos, i = -1, len = 0, s = '', chunkSize = 128,
+              chunk = String.fromCharCode.apply(
+                  null,
+                  (new Uint8Array(buffer.subarray(p, p + chunkSize)) as any));
+          while ((0 > (i = chunk.indexOf(NEWLINE))) && (len < lineLimit) &&
+                 (p < buffer.byteLength)) {
+            s += chunk;
+            len += chunk.length;
+            p += chunkSize;
+            chunk += String.fromCharCode.apply(
+                null,
+                (new Uint8Array(buffer.subarray(p, p + chunkSize)) as any));
+          }
 
-              if (-1 < i) {
-                /*for (i=l-1; i>=0; i--) {
-                        byteCode = m.charCodeAt(i);
-                        if (byteCode > 0x7f && byteCode <= 0x7ff) byteLen++;
-                        else if (byteCode > 0x7ff && byteCode <= 0xffff) byteLen
-                += 2; if (byteCode >= 0xDC00 && byteCode <= 0xDFFF) i--; //trail
-                surrogate
-                }*/
-                if (false !== consume)
-                  buffer.pos += len + i + 1;
-                return s + chunk.slice(0, i);
-              }
-              return null;
-            },
+          if (-1 < i) {
+            /*for (i=l-1; i>=0; i--) {
+                    byteCode = m.charCodeAt(i);
+                    if (byteCode > 0x7f && byteCode <= 0x7ff) byteLen++;
+                    else if (byteCode > 0x7ff && byteCode <= 0xffff) byteLen
+            += 2; if (byteCode >= 0xDC00 && byteCode <= 0xDFFF) i--; //trail
+            surrogate
+            }*/
+            if (false !== consume)
+              buffer.pos += len + i + 1;
+            return s + chunk.slice(0, i);
+          }
+          return null;
+        },
 
         /* minimal header reading.  modify if you want to parse more information
          */
         RGBE_ReadHeader =
-            function(buffer: Uint8Array) {
+            function(buffer: BufferPos) {
           var line, match,
 
               // regexes to parse header info fields
@@ -283,8 +286,7 @@ export class RGBELoader extends DataTextureLoader {
         };
 
     var byteArray =
-        new Uint8Array(buffer);  //, byteLength = byteArray.byteLength;
-    var byteArray.pos = 0;
+        new BufferPos(buffer);  //, byteLength = byteArray.byteLength;
     var rgbe_header_info = RGBE_ReadHeader(byteArray);
 
     if (RGBE_RETURN_FAILURE !== rgbe_header_info) {
@@ -350,4 +352,12 @@ export class RGBELoader extends DataTextureLoader {
     this.type = value;
     return this;
   };
+}
+
+class BufferPos extends Uint8Array {
+  pos: number;
+  constructor(array: Uint8Array) {
+    super(array);
+    this.pos = 0;
+  }
 }
