@@ -126,10 +126,8 @@ export class PMREMGenerator {
             ([] as number[]).concat(...coordinates),
             positionSize * vertices * face);
         uv.set(uv1, uvSize * vertices * face);
-        faceIndex.fill(
-            face,
-            faceIndexSize * vertices * face,
-            faceIndexSize * vertices * (face + 1));
+        const fill = [face, face, face, face, face, face];
+        faceIndex.set(fill, faceIndexSize * vertices * face);
       }
       const planes = new BufferGeometry();
       planes.addAttribute(
