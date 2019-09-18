@@ -94,6 +94,7 @@ const $lastTouches = Symbol('lastTouches');
 const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
 const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
+const $wrapAngle = Symbol('wrapAngle');
 
 // Event handlers
 const $onMouseMove = Symbol('onMouseMove');
@@ -117,7 +118,6 @@ const ZOOM_SENSITIVITY = 0.1;
 const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
 const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
-const TAU = 2 * Math.PI;
 const UP = new Vector3(0, 1, 0);
 
 export const KeyCode = {
@@ -399,8 +399,8 @@ export class SmoothControls extends EventDispatcher {
 
     const {theta, phi, radius} = this[$goalSpherical];
 
-    const nextTheta =
-        clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!);
+    const nextTheta = this[$wrapAngle](
+        clamp(goalTheta, minimumAzimuthalAngle!, maximumAzimuthalAngle!));
     const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
     const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
 
@@ -494,6 +494,13 @@ export class SmoothControls extends EventDispatcher {
     const {maximumPolarAngle, maximumRadius, maximumFieldOfView} =
         this[$options];
 
+    const dTheta = this[$spherical].theta - this[$goalSpherical].theta;
+    if (Math.abs(dTheta) > Math.PI &&
+        !isFinite(this[$options].minimumAzimuthalAngle!) &&
+        !isFinite(this[$options].maximumAzimuthalAngle!)) {
+      this[$spherical].theta -= Math.sign(dTheta) * 2 * Math.PI;
+    }
+
     this[$spherical].theta = this[$thetaDamper].update(
         this[$spherical].theta, this[$goalSpherical].theta, delta, Math.PI);
 
@@ -567,8 +574,13 @@ export class SmoothControls extends EventDispatcher {
     return handled;
   }
 
+  // Wraps to bewteen -pi and pi
+  private[$wrapAngle](radians: number): number {
+    return (radians + Math.PI) % (2 * Math.PI) - Math.PI;
+  }
+
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
-    return TAU * pixelLength / this.element.clientHeight;
+    return 2 * Math.PI * pixelLength / this.element.clientHeight;
   }
 
   private[$sphericalToPosition](spherical: Spherical, position: Vector3) {

@@ -3,7 +3,10 @@
     "target": "es2017",
     "module": "es2015",
     "moduleResolution": "node",
-    "lib": ["es2017", "dom"],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
     "sourceMap": true,
     "inlineSources": true,
     "strict": true,
@@ -14,7 +17,8 @@
     "outDir": "./lib",
     "experimentalDecorators": true,
     "noErrorTruncation": true,
-    "declaration": true
+    "allowJs": true
+    // "declaration": true
   },
   "include": [
     "./src/**/*.ts",
@@ -22,4 +26,3 @@
   ],
   "exclude": []
 }
-
