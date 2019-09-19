@@ -15,7 +15,7 @@
 
 import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 
-import {RGBELoader} from '../third_party/three/RGBELoader.js';
+import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import {PMREMGenerator} from './PMREMGenerator.js';
