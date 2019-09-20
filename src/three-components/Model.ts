@@ -30,11 +30,12 @@ export const DEFAULT_FOV_DEG = 45;
 export default class Model extends Object3D {
   private[$currentScene]: CacheRetainedScene|null = null;
   private loader = new CachingGLTFLoader();
-  private mixer: AnimationMixer = new AnimationMixer(null);
+  private mixer = new AnimationMixer(null);
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
+  private framingFactor = 1;
 
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
@@ -99,6 +100,13 @@ export default class Model extends Object3D {
     this.modelContainer.add(model);
     this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
+  }
+
+  setFramingFactor(factor: number) {
+    if (factor !== this.framingFactor) {
+      this.framingFactor = factor;
+      this.updateFraming();
+    }
   }
 
   async setSource(
@@ -269,12 +277,11 @@ export default class Model extends Object3D {
    * Calculates the idealCameraDistance and fovAspect that allows the 3D object
    * to be framed tightly in a 2D window of any aspect ratio without clipping at
    * any camera orbit. The camera's center target point can be optionally
-   * specified, as can a margin, where margin = 0.2 would add 20% margin on all
-   * sides (defaults to 0). If no center is specified, it defaults to the center
-   * of the bounding box, which means asymmetric models will tend to be tight on
-   * one side instead of both. Proper choice of center can correct this.
+   * specified. If no center is specified, it defaults to the center of the
+   * bounding box, which means asymmetric models will tend to be tight on one
+   * side instead of both. Proper choice of center can correct this.
    */
-  updateFraming(margin: number = 0, center: Vector3|null = null) {
+  updateFraming(center: Vector3|null = null) {
     this.remove(this.modelContainer);
 
     if (center == null) {
@@ -302,7 +309,7 @@ export default class Model extends Object3D {
     this.fovAspect =
         reduceVertices(this.modelContainer, horizontalFov) / verticalFov;
 
-    this.idealCameraDistance *= 1 + margin;
+    this.idealCameraDistance *= this.framingFactor;
     this.add(this.modelContainer);
   }
 }

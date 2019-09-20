@@ -47,9 +47,10 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   WHEN_FOCUSED: 'allow-when-focused'
 };
 
-export const DEFAULT_CAMERA_ORBIT = '0deg 75deg auto';
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
+const DEFAULT_SPHERICAL = deserializeSpherical(DEFAULT_CAMERA_ORBIT);
 
 const HALF_FOV_RAD = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
@@ -254,32 +255,29 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateCameraOrbit]() {
       let sphericalValues = deserializeSpherical(this.cameraOrbit);
 
-      if (sphericalValues == null) {
-        sphericalValues = deserializeSpherical(DEFAULT_CAMERA_ORBIT)!;
-      }
-
-      let [theta, phi, radius] = sphericalValues;
-
-      if (typeof radius === 'string') {
-        switch (radius) {
-          default:
-          case 'auto':
-            radius = this[$scene].model.idealCameraDistance;
-            break;
+      for (let i = 0; i < 4; i++) {
+        if (sphericalValues[i] == null) {
+          sphericalValues[i] = DEFAULT_SPHERICAL[i];
         }
       }
-      this[$controls].setOrbit(theta, phi, radius as number);
+
+      let [theta, phi, radius, factor] = sphericalValues;
+
+      if (radius == null) {
+        this[$scene].model.setFramingFactor(factor!);
+        radius = this[$scene].model.idealCameraDistance;
+      }
+
+      this[$controls].setOrbit(theta!, phi!, radius!);
     }
 
     [$updateCameraTarget]() {
       const targetValues = deserializeVector3(this.cameraTarget);
       let target = this[$scene].model.boundingBox.getCenter(new Vector3);
 
-      if (targetValues != null) {
-        for (let i = 0; i < 3; i++) {
-          if (targetValues[i] !== 'auto') {
-            target.setComponent(i, targetValues[i] as number);
-          }
+      for (let i = 0; i < 3; i++) {
+        if (targetValues[i] != null) {
+          target.setComponent(i, targetValues[i]!);
         }
       }
 

@@ -159,17 +159,18 @@
             </li>
             <li>
               <div>camera-orbit</div>
-              <p>Set the starting and/or subsequent orbital position of the camera.
-              You can control the azimuthal and polar angles, and the distance
-              from the model. Accepts values of the form "$angle $angle $distance",
-              like "10deg 75deg 1.5m". Also supports units in radians ("rad") for
-              angles and centimeters ("cm") or millimeters ("mm") for camera
-              distance. A special value "auto" can be used for the distance, which
-              sets the distance to the ideal framing distance based on the
-              responsive scaling applied to the model scene. Any time this value
-              changes from its initially configured value, the camera will
-              interpolate from its current position to the new value. Defaults to
-              "0deg 75deg auto".</p>
+              <p>Set the starting and/or subsequent orbital position of the
+              camera. You can control the azimuthal and polar angles, and the
+              distance from the model. Accepts values of the form "$angle $angle
+              $distance", like "10deg 75deg 1.5m". Also supports units in
+              radians ("rad") for angles and centimeters ("cm") or millimeters
+              ("mm") for camera distance. Camera distance can also be set as a
+              percentage ('%'), where 100% gives the model tight framing within
+              any window based on all possible theta and phi values. Any time
+              this value changes from its initially configured value, the camera
+              will interpolate from its current position to the new value.
+              Defaults to "0deg 75deg 105%". Any value set to 'auto' will revert
+              to the default.</p>
             </li>
             <li>
               <div>camera-target</div>

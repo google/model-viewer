@@ -85,6 +85,11 @@ suite('ModelScene', () => {
       const expectedDistance = dummyRadius / Math.sin(halfFov);
       expect(scene.model.idealCameraDistance)
           .to.be.closeTo(expectedDistance, 0.0001);
+
+      const framingFactor = 1.2;
+      scene.model.setFramingFactor(framingFactor);
+      expect(scene.model.idealCameraDistance)
+          .to.be.closeTo(expectedDistance * framingFactor, 0.0001);
     });
 
     test('fovAspect is set correctly', () => {

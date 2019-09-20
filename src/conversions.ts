@@ -25,30 +25,36 @@ import {parseValues, ValueNode} from './parsers.js';
  * If no unit is specified, assumes meters. Returns 0 for a ValueNode that
  * cannot be parsed.
  */
-const lengthValueNodeToMeters = (lengthValueNode: ValueNode): number => {
-  const value = parseFloat(lengthValueNode.value as any);
+const lengthValueNodeToMeters =
+    (lengthValueNode: ValueNode): [number|null, number|null] => {
+      const value = parseFloat(lengthValueNode.value as any);
 
-  if ((self as any).isNaN(value)) {
-    return 0;
-  }
+      if (isNaN(value)) {
+        return [null, null];
+      }
 
-  let scale;
+      let absolute: number|null;
+      let relative = null;
 
-  switch (lengthValueNode.unit) {
-    default:
-    case 'm':
-      scale = 1;
-      break;
-    case 'cm':
-      scale = 1 / 100;
-      break;
-    case 'mm':
-      scale = 1 / 1000;
-      break;
-  }
+      switch (lengthValueNode.unit) {
+        default:
+        case 'm':
+          absolute = value;
+          break;
+        case 'cm':
+          absolute = value / 100;
+          break;
+        case 'mm':
+          absolute = value / 1000;
+          break;
+        case '%':
+          absolute = null;
+          relative = value / 100;
+          break;
+      }
 
-  return value * scale;
-};
+      return [absolute, relative];
+    };
 
 /**
  * Converts an angle-like ValueNode to radians expressed as a number. Currently,
@@ -59,11 +65,11 @@ const lengthValueNodeToMeters = (lengthValueNode: ValueNode): number => {
  * ValueNode that cannot be parsed.
  */
 const convertAngleValueNode =
-    (angleValueNode: ValueNode, desiredUnits: string = 'rad'): number => {
+    (angleValueNode: ValueNode, desiredUnits: string = 'rad'): number|null => {
       const value = parseFloat(angleValueNode.value as any);
 
       if ((self as any).isNaN(value)) {
-        return 0;
+        return null;
       }
 
       const inputUnits = angleValueNode.unit;
@@ -85,26 +91,23 @@ const convertAngleValueNode =
  *
  * Returns null if the spherical string cannot be parsed.
  */
-export const deserializeSpherical =
-    (sphericalString: string): [number, number, number|string]|null => {
-      try {
-        const sphericalValueNodes = parseValues(sphericalString);
+export const deserializeSpherical = (sphericalString: string):
+    [number|null, number|null, number|null, number|null] => {
+      const sphericalValueNodes = parseValues(sphericalString);
 
-        if (sphericalValueNodes.length === 3) {
-          const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
+      if (sphericalValueNodes.length === 3) {
+        const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
 
-          const theta = convertAngleValueNode(thetaNode);
-          const phi = convertAngleValueNode(phiNode);
-          const radius = radiusNode.value === 'auto' ?
-              'auto' :
-              lengthValueNodeToMeters(radiusNode);
+        const theta = convertAngleValueNode(thetaNode);
+        const phi = convertAngleValueNode(phiNode);
+        const absoluteRelative = lengthValueNodeToMeters(radiusNode);
+        const radius = absoluteRelative[0];
+        const factor = absoluteRelative[1];
 
-          return [theta, phi, radius];
-        }
-      } catch (_error) {
+        return [theta, phi, radius, factor];
+      } else {
+        return [null, null, null, 1];
       }
-
-      return null;
     };
 
 /**
@@ -117,38 +120,27 @@ export const deserializeSpherical =
  * Returns null if the vector string cannot be parsed.
  */
 export const deserializeVector3 =
-    (vectorString: string): (number|string)[]|null => {
-      try {
-        const vectorValueNodes = parseValues(vectorString);
+    (vectorString: string): [number|null, number|null, number|null] => {
+      const xyz: [number|null, number|null, number|null] = [null, null, null];
 
-        const xyz = [];
-        if (vectorValueNodes.length === 3) {
-          for (let i = 0; i < 3; i++) {
-            xyz.push(
-                vectorValueNodes[i].value === 'auto' ?
-                    'auto' :
-                    lengthValueNodeToMeters(vectorValueNodes[i]));
-          }
-
-          return xyz;
+      const vectorValueNodes = parseValues(vectorString);
+      if (vectorValueNodes.length === 3) {
+        for (let i = 0; i < 3; i++) {
+          xyz[i] = lengthValueNodeToMeters(vectorValueNodes[i])[0];
         }
-      } catch (_error) {
       }
 
-      return null;
+      return xyz;
     };
 
 export const deserializeAngleToDeg = (angleString: string): number|null => {
-  try {
-    const angleValueNode = parseValues(angleString);
+  const angleValueNode = parseValues(angleString);
 
-    if (angleValueNode.length === 1) {
-      return convertAngleValueNode(angleValueNode[0], 'deg');
-    }
-  } catch (_error) {
+  if (angleValueNode.length === 1) {
+    return convertAngleValueNode(angleValueNode[0], 'deg');
+  } else {
+    return null;
   }
-
-  return null;
 };
 
 /**

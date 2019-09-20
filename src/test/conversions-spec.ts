@@ -22,31 +22,36 @@ const expect = chai.expect;
 suite('conversions', () => {
   suite('deserializeSpherical', () => {
     test('converts a spherical string to spherical values', () => {
-      expect(deserializeSpherical('0rad 1.23rad 1m')).to.be.eql([0, 1.23, 1]);
+      expect(deserializeSpherical('0rad 1.23rad 1m'))
+          .to.be.eql([0, 1.23, 1, null]);
     });
 
     test('assumes radians when units are omitted from theta and phi', () => {
-      expect(deserializeSpherical('1.23 0 1m')).to.be.eql([1.23, 0, 1]);
+      expect(deserializeSpherical('1.23 0 1m')).to.be.eql([1.23, 0, 1, null]);
     });
 
     test('assumes meters when units are omitted from radius', () => {
-      expect(deserializeSpherical('1rad 20rad 3')).to.be.eql([1, 20, 3]);
+      expect(deserializeSpherical('1rad 20rad 3')).to.be.eql([1, 20, 3, null]);
     });
 
     test(
         'allows degress to be used instead of radians for theta and phi',
         () => {
           expect(deserializeSpherical('9.9rad 3.14deg 1m'))
-              .to.be.eql([9.9, ThreeMath.degToRad(3.14), 1]);
+              .to.be.eql([9.9, ThreeMath.degToRad(3.14), 1, null]);
         });
 
     test('allows radius to be expressed in mm or cm', () => {
-      expect(deserializeSpherical('0 0 23mm')).to.be.eql([0, 0, 0.023]);
-      expect(deserializeSpherical('0 0 100cm')).to.be.eql([0, 0, 1]);
+      expect(deserializeSpherical('0 0 23mm')).to.be.eql([0, 0, 0.023, null]);
+      expect(deserializeSpherical('0 0 100cm')).to.be.eql([0, 0, 1, null]);
+    });
+
+    test('returns a factor if radius is expressed in %', () => {
+      expect(deserializeSpherical('0 0 110%')).to.be.eql([0, 0, null, 1.1]);
     });
 
     test('is resilient to awkward whitespace', () => {
-      expect(deserializeSpherical('  0 0\n   0 ')).to.be.eql([0, 0, 0]);
+      expect(deserializeSpherical('  0 0\n   0 ')).to.be.eql([0, 0, 0, null]);
     });
   });
 
