@@ -23,14 +23,15 @@
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb",
       "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
       "dimensions": {
-        "width": 1024,
-        "height": 768
+        "width": 1024
+      },
+      "orbit": {
+        "radius": 1086
       }
     },
     {
       "name": "khronos-AlphaBlendModeTest",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -39,7 +40,6 @@
     {
       "name": "khronos-AnimatedMorphCube",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -48,7 +48,6 @@
     {
       "name": "khronos-AnimatedMorphSphere",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -57,7 +56,6 @@
     {
       "name": "khronos-AntiqueCamera",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 512,
         "height": 1024
@@ -66,154 +64,85 @@
     {
       "name": "khronos-Avocado",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
+      "target": {
+        "y": 0.0314
+      },
+      "orbit": {
+        "radius": 0.091
       }
     },
     {
       "name": "khronos-BarramundiFish",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb"
     },
     {
       "name": "khronos-BoomBoxWithAxes",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
         "height": 1024
       }
     },
     {
       "name": "khronos-Box",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb"
     },
     {
       "name": "khronos-BoxAnimated",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb"
     },
     {
       "name": "khronos-BoxInterleaved",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb"
     },
     {
       "name": "khronos-BoxTextured",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb"
     },
     {
       "name": "khronos-BoxTexturedNonPowerOfTwo",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTexturedNonPowerOfTwo/glTF-Binary/BoxTexturedNonPowerOfTwo.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxTexturedNonPowerOfTwo/glTF-Binary/BoxTexturedNonPowerOfTwo.glb"
     },
     {
       "name": "khronos-BoxVertexColors",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"
     },
     {
       "name": "khronos-BrainStem",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb"
     },
     {
       "name": "khronos-Buggy",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf"
     },
     {
       "name": "khronos-CesiumMilkTruck",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf"
     },
     {
       "name": "khronos-Corset",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
         "height": 1024
       }
     },
     {
       "name": "khronos-Cube",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"
     },
     {
       "name": "khronos-DamagedHelmet",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
-      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr"
     },
     {
       "name": "khronos-Duck",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Duck/glTF/Duck.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Duck/glTF/Duck.gltf"
     },
     {
       "name": "khronos-EnvironmentTest",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 1024,
-        "height": 768
+        "width": 1024
       },
       "exclude": [
         "filament"
@@ -222,7 +151,6 @@
     {
       "name": "khronos-FlightHelmet",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 512,
         "height": 1024
@@ -231,7 +159,6 @@
     {
       "name": "khronos-GearboxAssy",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -239,62 +166,36 @@
     },
     {
       "name": "khronos-InterpolationTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/InterpolationTest/glTF-Binary/InterpolationTest.glb",
-      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/InterpolationTest/glTF-Binary/InterpolationTest.glb"
     },
     {
       "name": "khronos-Lantern",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Lantern/glTF/Lantern.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
         "height": 1024
       }
     },
     {
       "name": "khronos-MetalRoughSpheres",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../../examples/assets/spruit_sunrise_1k_HDR.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_HDR.hdr"
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../../examples/assets/spruit_sunrise_1k_LDR.jpg",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "lighting": "../../../../examples/assets/spruit_sunrise_1k_LDR.jpg"
     },
     {
       "name": "khronos-Monster",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Monster/glTF-Binary/Monster.glb",
-      "lighting": "../../../../examples/assets/aircraft_workshop_01_1k.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Monster/glTF-Binary/Monster.glb"
     },
     {
       "name": "khronos-MorphPrimitivesTest",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MorphPrimitivesTest/glTF-Binary/MorphPrimitivesTest.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -302,44 +203,23 @@
     },
     {
       "name": "khronos-MultiUVTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MultiUVTest/glTF/MultiUVTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/MultiUVTest/glTF/MultiUVTest.gltf"
     },
     {
       "name": "khronos-NormalTangentMirrorTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf"
     },
     {
       "name": "khronos-NormalTangentTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf"
     },
     {
       "name": "khronos-OrientationTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/OrientationTest/glTF/OrientationTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/OrientationTest/glTF/OrientationTest.gltf"
     },
     {
       "name": "khronos-ReciprocatingSaw",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
         "width": 1024,
         "height": 512
@@ -348,113 +228,60 @@
     {
       "name": "khronos-SciFiHelmet",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
         "height": 1024
       }
     },
     {
       "name": "khronos-SimpleSparseAccessor",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SimpleSparseAccessor/glTF/SimpleSparseAccessor.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      },
       "exclude": [
         "filament"
       ]
     },
     {
       "name": "khronos-SpecGlossVsMetalRough",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb"
     },
     {
       "name": "khronos-Suzanne",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf"
     },
     {
       "name": "khronos-TextureCoordinateTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb"
     },
     {
       "name": "khronos-TextureSettingsTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb"
     },
     {
       "name": "khronos-TextureTransformTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureTransformTest/glTF/TextureTransformTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TextureTransformTest/glTF/TextureTransformTest.gltf"
     },
     {
       "name": "khronos-UnlitTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf"
     },
     {
       "name": "khronos-VertexColorTest",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/VertexColorTest/glTF/VertexColorTest.gltf",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/VertexColorTest/glTF/VertexColorTest.gltf"
     },
     {
       "name": "Astronaut",
       "model": "../../../../examples/assets/Astronaut.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
       "dimensions": {
-        "width": 768,
         "height": 1024
       }
     },
     {
       "name": "FurnaceTest",
       "model": "../../../../examples/assets/pbr-spheres.glb",
-      "lighting": "../../../../examples/assets/grey.png",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "lighting": "../../../../examples/assets/grey.png"
     },
     {
       "name": "AlphaBlendLitmusTest",
-      "model": "../../../../examples/assets/alpha-blend-litmus.glb",
-      "lighting": "../../../../examples/assets/lightroom_14b.hdr",
-      "dimensions": {
-        "width": 768,
-        "height": 768
-      }
+      "model": "../../../../examples/assets/alpha-blend-litmus.glb"
     }
   ]
 }

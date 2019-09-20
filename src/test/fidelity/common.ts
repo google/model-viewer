@@ -82,7 +82,9 @@ export interface ScenarioConfig {
   model: string;
   lighting: string;
   dimensions: Dimensions;
-  exclude?: Array<string>;
+  target: {x: number, y: number, z: number},
+      orbit: {theta: number, phi: number, radius: number},
+      exclude?: Array<string>;
 }
 
 export interface RendererConfig {
