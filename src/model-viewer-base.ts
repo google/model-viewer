@@ -74,6 +74,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return 'model-viewer';
   }
 
+  /** @nocollapse */
   static get template() {
     if (!this.hasOwnProperty($template)) {
       this[$template] = makeTemplate(this.is);
