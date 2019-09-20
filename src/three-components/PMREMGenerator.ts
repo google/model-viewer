@@ -144,6 +144,8 @@ export class PMREMGenerator {
   }
 
   fromDefault(): WebGLRenderTarget {
+    const dpr = this.renderer.getPixelRatio();
+    this.renderer.setPixelRatio(1);
     const defaultScene = environmentScene();
 
     const cubeUVRenderTarget =
@@ -152,19 +154,27 @@ export class PMREMGenerator {
     this[$applyPMREM](cubeUVRenderTarget);
 
     defaultScene.dispose();
+    this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
   fromScene(
       scene: Scene, near: number = DEFAULT_NEAR,
       far: number = DEFAULT_FAR): WebGLRenderTarget {
+    const dpr = this.renderer.getPixelRatio();
+    this.renderer.setPixelRatio(1);
+
     const cubeUVRenderTarget = this[$sceneToCubeUV](scene, near, far);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
   fromEquirectangular(equirectangular: Texture): WebGLRenderTarget {
+    const dpr = this.renderer.getPixelRatio();
+    this.renderer.setPixelRatio(1);
+
     equirectangular.magFilter = NearestFilter;
     equirectangular.minFilter = NearestFilter;
     equirectangular.generateMipmaps = false;
@@ -172,6 +182,7 @@ export class PMREMGenerator {
     const cubeUVRenderTarget = this[$equirectangularToCubeUV](equirectangular);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
