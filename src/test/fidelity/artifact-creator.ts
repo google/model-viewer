@@ -54,8 +54,10 @@ export class ArtifactCreator {
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
 
-    for (const scenario of scenarios) {
-      const {name: scenarioName, dimensions} = scenario;
+    for (const scenarioBase of scenarios) {
+      const scenarioName = scenarioBase.name;
+      const scenario = this[$configReader].scenarioConfig(scenarioName)!;
+      const {dimensions} = scenario;
 
       if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
         continue;
