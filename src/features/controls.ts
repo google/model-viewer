@@ -68,7 +68,7 @@ export const INTERACTION_PROMPT =
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
-const $framedFieldOfView = Symbol('framedFov');
+const $framedFieldOfView = Symbol('framedFieldOfView');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
