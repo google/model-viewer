@@ -50,7 +50,8 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
-const DEFAULT_SPHERICAL = deserializeSpherical(DEFAULT_CAMERA_ORBIT);
+const DEFAULT_SPHERICAL =
+    deserializeSpherical(DEFAULT_CAMERA_ORBIT, [0, 0, 0, 0]);
 
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
@@ -245,22 +246,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$updateFieldOfView]() {
-      let fov = deserializeAngleToDeg(this.fieldOfView);
-      if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW || fov == null) {
-        fov = DEFAULT_FOV_DEG;
-      }
+      let fov = deserializeAngleToDeg(this.fieldOfView, DEFAULT_FOV_DEG);
       this[$controls].setFieldOfView(fov!);
     }
 
     [$updateCameraOrbit]() {
-      let sphericalValues = deserializeSpherical(this.cameraOrbit);
-
-      for (let i = 0; i < 4; i++) {
-        if (sphericalValues[i] == null) {
-          sphericalValues[i] = DEFAULT_SPHERICAL[i];
-        }
-      }
-
+      let sphericalValues =
+          deserializeSpherical(this.cameraOrbit, DEFAULT_SPHERICAL);
       let [theta, phi, radius, factor] = sphericalValues;
 
       if (radius == null) {
@@ -272,14 +264,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$updateCameraTarget]() {
-      const targetValues = deserializeVector3(this.cameraTarget);
-      let target = this[$scene].model.boundingBox.getCenter(new Vector3);
-
-      for (let i = 0; i < 3; i++) {
-        if (targetValues[i] != null) {
-          target.setComponent(i, targetValues[i]!);
-        }
-      }
+      const defaultTarget =
+          this[$scene].model.boundingBox.getCenter(new Vector3);
+      const target = deserializeVector3(this.cameraTarget, defaultTarget);
 
       this[$controls].setTarget(target);
     }

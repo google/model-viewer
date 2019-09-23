@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Math as ThreeMath} from 'three';
+import {Math as ThreeMath, Vector3} from 'three';
 
 import {parseValues, ValueNode} from './parsers.js';
 
@@ -26,34 +26,26 @@ import {parseValues, ValueNode} from './parsers.js';
  * cannot be parsed.
  */
 const lengthValueNodeToMeters =
-    (lengthValueNode: ValueNode): [number|null, number|null] => {
-      const value = parseFloat(lengthValueNode.value as any);
+    (lengthValueNode: ValueNode, defaultMeters: number): number => {
+      let length = parseFloat(lengthValueNode.value as any);
 
-      if (isNaN(value)) {
-        return [null, null];
+      if (isNaN(length)) {
+        return defaultMeters;
       }
-
-      let absolute: number|null;
-      let relative = null;
 
       switch (lengthValueNode.unit) {
         default:
         case 'm':
-          absolute = value;
           break;
         case 'cm':
-          absolute = value / 100;
+          length /= 100;
           break;
         case 'mm':
-          absolute = value / 1000;
-          break;
-        case '%':
-          absolute = null;
-          relative = value / 100;
+          length /= 1000;
           break;
       }
 
-      return [absolute, relative];
+      return length;
     };
 
 /**
@@ -65,11 +57,13 @@ const lengthValueNodeToMeters =
  * ValueNode that cannot be parsed.
  */
 const convertAngleValueNode =
-    (angleValueNode: ValueNode, desiredUnits: string = 'rad'): number|null => {
+    (angleValueNode: ValueNode,
+     defaultRadians: number,
+     desiredUnits: string = 'rad'): number => {
       const value = parseFloat(angleValueNode.value as any);
 
       if ((self as any).isNaN(value)) {
-        return null;
+        return defaultRadians;
       }
 
       const inputUnits = angleValueNode.unit;
@@ -91,24 +85,30 @@ const convertAngleValueNode =
  *
  * Returns null if the spherical string cannot be parsed.
  */
-export const deserializeSpherical = (sphericalString: string):
-    [number|null, number|null, number|null, number|null] => {
-      const sphericalValueNodes = parseValues(sphericalString);
+export const deserializeSpherical =
+    (sphericalString: string,
+     defaultValues: [number, number, number|null, number|null]):
+        [number, number, number|null, number|null] => {
+          let [theta, phi, radius, factor] = defaultValues;
+          const sphericalValueNodes = parseValues(sphericalString);
 
-      if (sphericalValueNodes.length === 3) {
-        const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
+          if (sphericalValueNodes.length === 3) {
+            const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
 
-        const theta = convertAngleValueNode(thetaNode);
-        const phi = convertAngleValueNode(phiNode);
-        const absoluteRelative = lengthValueNodeToMeters(radiusNode);
-        const radius = absoluteRelative[0];
-        const factor = absoluteRelative[1];
-
-        return [theta, phi, radius, factor];
-      } else {
-        return [null, null, null, 1];
-      }
-    };
+            theta = convertAngleValueNode(thetaNode, theta);
+            phi = convertAngleValueNode(phiNode, phi);
+            const value = lengthValueNodeToMeters(
+                radiusNode, radius == null ? factor! : radius);
+            if (radiusNode.unit == '%') {
+              radius = null;
+              factor = value / 100;
+            } else {
+              radius = value;
+              factor = null;
+            }
+          }
+          return [theta, phi, radius, factor];
+        };
 
 /**
  * Vector String => Vector Values
@@ -120,28 +120,22 @@ export const deserializeSpherical = (sphericalString: string):
  * Returns null if the vector string cannot be parsed.
  */
 export const deserializeVector3 =
-    (vectorString: string): [number|null, number|null, number|null] => {
-      const xyz: [number|null, number|null, number|null] = [null, null, null];
-
+    (vectorString: string, defaultValues: Vector3): Vector3 => {
       const vectorValueNodes = parseValues(vectorString);
-      if (vectorValueNodes.length === 3) {
-        for (let i = 0; i < 3; i++) {
-          xyz[i] = lengthValueNodeToMeters(vectorValueNodes[i])[0];
-        }
-      }
+      const xyz = new Vector3(
+          lengthValueNodeToMeters(vectorValueNodes[0], defaultValues.x),
+          lengthValueNodeToMeters(vectorValueNodes[1], defaultValues.y),
+          lengthValueNodeToMeters(vectorValueNodes[2], defaultValues.z));
 
       return xyz;
     };
 
-export const deserializeAngleToDeg = (angleString: string): number|null => {
-  const angleValueNode = parseValues(angleString);
-
-  if (angleValueNode.length === 1) {
-    return convertAngleValueNode(angleValueNode[0], 'deg');
-  } else {
-    return null;
-  }
-};
+export const deserializeAngleToDeg =
+    (angleString: string, defaultDeg: number): number|null => {
+      const angleValueNode = parseValues(angleString);
+      return convertAngleValueNode(
+          angleValueNode[0], defaultDeg * Math.PI / 180, 'deg');
+    };
 
 /**
  * For our purposes, an enumeration is a fixed set of CSS-expression-compatible
