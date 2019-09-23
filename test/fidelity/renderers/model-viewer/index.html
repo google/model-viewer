@@ -68,7 +68,7 @@
       modelViewer.src = scenario.model;
       modelViewer.backgroundImage = scenario.lighting;
       const {theta, phi, radius} = scenario.orbit;
-      modelViewer.cameraOrbit = `${theta}rad ${phi}deg ${radius}m`;
+      modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
     });

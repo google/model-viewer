@@ -26,7 +26,7 @@
         "width": 1024
       },
       "orbit": {
-        "radius": 1086
+        "radius": 800
       }
     },
     {
@@ -35,22 +35,23 @@
       "dimensions": {
         "width": 1024,
         "height": 512
+      },
+      "target": {
+        "y": 1.1
       }
     },
     {
       "name": "khronos-AnimatedMorphCube",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
-      "dimensions": {
-        "width": 1024,
-        "height": 512
+      "orbit": {
+        "radius": 4.75
       }
     },
     {
       "name": "khronos-AnimatedMorphSphere",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb",
-      "dimensions": {
-        "width": 1024,
-        "height": 512
+      "orbit": {
+        "radius": 2.75
       }
     },
     {
@@ -59,6 +60,12 @@
       "dimensions": {
         "width": 512,
         "height": 1024
+      },
+      "target": {
+        "y": 3.6
+      },
+      "orbit": {
+        "radius": 11.2
       }
     },
     {
@@ -73,13 +80,27 @@
     },
     {
       "name": "khronos-BarramundiFish",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb"
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      },
+      "target": {
+        "y": 0.14
+      },
+      "orbit": {
+        "theta": -90,
+        "radius": 0.4
+      }
     },
     {
       "name": "khronos-BoomBoxWithAxes",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
       "dimensions": {
         "height": 1024
+      },
+      "orbit": {
+        "radius": 0.05
       }
     },
     {
