@@ -42,7 +42,7 @@ export default class Model extends Object3D {
   public boundingBox = new Box3();
   public size = new Vector3();
   public idealCameraDistance = 0;
-  public fovAspect = 0;
+  public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
 
@@ -274,12 +274,12 @@ export default class Model extends Object3D {
   }
 
   /**
-   * Calculates the idealCameraDistance and fovAspect that allows the 3D object
-   * to be framed tightly in a 2D window of any aspect ratio without clipping at
-   * any camera orbit. The camera's center target point can be optionally
-   * specified. If no center is specified, it defaults to the center of the
-   * bounding box, which means asymmetric models will tend to be tight on one
-   * side instead of both. Proper choice of center can correct this.
+   * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
+   * object to be framed tightly in a 2D window of any aspect ratio without
+   * clipping at any camera orbit. The camera's center target point can be
+   * optionally specified. If no center is specified, it defaults to the center
+   * of the bounding box, which means asymmetric models will tend to be tight on
+   * one side instead of both. Proper choice of center can correct this.
    */
   updateFraming(center: Vector3|null = null) {
     this.remove(this.modelContainer);
@@ -306,7 +306,7 @@ export default class Model extends Object3D {
       return Math.max(
           value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
     };
-    this.fovAspect =
+    this.fieldOfViewAspect =
         reduceVertices(this.modelContainer, horizontalFov) / verticalFov;
 
     this.idealCameraDistance *= this.framingFactor;

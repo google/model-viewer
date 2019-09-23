@@ -92,10 +92,10 @@ suite('ModelScene', () => {
           .to.be.closeTo(expectedDistance * framingFactor, 0.0001);
     });
 
-    test('fovAspect is set correctly', () => {
+    test('fieldOfViewAspect is set correctly', () => {
       scene.model.setObject(dummyMesh);
 
-      expect(scene.model.fovAspect).to.be.closeTo(1, 0.0001);
+      expect(scene.model.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

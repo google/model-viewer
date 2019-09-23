@@ -52,7 +52,7 @@ const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
 const DEFAULT_SPHERICAL = deserializeSpherical(DEFAULT_CAMERA_ORBIT);
 
-const HALF_FOV_RAD = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
@@ -67,7 +67,7 @@ export const INTERACTION_PROMPT =
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
-const $framedFov = Symbol('framedFov');
+const $framedFieldOfView = Symbol('framedFov');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -144,7 +144,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$controls] = new SmoothControls(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
-    protected[$framedFov]: number|null = null;
+    protected[$framedFieldOfView]: number|null = null;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -331,13 +331,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateCamera]() {
       const controls = this[$controls];
       const {aspect} = this[$scene];
-      const {idealCameraDistance, fovAspect} = this[$scene].model;
+      const {idealCameraDistance, fieldOfViewAspect} = this[$scene].model;
 
       const minimumRadius = idealCameraDistance / 2;
       const maximumRadius = idealCameraDistance;
       controls.applyOptions({minimumRadius, maximumRadius});
 
-      const modelRadius = idealCameraDistance * Math.sin(HALF_FOV_RAD);
+      const modelRadius =
+          idealCameraDistance * Math.sin(HALF_FIELD_OF_VIEW_RADIANS);
       const near = minimumRadius - modelRadius;
       const far = maximumRadius + modelRadius;
 
@@ -345,17 +346,17 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       controls.setRadius(idealCameraDistance);
 
       if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW) {
-        const zoom = (this[$framedFov] != null) ?
-            controls.getFieldOfView() / this[$framedFov]! :
+        const zoom = (this[$framedFieldOfView] != null) ?
+            controls.getFieldOfView() / this[$framedFieldOfView]! :
             1;
 
-        const vertical =
-            Math.tan(HALF_FOV_RAD) * Math.max(1, fovAspect / aspect);
-        this[$framedFov] = 2 * Math.atan(vertical) * 180 / Math.PI;
+        const vertical = Math.tan(HALF_FIELD_OF_VIEW_RADIANS) *
+            Math.max(1, fieldOfViewAspect / aspect);
+        this[$framedFieldOfView] = 2 * Math.atan(vertical) * 180 / Math.PI;
 
-        const maximumFieldOfView = this[$framedFov]!;
+        const maximumFieldOfView = this[$framedFieldOfView]!;
         controls.applyOptions({maximumFieldOfView});
-        controls.setFieldOfView(zoom * this[$framedFov]!);
+        controls.setFieldOfView(zoom * this[$framedFieldOfView]!);
       }
 
       controls.jumpToGoal();
