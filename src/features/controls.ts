@@ -33,7 +33,7 @@ export interface SphericalPosition {
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
-export type InteractionPolicy = 'always-allow'|'allow-when-focused';
+export type InteractionPolicy = 'always-allow'|'allow-when-focused'|'allow-toggle';
 
 const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -44,7 +44,8 @@ const InteractionPromptStrategy:
 
 const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   ALWAYS_ALLOW: 'always-allow',
-  WHEN_FOCUSED: 'allow-when-focused'
+  WHEN_FOCUSED: 'allow-when-focused',
+  TOGGLE: 'allow-toggle',
 };
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
@@ -82,14 +83,17 @@ const $updateCamera = Symbol('updateCamera');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
 const $updateCameraTarget = Symbol('updateCameraTarget');
 const $updateFieldOfView = Symbol('updateFieldOfView');
+const $determineInteractionEnabledOrDisabled = Symbol('determineInteractionEnabledOrDisabled');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
 const $changeHandler = Symbol('changeHandler');
+const $clickHandler = Symbol('clickHandler');
 const $promptTransitionendHandler = Symbol('promptTransitionendHandler');
 
 const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
+const $onClick = Symbol('onClick');
 const $onChange = Symbol('onChange');
 const $onPromptTransitionend = Symbol('onPromptTransitionend');
 
@@ -160,6 +164,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$focusHandler] = () => this[$onFocus]();
     protected[$blurHandler] = () => this[$onBlur]();
+    protected[$clickHandler] = () => this[$onClick]();
 
     protected[$promptTransitionendHandler] = () =>
         this[$onPromptTransitionend]();
@@ -210,16 +215,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
-          controls.enableInteraction();
-
           scene.canvas.addEventListener('focus', this[$focusHandler]);
           scene.canvas.addEventListener('blur', this[$blurHandler]);
         } else {
           scene.canvas.removeEventListener('focus', this[$focusHandler]);
           scene.canvas.removeEventListener('blur', this[$blurHandler]);
-
-          controls.disableInteraction();
         }
+
+        this[$determineInteractionEnabledOrDisabled]();
       }
 
       if (changedProperties.has('interactionPrompt')) {
@@ -230,6 +233,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
+
+        this[$determineInteractionEnabledOrDisabled]();
+
         controls.applyOptions({interactionPolicy});
       }
 
@@ -249,6 +255,27 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$controls].jumpToGoal();
         this[$jumpCamera] = false;
       }
+    }
+
+    [$determineInteractionEnabledOrDisabled]() {
+      const controls = this[$controls];
+
+      if (!this.cameraControls) {
+        this.removeEventListener('click', this[$clickHandler]);
+        controls.disableInteraction();
+
+        return;
+      }
+
+      if (this.interactionPolicy === InteractionPolicy.TOGGLE) {
+        this.addEventListener('click', this[$clickHandler]);
+        controls.disableInteraction();
+
+        return;
+      }
+
+      this.removeEventListener('click', this[$clickHandler]);
+      controls.enableInteraction();
     }
 
     [$updateFieldOfView]() {
@@ -443,6 +470,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onBlur]() {
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
+    }
+
+    [$onClick]() {
+      const controls = this[$controls];
+
+      if (controls.wasDragInteraction()) {
+        return;
+      }
+
+      if (controls.interactionEnabled) {
+        controls.disableInteraction();
+      } else {
+        controls.enableInteraction();
+      }
     }
 
     [$onChange]({source}: ChangeEvent) {

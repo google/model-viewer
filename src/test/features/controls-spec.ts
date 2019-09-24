@@ -283,6 +283,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('creates SmoothControls if enabled', () => {
         expect(controls).to.be.ok;
+        expect(controls.interactionEnabled).to.be.true;
       });
 
       test(
@@ -303,6 +304,17 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal('always-allow');
           });
 
+      test(
+          'sets controls interactionPolicy to allow-toggle',
+          async () => {
+            element.interactionPolicy = 'allow-toggle';
+            await timePasses();
+            expect(controls.options.interactionPolicy)
+                .to.be.equal('allow-toggle');
+            expect(controls.interactionEnabled)
+                .to.be.false;
+          });
+
       test('sets max radius greater than the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
             element[$scene].model.position);
@@ -314,6 +326,49 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.cameraControls = false;
         await timePasses();
         expect(controls.interactionEnabled).to.be.false;
+      });
+
+      suite('interactionPolicy allow-toggle', () => {
+        test(
+          'toggles interactionEnable on click',
+          async () => {
+            element.interactionPolicy = 'allow-toggle';
+            await timePasses();
+            expect(controls.interactionEnabled, 'initial')
+                .to.be.false;
+            
+            dispatchSyntheticEvent(element, 'click', {clientX: 0, clientY: 10});
+
+            expect(controls.interactionEnabled, 'toggled on')
+                .to.be.true;
+
+            dispatchSyntheticEvent(element, 'click', {clientX: 0, clientY: 10});
+
+            expect(controls.interactionEnabled, 'toggled off')
+                .to.be.false;
+          });
+
+        test(
+          'does not toggle interactionEnabled on drag',
+          async () => {
+            element.interactionPolicy = 'allow-toggle';
+            await timePasses();
+            expect(controls.interactionEnabled, 'initial')
+                .to.be.false;
+            
+            dispatchSyntheticEvent(element, 'click', {clientX: 0, clientY: 10});
+
+            expect(controls.interactionEnabled, 'toggled on')
+                .to.be.true;
+
+            dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(element, 'mousemove', {clientX: 200, clientY: 200});
+            dispatchSyntheticEvent(element, 'mouseup', {clientX: 200, clientY: 200});
+            dispatchSyntheticEvent(element, 'click', {clientX: 200, clientY: 200});
+
+            expect(controls.interactionEnabled, 'keeps toggle on')
+                .to.be.true;
+          });
       });
 
       suite('when user is interacting', () => {

@@ -402,6 +402,103 @@ suite('SmoothControls', () => {
             expect(controls.getFieldOfView())
                 .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
+
+          test('handles cursor when interaction enabled', () => {
+            expect(element.style.cursor).to.be.equal('grab');
+          });
+
+          test('handles cursor when interaction start', () => {
+            dispatchSyntheticEvent(element, 'mousedown');
+
+            expect(element.style.cursor).to.be.equal('grabbing');
+          });
+
+          test('handles cursor when disabled', () => {
+            controls.disableInteraction();
+
+            expect(element.style.cursor).to.be.equal('');
+          });
+        });
+
+        suite('allow-toggle', () => {
+          setup(() => {
+            controls.applyOptions({interactionPolicy: 'allow-toggle'});
+            settleControls(controls);
+          });
+
+          test('handles cursor when interaction enabled', () => {
+            expect(element.style.cursor).to.be.equal('grab');
+          });
+
+          test('handles cursor when interaction start', () => {
+            dispatchSyntheticEvent(element, 'mousedown');
+
+            expect(element.style.cursor).to.be.equal('grabbing');
+          });
+
+          test('handles cursor when interaction disabled', () => {
+            controls.disableInteraction();
+
+            expect(element.style.cursor).to.be.equal('pointer');
+          });
+        });
+
+        suite('wasDragInteraction', () => {
+          setup(() => {
+            controls.applyOptions({interactionPolicy: 'always-allow'});
+            settleControls(controls);
+          });
+
+          test('wasDragInteraction false when no mousemove', () => {
+            dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(element, 'mouseup', {clientX: 0, clientY: 10});
+
+            expect(controls.wasDragInteraction()).to.be.false;
+          });
+
+          test('wasDragInteraction true when mousemove', () => {
+            dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(
+              element, 'mousemove',
+              {clientX: controls.options.minDragDistance, clientY: 10}
+            );
+            dispatchSyntheticEvent(element, 'mouseup',
+              {clientX: controls.options.minDragDistance, clientY: 10}
+            );
+
+            expect(controls.wasDragInteraction()).to.be.true;
+          });
+
+          test('not wasDragInteraction when small mousemove', () => {
+            dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
+            dispatchSyntheticEvent(element, 'mousemove', {clientX: 1, clientY: 10});
+            dispatchSyntheticEvent(element, 'mouseup', {clientX: 0, clientY: 10});
+
+            expect(controls.wasDragInteraction()).to.be.false;
+          });
+
+          test('wasDragInteraction when mouseup greater than minDragDistance', () => {
+            dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 0});
+            dispatchSyntheticEvent(
+              element, 'mouseup',
+              {clientX: controls.options.minDragDistance! * 2, clientY: 0}
+            );
+
+            expect(controls.wasDragInteraction()).to.be.true;
+          });
+
+          test('wasDragInteraction when mouseup ends in the same spot', () => {
+            const touchUpAndDownPointer = {clientX: 0, clientY: 10};
+            dispatchSyntheticEvent(element, 'mousedown', touchUpAndDownPointer);
+            dispatchSyntheticEvent(
+              element, 'mousemove',
+              {clientX: 10000, clientY: 0}
+            );
+            dispatchSyntheticEvent(element, 'mouseup', touchUpAndDownPointer);
+            
+            // expect(controls.distanceMoved()).to.eql(100);
+            expect(controls.wasDragInteraction()).to.be.true;
+          });
         });
 
         suite('events', () => {
