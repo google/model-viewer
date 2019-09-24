@@ -133,8 +133,7 @@ export const deserializeVector3 =
 export const deserializeAngleToDeg =
     (angleString: string, defaultDeg: number): number|null => {
       const angleValueNode = parseValues(angleString);
-      return convertAngleValueNode(
-          angleValueNode[0], defaultDeg * Math.PI / 180, 'deg');
+      return convertAngleValueNode(angleValueNode[0], defaultDeg, 'deg');
     };
 
 /**

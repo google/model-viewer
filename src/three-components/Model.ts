@@ -104,8 +104,8 @@ export default class Model extends Object3D {
 
   setFramingFactor(factor: number) {
     if (factor !== this.framingFactor) {
+      this.idealCameraDistance *= factor / this.framingFactor;
       this.framingFactor = factor;
-      this.updateFraming();
     }
   }
 

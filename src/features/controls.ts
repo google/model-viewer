@@ -330,7 +330,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const far = maximumRadius + modelRadius;
 
       controls.updateIntrinsics(near, far, aspect);
-      controls.setRadius(idealCameraDistance);
 
       if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW) {
         const zoom = (this[$framedFieldOfView] != null) ?
