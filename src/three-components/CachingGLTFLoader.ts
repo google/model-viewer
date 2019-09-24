@@ -52,6 +52,7 @@ export class CachingGLTFLoader {
     return cache;
   }
 
+  /** @nocollapse */
   static clearCache() {
     cache.forEach((_value, url) => {
       this.delete(url);
@@ -63,6 +64,7 @@ export class CachingGLTFLoader {
     return cache.has(url);
   }
 
+  /** @nocollapse */
   static async delete(url: string) {
     if (!this.has(url)) {
       return;
