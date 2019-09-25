@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector2, Vector3} from 'three';
+import {Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector3} from 'three';
 
 import {clamp} from '../utilities.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'zoom';
+
+interface Pointer {
+  clientX: number,
+  clientY: number,
+}
 
 export interface SmoothControlsOptions {
   // The closest the camera can be to the target
@@ -106,7 +111,9 @@ const $onTouchMove = Symbol('onTouchMove');
 const $onWheel = Symbol('onWheel');
 const $onKeyDown = Symbol('onKeyDown');
 const $handlePointerMove = Symbol('handlePointerMove');
+const $handleSinglePointerMove = Symbol('handleSinglePointerMove');
 const $handlePointerDown = Symbol('handlePointerDown');
+const $handleSinglePointerDown = Symbol('handleSinglePointerDown');
 const $handlePointerUp = Symbol('handlePointerUp');
 const $handleWheel = Symbol('handleWheel');
 const $handleKey = Symbol('handleKey');
@@ -237,7 +244,10 @@ export class SmoothControls extends EventDispatcher {
   private[$targetDamperZ] = new Damper();
 
   private[$pointerIsDown] = false;
-  private[$lastPointerPosition] = new Vector2();
+  private[$lastPointerPosition]: Pointer = {
+    clientX: 0,
+    clientY: 0,
+  };
   private[$lastTouches]: TouchList;
   private[$touchMode]: TouchMode;
 
@@ -625,34 +635,32 @@ export class SmoothControls extends EventDispatcher {
 
           break;
         case 'rotate':
-          const {clientX: xOne, clientY: yOne} = this[$lastTouches][0];
-          const {clientX: xTwo, clientY: yTwo} = touches[0];
-
-          const deltaTheta = this[$pixelLengthToSphericalAngle](xTwo - xOne);
-          const deltaPhi = this[$pixelLengthToSphericalAngle](yTwo - yOne);
-
-          handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0, 0);
+          handled = this[$handleSinglePointerMove](touches[0]);
           break;
       }
 
       this[$lastTouches] = touches;
     } else {
-      const {clientX: x, clientY: y} = event as MouseEvent;
-
-      const deltaTheta =
-          this[$pixelLengthToSphericalAngle](x - this[$lastPointerPosition].x);
-      const deltaPhi =
-          this[$pixelLengthToSphericalAngle](y - this[$lastPointerPosition].y);
-
-      handled = this[$userAdjustOrbit](deltaTheta, deltaPhi, 0, 0);
-
-      this[$lastPointerPosition].set(x, y);
+      handled = this[$handleSinglePointerMove](event as MouseEvent);
     }
 
     if ((handled || this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
     };
+  }
+
+  private[$handleSinglePointerMove](pointer: Pointer): boolean {
+    const {clientX, clientY} = pointer;
+    const deltaTheta =
+        this[$pixelLengthToSphericalAngle](clientX - this[$lastPointerPosition].clientX);
+    const deltaPhi =
+        this[$pixelLengthToSphericalAngle](clientY - this[$lastPointerPosition].clientY);
+
+    this[$lastPointerPosition].clientX = clientX;
+    this[$lastPointerPosition].clientY = clientY;
+
+    return this[$userAdjustOrbit](deltaTheta, deltaPhi, 0, 0);
   }
 
   private[$handlePointerDown](event: MouseEvent|TouchEvent) {
@@ -665,6 +673,7 @@ export class SmoothControls extends EventDispatcher {
         default:
         case 1:
           this[$touchMode] = 'rotate';
+          this[$handleSinglePointerDown](touches[0]);
           break;
         case 2:
           this[$touchMode] = 'zoom';
@@ -673,10 +682,14 @@ export class SmoothControls extends EventDispatcher {
 
       this[$lastTouches] = touches;
     } else {
-      const {clientX: x, clientY: y} = event as MouseEvent;
-      this[$lastPointerPosition].set(x, y);
-      this.element.style.cursor = 'grabbing';
+      this[$handleSinglePointerDown](event as MouseEvent);
     }
+  }
+
+  private[$handleSinglePointerDown](pointer: Pointer) {
+    this[$lastPointerPosition].clientX = pointer.clientX;
+    this[$lastPointerPosition].clientY = pointer.clientY;
+    this.element.style.cursor = 'grabbing';
   }
 
   private[$handlePointerUp](_event: MouseEvent|TouchEvent) {
