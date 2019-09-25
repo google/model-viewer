@@ -78,10 +78,9 @@ export class LoadingStatusAnnouncer extends EventDispatcher {
     const {style} = statusElement;
 
     statusElement.setAttribute('role', 'status');
+    statusElement.classList.add('screen-reader-only');
 
-    style.position = 'absolute';
-    style.color = 'transparent';
-    style.top = style.left = style.margin = '0';
+    style.top = style.left = '0';
     style.pointerEvents = 'none';
   }
 
