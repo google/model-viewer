@@ -22,8 +22,7 @@ export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'zoom';
 
 interface Pointer {
-  clientX: number,
-  clientY: number,
+  clientX: number, clientY: number,
 }
 
 export interface SmoothControlsOptions {
@@ -52,8 +51,8 @@ export interface SmoothControlsOptions {
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumRadius: 1,
   maximumRadius: 2,
-  minimumPolarAngle: 0,        // Math.PI / 8,
-  maximumPolarAngle: Math.PI,  // - Math.PI / 8,
+  minimumPolarAngle: Math.PI / 8,
+  maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
@@ -652,10 +651,10 @@ export class SmoothControls extends EventDispatcher {
 
   private[$handleSinglePointerMove](pointer: Pointer): boolean {
     const {clientX, clientY} = pointer;
-    const deltaTheta =
-        this[$pixelLengthToSphericalAngle](clientX - this[$lastPointerPosition].clientX);
-    const deltaPhi =
-        this[$pixelLengthToSphericalAngle](clientY - this[$lastPointerPosition].clientY);
+    const deltaTheta = this[$pixelLengthToSphericalAngle](
+        clientX - this[$lastPointerPosition].clientX);
+    const deltaPhi = this[$pixelLengthToSphericalAngle](
+        clientY - this[$lastPointerPosition].clientY);
 
     this[$lastPointerPosition].clientX = clientX;
     this[$lastPointerPosition].clientY = clientY;
