@@ -86,9 +86,8 @@ const convertAngleValueNode =
  * Returns null if the spherical string cannot be parsed.
  */
 export const deserializeSpherical =
-    (sphericalString: string,
-     defaultValues: [number, number, number|null, number|null]):
-        [number, number, number|null, number|null] => {
+    (sphericalString: string, defaultValues: [number, number, number, number]):
+        [number, number, number] => {
           let [theta, phi, radius, factor] = defaultValues;
           const sphericalValueNodes = parseValues(sphericalString);
 
@@ -99,15 +98,15 @@ export const deserializeSpherical =
             phi = convertAngleValueNode(phiNode, phi);
             const value = lengthValueNodeToMeters(
                 radiusNode, radius == null ? factor! : radius);
+
             if (radiusNode.unit == '%') {
-              radius = null;
               factor = value / 100;
             } else {
               radius = value;
-              factor = null;
             }
           }
-          return [theta, phi, radius, factor];
+
+          return [theta, phi, radius * factor];
         };
 
 /**

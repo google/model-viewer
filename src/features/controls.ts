@@ -50,8 +50,14 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
-const DEFAULT_SPHERICAL =
-    deserializeSpherical(DEFAULT_CAMERA_ORBIT, [0, 0, 0, 0]);
+const sphericalDefaults = (() => {
+  const [defaultTheta, defaultPhi, defaultFactor] =
+      deserializeSpherical(DEFAULT_CAMERA_ORBIT, [0, 0, 1, 0]);
+
+  return (defaultRadius: number): [number, number, number, number] => {
+    return [defaultTheta, defaultPhi, defaultRadius, defaultFactor];
+  };
+})();
 
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
@@ -91,6 +97,7 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 
+const $sphericalDefaults = Symbol('sphericalDefaults');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 
@@ -146,6 +153,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
     protected[$framedFieldOfView]: number|null = null;
+    protected[$sphericalDefaults] = [0, 0, 0, 0];
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -251,16 +259,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$updateCameraOrbit]() {
-      let sphericalValues =
-          deserializeSpherical(this.cameraOrbit, DEFAULT_SPHERICAL);
-      let [theta, phi, radius, factor] = sphericalValues;
+      let sphericalValues = deserializeSpherical(
+          this.cameraOrbit,
+          sphericalDefaults(this[$scene].model.idealCameraDistance));
+      let [theta, phi, radius] = sphericalValues;
 
-      if (radius == null) {
-        this[$scene].model.setFramingFactor(factor!);
-        radius = this[$scene].model.idealCameraDistance;
-      }
-
-      this[$controls].setOrbit(theta!, phi!, radius!);
+      this[$controls].setOrbit(theta, phi, radius);
     }
 
     [$updateCameraTarget]() {

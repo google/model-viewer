@@ -35,7 +35,6 @@ export default class Model extends Object3D {
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
-  private framingFactor = 1;
 
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
@@ -100,13 +99,6 @@ export default class Model extends Object3D {
     this.modelContainer.add(model);
     this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
-  }
-
-  setFramingFactor(factor: number) {
-    if (factor !== this.framingFactor) {
-      this.idealCameraDistance *= factor / this.framingFactor;
-      this.framingFactor = factor;
-    }
   }
 
   async setSource(
@@ -309,7 +301,6 @@ export default class Model extends Object3D {
     this.fieldOfViewAspect =
         reduceVertices(this.modelContainer, horizontalFov) / verticalFov;
 
-    this.idealCameraDistance *= this.framingFactor;
     this.add(this.modelContainer);
   }
 }
