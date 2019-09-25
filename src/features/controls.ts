@@ -434,15 +434,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (svg == null) {
         return;
       }
-
-      // NOTE(cdata): We need to make sure that SVG animations are paused
-      // when the prompt is not visible, otherwise we may a significant
-      // compositing cost even while the prompt is at opacity 0.
-      if (this[$promptElement].classList.contains('visible')) {
-        svg.unpauseAnimations();
-      } else {
-        svg.pauseAnimations();
-      }
     }
 
     [$onResize](event: any) {

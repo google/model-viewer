@@ -165,6 +165,15 @@ template.innerHTML = `
       transform: translateY(-100%);
     }
 
+    @keyframes wiggle {
+      from {
+        transform: translateX(5%);
+      }
+      to {
+        transform: translateX(-5%);
+      }
+    }
+
     .slot.controls-prompt {
       display: var(--interaction-prompt-display, flex);
       position: absolute;
@@ -179,6 +188,11 @@ template.innerHTML = `
       transform-origin: center center;
       transform: scale(0.9);
       transition: transform 0.3s, opacity 0.3s;
+      animation-name: wiggle;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate-reverse;
+      animation-timing-function: linear;
     }
 
     .slot.controls-prompt > * {
