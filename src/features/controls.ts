@@ -97,7 +97,6 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 
-const $sphericalDefaults = Symbol('sphericalDefaults');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 
@@ -153,7 +152,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
     protected[$framedFieldOfView]: number|null = null;
-    protected[$sphericalDefaults] = [0, 0, 0, 0];
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -324,13 +322,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {aspect} = this[$scene];
       const {idealCameraDistance, fieldOfViewAspect} = this[$scene].model;
 
-      const minimumRadius = idealCameraDistance / 2;
       const maximumRadius = idealCameraDistance * 2;
-      controls.applyOptions({minimumRadius, maximumRadius});
+      controls.applyOptions({maximumRadius});
 
       const modelRadius =
           idealCameraDistance * Math.sin(HALF_FIELD_OF_VIEW_RADIANS);
-      const near = minimumRadius - modelRadius;
+      const near = 0;
       const far = maximumRadius + modelRadius;
 
       controls.updateIntrinsics(near, far, aspect);

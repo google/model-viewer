@@ -135,8 +135,6 @@ suite('SmoothControls', () => {
         test('changes the absolute distance to the target', () => {
           settleControls(controls);
 
-          expect(camera.position.length())
-              .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
           controls.setOrbit(0, HALF_PI, 1.5);
           settleControls(controls);
           expect(camera.position.length()).to.be.equal(1.5);
@@ -318,8 +316,7 @@ suite('SmoothControls', () => {
           });
 
           test('does not zoom when scrolling while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            const radius = controls.getCameraSpherical().radius;
             expect(controls.getFieldOfView())
                 .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
@@ -327,8 +324,7 @@ suite('SmoothControls', () => {
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getCameraSpherical().radius).to.be.equal(radius);
             expect(controls.getFieldOfView())
                 .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
           });

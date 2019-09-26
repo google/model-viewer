@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Quaternion, Spherical, Vector3} from 'three';
+import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {clamp} from '../utilities.js';
 
@@ -49,7 +49,7 @@ export interface SmoothControlsOptions {
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
-  minimumRadius: 1,
+  minimumRadius: 0,
   maximumRadius: 2,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
@@ -79,8 +79,6 @@ const $targetDamperY = Symbol('targetDamperY');
 const $targetDamperZ = Symbol('targetDamperZ');
 
 const $options = Symbol('options');
-const $upQuaternion = Symbol('upQuaternion');
-const $upQuaternionInverse = Symbol('upQuaternionInverse');
 const $touchMode = Symbol('touchMode');
 const $canInteract = Symbol('canInteract');
 const $interactionEnabled = Symbol('interactionEnabled');
@@ -96,7 +94,6 @@ const $lastTouches = Symbol('lastTouches');
 
 // Value conversion methods
 const $pixelLengthToSphericalAngle = Symbol('pixelLengthToSphericalAngle');
-const $sphericalToPosition = Symbol('sphericalToPosition');
 const $twoTouchDistance = Symbol('twoTouchDistance');
 const $wrapAngle = Symbol('wrapAngle');
 
@@ -124,7 +121,6 @@ const ZOOM_SENSITIVITY = 0.1;
 const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
 const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
-const UP = new Vector3(0, 1, 0);
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -224,8 +220,6 @@ export class SmoothControls extends EventDispatcher {
   private[$interactionEnabled]: boolean = false;
 
   private[$options]: SmoothControlsOptions;
-  private[$upQuaternion] = new Quaternion();
-  private[$upQuaternionInverse] = new Quaternion();
   private[$isUserChange] = false;
 
   private[$spherical] = new Spherical();
@@ -263,9 +257,6 @@ export class SmoothControls extends EventDispatcher {
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
     super();
-
-    this[$upQuaternion].setFromUnitVectors(camera.up, UP);
-    this[$upQuaternionInverse].copy(this[$upQuaternion]).inverse();
 
     this[$onMouseMove] = (event: Event) =>
         this[$handlePointerMove](event as MouseEvent);
@@ -549,8 +540,10 @@ export class SmoothControls extends EventDispatcher {
   private[$moveCamera]() {
     // Derive the new camera position from the updated spherical:
     this[$spherical].makeSafe();
-    this[$sphericalToPosition](this[$spherical], this.camera.position);
-    this.camera.lookAt(this[$target]);
+    this.camera.position.setFromSpherical(this[$spherical]);
+    this.camera.position.add(this[$target]);
+    this.camera.setRotationFromEuler(new Euler(
+        this[$spherical].phi - Math.PI / 2, this[$spherical].theta, 0, 'YXZ'));
 
     if (this.camera.fov !== Math.exp(this[$logFov])) {
       this.camera.fov = Math.exp(this[$logFov]);
@@ -590,12 +583,6 @@ export class SmoothControls extends EventDispatcher {
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
     return 2 * Math.PI * pixelLength / this.element.clientHeight;
-  }
-
-  private[$sphericalToPosition](spherical: Spherical, position: Vector3) {
-    position.setFromSpherical(spherical);
-    position.applyQuaternion(this[$upQuaternionInverse]);
-    position.add(this[$target]);
   }
 
   private[$twoTouchDistance](touchOne: Touch, touchTwo: Touch): number {
