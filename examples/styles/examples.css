@@ -569,6 +569,10 @@ paper-button {
   color: #999;
 }
 
+.eg-image {
+    max-width: 40vw;
+}
+
 @media only screen and (min-width: 1664px) {
   :root {
     --snippet-offset: 40px -40px;
@@ -581,6 +585,9 @@ paper-button {
   .demo pre {
     margin: 16px auto;
   }
+    .eg-image {
+        max-width: 20vw;
+    }
 }
 
 @media only screen and (max-width: 1280px) {
@@ -702,4 +709,11 @@ paper-button {
     padding: 20px;
   }
 
+
+  .eg-image {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 50vw;
+  }
 }
