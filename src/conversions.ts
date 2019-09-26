@@ -22,8 +22,8 @@ import {parseValues, ValueNode} from './parsers.js';
  * Converts a length-like ValueNode to meters expressed as a number. Currently,
  * only ValueNodes that represent a metric value (m, cm, mm) are supported.
  *
- * If no unit is specified, assumes meters. Returns 0 for a ValueNode that
- * cannot be parsed.
+ * Assumes meters if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the ValueNode cannot be parsed.
  */
 const lengthValueNodeToMeters =
     (lengthValueNode: ValueNode, defaultMeters: number): number => {
@@ -53,8 +53,8 @@ const lengthValueNodeToMeters =
  * only ValueNodes that represent an angle expressed in degrees (deg) or radians
  * (rad) are supported.
  *
- * Assumes radians if unit is not specified or recognized. Returns 0 for a
- * ValueNode that cannot be parsed.
+ * Assumes radians if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the ValueNode cannot be parsed.
  */
 const convertAngleValueNode =
     (angleValueNode: ValueNode,
@@ -79,11 +79,13 @@ const convertAngleValueNode =
  * Spherical object. Position strings are of the form "$theta $phi $radius".
  * Accepted units for theta and phi are radians (rad) and degrees (deg).
  * Accepted units for radius include meters (m), centimeters (cm) and
- * millimeters (mm), or auto. If radius is set to auto, it implies that the
- * consumer of the deserialized values has some idealized notion of the radius
- * that should be applied.
+ * millimeters (mm), or percent (%). If percent is used, the radius parameter
+ * will be set to the appropriate fraction of the supplied default radius. The
+ * supplied default values are [theta (rad), phi(rad), radius(m), percent(%).]
  *
- * Returns null if the spherical string cannot be parsed.
+ * Assumes radians/meters if unit is not specified or recognized. Returns the
+ * supplied default if 'auto' is given or the ValueNode cannot be parsed. 'auto'
+ * for radius returns the product of the default radius and default percent.
  */
 export const deserializeSpherical =
     (sphericalString: string, defaultValues: [number, number, number, number]):
@@ -113,11 +115,12 @@ export const deserializeSpherical =
 /**
  * Vector String => Vector Values
  *
- * Converts a "vector string" to 3 values, either numbers in meters or the
- * string 'auto'. Position strings are of the form "$x $y $z". Accepted units
- * include meters (m), centimeters (cm) and millimeters (mm).
+ * Converts a "vector string" to a Vector3. Position strings are of the form "$x
+ * $y $z". Accepted units include meters (m), centimeters (cm) and millimeters
+ * (mm).
  *
- * Returns null if the vector string cannot be parsed.
+ * Assumes meters if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the vector string cannot be parsed.
  */
 export const deserializeVector3 =
     (vectorString: string, defaultValues: Vector3): Vector3 => {
