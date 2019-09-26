@@ -38,12 +38,17 @@
       },
       "target": {
         "y": 1.1
+      },
+      "orbit": {
+        "radius": 6
       }
     },
     {
       "name": "khronos-AnimatedMorphCube",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
       "orbit": {
+        "theta": 30,
+        "phi": 60,
         "radius": 4.75
       }
     },
@@ -258,10 +263,7 @@
         "height": 1024
       },
       "target": {
-        "y": -0.1
-      },
-      "orbit": {
-        "radius": 0.8
+        "y": -0.15
       }
     },
     {

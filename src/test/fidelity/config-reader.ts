@@ -19,7 +19,8 @@ const defaultScenario = {
   lighting: '../../../../examples/assets/lightroom_14b.hdr',
   dimensions: {width: 768, height: 768},
   target: {x: 0, y: 0, z: 0},
-  orbit: {theta: 0, phi: 90, radius: 1}
+  orbit: {theta: 0, phi: 90, radius: 1},
+  verticalFoV: 45
 };
 
 export class ConfigReader {

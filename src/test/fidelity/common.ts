@@ -84,6 +84,7 @@ export interface ScenarioConfig {
   dimensions: Dimensions;
   target: {x: number, y: number, z: number};
   orbit: {theta: number, phi: number, radius: number};
+  verticalFoV: number;
   exclude?: Array<string>;
 }
 

@@ -217,7 +217,7 @@ export class FilamentViewer extends LitElement {
 
     const Fov = self.Filament.Camera$Fov;
     const canvas = this[$canvas]!;
-    const {dimensions, target, orbit} = this.scenario;
+    const {dimensions, target, orbit, verticalFoV} = this.scenario;
 
     const dpr = resolveDpr();
     const width = dimensions.width * dpr;
@@ -243,12 +243,11 @@ export class FilamentViewer extends LitElement {
       radiusSinPhi * Math.cos(theta) + target.z
     ];
 
-    const fov = 45;
-
     const near = orbit.radius / 10.0;
     const far = orbit.radius * 10.0;
 
-    this[$camera].setProjectionFov(fov, aspect, near, far, Fov!.VERTICAL);
+    this[$camera].setProjectionFov(
+        verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
     this[$camera].lookAt(eye, center, up);
   }
