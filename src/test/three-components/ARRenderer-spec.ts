@@ -136,7 +136,7 @@ suite('ARRenderer', () => {
   setup(() => {
     element = new ModelViewerElementBase();
     renderer = element[$renderer];
-    arRenderer = ARRenderer.fromInlineRenderer(renderer);
+    arRenderer = new ARRenderer(renderer);
   });
 
   teardown(async () => {

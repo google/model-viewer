@@ -54,18 +54,16 @@ export class ARRenderer extends EventDispatcher {
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
-  /**
-   * Given an inline Renderer, construct an ARRenderer and return it
-   */
-  static fromInlineRenderer(renderer: Renderer) {
-    return new ARRenderer(renderer);
-  }
-
   constructor(parentRenderer: Renderer) {
     super();
     const inputContext: WebGLRenderingContext = parentRenderer.context!;
+
+    // The parentRenderer is a Renderer object which has-a ARRenderer. We need
+    // to save a reference so we can restore state once the AR session is done.
     this.parentRenderer = parentRenderer;
 
+    // this.renderer is a three.js WebGLRenderer, it is shared with the parent
+    // Renderer.
     this.renderer = parentRenderer.renderer;
 
     this.inputContext = inputContext;
@@ -104,9 +102,10 @@ export class ARRenderer extends EventDispatcher {
     });
     await waitForAnimationFrame;
 
+    // Redirect rendering to the WebXR offscreen framebuffer.
+    // TODO: this method should be added to three.js's exported interface.
     (this.renderer as any)
-        .setFramebuffer(
-            (session.renderState.baseLayer as XRWebGLLayer).framebuffer);
+        .setFramebuffer(session.renderState.baseLayer!.framebuffer);
     return session;
   }
 
@@ -185,9 +184,11 @@ export class ARRenderer extends EventDispatcher {
     }
   }
 
-  [$postSessionCleanup]() {
-    (this.renderer as any).setFramebuffer(null);
-    this.parentRenderer.setRendererSize(1, 1);
+    [$postSessionCleanup]() {
+      // The offscreen WebXR framebuffer is now invalid, switch
+      // back to the default framebuffer for canvas output.
+      // TODO: this method should be added to three.js's exported interface.
+      (this.renderer as any).setFramebuffer(null);
 
     // Trigger a parent renderer update. TODO(klausw): are these all
     // necessary and sufficient?
@@ -195,6 +196,11 @@ export class ARRenderer extends EventDispatcher {
       this.dolly.remove(this[$presentedScene]!);
       this[$presentedScene]!.isDirty = true;
     }
+    // The parentRenderer's render method automatically updates
+    // the device pixel ratio, but only updates the three.js renderer
+    // size if there's a size mismatch. Reset the size to force that
+    // to refresh.
+    this.parentRenderer.setRendererSize(1, 1);
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
@@ -314,8 +320,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
-      const viewport =
-          (session.renderState.baseLayer as XRWebGLLayer).getViewport(view);
+      const viewport = session.renderState.baseLayer!.getViewport(view);
       this.renderer.setViewport(0, 0, viewport.width, viewport.height);
       this.renderer.setSize(viewport.width, viewport.height, false);
       this.camera.projectionMatrix.fromArray(view.projectionMatrix);

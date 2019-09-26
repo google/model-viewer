@@ -120,12 +120,22 @@ interface XRFrame {
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
 
 interface XRRenderState {
-  baseLayer: XRLayer;
+  readonly depthNear: number;
+  readonly depthFar: number;
+  readonly inlineVerticalFieldOfView?: number;
+  readonly baseLayer?: XRWebGLLayer;
+}
+
+interface XRRenderStateInit {
+  depthNear?: number;
+  depthFar?: number;
+  inlineVerticalFieldOfView?: number;
+  baseLayer?: XRWebGLLayer;
 }
 
 interface XRSession extends EventTarget {
   renderState: XRRenderState;
-  updateRenderState(obj: any): any;
+  updateRenderState(state?: XRRenderStateInit): any;
   requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
   requestHitTest(ray: XRRay, frameOfReference: XRFrameOfReference):
       Promise<XRHitResult[]>;

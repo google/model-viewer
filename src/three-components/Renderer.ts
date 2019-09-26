@@ -90,7 +90,7 @@ export default class Renderer extends EventDispatcher {
       console.warn(error);
     }
 
-    this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
+    this[$arRenderer] = new ARRenderer(this);
     this.textureUtils = this.canRender ? new TextureUtils(this.renderer) : null;
 
     this.setRendererSize(1, 1);
