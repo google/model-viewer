@@ -161,6 +161,8 @@ interface XRLayer {}
 
 declare class XRWebGLLayer implements XRLayer {
   public framebuffer: WebGLFramebuffer;
+  public framebufferWidth: number; 
+  public framebufferHeight: number; 
 
   constructor(
       session: XRSession, gl: WebGLRenderingContext,

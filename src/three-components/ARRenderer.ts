@@ -106,6 +106,10 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.renderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
+    this.renderer.setSize(session.renderState.baseLayer!.framebufferWidth,
+                          session.renderState.baseLayer!.framebufferHeight,
+                          false);
+
     return session;
   }
 
@@ -321,8 +325,7 @@ export class ARRenderer extends EventDispatcher {
 
     for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
-      this.renderer.setViewport(0, 0, viewport.width, viewport.height);
-      this.renderer.setSize(viewport.width, viewport.height, false);
+      this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
       this.camera.projectionMatrix.fromArray(view.projectionMatrix);
       const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
 
