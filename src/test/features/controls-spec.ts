@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, sphericalDefaults, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -72,6 +72,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
     suite('camera-orbit', () => {
       let element: ModelViewerElementBase&ControlsInterface;
       let controls: SmoothControls;
+      let defaultRadius: number;
 
       setup(async () => {
         element = new ModelViewerElement();
@@ -89,6 +90,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         await timePasses();
 
         settleControls(controls);
+
+        const orbitDefault =
+            sphericalDefaults(element[$scene].model.idealCameraDistance);
+        defaultRadius = orbitDefault[2] * orbitDefault[3];
       });
 
       teardown(() => {
@@ -98,8 +103,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults radius to ideal camera distance', () => {
-        expect((element as any).getCameraOrbit().radius)
-            .to.be.equal((element as any)[$scene].model.idealCameraDistance);
+        expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
       });
 
       // TODO(#583)
@@ -146,6 +150,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         expectSphericalsToBeEqual(
             element.getCameraOrbit(), {...orbit, radius: nextRadius});
+
+        element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad auto`;
+
+        await timePasses();
+
+        settleControls(controls);
+
+        expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
       });
 
       test('can independently adjust target', async () => {
@@ -289,10 +301,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal('always-allow');
           });
 
-      test('sets max radius to the camera framed distance', () => {
+      test('sets max radius greater than the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
             element[$scene].model.position);
-        expect(controls.options.maximumRadius).to.be.equal(cameraDistance);
+        expect(controls.options.maximumRadius)
+            .to.be.greaterThan(cameraDistance);
       });
 
       test('disables interaction if disabled after enabled', async () => {
@@ -346,7 +359,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'has initial aria-label set to alt before interaction',
             async () => {
-              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+              const canvas: HTMLCanvasElement = element[$scene].canvas;
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal(element.alt);
@@ -358,7 +371,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           });
 
           test('prompts user to interact when focused', async () => {
-            const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+            const canvas: HTMLCanvasElement = element[$scene].canvas;
             const promptElement: HTMLElement = (element as any)[$promptElement];
 
             settleControls(controls);
@@ -387,8 +400,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 Object.defineProperty(
                     element, 'loaded', {value: false, configurable: true});
 
-                const canvas: HTMLCanvasElement =
-                    (element[$scene] as any).canvas;
+                const canvas: HTMLCanvasElement = element[$scene].canvas;
                 const promptElement: HTMLElement =
                     (element as any)[$promptElement];
 
@@ -414,7 +426,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           // TODO(#584)
           test.skip('does not prompt if user already interacted', async () => {
-            const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+            const canvas: HTMLCanvasElement = element[$scene].canvas;
             const promptElement = (element as any)[$promptElement];
             const originalLabel = canvas.getAttribute('aria-label');
 
@@ -436,7 +448,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting horizontally',
             async () => {
-              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+              const canvas: HTMLCanvasElement = element[$scene].canvas;
 
               await rafPasses();
               canvas.focus();
@@ -469,7 +481,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting vertically',
             async () => {
-              const canvas: HTMLCanvasElement = (element[$scene] as any).canvas;
+              const canvas: HTMLCanvasElement = element[$scene].canvas;
 
               await rafPasses();
               canvas.focus();

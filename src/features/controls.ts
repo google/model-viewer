@@ -50,7 +50,7 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
-const sphericalDefaults = (() => {
+export const sphericalDefaults = (() => {
   const [defaultTheta, defaultPhi, defaultFactor] =
       deserializeSpherical(DEFAULT_CAMERA_ORBIT, [0, 0, 1, 0]);
 
@@ -325,7 +325,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {idealCameraDistance, fieldOfViewAspect} = this[$scene].model;
 
       const minimumRadius = idealCameraDistance / 2;
-      const maximumRadius = idealCameraDistance;
+      const maximumRadius = idealCameraDistance * 2;
       controls.applyOptions({minimumRadius, maximumRadius});
 
       const modelRadius =

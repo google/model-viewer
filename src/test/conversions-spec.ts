@@ -19,47 +19,47 @@ import {Vector3} from 'three';
 import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3, enumerationDeserializer} from '../conversions.js';
 
 const expect = chai.expect;
-const DEFAULT_SPHERICAL: [number, number, number, number] = [0, 0, 0, 0];
+const DEFAULT_SPHERICAL: [number, number, number, number] = [0, 0, 2, 100];
 
 suite('conversions', () => {
   suite('deserializeSpherical', () => {
     test('converts a spherical string to spherical values', () => {
       expect(deserializeSpherical('0rad 1.23rad 1m', DEFAULT_SPHERICAL))
-          .to.be.eql([0, 1.23, 1, null]);
+          .to.be.eql([0, 1.23, 1]);
     });
 
     test('assumes radians when units are omitted from theta and phi', () => {
       expect(deserializeSpherical('1.23 0 1m', DEFAULT_SPHERICAL))
-          .to.be.eql([1.23, 0, 1, null]);
+          .to.be.eql([1.23, 0, 1]);
     });
 
     test('assumes meters when units are omitted from radius', () => {
       expect(deserializeSpherical('1rad 20rad 3', DEFAULT_SPHERICAL))
-          .to.be.eql([1, 20, 3, null]);
+          .to.be.eql([1, 20, 3]);
     });
 
     test(
         'allows degress to be used instead of radians for theta and phi',
         () => {
           expect(deserializeSpherical('9.9rad 3.14deg 1m', DEFAULT_SPHERICAL))
-              .to.be.eql([9.9, ThreeMath.degToRad(3.14), 1, null]);
+              .to.be.eql([9.9, ThreeMath.degToRad(3.14), 1]);
         });
 
     test('allows radius to be expressed in mm or cm', () => {
       expect(deserializeSpherical('0 0 23mm', DEFAULT_SPHERICAL))
-          .to.be.eql([0, 0, 0.023, null]);
+          .to.be.eql([0, 0, 0.023]);
       expect(deserializeSpherical('0 0 100cm', DEFAULT_SPHERICAL))
-          .to.be.eql([0, 0, 1, null]);
+          .to.be.eql([0, 0, 1]);
     });
 
     test('returns a factor if radius is expressed in %', () => {
       expect(deserializeSpherical('0 0 110%', DEFAULT_SPHERICAL))
-          .to.be.eql([0, 0, null, 1.1]);
+          .to.be.eql([0, 0, 2.2]);
     });
 
     test('is resilient to awkward whitespace', () => {
       expect(deserializeSpherical('  0 0\n   0 ', DEFAULT_SPHERICAL))
-          .to.be.eql([0, 0, 0, null]);
+          .to.be.eql([0, 0, 0]);
     });
   });
 

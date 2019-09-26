@@ -88,25 +88,26 @@ const convertAngleValueNode =
 export const deserializeSpherical =
     (sphericalString: string, defaultValues: [number, number, number, number]):
         [number, number, number] => {
-          let [theta, phi, radius, factor] = defaultValues;
-          const sphericalValueNodes = parseValues(sphericalString);
+          let [theta, phi, radius, percent] = defaultValues;
+          try {
+            const sphericalValueNodes = parseValues(sphericalString);
 
-          if (sphericalValueNodes.length === 3) {
-            const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
+            if (sphericalValueNodes.length === 3) {
+              const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
 
-            theta = convertAngleValueNode(thetaNode, theta);
-            phi = convertAngleValueNode(phiNode, phi);
-            const value = lengthValueNodeToMeters(
-                radiusNode, radius == null ? factor! : radius);
+              theta = convertAngleValueNode(thetaNode, theta);
+              phi = convertAngleValueNode(phiNode, phi);
 
-            if (radiusNode.unit == '%') {
-              factor = value / 100;
-            } else {
-              radius = value;
+              if (radiusNode.unit == '%') {
+                radius *= lengthValueNodeToMeters(radiusNode, percent) / 100;
+              } else {
+                radius = lengthValueNodeToMeters(radiusNode, radius * percent);
+              }
             }
+          } catch (_error) {
           }
 
-          return [theta, phi, radius * factor];
+          return [theta, phi, radius];
         };
 
 /**
@@ -120,19 +121,26 @@ export const deserializeSpherical =
  */
 export const deserializeVector3 =
     (vectorString: string, defaultValues: Vector3): Vector3 => {
-      const vectorValueNodes = parseValues(vectorString);
-      const xyz = new Vector3(
-          lengthValueNodeToMeters(vectorValueNodes[0], defaultValues.x),
-          lengthValueNodeToMeters(vectorValueNodes[1], defaultValues.y),
-          lengthValueNodeToMeters(vectorValueNodes[2], defaultValues.z));
-
-      return xyz;
+      try {
+        const vectorValueNodes = parseValues(vectorString);
+        const xyz = new Vector3(
+            lengthValueNodeToMeters(vectorValueNodes[0], defaultValues.x),
+            lengthValueNodeToMeters(vectorValueNodes[1], defaultValues.y),
+            lengthValueNodeToMeters(vectorValueNodes[2], defaultValues.z));
+        return xyz;
+      } catch (_error) {
+        return defaultValues;
+      }
     };
 
 export const deserializeAngleToDeg =
     (angleString: string, defaultDeg: number): number|null => {
-      const angleValueNode = parseValues(angleString);
-      return convertAngleValueNode(angleValueNode[0], defaultDeg, 'deg');
+      try {
+        const angleValueNode = parseValues(angleString);
+        return convertAngleValueNode(angleValueNode[0], defaultDeg, 'deg');
+      } catch (_error) {
+        return defaultDeg;
+      }
     };
 
 /**
