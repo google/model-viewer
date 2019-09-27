@@ -167,10 +167,10 @@ template.innerHTML = `
 
     @keyframes wiggle {
       from {
-        transform: translateX(5%);
+        transform: translateX(10%);
       }
       to {
-        transform: translateX(-5%);
+        transform: translateX(-10%);
       }
     }
 
@@ -192,7 +192,7 @@ template.innerHTML = `
       animation-duration: 2s;
       animation-iteration-count: infinite;
       animation-direction: alternate-reverse;
-      animation-timing-function: linear;
+      animation-timing-function: ease-in-out;
     }
 
     .slot.controls-prompt > * {
