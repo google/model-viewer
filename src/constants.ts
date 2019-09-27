@@ -67,6 +67,19 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
 
 // @see https://developer.chrome.com/multidevice/user-agent
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
-export const IS_IOS_SAFARI = IS_IOS && /Safari\//.test(navigator.userAgent);
+// Prior to iOS 13, detecting iOS Safari was relatively straight-forward.
+// As of iOS 13, Safari on iPad (in its default configuration) reports the same
+// user-agent string as Safari on desktop MacOS. Strictly speaking, we only care
+// about iOS for the purposes if selecting for cases where Quick Look is known
+// to be supported. However, for API correctness purposes, we must rely on
+// known, detectable signals to distinguish iOS Safari from MacOS Safari. At the
+// time of this writing, there are no non-iOS/iPadOS Apple devices with
+// multi-touch displays.
+// @see https://stackoverflow.com/questions/57765958/how-to-detect-ipad-and-ipad-os-version-in-ios-13-and-up
+// @see https://forums.developer.apple.com/thread/119186
+// @see https://github.com/GoogleWebComponents/model-viewer/issues/758
+export const IS_IOS_SAFARI = /Safari\//.test(navigator.userAgent) &&
+    (IS_IOS ||
+     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 export const IS_IE11 =
     !((window as any).ActiveXObject) && 'ActiveXObject' in window;
