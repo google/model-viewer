@@ -22,8 +22,7 @@ export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'zoom';
 
 interface Pointer {
-  clientX: number,
-  clientY: number,
+  clientX: number, clientY: number,
 }
 
 export interface SmoothControlsOptions {
@@ -461,14 +460,18 @@ export class SmoothControls extends EventDispatcher {
 
   /**
    * Adjust the orbital position of the camera relative to its current orbital
-   * position.
+   * position. Does not let the theta goal get more than pi ahead of the current
+   * theta, which ensures interpolation continues in the direction of the delta.
    */
   adjustOrbit(
       deltaTheta: number, deltaPhi: number, deltaRadius: number,
       deltaFov: number): boolean {
     const {theta, phi, radius} = this[$goalSpherical];
 
-    const goalTheta = theta - deltaTheta;
+    const dTheta = this[$spherical].theta - theta;
+    const dThetaLimit = Math.PI - 0.001;
+    const goalTheta =
+        theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
     const goalPhi = phi - deltaPhi;
     const goalRadius = radius + deltaRadius;
     let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
@@ -586,7 +589,9 @@ export class SmoothControls extends EventDispatcher {
 
   // Wraps to bewteen -pi and pi
   private[$wrapAngle](radians: number): number {
-    return (radians + Math.PI) % (2 * Math.PI) - Math.PI;
+    const normalized = (radians + Math.PI) / (2 * Math.PI);
+    const wrapped = normalized - Math.floor(normalized);
+    return wrapped * 2 * Math.PI - Math.PI;
   }
 
   private[$pixelLengthToSphericalAngle](pixelLength: number): number {
@@ -652,10 +657,10 @@ export class SmoothControls extends EventDispatcher {
 
   private[$handleSinglePointerMove](pointer: Pointer): boolean {
     const {clientX, clientY} = pointer;
-    const deltaTheta =
-        this[$pixelLengthToSphericalAngle](clientX - this[$lastPointerPosition].clientX);
-    const deltaPhi =
-        this[$pixelLengthToSphericalAngle](clientY - this[$lastPointerPosition].clientY);
+    const deltaTheta = this[$pixelLengthToSphericalAngle](
+        clientX - this[$lastPointerPosition].clientX);
+    const deltaPhi = this[$pixelLengthToSphericalAngle](
+        clientY - this[$lastPointerPosition].clientY);
 
     this[$lastPointerPosition].clientX = clientX;
     this[$lastPointerPosition].clientY = clientY;

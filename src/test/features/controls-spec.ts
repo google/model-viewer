@@ -236,7 +236,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await timePasses();
 
           expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
-          const orbit = element.getCameraOrbit();
+          let orbit = element.getCameraOrbit();
+          // round to nearest 0.0001
+          orbit.theta = Math.round(orbit.theta * 10000) / 10000;
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
               .to.equal(cameraOrbit);
         });
