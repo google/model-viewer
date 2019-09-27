@@ -460,7 +460,8 @@ export class SmoothControls extends EventDispatcher {
 
   /**
    * Adjust the orbital position of the camera relative to its current orbital
-   * position.
+   * position. Does not let the theta goal get more than pi ahead of the current
+   * theta, which ensures interpolation continues in the direction of the delta.
    */
   adjustOrbit(
       deltaTheta: number, deltaPhi: number, deltaRadius: number,
