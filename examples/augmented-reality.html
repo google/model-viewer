@@ -55,7 +55,7 @@
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
         <div class="heading">
           <h2 class="demo-title">Augmented Reality</h2>
-          <h4>This demonstrates several augmented reality features, including unstable-webxr, magic-leap and ios-src.</h4>
+          <h4>This demonstrates several augmented reality features, including <code>unstable-webxr</code>, <code>magic-leap</code>, <code>ios-src</code>, &amp; the accompanying attribute <code>quick-look-browsers</code>.</h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
@@ -74,6 +74,13 @@
           <li>
             <div>ios-src</div>
             <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>
+          </li>
+          <li>
+            <div>quick-look-browsers</div>
+            <p>Set this attribute to control which iOS browsers will be allowed
+              to launch AR Quick Look on iOS. Allowed values are "safari" and
+              "chrome". You can specify any number of browsers separated by
+              whitespace, for example: "safari chrome". Defaults to "safari".</p>
           </li>
           <li>
             <div>magic-leap</div>
