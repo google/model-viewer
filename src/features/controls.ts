@@ -99,6 +99,8 @@ const PHI = 2.0 * Math.PI;
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
+const ROTATION_SPEED = 0.005;
+
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
@@ -336,8 +338,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const promptRectCenter = promptRect.left + (promptRect.width / 2);
         const promptOffset = (modelViewerRectCenter) - (promptRectCenter);
 
+        (this as any)[$scene].pivot.rotation.y = -promptOffset * ROTATION_SPEED;
         this[$needsRender]();
-        (this as any)[$scene].pivot.rotation.y = promptOffset * -0.01;
       }
 
       this[$controls].update(time, delta);
