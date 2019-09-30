@@ -206,11 +206,16 @@ export class ArtifactCreator {
     console.log(
         `🖌  Rendering ${scenarioName} with ${rendererConfig.description}`);
 
+    // NOTE: The function passed to page.evaluate is stringified and eval'd
+    // in a browser context. Importantly, this implies that no external
+    // variables are captured in its closure scope. TypeScript compiler
+    // currently has no mechanism to detect this and will happily tell you
+    // your code is correct when it isn't.
     await page.evaluate(async () => {
       const modelBecomesReady = (self as any).modelLoaded ?
           Promise.resolve() :
           new Promise((resolve, reject) => {
-            const timeout = setTimeout(reject, 10000);
+            const timeout = setTimeout(reject, 60000);
 
             self.addEventListener('model-ready', () => {
               clearTimeout(timeout);
