@@ -359,6 +359,24 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
+
+        test('plays css animation only when visible', async () => {
+          element.interactionPrompt = 'auto';
+
+          const computedStyle = getComputedStyle((element as any)[$promptElement]);
+          expect(computedStyle.animationPlayState).to.be.equal('paused');
+
+          await timePasses(element.interactionPromptThreshold + 100);
+          expect(computedStyle.animationPlayState).to.be.equal('running');
+        });
+
+        test('has correct animation properties', async () => {
+          const computedStyle = getComputedStyle((element as any)[$promptElement]);
+          expect(computedStyle.animationDuration).to.be.equal('3s');
+          expect(computedStyle.animationName).to.be.equal('wiggle');
+          expect(computedStyle.animationIterationCount).to.be.equal('infinite');
+          expect(computedStyle.animationTimingFunction).to.be.equal('linear');
+        });
       });
 
       suite('a11y', () => {
