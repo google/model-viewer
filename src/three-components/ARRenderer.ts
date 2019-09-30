@@ -234,7 +234,6 @@ export class ARRenderer extends EventDispatcher {
   [$postSessionCleanup]() {
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]!);
-      this[$presentedScene]!.updateFraming();
     }
 
     this[$refSpace] = null;

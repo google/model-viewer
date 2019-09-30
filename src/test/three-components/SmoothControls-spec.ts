@@ -135,8 +135,6 @@ suite('SmoothControls', () => {
         test('changes the absolute distance to the target', () => {
           settleControls(controls);
 
-          expect(camera.position.length())
-              .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
           controls.setOrbit(0, HALF_PI, 1.5);
           settleControls(controls);
           expect(camera.position.length()).to.be.equal(1.5);
@@ -158,6 +156,22 @@ suite('SmoothControls', () => {
           expect(controls.getCameraSpherical().theta)
               .to.be.closeTo(-QUARTER_PI, 0.0001);
         });
+
+        test(
+            'adjustOrbit does not move the goal theta more than pi past the current theta',
+            () => {
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+
+              controls.update(performance.now(), ONE_FRAME_DELTA);
+              const startingTheta = controls.getCameraSpherical().theta;
+              expect(startingTheta).to.be.greaterThan(0);
+
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+              settleControls(controls);
+              const goalTheta = controls.getCameraSpherical().theta;
+              expect(goalTheta).to.be.greaterThan(-Math.PI);
+              expect(goalTheta).to.be.lessThan(startingTheta - Math.PI);
+            });
       });
     });
 
@@ -265,12 +279,12 @@ suite('SmoothControls', () => {
         });
 
         test('prevents field of view from exceeding options', () => {
-          controls.setFov(5);
+          controls.setFieldOfView(5);
           settleControls(controls);
 
           expect(controls.getFieldOfView()).to.be.closeTo(15, 0.00001);
 
-          controls.setFov(30);
+          controls.setFieldOfView(30);
           settleControls(controls);
 
           expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);
@@ -318,8 +332,7 @@ suite('SmoothControls', () => {
           });
 
           test('does not zoom when scrolling while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            const radius = controls.getCameraSpherical().radius;
             expect(controls.getFieldOfView())
                 .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
@@ -327,8 +340,7 @@ suite('SmoothControls', () => {
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getCameraSpherical().radius).to.be.equal(radius);
             expect(controls.getFieldOfView())
                 .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
           });

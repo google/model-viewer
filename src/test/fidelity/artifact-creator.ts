@@ -54,8 +54,10 @@ export class ArtifactCreator {
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
 
-    for (const scenario of scenarios) {
-      const {name: scenarioName, dimensions} = scenario;
+    for (const scenarioBase of scenarios) {
+      const scenarioName = scenarioBase.name;
+      const scenario = this[$configReader].scenarioConfig(scenarioName)!;
+      const {dimensions} = scenario;
 
       if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
         continue;
@@ -204,11 +206,16 @@ export class ArtifactCreator {
     console.log(
         `🖌  Rendering ${scenarioName} with ${rendererConfig.description}`);
 
+    // NOTE: The function passed to page.evaluate is stringified and eval'd
+    // in a browser context. Importantly, this implies that no external
+    // variables are captured in its closure scope. TypeScript compiler
+    // currently has no mechanism to detect this and will happily tell you
+    // your code is correct when it isn't.
     await page.evaluate(async () => {
       const modelBecomesReady = (self as any).modelLoaded ?
           Promise.resolve() :
           new Promise((resolve, reject) => {
-            const timeout = setTimeout(reject, 10000);
+            const timeout = setTimeout(reject, 60000);
 
             self.addEventListener('model-ready', () => {
               clearTimeout(timeout);

@@ -1,5 +1,5 @@
 <!--
-/* @license
+/*
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; Augmented Reality</title>
+  <title>&lt;model-viewer&gt; Customizing UI</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
 
@@ -40,10 +41,6 @@
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
-
 </head>
 <body>
 
@@ -51,47 +48,28 @@
     <div id="demo-container-1" class="demo"></div>
     <div class="content">
       <div class="wrapper">
-
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Using Slots In &lt;model-viewer&gt;. </span>This page demonstrates how you can change parts of &lt;model-viewer&gt; using web component slots.</h4>
         <div class="heading">
-          <h2 class="demo-title">Augmented Reality</h2>
-          <h4>This demonstrates several augmented reality features, including <code>unstable-webxr</code>, <code>magic-leap</code>, <code>ios-src</code>, &amp; the accompanying attribute <code>quick-look-browsers</code>.</h4>
+          <h2 class="demo-title">Custom AR Button</h2>
+          <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer src="assets/Astronaut.glb" ar camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
+  <model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="assets/Astronaut.glb" background-color="#222" alt="A 3D model of an astronaut">
+      <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
+          👋 Activate AR
+      </button>
+  </model-viewer>
           </template>
         </example-snippet>
 
-        <h3 style="margin-top: 40px; padding-bottom: 8px;" class="border-bottom">iOS, Magic Leap & WebXR</h3>
-        <ul class="list-attribute">
-          <li>
-            <div>ar</div>
-            <p>Enable the ability to launch
-            <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
-            on supported devices.</p>
-          </li>
-          <li>
-            <div>ios-src</div>
-            <p>Provides augmented reality on supported iOS 12+ devices via AR Quick Look, but requires an additional USDZ model.</p>
-          </li>
-          <li>
-            <div>quick-look-browsers</div>
-            <p>Set this attribute to control which iOS browsers will be allowed
-              to launch AR Quick Look on iOS. Allowed values are "safari" and
-              "chrome". You can specify any number of browsers separated by
-              whitespace, for example: "safari chrome". Defaults to "safari".</p>
-          </li>
-          <li>
-            <div>magic-leap</div>
-            <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
-          </li>
-          <li>
-            <div>unstable-webxr</div>
-            <p>Provides augmented reality via the experimental <a href="https://immersive-web.github.io/webxr/">WebXR Device API</a>, implemented in Chrome Canary only behind flags. For more information see the <a href="https://codelabs.developers.google.com/codelabs/ar-with-webxr/#1">AR with WebXR Codelab</a>.</p>
-          </li>
-        </ul>
+        <p>
+            Since this slot will only appear on an AR enabled device screenshots are provided below. They compare the &lt;model-viewer&gt; default button in the bottom right and a custom button ("👋 Activate AR") in the top right of the viewport, with a custom <code>style</code>.
+        </p>
 
+        <img class="eg-image" src="./assets/eg-default-ar-button.jpg" alt="Image displaying the default <model-viewer> button of a box with slits cut out in the lower-right, next to the example astronaut model." />
+        <img class="eg-image" src="./assets/eg-custom-ar-button.jpg" alt="Image displaying <model-viewer> with a custom button reading '👋 Activate AR'." / >
       </div>
     </div>
   </div>
@@ -99,14 +77,15 @@
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
       </li>
     </ul>
-
     <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
     <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
   </div>
+
+  <script src="./scripts/helpers.js"></script>
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"
@@ -125,6 +104,5 @@
   <script nomodule
       src="../dist/model-viewer-legacy.js">
   </script>
-
 </body>
 </html>

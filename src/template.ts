@@ -45,10 +45,31 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       display: none;
+      /* NOTE(cdata): Chrome 76 and below apparently have a bug
+       * that causes our canvas not to display pixels unless it is
+       * on its own render layer
+       * @see https://github.com/GoogleWebComponents/model-viewer/pull/755#issuecomment-536597893
+       */
+      transform: translateZ(0);
     }
 
     canvas.show {
       display: block;
+    }
+
+    /* Adapted from HTML5 Boilerplate
+     *
+     * @see https://github.com/h5bp/html5-boilerplate/blob/ceb4620c78fc82e13534fc44202a3f168754873f/dist/css/main.css#L122-L133 */
+    .screen-reader-only {
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      white-space: nowrap;
+      width: 1px;
     }
 
     .slot {

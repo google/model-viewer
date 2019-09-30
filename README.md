@@ -208,7 +208,7 @@ run build separately to pick up the changes.
 * `npm run fetch-samples` - Pull the Khronos sample models for fidelity testing. 
 Note: This will download hundreds of megabytes of data the first time you run it.
 * `npm run check-fidelity` - Compare rendering to third-party renderers.
-* `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers.
+* `npm run update-screenshots` - Take screenshots of fidelity tests using third-party renderers. If you get an error about not having `convert`, make sure to install Image Magick, e.g. on OSX run `brew install imagemagick`.
 
 ## Examples
 
