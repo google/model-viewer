@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} from 'three';
-import {Vector3} from 'three';
+import {Camera, Material, Object3D, Scene, Shader, Vector3} from 'three';
+import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
@@ -30,14 +30,6 @@ export interface Gltf {
   parser: any;
   userData: any;
 }
-
-type SkinnedMeshMap = {
-  [index: string]: SkinnedMesh
-};
-
-type BoneMap = {
-  [index: string]: Bone
-};
 
 /**
  * This is a patch to Three.js' handling of PMREM environments. This patch
@@ -65,23 +57,10 @@ const updateShader = (shader: Shader) => {
  */
 export const cloneGltf = (gltf: Gltf): Gltf => {
   const hasScene = gltf.scene != null;
-  const clone:
-      Gltf = {...gltf, scene: hasScene ? gltf.scene!.clone(true) : null};
-
-  const skinnedMeshes: SkinnedMeshMap = {};
-  let hasSkinnedMeshes = false;
-
-  if (hasScene) {
-    gltf.scene!.traverse((node: any) => {
-      if (node.isSkinnedMesh) {
-        hasSkinnedMeshes = true;
-        skinnedMeshes[node.name] = node as SkinnedMesh;
-      }
-    });
-  }
-
-  const cloneBones: BoneMap = {};
-  const cloneSkinnedMeshes: SkinnedMeshMap = {};
+  const clone: Gltf = {
+    ...gltf,
+    scene: hasScene ? SkeletonUtils.clone(gltf.scene!) as Scene : null
+  };
 
   if (hasScene) {
     const specularGlossiness =
@@ -116,34 +95,7 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
       } else if (node.material != null) {
         node.material = cloneAndPatchMaterial(node.material);
       }
-
-      if (hasSkinnedMeshes) {
-        if (node.isBone) {
-          cloneBones[node.name] = node as Bone;
-        }
-
-        if (node.isSkinnedMesh) {
-          cloneSkinnedMeshes[node.name] = node as SkinnedMesh;
-        }
-      }
     });
-  }
-
-  for (let name in skinnedMeshes) {
-    const skinnedMesh = skinnedMeshes[name];
-    const skeleton = skinnedMesh.skeleton;
-    const cloneSkinnedMesh = cloneSkinnedMeshes[name];
-
-    const orderedCloneBones: Array<Bone> = [];
-
-    for (let i = 0; i < skeleton.bones.length; ++i) {
-      const cloneBone = cloneBones[skeleton.bones[i].name];
-      orderedCloneBones.push(cloneBone);
-    }
-
-    cloneSkinnedMesh.bind(
-        new Skeleton(orderedCloneBones, skeleton.boneInverses),
-        cloneSkinnedMesh.matrixWorld);
   }
 
   return clone;
