@@ -45,6 +45,12 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       display: none;
+      /* NOTE(cdata): Chrome 76 and below apparently have a bug
+       * that causes our canvas not to display pixels unless it is
+       * on its own render layer
+       * @see https://github.com/GoogleWebComponents/model-viewer/pull/755#issuecomment-536597893
+       */
+      transform: translateZ(0);
     }
 
     canvas.show {

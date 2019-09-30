@@ -47,9 +47,7 @@
     <model-viewer id="modelViewer"
         slot="renderer"
         camera-controls
-        camera-orbit="0 90deg auto"
-        interaction-prompt="none"
-        >
+        interaction-prompt="none">
     </model-viewer>
   </renderer-harness>
   <script type="module" src="../../../../dist/renderer-harness.js"></script>
@@ -69,6 +67,11 @@
 
       modelViewer.src = scenario.model;
       modelViewer.backgroundImage = scenario.lighting;
+      const {theta, phi, radius} = scenario.orbit;
+      modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
+      const {x, y, z} = scenario.target;
+      modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
+      modelViewer.fieldOfView = `${scenario.verticalFoV}`;
     });
   </script>
 </body>

@@ -16,6 +16,7 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
+import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import Renderer from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
@@ -69,47 +70,27 @@ suite('ModelScene', () => {
       expect(scene.canvas.style.height).to.be.equal('200px');
     });
 
-    test('scales when X-bound', () => {
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(10, 3, 1));
-      scene.model.setObject(dummyMesh);
-
-      const width = 2000;
-      const height = 1000;
-      const aspect = width / height;
-      scene.setSize(width, height);
-
-      expect(scene.framedHeight).to.be.equal(10 / aspect);
-    });
-
-    test('scales when Z-bound', () => {
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
-      scene.model.setObject(dummyMesh);
-
-      const width = 2000;
-      const height = 1000;
-      const aspect = width / height;
-      scene.setSize(width, height);
-
-      expect(scene.framedHeight).to.be.equal(10 / aspect);
-    });
-
-    test('scales when Y-bound', () => {
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(3, 10, 1));
-      scene.model.setObject(dummyMesh);
-
-      const width = 2000;
-      const height = 1000;
-      scene.setSize(width, height);
-
-      expect(scene.framedHeight).to.be.equal(10);
-    });
-
     test('model is not scaled', () => {
       dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
       scene.model.setObject(dummyMesh);
 
       scene.setSize(1000, 500);
       expect(scene.model.scale).to.be.eql(new Vector3(1, 1, 1));
+    });
+
+    test('idealCameraDistance is set correctly', () => {
+      scene.model.setObject(dummyMesh);
+
+      const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+      const expectedDistance = dummyRadius / Math.sin(halfFov);
+      expect(scene.model.idealCameraDistance)
+          .to.be.closeTo(expectedDistance, 0.0001);
+    });
+
+    test('fieldOfViewAspect is set correctly', () => {
+      scene.model.setObject(dummyMesh);
+
+      expect(scene.model.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

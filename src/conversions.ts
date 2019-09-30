@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Math as ThreeMath} from 'three';
+import {Math as ThreeMath, Vector3} from 'three';
 
 import {parseValues, ValueNode} from './parsers.js';
 
@@ -22,48 +22,48 @@ import {parseValues, ValueNode} from './parsers.js';
  * Converts a length-like ValueNode to meters expressed as a number. Currently,
  * only ValueNodes that represent a metric value (m, cm, mm) are supported.
  *
- * If no unit is specified, assumes meters. Returns 0 for a ValueNode that
- * cannot be parsed.
+ * Assumes meters if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the ValueNode cannot be parsed.
  */
-const lengthValueNodeToMeters = (lengthValueNode: ValueNode): number => {
-  const value = parseFloat(lengthValueNode.value as any);
+const lengthValueNodeToMeters =
+    (lengthValueNode: ValueNode, defaultMeters: number): number => {
+      let length = parseFloat(lengthValueNode.value as any);
 
-  if ((self as any).isNaN(value)) {
-    return 0;
-  }
+      if (isNaN(length)) {
+        return defaultMeters;
+      }
 
-  let scale;
+      switch (lengthValueNode.unit) {
+        default:
+        case 'm':
+          break;
+        case 'cm':
+          length /= 100;
+          break;
+        case 'mm':
+          length /= 1000;
+          break;
+      }
 
-  switch (lengthValueNode.unit) {
-    default:
-    case 'm':
-      scale = 1;
-      break;
-    case 'cm':
-      scale = 1 / 100;
-      break;
-    case 'mm':
-      scale = 1 / 1000;
-      break;
-  }
-
-  return value * scale;
-};
+      return length;
+    };
 
 /**
  * Converts an angle-like ValueNode to radians expressed as a number. Currently,
  * only ValueNodes that represent an angle expressed in degrees (deg) or radians
  * (rad) are supported.
  *
- * Assumes radians if unit is not specified or recognized. Returns 0 for a
- * ValueNode that cannot be parsed.
+ * Assumes radians if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the ValueNode cannot be parsed.
  */
 const convertAngleValueNode =
-    (angleValueNode: ValueNode, desiredUnits: string = 'rad'): number => {
+    (angleValueNode: ValueNode,
+     defaultRadians: number,
+     desiredUnits: string = 'rad'): number => {
       const value = parseFloat(angleValueNode.value as any);
 
       if ((self as any).isNaN(value)) {
-        return 0;
+        return defaultRadians;
       }
 
       const inputUnits = angleValueNode.unit;
@@ -79,77 +79,72 @@ const convertAngleValueNode =
  * Spherical object. Position strings are of the form "$theta $phi $radius".
  * Accepted units for theta and phi are radians (rad) and degrees (deg).
  * Accepted units for radius include meters (m), centimeters (cm) and
- * millimeters (mm), or auto. If radius is set to auto, it implies that the
- * consumer of the deserialized values has some idealized notion of the radius
- * that should be applied.
+ * millimeters (mm), or percent (%). If percent is used, the radius parameter
+ * will be set to the appropriate fraction of the supplied default radius. The
+ * supplied default values are [theta (rad), phi(rad), radius(m), percent(%).]
  *
- * Returns null if the spherical string cannot be parsed.
+ * Assumes radians/meters if unit is not specified or recognized. Returns the
+ * supplied default if 'auto' is given or the ValueNode cannot be parsed. 'auto'
+ * for radius returns the product of the default radius and default percent.
  */
 export const deserializeSpherical =
-    (sphericalString: string): [number, number, number|string]|null => {
-      try {
-        const sphericalValueNodes = parseValues(sphericalString);
+    (sphericalString: string, defaultValues: [number, number, number, number]):
+        [number, number, number] => {
+          let [theta, phi, radius, percent] = defaultValues;
+          try {
+            const sphericalValueNodes = parseValues(sphericalString);
 
-        if (sphericalValueNodes.length === 3) {
-          const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
+            if (sphericalValueNodes.length === 3) {
+              const [thetaNode, phiNode, radiusNode] = sphericalValueNodes;
 
-          const theta = convertAngleValueNode(thetaNode);
-          const phi = convertAngleValueNode(phiNode);
-          const radius = radiusNode.value === 'auto' ?
-              'auto' :
-              lengthValueNodeToMeters(radiusNode);
+              theta = convertAngleValueNode(thetaNode, theta);
+              phi = convertAngleValueNode(phiNode, phi);
+
+              if (radiusNode.unit == '%') {
+                radius *= lengthValueNodeToMeters(radiusNode, percent) / 100;
+              } else {
+                radius = lengthValueNodeToMeters(radiusNode, radius * percent);
+              }
+            }
+          } catch (_error) {
+          }
 
           return [theta, phi, radius];
-        }
-      } catch (_error) {
-      }
-
-      return null;
-    };
+        };
 
 /**
  * Vector String => Vector Values
  *
- * Converts a "vector string" to 3 values, either numbers in meters or the
- * string 'auto'. Position strings are of the form "$x $y $z". Accepted units
- * include meters (m), centimeters (cm) and millimeters (mm).
+ * Converts a "vector string" to a Vector3. Position strings are of the form "$x
+ * $y $z". Accepted units include meters (m), centimeters (cm) and millimeters
+ * (mm).
  *
- * Returns null if the vector string cannot be parsed.
+ * Assumes meters if unit is not specified or recognized. Returns the supplied
+ * default if 'auto' is given or the vector string cannot be parsed.
  */
 export const deserializeVector3 =
-    (vectorString: string): (number|string)[]|null => {
+    (vectorString: string, defaultValues: Vector3): Vector3 => {
       try {
         const vectorValueNodes = parseValues(vectorString);
-
-        const xyz = [];
-        if (vectorValueNodes.length === 3) {
-          for (let i = 0; i < 3; i++) {
-            xyz.push(
-                vectorValueNodes[i].value === 'auto' ?
-                    'auto' :
-                    lengthValueNodeToMeters(vectorValueNodes[i]));
-          }
-
-          return xyz;
-        }
+        const xyz = new Vector3(
+            lengthValueNodeToMeters(vectorValueNodes[0], defaultValues.x),
+            lengthValueNodeToMeters(vectorValueNodes[1], defaultValues.y),
+            lengthValueNodeToMeters(vectorValueNodes[2], defaultValues.z));
+        return xyz;
       } catch (_error) {
+        return defaultValues;
       }
-
-      return null;
     };
 
-export const deserializeAngleToDeg = (angleString: string): number|null => {
-  try {
-    const angleValueNode = parseValues(angleString);
-
-    if (angleValueNode.length === 1) {
-      return convertAngleValueNode(angleValueNode[0], 'deg');
-    }
-  } catch (_error) {
-  }
-
-  return null;
-};
+export const deserializeAngleToDeg =
+    (angleString: string, defaultDeg: number): number|null => {
+      try {
+        const angleValueNode = parseValues(angleString);
+        return convertAngleValueNode(angleValueNode[0], defaultDeg, 'deg');
+      } catch (_error) {
+        return defaultDeg;
+      }
+    };
 
 /**
  * For our purposes, an enumeration is a fixed set of CSS-expression-compatible

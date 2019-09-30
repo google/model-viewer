@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} from 'three';
+import {Vector3} from 'three';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
@@ -156,3 +157,50 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
     to.add(from.children.shift()!);
   }
 };
+
+/**
+ * Performs a reduction across all the vertices of the input model and all its
+ * children. The supplied function takes the reduced value and a vertex and
+ * returns the newly reduced value. The value is initialized as zero.
+ *
+ * Adapted from Three.js, @see https://github.com/mrdoob/three.js/blob/7e0a78beb9317e580d7fa4da9b5b12be051c6feb/src/math/Box3.js#L241
+ */
+export const reduceVertices =
+    (model: Object3D, func: (value: number, vertex: Vector3) => number):
+        number => {
+          let value = 0;
+          const vector = new Vector3();
+          model.traverse((object: any) => {
+            let i, l;
+
+            object.updateWorldMatrix(false, false);
+
+            let geometry = object.geometry;
+
+            if (geometry !== undefined) {
+              if (geometry.isGeometry) {
+                let vertices = geometry.vertices;
+
+                for (i = 0, l = vertices.length; i < l; i++) {
+                  vector.copy(vertices[i]);
+                  vector.applyMatrix4(object.matrixWorld);
+
+                  value = func(value, vector);
+                }
+
+              } else if (geometry.isBufferGeometry) {
+                let attribute = geometry.attributes.position;
+
+                if (attribute !== undefined) {
+                  for (i = 0, l = attribute.count; i < l; i++) {
+                    vector.fromBufferAttribute(attribute, i)
+                        .applyMatrix4(object.matrixWorld);
+
+                    value = func(value, vector);
+                  }
+                }
+              }
+            }
+          });
+          return value;
+        };
