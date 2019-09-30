@@ -166,11 +166,14 @@ template.innerHTML = `
     }
 
     @keyframes wiggle {
-      from {
-        transform: translateX(10%);
+      0%, 50%, 100% {
+        transform: translateX(0%);
       }
-      to {
-        transform: translateX(-10%);
+      25% {
+        transform: translateX(-5%);
+      }
+      75% {
+        transform: translateX(5%);
       }
     }
 
@@ -189,10 +192,10 @@ template.innerHTML = `
       transform: scale(0.9);
       transition: transform 0.3s, opacity 0.3s;
       animation-name: wiggle;
-      animation-duration: 2s;
+      animation-duration: 3s;
       animation-iteration-count: infinite;
-      animation-direction: alternate-reverse;
-      animation-timing-function: ease-in-out;
+      animation-timing-function: linear;
+      animation-play-state: paused;
     }
 
     .slot.controls-prompt > * {
@@ -206,6 +209,7 @@ template.innerHTML = `
     .slot.controls-prompt.visible {
       opacity: 1;
       transform: scale(1);
+      animation-play-state: running;
     }
 
     .slot.ar-button {
