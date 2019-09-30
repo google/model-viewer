@@ -271,6 +271,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const target = deserializeVector3(this.cameraTarget, defaultTarget);
 
       this[$controls].setTarget(target);
+      this[$scene].pivotCenter.copy(target);
     }
 
     [$tick](time: number, delta: number) {
