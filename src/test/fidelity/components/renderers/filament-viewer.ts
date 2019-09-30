@@ -162,7 +162,7 @@ export class FilamentViewer extends LitElement {
 
     this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
     this[$scene].setIndirectLight(this[$ibl]);
-    this[$ibl].setIntensity(40000);
+    this[$ibl].setIntensity(1.0);
     this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
     this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
@@ -250,5 +250,6 @@ export class FilamentViewer extends LitElement {
         verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
     this[$camera].lookAt(eye, center, up);
+    this[$camera].setExposure(1.0, 1.2, 100);
   }
 }
