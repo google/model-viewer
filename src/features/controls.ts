@@ -99,7 +99,7 @@ const PHI = 2.0 * Math.PI;
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
-const ROTATION_SPEED = 0.005;
+const OFFSET_ROTATION_MULTIPLIER = 0.005;
 
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT =
@@ -331,14 +331,21 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (this[$promptElementVisible]) {
-        const modelViewerRect = this.getBoundingClientRect();
-        const modelViewerRectCenter =
-            modelViewerRect.left + (modelViewerRect.width / 2);
-        const promptRect = this[$promptElementSVG].getBoundingClientRect();
-        const promptRectCenter = promptRect.left + (promptRect.width / 2);
-        const promptOffset = (modelViewerRectCenter) - (promptRectCenter);
+        const {
+          left: modelViewerLeft,
+          width: modelViewerWidth,
+        } = this.getBoundingClientRect();
+        const {
+          left: promptLeft,
+          width: promptWidth,
+        } = this[$promptElementSVG].getBoundingClientRect();
 
-        (this as any)[$scene].pivot.rotation.y = -promptOffset * ROTATION_SPEED;
+        const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
+        const promptCenter = promptLeft + (promptWidth / 2);
+        const promptOffset = promptCenter - modelViewerCenter;
+
+        (this as any)[$scene].pivot.rotation.y =
+            promptOffset * OFFSET_ROTATION_MULTIPLIER;
         this[$needsRender]();
       }
 
