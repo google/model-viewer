@@ -66,7 +66,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('autoRotate')) {
-        this[$scene].pivot.rotation.set(0, 0, 0);
+        this[$scene].setRotation(0);
         this[$needsRender]();
       }
     }
