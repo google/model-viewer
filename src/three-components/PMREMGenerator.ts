@@ -15,21 +15,9 @@
 
 import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 
-import {environmentScene} from './EnvironmentScene.js';
+import EnvironmentScene from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-
-/**
- * This class generates a Prefiltered, Mipmapped Radiance Environment Map
- * (PMREM) from a cubeMap environment texture. This allows different levels of
- * blur to be quickly accessed based on material roughness. It is packed into a
- * special CubeUV format that allows us to perform custom interpolation so that
- * we can support nonlinear formats such as RGBE. Unlike a traditional mipmap
- * chain, it only goes down to the LOD_MIN level (below), and then creates extra
- * even more filtered 'mips' at the same LOD_MIN resolution, associated with
- * higher roughness levels. In this way we maintain resolution to smoothly
- * interpolate diffuse lighting while limiting sampling computation.
- */
 
 const LOD_MIN = 4;
 const LOD_MAX = 8;
@@ -67,6 +55,18 @@ const $createRenderTarget = Symbol('createRenderTarget');
 const $applyPMREM = Symbol('applyPMREM');
 const $blur = Symbol('blur');
 const $halfBlur = Symbol('halfBlur');
+
+/**
+ * This class generates a Prefiltered, Mipmapped Radiance Environment Map
+ * (PMREM) from a cubeMap environment texture. This allows different levels of
+ * blur to be quickly accessed based on material roughness. It is packed into a
+ * special CubeUV format that allows us to perform custom interpolation so that
+ * we can support nonlinear formats such as RGBE. Unlike a traditional mipmap
+ * chain, it only goes down to the LOD_MIN level (above), and then creates extra
+ * even more filtered 'mips' at the same LOD_MIN resolution, associated with
+ * higher roughness levels. In this way we maintain resolution to smoothly
+ * interpolate diffuse lighting while limiting sampling computation.
+ */
 
 export class PMREMGenerator {
   // These arrays will each be TOTAL_LODS in length, each referring to a 'mip'.
@@ -143,10 +143,14 @@ export class PMREMGenerator {
     }
   }
 
+  /**
+   * Generates a PMREM from our default EnvironmentScene, which is a blurry
+   * greyscale room with several boxes on the floor and several lit windows.
+   */
   fromDefault(): WebGLRenderTarget {
     const dpr = this.renderer.getPixelRatio();
     this.renderer.setPixelRatio(1);
-    const defaultScene = environmentScene();
+    const defaultScene = new EnvironmentScene;
 
     const cubeUVRenderTarget =
         this[$sceneToCubeUV](defaultScene, DEFAULT_NEAR, DEFAULT_FAR);
@@ -158,6 +162,12 @@ export class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
+  /**
+   * Generates a PMREM from a supplied Scene, which can be faster than using an
+   * image if networking bandwidth is low. Optional near and far planes ensure
+   * the scene is rendered in its entirety (the cubeCamera is placed at the
+   * origin).
+   */
   fromScene(
       scene: Scene, near: number = DEFAULT_NEAR,
       far: number = DEFAULT_FAR): WebGLRenderTarget {
@@ -171,6 +181,10 @@ export class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
+  /**
+   * Generates a PMREM from an equirectangular texture, which can be either LDR
+   * (RGBFormat) or HDR (RGBEFormat).
+   */
   fromEquirectangular(equirectangular: Texture): WebGLRenderTarget {
     const dpr = this.renderer.getPixelRatio();
     this.renderer.setPixelRatio(1);
@@ -335,13 +349,9 @@ export class PMREMGenerator {
     const samples = 1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels);
 
     if (samples > MAX_SAMPLES) {
-      console.log(
-          'sigmaRadians, ',
-          sigmaRadians,
-          ', is too large and will clip, as it requested ',
-          samples,
-          ' samples when the maximum is set to ',
-          MAX_SAMPLES);
+      console.warn(`sigmaRadians, ${
+          sigmaRadians}, is too large and will clip, as it requested ${
+          samples} samples when the maximum is set to ${MAX_SAMPLES}`);
     }
 
     let weights = [];
