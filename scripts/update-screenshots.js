@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+require = require('esm')(module);
+const {ConfigReader} = require('../lib/test/fidelity/config-reader.js');
+
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
 const path = require('path');
@@ -76,8 +79,12 @@ const updateScreenshots = async (config) => {
     // Ignored...
   }
 
-  for (const scenario of scenarios) {
-    const {name: scenarioName, model, lighting, dimensions, exclude} = scenario;
+  const configReader = new ConfigReader(config);
+
+  for (const scenarioBase of scenarios) {
+    const scenarioName = scenarioBase.name;
+    const scenario = configReader.scenarioConfig(scenarioName);
+    const {model, lighting, dimensions, exclude} = scenario;
     const scenarioGoldensDirectory = path.join(goldensDirectory, scenarioName);
     const {width, height} = dimensions;
 
