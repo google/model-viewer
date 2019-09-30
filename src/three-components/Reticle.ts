@@ -15,9 +15,6 @@
 
 import {Camera, Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
-const originArray = new Float32Array(3);
-const directionArray = new Float32Array(3);
-
 /**
  * The Reticle class creates an object that repeatedly calls
  * `xrSession.requestHitTest()` to render a ring along a found
@@ -61,15 +58,12 @@ export default class Reticle extends Object3D {
     this.raycaster = this.raycaster || new Raycaster();
     this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
     const ray = this.raycaster.ray;
-
-    originArray.set(ray.origin.toArray());
-    directionArray.set(ray.direction.toArray());
+    let xrray: XRRay = new XRRay(ray.origin, ray.direction);
 
     let hits: Array<XRHitResult>;
 
     try {
-      hits =
-          await session.requestHitTest(originArray, directionArray, frameOfRef);
+      hits = await session.requestHitTest(xrray, frameOfRef);
     } catch (error) {
       hits = [];
     }

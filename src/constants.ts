@@ -17,21 +17,16 @@
 // the appropriate flags. However, just because we have the API does not
 // guarantee that AR will work.
 export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
-    self.XRSession != null && self.XRDevice != null &&
-    self.XRDevice.prototype.supportsSession != null;
+    self.XRSession != null && navigator.xr.supportsSession != null;
 
 export const HAS_WEBXR_HIT_TEST_API =
     HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTest;
-
-export const HAS_FULLSCREEN_API = document.documentElement != null &&
-    document.documentElement.requestFullscreen != null;
 
 export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
 export const HAS_INTERSECTION_OBSERVER = self.IntersectionObserver != null;
 
-export const IS_WEBXR_AR_CANDIDATE =
-    HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
+export const IS_WEBXR_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API;
 
 export const IS_MOBILE = (() => {
   const userAgent =
