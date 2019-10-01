@@ -250,10 +250,7 @@
       },
       "orbit": {
         "radius": 20
-      },
-      "exclude": [
-        "filament"
-      ]
+      }
     },
     {
       "name": "khronos-FlightHelmet",
