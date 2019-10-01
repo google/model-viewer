@@ -166,14 +166,23 @@ template.innerHTML = `
     }
 
     @keyframes wiggle {
-      0%, 50%, 100% {
-        transform: translateX(0%);
-      }
-      25% {
+      5% {
         transform: translateX(-5%);
       }
-      75% {
+      15% {
         transform: translateX(5%);
+      }
+      0%, 20%, 100% {
+        transform: translateX(0%);
+      }
+    }
+
+    @keyframes fade {
+      5%, 20% {
+        opacity: 1;
+      }
+      0%, 25%, 100% {
+        opacity: 0;
       }
     }
 
@@ -187,14 +196,13 @@ template.innerHTML = `
       pointer-events: none;
       align-items: center;
       justify-content: center;
-      opacity: 0;
       transform-origin: center center;
       transform: scale(0.9);
-      transition: transform 0.3s, opacity 0.3s;
-      animation-name: wiggle;
-      animation-duration: 3s;
+      transition: transform 0.3s;
+      animation-name: wiggle, fade;
+      animation-duration: 5s;
       animation-iteration-count: infinite;
-      animation-timing-function: linear;
+      animation-timing-function: ease-in-out;
       animation-play-state: paused;
     }
 
@@ -203,11 +211,17 @@ template.innerHTML = `
     }
 
     .slot.controls-prompt svg {
+      opacity: 0;
       transform: scale(0.5);
+      transition: opacity 0.3s;
+    }
+
+    .slot.controls-prompt.visible svg {
+      opacity: 1;
+      transition: opacity 0.3s;
     }
 
     .slot.controls-prompt.visible {
-      opacity: 1;
       transform: scale(1);
       animation-play-state: running;
     }
