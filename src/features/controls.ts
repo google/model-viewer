@@ -99,8 +99,6 @@ const PHI = 2.0 * Math.PI;
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
-const OFFSET_ROTATION_MULTIPLIER = 0.005;
-
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
@@ -342,10 +340,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
         const promptCenter = promptLeft + (promptWidth / 2);
-        const promptOffset = promptCenter - modelViewerCenter;
+        const promptOffsetRelative =
+            (promptCenter - modelViewerCenter) / modelViewerWidth;
 
-        (this as any)[$scene].pivot.rotation.y =
-            promptOffset * OFFSET_ROTATION_MULTIPLIER;
+        (this as any)[$scene].pivot.rotation.y = promptOffsetRelative;
         this[$needsRender]();
       }
 
@@ -360,8 +358,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$deferInteractionPrompt]() {
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
-      this[$promptElementVisible] = false;
       this[$promptElement].classList.remove('visible');
+      this[$promptElementVisible] = false;
 
       // Implicitly there was some reason to defer the prompt. If the user
       // has been prompted at least once already, we no longer need to
@@ -485,8 +483,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onBlur]() {
       this[$waitingToPromptUser] = false;
-      this[$promptElementVisible] = false;
       this[$promptElement].classList.remove('visible');
+      this[$promptElementVisible] = false;
     }
 
     [$onChange]({source}: ChangeEvent) {
