@@ -166,22 +166,22 @@ template.innerHTML = `
     }
 
     @keyframes wiggle {
-      5% {
+      10%, 12% {
         transform: translateX(-5%);
       }
-      15% {
+      30%, 32% {
         transform: translateX(5%);
       }
-      0%, 20%, 100% {
+      0%, 45%, 100% {
         transform: translateX(0%);
       }
     }
 
     @keyframes fade {
-      5%, 20% {
+      5%, 40% {
         opacity: 1;
       }
-      0%, 25%, 100% {
+      0%, 45%, 100% {
         opacity: 0;
       }
     }
@@ -200,7 +200,7 @@ template.innerHTML = `
       transform: scale(0.9);
       transition: transform 0.3s;
       animation-name: wiggle, fade;
-      animation-duration: 5s;
+      animation-duration: 6s;
       animation-iteration-count: infinite;
       animation-timing-function: ease-in-out;
       animation-play-state: paused;
