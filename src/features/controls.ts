@@ -59,6 +59,8 @@ export const sphericalDefaults = (() => {
   };
 })();
 
+const OFFSET_ROTATION_MULTIPLIER = 5;
+
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
@@ -311,7 +313,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const promptCenter = promptLeft + (promptWidth / 2);
         const promptOffsetRelative = (promptCenter - modelViewerCenter) / modelViewerWidth;
 
-        (this as any)[$scene].pivot.rotation.y = promptOffsetRelative;
+        (this as any)[$scene].pivot.rotation.y = promptOffsetRelative * OFFSET_ROTATION_MULTIPLIER;
         this[$needsRender]();
       }
 
