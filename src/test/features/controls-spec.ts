@@ -372,7 +372,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         test('has correct animation properties', async () => {
           const computedStyle = getComputedStyle((element as any)[$promptElement]);
-          expect(computedStyle.animationDuration).to.be.equal('5s');
+          expect(computedStyle.animationDuration).to.be.equal('6s');
           expect(computedStyle.animationName).to.be.equal('wiggle, fade');
           expect(computedStyle.animationIterationCount).to.be.equal('infinite');
           expect(computedStyle.animationTimingFunction).to.be.equal('ease-in-out');
