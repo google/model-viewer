@@ -638,6 +638,7 @@ export class SmoothControls extends EventDispatcher {
     if ((handled || this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
+      event.stopPropagation();
     };
   }
 
@@ -699,6 +700,7 @@ export class SmoothControls extends EventDispatcher {
          this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
+      event.stopPropagation();
     }
   }
 
@@ -740,6 +742,7 @@ export class SmoothControls extends EventDispatcher {
         (handled || this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
+      event.stopPropagation();
     }
   }
 }
