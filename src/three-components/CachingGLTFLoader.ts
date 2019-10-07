@@ -135,18 +135,20 @@ export class CachingGLTFLoader {
       Promise<CacheRetainedScene|null> {
     await this.preload(url, progressCallback);
 
-    const gltf = await cache.get(url);
+    const gltf = await cache.get(url)!;
 
-    // Animations for objects without names target their UUID instead. When
-    // objects are cloned, they get new UUIDs which the animation can't find. To
-    // fix this, we assign their UUID as their name.
-    gltf!.scene!.traverse((node: Object3D) => {
-      if (!node.name) {
-        node.name = node.uuid;
-      }
-    });
+    if (gltf.scene != null) {
+      // Animations for objects without names target their UUID instead. When
+      // objects are cloned, they get new UUIDs which the animation can't find.
+      // To fix this, we assign their UUID as their name.
+      gltf.scene.traverse((node: Object3D) => {
+        if (!node.name) {
+          node.name = node.uuid;
+        }
+      });
+    }
 
-    const clone = cloneGltf(gltf!);
+    const clone = cloneGltf(gltf);
     const model = clone.scene ? clone.scene : null;
 
     if (model != null) {
