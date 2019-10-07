@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 import {Mesh} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -58,6 +58,7 @@ export default class ModelScene extends Scene {
   public renderer: Renderer;
   public shadow: StaticShadow;
   public pivot: Object3D;
+  public pivotCenter: Vector3;
   public width = 1;
   public height = 1;
   public isVisible: boolean = false;
@@ -93,6 +94,7 @@ export default class ModelScene extends Scene {
     this.activeCamera = this.camera;
     this.pivot = new Object3D();
     this.pivot.name = 'Pivot';
+    this.pivotCenter = new Vector3;
 
     this.skyboxMesh = this.createSkyboxMesh();
 
@@ -192,6 +194,18 @@ export default class ModelScene extends Scene {
   }
 
   /**
+   * Sets the rotation of the model's pivot, around its pivotCenter point.
+   */
+  setRotation(radiansY: number) {
+    this.pivot.rotation.y = radiansY;
+    this.pivot.position.x = -this.pivotCenter.x;
+    this.pivot.position.z = -this.pivotCenter.z;
+    this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
+    this.pivot.position.x += this.pivotCenter.x;
+    this.pivot.position.z += this.pivotCenter.z;
+  }
+
+  /**
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
@@ -212,14 +226,14 @@ export default class ModelScene extends Scene {
     // capture is unrotated so it can be freely rotated when applied
     // as a texture.
     const currentRotation = this.pivot.rotation.y;
-    this.pivot.rotation.y = 0;
+    this.setRotation(0);
 
     this.shadow.render(this.renderer.renderer, this);
 
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
     this.pivot.add(this.shadow);
-    this.pivot.rotation.y = currentRotation;
+    this.setRotation(currentRotation);
   }
 
   createSkyboxMesh(): Mesh {

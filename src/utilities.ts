@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {HAS_FULLSCREEN_API, HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
+import {HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
 
 export type Constructor<T = object> = {
   new (...args: any[]): T,
@@ -30,10 +30,6 @@ export const assertIsArCandidate = () => {
   }
 
   const missingApis = [];
-
-  if (!HAS_FULLSCREEN_API) {
-    missingApis.push('Fullscreen API');
-  }
 
   if (!HAS_WEBXR_DEVICE_API) {
     missingApis.push('WebXR Device API');

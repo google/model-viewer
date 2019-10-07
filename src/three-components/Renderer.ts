@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,7 @@ export default class Renderer extends EventDispatcher {
       console.warn(error);
     }
 
-    this[$arRenderer] = ARRenderer.fromInlineRenderer(this);
+    this[$arRenderer] = new ARRenderer(this);
     this.textureUtils = this.canRender ? new TextureUtils(this.renderer) : null;
 
     this.setRendererSize(1, 1);
@@ -128,7 +128,7 @@ export default class Renderer extends EventDispatcher {
     return this[$arRenderer].presentedScene;
   }
 
-  async present(scene: ModelScene): Promise<HTMLCanvasElement> {
+  async present(scene: ModelScene): Promise<void> {
     try {
       return await this[$arRenderer].present(scene);
     } catch (error) {

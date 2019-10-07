@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,10 +39,9 @@ class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
   }
 
-  // We don't use nor test the returned XRInputPose
-  // other than its existence.
-  getInputPose(_xrInputSource: XRInputSource, _frameOfRef?: XRReferenceSpace) {
-    return {} as XRInputPose;
+  // We don't use nor test the returned XRPose other than its existence.
+  getPose(_xrSpace: XRSpace, _frameOfRef: XRReferenceSpace) {
+    return {} as XRPose;
   }
 
   getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
@@ -71,13 +70,17 @@ suite('ARRenderer', () => {
 
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
-        public baseLayer: XRLayer = {} as XRLayer;
+        public renderState: XRRenderState = {baseLayer: {} as XRLayer} as
+            XRRenderState;
+
+        updateRenderState(_object: any) {
+        }
 
         requestFrameOfReference() {
           return {};
         }
 
-        async requestReferenceSpace(_options: XRReferenceSpaceOptions):
+        async requestReferenceSpace(_type: XRReferenceSpaceType):
             Promise<XRReferenceSpace> {
           return {
             originOffset: {
@@ -88,18 +91,20 @@ suite('ARRenderer', () => {
           } as XRReferenceSpace;
         }
 
-        getInputSources() {
+        get inputSources(): Array<XRInputSource> {
           return inputSources;
         }
 
         /**
          * Returns a hit if ray collides with the XZ plane
          */
-        async requestHitTest(
-            origin: Float32Array, dir: Float32Array,
-            _frameOfRef: XRFrameOfReference): Promise<Array<XRHitResult>> {
+        async requestHitTest(rayIn: XRRay, _frameOfRef: XRFrameOfReference):
+            Promise<Array<XRHitResult>> {
           const hits = [];
-          const ray = new Ray(new Vector3(...origin), new Vector3(...dir));
+          const ray = new Ray(
+              new Vector3(rayIn.origin.x, rayIn.origin.y, rayIn.origin.z),
+              new Vector3(
+                  rayIn.direction.x, rayIn.direction.y, rayIn.direction.z));
           const success = ray.intersectPlane(xzPlane, vec3);
 
           if (success) {
@@ -131,7 +136,7 @@ suite('ARRenderer', () => {
   setup(() => {
     element = new ModelViewerElementBase();
     renderer = element[$renderer];
-    arRenderer = ARRenderer.fromInlineRenderer(renderer);
+    arRenderer = new ARRenderer(renderer);
   });
 
   teardown(async () => {
@@ -227,7 +232,12 @@ suite('ARRenderer', () => {
         arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
         arRenderer.camera.updateMatrixWorld(true);
 
-        setInputSources([{targetRayMode: 'screen', handedness: ''}]);
+        setInputSources([{
+          targetRayMode: 'screen' as XRTargetRayMode,
+          handedness: '' as XRHandedness,
+          targetRaySpace: {} as XRSpace,
+          profiles: []
+        }]);
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await waitForEvent(arRenderer, 'modelmove');
 
@@ -253,7 +263,12 @@ suite('ARRenderer', () => {
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
 
-        setInputSources([{targetRayMode: 'gaze', handedness: ''}]);
+        setInputSources([{
+          targetRayMode: 'gaze' as XRTargetRayMode,
+          handedness: '' as XRHandedness,
+          targetRaySpace: {} as XRSpace,
+          profiles: []
+        }]);
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await timePasses();
 

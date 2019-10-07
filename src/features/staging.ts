@@ -1,6 +1,6 @@
 
 /* @license
- * Copyright 2019 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import {property} from 'lit-element';
 import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 import {Timer} from '../utilities/timer.js';
+
 import {CameraChangeDetails} from './controls.js';
 
 // How much the model will rotate per
@@ -65,7 +66,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('autoRotate')) {
-        (this as any)[$scene].pivot.rotation.set(0, 0, 0);
+        this[$scene].setRotation(0);
         this[$needsRender]();
       }
     }
@@ -80,8 +81,9 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$autoRotateTimer].tick(delta);
 
       if (this[$autoRotateTimer].hasStopped) {
-        (this as any)[$scene].pivot.rotation.y +=
-            ROTATION_SPEED * delta * 0.001;
+        const rotation =
+            this.turntableRotation + ROTATION_SPEED * delta * 0.001;
+        this[$scene].setRotation(rotation);
         this[$needsRender]();
       }
     }
@@ -95,7 +97,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get turntableRotation(): number {
-      return (this as any)[$scene].pivot.rotation.y;
+      return this[$scene].pivot.rotation.y;
     }
   }
 

@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,28 +250,13 @@ configuration or device capabilities');
 
     protected async[$enterARWithWebXR]() {
       const renderer = this[$renderer];
-
-      console.log('Attempting to enter fullscreen and present in AR...');
+      console.log('Attempting to present in AR...');
 
       try {
-        const enterFullscreen = this.requestFullscreen();
-
-        try {
-          const outputElement = await renderer.present(this[$scene]);
-          this.shadowRoot!.appendChild(outputElement);
-          await enterFullscreen;
-        } catch (error) {
-          console.warn('Error while trying to present to AR');
-          console.error(error);
-          await enterFullscreen;
-          if (document.fullscreenElement === this) {
-            console.warn('Exiting fullscreen under dire circumstances');
-            document.exitFullscreen();
-          }
-        }
+        await renderer.present(this[$scene]);
       } catch (error) {
+        console.warn('Error while trying to present to AR');
         console.error(error);
-        console.warn('AR will not activate without fullscreen permission');
       }
     }
 

@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2019 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,7 +162,7 @@ export class FilamentViewer extends LitElement {
 
     this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
     this[$scene].setIndirectLight(this[$ibl]);
-    this[$ibl].setIntensity(40000);
+    this[$ibl].setIntensity(1.0);
     this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
     this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
@@ -250,5 +250,6 @@ export class FilamentViewer extends LitElement {
         verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
     this[$camera].lookAt(eye, center, up);
+    this[$camera].setExposure(1.0, 1.2, 100);
   }
 }
