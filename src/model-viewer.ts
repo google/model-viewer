@@ -23,6 +23,10 @@ import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
+// Uncomment these lines to export PMREM textures in Glitch:
+// export {default as TextureUtils} from './three-components/TextureUtils';
+// export * from 'three';
+
 export const ModelViewerElement = MagicLeapMixin(
     StagingMixin(EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(
         AnimationMixin(FocusVisiblePolyfillMixin(ModelViewerElementBase))))))));

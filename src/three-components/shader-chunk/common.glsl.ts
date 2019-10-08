@@ -25,25 +25,22 @@ import {texelConversions} from './encodings_pars_fragment.glsl.js';
 // or y (not both) by wrapping around to the neighboring face.
 
 export const getDirectionChunk = /* glsl */ `
-vec3 getDirection(vec2 uv, int face) {
+vec3 getDirection(vec2 uv, float face) {
     uv = 2.0 * uv - 1.0;
-    vec3 direction = vec3(clamp(uv, -1.0, 1.0), 1.0);
-    uv = abs(uv);
-    float over = max(uv.x, uv.y) - 1.0;
-    if(over > 0.0) direction.z -= over;
-    if (face == 0) {
+    vec3 direction = vec3(uv, 1.0);
+    if (face == 0.0) {
       direction = direction.zyx;
       direction.z *= -1.0;
-    } else if (face == 1) {
+    } else if (face == 1.0) {
       direction = direction.xzy;
       direction.z *= -1.0;
-    } else if (face == 3) {
+    } else if (face == 3.0) {
       direction = direction.zyx;
       direction.x *= -1.0;
-    } else if (face == 4) {
+    } else if (face == 4.0) {
       direction = direction.xzy;
       direction.y *= -1.0;
-    } else if (face == 5) {
+    } else if (face == 5.0) {
       direction.xz *= -1.0;
     }
     return direction;
@@ -51,36 +48,36 @@ vec3 getDirection(vec2 uv, int face) {
 `;
 
 export const getFaceChunk = /* glsl */ `
-int getFace(vec3 direction) {
+float getFace(vec3 direction) {
     vec3 absDirection = abs(direction);
-    int face = -1;
+    float face = -1.0;
     if (absDirection.x > absDirection.z) {
       if (absDirection.x > absDirection.y)
-        face = direction.x > 0.0 ? 0 : 3;
+        face = direction.x > 0.0 ? 0.0 : 3.0;
       else
-        face = direction.y > 0.0 ? 1 : 4;
+        face = direction.y > 0.0 ? 1.0 : 4.0;
     } else {
       if (absDirection.z > absDirection.y)
-        face = direction.z > 0.0 ? 2 : 5;
+        face = direction.z > 0.0 ? 2.0 : 5.0;
       else
-        face = direction.y > 0.0 ? 1 : 4;
+        face = direction.y > 0.0 ? 1.0 : 4.0;
     }
     return face;
 }
 `;
 
 export const getUVChunk = /* glsl */ `
-vec2 getUV(vec3 direction, int face) {
+vec2 getUV(vec3 direction, float face) {
     vec2 uv;
-    if (face == 0) {
+    if (face == 0.0) {
       uv = vec2(-direction.z, direction.y) / abs(direction.x);
-    } else if (face == 1) {
+    } else if (face == 1.0) {
       uv = vec2(direction.x, -direction.z) / abs(direction.y);
-    } else if (face == 2) {
+    } else if (face == 2.0) {
       uv = direction.xy / abs(direction.z);
-    } else if (face == 3) {
+    } else if (face == 3.0) {
       uv = vec2(direction.z, direction.y) / abs(direction.x);
-    } else if (face == 4) {
+    } else if (face == 4.0) {
       uv = direction.xz / abs(direction.y);
     } else {
       uv = vec2(-direction.x, direction.y) / abs(direction.z);

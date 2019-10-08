@@ -17,8 +17,7 @@
     "outDir": "./lib",
     "experimentalDecorators": true,
     "noErrorTruncation": true,
-    "allowJs": true
-    // "declaration": true
+    "declaration": true
   },
   "include": [
     "./src/**/*.ts",
