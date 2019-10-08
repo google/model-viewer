@@ -211,6 +211,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
           controls.enableInteraction();
+          if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+            this[$waitingToPromptUser] = true;
+          }
 
           scene.canvas.addEventListener('focus', this[$focusHandler]);
           scene.canvas.addEventListener('blur', this[$blurHandler]);
@@ -219,11 +222,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           scene.canvas.removeEventListener('blur', this[$blurHandler]);
 
           controls.disableInteraction();
+          this[$deferInteractionPrompt]();
         }
       }
 
       if (changedProperties.has('interactionPrompt')) {
-        if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
+        if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
+            this.cameraControls) {
           this[$waitingToPromptUser] = true;
         }
       }

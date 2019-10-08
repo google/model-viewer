@@ -220,12 +220,14 @@
             <li>
               <div>interaction-prompt</div>
               <p>Allows you to change the conditions under which the visual and
-              audible interaction prompt will display. Allowed values are "auto"
-              and "when-focused". If set to "auto", the interaction prompt will
-              be displayed as soon as the interaction-prompt-threshold (see below)
-              time has elapsed (after the model is revealed). If set to "when-focused",
-              the interaction prompt will only be activated if the element has
-              first received focus. Defaults to "when-focused".</p>
+              audible interaction prompt will display. Allowed values are
+              "auto", "when-focused" and "none". If set to "auto", the
+              interaction prompt will be displayed as soon as the
+              interaction-prompt-threshold (see below) time has elapsed (after
+              the model is revealed). If set to "when-focused", the interaction
+              prompt will only be activated if the element has first received
+              focus. Defaults to "auto". The interaction prompt will only
+              display if camera-controls are enabled.</p>
             </li>
             <li>
               <div>interaction-prompt-threshold</div>
