@@ -349,6 +349,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const promptElement: HTMLElement = (element as any)[$promptElement];
           expect(promptElement.classList.contains('visible')).to.be.equal(true);
         });
+
+        test('does not appear when camera-controls is disabled', async () => {
+          element.interactionPrompt = 'auto';
+          element.cameraControls = false;
+          await timePasses(element.interactionPromptThreshold + 100);
+
+          const promptElement: HTMLElement = (element as any)[$promptElement];
+          expect(promptElement.classList.contains('visible'))
+              .to.be.equal(false);
+        });
       });
 
       suite('a11y', () => {
