@@ -431,6 +431,17 @@
       }
     },
     {
+      "name": "khronos-Sponza",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf",
+      "target": {
+        "y": 1
+      },
+      "orbit": {
+        "theta": 90,
+        "radius": 0
+      }
+    },
+    {
       "name": "khronos-Suzanne",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
@@ -463,6 +474,17 @@
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf",
       "orbit": {
         "radius": 7
+      }
+    },
+    {
+      "name": "khronos-VC",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/VC/glTF-Binary/VC.glb",
+      "target": {
+        "y": 10
+      },
+      "orbit": {
+        "phi": 70,
+        "radius": 0
       }
     },
     {
