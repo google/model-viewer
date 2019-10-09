@@ -147,14 +147,29 @@ suite('SmoothControls', () => {
           settleControls(controls);
           expect(controls.getCameraSpherical().theta).to.be.equal(QUARTER_PI);
 
-          controls.setOrbit(4 * Math.PI - QUARTER_PI);
+          controls.setOrbit(4 * Math.PI - HALF_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(4 * Math.PI + QUARTER_PI, 0.0001);
+
           controls.update(performance.now(), ONE_FRAME_DELTA);
           expect(Math.abs(controls.getCameraSpherical().theta))
-              .to.be.lessThan(QUARTER_PI);
+              .to.be.lessThan(4 * Math.PI + QUARTER_PI);
 
           settleControls(controls);
           expect(controls.getCameraSpherical().theta)
-              .to.be.closeTo(-QUARTER_PI, 0.0001);
+              .to.be.closeTo(4 * Math.PI - HALF_PI, 0.0001);
+
+          controls.setOrbit(THREE_QUARTERS_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(Math.PI + HALF_PI, 0.0001);
+
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(Math.PI + HALF_PI);
+
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(THREE_QUARTERS_PI, 0.0001);
         });
 
         test(
@@ -169,8 +184,8 @@ suite('SmoothControls', () => {
               controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
               settleControls(controls);
               const goalTheta = controls.getCameraSpherical().theta;
-              expect(goalTheta).to.be.greaterThan(-Math.PI);
-              expect(goalTheta).to.be.lessThan(startingTheta - Math.PI);
+              expect(goalTheta).to.be.greaterThan(Math.PI);
+              expect(goalTheta).to.be.lessThan(startingTheta + Math.PI);
             });
       });
     });
