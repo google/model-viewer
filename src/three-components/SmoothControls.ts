@@ -405,8 +405,6 @@ export class SmoothControls extends EventDispatcher {
       this[$spherical].theta =
           this[$wrapAngle](this[$spherical].theta - nextTheta) + nextTheta;
     }
-    // const nextTheta = this[$wrapAngle](goalTheta);
-    // this[$spherical].theta += nextTheta - goalTheta;
 
     const nextPhi = clamp(goalPhi, minimumPolarAngle!, maximumPolarAngle!);
     const nextRadius = clamp(goalRadius, minimumRadius!, maximumRadius!);
@@ -470,17 +468,6 @@ export class SmoothControls extends EventDispatcher {
     const dThetaLimit = Math.PI - 0.001;
     const goalTheta =
         theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
-
-    // console.log(
-    //     'last theta = ',
-    //     this[$spherical].theta * 180 / Math.PI,
-    //     ', last goal = ',
-    //     theta * 180 / Math.PI,
-    //     ', dTheta = ',
-    //     dTheta * 180 / Math.PI,
-    //     ', next goal = ',
-    //     goalTheta * 180 / Math.PI);
-
     const goalPhi = phi - deltaPhi;
     const goalRadius = radius + deltaRadius;
     let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
