@@ -277,6 +277,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$controls].setTarget(target);
       this[$scene].pivotCenter.copy(target);
+      this[$scene].setRotation(this[$scene].pivot.rotation.y);
     }
 
     [$tick](time: number, delta: number) {
@@ -302,6 +303,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$controls].update(time, delta);
+      const target = this.getCameraTarget();
+      if (!this[$scene].pivotCenter.equals(target)) {
+        this[$scene].pivotCenter.copy(target);
+        this[$scene].setRotation(this[$scene].pivot.rotation.y);
+      }
     }
 
     [$deferInteractionPrompt]() {
