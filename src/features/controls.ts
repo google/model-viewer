@@ -339,6 +339,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           width: promptWidth,
         } = this[$promptElementSVG].getBoundingClientRect();
 
+        if (!modelViewerWidth) return;
+
         const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
         const promptCenter = promptLeft + (promptWidth / 2);
         const promptOffsetRelative =
