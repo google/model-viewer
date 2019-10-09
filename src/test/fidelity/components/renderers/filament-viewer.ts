@@ -259,7 +259,7 @@ export class FilamentViewer extends LitElement {
     const {min, max} = this[$boundingBox]!;
     const modelRadius =
         Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
-    const far = 2 * modelRadius;
+    const far = 2 * Math.max(modelRadius, orbit.radius);
     const near = far / 1000;
 
     this[$camera].setProjectionFov(

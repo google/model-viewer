@@ -79,6 +79,7 @@ const $framedFieldOfView = Symbol('framedFieldOfView');
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
+const $setIntrinsics = Symbol('set$setIntrinsics');
 const $updateCameraOrbit = Symbol('updateCameraOrbit');
 const $updateCameraTarget = Symbol('updateCameraTarget');
 const $updateFieldOfView = Symbol('updateFieldOfView');
@@ -257,15 +258,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$updateFieldOfView]() {
-      let fov = deserializeAngleToDeg(this.fieldOfView, DEFAULT_FOV_DEG);
-      this[$controls].setFieldOfView(fov!);
+      const fov = deserializeAngleToDeg(this.fieldOfView, DEFAULT_FOV_DEG)!;
+      this[$controls].applyOptions({maximumFieldOfView: fov});
+      this[$controls].setFieldOfView(fov);
     }
 
     [$updateCameraOrbit]() {
-      let sphericalValues = deserializeSpherical(
+      const sphericalValues = deserializeSpherical(
           this.cameraOrbit,
           sphericalDefaults(this[$scene].model.idealCameraDistance));
-      let [theta, phi, radius] = sphericalValues;
+      const [theta, phi, radius] = sphericalValues;
+
+      this[$setIntrinsics](radius);
 
       this[$controls].setOrbit(theta, phi, radius);
     }
@@ -325,18 +329,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     [$updateCamera]() {
       const controls = this[$controls];
-      const {aspect} = this[$scene];
-      const {idealCameraDistance, fieldOfViewAspect} = this[$scene].model;
+      const {model, aspect} = this[$scene];
 
-      const maximumRadius = idealCameraDistance * 2;
-      controls.applyOptions({maximumRadius});
-
-      const modelRadius =
-          idealCameraDistance * Math.sin(HALF_FIELD_OF_VIEW_RADIANS);
-      const near = 0;
-      const far = maximumRadius + modelRadius;
-
-      controls.updateIntrinsics(near, far, aspect);
+      this[$setIntrinsics](this.getCameraOrbit().radius);
 
       if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW) {
         const zoom = (this[$framedFieldOfView] != null) ?
@@ -344,7 +339,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             1;
 
         const vertical = Math.tan(HALF_FIELD_OF_VIEW_RADIANS) *
-            Math.max(1, fieldOfViewAspect / aspect);
+            Math.max(1, model.fieldOfViewAspect / aspect);
         this[$framedFieldOfView] = 2 * Math.atan(vertical) * 180 / Math.PI;
 
         const maximumFieldOfView = this[$framedFieldOfView]!;
@@ -353,6 +348,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       controls.jumpToGoal();
+    }
+
+    /**
+     * Updates the camera's intrinsics to enclose the scene when orbiting at the
+     * supplied radius.
+     */
+    [$setIntrinsics](radius: number) {
+      const {model, aspect} = this[$scene];
+      const maximumRadius = Math.max(model.idealCameraDistance, radius);
+
+      this[$controls].applyOptions({maximumRadius});
+      const near = 0;
+      const far = 2 * maximumRadius;
+      this[$controls].updateIntrinsics(near, far, aspect);
     }
 
     [$updateAria]() {
