@@ -306,7 +306,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const target = this.getCameraTarget();
       if (!this[$scene].pivotCenter.equals(target)) {
         this[$scene].pivotCenter.copy(target);
-        this[$scene].setRotation();
+        this[$scene].setRotation(this[$scene].pivot.rotation.y);
       }
     }
 
