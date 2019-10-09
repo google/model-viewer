@@ -196,7 +196,7 @@ export default class ModelScene extends Scene {
   /**
    * Sets the rotation of the model's pivot, around its pivotCenter point.
    */
-  setRotation(radiansY: number) {
+  setRotation(radiansY: number = this.pivot.rotation.y) {
     this.pivot.rotation.y = radiansY;
     this.pivot.position.x = -this.pivotCenter.x;
     this.pivot.position.z = -this.pivotCenter.z;
