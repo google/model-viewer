@@ -16,7 +16,6 @@ import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} 
 import {Vector3} from 'three';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
 // https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
@@ -45,10 +44,8 @@ type BoneMap = {
  * the onBeforeCompile method.
  */
 const updateShader = (shader: Shader) => {
-  shader.fragmentShader =
-      shader.fragmentShader
-          .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-          .replace('#include <normalmap_pars_fragment>', normalmapChunk);
+  shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <cube_uv_reflection_fragment>', cubeUVChunk);
 };
 
 
