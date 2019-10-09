@@ -198,12 +198,13 @@ template.innerHTML = `
       justify-content: center;
       transform-origin: center center;
       transform: scale(0.9);
-      transition: transform 0.3s;
+      transition: transform 0.3s opacity 0.3s;
       animation-name: wiggle, fade;
       animation-duration: 6s;
       animation-iteration-count: infinite;
       animation-timing-function: ease-in-out;
       animation-play-state: paused;
+      animation-delay: 50ms;
     }
 
     .slot.controls-prompt > * {
@@ -224,6 +225,7 @@ template.innerHTML = `
     .slot.controls-prompt.visible {
       transform: scale(1);
       animation-play-state: running;
+      animation-fill-mode: backwards;
     }
 
     .slot.ar-button {
