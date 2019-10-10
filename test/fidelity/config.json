@@ -71,10 +71,12 @@
     {
       "name": "khronos-AnimatedTriangle",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
+      "target": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "orbit": {
-        "theta": 30,
-        "phi": 60,
-        "radius": 4.75
+        "radius": 1.5
       }
     },
     {
@@ -483,12 +485,11 @@
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/SimpleMorph/glTF/SimpleMorph.gltf",
       "target": {
         "x": 0.5,
-        "y": 1
+        "y": 1.2
       },
       "orbit": {
-        "radius": 2.5
-      },
-      "verticalFoV": 80
+        "radius": 3.5
+      }
     },
     {
       "name": "khronos-SimpleSparseAccessor",
@@ -552,18 +553,32 @@
     },
     {
       "name": "khronos-Triangle",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf"
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf",
+      "target": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "orbit": {
+        "radius": 1.5
+      }
     },
     {
-      "name": "khronos-TiangleWithoutIndices",
-      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TiangleWithoutIndices/glTF/TiangleWithoutIndices.gltf"
+      "name": "khronos-TriangleWithoutIndices",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TriangleWithoutIndices/glTF/TriangleWithoutIndices.gltf",
+      "target": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "orbit": {
+        "radius": 1.5
+      }
     },
     {
       "name": "khronos-TwoSidedPlane",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/TwoSidedPlane/glTF/TwoSidedPlane.gltf",
       "orbit": {
         "phi": 60,
-        "radius": 3
+        "radius": 3.5
       }
     },
     {
