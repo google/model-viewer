@@ -115,23 +115,24 @@ export default class StaticShadow extends Mesh {
     const modelCenter = boundingBox.getCenter(new Vector3);
     this[$camera].position.x = modelCenter.x;
     this[$camera].position.z = modelCenter.z;
-    this[$camera].position.y = modelCenter.y + size.y;
+    this[$camera].position.y = boundingBox.max.y;
 
     this[$camera].lookAt(modelCenter);
     this[$camera].updateMatrixWorld(true);
 
+    const shadowOffset = size.y * 0.0001;
     this.scale.x = size.x;
     this.scale.z = size.z;
     this.position.x = modelCenter.x;
     this.position.z = modelCenter.z;
-    this.position.y = boundingBox.min.y;
+    this.position.y = boundingBox.min.y - shadowOffset;
 
     this[$camera].top = size.z / 2;
     this[$camera].bottom = size.z / -2;
     this[$camera].left = size.x / -2;
     this[$camera].right = size.x / 2;
     this[$camera].near = 0;
-    this[$camera].far = size.y * 2;
+    this[$camera].far = size.y - shadowOffset;
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;
