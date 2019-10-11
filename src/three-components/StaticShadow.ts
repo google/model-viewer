@@ -115,7 +115,7 @@ export default class StaticShadow extends Mesh {
     const modelCenter = boundingBox.getCenter(new Vector3);
     // Nothing within shadowOffset of the bottom of the model casts a shadow
     // (this is to avoid having a baked-in shadow plane cast its own shadow).
-    const shadowOffset = size.y * 0.0001;
+    const shadowOffset = size.y * 0.002;
 
     this[$camera].position.x = modelCenter.x;
     this[$camera].position.z = modelCenter.z;
