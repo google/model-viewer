@@ -113,9 +113,13 @@ export default class StaticShadow extends Mesh {
 
     const {boundingBox, size} = scene.model;
     const modelCenter = boundingBox.getCenter(new Vector3);
+    // Nothing within shadowOffset of the bottom of the model casts a shadow
+    // (this is to avoid having a baked-in shadow plane cast its own shadow).
+    const shadowOffset = size.y * 0.0001;
+
     this[$camera].position.x = modelCenter.x;
     this[$camera].position.z = modelCenter.z;
-    this[$camera].position.y = modelCenter.y + size.y;
+    this[$camera].position.y = boundingBox.max.y + shadowOffset;
 
     this[$camera].lookAt(modelCenter);
     this[$camera].updateMatrixWorld(true);
@@ -124,14 +128,16 @@ export default class StaticShadow extends Mesh {
     this.scale.z = size.z;
     this.position.x = modelCenter.x;
     this.position.z = modelCenter.z;
-    this.position.y = boundingBox.min.y;
+    // We keep our shadow from Z-fighting with a baked-in shadow by lowering it
+    // by shadowOffset.
+    this.position.y = boundingBox.min.y - shadowOffset;
 
     this[$camera].top = size.z / 2;
     this[$camera].bottom = size.z / -2;
     this[$camera].left = size.x / -2;
     this[$camera].right = size.x / 2;
     this[$camera].near = 0;
-    this[$camera].far = size.y * 2;
+    this[$camera].far = size.y;
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;
