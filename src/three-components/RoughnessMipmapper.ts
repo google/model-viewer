@@ -31,10 +31,11 @@ export class RoughnessMipmapper {
 
   generateMipmaps(renderer: WebGLRenderer, material: MeshStandardMaterial) {
     const {roughnessMap} = material;
-    if (roughnessMap == null || roughnessMap.generateMipmaps ||
-        roughnessMap!.mipmaps.length > 1) {
+    if (roughnessMap == null || !roughnessMap.generateMipmaps ||
+        material.userData.roughnessUpdated) {
       return;
     }
+    material.userData.roughnessUpdated = true;
 
     let {width, height} = roughnessMap.image;
     if (!_Math.isPowerOfTwo(width) || !_Math.isPowerOfTwo(height)) {
@@ -42,23 +43,33 @@ export class RoughnessMipmapper {
     }
 
     const dpr = renderer.getPixelRatio();
+    const autoClear = renderer.autoClear;
     renderer.setPixelRatio(1);
+    renderer.autoClear = false;
 
+    const roughnessTarget = new WebGLRenderTarget(0, 0);
+    roughnessTarget.texture = roughnessMap;
+    roughnessTarget.width = roughnessMap.image.width;
+    roughnessTarget.height = roughnessMap.image.height;
     this[$mipmapMaterial].uniforms.roughnessMap.value = roughnessMap;
     this[$mipmapMaterial].uniforms.normalMap.value = material.normalMap;
 
     width /= 2;
     height /= 2;
-    for (; width >= 1 && height >= 1; width /= 2, height /= 2) {
-      const mipmap = new WebGLRenderTarget(width, height);
-      renderer.setRenderTarget(mipmap);
-
-
+    for (let mip = 1; width >= 1 && height >= 1;
+         ++mip, width /= 2, height /= 2) {
+      // rendering to a mip level is not allowed in webGL1. Instead we must set
+      // up a secondary texture to write the result to, then use
+      // gl.copyTexImage2D to copy it back to the proper mipmap level. In this
+      // case roughnessMap does not need to be a renderTarget, since it will
+      // only be read from and copied to. The secondary texture will be a
+      // renderTarget, and we can reuse it by narrowing the viewport.
+      renderer.setRenderTarget(roughnessTarget, undefined, mip);
       renderer.render(this[$scene], this[$flatCamera]);
-      roughnessMap.mipmaps.push(mipmap.texture.image);
     }
 
     renderer.setPixelRatio(dpr);
+    renderer.autoClear = autoClear;
   }
 }
 
@@ -88,12 +99,13 @@ void main() {
       fragmentShader: `
 precision mediump float;
 precision mediump int;
+varying vec2 vUv;
 uniform sampler2D roughnessMap;
 uniform sampler2D normalMap;
 uniform vec2 texelSize;
 void main() {
-  
-  gl_FragColor.rgb = texture2D(roughnessMap, vUv, -1.0);
+  float roughness = texture2D(roughnessMap, vUv, -1.0).g;
+  gl_FragColor.g = roughness;
 }
       `,
 
