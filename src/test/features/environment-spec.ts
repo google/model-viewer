@@ -17,7 +17,7 @@ import {Color, Material, Mesh, Scene} from 'three';
 import {MeshStandardMaterial} from 'three';
 
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
-import ModelViewerElementBase, {$resetRenderer, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
 import ModelScene from '../../three-components/ModelScene.js';
 import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
@@ -119,11 +119,12 @@ const waitForLoadAndEnvMap =
     };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
-  suiteTeardown(() => {
-    // Reset the renderer once at the end of this spec, to clear out all
-    // of the heavy cached image buffers:
-    ModelViewerElementBase[$resetRenderer]();
-  });
+  suiteTeardown(
+      () => {
+          // Reset the renderer once at the end of this spec, to clear out all
+          // of the heavy cached image buffers:
+          // ModelViewerElementBase[$resetRenderer]();
+      });
 
   let nextId = 0;
   let tagName: string;

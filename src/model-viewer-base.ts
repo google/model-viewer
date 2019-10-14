@@ -20,11 +20,9 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import ModelScene from './three-components/ModelScene.js';
-import Renderer from './three-components/Renderer.js';
+import {renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
-
-let renderer = new Renderer();
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
@@ -41,7 +39,7 @@ const $intersectionObserver = Symbol('intersectionObserver');
 const $lastDpr = Symbol('lastDpr');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 
-export const $resetRenderer = Symbol('resetRenderer');
+// export const $resetRenderer = Symbol('resetRenderer') ;
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
@@ -65,10 +63,10 @@ export const $getModelIsVisible = Symbol('getModelIsVisible');
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
 
-  static[$resetRenderer]() {
-    renderer.dispose();
-    renderer = new Renderer();
-  }
+  // static[$resetRenderer]() {
+  //   renderer.dispose();
+  //   renderer = new Renderer();
+  // }
 
   static get is() {
     return 'model-viewer';

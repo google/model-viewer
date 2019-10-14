@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Camera, Material, MeshStandardMaterial, Object3D, Scene, Shader, Vector3, WebGLRenderer} from 'three';
+import {Camera, Material, Object3D, Scene, Shader, Vector3} from 'three';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
-import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
@@ -40,17 +39,6 @@ const updateShader = (shader: Shader) => {
   shader.fragmentShader = shader.fragmentShader.replace(
       '#include <cube_uv_reflection_fragment>', cubeUVChunk);
 };
-
-const roughnessMipmapper = new RoughnessMipmapper;
-const updateRoughnessMap =
-    (renderer: WebGLRenderer,
-     _scene: any,
-     _camera: any,
-     _geometry: any,
-     material: MeshStandardMaterial,
-     _group: any) => {
-      roughnessMipmapper.generateMipmaps(renderer, material);
-    };
 
 /**
  * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
@@ -90,7 +78,6 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
       node.renderOrder = 1000;
 
       if (node.isMesh) {
-        node.onAfterRender = updateRoughnessMap;
         if (specularGlossiness != null) {
           node.onBeforeRender = specularGlossiness.refreshUniforms;
         }

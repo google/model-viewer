@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import {Mesh, Object3D, Scene} from 'three';
+import {Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
+import {renderer} from './Renderer.js';
+import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -126,6 +128,8 @@ export class CachingGLTFLoader {
     preloaded.set(url, true);
   }
 
+  protected roughnessMipmapper = new RoughnessMipmapper;
+
   /**
    * Loads a glTF from the specified url and resolves a unique clone of the
    * glTF. If the glTF has already been loaded, makes a clone of the cached
@@ -145,6 +149,19 @@ export class CachingGLTFLoader {
         if (!node.name) {
           node.name = node.uuid;
         }
+        if (!(node as Mesh).isMesh) {
+          return;
+        }
+        const mesh = node as Mesh;
+        const materials =
+            Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(material => {
+          if ((material as any).isMeshStandardMaterial) {
+            this.roughnessMipmapper.generateMipmaps(
+                renderer.renderer, material as MeshStandardMaterial);
+            material.needsUpdate = true;
+          }
+        });
       });
     }
 

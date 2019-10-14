@@ -19,11 +19,13 @@ import {_Math} from 'three/src/math/Math';
 const $mipmapMaterial = Symbol('mipmapMaterial');
 const $scene = Symbol('scene');
 const $flatCamera = Symbol('flatCamera');
+const $tempTarget = Symbol('tempTarget');
 
 export class RoughnessMipmapper {
   private[$mipmapMaterial] = new MipmapMaterial;
   private[$scene] = new Scene;
   private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
+  private[$tempTarget]: WebGLRenderTarget|null = null;
 
   constructor() {
     this[$scene].add(new Mesh(new PlaneBufferGeometry, this[$mipmapMaterial]));
@@ -47,15 +49,21 @@ export class RoughnessMipmapper {
     renderer.setPixelRatio(1);
     renderer.autoClear = false;
 
-    const roughnessTarget = new WebGLRenderTarget(0, 0);
-    roughnessTarget.texture = roughnessMap;
-    roughnessTarget.width = roughnessMap.image.width;
-    roughnessTarget.height = roughnessMap.image.height;
+    width /= 2;
+    height /= 2;
+
+    if (this[$tempTarget] == null || this[$tempTarget]!.width !== width ||
+        this[$tempTarget]!.height !== height) {
+      if (this[$tempTarget] != null) {
+        this[$tempTarget]!.dispose();
+      }
+      this[$tempTarget] = new WebGLRenderTarget(width, height);
+    }
+    renderer.setRenderTarget(this[$tempTarget]);
     this[$mipmapMaterial].uniforms.roughnessMap.value = roughnessMap;
     this[$mipmapMaterial].uniforms.normalMap.value = material.normalMap;
 
-    width /= 2;
-    height /= 2;
+    const position = new Vector2(0, 0);
     for (let mip = 1; width >= 1 && height >= 1;
          ++mip, width /= 2, height /= 2) {
       // rendering to a mip level is not allowed in webGL1. Instead we must set
@@ -64,8 +72,9 @@ export class RoughnessMipmapper {
       // case roughnessMap does not need to be a renderTarget, since it will
       // only be read from and copied to. The secondary texture will be a
       // renderTarget, and we can reuse it by narrowing the viewport.
-      renderer.setRenderTarget(roughnessTarget, undefined, mip);
+      renderer.setViewport(position.x, position.y, width, height);
       renderer.render(this[$scene], this[$flatCamera]);
+      renderer.copyFramebufferToTexture(position, roughnessMap, mip);
     }
 
     renderer.setPixelRatio(dpr);
@@ -104,7 +113,8 @@ uniform sampler2D roughnessMap;
 uniform sampler2D normalMap;
 uniform vec2 texelSize;
 void main() {
-  float roughness = texture2D(roughnessMap, vUv, -1.0).g;
+  gl_FragColor = texture2D(roughnessMap, vUv);
+  float roughness = gl_FragColor.g;
   gl_FragColor.g = roughness;
 }
       `,

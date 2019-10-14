@@ -223,3 +223,5 @@ export default class Renderer extends EventDispatcher {
     this.scenes.clear();
   }
 }
+
+export let renderer = new Renderer();
