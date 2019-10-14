@@ -31,6 +31,8 @@ const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
+const UNSIZED_MEDIA_LEFT = 0;
+const UNSIZED_MEDIA_TOP = 0;
 
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
@@ -163,19 +165,23 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // Because of potential race conditions related to invoking the constructor
     // we only use the bounding rect to set the initial size if the element is
     // already connected to the document:
-    let width, height;
+    let width, height, left, top;
     if (this.isConnected) {
       const rect = this.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
+      left = rect.left;
+      top = rect.top;
     } else {
       width = UNSIZED_MEDIA_WIDTH;
       height = UNSIZED_MEDIA_HEIGHT;
+      left = UNSIZED_MEDIA_LEFT;
+      top = UNSIZED_MEDIA_TOP;
     }
 
     // Create the underlying ModelScene.
     this[$scene] = new ModelScene(
-        {canvas: this[$canvas], element: this, width, height, renderer});
+        {canvas: this[$canvas], element: this, width, height, left, top, renderer});
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -331,17 +337,21 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * Called on initialization and when the resize observer fires.
    */
   [$updateSize](
-      {width, height}: {width: any, height: any}, forceApply = false) {
+    {width, height, left, top}: {width: any, height: any, left: any, top: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
+    const {left: prevLeft, top: prevTop} = this[$scene].getOffset();
+
     // Round off the pixel size
     const intWidth = parseInt(width, 10);
     const intHeight = parseInt(height, 10);
+    const intLeft = parseInt(left, 10);
+    const intTop = parseInt(top, 10);
 
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
-      this[$onResize]({width: intWidth, height: intHeight});
+    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight || prevLeft !== intLeft || prevTop !== intTop)) {
+      this[$onResize]({width: intWidth, height: intHeight, left: intLeft, top: intTop});
     }
   }
 
@@ -378,8 +388,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$needsRender]();
   }
 
-  [$onResize](e: {width: number, height: number}) {
+  [$onResize](e: {width: number, height: number, left: number, top: number}) {
     this[$scene].setSize(e.width, e.height);
+    this[$scene].setOffset(e.left, e.top);
     this[$needsRender]();
   }
 
