@@ -210,7 +210,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
         for (let entry of entries) {
           if (entry.target === this) {
-            this[$updateSize](entry.contentRect);
+            this[$updateSize](entry.target.getBoundingClientRect());
           }
         }
       });
@@ -346,6 +346,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const intHeight = parseInt(height, 10);
     const intLeft = parseInt(left, 10);
     const intTop = parseInt(top, 10);
+
+    console.log(intWidth, intHeight, intLeft, intTop)
 
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
