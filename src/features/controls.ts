@@ -302,20 +302,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$promptElementVisible]) {
         const {
           left: modelViewerLeft,
+        } = this[$scene].getOffset();
+        const {
           width: modelViewerWidth,
-        } = this.getBoundingClientRect();
+        } = this[$scene].getSize();
         const {
           left: promptLeft,
           width: promptWidth,
         } = this[$promptElementSVG].getBoundingClientRect();
 
-        if (!modelViewerWidth) return;
-
         const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
         const promptCenter = promptLeft + (promptWidth / 2);
         const promptOffsetRelative = (promptCenter - modelViewerCenter) / modelViewerWidth;
 
-        (this as any)[$scene].pivot.rotation.y = promptOffsetRelative * OFFSET_ROTATION_MULTIPLIER;
+        this[$scene].pivot.rotation.y = promptOffsetRelative * OFFSET_ROTATION_MULTIPLIER;
         this[$needsRender]();
       }
 
