@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $scene} from '../model-viewer-base.js';
+import {IS_IE11} from '../constants.js';
+import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
+
 import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
@@ -143,6 +145,37 @@ suite('ModelViewerElementBase', () => {
         const sourceErrors = waitForEvent(element, 'error');
         element.src = './does-not-exist.glb';
         await sourceErrors;
+      });
+    });
+
+    suite('when losing the GL context', () => {
+      let element: ModelViewerElementBase;
+      setup(() => {
+        element = new ModelViewerElement();
+        document.body.appendChild(element);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test('dispatches a related error event', async () => {
+        const renderer = element[$renderer].renderer;
+        const errorEventDispatches = waitForEvent(element, 'error');
+        // We make a best effor to simulate the real scenario here, but
+        // for some cases like headless Chrome WebGL might be disabled,
+        // so we simulate the scenario.
+        // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
+        if (renderer.context != null && !IS_IE11) {
+          renderer.forceContextLoss();
+        } else {
+          renderer.domElement.dispatchEvent(
+              new CustomEvent('webglcontextlost'));
+        }
+        const event = await errorEventDispatches;
+        expect((event as any).detail.type).to.be.equal('webglcontextlost');
       });
     });
 

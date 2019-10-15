@@ -20,7 +20,7 @@ import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
-import Renderer from './Renderer.js';
+import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
 

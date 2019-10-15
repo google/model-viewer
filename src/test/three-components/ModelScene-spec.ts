@@ -18,7 +18,7 @@ import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import ModelScene from '../../three-components/ModelScene.js';
-import Renderer from '../../three-components/Renderer.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
 
 

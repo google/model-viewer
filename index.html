@@ -470,6 +470,18 @@
               have loaded by the time this event fires.</p>
             </li>
             <li>
+              <div>error</div>
+              <p>This event can be triggered for two reasons: a model has failed
+              to load or parse, or the WebGL context was lost. If the model failed
+              to load, event.detail.type will be 'loadfailure'. If the WebGL context
+              was lost, event.detail.type will be 'webglcontextlost'. In both cases,
+              recovery countermeasures are left as an exercise for the user. The
+              element will not make automatic attempts to re-load a model that has failed
+              to load. Nor will the element attempt to restore the GL context after
+              it has been lost. Error events also hold a reference to the originating
+              error event (when there is one) as event.detail.sourceEvent.</p>
+            </li>
+            <li>
               <div>load</div>
               <p>Fired when a model is loaded. Can fire multiple times per <span
               class="attribute">&lt;model-viewer&gt;</span> if the src attribute

@@ -27,7 +27,7 @@ import {NumberNode, ZERO} from './parsers';
 export const degreesToRadians =
     (numberNode: NumberNode, fallbackRadianValue: number = 0): NumberNode => {
       let {number, unit} = numberNode;
-      if (isNaN(number) || !isFinite(number)) {
+      if (!isFinite(number)) {
         number = fallbackRadianValue;
         unit = 'rad';
       } else if (numberNode.unit === 'rad' || numberNode.unit == null) {
@@ -54,7 +54,7 @@ export const radiansToDegrees =
     (numberNode: NumberNode, fallbackDegreeValue: number = 0): NumberNode => {
       let {number, unit} = numberNode;
 
-      if (isNaN(number) || !isFinite(number)) {
+      if (!isFinite(number)) {
         number = fallbackDegreeValue;
         unit = 'deg';
       } else if (numberNode.unit === 'deg') {
@@ -81,7 +81,7 @@ export const lengthToBaseMeters =
     (numberNode: NumberNode, fallbackMeterValue: number = 0): NumberNode => {
       let {number, unit} = numberNode;
 
-      if (isNaN(number) || !isFinite(number)) {
+      if (!isFinite(number)) {
         number = fallbackMeterValue;
         unit = 'm';
       } else if (numberNode.unit === 'm') {
