@@ -15,7 +15,6 @@
 
 import {Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {_Math} from 'three/src/math/Math';
-import {sceneRenderer} from './Renderer';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
 const $scene = Symbol('scene');
@@ -89,8 +88,29 @@ export class RoughnessMipmapper {
     renderer.autoClear = autoClear;
 
     // debug
-    sceneRenderer.saveTexture(roughnessMap, 'roughness.png');
-    sceneRenderer.saveTexture(this[$tempTarget]!.texture, 'temp.png');
+    const saveTarget =
+        (target: WebGLRenderTarget, filename: string) => {
+          const {width, height} = target;
+          const output = document.createElement('canvas');
+          output.width = width;
+          output.height = height;
+          const ctx = output.getContext('2d')!;
+          const img = ctx.getImageData(0, 0, width, height);
+          renderer.readRenderTargetPixels(
+              target, 0, 0, width, height, img.data);
+          ctx.putImageData(img, 0, 0);
+          const a = document.createElement('a');
+          a.href =
+              output.toDataURL().replace('image/png', 'image/octet-stream');
+          a.download = filename;
+          a.click();
+        }
+
+    // const roughnessTarget = new WebGLRenderTarget(
+    //     roughnessMap!.image.width, roughnessMap!.image.height);
+    // roughnessTarget.texture = roughnessMap!;
+    // saveTarget(roughnessTarget, 'roughness.png');
+    saveTarget(this[$tempTarget]!, 'temp.png');
   }
 }
 
@@ -128,7 +148,7 @@ void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   float roughness = gl_FragColor.g;
   gl_FragColor.g = 0.0;
-  gl_FragColor=vec4(1.0,0.0,0.0,0.5);
+  // gl_FragColor=vec4(1.0,0.0,0.0,0.5);
 }
       `,
 
