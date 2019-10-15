@@ -273,7 +273,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // of a microtask, LitElement/UpdatingElement will notify of a change even
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
-    if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
+    if (changedProperties.has('src') &&
+        (this.src == null || this.src !== this[$scene].model.url)) {
       this[$loaded] = false;
       this[$loadedTime] = 0;
       (async () => {

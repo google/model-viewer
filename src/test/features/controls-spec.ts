@@ -24,6 +24,7 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
@@ -410,14 +411,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               async () => {
                 element.src = null;
 
-                Object.defineProperty(
-                    element, 'loaded', {value: false, configurable: true});
-
                 const canvas: HTMLCanvasElement = element[$scene].canvas;
                 const promptElement: HTMLElement =
                     (element as any)[$promptElement];
-
-                settleControls(controls);
 
                 await rafPasses();
 
@@ -428,13 +424,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
-                Object.defineProperty(
-                    element, 'loaded', {value: true, configurable: true});
+                canvas.blur();
 
-                await timePasses(element.interactionPromptThreshold + 100);
+                element.src = ASTRONAUT_GLB_PATH;
 
-                expect(promptElement.classList.contains('visible'))
-                    .to.be.equal(true);
+                await waitForEvent(element, 'load');
+
+                canvas.focus();
+
+                await until(() => promptElement.classList.contains('visible'));
               });
 
           // TODO(#584)

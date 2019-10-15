@@ -106,7 +106,10 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               element.preload = true;
               element.src = ASTRONAUT_GLB_PATH;
 
-              await waitForEvent(element, 'load');
+              await waitForEvent(
+                  element,
+                  'model-visibility',
+                  (event: any) => event.detail.visible);
 
               const canvas = element[$canvas];
               const picked = pickShadowDescendant(element);

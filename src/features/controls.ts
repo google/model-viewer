@@ -283,6 +283,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         controls.applyOptions({interactionPolicy});
       }
 
+      if (changedProperties.has('src')) {
+        this[$deferInteractionPrompt]();
+        this[$waitingToPromptUser] = true;
+      }
+
       if (this[$jumpCamera] === true) {
         Promise.resolve().then(() => {
           this[$controls].jumpToGoal();
@@ -313,8 +318,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.interactionPrompt !== InteractionPromptStrategy.NONE) {
         if (this.loaded &&
             time > this[$loadedTime] + this.interactionPromptThreshold) {
-          (this as any)[$scene].canvas.setAttribute(
-              'aria-label', INTERACTION_PROMPT);
+          this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
 
           // NOTE(cdata): After notifying users that the controls are
           // available, we flag that the user has been prompted at least

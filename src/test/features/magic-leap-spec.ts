@@ -64,7 +64,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
           const presented = pickShadowDescendant(element);
 
           expect(presented).to.be.ok;
-          expect(presented!.classList.contains('container')).to.be.equal(true);
+          expect(presented!.tagName).to.be.equal('CANVAS');
         });
       });
 
