@@ -16,7 +16,7 @@
 import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
 import {assertIsArCandidate} from '../utilities.js';
 import ModelScene from './ModelScene.js';
-import Renderer from './Renderer.js';
+import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
@@ -106,9 +106,10 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.renderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    this.renderer.setSize(session.renderState.baseLayer!.framebufferWidth,
-                          session.renderState.baseLayer!.framebufferHeight,
-                          false);
+    this.renderer.setSize(
+        session.renderState.baseLayer!.framebufferWidth,
+        session.renderState.baseLayer!.framebufferHeight,
+        false);
 
     return session;
   }
@@ -188,11 +189,11 @@ export class ARRenderer extends EventDispatcher {
     }
   }
 
-    [$postSessionCleanup]() {
-      // The offscreen WebXR framebuffer is now invalid, switch
-      // back to the default framebuffer for canvas output.
-      // TODO: this method should be added to three.js's exported interface.
-      (this.renderer as any).setFramebuffer(null);
+  [$postSessionCleanup]() {
+    // The offscreen WebXR framebuffer is now invalid, switch
+    // back to the default framebuffer for canvas output.
+    // TODO: this method should be added to three.js's exported interface.
+    (this.renderer as any).setFramebuffer(null);
 
     // Trigger a parent renderer update. TODO(klausw): are these all
     // necessary and sufficient?
@@ -325,7 +326,8 @@ export class ARRenderer extends EventDispatcher {
 
     for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
-      this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+      this.renderer.setViewport(
+          viewport.x, viewport.y, viewport.width, viewport.height);
       this.camera.projectionMatrix.fromArray(view.projectionMatrix);
       const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
 

@@ -319,7 +319,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.dispatchEvent(new CustomEvent('preload', {detail}));
         } catch (error) {
           this.dispatchEvent(new CustomEvent(
-              'error', {detail: {type: 'preload', sourceError: error}}));
+              'error', {detail: {type: 'loadfailure', sourceError: error}}));
         } finally {
           updatePreloadProgress(1.0);
           this.requestUpdate();
