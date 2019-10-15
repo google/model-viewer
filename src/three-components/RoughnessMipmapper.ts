@@ -15,6 +15,7 @@
 
 import {Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {_Math} from 'three/src/math/Math';
+import {sceneRenderer} from './Renderer';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
 const $scene = Symbol('scene');
@@ -28,7 +29,8 @@ export class RoughnessMipmapper {
   private[$tempTarget]: WebGLRenderTarget|null = null;
 
   constructor() {
-    this[$scene].add(new Mesh(new PlaneBufferGeometry, this[$mipmapMaterial]));
+    this[$scene].add(
+        new Mesh(new PlaneBufferGeometry(2, 2), this[$mipmapMaterial]));
   }
 
   generateMipmaps(renderer: WebGLRenderer, material: MeshStandardMaterial) {
@@ -59,11 +61,12 @@ export class RoughnessMipmapper {
       }
       this[$tempTarget] = new WebGLRenderTarget(width, height);
     }
-    renderer.setRenderTarget(this[$tempTarget]);
+
     this[$mipmapMaterial].uniforms.roughnessMap.value = roughnessMap;
     this[$mipmapMaterial].uniforms.normalMap.value = material.normalMap;
 
     const position = new Vector2(0, 0);
+    const texelSize = new Vector2(0, 0);
     for (let mip = 1; width >= 1 && height >= 1;
          ++mip, width /= 2, height /= 2) {
       // rendering to a mip level is not allowed in webGL1. Instead we must set
@@ -72,13 +75,22 @@ export class RoughnessMipmapper {
       // case roughnessMap does not need to be a renderTarget, since it will
       // only be read from and copied to. The secondary texture will be a
       // renderTarget, and we can reuse it by narrowing the viewport.
+      texelSize.set(1.0 / width, 1.0 / height);
+      this[$mipmapMaterial].uniforms.texelSize.value = texelSize;
+
+      renderer.setRenderTarget(this[$tempTarget]);
       renderer.setViewport(position.x, position.y, width, height);
       renderer.render(this[$scene], this[$flatCamera]);
       renderer.copyFramebufferToTexture(position, roughnessMap, mip);
+      this[$mipmapMaterial].needsUpdate = true;
     }
 
     renderer.setPixelRatio(dpr);
     renderer.autoClear = autoClear;
+
+    // debug
+    sceneRenderer.saveTexture(roughnessMap, 'roughness.png');
+    sceneRenderer.saveTexture(this[$tempTarget]!.texture, 'temp.png');
   }
 }
 
@@ -113,9 +125,10 @@ uniform sampler2D roughnessMap;
 uniform sampler2D normalMap;
 uniform vec2 texelSize;
 void main() {
-  gl_FragColor = texture2D(roughnessMap, vUv);
+  gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   float roughness = gl_FragColor.g;
-  gl_FragColor.g = roughness;
+  gl_FragColor.g = 0.0;
+  gl_FragColor=vec4(1.0,0.0,0.0,0.5);
 }
       `,
 

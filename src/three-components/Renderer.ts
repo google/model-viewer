@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneBufferGeometry, Scene, Texture, WebGLRenderer} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -75,6 +75,7 @@ export default class Renderer extends EventDispatcher {
       this.renderer = new WebGLRenderer({
         canvas: this.canvas,
         context: this.context,
+        preserveDrawingBuffer: true
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
@@ -208,6 +209,23 @@ export default class Renderer extends EventDispatcher {
     this.lastTick = t;
   }
 
+  saveTexture(texture: Texture, filename: string) {
+    const camera = new OrthographicCamera(-1, 1, -1, 1, -1, 1);
+    const scene = new Scene();
+    const mesh = new Mesh(
+        new PlaneBufferGeometry(2, 2), new MeshBasicMaterial({map: texture}));
+    scene.add(mesh);
+    this.renderer.setRenderTarget(null);
+    this.setRendererSize(texture.image.width, texture.image.height);
+
+    var a = document.createElement('a');
+    this.renderer.render(scene, camera);
+    a.href = this.renderer.domElement.toDataURL().replace(
+        'image/png', 'image/octet-stream');
+    a.download = filename;
+    a.click();
+  }
+
   dispose() {
     if (this.textureUtils != null) {
       this.textureUtils.dispose();
@@ -224,4 +242,4 @@ export default class Renderer extends EventDispatcher {
   }
 }
 
-export let renderer = new Renderer();
+export let sceneRenderer = new Renderer();

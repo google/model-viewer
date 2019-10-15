@@ -19,7 +19,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
-import {renderer} from './Renderer.js';
+import {sceneRenderer} from './Renderer.js';
 import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 
 export type ProgressCallback = (progress: number) => void;
@@ -158,7 +158,7 @@ export class CachingGLTFLoader {
         materials.forEach(material => {
           if ((material as any).isMeshStandardMaterial) {
             this.roughnessMipmapper.generateMipmaps(
-                renderer.renderer, material as MeshStandardMaterial);
+                sceneRenderer.renderer, material as MeshStandardMaterial);
             material.needsUpdate = true;
           }
         });
