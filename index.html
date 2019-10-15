@@ -131,7 +131,12 @@
             </li>
             <li>
               <div>auto-rotate</div>
-              <p>Enables the auto rotation of the model.</p>
+              <p>Enables the auto-rotation of the model.</p>
+            </li>
+            <li>
+              <div>auto-rotate-delay</div>
+              <p>Sets the delay before auto-rotation begins. The format of the value
+              is a number in milliseconds. The default is 3000.</p>
             </li>
             <li>
               <div>autoplay</div>
@@ -438,6 +443,13 @@
               <p>Causes animations to be paused. If you want to reset the
               current animation to the beginning, you should also set the
               currentTime property to 0.</p>
+            </li>
+            <li>
+              <div>resetTurntableRotation()</div>
+              <p>Resets the turntable that rotates the model when auto-rotate
+              is enabled. The new value of the turntable rotation will be 0 after
+              this method is invoked, but the model may not update until the next
+              render frame.</p>
             </li>
             <li>
               <div>toDataURL(type, encoderOptions)</div>

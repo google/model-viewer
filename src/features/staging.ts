@@ -25,13 +25,11 @@ import {CameraChangeDetails} from './controls.js';
 // How much the model will rotate per
 // second in radians:
 const ROTATION_SPEED = Math.PI / 32;
-const AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION = 3000;
+export const AUTO_ROTATE_DELAY_DEFAULT = 3000;
 
 const $autoRotateTimer = Symbol('autoRotateTimer');
 const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
-
-export {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION};
 
 export interface StagingInterface {
   autoRotate: boolean;
@@ -43,8 +41,10 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'auto-rotate'})
     autoRotate: boolean = false;
 
-    private[$autoRotateTimer]: Timer =
-        new Timer(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+    @property({type: Number, attribute: 'auto-rotate-delay'})
+    autoRotateDelay: number = AUTO_ROTATE_DELAY_DEFAULT;
+
+    private[$autoRotateTimer]: Timer = new Timer(this.autoRotateDelay);
     private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
         this[$onCameraChange](event);
 
@@ -66,8 +66,16 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('autoRotate')) {
-        this[$scene].setRotation(0);
         this[$needsRender]();
+      }
+
+      if (changedProperties.has('autoRotateDelay')) {
+        const timer = new Timer(this.autoRotateDelay);
+        timer.tick(this[$autoRotateTimer].time);
+        if (timer.hasStopped) {
+          timer.reset();
+        }
+        this[$autoRotateTimer] = timer;
       }
     }
 
@@ -98,6 +106,10 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     get turntableRotation(): number {
       return this[$scene].pivot.rotation.y;
+    }
+
+    resetTurntableRotation() {
+      this[$scene].setRotation(0);
     }
   }
 
