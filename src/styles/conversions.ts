@@ -127,7 +127,7 @@ export const normalizeUnit = (() => {
   return (node: NumberNode, fallback: NumberNode = ZERO) => {
     let {number, unit} = node;
 
-    if (isNaN(number) || !isFinite(number)) {
+    if (!isFinite(number)) {
       number = fallback.number;
       unit = fallback.unit;
     }
