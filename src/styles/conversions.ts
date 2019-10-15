@@ -20,12 +20,15 @@ import {NumberNode, ZERO} from './parsers';
  * in radians, does nothing. If the value is in degrees, converts it to radians.
  * If the value has no specified unit, the unit is assumed to be radians. If the
  * value is not in radians or degrees, the value is resolved as 0 radians.
+ *
+ * Also accepts a second argument that is a default value to use if the input
+ * numberNode number is NaN or Infinity.
  */
 export const degreesToRadians =
-    (numberNode: NumberNode, defaultRadians: number = 0): NumberNode => {
+    (numberNode: NumberNode, fallbackRadianValue: number = 0): NumberNode => {
       let {number, unit} = numberNode;
       if (isNaN(number) || !isFinite(number)) {
-        number = defaultRadians;
+        number = fallbackRadianValue;
         unit = 'rad';
       } else if (numberNode.unit === 'rad' || numberNode.unit == null) {
         return numberNode;
@@ -43,13 +46,16 @@ export const degreesToRadians =
  * in degrees, does nothing. If the value is in radians or has no specified
  * unit, converts it to degrees. If the value is not in radians or degrees, the
  * value is resolved as 0 degrees.
+ *
+ * Also accepts a second argument that is a default value to use if the input
+ * numberNode number is NaN or Infinity.
  */
 export const radiansToDegrees =
-    (numberNode: NumberNode, defaultDegrees: number = 0): NumberNode => {
+    (numberNode: NumberNode, fallbackDegreeValue: number = 0): NumberNode => {
       let {number, unit} = numberNode;
 
       if (isNaN(number) || !isFinite(number)) {
-        number = defaultDegrees;
+        number = fallbackDegreeValue;
         unit = 'deg';
       } else if (numberNode.unit === 'deg') {
         return numberNode;

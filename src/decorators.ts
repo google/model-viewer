@@ -31,7 +31,7 @@ export type IntrinsicsFactory<T extends Intrinsics<Array<Unit>>,
 export interface StyleDecoratorConfig<T extends Intrinsics<Array<Unit>>,
                                                 U extends UpdatingElement> {
   intrinsics: T|IntrinsicsFactory<T, U>;
-  updateHandler: string|Symbol;
+  updateHandler: symbol;
   observeEffects?: boolean;
 }
 
@@ -116,9 +116,13 @@ export const style =
 
               const result = this[$styleEvaluator].evaluate();
 
-              (this as unknown as
-               {[index: string]: (style: EvaluatedStyle<T>) =>
-                    void})[config.updateHandler as string](result);
+              // @see https://github.com/microsoft/TypeScript/pull/30769
+              // @see https://github.com/Microsoft/TypeScript/issues/1863
+              (this as unknown as Record<
+                   string,
+                   (style: EvaluatedStyle<T>) =>
+                       void>)[config.updateHandler as unknown as string](
+                  result);
             }
           },
 

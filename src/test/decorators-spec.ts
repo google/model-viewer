@@ -20,19 +20,21 @@ import {timePasses} from './helpers.js';
 
 const expect = chai.expect;
 
+const $updateFoo = Symbol('updateFoo');
+
 const fooIntrinsics = {
   basis: [numberNode(1, 'm'), numberNode(Math.PI, 'rad')],
   keywords: {auto: [null, numberNode(200, '%')]}
 };
 
 class StyleableElement extends UpdatingElement {
-  @style({intrinsics: fooIntrinsics, updateHandler: 'updateFoo'})
+  @style({intrinsics: fooIntrinsics, updateHandler: $updateFoo})
   @property({type: String})
   foo: string = '200cm 1rad';
 
   fooUpdates: Array<[number, number]> = [];
 
-  updateFoo(style: [number, number]) {
+  [$updateFoo](style: [number, number]) {
     this.fooUpdates.push(style);
   }
 }

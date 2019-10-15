@@ -244,7 +244,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.cameraOrbit = cameraOrbit;
           const fieldOfView = 30;
           element.fieldOfView = `${fieldOfView}deg`;
-          console.log('JUMP!');
           element.jumpCameraToGoal();
 
           await rafPasses();

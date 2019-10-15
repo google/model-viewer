@@ -75,7 +75,7 @@ export abstract class Evaluator<T> {
    * as the result of invoking its evaluate method. This is mainly used to
    * ensure that CSS function nodes are cast to the corresponding Evaluators
    * that will resolve the result of the function, but is also used to ensure
-   * that an percentage nested at arbitrary depth in the expression will always
+   * that a percentage nested at arbitrary depth in the expression will always
    * be evaluated against the correct basis.
    */
   static evaluatableFor(
