@@ -215,6 +215,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         for (let entry of entries) {
           if (entry.target === this) {
             this[$scene].isVisible = entry.isIntersecting;
+            this.requestUpdate();
           }
         }
       }, {
