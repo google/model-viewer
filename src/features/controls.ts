@@ -105,7 +105,6 @@ export const INTERACTION_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
 
 export const $controls = Symbol('controls');
-export const $promptElementSVG = Symbol('promptElementSVG');
 export const $promptElement = Symbol('promptElement');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 const $framedFieldOfView = Symbol('framedFieldOfView');
@@ -192,8 +191,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.controls-prompt')!;
-    protected[$promptElementSVG] =
-        this.shadowRoot!.querySelector('.controls-prompt svg')!;
 
     protected[$promptElementVisible] = false;
     protected[$userPromptedOnce] = false;
@@ -339,7 +336,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const {
           left: promptLeft,
           width: promptWidth,
-        } = this[$promptElementSVG].getBoundingClientRect();
+        } = this[$promptElement].getBoundingClientRect();
 
         const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
         const promptCenter = promptLeft + (promptWidth / 2);
