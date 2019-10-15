@@ -198,13 +198,19 @@ template.innerHTML = `
       justify-content: center;
       transform-origin: center center;
       transform: scale(0.9);
-      transition: transform 0.3s opacity 0.3s;
+      visibility: hidden;
+      transition: visibility 0.3s;
+      transition-delay: 0.3s;
       animation-name: wiggle, fade;
       animation-duration: 6s;
       animation-iteration-count: infinite;
       animation-timing-function: ease-in-out;
       animation-play-state: paused;
-      animation-delay: 50ms;
+    }
+
+    .slot.controls-prompt .wrapper {
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
     .slot.controls-prompt > * {
@@ -212,20 +218,19 @@ template.innerHTML = `
     }
 
     .slot.controls-prompt svg {
-      opacity: 0;
       transform: scale(0.5);
-      transition: opacity 0.3s;
-    }
-
-    .slot.controls-prompt.visible svg {
-      opacity: 1;
-      transition: opacity 0.3s;
     }
 
     .slot.controls-prompt.visible {
+      visibility: visible;
       transform: scale(1);
       animation-play-state: running;
-      animation-fill-mode: backwards;
+      transition: visibility 0.3s;
+    }
+
+    .slot.controls-prompt.visible .wrapper {
+      opacity: 1;
+      transition: opacity 0.3s;
     }
 
     .slot.ar-button {
@@ -329,9 +334,11 @@ template.innerHTML = `
     </div>
 
     <div class="slot controls-prompt">
-      <slot name="controls-prompt" aria-hidden="true">
-        ${ControlsPrompt}
-      </slot>
+      <span class="wrapper">
+        <slot name="controls-prompt" aria-hidden="true">
+          ${ControlsPrompt}
+        </slot>
+      </span>
     </div>
 
     <div class="slot default">
