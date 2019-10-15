@@ -443,8 +443,8 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Sets the target the camera is pointing toward
    */
-  setTarget(target: Vector3) {
-    this[$goalTarget].copy(target);
+  setTarget(x: number, y: number, z: number) {
+    this[$goalTarget].set(x, y, z);
   }
 
   /**

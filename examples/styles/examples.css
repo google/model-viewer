@@ -495,7 +495,8 @@ paper-button {
   font-weight: 500;
   padding-right: 16px;
 }
-.list-attribute li > p {
+.list-attribute li > p,
+.list-attribute li > span {
   flex: 2;
   margin: 0;
 }

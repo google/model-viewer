@@ -16,8 +16,11 @@
 import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
-import {deserializeAngleToDeg, deserializeSpherical, deserializeVector3} from '../conversions.js';
+import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import {normalizeUnit} from '../styles/conversions.js';
+import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
+import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {DEFAULT_FOV_DEG} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
@@ -50,14 +53,42 @@ const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
-export const sphericalDefaults = (() => {
-  const [defaultTheta, defaultPhi, defaultFactor] =
-      deserializeSpherical(DEFAULT_CAMERA_ORBIT, [0, 0, 1, 0]);
 
-  return (defaultRadius: number): [number, number, number, number] => {
-    return [defaultTheta, defaultPhi, defaultRadius, defaultFactor];
+export const fieldOfViewIntrinsics = {
+  basis: [numberNode(DEFAULT_FOV_DEG * Math.PI / 180, 'rad')],
+  keywords: {auto: [null]}
+};
+
+export const cameraOrbitIntrinsics = (() => {
+  const defaultTerms =
+      parseExpressions(DEFAULT_CAMERA_ORBIT)[0]
+          .terms as [NumberNode<'rad'>, NumberNode<'rad'>, IdentNode];
+
+  const theta = normalizeUnit(defaultTerms[0]) as NumberNode<'rad'>;
+  const phi = normalizeUnit(defaultTerms[1]) as NumberNode<'rad'>;
+
+  return (element: ModelViewerElementBase) => {
+    const radius = element[$scene].model.idealCameraDistance;
+
+    return {
+      basis: [theta, phi, numberNode(radius, 'm')],
+      keywords: {auto: [null, null, numberNode(105, '%')]}
+    };
   };
 })();
+
+export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
+  const center = element[$scene].model.boundingBox.getCenter(new Vector3);
+
+  return {
+    basis: [
+      numberNode(center.x, 'm'),
+      numberNode(center.y, 'm'),
+      numberNode(center.z, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
+};
 
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
@@ -79,9 +110,6 @@ const $framedFieldOfView = Symbol('framedFieldOfView');
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCamera = Symbol('updateCamera');
-const $updateCameraOrbit = Symbol('updateCameraOrbit');
-const $updateCameraTarget = Symbol('updateCameraTarget');
-const $updateFieldOfView = Symbol('updateFieldOfView');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -99,6 +127,10 @@ const $userPromptedOnce = Symbol('userPromptedOnce');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
+
+const $syncCameraOrbit = Symbol('syncCameraOrbit');
+const $syncFieldOfView = Symbol('syncFieldOfView');
+const $syncCameraTarget = Symbol('syncCameraTarget');
 
 export interface ControlsInterface {
   cameraControls: boolean;
@@ -120,13 +152,28 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'camera-controls'})
     cameraControls: boolean = false;
 
+    @style({
+      intrinsics: cameraOrbitIntrinsics,
+      observeEffects: true,
+      updateHandler: $syncCameraOrbit
+    })
     @property({type: String, attribute: 'camera-orbit', hasChanged: () => true})
     cameraOrbit: string = DEFAULT_CAMERA_ORBIT;
 
+    @style({
+      intrinsics: cameraTargetIntrinsics,
+      observeEffects: true,
+      updateHandler: $syncCameraTarget
+    })
     @property(
         {type: String, attribute: 'camera-target', hasChanged: () => true})
     cameraTarget: string = DEFAULT_CAMERA_TARGET;
 
+    @style({
+      intrinsics: fieldOfViewIntrinsics,
+      observeEffects: true,
+      updateHandler: $syncFieldOfView
+    })
     @property(
         {type: String, attribute: 'field-of-view', hasChanged: () => true})
     fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
@@ -179,13 +226,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     jumpCameraToGoal() {
       this[$jumpCamera] = true;
+      this.requestUpdate($jumpCamera, false);
     }
 
     connectedCallback() {
       super.connectedCallback();
-
-      this[$updateCameraOrbit]();
-      this[$updateFieldOfView]();
 
       this[$promptTransitionendHandler]();
       this[$promptElement].addEventListener(
@@ -202,8 +247,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$controls].removeEventListener('change', this[$changeHandler]);
     }
 
-    updated(changedProperties: Map<string, any>) {
-      super.updated(changedProperties);
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
+      super.updated(changedProperties as Map<string, any>);
 
       const controls = this[$controls];
       const scene = (this as any)[$scene];
@@ -238,45 +283,31 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         controls.applyOptions({interactionPolicy});
       }
 
-      if (changedProperties.has('cameraOrbit')) {
-        this[$updateCameraOrbit]();
-      }
-
-      if (changedProperties.has('cameraTarget')) {
-        this[$updateCameraTarget]();
-      }
-
-      if (changedProperties.has('fieldOfView')) {
-        this[$updateFieldOfView]();
+      if (changedProperties.has('src')) {
+        this[$deferInteractionPrompt]();
+        this[$waitingToPromptUser] = true;
       }
 
       if (this[$jumpCamera] === true) {
-        this[$controls].jumpToGoal();
-        this[$jumpCamera] = false;
+        Promise.resolve().then(() => {
+          this[$controls].jumpToGoal();
+          this[$jumpCamera] = false;
+        });
       }
     }
 
-    [$updateFieldOfView]() {
-      let fov = deserializeAngleToDeg(this.fieldOfView, DEFAULT_FOV_DEG);
-      this[$controls].setFieldOfView(fov!);
+    [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$controls].setFieldOfView(style[0] * 180 / Math.PI);
     }
 
-    [$updateCameraOrbit]() {
-      let sphericalValues = deserializeSpherical(
-          this.cameraOrbit,
-          sphericalDefaults(this[$scene].model.idealCameraDistance));
-      let [theta, phi, radius] = sphericalValues;
-
-      this[$controls].setOrbit(theta, phi, radius);
+    [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
-    [$updateCameraTarget]() {
-      const defaultTarget =
-          this[$scene].model.boundingBox.getCenter(new Vector3);
-      const target = deserializeVector3(this.cameraTarget, defaultTarget);
-
-      this[$controls].setTarget(target);
-      this[$scene].pivotCenter.copy(target);
+    [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
+      const [x, y, z] = style;
+      this[$controls].setTarget(x, y, z);
+      this[$scene].pivotCenter.set(x, y, z);
       this[$scene].setRotation(this[$scene].pivot.rotation.y);
     }
 
@@ -287,8 +318,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.interactionPrompt !== InteractionPromptStrategy.NONE) {
         if (this.loaded &&
             time > this[$loadedTime] + this.interactionPromptThreshold) {
-          (this as any)[$scene].canvas.setAttribute(
-              'aria-label', INTERACTION_PROMPT);
+          this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
 
           // NOTE(cdata): After notifying users that the controls are
           // available, we flag that the user has been prompted at least
@@ -423,8 +453,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelLoad](event: any) {
       super[$onModelLoad](event);
       this[$updateCamera]();
-      this[$updateCameraOrbit]();
-      this[$updateCameraTarget]();
+      this.requestUpdate('cameraOrbit', this.cameraOrbit);
+      this.requestUpdate('fieldOfView', this.fieldOfView);
+      this.requestUpdate('cameraTarget', this.cameraTarget);
       this[$controls].jumpToGoal();
     }
 

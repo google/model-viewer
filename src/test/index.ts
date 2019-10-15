@@ -14,8 +14,12 @@
  */
 
 import './utils-spec.js';
-import './parsers-spec.js';
-import './conversions-spec.js';
+import './styles/parsers-spec.js';
+import './styles/conversions-spec.js';
+import './styles/deserializers-spec.js';
+import './styles/evaluators-spec.js';
+import './styles/style-effector-spec.js';
+import './decorators-spec.js';
 import './model-viewer-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, sphericalDefaults, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
+import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
@@ -23,6 +24,7 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
@@ -91,9 +93,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        const orbitDefault =
-            sphericalDefaults(element[$scene].model.idealCameraDistance);
-        defaultRadius = orbitDefault[2] * orbitDefault[3];
+        const orbitIntrinsics = cameraOrbitIntrinsics(element);
+        const evaluator = new StyleEvaluator([], orbitIntrinsics);
+
+        defaultRadius = evaluator.evaluate()[2];
       });
 
       teardown(() => {
@@ -154,7 +157,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad auto`;
 
         await timePasses();
-
         settleControls(controls);
 
         expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
@@ -245,7 +247,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.fieldOfView = `${fieldOfView}deg`;
           element.jumpCameraToGoal();
 
-          await timePasses();
+          await rafPasses();
 
           expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
           let orbit = element.getCameraOrbit();
@@ -409,14 +411,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               async () => {
                 element.src = null;
 
-                Object.defineProperty(
-                    element, 'loaded', {value: false, configurable: true});
-
                 const canvas: HTMLCanvasElement = element[$scene].canvas;
                 const promptElement: HTMLElement =
                     (element as any)[$promptElement];
-
-                settleControls(controls);
 
                 await rafPasses();
 
@@ -427,13 +424,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
-                Object.defineProperty(
-                    element, 'loaded', {value: true, configurable: true});
+                canvas.blur();
 
-                await timePasses(element.interactionPromptThreshold + 100);
+                element.src = ASTRONAUT_GLB_PATH;
 
-                expect(promptElement.classList.contains('visible'))
-                    .to.be.equal(true);
+                await waitForEvent(element, 'load');
+
+                canvas.focus();
+
+                await until(() => promptElement.classList.contains('visible'));
               });
 
           // TODO(#584)
