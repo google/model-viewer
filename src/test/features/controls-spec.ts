@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
@@ -365,19 +365,33 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test('plays css animation only when visible', async () => {
           element.interactionPrompt = 'auto';
 
-          const computedStyle = getComputedStyle((element as any)[$promptElement]);
-          expect(computedStyle.animationPlayState).to.be.equal('paused');
+          const computedStyle =
+              getComputedStyle((element as any)[$promptAnimatedContainer]);
+          expect(computedStyle.animationPlayState)
+              .to.be.match(/^paused(\, paused)?$/);
 
           await timePasses(element.interactionPromptThreshold + 100);
-          expect(computedStyle.animationPlayState).to.be.equal('running');
+          expect(computedStyle.animationPlayState)
+              .to.be.match(/^running(\, running)?$/);
         });
 
-        test('has correct animation properties', async () => {
-          const computedStyle = getComputedStyle((element as any)[$promptElement]);
-          expect(computedStyle.animationDuration).to.be.equal('6s');
-          expect(computedStyle.animationName).to.be.equal('wiggle, fade');
-          expect(computedStyle.animationIterationCount).to.be.equal('infinite');
-          expect(computedStyle.animationTimingFunction).to.be.equal('ease-in-out');
+        test('has a css animation', () => {
+          const computedStyle =
+              getComputedStyle((element as any)[$promptAnimatedContainer]);
+          expect(computedStyle.animationName).to.not.be.equal('none');
+        });
+
+        suite('when configured to be basic', () => {
+          setup(async () => {
+            element.interactionPromptStyle = 'basic';
+            await timePasses();
+          });
+
+          test('does not have a css animation', () => {
+            const computedStyle =
+                getComputedStyle((element as any)[$promptAnimatedContainer]);
+            expect(computedStyle.animationName).to.be.equal('none');
+          });
         });
       });
 
@@ -444,9 +458,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
                 canvas.blur();
 
+                const modelLoads = waitForEvent(element, 'load');
                 element.src = ASTRONAUT_GLB_PATH;
-
-                await waitForEvent(element, 'load');
+                await modelLoads;
 
                 canvas.focus();
 

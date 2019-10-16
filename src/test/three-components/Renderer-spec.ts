@@ -39,8 +39,6 @@ function createScene(): ModelScene&TestScene {
     canvas: element[$canvas],
     width: 200,
     height: 100,
-    left: 0,
-    top: 0,
     renderer,
   });
   scene.isVisible = true;
@@ -135,9 +133,8 @@ suite('Renderer', () => {
         const {element} = scene;
         const initialDpr = renderer.renderer.getPixelRatio();
         const {width, height} = scene.getSize();
-        const {left, top} = scene.getOffset();
 
-        element[$onResize]({width, height, left, top});
+        element[$onResize]({width, height});
 
         Object.defineProperty(
             self, 'devicePixelRatio', {value: initialDpr + 1});

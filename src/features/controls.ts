@@ -36,16 +36,23 @@ export interface SphericalPosition {
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
+export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 
-const InteractionPromptStrategy:
+export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
       WHEN_FOCUSED: 'when-focused',
       NONE: 'none'
     };
 
-const InteractionPolicy: {[index: string]: InteractionPolicy} = {
+export const InteractionPromptStyle:
+    {[index: string]: InteractionPromptStyle} = {
+      BASIC: 'basic',
+      WIGGLE: 'wiggle'
+    };
+
+export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   ALWAYS_ALLOW: 'always-allow',
   WHEN_FOCUSED: 'allow-when-focused'
 };
@@ -89,8 +96,8 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
     keywords: {auto: [null, null, null]}
   };
 };
-const OFFSET_ROTATION_MULTIPLIER = 5;
 
+const OFFSET_ROTATION_MULTIPLIER = 5;
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
@@ -106,6 +113,7 @@ export const INTERACTION_PROMPT =
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
+export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 const $framedFieldOfView = Symbol('framedFieldOfView');
 
@@ -125,6 +133,8 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 const $promptElementVisible = Symbol('promptElementVisible');
+const $lastPromptOffset = Symbol('lastPromptOffste');
+const $focusedTime = Symbol('focusedTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
@@ -139,6 +149,7 @@ export interface ControlsInterface {
   cameraTarget: string;
   fieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
+  interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
@@ -182,6 +193,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
 
+    @property({type: String, attribute: 'interaction-prompt-style'})
+    interactionPromptStyle: InteractionPromptStyle =
+        InteractionPromptStyle.WIGGLE;
+
     @property({type: String, attribute: 'interaction-prompt'})
     interactionPrompt: InteractionPromptStrategy =
         InteractionPromptStrategy.AUTO;
@@ -190,8 +205,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
     protected[$promptElement] =
-        this.shadowRoot!.querySelector('.controls-prompt')!;
+        this.shadowRoot!.querySelector('.interaction-prompt')!;
+    protected[$promptAnimatedContainer] = this.shadowRoot!.querySelector(
+        '.interaction-prompt > .animated-container')!;
 
+    protected[$focusedTime] = Infinity;
+    protected[$lastPromptOffset] = 0;
     protected[$promptElementVisible] = false;
     protected[$userPromptedOnce] = false;
     protected[$waitingToPromptUser] = false;
@@ -264,21 +283,26 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (changedProperties.has('interactionPrompt')) {
+      if (changedProperties.has('interactionPrompt') ||
+          changedProperties.has('cameraControls') ||
+          changedProperties.has('src')) {
         if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
             this.cameraControls) {
           this[$waitingToPromptUser] = true;
+        } else {
+          this[$deferInteractionPrompt]();
         }
+      }
+
+      if (changedProperties.has('interactionPromptStyle')) {
+        this[$promptElement].classList.toggle(
+            'wiggle',
+            this.interactionPromptStyle === InteractionPromptStyle.WIGGLE);
       }
 
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
         controls.applyOptions({interactionPolicy});
-      }
-
-      if (changedProperties.has('src')) {
-        this[$deferInteractionPrompt]();
-        this[$waitingToPromptUser] = true;
       }
 
       if (this[$jumpCamera] === true) {
@@ -309,8 +333,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (this[$waitingToPromptUser] &&
           this.interactionPrompt !== InteractionPromptStrategy.NONE) {
+        const thresholdTime =
+            this.interactionPrompt === InteractionPromptStrategy.AUTO ?
+            this[$loadedTime] :
+            this[$focusedTime];
         if (this.loaded &&
-            time > this[$loadedTime] + this.interactionPromptThreshold) {
+            time > thresholdTime + this.interactionPromptThreshold) {
           this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
 
           // NOTE(cdata): After notifying users that the controls are
@@ -326,26 +354,23 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (this[$promptElementVisible]) {
-        const {
-          left: modelViewerLeft,
-        } = this[$scene].getOffset();
-        const {
-          width: modelViewerWidth,
-        } = this[$scene].getSize();
-        const {
-          left: promptLeft,
-          width: promptWidth,
-        } = this[$promptElement].getBoundingClientRect();
+      if (this[$promptElementVisible] &&
+          this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
+        const transformString =
+            self.getComputedStyle(this[$promptAnimatedContainer])
+                .getPropertyValue('transform');
+        // Parse the fifth term of computed transform style
+        // which is in form of matrix(n0, n1, n2, n3, n4, n5)
+        // @see https://www.w3.org/TR/css-transforms-1/#serialization-of-the-computed-value
+        const offset = parseFloat(transformString.split(',')[4]);
+        const delta = offset - this[$lastPromptOffset];
 
-        const modelViewerCenter = modelViewerLeft + (modelViewerWidth / 2);
-        const promptCenter = promptLeft + (promptWidth / 2);
-        const promptOffsetRelative =
-            (promptCenter - modelViewerCenter) / modelViewerWidth;
-
-        this[$scene].pivot.rotation.y =
-            promptOffsetRelative * OFFSET_ROTATION_MULTIPLIER;
-        this[$needsRender]();
+        if (isFinite(offset)) {
+          this[$lastPromptOffset] = offset;
+          this[$scene].pivot.rotation.y +=
+              delta / this[$scene].width * OFFSET_ROTATION_MULTIPLIER;
+          this[$needsRender]();
+        }
       }
 
       this[$controls].update(time, delta);
@@ -462,6 +487,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onFocus]() {
       const {canvas} = (this as any)[$scene];
 
+      if (!isFinite(this[$focusedTime])) {
+        this[$focusedTime] = performance.now();
+      }
+
       // NOTE(cdata): On every re-focus, we switch the aria-label back to
       // the original, non-prompt label if appropriate. If the user has
       // already interacted, they no longer need to hear the prompt.
@@ -486,6 +515,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
       this[$promptElementVisible] = false;
+      this[$focusedTime] = Infinity;
     }
 
     [$onChange]({source}: ChangeEvent) {

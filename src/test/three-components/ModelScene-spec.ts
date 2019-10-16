@@ -46,8 +46,6 @@ suite('ModelScene', () => {
       canvas: element[$canvas],
       width: 200,
       height: 100,
-      left: 0,
-      top: 0,
       renderer,
     });
   });
@@ -58,14 +56,6 @@ suite('ModelScene', () => {
       scene.addEventListener('model-load', () => fired = true);
       await scene.setModelSource(assetPath('Astronaut.glb'));
       expect(fired).to.be.ok;
-    });
-  });
-
-  suite('setOffset', () => {
-    test('offset set correctly', async function() {
-      scene.setOffset(100, 50);
-      expect(scene.left).to.be.equal(100);
-      expect(scene.top).to.be.equal(50);
     });
   });
 

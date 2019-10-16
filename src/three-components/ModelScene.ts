@@ -33,8 +33,6 @@ export interface ModelSceneConfig {
   canvas: HTMLCanvasElement;
   width: number;
   height: number;
-  left: number;
-  top: number;
   renderer: Renderer;
 }
 
@@ -63,8 +61,6 @@ export default class ModelScene extends Scene {
   public pivotCenter: Vector3;
   public width = 1;
   public height = 1;
-  public left = 0;
-  public top = 0;
   public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
@@ -77,7 +73,7 @@ export default class ModelScene extends Scene {
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
-  constructor({canvas, element, width, height, left, top, renderer}: ModelSceneConfig) {
+  constructor({canvas, element, width, height, renderer}: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
@@ -106,7 +102,6 @@ export default class ModelScene extends Scene {
     this.pivot.add(this.model);
 
     this.setSize(width, height);
-    this.setOffset(left, top);
     this.background = new Color(0xffffff);
 
     this.model.addEventListener(
@@ -176,23 +171,6 @@ export default class ModelScene extends Scene {
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  /**
-   * Receives and records the left and top offset of the 2D canvas element
-   */
-  setOffset(left: number, top: number) {
-    if (left !== this.left || top !== this.top) {
-      this.left = left;
-      this.top = top;
-    }
-  }
-
-  /**
-   * Returns the offset of the corresponding canvas element.
-   */
-  getOffset(): {left: number, top: number} {
-    return {left: this.left, top: this.top};
   }
 
   resetModelPose() {
