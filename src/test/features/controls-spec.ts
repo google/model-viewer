@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {IS_IE11} from '../../constants.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
@@ -193,6 +194,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
       });
 
+      test('changes FOV basis when aspect ratio changes', async () => {
+        const fov = element.getFieldOfView();
+        element.setAttribute('style', 'width: 200px; height: 300px');
+
+        await until(() => element.getFieldOfView() !== fov);
+        expect(element.getFieldOfView()).to.be.greaterThan(fov);
+      });
+
       test('causes camera-change event to fire', async () => {
         const cameraChangeDispatches = waitForEvent(element, 'camera-change');
         const cameraOrbit = element.getCameraOrbit();
@@ -361,6 +370,38 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
+
+        test('plays the css animation when threshold elapses', async () => {
+          element.interactionPrompt = 'auto';
+
+          const computedStyle =
+              getComputedStyle((element as any)[$promptAnimatedContainer]);
+          expect(computedStyle.animationPlayState)
+              .to.be.match(/^paused(\, paused)?$/);
+
+          await timePasses(element.interactionPromptThreshold + 100);
+          expect(computedStyle.animationPlayState)
+              .to.be.match(/^running(\, running)?$/);
+        });
+
+        test('has a css animation', () => {
+          const computedStyle =
+              getComputedStyle((element as any)[$promptAnimatedContainer]);
+          expect(computedStyle.animationName).to.not.be.equal('none');
+        });
+
+        suite('when configured to be basic', () => {
+          setup(async () => {
+            element.interactionPromptStyle = 'basic';
+            await timePasses();
+          });
+
+          test('does not have a css animation', () => {
+            const computedStyle =
+                getComputedStyle((element as any)[$promptAnimatedContainer]);
+            expect(computedStyle.animationName).to.be.equal('none');
+          });
+        });
       });
 
       suite('a11y', () => {
@@ -409,6 +450,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           test(
               'does not prompt users to interact before a model is loaded',
               async () => {
+                if (IS_IE11) {
+                  console.warn('Skipping this test for IE11 only');
+                  return;
+                }
                 element.src = null;
 
                 const canvas: HTMLCanvasElement = element[$scene].canvas;
@@ -427,7 +472,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 canvas.blur();
 
                 element.src = ASTRONAUT_GLB_PATH;
-
                 await waitForEvent(element, 'load');
 
                 canvas.focus();
