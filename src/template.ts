@@ -165,7 +165,28 @@ template.innerHTML = `
       transform: translateY(-100%);
     }
 
-    .slot.controls-prompt {
+    @keyframes wiggle {
+      10%, 12% {
+        transform: translateX(-5%);
+      }
+      30%, 32% {
+        transform: translateX(5%);
+      }
+      0%, 45%, 100% {
+        transform: translateX(0%);
+      }
+    }
+
+    @keyframes fade {
+      5%, 40% {
+        opacity: 1;
+      }
+      0%, 45%, 100% {
+        opacity: 0;
+      }
+    }
+
+    .slot.interaction-prompt {
       display: var(--interaction-prompt-display, flex);
       position: absolute;
       top: 0;
@@ -175,23 +196,39 @@ template.innerHTML = `
       pointer-events: none;
       align-items: center;
       justify-content: center;
+
       opacity: 0;
-      transform-origin: center center;
-      transform: scale(0.9);
-      transition: transform 0.3s, opacity 0.3s;
+      overflow: hidden;
+      transition: opacity 0.3s;
     }
 
-    .slot.controls-prompt > * {
-      pointer-events: none;
-    }
-
-    .slot.controls-prompt svg {
-      transform: scale(0.5);
-    }
-
-    .slot.controls-prompt.visible {
+    .slot.interaction-prompt.visible {
       opacity: 1;
-      transform: scale(1);
+    }
+
+    .slot.interaction-prompt > .animated-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slot.interaction-prompt.wiggle > .animated-container {
+      animation-name: wiggle, fade;
+      animation-duration: 6s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+      animation-play-state: paused;
+    }
+
+    .slot.interaction-prompt.wiggle.visible > .animated-container {
+      animation-play-state: running;
+    }
+
+    .slot.interaction-prompt > * {
+      pointer-events: none;
     }
 
     .slot.ar-button {
@@ -294,10 +331,12 @@ template.innerHTML = `
       </slot>
     </div>
 
-    <div class="slot controls-prompt">
-      <slot name="controls-prompt" aria-hidden="true">
-        ${ControlsPrompt}
-      </slot>
+    <div class="slot interaction-prompt">
+      <div class="animated-container">
+        <slot name="interaction-prompt" aria-hidden="true">
+          ${ControlsPrompt}
+        </slot>
+      </div>
     </div>
 
     <div class="slot default">
