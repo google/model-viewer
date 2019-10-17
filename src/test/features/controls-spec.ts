@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -362,7 +363,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.be.equal(false);
         });
 
-        test('plays css animation only when visible', async () => {
+        test('plays the css animation when threshold elapses', async () => {
           element.interactionPrompt = 'auto';
 
           const computedStyle =
@@ -441,6 +442,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           test(
               'does not prompt users to interact before a model is loaded',
               async () => {
+                if (IS_IE11) {
+                  console.warn('Skipping this test for IE11 only');
+                  return;
+                }
                 element.src = null;
 
                 const canvas: HTMLCanvasElement = element[$scene].canvas;
@@ -458,9 +463,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
                 canvas.blur();
 
-                const modelLoads = waitForEvent(element, 'load');
                 element.src = ASTRONAUT_GLB_PATH;
-                await modelLoads;
+                await waitForEvent(element, 'load');
 
                 canvas.focus();
 
