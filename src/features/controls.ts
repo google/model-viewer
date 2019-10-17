@@ -54,9 +54,12 @@ export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
 
-export const fieldOfViewIntrinsics = {
-  basis: [numberNode(DEFAULT_FOV_DEG * Math.PI / 180, 'rad')],
-  keywords: {auto: [null]}
+export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
+  return {
+    basis: [numberNode(
+        (element as any)[$zoomAdjustedFieldOfView] * Math.PI / 180, 'rad')],
+    keywords: {auto: [null]}
+  };
 };
 
 export const cameraOrbitIntrinsics = (() => {
@@ -125,6 +128,7 @@ const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
 
+const $zoomAdjustedFieldOfView = Symbol('zoomAdjustedFieldOfView');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 
@@ -199,6 +203,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
     protected[$framedFieldOfView]: number|null = null;
+    protected[$zoomAdjustedFieldOfView]: number = DEFAULT_FOV_DEG;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -385,7 +390,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const maximumFieldOfView = this[$framedFieldOfView]!;
         controls.applyOptions({maximumFieldOfView});
-        controls.setFieldOfView(zoom * this[$framedFieldOfView]!);
+        // TODO(#835): Move computation of this value to Model or ModelScene
+        this[$zoomAdjustedFieldOfView] = this[$framedFieldOfView]! * zoom;
+        this.requestUpdate('fieldOfView', this.fieldOfView);
       }
 
       controls.jumpToGoal();
@@ -454,7 +461,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$onModelLoad](event);
       this[$updateCamera]();
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
-      this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this[$controls].jumpToGoal();
     }

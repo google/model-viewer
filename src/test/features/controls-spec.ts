@@ -193,6 +193,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
       });
 
+      test('changes FOV basis when aspect ratio changes', async () => {
+        const fov = element.getFieldOfView();
+        element.setAttribute('style', 'width: 200px; height: 300px');
+
+        await until(() => element.getFieldOfView() !== fov);
+        expect(element.getFieldOfView()).to.be.greaterThan(fov);
+      });
+
       test('causes camera-change event to fire', async () => {
         const cameraChangeDispatches = waitForEvent(element, 'camera-change');
         const cameraOrbit = element.getCameraOrbit();
