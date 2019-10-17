@@ -196,13 +196,20 @@ export default class ModelScene extends Scene {
   /**
    * Sets the rotation of the model's pivot, around its pivotCenter point.
    */
-  setRotation(radiansY: number) {
+  setPivotRotation(radiansY: number) {
     this.pivot.rotation.y = radiansY;
     this.pivot.position.x = -this.pivotCenter.x;
     this.pivot.position.z = -this.pivotCenter.z;
     this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
     this.pivot.position.x += this.pivotCenter.x;
     this.pivot.position.z += this.pivotCenter.z;
+  }
+
+  /**
+   * Gets the current rotation value of the pivot
+   */
+  getPivotRotation(): number {
+    return this.pivot.rotation.y;
   }
 
   /**
@@ -226,14 +233,14 @@ export default class ModelScene extends Scene {
     // capture is unrotated so it can be freely rotated when applied
     // as a texture.
     const currentRotation = this.pivot.rotation.y;
-    this.setRotation(0);
+    this.setPivotRotation(0);
 
     this.shadow.render(this.renderer.renderer, this);
 
     // Lazily add the shadow so we're only displaying it once it has
     // a generated texture.
     this.pivot.add(this.shadow);
-    this.setRotation(currentRotation);
+    this.setPivotRotation(currentRotation);
   }
 
   createSkyboxMesh(): Mesh {

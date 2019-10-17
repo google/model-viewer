@@ -323,9 +323,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
+      const scene = this[$scene];
       this[$controls].setTarget(x, y, z);
-      this[$scene].pivotCenter.set(x, y, z);
-      this[$scene].setRotation(this[$scene].pivot.rotation.y);
+      // TODO(#837): Mutating scene.pivotCenter should automatically adjust
+      // pivot rotation
+      scene.pivotCenter.set(x, y, z);
+      scene.setPivotRotation(scene.getPivotRotation());
     }
 
     [$tick](time: number, delta: number) {
@@ -366,9 +369,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const delta = offset - this[$lastPromptOffset];
 
         if (isFinite(offset)) {
+          const scene = this[$scene];
+
           this[$lastPromptOffset] = offset;
-          this[$scene].pivot.rotation.y +=
-              delta / this[$scene].width * OFFSET_ROTATION_MULTIPLIER;
+          scene.setPivotRotation(
+              scene.getPivotRotation() +
+              delta / scene.width * OFFSET_ROTATION_MULTIPLIER);
           this[$needsRender]();
         }
       }
@@ -377,7 +383,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const target = this.getCameraTarget();
       if (!this[$scene].pivotCenter.equals(target)) {
         this[$scene].pivotCenter.copy(target);
-        this[$scene].setRotation(this[$scene].pivot.rotation.y);
+        this[$scene].setPivotRotation(this[$scene].getPivotRotation());
       }
     }
 
