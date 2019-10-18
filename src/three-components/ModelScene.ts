@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, CameraHelper, Color, Event as ThreeEvent, MeshStandardMaterial, Object3D, PerspectiveCamera, PlaneBufferGeometry, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 import {Mesh} from 'three';
+import {DirectionalLight} from 'three';
 
-import ModelViewerElementBase from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model from './Model.js';
 import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import StaticShadow from './StaticShadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -56,7 +56,8 @@ export default class ModelScene extends Scene {
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
-  public shadow: StaticShadow;
+  // public shadow: StaticShadow;
+  public shadowLight: DirectionalLight;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -84,7 +85,7 @@ export default class ModelScene extends Scene {
     this.renderer = renderer;
 
     this.model = new Model();
-    this.shadow = new StaticShadow();
+    // this.shadow = new StaticShadow();
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -100,6 +101,7 @@ export default class ModelScene extends Scene {
 
     this.add(this.pivot);
     this.pivot.add(this.model);
+    this.shadowLight = new DirectionalLight;
 
     this.setSize(width, height);
     this.background = new Color(0xffffff);
@@ -203,6 +205,8 @@ export default class ModelScene extends Scene {
     this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
     this.pivot.position.x += this.pivotCenter.x;
     this.pivot.position.z += this.pivotCenter.z;
+    this.shadowLight.shadow.camera.up.set(
+        Math.sin(radiansY), 0, Math.cos(radiansY));
   }
 
   /**
@@ -216,31 +220,52 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.updateStaticShadow();
+    this.updateShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
-  /**
-   * Called to update the shadow rendering when the model changes.
-   */
-  updateStaticShadow() {
-    if (!this.model.hasModel() || this.model.size.length() === 0) {
-      this.pivot.remove(this.shadow);
-      return;
+  updateShadow() {
+    const {boundingBox, size} = this.model;
+    // Nothing within shadowOffset of the bottom of the model casts a shadow
+    // (this is to avoid having a baked-in shadow plane cast its own shadow).
+    const shadowOffset = size.y * 0.002;
+
+    this.shadowLight.position.y = boundingBox.max.y + shadowOffset;
+    this.shadowLight.up.set(0, 0, 1);
+    const {camera} = this.shadowLight.shadow;
+    camera.left = boundingBox.min.x;
+    camera.right = boundingBox.max.x;
+    camera.bottom = boundingBox.min.z;
+    camera.top = boundingBox.max.z;
+    camera.near = 0;
+    camera.far = size.y + 2 * shadowOffset;
+    this.shadowLight.updateMatrixWorld();
+    this.add(this.shadowLight);
+
+    const planeGeometry = new PlaneBufferGeometry(size.x, size.z);
+    const planeMaterial = new MeshStandardMaterial({color: 0xffffff});
+    const plane = new Mesh(planeGeometry, planeMaterial);
+    plane.rotateX(-Math.PI / 2);
+    boundingBox.getCenter(plane.position);
+    plane.position.y -= size.y / 2;
+    plane.receiveShadow = true;
+    plane.castShadow = false;
+    this.pivot.add(plane);
+    const helper = new CameraHelper(this.shadowLight.shadow.camera);
+    this.add(helper);
+
+    (this.shadowLight.shadow as any).updateMatrices(this.shadowLight);
+    this.renderer.renderer.shadowMap.needsUpdate = true;
+    this.element[$needsRender]();
+  }
+
+  setShadowIntensity(intensity: number) {
+    this.shadowLight.intensity = intensity;
+    if (intensity > 0) {
+      this.shadowLight.castShadow = true;
+    } else {
+      this.shadowLight.castShadow = false;
     }
-
-    // Remove and cache the current pivot rotation so that the shadow's
-    // capture is unrotated so it can be freely rotated when applied
-    // as a texture.
-    const currentRotation = this.pivot.rotation.y;
-    this.setPivotRotation(0);
-
-    this.shadow.render(this.renderer.renderer, this);
-
-    // Lazily add the shadow so we're only displaying it once it has
-    // a generated texture.
-    this.pivot.add(this.shadow);
-    this.setPivotRotation(currentRotation);
   }
 
   createSkyboxMesh(): Mesh {

@@ -180,7 +180,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     private[$updateShadow]() {
-      this[$scene].shadow.intensity = this.shadowIntensity;
+      this[$scene].setShadowIntensity(this.shadowIntensity);
       this[$needsRender]();
     }
 

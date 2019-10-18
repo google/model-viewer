@@ -32,11 +32,12 @@ const DEFAULT_CONFIG: ShadowGenerationConfig = {
   textureHeight: 512,
 };
 
-const shadowGeneratorMaterial = new MeshBasicMaterial({
-  color: 0x000000,
-});
+// const shadowGeneratorMaterial = new MeshBasicMaterial({
+//   color: 0x000000,
+// });
 
 const shadowTextureMaterial = new MeshBasicMaterial({
+  color: 0x000000,
   transparent: true,
   opacity: BASE_SHADOW_OPACITY,
 });
@@ -93,7 +94,7 @@ export default class StaticShadow extends Mesh {
   render(
       renderer: WebGLRenderer, scene: ModelScene,
       config: ShadowGenerationConfig = {}) {
-    const userSceneOverrideMaterial = scene.overrideMaterial;
+    // const userSceneOverrideMaterial = scene.overrideMaterial;
     const userSceneBackground = scene.background;
     const userClearAlpha = renderer.getClearAlpha();
     const userRenderTarget = renderer.getRenderTarget();
@@ -102,7 +103,7 @@ export default class StaticShadow extends Mesh {
     config = Object.assign({}, config, DEFAULT_CONFIG);
 
     renderer.setClearAlpha(0);
-    scene.overrideMaterial = shadowGeneratorMaterial;
+    // scene.overrideMaterial = shadowGeneratorMaterial;
     scene.background = null;
 
     // Update render target size if necessary
@@ -141,7 +142,7 @@ export default class StaticShadow extends Mesh {
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;
-    // temporarily remove it incase.
+    // temporarily remove it in case.
     if (shadowParent) {
       shadowParent.remove(this);
     }
@@ -157,7 +158,7 @@ export default class StaticShadow extends Mesh {
     (this.material as any).needsUpdate = true;
 
     // Reset the values on the renderer and scene
-    scene.overrideMaterial = userSceneOverrideMaterial;
+    // scene.overrideMaterial = userSceneOverrideMaterial;
     scene.background = userSceneBackground;
     renderer.setClearAlpha(userClearAlpha);
     renderer.setRenderTarget(userRenderTarget);
