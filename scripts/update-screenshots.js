@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+require = require('esm')(module);
+const {ConfigReader} = require('../lib/test/fidelity/config-reader.js');
 
 const fs = require('fs').promises;
 const {spawn} = require('child_process');
@@ -76,8 +79,12 @@ const updateScreenshots = async (config) => {
     // Ignored...
   }
 
-  for (const scenario of scenarios) {
-    const {name: scenarioName, model, lighting, dimensions, exclude} = scenario;
+  const configReader = new ConfigReader(config);
+
+  for (const scenarioBase of scenarios) {
+    const scenarioName = scenarioBase.name;
+    const scenario = configReader.scenarioConfig(scenarioName);
+    const {model, lighting, dimensions, exclude} = scenario;
     const scenarioGoldensDirectory = path.join(goldensDirectory, scenarioName);
     const {width, height} = dimensions;
 

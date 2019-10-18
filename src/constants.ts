@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,21 +17,16 @@
 // the appropriate flags. However, just because we have the API does not
 // guarantee that AR will work.
 export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
-    self.XRSession != null && self.XRDevice != null &&
-    self.XRDevice.prototype.supportsSession != null;
+    self.XRSession != null && navigator.xr.supportsSession != null;
 
 export const HAS_WEBXR_HIT_TEST_API =
     HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTest;
-
-export const HAS_FULLSCREEN_API = document.documentElement != null &&
-    document.documentElement.requestFullscreen != null;
 
 export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
 export const HAS_INTERSECTION_OBSERVER = self.IntersectionObserver != null;
 
-export const IS_WEBXR_AR_CANDIDATE =
-    HAS_WEBXR_HIT_TEST_API && HAS_FULLSCREEN_API;
+export const IS_WEBXR_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API;
 
 export const IS_MOBILE = (() => {
   const userAgent =
@@ -54,8 +49,20 @@ export const OFFSCREEN_CANVAS_SUPPORT_BITMAP =
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
+// Prior to iOS 13, detecting iOS Safari was relatively straight-forward.
+// As of iOS 13, Safari on iPad (in its default configuration) reports the same
+// user-agent string as Safari on desktop MacOS. Strictly speaking, we only care
+// about iOS for the purposes if selecting for cases where Quick Look is known
+// to be supported. However, for API correctness purposes, we must rely on
+// known, detectable signals to distinguish iOS Safari from MacOS Safari. At the
+// time of this writing, there are no non-iOS/iPadOS Apple devices with
+// multi-touch displays.
+// @see https://stackoverflow.com/questions/57765958/how-to-detect-ipad-and-ipad-os-version-in-ios-13-and-up
+// @see https://forums.developer.apple.com/thread/119186
+// @see https://github.com/GoogleWebComponents/model-viewer/issues/758
 export const IS_IOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream;
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
   const tempAnchor = document.createElement('a');

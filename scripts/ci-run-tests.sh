@@ -20,9 +20,9 @@ set -x
 
 if [ "${TEST_TYPE}" = "unit" ]; then
 
-  xvfb-run npm run test
+  npm run test
 
-  if  [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" != "master" ]; then
+  if  [[ "${TRAVIS_PULL_REQUEST}" = "false" && "${TRAVIS_BRANCH}" != "master" ]]; then
     ./scripts/run-sauce-tests.sh;
   fi
 fi

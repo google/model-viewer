@@ -1,5 +1,5 @@
-/*
- * Copyright 2019 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,13 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
+import {Event as ThreeEvent} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import ModelScene from './three-components/ModelScene.js';
-import Renderer from './three-components/Renderer.js';
+import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -40,9 +41,12 @@ const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $lastDpr = Symbol('lastDpr');
 const $clearModelTimeout = Symbol('clearModelTimeout');
+const $onContextLost = Symbol('onContextLost');
+const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
+export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
@@ -55,6 +59,8 @@ export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
+export const $getLoaded = Symbol('getLoaded');
+export const $getModelIsVisible = Symbol('getModelIsVisible');
 
 /**
  * Definition for a basic <model-viewer> element.
@@ -71,6 +77,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return 'model-viewer';
   }
 
+  /** @nocollapse */
   static get template() {
     if (!this.hasOwnProperty($template)) {
       this[$template] = makeTemplate(this.is);
@@ -93,6 +100,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   src: string|null = null;
 
   protected[$loaded]: boolean = false;
+  protected[$loadedTime]: number = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
@@ -110,8 +118,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
 
+  protected[$contextLostHandler] = (event: ContextLostEvent) =>
+      this[$onContextLost](event);
+
   get loaded() {
-    return this[$loaded];
+    return this[$getLoaded]();
   }
 
   get[$renderer]() {
@@ -119,7 +130,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get modelIsVisible() {
-    return true;
+    return this[$getModelIsVisible]();
   }
 
   /**
@@ -170,7 +181,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$markLoaded]();
       this[$onModelLoad](event);
 
-      this.dispatchEvent(new CustomEvent('load', {detail: {url: event.url}}));
+      this.dispatchEvent(
+          new CustomEvent('load', {detail: {url: (event as any).url}}));
     });
 
     // Update initial size on microtask timing so that subclasses have a
@@ -203,6 +215,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         for (let entry of entries) {
           if (entry.target === this) {
             this[$scene].isVisible = entry.isIntersecting;
+            this.requestUpdate();
           }
         }
       }, {
@@ -229,6 +242,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
+    this[$renderer].addEventListener(
+        'contextlost',
+        this[$contextLostHandler] as (event: ThreeEvent) => void);
+
     this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
 
@@ -253,6 +270,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
+    this[$renderer].removeEventListener(
+        'contextlost',
+        this[$contextLostHandler] as (event: ThreeEvent) => void);
+
     this[$renderer].unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
@@ -267,8 +288,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // of a microtask, LitElement/UpdatingElement will notify of a change even
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
-    if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
+    if (changedProperties.has('src') &&
+        (this.src == null || this.src !== this[$scene].model.url)) {
       this[$loaded] = false;
+      this[$loadedTime] = 0;
       (async () => {
         const updateSourceProgress = this[$progressTracker].beginActivity();
         await this[$updateSource](
@@ -290,6 +313,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
   get[$ariaLabel]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
                                                        this.alt;
+  }
+
+  // NOTE(cdata): Although this may seem extremely redundant, it is required in
+  // order to support overloading when TypeScript is compiled to ES5
+  // @see https://github.com/Polymer/lit-element/pull/745
+  // @see https://github.com/microsoft/TypeScript/issues/338
+  [$getLoaded](): boolean {
+    return this[$loaded];
+  }
+
+  // @see [$getLoaded]
+  [$getModelIsVisible](): boolean {
+    return true;
   }
 
   /**
@@ -330,6 +366,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     this[$loaded] = true;
+    this[$loadedTime] = performance.now();
     // Asynchronously invoke `update`:
     this.requestUpdate();
   }
@@ -345,6 +382,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
     this[$needsRender]();
+  }
+
+  [$onContextLost](event: ContextLostEvent) {
+    this.dispatchEvent(new CustomEvent(
+        'error',
+        {detail: {type: 'webglcontextlost', sourceError: event.attachment}}));
   }
 
   /**

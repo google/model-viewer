@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,14 @@
 
 import {Dimensions, ImageComparisonConfig, RendererConfig, ScenarioConfig} from './common.js';
 
+const defaultScenario = {
+  lighting: '../../../../examples/assets/lightroom_14b.hdr',
+  dimensions: {width: 768, height: 768},
+  target: {x: 0, y: 0, z: 0},
+  orbit: {theta: 0, phi: 90, radius: 1},
+  verticalFoV: 45
+};
+
 export class ConfigReader {
   constructor(readonly config: ImageComparisonConfig) {
   }
@@ -24,7 +32,15 @@ export class ConfigReader {
 
     for (const scenario of scenarios) {
       if (scenario.name === name) {
-        return scenario;
+        const output = Object.assign({}, defaultScenario, scenario);
+
+        // This is necessary because Object.assign is not deep
+        output.dimensions =
+            Object.assign({}, defaultScenario.dimensions, scenario.dimensions);
+        output.target =
+            Object.assign({}, defaultScenario.target, scenario.target);
+        output.orbit = Object.assign({}, defaultScenario.orbit, scenario.orbit);
+        return output;
       }
     }
 

@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Bone, Camera, Material, Object3D, Scene, Shader, Skeleton, SkinnedMesh} from 'three';
+import {Camera, Material, Object3D, Scene, Shader, Vector3} from 'three';
+import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js';
-import {lightsChunk} from './shader-chunk/lights_fragment_maps.glsl.js';
 import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
@@ -32,14 +31,6 @@ export interface Gltf {
   userData: any;
 }
 
-type SkinnedMeshMap = {
-  [index: string]: SkinnedMesh
-};
-
-type BoneMap = {
-  [index: string]: Bone
-};
-
 /**
  * This is a patch to Three.js' handling of PMREM environments. This patch
  * has to be applied after cloning because Three.js does not seem to clone
@@ -49,20 +40,10 @@ const updateShader = (shader: Shader) => {
   shader.fragmentShader =
       shader.fragmentShader
           .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-          .replace('#include <envmap_physical_pars_fragment>', envmapChunk)
-          .replace('#include <lights_fragment_maps>', lightsChunk)
           .replace('#include <normalmap_pars_fragment>', normalmapChunk);
 };
 
-/**
- * Creates a clone of the given material, and applies a patch to the
- * shader program.
- */
-const cloneAndPatchMaterial = (material: Material): Material => {
-  const clone = material.clone();
-  clone.onBeforeCompile = updateShader;
-  return clone;
-};
+
 
 /**
  * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
@@ -76,29 +57,34 @@ const cloneAndPatchMaterial = (material: Material): Material => {
  */
 export const cloneGltf = (gltf: Gltf): Gltf => {
   const hasScene = gltf.scene != null;
-  const clone:
-      Gltf = {...gltf, scene: hasScene ? gltf.scene!.clone(true) : null};
-
-  const skinnedMeshes: SkinnedMeshMap = {};
-  let hasSkinnedMeshes = false;
-
-  if (hasScene) {
-    gltf.scene!.traverse((node: any) => {
-      if (node.isSkinnedMesh) {
-        hasSkinnedMeshes = true;
-        skinnedMeshes[node.name] = node as SkinnedMesh;
-      }
-    });
-  }
-
-  const cloneBones: BoneMap = {};
-  const cloneSkinnedMeshes: SkinnedMeshMap = {};
+  const clone: Gltf = {
+    ...gltf,
+    scene: hasScene ? SkeletonUtils.clone(gltf.scene!) as Scene : null
+  };
 
   if (hasScene) {
+    const specularGlossiness =
+        gltf.parser.extensions['KHR_materials_pbrSpecularGlossiness'];
+    /**
+     * Creates a clone of the given material, and applies a patch to the
+     * shader program.
+     */
+    const cloneAndPatchMaterial = (material: Material): Material => {
+      const clone = (material as any).isGLTFSpecularGlossinessMaterial ?
+          specularGlossiness.cloneMaterial(material) :
+          material.clone();
+      clone.onBeforeCompile = updateShader;
+      return clone;
+    };
+
     clone.scene!.traverse((node: any) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
       node.renderOrder = 1000;
+
+      if (specularGlossiness != null && node.isMesh) {
+        node.onBeforeRender = specularGlossiness.refreshUniforms;
+      }
 
       // Materials aren't cloned when cloning meshes; geometry
       // and materials are copied by reference. This is necessary
@@ -109,34 +95,7 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
       } else if (node.material != null) {
         node.material = cloneAndPatchMaterial(node.material);
       }
-
-      if (hasSkinnedMeshes) {
-        if (node.isBone) {
-          cloneBones[node.name] = node as Bone;
-        }
-
-        if (node.isSkinnedMesh) {
-          cloneSkinnedMeshes[node.name] = node as SkinnedMesh;
-        }
-      }
     });
-  }
-
-  for (let name in skinnedMeshes) {
-    const skinnedMesh = skinnedMeshes[name];
-    const skeleton = skinnedMesh.skeleton;
-    const cloneSkinnedMesh = cloneSkinnedMeshes[name];
-
-    const orderedCloneBones: Array<Bone> = [];
-
-    for (let i = 0; i < skeleton.bones.length; ++i) {
-      const cloneBone = cloneBones[skeleton.bones[i].name];
-      orderedCloneBones.push(cloneBone);
-    }
-
-    cloneSkinnedMesh.bind(
-        new Skeleton(orderedCloneBones, skeleton.boneInverses),
-        cloneSkinnedMesh.matrixWorld);
   }
 
   return clone;
@@ -150,3 +109,50 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
     to.add(from.children.shift()!);
   }
 };
+
+/**
+ * Performs a reduction across all the vertices of the input model and all its
+ * children. The supplied function takes the reduced value and a vertex and
+ * returns the newly reduced value. The value is initialized as zero.
+ *
+ * Adapted from Three.js, @see https://github.com/mrdoob/three.js/blob/7e0a78beb9317e580d7fa4da9b5b12be051c6feb/src/math/Box3.js#L241
+ */
+export const reduceVertices =
+    (model: Object3D, func: (value: number, vertex: Vector3) => number):
+        number => {
+          let value = 0;
+          const vector = new Vector3();
+          model.traverse((object: any) => {
+            let i, l;
+
+            object.updateWorldMatrix(false, false);
+
+            let geometry = object.geometry;
+
+            if (geometry !== undefined) {
+              if (geometry.isGeometry) {
+                let vertices = geometry.vertices;
+
+                for (i = 0, l = vertices.length; i < l; i++) {
+                  vector.copy(vertices[i]);
+                  vector.applyMatrix4(object.matrixWorld);
+
+                  value = func(value, vector);
+                }
+
+              } else if (geometry.isBufferGeometry) {
+                let attribute = geometry.attributes.position;
+
+                if (attribute !== undefined) {
+                  for (i = 0, l = attribute.count; i < l; i++) {
+                    vector.fromBufferAttribute(attribute, i)
+                        .applyMatrix4(object.matrixWorld);
+
+                    value = func(value, vector);
+                  }
+                }
+              }
+            }
+          });
+          return value;
+        };

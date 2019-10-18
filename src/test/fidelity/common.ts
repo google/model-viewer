@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,9 @@ export interface ScenarioConfig {
   model: string;
   lighting: string;
   dimensions: Dimensions;
+  target: {x: number, y: number, z: number};
+  orbit: {theta: number, phi: number, radius: number};
+  verticalFoV: number;
   exclude?: Array<string>;
 }
 

@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-import {DirectionalLight, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, Vector3, WebGLRenderTarget} from 'three';
+import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, RGBAFormat, Vector3, WebGLRenderTarget} from 'three';
 import {WebGLRenderer} from 'three';
+import ModelScene from './ModelScene';
 
 export interface ShadowGenerationConfig {
-  near?: number;
-  far?: number;
   textureWidth?: number;
   textureHeight?: number;
 }
@@ -26,13 +25,9 @@ export interface ShadowGenerationConfig {
 const $camera = Symbol('camera');
 const $renderTarget = Symbol('renderTarget');
 
-const scale = new Vector3();
-
 const BASE_SHADOW_OPACITY = 0.1;
 
 const DEFAULT_CONFIG: ShadowGenerationConfig = {
-  near: 0.01,
-  far: 100,
   textureWidth: 512,
   textureHeight: 512,
 };
@@ -94,18 +89,9 @@ export default class StaticShadow extends Mesh {
    * Updates the generated static shadow. The size of the camera is dependent
    * on the current scale of the StaticShadow that will host the texture.
    * It's expected for the StaticShadow to be facing the light source.
-   *
-   * @param {THREE.WebGLRenderer} renderer
-   * @param {THREE.Scene} scene
-   * @param {THREE.DirectionalLight} light
-   * @param {Object} config
-   * @param {number} config.near
-   * @param {number} config.far
-   * @param {number} config.textureWidth
-   * @param {number} config.textureHeight
    */
   render(
-      renderer: WebGLRenderer, scene: Scene, light: DirectionalLight,
+      renderer: WebGLRenderer, scene: ModelScene,
       config: ShadowGenerationConfig = {}) {
     const userSceneOverrideMaterial = scene.overrideMaterial;
     const userSceneBackground = scene.background;
@@ -125,26 +111,33 @@ export default class StaticShadow extends Mesh {
       this[$renderTarget].setSize(config.textureWidth!, config.textureHeight!);
     }
 
-    // Set the camera to where the light source is,
-    // and facing its target.
-    light.updateMatrixWorld(true);
-    light.target.updateMatrixWorld(true);
+    const {boundingBox, size} = scene.model;
+    const modelCenter = boundingBox.getCenter(new Vector3);
+    // Nothing within shadowOffset of the bottom of the model casts a shadow
+    // (this is to avoid having a baked-in shadow plane cast its own shadow).
+    const shadowOffset = size.y * 0.002;
 
-    this[$camera].position.setFromMatrixPosition(light.matrixWorld);
+    this[$camera].position.x = modelCenter.x;
+    this[$camera].position.z = modelCenter.z;
+    this[$camera].position.y = boundingBox.max.y + shadowOffset;
+
+    this[$camera].lookAt(modelCenter);
     this[$camera].updateMatrixWorld(true);
-    this[$camera].lookAt(light.target.position);
 
-    // Update the camera's frustum to fully engulf the StaticShadow
-    // mesh that will be rendering the generated texture.
-    this.updateMatrixWorld(true);
-    scale.setFromMatrixScale(this.matrixWorld);
+    this.scale.x = size.x;
+    this.scale.z = size.z;
+    this.position.x = modelCenter.x;
+    this.position.z = modelCenter.z;
+    // We keep our shadow from Z-fighting with a baked-in shadow by lowering it
+    // by shadowOffset.
+    this.position.y = boundingBox.min.y - shadowOffset;
 
-    this[$camera].top = scale.z / 2;
-    this[$camera].bottom = scale.z / -2;
-    this[$camera].left = scale.x / -2;
-    this[$camera].right = scale.x / 2;
-    this[$camera].near = config.near!;
-    this[$camera].far = config.far!;
+    this[$camera].top = size.z / 2;
+    this[$camera].bottom = size.z / -2;
+    this[$camera].left = size.x / -2;
+    this[$camera].right = size.x / 2;
+    this[$camera].near = 0;
+    this[$camera].far = size.y;
     this[$camera].updateProjectionMatrix();
 
     // There's a chance the shadow will be in the scene that's being rerendered;

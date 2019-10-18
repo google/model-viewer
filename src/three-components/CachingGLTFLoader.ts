@@ -1,5 +1,5 @@
-/*
- * Copyright 2019 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Mesh, Scene} from 'three';
+import {Mesh, Object3D, Scene} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
@@ -52,6 +52,7 @@ export class CachingGLTFLoader {
     return cache;
   }
 
+  /** @nocollapse */
   static clearCache() {
     cache.forEach((_value, url) => {
       this.delete(url);
@@ -63,6 +64,7 @@ export class CachingGLTFLoader {
     return cache.has(url);
   }
 
+  /** @nocollapse */
   static async delete(url: string) {
     if (!this.has(url)) {
       return;
@@ -133,11 +135,24 @@ export class CachingGLTFLoader {
       Promise<CacheRetainedScene|null> {
     await this.preload(url, progressCallback);
 
-    const gltf = cloneGltf(await cache.get(url)!);
-    const model = gltf.scene ? gltf.scene : null;
+    const gltf = await cache.get(url)!;
+
+    if (gltf.scene != null) {
+      // Animations for objects without names target their UUID instead. When
+      // objects are cloned, they get new UUIDs which the animation can't find.
+      // To fix this, we assign their UUID as their name.
+      gltf.scene.traverse((node: Object3D) => {
+        if (!node.name) {
+          node.name = node.uuid;
+        }
+      });
+    }
+
+    const clone = cloneGltf(gltf);
+    const model = clone.scene ? clone.scene : null;
 
     if (model != null) {
-      model.userData.animations = gltf.animations;  // save animations
+      model.userData.animations = clone.animations;  // save animations
 
       this[$evictionPolicy].retain(url);
 
@@ -173,6 +188,3 @@ export class CachingGLTFLoader {
     return model as CacheRetainedScene | null;
   }
 }
-
-(self as any).CachingGLTFLoader = CachingGLTFLoader;
-(self as any).$evictionPolicy = $evictionPolicy

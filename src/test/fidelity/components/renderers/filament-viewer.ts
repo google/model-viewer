@@ -1,3 +1,18 @@
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {resolveDpr} from '../../../../utilities.js';
@@ -18,11 +33,6 @@ const basepath = (urlString: string): string => {
 
 const IS_BINARY_RE = /\.glb$/;
 
-interface BoundingBox {
-  min: [number, number, number];
-  max: [number, number, number];
-}
-
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $ibl = Symbol('ibl');
@@ -32,7 +42,6 @@ const $renderer = Symbol('renderer');
 const $camera = Symbol('camera');
 const $view = Symbol('view');
 const $canvas = Symbol('canvas');
-const $boundingBox = Symbol('boundingBox');
 const $currentAsset = Symbol('currentAsset');
 
 const $initialize = Symbol('initialize');
@@ -58,7 +67,6 @@ export class FilamentViewer extends LitElement {
   private[$currentAsset]: any = null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
-  private[$boundingBox]: BoundingBox|null = null;
 
   constructor() {
     super();
@@ -109,7 +117,6 @@ export class FilamentViewer extends LitElement {
     this[$view] = this[$engine].createView();
     this[$view].setCamera(this[$camera]);
     this[$view].setScene(this[$scene]);
-    this[$boundingBox] = {min: [-1, -1, -1], max: [1, 1, 1]};
 
     this[$updateSize]();
   }
@@ -155,7 +162,7 @@ export class FilamentViewer extends LitElement {
 
     this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
     this[$scene].setIndirectLight(this[$ibl]);
-    this[$ibl].setIntensity(40000);
+    this[$ibl].setIntensity(1.0);
     this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
     this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
@@ -175,7 +182,6 @@ export class FilamentViewer extends LitElement {
     finalize();
     loader.delete();
 
-    this[$boundingBox] = this[$currentAsset].getBoundingBox() as BoundingBox;
     this[$scene].addEntities(this[$currentAsset].getEntities());
 
     this[$updateSize]();
@@ -211,53 +217,39 @@ export class FilamentViewer extends LitElement {
 
     const Fov = self.Filament.Camera$Fov;
     const canvas = this[$canvas]!;
-    const {scenario} = this;
+    const {dimensions, target, orbit, verticalFoV} = this.scenario;
 
     const dpr = resolveDpr();
-    const width = scenario.dimensions.width * dpr;
-    const height = scenario.dimensions.height * dpr;
+    const width = dimensions.width * dpr;
+    const height = dimensions.height * dpr;
 
     canvas.width = width;
     canvas.height = height;
-    canvas.style.width = `${scenario.dimensions.width}px`;
-    canvas.style.height = `${scenario.dimensions.height}px`;
+    canvas.style.width = `${dimensions.width}px`;
+    canvas.style.height = `${dimensions.height}px`;
 
     this[$view].setViewport([0, 0, width, height]);
 
     const aspect = width / height;
-    const target = [0, 0, 0];
-    const eye = [0, 0, 0];
-    const boundingBox = this[$boundingBox]!;
 
-    for (let i = 0; i < 3; i++) {
-      target[i] = (boundingBox.min[i] + boundingBox.max[i]) / 2.0;
-      eye[i] = target[i];
-    }
+    const center = [target.x, target.y, target.z];
 
-    const boxHalfX = Math.max(
-        Math.abs(boundingBox.min[0] - target[0]),
-        Math.abs(boundingBox.max[0] - target[0]));
-    const boxHalfZ = Math.max(
-        Math.abs(boundingBox.min[2] - target[2]),
-        Math.abs(boundingBox.max[2] - target[2]));
-    const boxHalfY = Math.max(
-        Math.abs(boundingBox.min[1] - target[1]),
-        Math.abs(boundingBox.max[1] - target[1]));
+    const theta = orbit.theta * Math.PI / 180;
+    const phi = orbit.phi * Math.PI / 180;
+    const radiusSinPhi = orbit.radius * Math.sin(phi);
+    const eye = [
+      radiusSinPhi * Math.sin(theta) + target.x,
+      orbit.radius * Math.cos(phi) + target.y,
+      radiusSinPhi * Math.cos(theta) + target.z
+    ];
 
-    const modelDepth = 2 * Math.max(boxHalfX, boxHalfZ);
-    const framedHeight = Math.max(2 * boxHalfY, modelDepth / aspect);
+    const near = orbit.radius / 10.0;
+    const far = orbit.radius * 10.0;
 
-    const fov = 45;
-
-    const framedDistance =
-        (framedHeight / 2) / Math.tan((fov / 2) * Math.PI / 180);
-    const near = framedHeight / 10.0;
-    const far = framedHeight * 10.0;
-    const cameraDistance = framedDistance + modelDepth / 2;
-
-    this[$camera].setProjectionFov(fov, aspect, near, far, Fov!.VERTICAL);
-    eye[2] += cameraDistance;
+    this[$camera].setProjectionFov(
+        verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
-    this[$camera].lookAt(eye, target, up);
+    this[$camera].lookAt(eye, center, up);
+    this[$camera].setExposure(1.0, 1.2, 100);
   }
 }

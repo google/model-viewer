@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,10 +45,31 @@ template.innerHTML = `
       width: 100%;
       height: 100%;
       display: none;
+      /* NOTE(cdata): Chrome 76 and below apparently have a bug
+       * that causes our canvas not to display pixels unless it is
+       * on its own render layer
+       * @see https://github.com/GoogleWebComponents/model-viewer/pull/755#issuecomment-536597893
+       */
+      transform: translateZ(0);
     }
 
     canvas.show {
       display: block;
+    }
+
+    /* Adapted from HTML5 Boilerplate
+     *
+     * @see https://github.com/h5bp/html5-boilerplate/blob/ceb4620c78fc82e13534fc44202a3f168754873f/dist/css/main.css#L122-L133 */
+    .screen-reader-only {
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      white-space: nowrap;
+      width: 1px;
     }
 
     .slot {
@@ -144,7 +165,28 @@ template.innerHTML = `
       transform: translateY(-100%);
     }
 
-    .slot.controls-prompt {
+    @keyframes wiggle {
+      10%, 12% {
+        transform: translateX(-5%);
+      }
+      30%, 32% {
+        transform: translateX(5%);
+      }
+      0%, 45%, 100% {
+        transform: translateX(0%);
+      }
+    }
+
+    @keyframes fade {
+      5%, 40% {
+        opacity: 1;
+      }
+      0%, 45%, 100% {
+        opacity: 0;
+      }
+    }
+
+    .slot.interaction-prompt {
       display: var(--interaction-prompt-display, flex);
       position: absolute;
       top: 0;
@@ -154,23 +196,39 @@ template.innerHTML = `
       pointer-events: none;
       align-items: center;
       justify-content: center;
+
       opacity: 0;
-      transform-origin: center center;
-      transform: scale(0.9);
-      transition: transform 0.3s, opacity 0.3s;
+      overflow: hidden;
+      transition: opacity 0.3s;
     }
 
-    .slot.controls-prompt > * {
-      pointer-events: none;
-    }
-
-    .slot.controls-prompt svg {
-      transform: scale(0.5);
-    }
-
-    .slot.controls-prompt.visible {
+    .slot.interaction-prompt.visible {
       opacity: 1;
-      transform: scale(1);
+    }
+
+    .slot.interaction-prompt > .animated-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slot.interaction-prompt.wiggle > .animated-container {
+      animation-name: wiggle, fade;
+      animation-duration: 6s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+      animation-play-state: paused;
+    }
+
+    .slot.interaction-prompt.wiggle.visible > .animated-container {
+      animation-play-state: running;
+    }
+
+    .slot.interaction-prompt > * {
+      pointer-events: none;
     }
 
     .slot.ar-button {
@@ -273,10 +331,12 @@ template.innerHTML = `
       </slot>
     </div>
 
-    <div class="slot controls-prompt">
-      <slot name="controls-prompt" aria-hidden="true">
-        ${ControlsPrompt}
-      </slot>
+    <div class="slot interaction-prompt">
+      <div class="animated-container">
+        <slot name="interaction-prompt" aria-hidden="true">
+          ${ControlsPrompt}
+        </slot>
+      </div>
     </div>
 
     <div class="slot default">

@@ -1,5 +1,5 @@
 <!--
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,20 @@
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
 
-  <!-- Include the Custom Elements ES5 adapter shim if you are loading an IE11-compatible bundle -->
-  <!--<script src="../node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>-->
-
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
   <!-- Resize Observer polyfill is optional, and improves resize behavior in non-Chrome browsers: -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- Fullscreen polyfill is required to support WebXR-based AR in stable browsers that support it: -->
-  <!--<script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>-->
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script nomodule src="../node_modules/intersection-observer/intersection-observer.js"></script>
+  <script nomodule>
+    try {
+      // Set a poll interval if we are using the IntersectionObserver polyfill
+      IntersectionObserver.prototype.POLL_INTERVAL = 100;
+    } catch (e) {}
+  </script>
 
   <!-- The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js"></script>

@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, Texture, WebGLRenderer} from 'three';
+import {Cache, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath, textureMatchesMeta} from '../helpers.js';
@@ -93,19 +93,17 @@ suite('TextureUtils', () => {
 
   suite('equirectangularToCubemap', () => {
     test('creates a cubemap render target from texture', async () => {
-      const texture = await textureUtils.load(EQUI_URL);
-      const target = textureUtils.equirectangularToCubemap(texture);
-      texture.dispose();
+      const target = await textureUtils.loadEquirectAsCubeUV(EQUI_URL);
       target.dispose();
       expect((target.texture as any).isTexture).to.be.ok;
-      expect(
-          textureMatchesMeta(target.texture, {mapping: 'Cube', url: EQUI_URL}))
+      expect(textureMatchesMeta(
+                 target.texture, {mapping: 'CubeUV', url: EQUI_URL}))
           .to.be.ok;
       target.texture.dispose();
     });
     test('throws on invalid texture', async () => {
       try {
-        await textureUtils.equirectangularToCubemap({} as Texture);
+        await textureUtils.loadEquirectAsCubeUV('');
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;

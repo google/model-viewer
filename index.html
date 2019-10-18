@@ -1,5 +1,5 @@
 <!--
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,8 @@
             <li><a href="examples/lighting-and-environment.html"><h4>Lighting &amp; Environment</h4></a></li>
 
             <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
+
+            <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
           </ul>
         </div>
 
@@ -129,7 +131,12 @@
             </li>
             <li>
               <div>auto-rotate</div>
-              <p>Enables the auto rotation of the model.</p>
+              <p>Enables the auto-rotation of the model.</p>
+            </li>
+            <li>
+              <div>auto-rotate-delay</div>
+              <p>Sets the delay before auto-rotation begins. The format of the value
+              is a number in milliseconds. The default is 3000.</p>
             </li>
             <li>
               <div>autoplay</div>
@@ -159,31 +166,47 @@
             </li>
             <li>
               <div>camera-orbit</div>
-              <p>Set the starting and/or subsequent orbital position of the camera.
-              You can control the azimuthal and polar angles, and the distance
-              from the model. Accepts values of the form "$angle $angle $distance",
-              like "10deg 75deg 1.5m". Also supports units in radians ("rad") for
-              angles and centimeters ("cm") or millimeters ("mm") for camera
-              distance. A special value "auto" can be used for the distance, which
-              sets the distance to the ideal framing distance based on the
-              responsive scaling applied to the model scene. Any time this value
-              changes from its initially configured value, the camera will
-              interpolate from its current position to the new value. Defaults to
-              "0deg 75deg auto".</p>
-            </li><li>
+              <span>
+                <p>Set the starting and/or subsequent orbital position of the
+                camera. You can control the azimuthal and polar angles, and the
+                distance from the model. Accepts values of the form "$angle $angle
+                $distance", like "10deg 75deg 1.5m". Also supports units in
+                radians ("rad") for angles and centimeters ("cm") or millimeters
+                ("mm") for camera distance. Camera distance can also be set as a
+                percentage ('%'), where 100% gives the model tight framing within
+                any window based on all possible theta and phi values. Any time
+                this value changes from its initially configured value, the camera
+                will interpolate from its current position to the new value.
+                Any value set to 'auto' will revert to the default.</p>
+                <p>For camera-orbit, camera-target and field-of-view, parts of the
+                property value can be configured with CSS-like functions. The CSS
+                calc() function is supported for these values, as well as a specialized
+                form of the env() function. You can use env(window-scroll-y) anywhere
+                in the expression to get a number from 0-1 that corresponds to the
+                current top-level scroll position of the current frame. For example,
+                a value like "calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m"
+                cause the camera to orbit horizontally around the model as the user
+                scrolls down the page.</p>
+                <p>Defaults to "0deg 75deg 105%"</p>
+              </span>
+            </li>
+            <li>
+              <div>camera-target</div>
+              <p>Set the starting and/or subsequent point the camera orbits
+              around. Accepts values of the form "$X $Y $Z", like "0m 1.5m
+              -0.5m". Also supports units in centimeters ("cm") or millimeters
+              ("mm"). A special value "auto" can be used, which sets the target
+              to the center of the model's bounding box in that dimension. Any
+              time this value changes from its initially configured value, the
+              camera will interpolate from its current position to the new
+              value. Defaults to "auto auto auto".</p>
+            </li>
+            <li>
               <div>environment-image</div>
               <p>Controls the environmental reflection of the model. Normally if
               background-image is set, that image will also be used for the
               environment-image. Use environment-image to only set the reflection
               without affecting the background.</p>
-            </li>
-            <li>
-              <div>environment-intensity</div>
-              <p>Controls the intensity of environmental lighting. There is
-              almost always light reflected from the environment, even when
-              background-image or environment-image are not set. The one exception
-              is for models with unlit materials. Set this value to 0 to hide the
-              environment entirely. Defaults to 1.</p>
             </li>
             <li>
               <div>exposure</div>
@@ -192,27 +215,35 @@
             </li>
             <li>
               <div>field-of-view</div>
-              <p>Used to configure the field of view of the camera. Accepts values
-              units in both degrees and radians (e.g., "30deg" or "0.5rad"). Accepts
-              any value between 20 and 45 degrees. Defaults to "45deg".</p>
+              <p>Used to configure the vertical field of view of the camera.
+              Accepts values units in both degrees and radians (e.g., "30deg" or
+              "0.5rad"). Accepts any value between 10 and 45 degrees. Any time
+              this value changes from its initially configured value, the camera
+              will interpolate from its current value to the new value. Defaults
+              to "auto", which sets either the vertical or horizontal field of
+              view to 45 degrees depending on the dimenions of the model and the
+              aspect ratio of the canvas.</p>
             </li>
             <li>
               <div>interaction-policy</div>
-              <p>Allows you to change whether the viewer requires focus before interacting with it.
-              If set to "allow-when-focused", the user must focus on the viewer (click / tap)
-              before being able to control it. If set to "always-allow", the user can 
-              control it even if the viewer is not the focused element on the page. 
-              Defaults to "always-allow".</p>
+              <p>Allows you to change whether the viewer requires focus before
+              interacting with it. If set to "allow-when-focused", the user must
+              focus on the viewer (click / tap) before being able to control it.
+              If set to "always-allow", the user can control it even if the
+              viewer is not the focused element on the page. Defaults to
+              "always-allow".</p>
             </li>
             <li>
               <div>interaction-prompt</div>
               <p>Allows you to change the conditions under which the visual and
-              audible interaction prompt will display. Allowed values are "auto"
-              and "when-focused". If set to "auto", the interaction prompt will
-              be displayed as soon as the interaction-prompt-threshold (see below)
-              time has elapsed (after the model is revealed). If set to "when-focused",
-              the interaction prompt will only be activated if the element has
-              first received focus. Defaults to "when-focused".</p>
+              audible interaction prompt will display. Allowed values are
+              "auto", "when-focused" and "none". If set to "auto", the
+              interaction prompt will be displayed as soon as the
+              interaction-prompt-threshold (see below) time has elapsed (after
+              the model is revealed). If set to "when-focused", the interaction
+              prompt will only be activated if the element has first received
+              focus. The interaction prompt will only display if camera-controls
+              are enabled. Defaults to "auto".</p>
             </li>
             <li>
               <div>interaction-prompt-threshold</div>
@@ -278,11 +309,6 @@
               <div>shadow-intensity</div>
               <p>Controls the opacity of the shadow. Set to 0 to turn off the
               shadow entirely. Defaults to 0.</p>
-            </li>
-            <li>
-              <div>stage-light-intensity</div>
-              <p>Controls the intensity of the built-in scene lighting. Set to 0
-              to turn off the scene lighting entirely. Defaults to 0.</p>
             </li>
             <li>
               <div>unstable-webxr</div>
@@ -419,6 +445,13 @@
               currentTime property to 0.</p>
             </li>
             <li>
+              <div>resetTurntableRotation()</div>
+              <p>Resets the turntable that rotates the model when auto-rotate
+              is enabled. The new value of the turntable rotation will be 0 after
+              this method is invoked, but the model may not update until the next
+              render frame.</p>
+            </li>
+            <li>
               <div>toDataURL(type, encoderOptions)</div>
               <p>Returns a screenshot of the current model render in the format
               specified by <i>type</i> (defaults to image/png). The screenshot is
@@ -447,6 +480,18 @@
               <p>Fired when the environment has changed. If the environment is
               derived from background-image or environment-image, the image will
               have loaded by the time this event fires.</p>
+            </li>
+            <li>
+              <div>error</div>
+              <p>This event can be triggered for two reasons: a model has failed
+              to load or parse, or the WebGL context was lost. If the model failed
+              to load, event.detail.type will be 'loadfailure'. If the WebGL context
+              was lost, event.detail.type will be 'webglcontextlost'. In both cases,
+              recovery countermeasures are left as an exercise for the user. The
+              element will not make automatic attempts to re-load a model that has failed
+              to load. Nor will the element attempt to restore the GL context after
+              it has been lost. Error events also hold a reference to the originating
+              error event (when there is one) as event.detail.sourceEvent.</p>
             </li>
             <li>
               <div>load</div>

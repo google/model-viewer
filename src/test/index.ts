@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,12 @@
  */
 
 import './utils-spec.js';
-import './parsers-spec.js';
-import './conversions-spec.js';
+import './styles/parsers-spec.js';
+import './styles/conversions-spec.js';
+import './styles/deserializers-spec.js';
+import './styles/evaluators-spec.js';
+import './styles/style-effector-spec.js';
+import './decorators-spec.js';
 import './model-viewer-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';

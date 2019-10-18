@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,27 +21,22 @@ import {LoadingMixin} from './features/loading.js';
 import {MagicLeapMixin} from './features/magic-leap.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
-import {Constructor} from './utilities.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
-type ModelViewerMixin =
-    (ModelViewerElement: Constructor<ModelViewerElementBase>) =>
-        Constructor<ModelViewerElementBase>;
+// Uncomment these lines to export PMREM textures in Glitch:
+// export {default as TextureUtils} from './three-components/TextureUtils';
+// export * from 'three';
 
-const mixins = [
-  FocusVisiblePolyfillMixin,
-  AnimationMixin,
-  LoadingMixin,
-  ARMixin,
-  ControlsMixin,
-  EnvironmentMixin,
-  StagingMixin,
-  MagicLeapMixin
-];
+export const ModelViewerElement = MagicLeapMixin(
+    StagingMixin(EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(
+        AnimationMixin(FocusVisiblePolyfillMixin(ModelViewerElementBase))))))));
 
-const ModelViewerElement: Constructor<ModelViewerElementBase> = mixins.reduce(
-    (Base: Constructor<ModelViewerElementBase>, Mixin: ModelViewerMixin) =>
-        Mixin(Base),
-    ModelViewerElementBase);
+export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
 customElements.define('model-viewer', ModelViewerElement);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'model-viewer': ModelViewerElement;
+  }
+}

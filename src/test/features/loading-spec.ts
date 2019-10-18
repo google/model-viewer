@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,36 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         expect(picked!.id).to.be.equal('default-poster');
       });
 
+      test('does not load when hidden from render tree', async () => {
+        let loadDispatched = false;
+        let preloadDispatched = false;
+        const loadHandler = () => {
+          loadDispatched = true;
+        };
+        const preloadHandler = () => {
+          preloadDispatched = true;
+        };
+
+        element.addEventListener('load', loadHandler);
+        element.addEventListener('preload', preloadHandler);
+
+        element.style.display = 'none';
+
+        // Give IntersectionObserver a chance to notify. In Chrome, this takes
+        // two rAFs (empirically observed). Await extra time just in case:
+        await timePasses(100);
+
+        element.src = ASTRONAUT_GLB_PATH;
+
+        await timePasses(500);  // Arbitrary time to allow model to load
+
+        element.removeEventListener('load', loadHandler);
+        element.removeEventListener('preload', preloadHandler);
+
+        expect(loadDispatched).to.be.false;
+        expect(preloadDispatched).to.be.false;
+      });
+
       suite('preload', () => {
         suite('src changes quickly', () => {
           test(
@@ -106,7 +136,10 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               element.preload = true;
               element.src = ASTRONAUT_GLB_PATH;
 
-              await waitForEvent(element, 'load');
+              await waitForEvent(
+                  element,
+                  'model-visibility',
+                  (event: any) => event.detail.visible);
 
               const canvas = element[$canvas];
               const picked = pickShadowDescendant(element);

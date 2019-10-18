@@ -1,21 +1,33 @@
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
 import {assertIsArCandidate} from '../utilities.js';
 import ModelScene from './ModelScene.js';
-import Renderer from './Renderer.js';
+import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
 const $presentedScene = Symbol('presentedScene');
 
-const $device = Symbol('device');
-const $devicePromise = Symbol('devicePromise');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
 
-const $outputCanvas = Symbol('outputCanvas');
 const $outputContext = Symbol('outputContext');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
@@ -23,12 +35,10 @@ const $postSessionCleanup = Symbol('postSessionCleanup');
 
 const matrix4 = new Matrix4();
 const vector3 = new Vector3();
-const originArray = new Float32Array(3);
-const directionArray = new Float32Array(3);
 
 export class ARRenderer extends EventDispatcher {
-  public renderer: WebGLRenderer|null;
-  public inputCanvas: HTMLCanvasElement;
+  public renderer: WebGLRenderer;
+  public parentRenderer: Renderer;
   public inputContext: WebGLRenderingContext;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
@@ -37,92 +47,69 @@ export class ARRenderer extends EventDispatcher {
   public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
-  private[$outputCanvas]: HTMLCanvasElement|null = null;
   private[$outputContext]: WebGLRenderingContext|null = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRCoordinateSystem|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
-  private[$device]: XRDevice|null = null;
-  private[$devicePromise]: Promise<void|XRDevice>;
 
-  /**
-   * Given an inline Renderer, construct an ARRenderer and return it
-   */
-  static fromInlineRenderer(renderer: Renderer) {
-    return new ARRenderer(renderer.canvas, renderer.context!);
-  }
-
-  constructor(
-      inputCanvas: HTMLCanvasElement, inputContext: WebGLRenderingContext) {
+  constructor(parentRenderer: Renderer) {
     super();
+    const inputContext: WebGLRenderingContext = parentRenderer.context!;
 
-    this.renderer = null;
+    // The parentRenderer is a Renderer object which has-a ARRenderer. We need
+    // to save a reference so we can restore state once the AR session is done.
+    this.parentRenderer = parentRenderer;
 
-    this.inputCanvas = inputCanvas;
+    // this.renderer is a three.js WebGLRenderer, it is shared with the parent
+    // Renderer.
+    this.renderer = parentRenderer.renderer;
+
     this.inputContext = inputContext;
 
     this.camera.matrixAutoUpdate = false;
 
     this.scene.add(this.reticle);
     this.scene.add(this.dolly);
-
-    // NOTE: XRDevice is being removed
-    // @see https://github.com/immersive-web/webxr/pull/405
-    this[$devicePromise] = this.resolveDevice()
-                               .then((device) => {
-                                 return this[$device] = device;
-                               })
-                               .catch((error) => {
-                                 console.warn(error);
-                                 console.warn('Browser AR will be disabled');
-                               });
   }
 
   initializeRenderer() {
-    if (this.renderer != null) {
-      return;
-    }
-
-    this.renderer = new WebGLRenderer(
-        {canvas: this.inputCanvas, context: this.inputContext});
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1);
-    this.renderer.autoClear = false;
-    this.renderer.gammaOutput = true;
-    this.renderer.gammaFactor = 2.2;
-  }
-
-  async resolveDevice(): Promise<XRDevice> {
-    assertIsArCandidate();
-
-    return await navigator.xr!.requestDevice();
   }
 
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
-    const device = this[$device];
+    const session: XRSession =
+        await navigator.xr!.requestSession!('immersive-ar');
 
-    const session: XRSession = await device!.requestSession(
-        {environmentIntegration: true, outputContext: this.outputContext!} as
-        any);
+    const gl: WebGLRenderingContext = assertContext(this.renderer.getContext());
 
-    const gl: WebGLRenderingContext =
-        assertContext(this.renderer!.getContext());
+    // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
+    // #293, handle WebXR API changes. WARNING: this can cause a GL context
+    // loss according to the spec, though current implementations don't do so.
+    await gl.makeXRCompatible();
+    this[$outputContext] = gl;
 
-    // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73
-    // @TODO #293, handle WebXR API changes
-    if ('setCompatibleXRDevice' in gl) {
-      await gl.setCompatibleXRDevice(device!);
-    } else {
-      await (gl as any).makeXRCompatible();
-    }
+    session.updateRenderState(
+        {baseLayer: new XRWebGLLayer(session, gl, {alpha: true})});
 
-    session.baseLayer = new XRWebGLLayer(session, gl, {alpha: true});
+    // The render state update takes effect on the next animation frame. Wait
+    // for it so that we get a framebuffer.
+    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+      session.requestAnimationFrame(() => resolve());
+    });
+    await waitForAnimationFrame;
+
+    // Redirect rendering to the WebXR offscreen framebuffer.
+    // TODO: this method should be added to three.js's exported interface.
     (this.renderer as any)
-        .setFramebuffer((session.baseLayer as XRWebGLLayer).framebuffer);
+        .setFramebuffer(session.renderState.baseLayer!.framebuffer);
+    this.renderer.setSize(
+        session.renderState.baseLayer!.framebufferWidth,
+        session.renderState.baseLayer!.framebufferHeight,
+        false);
 
     return session;
   }
@@ -141,12 +128,7 @@ export class ARRenderer extends EventDispatcher {
   async supportsPresentation() {
     try {
       assertIsArCandidate();
-
-      const device: XRDevice = await this[$devicePromise] as XRDevice;
-      await device.supportsSession(
-          {environmentIntegration: true, outputContext: this.outputContext!} as
-          any);
-
+      await navigator.xr!.supportsSession!('immersive-ar');
       return true;
     } catch (error) {
       return false;
@@ -156,10 +138,9 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Present a scene in AR
    */
-  async present(scene: ModelScene): Promise<HTMLCanvasElement> {
+  async present(scene: ModelScene): Promise<void> {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
-      return this.outputCanvas;
     }
 
     scene.model.scale.set(1, 1, 1);
@@ -175,18 +156,10 @@ export class ARRenderer extends EventDispatcher {
 
     // `requestReferenceSpace` replaced `requestFrameOfReference` in Chrome M73
     // @TODO #293, handle WebXR API changes
-    this[$refSpace] = await (
-        'requestFrameOfReference' in this[$currentSession]!?
-            (this[$currentSession] as any)
-                .requestFrameOfReference('eye-level') :
-            this[$currentSession]!.requestReferenceSpace({
-              type: 'stationary',
-              subtype: 'eye-level',
-            } as any));
+    this[$refSpace] =
+        await (this[$currentSession]!.requestReferenceSpace('local') as any);
 
     this[$tick]();
-
-    return this.outputCanvas;
   }
 
   /**
@@ -217,18 +190,25 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$postSessionCleanup]() {
+    // The offscreen WebXR framebuffer is now invalid, switch
+    // back to the default framebuffer for canvas output.
+    // TODO: this method should be added to three.js's exported interface.
+    (this.renderer as any).setFramebuffer(null);
+
+    // Trigger a parent renderer update. TODO(klausw): are these all
+    // necessary and sufficient?
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]!);
-      this[$presentedScene]!.updateFraming();
-      this[$presentedScene]!.alignModel();
+      this[$presentedScene]!.isDirty = true;
     }
+    // The parentRenderer's render method automatically updates
+    // the device pixel ratio, but only updates the three.js renderer
+    // size if there's a size mismatch. Reset the size to force that
+    // to refresh.
+    this.parentRenderer.setRendererSize(1, 1);
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
-
-    if (this.outputCanvas.parentNode != null) {
-      this.outputCanvas.parentNode.removeChild(this.outputCanvas);
-    }
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -242,27 +222,7 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  get outputCanvas(): HTMLCanvasElement {
-    if (this[$outputCanvas] == null) {
-      this[$outputCanvas] = document.createElement('canvas');
-      this[$outputCanvas]!.setAttribute('style', `
-display: block;
-position: absolute;
-top: 0px;
-left: 0px;
-width: 100%;
-height: 100%;`);
-    }
-
-    return this[$outputCanvas]!;
-  }
-
   get outputContext() {
-    if (this[$outputContext] == null) {
-      this[$outputContext] =
-          this.outputCanvas.getContext('xrpresent') as WebGLRenderingContext;
-    }
-
     return this[$outputContext];
   }
 
@@ -279,13 +239,13 @@ height: 100%;`);
     // Eventually we might use input coordinates for this.
     this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
     const ray = this.raycaster.ray;
-    originArray.set(ray.origin.toArray());
-    directionArray.set(ray.direction.toArray());
+    let xrray: XRRay =
+        new XRRay(ray.origin as DOMPointInit, ray.direction as DOMPointInit);
 
     let hits;
     try {
       hits = await (this[$currentSession] as any)
-                 .requestHitTest(originArray, directionArray, this[$refSpace]);
+                 .requestHitTest(xrray, this[$refSpace]);
     } catch (e) {
       // Spec says this should no longer throw on invalid requests:
       // https://github.com/immersive-web/hit-test/issues/24
@@ -327,14 +287,15 @@ height: 100%;`);
     // which is only added to the session's active input sources immediately
     // before `selectstart` and removed immediately after `selectend` event.
     // If we have a 'screen' source here, it means the output canvas was tapped.
-    const sources = session.getInputSources().filter(
-        input => input.targetRayMode === 'screen');
+    const sources = Array.from(session.inputSources)
+                        .filter(input => input.targetRayMode === 'screen');
 
     if (sources.length === 0) {
       return;
     }
 
-    const pose = (frame as any).getInputPose(sources[0], this[$refSpace])
+    const pose =
+        (frame as any).getPose(sources[0].targetRaySpace, this[$refSpace])
     if (pose) {
       this.placeModel();
     }
@@ -363,12 +324,12 @@ height: 100%;`);
       return;
     }
 
-    for (const view of (frame as any).views) {
-      const viewport = (session.baseLayer as XRWebGLLayer).getViewport(view);
-      this.renderer!.setViewport(0, 0, viewport.width, viewport.height);
-      this.renderer!.setSize(viewport.width, viewport.height, false);
+    for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
+      const viewport = session.renderState.baseLayer!.getViewport(view);
+      this.renderer.setViewport(
+          viewport.x, viewport.y, viewport.width, viewport.height);
       this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-      const viewMatrix = matrix4.fromArray(pose.getViewMatrix(view));
+      const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
 
       this.camera.matrix.getInverse(viewMatrix);
       this.camera.updateMatrixWorld(true);
@@ -382,7 +343,7 @@ height: 100%;`);
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
       // this.renderer.clearDepth();
-      this.renderer!.render(this.scene, this.camera);
+      this.renderer.render(this.scene, this.camera);
     }
   }
 }

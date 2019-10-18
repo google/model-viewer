@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,7 @@ suite('SmoothControls', () => {
 
     suite('when target is modified', () => {
       test('camera looks at the configured target', () => {
-        controls.setTarget(new Vector3(3, 2, 1));
+        controls.setTarget(3, 2, 1);
         settleControls(controls);
 
         expect(cameraIsLookingAt(camera, controls.getTarget()))
@@ -135,12 +135,58 @@ suite('SmoothControls', () => {
         test('changes the absolute distance to the target', () => {
           settleControls(controls);
 
-          expect(camera.position.length())
-              .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
           controls.setOrbit(0, HALF_PI, 1.5);
           settleControls(controls);
           expect(camera.position.length()).to.be.equal(1.5);
         });
+      });
+
+      suite('azimuth', () => {
+        test('wraps and takes the shortest path', () => {
+          controls.setOrbit(QUARTER_PI);
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta).to.be.equal(QUARTER_PI);
+
+          controls.setOrbit(4 * Math.PI - HALF_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(4 * Math.PI + QUARTER_PI, 0.0001);
+
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(4 * Math.PI + QUARTER_PI);
+
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(4 * Math.PI - HALF_PI, 0.0001);
+
+          controls.setOrbit(THREE_QUARTERS_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(Math.PI + HALF_PI, 0.0001);
+
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(Math.PI + HALF_PI);
+
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.closeTo(THREE_QUARTERS_PI, 0.0001);
+        });
+
+        test(
+            'adjustOrbit does not move the goal theta more than pi past the current theta',
+            () => {
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+
+              controls.update(performance.now(), ONE_FRAME_DELTA);
+              const startingTheta = controls.getCameraSpherical().theta;
+              expect(startingTheta).to.be.greaterThan(0);
+
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+              settleControls(controls);
+              const goalTheta = controls.getCameraSpherical().theta;
+              expect(goalTheta).to.be.greaterThan(Math.PI);
+              expect(goalTheta).to.be.lessThan(startingTheta + Math.PI);
+            });
       });
     });
 
@@ -179,21 +225,25 @@ suite('SmoothControls', () => {
       suite('azimuth', () => {
         setup(() => {
           controls.applyOptions({
-            minimumAzimuthalAngle: -1 * HALF_PI,
-            maximumAzimuthalAngle: HALF_PI
+            minimumAzimuthalAngle: -1 * THREE_QUARTERS_PI,
+            maximumAzimuthalAngle: THREE_QUARTERS_PI
           });
         });
 
         test('prevents camera azimuth from exceeding options', () => {
           controls.setOrbit(-Math.PI, 0, 0);
           settleControls(controls);
-
-          expect(controls.getCameraSpherical().theta).to.be.equal(-1 * HALF_PI);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.equal(-1 * THREE_QUARTERS_PI);
 
           controls.setOrbit(Math.PI, 0, 0);
-          settleControls(controls);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          expect(Math.abs(controls.getCameraSpherical().theta))
+              .to.be.lessThan(THREE_QUARTERS_PI);
 
-          expect(controls.getCameraSpherical().theta).to.be.equal(HALF_PI);
+          settleControls(controls);
+          expect(controls.getCameraSpherical().theta)
+              .to.be.equal(THREE_QUARTERS_PI);
         });
       });
 
@@ -234,6 +284,25 @@ suite('SmoothControls', () => {
           settleControls(controls);
 
           expect(controls.getCameraSpherical().radius).to.be.equal(20);
+        });
+      });
+
+      suite('field of view', () => {
+        setup(() => {
+          controls.applyOptions(
+              {minimumFieldOfView: 15, maximumFieldOfView: 20});
+        });
+
+        test('prevents field of view from exceeding options', () => {
+          controls.setFieldOfView(5);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(15, 0.00001);
+
+          controls.setFieldOfView(30);
+          settleControls(controls);
+
+          expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);
         });
       });
 
@@ -278,15 +347,17 @@ suite('SmoothControls', () => {
           });
 
           test('does not zoom when scrolling while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            const radius = controls.getCameraSpherical().radius;
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getCameraSpherical().radius).to.be.equal(radius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
           });
 
           test('does not orbit when pointing while blurred', () => {
@@ -301,17 +372,17 @@ suite('SmoothControls', () => {
           });
 
           test('does zoom when scrolling while focused', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
             element.focus();
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 
@@ -336,15 +407,15 @@ suite('SmoothControls', () => {
           });
 
           test('zooms when scrolling, even while blurred', () => {
-            expect(controls.getCameraSpherical().radius)
-                .to.be.equal(DEFAULT_OPTIONS.minimumRadius);
+            expect(controls.getFieldOfView())
+                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
 
-            dispatchSyntheticEvent(element, 'wheel');
+            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
 
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().radius)
-                .to.be.greaterThan(DEFAULT_OPTIONS.minimumRadius as number);
+            expect(controls.getFieldOfView())
+                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
           });
         });
 

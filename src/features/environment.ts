@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,120 +19,102 @@ import {Color, Texture} from 'three';
 import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
-export interface EnvironmentInterface {
-  environmentImage: string|null;
-  environmentIntensity: number;
-  backgroundImage: string|null;
-  backgroundColor: string;
-  shadowIntensity: number;
-  stageLightIntensity: number;
-  exposure: number;
-}
-
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_EXPOSURE = 1.0;
-const DEFAULT_STAGE_LIGHT_INTENSITY = 0.0;
-const DEFAULT_ENVIRONMENT_INTENSITY = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateLighting = Symbol('updateLighting');
 const $updateToneMapping = Symbol('updateToneMapping');
 const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
-export const EnvironmentMixin = (ModelViewerElement:
-                                     Constructor<ModelViewerElementBase>):
-    Constructor<ModelViewerElementBase&EnvironmentInterface> => {
-      class EnvironmentModelViewerElement extends ModelViewerElement {
-        @property({
-          type: String,
-          attribute: 'environment-image',
-          converter: {fromAttribute: deserializeUrl}
-        })
-        environmentImage: string|null = null;
+export interface EnvironmentInterface {
+  environmentImage: string|null;
+  backgroundImage: string|null;
+  backgroundColor: string;
+  shadowIntensity: number;
+  exposure: number;
+}
 
-        @property({type: Number, attribute: 'environment-intensity'})
-        environmentIntensity: number = DEFAULT_ENVIRONMENT_INTENSITY;
+export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
+    ModelViewerElement: T): Constructor<EnvironmentInterface>&T => {
+  class EnvironmentModelViewerElement extends ModelViewerElement {
+    @property({
+      type: String,
+      attribute: 'environment-image',
+      converter: {fromAttribute: deserializeUrl}
+    })
+    environmentImage: string|null = null;
 
-        @property({
-          type: String,
-          attribute: 'background-image',
-          converter: {fromAttribute: deserializeUrl}
-        })
-        backgroundImage: string|null = null;
+    @property({
+      type: String,
+      attribute: 'background-image',
+      converter: {fromAttribute: deserializeUrl}
+    })
+    backgroundImage: string|null = null;
 
-        @property({type: String, attribute: 'background-color'})
-        backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
+    @property({type: String, attribute: 'background-color'})
+    backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
 
-        @property({type: Number, attribute: 'shadow-intensity'})
-        shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
+    @property({type: Number, attribute: 'shadow-intensity'})
+    shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
 
-        @property({type: Number, attribute: 'stage-light-intensity'})
-        stageLightIntensity: number = DEFAULT_STAGE_LIGHT_INTENSITY;
+    @property({
+      type: Number,
+    })
+    exposure: number = DEFAULT_EXPOSURE;
 
-        @property({
-          type: Number,
-        })
-        exposure: number = DEFAULT_EXPOSURE;
+    private[$currentEnvironmentMap]: Texture|null = null;
 
-        private[$currentEnvironmentMap]: Texture|null = null;
+    private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
-        private[$cancelEnvironmentUpdate]:
-            ((...args: any[]) => any)|null = null;
+    updated(changedProperties: Map<string, any>) {
+      super.updated(changedProperties);
 
-        updated(changedProperties: Map<string, any>) {
-          super.updated(changedProperties);
+      if (changedProperties.has('shadowIntensity')) {
+        this[$updateShadow]();
+      }
 
-          if (changedProperties.has('shadowIntensity')) {
-            this[$updateShadow]();
-          }
+      if (changedProperties.has('exposure')) {
+        this[$updateToneMapping]();
+      }
 
-          if (changedProperties.has('exposure')) {
-            this[$updateToneMapping]();
-          }
+      if (changedProperties.has('environmentImage') ||
+          changedProperties.has('backgroundImage') ||
+          changedProperties.has('backgroundColor') ||
+          changedProperties.has('experimentalPmrem')) {
+        this[$updateEnvironment]();
+      }
+    }
 
-          if (changedProperties.has('environmentIntensity') ||
-              changedProperties.has('stageLightIntensity')) {
-            this[$updateLighting]();
-          }
+    [$onModelLoad](event: any) {
+      super[$onModelLoad](event);
 
-          if (changedProperties.has('environmentImage') ||
-              changedProperties.has('backgroundImage') ||
-              changedProperties.has('backgroundColor') ||
-              changedProperties.has('experimentalPmrem')) {
-            this[$updateEnvironment]();
-          }
-        }
+      if (this[$currentEnvironmentMap] != null) {
+        this[$applyEnvironmentMap](this[$currentEnvironmentMap]!);
+      }
+    }
 
-        [$onModelLoad](event: any) {
-          super[$onModelLoad](event);
+    async[$updateEnvironment]() {
+      const {backgroundImage, environmentImage} = this;
+      let {backgroundColor} = this;
 
-          if (this[$currentEnvironmentMap] != null) {
-            this[$applyEnvironmentMap](this[$currentEnvironmentMap]!);
-          }
-        }
+      if (this[$cancelEnvironmentUpdate] != null) {
+        this[$cancelEnvironmentUpdate]!();
+        this[$cancelEnvironmentUpdate] = null;
+      }
 
-        async[$updateEnvironment]() {
-          const {backgroundImage, environmentImage} = this;
-          let {backgroundColor} = this;
+      const {textureUtils} = this[$renderer];
 
-          if (this[$cancelEnvironmentUpdate] != null) {
-            this[$cancelEnvironmentUpdate]!();
-            this[$cancelEnvironmentUpdate] = null;
-          }
+      if (textureUtils == null) {
+        return;
+      }
 
-          const {textureUtils} = this[$renderer];
-
-          if (textureUtils == null) {
-            return;
-          }
-
-          try {
-            const {environmentMap,
-                   skybox} = await new Promise(async (resolve, reject) => {
+      try {
+        const {environmentMap, skybox} =
+            await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
                   backgroundImage,
                   environmentImage,
@@ -141,79 +123,72 @@ export const EnvironmentMixin = (ModelViewerElement:
               resolve(await texturesLoad);
             });
 
-            if (skybox != null) {
-              const material = this[$scene].skyboxMaterial();
-              // This hack causes ShaderMaterial to populate the correct
-              // envMapTexelToLinear function.
-              (material as any).envMap = skybox.texture;
-              material.uniforms.envMap.value = skybox.texture;
-              material.needsUpdate = true;
-              this[$scene].add(this[$scene].skyboxMesh);
-            } else {
-              this[$scene].remove(this[$scene].skyboxMesh);
-              if (!backgroundColor) {
-                backgroundColor = DEFAULT_BACKGROUND_COLOR;
-              }
-
-              const parsedColor = new Color(backgroundColor);
-              this[$scene].background = parsedColor;
-              // Set the container node's background color so that it matches
-              // the background color configured for the scene. It's important
-              // to do this because we round the size of the canvas off to the
-              // nearest pixel, so it is possible (indeed likely) that there is
-              // a marginal gap around one or two edges of the canvas.
-              this[$container].style.backgroundColor = backgroundColor;
-            }
-
-            this[$applyEnvironmentMap](environmentMap.texture);
-            this[$scene].model.dispatchEvent({type: 'envmap-update'});
-          } catch (errorOrPromise) {
-            if (errorOrPromise instanceof Error) {
-              this[$applyEnvironmentMap](null);
-              throw errorOrPromise;
-            }
-
-            const {environmentMap, skybox} = await errorOrPromise;
-
-            if (environmentMap != null) {
-              environmentMap.dispose();
-            }
-
-            if (skybox != null) {
-              skybox.dispose();
-            }
+        if (skybox != null) {
+          const material = this[$scene].skyboxMaterial();
+          // This hack causes ShaderMaterial to populate the correct
+          // envMapTexelToLinear function.
+          (material as any).envMap = skybox.texture;
+          material.uniforms.envMap.value = skybox.texture;
+          material.needsUpdate = true;
+          this[$scene].add(this[$scene].skyboxMesh);
+        } else {
+          this[$scene].remove(this[$scene].skyboxMesh);
+          if (!backgroundColor) {
+            backgroundColor = DEFAULT_BACKGROUND_COLOR;
           }
+
+          const parsedColor = new Color(backgroundColor);
+          this[$scene].background = parsedColor;
+          // Set the container node's background color so that it matches
+          // the background color configured for the scene. It's important
+          // to do this because we round the size of the canvas off to the
+          // nearest pixel, so it is possible (indeed likely) that there is
+          // a marginal gap around one or two edges of the canvas.
+          this[$container].style.backgroundColor = backgroundColor;
         }
 
-        /**
-         * Sets the Model to use the provided environment map,
-         * or `null` if the Model should remove its' environment map.
-         */
-        private[$applyEnvironmentMap](environmentMap: Texture|null) {
-          this[$currentEnvironmentMap] = environmentMap;
-          this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
-          this.dispatchEvent(new CustomEvent('environment-change'));
-
-          this[$updateLighting]();
-          this[$needsRender]();
+        this[$applyEnvironmentMap](environmentMap.texture);
+        this[$scene].model.dispatchEvent({type: 'envmap-update'});
+      } catch (errorOrPromise) {
+        if (errorOrPromise instanceof Error) {
+          this[$applyEnvironmentMap](null);
+          throw errorOrPromise;
         }
 
-        private[$updateShadow]() {
-          this[$scene].shadow.intensity = this.shadowIntensity;
-          this[$needsRender]();
+        const {environmentMap, skybox} = await errorOrPromise;
+
+        if (environmentMap != null) {
+          environmentMap.dispose();
         }
 
-        private[$updateToneMapping]() {
-          this[$scene].exposure = this.exposure;
-          this[$needsRender]();
-        }
-
-        private[$updateLighting]() {
-          const scene = this[$scene];
-          scene.configureStageLighting(this.stageLightIntensity);
-          scene.model.setEnvironmentMapIntensity(this.environmentIntensity);
+        if (skybox != null) {
+          skybox.dispose();
         }
       }
+    }
 
-      return EnvironmentModelViewerElement;
-    };
+    /**
+     * Sets the Model to use the provided environment map,
+     * or `null` if the Model should remove its' environment map.
+     */
+    private[$applyEnvironmentMap](environmentMap: Texture|null) {
+      this[$currentEnvironmentMap] = environmentMap;
+      this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
+      this.dispatchEvent(new CustomEvent('environment-change'));
+
+      this[$needsRender]();
+    }
+
+    private[$updateShadow]() {
+      this[$scene].shadow.intensity = this.shadowIntensity;
+      this[$needsRender]();
+    }
+
+    private[$updateToneMapping]() {
+      this[$scene].exposure = this.exposure;
+      this[$needsRender]();
+    }
+  }
+
+  return EnvironmentModelViewerElement;
+};

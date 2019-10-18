@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Google Inc. All Rights Reserved.
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,21 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
 
 import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {moveChildren} from './ModelUtils.js';
+import {moveChildren, reduceVertices} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 const $currentScene = Symbol('currentScene');
 
+export const DEFAULT_FOV_DEG = 45;
 
 /**
  * An Object3D that can swap out its underlying
  * model.
- *
- * @extends THREE.Object3D
  */
 export default class Model extends Object3D {
   private[$currentScene]: CacheRetainedScene|null = null;
   private loader = new CachingGLTFLoader();
-  private mixer: AnimationMixer = new AnimationMixer(null);
+  private mixer = new AnimationMixer(null);
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
@@ -41,6 +40,8 @@ export default class Model extends Object3D {
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
+  public idealCameraDistance = 0;
+  public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
 
@@ -59,8 +60,6 @@ export default class Model extends Object3D {
   /**
    * Returns a boolean indicating whether or not there is a
    * loaded model attached.
-   *
-   * @return {Boolean}
    */
   hasModel(): boolean {
     return !!this.modelContainer.children.length;
@@ -91,46 +90,17 @@ export default class Model extends Object3D {
     this.dispatchEvent({type: 'envmap-change', value: map});
   }
 
-  setEnvironmentMapIntensity(intensity: number) {
-    const intensityIsNumber =
-        typeof intensity === 'number' && !(self as any).isNaN(intensity);
-
-    if (!intensityIsNumber) {
-      intensity = 1.0;
-    }
-
-    this.modelContainer.traverse(object => {
-      if (object && (object as Mesh).isMesh && (object as Mesh).material) {
-        const {material} = object as Mesh;
-        if (Array.isArray(material)) {
-          material.forEach(
-              material => (material as MeshStandardMaterial).envMapIntensity =
-                  intensity);
-        } else {
-          ((object as Mesh).material as MeshStandardMaterial).envMapIntensity =
-              intensity;
-        }
-      }
-    });
-  }
-
   /**
    * Pass in a THREE.Object3D to be controlled
    * by this model.
-   *
-   * @param {THREE.Object3D}
    */
   setObject(model: Object3D) {
     this.clear();
     this.modelContainer.add(model);
-    this.updateBoundingBox();
+    this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
   }
 
-  /**
-   * @param {String?} url
-   * @param {Function?} progressCallback
-   */
   async setSource(
       url: string|null, progressCallback?: (progress: number) => void) {
     if (!url || url === this.url) {
@@ -198,7 +168,7 @@ export default class Model extends Object3D {
 
     this.userData.url = url;
 
-    this.updateBoundingBox();
+    this.updateFraming();
 
     this.dispatchEvent({type: 'model-load', url});
   }
@@ -295,10 +265,42 @@ export default class Model extends Object3D {
     this.mixer.uncacheRoot(this);
   }
 
-  updateBoundingBox() {
+  /**
+   * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
+   * object to be framed tightly in a 2D window of any aspect ratio without
+   * clipping at any camera orbit. The camera's center target point can be
+   * optionally specified. If no center is specified, it defaults to the center
+   * of the bounding box, which means asymmetric models will tend to be tight on
+   * one side instead of both. Proper choice of center can correct this.
+   */
+  updateFraming(center: Vector3|null = null) {
     this.remove(this.modelContainer);
-    this.boundingBox.setFromObject(this.modelContainer);
-    this.boundingBox.getSize(this.size);
+
+    if (center == null) {
+      this.boundingBox.setFromObject(this.modelContainer);
+      this.boundingBox.getSize(this.size);
+      center = this.boundingBox.getCenter(new Vector3);
+    }
+
+    const radiusSquared = (value: number, vertex: Vector3): number => {
+      return Math.max(value, center!.distanceToSquared(vertex));
+    };
+    const framedRadius =
+        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared));
+
+    const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+    this.idealCameraDistance = framedRadius / Math.sin(halfFov);
+    const verticalFov = Math.tan(halfFov);
+
+    const horizontalFov = (value: number, vertex: Vector3): number => {
+      vertex.sub(center!);
+      const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
+      return Math.max(
+          value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
+    };
+    this.fieldOfViewAspect =
+        reduceVertices(this.modelContainer, horizontalFov) / verticalFov;
+
     this.add(this.modelContainer);
   }
 }

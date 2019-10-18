@@ -1,9 +1,24 @@
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 type Constructor<T = object> = {
   new (...args: any[]): T,
   prototype: T
 };
 
-type XRFrameOfReferenceType = 'head-model'|'eye-level'|'stage';
+type XRReferenceSpaceType = 'local'|'local-floor'|'bounded-floor'|'unbounded';
 
 interface XRFrameOfReferenceOptions {
   disableStageEmulation?: boolean;
@@ -40,6 +55,8 @@ interface XRHitResult {
 
 interface XR extends EventTarget {
   requestDevice(): Promise<XRDevice>;
+  requestSession(mode: any, options?: any): any;
+  supportsSession(mode: any): Promise<XRSession>;
 }
 
 interface XRRigidTransform {
@@ -50,12 +67,6 @@ interface XRRigidTransform {
 
 interface XRSpace extends EventTarget {
   getTransformTo(other: XRSpace): XRRigidTransform;
-}
-
-type XRReferenceSpaceType = 'stationary'|'bounded'|'unbounded';
-
-interface XRReferenceSpaceOptions {
-  type: XRReferenceSpaceType;
 }
 
 interface XRReferenceSpace extends XRSpace {
@@ -76,16 +87,17 @@ interface XRViewerPose {
   readonly views: Array<XRView>
 }
 
-interface XRRay {
+declare class XRRay {
   readonly origin: DOMPointReadOnly;
   readonly direction: DOMPointReadOnly;
   matrix: Float32Array;
+
+  constructor(origin: DOMPointInit, direction: DOMPointInit)
 }
 
-interface XRInputPose {
+interface XRPose {
   readonly emulatedPosition: boolean;
-  readonly targetRay: XRRay;
-  readonly gripTransform: XRRigidTransform;
+  readonly transform: XRRigidTransform;
 }
 
 type XRHandedness = ''|'left'|'right';
@@ -94,25 +106,40 @@ type XRTargetRayMode = 'gaze'|'tracked-pointer'|'screen';
 interface XRInputSource {
   readonly handedness: XRHandedness;
   readonly targetRayMode: XRTargetRayMode;
+  readonly targetRaySpace: XRSpace;
+  readonly gripSpace?: XRSpace;
+  readonly profiles: Array<String>;
 }
 
 interface XRFrame {
   readonly session: XRSession;
   getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose;
-  getInputPose(inputSource: XRInputSource, referenceSpace?: XRReferenceSpace):
-      XRInputPose;
+  getPose(space: XRSpace, referenceSpace: XRReferenceSpace): XRPose;
 }
 
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
 
+interface XRRenderState {
+  readonly depthNear: number;
+  readonly depthFar: number;
+  readonly inlineVerticalFieldOfView?: number;
+  readonly baseLayer?: XRWebGLLayer;
+}
+
+interface XRRenderStateInit {
+  depthNear?: number;
+  depthFar?: number;
+  inlineVerticalFieldOfView?: number;
+  baseLayer?: XRWebGLLayer;
+}
+
 interface XRSession extends EventTarget {
-  baseLayer: XRLayer;
-  requestReferenceSpace(options: XRReferenceSpaceOptions):
-      Promise<XRReferenceSpace>;
-  requestHitTest(
-      origin: Float32Array, direction: Float32Array,
-      frameOfReference: XRFrameOfReference): Promise<XRHitResult[]>;
-  getInputSources(): Array<XRInputSource>;
+  renderState: XRRenderState;
+  updateRenderState(state?: XRRenderStateInit): any;
+  requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
+  requestHitTest(ray: XRRay, frameOfReference: XRFrameOfReference):
+      Promise<XRHitResult[]>;
+  inputSources: Array<XRInputSource>;
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;
   end(): Promise<void>;
@@ -134,6 +161,8 @@ interface XRLayer {}
 
 declare class XRWebGLLayer implements XRLayer {
   public framebuffer: WebGLFramebuffer;
+  public framebufferWidth: number; 
+  public framebufferHeight: number; 
 
   constructor(
       session: XRSession, gl: WebGLRenderingContext,
@@ -155,4 +184,5 @@ interface Navigator {
 
 interface WebGLRenderingContext {
   setCompatibleXRDevice(device: XRDevice): void;
+  makeXRCompatible(): Promise<void>;
 }

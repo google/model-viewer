@@ -1,4 +1,4 @@
-/*
+/* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -495,7 +495,8 @@ paper-button {
   font-weight: 500;
   padding-right: 16px;
 }
-.list-attribute li > p {
+.list-attribute li > p,
+.list-attribute li > span {
   flex: 2;
   margin: 0;
 }
@@ -569,6 +570,10 @@ paper-button {
   color: #999;
 }
 
+.eg-image {
+    max-width: 40vw;
+}
+
 @media only screen and (min-width: 1664px) {
   :root {
     --snippet-offset: 40px -40px;
@@ -581,6 +586,9 @@ paper-button {
   .demo pre {
     margin: 16px auto;
   }
+    .eg-image {
+        max-width: 20vw;
+    }
 }
 
 @media only screen and (max-width: 1280px) {
@@ -702,4 +710,11 @@ paper-button {
     padding: 20px;
   }
 
+
+  .eg-image {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 50vw;
+  }
 }
