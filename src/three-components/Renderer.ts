@@ -194,15 +194,15 @@ export class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
-      const {exposure, shadowMaterial} = scene;
+      const {exposure, shadow} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
       const shadowNeedsUpdate = this.renderer.shadowMap.needsUpdate;
-      this.renderer.shadowMap.enabled = shadowMaterial.opacity > 0;
+      this.renderer.shadowMap.enabled = shadow != null && shadow.visible;
       this.renderer.shadowMap.needsUpdate =
-          shadowNeedsUpdate || scene.shadowNeedsUpdate;
+          shadowNeedsUpdate || shadow.needsUpdate;
       scene.shadowNeedsUpdate = false;
 
       // Need to set the render target in order to prevent

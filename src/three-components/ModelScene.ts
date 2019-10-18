@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, PlaneBufferGeometry, Scene, Shader, ShaderLib, ShaderMaterial, ShadowMaterial, Vector3} from 'three';
-import {Mesh} from 'three';
-import {DirectionalLight} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, ShadowMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -23,6 +21,7 @@ import {resolveDpr} from '../utilities.js';
 import Model from './Model.js';
 import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
+import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -56,10 +55,7 @@ export default class ModelScene extends Scene {
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
-  // public shadow: StaticShadow;
-  public shadowLight = new DirectionalLight;
-  public shadowMaterial = new ShadowMaterial;
-  public shadowNeedsUpdate = true;
+  public shadow: Shadow|null = null;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -206,9 +202,9 @@ export default class ModelScene extends Scene {
     this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
     this.pivot.position.x += this.pivotCenter.x;
     this.pivot.position.z += this.pivotCenter.z;
-    this.shadowLight.shadow.camera.up.set(
-        Math.sin(radiansY), 0, Math.cos(radiansY));
-    (this.shadowLight.shadow as any).updateMatrices(this.shadowLight);
+    if (this.shadow != null) {
+      this.shadow.setRotation(radiansY);
+    }
   }
 
   /**
@@ -222,61 +218,13 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.createShadow();
-    this.dispatchEvent({type: 'model-load', url: event.url});
-  }
-
-  createShadow() {
-    const {boundingBox, size} = this.model;
-    const {camera, mapSize} = this.shadowLight.shadow;
-    // Nothing within shadowOffset of the bottom of the model casts a shadow
-    // (this is to avoid having a baked-in shadow plane cast its own shadow).
-    const shadowOffset = size.y * 0.001;
-
-    this.shadowLight.intensity = 0;
-    this.shadowLight.castShadow = true;
-    const maxShadowSize = 128;
-    const width = size.x > size.z ? maxShadowSize :
-                                    Math.floor(maxShadowSize * size.x / size.z);
-    const height = size.x > size.z ?
-        Math.floor(maxShadowSize * size.z / size.x) :
-        maxShadowSize;
-
-    mapSize.set(width, height);
-    const widthPad = 2 * size.x / width;
-    const heightPad = 2 * size.z / height;
-    this.shadowLight.position.y = boundingBox.max.y + shadowOffset;
-    this.shadowLight.up.set(0, 0, 1);
-    camera.left = -boundingBox.max.x - widthPad;
-    camera.right = -boundingBox.min.x + widthPad;
-    camera.bottom = boundingBox.min.z - heightPad;
-    camera.top = boundingBox.max.z + heightPad;
-    camera.near = 0;
-    camera.far = size.y - shadowOffset;
-    this.shadowLight.updateMatrixWorld();
-    this.pivot.add(this.shadowLight);
-    this.shadowLight.target = this.pivot;
-
-    const planeGeometry =
-        new PlaneBufferGeometry(size.x + 2 * widthPad, size.z + 2 * heightPad);
-    const plane = new Mesh(planeGeometry, this.shadowMaterial);
-    plane.rotateX(-Math.PI / 2);
-    boundingBox.getCenter(plane.position);
-    plane.position.y -= size.y / 2 - 2 * shadowOffset;
-    plane.receiveShadow = true;
-    plane.castShadow = false;
-    this.pivot.add(plane);
-    // const helper = new CameraHelper(this.shadowLight.shadow.camera);
-    // this.add(helper);
-
-    (this.shadowLight.shadow as any).updateMatrices(this.shadowLight);
-    this.shadowNeedsUpdate = true;
+    if (this.shadow == null) {
+      this.shadow = new Shadow(this);
+    } else {
+      this.shadow.setSize(this);
+    }
     this.element[$needsRender]();
-  }
-
-  setShadowIntensity(intensity: number) {
-    const BASE_SHADOW_OPACITY = 0.1;
-    this.shadowMaterial.opacity = intensity * BASE_SHADOW_OPACITY;
+    this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
   createSkyboxMesh(): Mesh {
