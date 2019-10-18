@@ -165,27 +165,6 @@ template.innerHTML = `
       transform: translateY(-100%);
     }
 
-    @keyframes wiggle {
-      10%, 12% {
-        transform: translateX(-5%);
-      }
-      30%, 32% {
-        transform: translateX(5%);
-      }
-      0%, 45%, 100% {
-        transform: translateX(0%);
-      }
-    }
-
-    @keyframes fade {
-      5%, 40% {
-        opacity: 1;
-      }
-      0%, 45%, 100% {
-        opacity: 0;
-      }
-    }
-
     .slot.interaction-prompt {
       display: var(--interaction-prompt-display, flex);
       position: absolute;
@@ -198,6 +177,7 @@ template.innerHTML = `
       justify-content: center;
 
       opacity: 0;
+      will-change: opacity;
       overflow: hidden;
       transition: opacity 0.3s;
     }
@@ -207,24 +187,7 @@ template.innerHTML = `
     }
 
     .slot.interaction-prompt > .animated-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-    }
-
-    .slot.interaction-prompt.wiggle > .animated-container {
-      animation-name: wiggle, fade;
-      animation-duration: 6s;
-      animation-iteration-count: infinite;
-      animation-timing-function: ease-in-out;
-      animation-play-state: paused;
-    }
-
-    .slot.interaction-prompt.wiggle.visible > .animated-container {
-      animation-play-state: running;
+      will-change: transform, opacity;
     }
 
     .slot.interaction-prompt > * {
@@ -332,7 +295,7 @@ template.innerHTML = `
     </div>
 
     <div class="slot interaction-prompt">
-      <div class="animated-container">
+      <div class="animated-container" part="interaction-prompt">
         <slot name="interaction-prompt" aria-hidden="true">
           ${ControlsPrompt}
         </slot>
