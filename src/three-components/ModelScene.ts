@@ -228,26 +228,37 @@ export default class ModelScene extends Scene {
 
   createShadow() {
     const {boundingBox, size} = this.model;
+    const {camera, mapSize} = this.shadowLight.shadow;
     // Nothing within shadowOffset of the bottom of the model casts a shadow
     // (this is to avoid having a baked-in shadow plane cast its own shadow).
     const shadowOffset = size.y * 0.001;
 
     this.shadowLight.intensity = 0;
     this.shadowLight.castShadow = true;
+    const maxShadowSize = 128;
+    const width = size.x > size.z ? maxShadowSize :
+                                    Math.floor(maxShadowSize * size.x / size.z);
+    const height = size.x > size.z ?
+        Math.floor(maxShadowSize * size.z / size.x) :
+        maxShadowSize;
+
+    mapSize.set(width, height);
+    const widthPad = 2 * size.x / width;
+    const heightPad = 2 * size.z / height;
     this.shadowLight.position.y = boundingBox.max.y + shadowOffset;
     this.shadowLight.up.set(0, 0, 1);
-    const {camera} = this.shadowLight.shadow;
-    camera.left = -boundingBox.max.x;
-    camera.right = -boundingBox.min.x;
-    camera.bottom = boundingBox.min.z;
-    camera.top = boundingBox.max.z;
+    camera.left = -boundingBox.max.x - widthPad;
+    camera.right = -boundingBox.min.x + widthPad;
+    camera.bottom = boundingBox.min.z - heightPad;
+    camera.top = boundingBox.max.z + heightPad;
     camera.near = 0;
     camera.far = size.y - shadowOffset;
     this.shadowLight.updateMatrixWorld();
     this.pivot.add(this.shadowLight);
     this.shadowLight.target = this.pivot;
 
-    const planeGeometry = new PlaneBufferGeometry(size.x, size.z);
+    const planeGeometry =
+        new PlaneBufferGeometry(size.x + 2 * widthPad, size.z + 2 * heightPad);
     const plane = new Mesh(planeGeometry, this.shadowMaterial);
     plane.rotateX(-Math.PI / 2);
     boundingBox.getCenter(plane.position);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, BasicShadowMap, EventDispatcher, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {Event} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
@@ -96,7 +96,7 @@ export class Renderer extends EventDispatcher {
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
       this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = BasicShadowMap;
+      this.renderer.shadowMap.type = PCFSoftShadowMap;
       this.renderer.shadowMap.autoUpdate = false;
 
       // ACESFilmicToneMapping appears to be the most "saturated",
