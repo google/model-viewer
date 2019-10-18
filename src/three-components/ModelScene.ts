@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, CameraHelper, Color, Event as ThreeEvent, MeshStandardMaterial, Object3D, PerspectiveCamera, PlaneBufferGeometry, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, PlaneBufferGeometry, Scene, Shader, ShaderLib, ShaderMaterial, ShadowMaterial, Vector3} from 'three';
 import {Mesh} from 'three';
 import {DirectionalLight} from 'three';
 
@@ -57,7 +57,9 @@ export default class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
   // public shadow: StaticShadow;
-  public shadowLight: DirectionalLight;
+  public shadowLight = new DirectionalLight;
+  public shadowMaterial = new ShadowMaterial;
+  public shadowNeedsUpdate = true;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -101,7 +103,6 @@ export default class ModelScene extends Scene {
 
     this.add(this.pivot);
     this.pivot.add(this.model);
-    this.shadowLight = new DirectionalLight;
 
     this.setSize(width, height);
     this.background = new Color(0xffffff);
@@ -207,6 +208,7 @@ export default class ModelScene extends Scene {
     this.pivot.position.z += this.pivotCenter.z;
     this.shadowLight.shadow.camera.up.set(
         Math.sin(radiansY), 0, Math.cos(radiansY));
+    (this.shadowLight.shadow as any).updateMatrices(this.shadowLight);
   }
 
   /**
@@ -220,52 +222,50 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.updateShadow();
+    this.createShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
-  updateShadow() {
+  createShadow() {
     const {boundingBox, size} = this.model;
     // Nothing within shadowOffset of the bottom of the model casts a shadow
     // (this is to avoid having a baked-in shadow plane cast its own shadow).
-    const shadowOffset = size.y * 0.002;
+    const shadowOffset = size.y * 0.001;
 
+    this.shadowLight.intensity = 0;
+    this.shadowLight.castShadow = true;
     this.shadowLight.position.y = boundingBox.max.y + shadowOffset;
     this.shadowLight.up.set(0, 0, 1);
     const {camera} = this.shadowLight.shadow;
-    camera.left = boundingBox.min.x;
-    camera.right = boundingBox.max.x;
+    camera.left = -boundingBox.max.x;
+    camera.right = -boundingBox.min.x;
     camera.bottom = boundingBox.min.z;
     camera.top = boundingBox.max.z;
     camera.near = 0;
-    camera.far = size.y + 2 * shadowOffset;
+    camera.far = size.y - shadowOffset;
     this.shadowLight.updateMatrixWorld();
-    this.add(this.shadowLight);
+    this.pivot.add(this.shadowLight);
+    this.shadowLight.target = this.pivot;
 
     const planeGeometry = new PlaneBufferGeometry(size.x, size.z);
-    const planeMaterial = new MeshStandardMaterial({color: 0xffffff});
-    const plane = new Mesh(planeGeometry, planeMaterial);
+    const plane = new Mesh(planeGeometry, this.shadowMaterial);
     plane.rotateX(-Math.PI / 2);
     boundingBox.getCenter(plane.position);
-    plane.position.y -= size.y / 2;
+    plane.position.y -= size.y / 2 - 2 * shadowOffset;
     plane.receiveShadow = true;
     plane.castShadow = false;
     this.pivot.add(plane);
-    const helper = new CameraHelper(this.shadowLight.shadow.camera);
-    this.add(helper);
+    // const helper = new CameraHelper(this.shadowLight.shadow.camera);
+    // this.add(helper);
 
     (this.shadowLight.shadow as any).updateMatrices(this.shadowLight);
-    this.renderer.renderer.shadowMap.needsUpdate = true;
+    this.shadowNeedsUpdate = true;
     this.element[$needsRender]();
   }
 
   setShadowIntensity(intensity: number) {
-    this.shadowLight.intensity = intensity;
-    if (intensity > 0) {
-      this.shadowLight.castShadow = true;
-    } else {
-      this.shadowLight.castShadow = false;
-    }
+    const BASE_SHADOW_OPACITY = 0.1;
+    this.shadowMaterial.opacity = intensity * BASE_SHADOW_OPACITY;
   }
 
   createSkyboxMesh(): Mesh {

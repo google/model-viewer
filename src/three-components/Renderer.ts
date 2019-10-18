@@ -97,7 +97,7 @@ export class Renderer extends EventDispatcher {
       this.renderer.setPixelRatio(resolveDpr());
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = BasicShadowMap;
-      // this.renderer.shadowMap.autoUpdate = false;
+      this.renderer.shadowMap.autoUpdate = false;
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
@@ -194,10 +194,16 @@ export class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
-      const {exposure} = scene;
+      const {exposure, shadowMaterial} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+
+      const shadowNeedsUpdate = this.renderer.shadowMap.needsUpdate;
+      this.renderer.shadowMap.enabled = shadowMaterial.opacity > 0;
+      this.renderer.shadowMap.needsUpdate =
+          shadowNeedsUpdate || scene.shadowNeedsUpdate;
+      scene.shadowNeedsUpdate = false;
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
