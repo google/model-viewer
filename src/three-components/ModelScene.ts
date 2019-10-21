@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, CameraHelper, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -232,10 +232,22 @@ export default class ModelScene extends Scene {
     if (shadowIntensity > 0 && this.model.hasModel()) {
       if (this.shadow == null) {
         this.shadow = new Shadow(this);
+        // this.showShadowHelper();
       } else {
         this.shadow.setScene(this);
       }
       this.shadow.setIntensity(shadowIntensity);
+    }
+  }
+
+  /**
+   * Renders a box representing the shadow camera, which is helpful in
+   * debugging.
+   */
+  showShadowHelper() {
+    if (this.shadow != null) {
+      const helper = new CameraHelper(this.shadow.shadow.camera);
+      this.add(helper);
     }
   }
 

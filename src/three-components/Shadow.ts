@@ -14,32 +14,35 @@
  */
 
 import {DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial} from 'three';
+
 import ModelScene from './ModelScene';
 
 // Nothing within shadowOffset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
 const SHADOW_OFFSET = 0.001;
 const BASE_SHADOW_OPACITY = 0.1;
+// The softness of the shadow is controlled with this resolution parameter. The
+// lower the resolution, the softer the shadow.
+const MAX_SHADOW_RESOLUTION = 64;
 
 export class Shadow extends DirectionalLight {
   private shadowMaterial = new ShadowMaterial;
-  private plane: Mesh;
+  private floor: Mesh;
   public needsUpdate = false;
 
   constructor(private scene: ModelScene) {
     super();
 
+    // We use the light only to cast a shadow, not to light the scene.
     this.intensity = 0;
     this.castShadow = true;
 
-    this.plane = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
-    this.plane.receiveShadow = true;
-    this.plane.castShadow = false;
-    scene.pivot.add(this.plane);
+    this.floor = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
+    this.floor.receiveShadow = true;
+    this.floor.castShadow = false;
+    scene.pivot.add(this.floor);
     scene.pivot.add(this);
     this.target = scene.pivot;
-    // const helper = new CameraHelper(this.shadow.camera);
-    // this.add(helper);
 
     this.setScene(scene);
   }
@@ -51,16 +54,18 @@ export class Shadow extends DirectionalLight {
 
     const shadowOffset = size.y * SHADOW_OFFSET;
 
-    this.plane.rotateX(-Math.PI / 2);
-    boundingBox.getCenter(this.plane.position);
-    this.plane.position.y -= size.y / 2 - 2 * shadowOffset;
+    this.floor.rotateX(-Math.PI / 2);
+    boundingBox.getCenter(this.floor.position);
+    // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
+    // to stay inside the shadow camera.
+    this.floor.position.y -= size.y / 2 - 2 * shadowOffset;
 
     this.position.y = boundingBox.max.y + shadowOffset;
     this.up.set(0, 0, 1);
     camera.near = 0;
-    camera.far = size.y - shadowOffset;
+    camera.far = size.y;
 
-    this.setMapSize(128);
+    this.setMapSize(MAX_SHADOW_RESOLUTION);
   }
 
   setMapSize(maxMapSize: number) {
@@ -72,8 +77,9 @@ export class Shadow extends DirectionalLight {
         size.x > size.z ? Math.floor(maxMapSize * size.z / size.x) : maxMapSize;
 
     mapSize.set(width, height);
-    const widthPad = 2 * Math.ceil(size.x / width);
-    const heightPad = 2 * Math.ceil(size.z / height);
+    // These pads account for the softening radius around the shadow.
+    const widthPad = 2.5 * size.x / width;
+    const heightPad = 2.5 * size.z / height;
 
     camera.left = -boundingBox.max.x - widthPad;
     camera.right = -boundingBox.min.x + widthPad;
@@ -83,7 +89,7 @@ export class Shadow extends DirectionalLight {
     this.updateMatrixWorld();
     (this.shadow as any).updateMatrices(this);
 
-    this.plane.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
+    this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
   }
 
@@ -91,10 +97,10 @@ export class Shadow extends DirectionalLight {
     this.shadowMaterial.opacity = intensity * BASE_SHADOW_OPACITY;
     if (intensity > 0) {
       this.visible = true;
-      this.plane.visible = true;
+      this.floor.visible = true;
     } else {
       this.visible = false;
-      this.plane.visible = false;
+      this.floor.visible = false;
     }
   }
 
