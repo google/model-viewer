@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-import './utils-spec.js';
-import './parsers-spec.js';
-import './conversions-spec.js';
+import './utilities-spec.js';
+import './styles/parsers-spec.js';
+import './styles/conversions-spec.js';
+import './styles/deserializers-spec.js';
+import './styles/evaluators-spec.js';
+import './styles/style-effector-spec.js';
+import './decorators-spec.js';
 import './model-viewer-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
@@ -24,6 +28,7 @@ import './three-components/SmoothControls-spec.js';
 import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';
 import './three-components/ModelUtils-spec.js';
+import './utilities/animation-spec.js';
 import './utilities/cache-eviction-policy-spec.js';
 import './utilities/focus-visible-spec.js';
 import './utilities/progress-tracker-spec.js';

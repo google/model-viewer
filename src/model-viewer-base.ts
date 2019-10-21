@@ -15,12 +15,13 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
+import {Event as ThreeEvent} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import ModelScene from './three-components/ModelScene.js';
-import {sceneRenderer} from './three-components/Renderer.js';
+import {ContextLostEvent, sceneRenderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -38,6 +39,8 @@ const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $lastDpr = Symbol('lastDpr');
 const $clearModelTimeout = Symbol('clearModelTimeout');
+const $onContextLost = Symbol('onContextLost');
+const $contextLostHandler = Symbol('contextLostHandler');
 
 // export const $resetRenderer = Symbol('resetRenderer') ;
 export const $ariaLabel = Symbol('ariaLabel');
@@ -112,6 +115,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$intersectionObserver]: IntersectionObserver|null = null;
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
+
+  protected[$contextLostHandler] = (event: ContextLostEvent) =>
+      this[$onContextLost](event);
 
   get loaded() {
     return this[$getLoaded]();
@@ -212,6 +218,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         for (let entry of entries) {
           if (entry.target === this) {
             this[$scene].isVisible = entry.isIntersecting;
+            this.requestUpdate();
           }
         }
       }, {
@@ -238,6 +245,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
+    this[$renderer].addEventListener(
+        'contextlost',
+        this[$contextLostHandler] as (event: ThreeEvent) => void);
+
     this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
 
@@ -262,6 +273,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
+    this[$renderer].removeEventListener(
+        'contextlost',
+        this[$contextLostHandler] as (event: ThreeEvent) => void);
+
     this[$renderer].unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
@@ -276,7 +291,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // of a microtask, LitElement/UpdatingElement will notify of a change even
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
-    if (changedProperties.has('src') && this.src !== this[$scene].model.url) {
+    if (changedProperties.has('src') &&
+        (this.src == null || this.src !== this[$scene].model.url)) {
       this[$loaded] = false;
       this[$loadedTime] = 0;
       (async () => {
@@ -369,6 +385,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
     this[$needsRender]();
+  }
+
+  [$onContextLost](event: ContextLostEvent) {
+    this.dispatchEvent(new CustomEvent(
+        'error',
+        {detail: {type: 'webglcontextlost', sourceError: event.attachment}}));
   }
 
   /**

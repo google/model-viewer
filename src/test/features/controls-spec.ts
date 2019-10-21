@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import {$controls, $promptElement, CameraChangeDetails, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, sphericalDefaults, SphericalPosition} from '../../features/controls.js';
+import {IS_IE11} from '../../constants.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
+import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
@@ -23,6 +25,7 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
@@ -91,9 +94,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        const orbitDefault =
-            sphericalDefaults(element[$scene].model.idealCameraDistance);
-        defaultRadius = orbitDefault[2] * orbitDefault[3];
+        const orbitIntrinsics = cameraOrbitIntrinsics(element);
+        const evaluator = new StyleEvaluator([], orbitIntrinsics);
+
+        defaultRadius = evaluator.evaluate()[2];
       });
 
       teardown(() => {
@@ -154,7 +158,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad auto`;
 
         await timePasses();
-
         settleControls(controls);
 
         expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
@@ -189,6 +192,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         settleControls(controls);
 
         expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
+      });
+
+      test('changes FOV basis when aspect ratio changes', async () => {
+        const fov = element.getFieldOfView();
+        element.setAttribute('style', 'width: 200px; height: 300px');
+
+        await until(() => element.getFieldOfView() !== fov);
+        expect(element.getFieldOfView()).to.be.greaterThan(fov);
       });
 
       test('causes camera-change event to fire', async () => {
@@ -245,7 +256,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.fieldOfView = `${fieldOfView}deg`;
           element.jumpCameraToGoal();
 
-          await timePasses();
+          await rafPasses();
 
           expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
           let orbit = element.getCameraOrbit();
@@ -359,6 +370,19 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
+
+        suite('when configured to be basic', () => {
+          setup(async () => {
+            element.interactionPromptStyle = 'basic';
+            await timePasses();
+          });
+
+          test('does not have a css animation', () => {
+            const computedStyle =
+                getComputedStyle((element as any)[$promptAnimatedContainer]);
+            expect(computedStyle.animationName).to.be.equal('none');
+          });
+        });
       });
 
       suite('a11y', () => {
@@ -407,16 +431,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           test(
               'does not prompt users to interact before a model is loaded',
               async () => {
+                if (IS_IE11) {
+                  console.warn('Skipping this test for IE11 only');
+                  return;
+                }
                 element.src = null;
-
-                Object.defineProperty(
-                    element, 'loaded', {value: false, configurable: true});
 
                 const canvas: HTMLCanvasElement = element[$scene].canvas;
                 const promptElement: HTMLElement =
                     (element as any)[$promptElement];
-
-                settleControls(controls);
 
                 await rafPasses();
 
@@ -427,13 +450,14 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
-                Object.defineProperty(
-                    element, 'loaded', {value: true, configurable: true});
+                canvas.blur();
 
-                await timePasses(element.interactionPromptThreshold + 100);
+                element.src = ASTRONAUT_GLB_PATH;
+                await waitForEvent(element, 'load');
 
-                expect(promptElement.classList.contains('visible'))
-                    .to.be.equal(true);
+                canvas.focus();
+
+                await until(() => promptElement.classList.contains('visible'));
               });
 
           // TODO(#584)

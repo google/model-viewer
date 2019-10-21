@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION, StagingMixin} from '../../features/staging.js';
+import {AUTO_ROTATE_DELAY_DEFAULT, StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase, {$onUserModelOrbit} from '../../model-viewer-base.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -55,16 +55,44 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     });
 
     suite('auto-rotate', () => {
+      // An arbitrary amount of time, greater than one rAF though
+      const AT_LEAST_ONE_RAF_MS = 50;
+
       setup(() => {
         element.autoRotate = true;
       });
 
-      test('causes the model to rotate over time', async () => {
+      test('causes the model to rotate after a delay', async () => {
         const {turntableRotation} = element;
-        await timePasses(50);  // An arbitrary amount of time, greater than one
-                               // rAF though
+        await timePasses(AT_LEAST_ONE_RAF_MS);
+        expect(element.turntableRotation).to.be.equal(turntableRotation);
+        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
         expect(element.turntableRotation).to.be.greaterThan(turntableRotation);
       });
+
+      test(
+          'retains turntable rotation when auto-rotate is toggled',
+          async () => {
+            element.autoRotateDelay = 0;
+            await timePasses(AT_LEAST_ONE_RAF_MS);
+
+            const {turntableRotation} = element;
+
+            expect(turntableRotation).to.be.greaterThan(0);
+
+            element.autoRotate = false;
+
+            await timePasses(AT_LEAST_ONE_RAF_MS);
+
+            expect(element.turntableRotation).to.be.equal(turntableRotation);
+
+            element.autoRotate = true;
+
+            await timePasses(AT_LEAST_ONE_RAF_MS);
+
+            expect(element.turntableRotation)
+                .to.be.greaterThan(turntableRotation);
+          });
 
       suite('when the model is not visible', () => {
         setup(() => {
@@ -73,11 +101,26 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         test('does not cause the model to rotate over time', async () => {
           const {turntableRotation} = element;
-          await timePasses(50);  // An arbitrary amount of time, greater than
-                                 // one rAF though
+
+          await timePasses(AUTO_ROTATE_DELAY_DEFAULT + AT_LEAST_ONE_RAF_MS);
+
           expect(element.turntableRotation).to.be.equal(turntableRotation);
         });
       });
+
+      suite('with zero auto-rotate-delay', () => {
+        setup(async () => {
+          element.autoRotateDelay = 0;
+          await timePasses();
+        });
+
+        test('causes the model to rotate ASAP', async () => {
+          const {turntableRotation} = element;
+          await timePasses(AT_LEAST_ONE_RAF_MS);
+          expect(element.turntableRotation)
+              .to.be.greaterThan(turntableRotation);
+        });
+      })
 
       // TODO(#582)
       test.skip('pauses rotate after user interaction', async () => {
@@ -85,11 +128,11 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         element[$onUserModelOrbit]();
 
-        await timePasses(50);  // An arbitrary amount of time, greater than one
-                               // rAF though
+        await timePasses(AT_LEAST_ONE_RAF_MS);
+
         expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
 
-        await timePasses(AUTO_ROTATE_DELAY_AFTER_USER_INTERACTION);
+        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
 
         expect(element.turntableRotation)
             .to.be.greaterThan(initialTurntableRotation);
