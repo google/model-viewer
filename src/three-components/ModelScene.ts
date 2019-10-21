@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, ShadowMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -56,6 +56,7 @@ export default class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
   public shadow: Shadow|null = null;
+  public shadowIntensity = 0;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -218,13 +219,24 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    if (this.shadow == null) {
-      this.shadow = new Shadow(this);
-    } else {
-      this.shadow.setSize(this);
-    }
+    this.setShadowIntensity(this.shadowIntensity);
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
+  }
+
+  /**
+   * Sets the shadow's intensity, lazily creating the shadow as necessary.
+   */
+  setShadowIntensity(shadowIntensity: number) {
+    this.shadowIntensity = shadowIntensity;
+    if (shadowIntensity > 0 && this.model.hasModel()) {
+      if (this.shadow == null) {
+        this.shadow = new Shadow(this);
+      } else {
+        this.shadow.setScene(this);
+      }
+      this.shadow.setIntensity(shadowIntensity);
+    }
   }
 
   createSkyboxMesh(): Mesh {

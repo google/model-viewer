@@ -41,13 +41,10 @@ export class Shadow extends DirectionalLight {
     // const helper = new CameraHelper(this.shadow.camera);
     // this.add(helper);
 
-    this.setSize(scene);
-    this.setMapSize(128);
-
-    (this.shadow as any).updateMatrices(this);
+    this.setScene(scene);
   }
 
-  setSize(scene: ModelScene) {
+  setScene(scene: ModelScene) {
     this.scene = scene;
     const {boundingBox, size} = scene.model;
     const {camera} = this.shadow;
@@ -62,7 +59,8 @@ export class Shadow extends DirectionalLight {
     this.up.set(0, 0, 1);
     camera.near = 0;
     camera.far = size.y - shadowOffset;
-    this.needsUpdate = true;
+
+    this.setMapSize(128);
   }
 
   setMapSize(maxMapSize: number) {
@@ -74,8 +72,8 @@ export class Shadow extends DirectionalLight {
         size.x > size.z ? Math.floor(maxMapSize * size.z / size.x) : maxMapSize;
 
     mapSize.set(width, height);
-    const widthPad = 2 * size.x / width;
-    const heightPad = 2 * size.z / height;
+    const widthPad = 2 * Math.ceil(size.x / width);
+    const heightPad = 2 * Math.ceil(size.z / height);
 
     camera.left = -boundingBox.max.x - widthPad;
     camera.right = -boundingBox.min.x + widthPad;
@@ -83,6 +81,7 @@ export class Shadow extends DirectionalLight {
     camera.top = boundingBox.max.z + heightPad;
 
     this.updateMatrixWorld();
+    (this.shadow as any).updateMatrices(this);
 
     this.plane.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
@@ -92,8 +91,10 @@ export class Shadow extends DirectionalLight {
     this.shadowMaterial.opacity = intensity * BASE_SHADOW_OPACITY;
     if (intensity > 0) {
       this.visible = true;
+      this.plane.visible = true;
     } else {
       this.visible = false;
+      this.plane.visible = false;
     }
   }
 

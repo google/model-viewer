@@ -200,10 +200,11 @@ export class Renderer extends EventDispatcher {
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
       const shadowNeedsUpdate = this.renderer.shadowMap.needsUpdate;
-      this.renderer.shadowMap.enabled = shadow != null && shadow.visible;
-      this.renderer.shadowMap.needsUpdate =
-          shadowNeedsUpdate || shadow.needsUpdate;
-      scene.shadowNeedsUpdate = false;
+      if (shadow != null) {
+        this.renderer.shadowMap.needsUpdate =
+            shadowNeedsUpdate || shadow.needsUpdate;
+        shadow.needsUpdate = false;
+      }
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
