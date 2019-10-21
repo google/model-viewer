@@ -32,6 +32,8 @@ import {timeline} from '../utilities/animation.js';
 // @see https://github.com/GoogleWebComponents/model-viewer/issues/839
 const PROMPT_ANIMATION_TIME = 5000;
 
+// For timing purposes, a "frame" is a timing agnostic relative unit of time
+// and a "value" is a target value for the keyframe.
 const wiggle = timeline(0, [
   {frames: 6, value: 0},
   {frames: 5, value: -1},
