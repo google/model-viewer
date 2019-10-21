@@ -113,6 +113,8 @@ export class ExampleSnippet extends UpdatingElement {
 
       let snippet = template.innerHTML;
 
+      snippet.replace('type="noexecute" ', '');
+
       if (!this.preserveWhitespace) {
         snippet = snippet.trim();
       }
