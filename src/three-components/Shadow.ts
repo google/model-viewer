@@ -104,6 +104,10 @@ export class Shadow extends DirectionalLight {
     }
   }
 
+  getIntensity(): number {
+    return this.shadowMaterial.opacity / BASE_SHADOW_OPACITY;
+  }
+
   setRotation(radiansY: number) {
     this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
     (this.shadow as any).updateMatrices(this);
