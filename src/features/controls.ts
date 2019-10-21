@@ -24,6 +24,33 @@ import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/par
 import {DEFAULT_FOV_DEG} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
+import {timeline} from '../utilities/animation.js';
+
+// NOTE(cdata): The following "animation" timing functions are deliberately
+// being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
+// would cause the interaction prompt to glitch unexpectedly
+// @see https://github.com/GoogleWebComponents/model-viewer/issues/839
+const PROMPT_ANIMATION_TIME = 5000;
+
+// For timing purposes, a "frame" is a timing agnostic relative unit of time
+// and a "value" is a target value for the keyframe.
+const wiggle = timeline(0, [
+  {frames: 6, value: 0},
+  {frames: 5, value: -1},
+  {frames: 1, value: -1},
+  {frames: 8, value: 1},
+  {frames: 1, value: 1},
+  {frames: 5, value: 0},
+  {frames: 12, value: 0}
+]);
+
+const fade = timeline(0, [
+  {frames: 2, value: 0},
+  {frames: 1, value: 1},
+  {frames: 5, value: 1},
+  {frames: 1, value: 0},
+  {frames: 4, value: 0}
+]);
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -100,7 +127,6 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
-const OFFSET_ROTATION_MULTIPLIER = 5;
 const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
@@ -135,8 +161,8 @@ const $onChange = Symbol('onChange');
 const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userPromptedOnce = Symbol('userPromptedOnce');
-const $promptElementVisible = Symbol('promptElementVisible');
-const $lastPromptOffset = Symbol('lastPromptOffste');
+const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
+const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
 
 const $zoomAdjustedFieldOfView = Symbol('zoomAdjustedFieldOfView');
@@ -209,13 +235,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
     protected[$promptElement] =
-        this.shadowRoot!.querySelector('.interaction-prompt')!;
-    protected[$promptAnimatedContainer] = this.shadowRoot!.querySelector(
-        '.interaction-prompt > .animated-container')!;
+        this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
+    protected[$promptAnimatedContainer] =
+        this.shadowRoot!.querySelector(
+            '.interaction-prompt > .animated-container') as HTMLElement;
 
     protected[$focusedTime] = Infinity;
     protected[$lastPromptOffset] = 0;
-    protected[$promptElementVisible] = false;
+    protected[$promptElementVisibleTime] = Infinity;
     protected[$userPromptedOnce] = false;
     protected[$waitingToPromptUser] = false;
     protected[$shouldPromptUserToInteract] = true;
@@ -345,6 +372,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             this.interactionPrompt === InteractionPromptStrategy.AUTO ?
             this[$loadedTime] :
             this[$focusedTime];
+
         if (this.loaded &&
             time > thresholdTime + this.interactionPromptThreshold) {
           this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
@@ -356,32 +384,33 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           // again for this particular <model-element> instance:
           this[$userPromptedOnce] = true;
           this[$waitingToPromptUser] = false;
-          this[$promptElementVisible] = true;
+          this[$promptElementVisibleTime] = time;
 
           this[$promptElement].classList.add('visible');
         }
       }
 
-      if (this[$promptElementVisible] &&
+
+      if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
-        const transformString =
-            self.getComputedStyle(this[$promptAnimatedContainer])
-                .getPropertyValue('transform');
-        // Parse the fifth term of computed transform style
-        // which is in form of matrix(n0, n1, n2, n3, n4, n5)
-        // @see https://www.w3.org/TR/css-transforms-1/#serialization-of-the-computed-value
-        const offset = parseFloat(transformString.split(',')[4]);
-        const delta = offset - this[$lastPromptOffset];
+        const scene = this[$scene];
+        const animationTime =
+            ((time - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
+            1;
+        const offset = wiggle(animationTime);
+        const opacity = fade(animationTime);
 
-        if (isFinite(offset)) {
-          const scene = this[$scene];
+        const xOffset = offset * scene.width * 0.05;
+        const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
 
-          this[$lastPromptOffset] = offset;
-          scene.setPivotRotation(
-              scene.getPivotRotation() +
-              delta / scene.width * OFFSET_ROTATION_MULTIPLIER);
-          this[$needsRender]();
-        }
+        this[$promptAnimatedContainer].style.transform =
+            `translateX(${xOffset}px)`;
+        this[$promptAnimatedContainer].style.opacity = `${opacity}`;
+
+        this[$controls].adjustOrbit(deltaTheta, 0, 0, 0);
+
+        this[$lastPromptOffset] = offset;
+        this[$needsRender]();
       }
 
       this[$controls].update(time, delta);
@@ -396,7 +425,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
-      this[$promptElementVisible] = false;
+      this[$promptElementVisibleTime] = Infinity;
 
       // Implicitly there was some reason to defer the prompt. If the user
       // has been prompted at least once already, we no longer need to
@@ -518,7 +547,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // camera controls (that is, we "should" prompt the user), we begin
       // the idle timer and indicate that we are waiting for it to cross the
       // prompt threshold:
-      if (this[$shouldPromptUserToInteract]) {
+      if (!isFinite(this[$promptElementVisibleTime]) &&
+          this[$shouldPromptUserToInteract]) {
         this[$waitingToPromptUser] = true;
       }
     }
@@ -526,7 +556,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onBlur]() {
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
-      this[$promptElementVisible] = false;
+
+      this[$promptElementVisibleTime] = Infinity;
       this[$focusedTime] = Infinity;
     }
 
