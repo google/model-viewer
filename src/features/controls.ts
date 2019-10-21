@@ -388,23 +388,24 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
+
       if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
         const scene = this[$scene];
         const animationTime =
-            ((time - this[$promptElementVisibleTime]) % PROMPT_ANIMATION_TIME) /
-            PROMPT_ANIMATION_TIME;
+            ((time - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
+            1;
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
 
         const xOffset = offset * scene.width * 0.05;
-        const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 8;
+        const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
 
         this[$promptAnimatedContainer].style.transform =
             `translateX(${xOffset}px)`;
         this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
-        this[$controls].adjustOrbit(deltaTheta * Math.PI / 6, 0, 0, 0);
+        this[$controls].adjustOrbit(deltaTheta, 0, 0, 0);
 
         this[$lastPromptOffset] = offset;
         this[$needsRender]();
@@ -544,7 +545,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // camera controls (that is, we "should" prompt the user), we begin
       // the idle timer and indicate that we are waiting for it to cross the
       // prompt threshold:
-      if (this[$shouldPromptUserToInteract]) {
+      if (!isFinite(this[$promptElementVisibleTime]) &&
+          this[$shouldPromptUserToInteract]) {
         this[$waitingToPromptUser] = true;
       }
     }
@@ -552,6 +554,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onBlur]() {
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
+
       this[$promptElementVisibleTime] = Infinity;
       this[$focusedTime] = Infinity;
     }
