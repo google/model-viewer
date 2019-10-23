@@ -14,6 +14,7 @@
  */
 
 import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
+import {Event} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -24,7 +25,15 @@ import ModelScene from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
 
+export interface ContextLostEvent extends Event {
+  type: 'contextlost';
+  sourceEvent: WebGLContextEvent;
+}
+
 export const $arRenderer = Symbol('arRenderer');
+
+const $onWebGLContextLost = Symbol('onWebGLContextLost');
+const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -37,7 +46,7 @@ export const $arRenderer = Symbol('arRenderer');
  * Canvas2DRenderingContext if supported for cheaper transfering of
  * the texture.
  */
-export default class Renderer extends EventDispatcher {
+export class Renderer extends EventDispatcher {
   public renderer!: WebGLRenderer;
   public context!: WebGLRenderingContext|null;
   public canvas: HTMLCanvasElement;
@@ -48,6 +57,9 @@ export default class Renderer extends EventDispatcher {
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
+
+  private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
+      this[$onWebGLContextLost](event);
 
   get canRender() {
     return this.renderer != null && this.context != null;
@@ -64,6 +76,8 @@ export default class Renderer extends EventDispatcher {
     }
 
     this.canvas = document.createElement('canvas');
+    this.canvas.addEventListener(
+        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
       this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
@@ -221,5 +235,13 @@ export default class Renderer extends EventDispatcher {
     (this as any).renderer = null;
 
     this.scenes.clear();
+
+    this.canvas.removeEventListener(
+        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
+  }
+
+  [$onWebGLContextLost](event: WebGLContextEvent) {
+    this.dispatchEvent(
+        {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
   }
 }

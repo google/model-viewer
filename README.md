@@ -24,8 +24,7 @@ supported to provide a seamless development experience.
 
 ## Installing
 
-You can load a _bundled build_ via
-unpkg.com by including the snippet below. This will automatically load the correct version for the user's browser.
+You can load a _bundled build_ via [UNPKG](https://unpkg.com/) by including the snippet below. This will automatically load the correct version for the user's browser.
 
 ```html
 <!-- 💁 Include both scripts below to support all browsers! -->

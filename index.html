@@ -61,7 +61,7 @@
           <template>
 <!-- Import the component -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
-<script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+<script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 <!-- Use it like any other HTML element -->
 <model-viewer src="examples/assets/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls background-color="#455A64"></model-viewer>
           </template>
@@ -131,7 +131,12 @@
             </li>
             <li>
               <div>auto-rotate</div>
-              <p>Enables the auto rotation of the model.</p>
+              <p>Enables the auto-rotation of the model.</p>
+            </li>
+            <li>
+              <div>auto-rotate-delay</div>
+              <p>Sets the delay before auto-rotation begins. The format of the value
+              is a number in milliseconds. The default is 3000.</p>
             </li>
             <li>
               <div>autoplay</div>
@@ -161,18 +166,29 @@
             </li>
             <li>
               <div>camera-orbit</div>
-              <p>Set the starting and/or subsequent orbital position of the
-              camera. You can control the azimuthal and polar angles, and the
-              distance from the model. Accepts values of the form "$angle $angle
-              $distance", like "10deg 75deg 1.5m". Also supports units in
-              radians ("rad") for angles and centimeters ("cm") or millimeters
-              ("mm") for camera distance. Camera distance can also be set as a
-              percentage ('%'), where 100% gives the model tight framing within
-              any window based on all possible theta and phi values. Any time
-              this value changes from its initially configured value, the camera
-              will interpolate from its current position to the new value.
-              Defaults to "0deg 75deg 105%". Any value set to 'auto' will revert
-              to the default.</p>
+              <span>
+                <p>Set the starting and/or subsequent orbital position of the
+                camera. You can control the azimuthal and polar angles, and the
+                distance from the model. Accepts values of the form "$angle $angle
+                $distance", like "10deg 75deg 1.5m". Also supports units in
+                radians ("rad") for angles and centimeters ("cm") or millimeters
+                ("mm") for camera distance. Camera distance can also be set as a
+                percentage ('%'), where 100% gives the model tight framing within
+                any window based on all possible theta and phi values. Any time
+                this value changes from its initially configured value, the camera
+                will interpolate from its current position to the new value.
+                Any value set to 'auto' will revert to the default.</p>
+                <p>For camera-orbit, camera-target and field-of-view, parts of the
+                property value can be configured with CSS-like functions. The CSS
+                calc() function is supported for these values, as well as a specialized
+                form of the env() function. You can use env(window-scroll-y) anywhere
+                in the expression to get a number from 0-1 that corresponds to the
+                current top-level scroll position of the current frame. For example,
+                a value like "calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m"
+                cause the camera to orbit horizontally around the model as the user
+                scrolls down the page.</p>
+                <p>Defaults to "0deg 75deg 105%"</p>
+              </span>
             </li>
             <li>
               <div>camera-target</div>
@@ -228,6 +244,16 @@
               prompt will only be activated if the element has first received
               focus. The interaction prompt will only display if camera-controls
               are enabled. Defaults to "auto".</p>
+            </li>
+            <li>
+              <div>interaction-prompt-style</div>
+              <p>Configures the presentation style of the interaction-prompt when
+              it is raised. The two allowed values are "wiggle" and "basic". When
+              set to "wiggle", the prompt will animate from horizontally and the
+              model will appear to be rotated as though the prompt is interacting
+              with it. When set to "basic", the prompt is not animated, and instead
+              simply appears until it is dismissed by user interaction.
+              Defaults to "wiggle".</p>
             </li>
             <li>
               <div>interaction-prompt-threshold</div>
@@ -429,6 +455,13 @@
               currentTime property to 0.</p>
             </li>
             <li>
+              <div>resetTurntableRotation()</div>
+              <p>Resets the turntable that rotates the model when auto-rotate
+              is enabled. The new value of the turntable rotation will be 0 after
+              this method is invoked, but the model may not update until the next
+              render frame.</p>
+            </li>
+            <li>
               <div>toDataURL(type, encoderOptions)</div>
               <p>Returns a screenshot of the current model render in the format
               specified by <i>type</i> (defaults to image/png). The screenshot is
@@ -457,6 +490,18 @@
               <p>Fired when the environment has changed. If the environment is
               derived from background-image or environment-image, the image will
               have loaded by the time this event fires.</p>
+            </li>
+            <li>
+              <div>error</div>
+              <p>This event can be triggered for two reasons: a model has failed
+              to load or parse, or the WebGL context was lost. If the model failed
+              to load, event.detail.type will be 'loadfailure'. If the WebGL context
+              was lost, event.detail.type will be 'webglcontextlost'. In both cases,
+              recovery countermeasures are left as an exercise for the user. The
+              element will not make automatic attempts to re-load a model that has failed
+              to load. Nor will the element attempt to restore the GL context after
+              it has been lost. Error events also hold a reference to the originating
+              error event (when there is one) as event.detail.sourceEvent.</p>
             </li>
             <li>
               <div>load</div>

@@ -17,74 +17,72 @@ import {Timer} from '../../utilities/timer.js';
 
 const expect = chai.expect;
 
-export default () => {
-  suite('Timer', () => {
-    test('has not ended by default', () => {
-      const timer = new Timer(20);
+suite('Timer', () => {
+  test('has not ended by default', () => {
+    const timer = new Timer(20);
 
-      expect(timer.hasStopped).to.be.false;
-    });
-
-    test('can tick', () => {
-      const timer = new Timer(20);
-
-      expect(timer.hasStopped).to.be.false;
-
-      timer.tick(30);
-
-      expect(timer.hasStopped).to.be.true;
-    });
-
-    test('can reset', () => {
-      const timer = new Timer(20);
-
-      expect(timer.hasStopped).to.be.false;
-
-      timer.tick(30);
-
-      expect(timer.hasStopped).to.be.true;
-
-      timer.reset();
-
-      expect(timer.hasStopped).to.be.false;
-    });
-
-    test('can stop', () => {
-      const timer = new Timer(20);
-
-      expect(timer.hasStopped).to.be.false;
-
-      timer.stop();
-
-      expect(timer.hasStopped).to.be.true;
-      expect(timer.time).to.equal(20);
-      expect(timer.timeScale).to.equal(1);
-
-      timer.reset();
-
-      expect(timer.hasStopped).to.be.false;
-    });
-
-    test('can get time', () => {
-      const timer = new Timer(20);
-
-      expect(timer.time).to.equal(0);
-      expect(timer.timeScale).to.equal(0);
-
-      timer.tick(10);
-
-      expect(timer.time).to.equal(10);
-      expect(timer.timeScale).to.equal(0.5);
-
-      timer.tick(10);
-
-      expect(timer.time).to.equal(20);
-      expect(timer.timeScale).to.equal(1);
-
-      timer.tick(10);
-
-      expect(timer.time).to.equal(20);
-      expect(timer.timeScale).to.equal(1);
-    });
+    expect(timer.hasStopped).to.be.false;
   });
-};
+
+  test('can tick', () => {
+    const timer = new Timer(20);
+
+    expect(timer.hasStopped).to.be.false;
+
+    timer.tick(30);
+
+    expect(timer.hasStopped).to.be.true;
+  });
+
+  test('can reset', () => {
+    const timer = new Timer(20);
+
+    expect(timer.hasStopped).to.be.false;
+
+    timer.tick(30);
+
+    expect(timer.hasStopped).to.be.true;
+
+    timer.reset();
+
+    expect(timer.hasStopped).to.be.false;
+  });
+
+  test('can stop', () => {
+    const timer = new Timer(20);
+
+    expect(timer.hasStopped).to.be.false;
+
+    timer.stop();
+
+    expect(timer.hasStopped).to.be.true;
+    expect(timer.time).to.equal(20);
+    expect(timer.timeScale).to.equal(1);
+
+    timer.reset();
+
+    expect(timer.hasStopped).to.be.false;
+  });
+
+  test('can get time', () => {
+    const timer = new Timer(20);
+
+    expect(timer.time).to.equal(0);
+    expect(timer.timeScale).to.equal(0);
+
+    timer.tick(10);
+
+    expect(timer.time).to.equal(10);
+    expect(timer.timeScale).to.equal(0.5);
+
+    timer.tick(10);
+
+    expect(timer.time).to.equal(20);
+    expect(timer.timeScale).to.equal(1);
+
+    timer.tick(10);
+
+    expect(timer.time).to.equal(20);
+    expect(timer.timeScale).to.equal(1);
+  });
+});

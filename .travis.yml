@@ -39,6 +39,7 @@ cache:
 after_success:
 - ./scripts/run-fidelity-check.sh
 before_deploy:
+- npm run create-legacy-bundles
 - cd ${TRAVIS_BUILD_DIR}
 - touch .nojekyll
 - echo 'node_modules/*' > .gitignore

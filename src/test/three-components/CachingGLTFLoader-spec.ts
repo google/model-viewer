@@ -32,10 +32,14 @@ suite('CachingGLTFLoader', () => {
     });
 
     suite('before glTF is loaded', () => {
-      test('reports that it has not finished loading', () => {
-        loader.load(ASTRONAUT_GLB_PATH);
-        expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
-            .to.be.false;
+      test('reports that it has not finished loading', async () => {
+        const fileLoads = loader.load(ASTRONAUT_GLB_PATH);
+        try {
+          expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
+              .to.be.false;
+        } finally {
+          await fileLoads;
+        }
       });
     });
 
@@ -47,9 +51,13 @@ suite('CachingGLTFLoader', () => {
       });
     });
 
-    test('synchronously populates the cache', () => {
-      loader.load(ASTRONAUT_GLB_PATH);
-      expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
+    test('synchronously populates the cache', async () => {
+      const fileLoads = loader.load(ASTRONAUT_GLB_PATH);
+      try {
+        expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
+      } finally {
+        await fileLoads;
+      }
     });
 
     test('yields a promise that resolves a scene', async () => {
