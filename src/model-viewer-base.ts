@@ -224,7 +224,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
             this.requestUpdate($isInRenderTree, oldValue);
 
             if (this[$isInRenderTree]) {
-              // Wait a microtask to give other properties a change to respond
+              // Wait a microtask to give other properties a chance to respond
               // to the state change, then resolve progress on entering the
               // render tree:
               Promise.resolve().then(() => {
