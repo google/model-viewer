@@ -174,7 +174,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     element.style.display = 'block';
     await waitForEvent(element, 'environment-change');
     expect(environmentChangeCount).to.be.equal(1);
-    element.addEventListener('environment-change', environmentChangeHandler);
+    element.removeEventListener('environment-change', environmentChangeHandler);
   });
 
   suite('with no background-image property', () => {
