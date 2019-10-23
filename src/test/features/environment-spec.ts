@@ -329,7 +329,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.src = MODEL_URL;
       document.body.appendChild(element);
       await waitForEvent(element, 'load');
-      scene.isVisible = true;
+      scene.visible = true;
     });
 
     teardown(() => {

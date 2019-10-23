@@ -219,8 +219,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         for (let entry of entries) {
           if (entry.target === this) {
             const oldValue = this[$isInRenderTree];
-            this[$isInRenderTree] = this[$scene].isVisible =
-                entry.isIntersecting;
+            this[$isInRenderTree] = this[$scene].visible = entry.isIntersecting;
             this.requestUpdate($isInRenderTree, oldValue);
 
             if (this[$isInRenderTree]) {
@@ -241,7 +240,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this[$isInRenderTree] = this[$scene].isVisible = true;
+      this[$isInRenderTree] = this[$scene].visible = true;
       this.requestUpdate($isInRenderTree, false);
     }
   }
