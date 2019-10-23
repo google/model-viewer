@@ -238,10 +238,10 @@ suite('ModelViewerElementBase', () => {
 
       test('sets a model within viewport to be visible', async () => {
         await until(() => {
-          return elements[0][$scene].isVisible;
+          return elements[0][$scene].visible;
         });
 
-        expect(elements[0][$scene].isVisible).to.be.true;
+        expect(elements[0][$scene].visible).to.be.true;
       });
 
       test.skip('only models visible in the viewport', async () => {
@@ -251,14 +251,14 @@ suite('ModelViewerElementBase', () => {
         await until(() => {
           return elements
               .map((element, index) => {
-                return (index === 0) === element[$scene].isVisible;
+                return (index === 0) === element[$scene].visible;
               })
               .reduce(((l, r) => l && r), true);
         });
 
-        expect(elements[0][$scene].isVisible).to.be.ok;
-        expect(elements[1][$scene].isVisible).to.not.be.ok;
-        expect(elements[2][$scene].isVisible).to.not.be.ok;
+        expect(elements[0][$scene].visible).to.be.ok;
+        expect(elements[1][$scene].visible).to.not.be.ok;
+        expect(elements[2][$scene].visible).to.not.be.ok;
       });
     });
   });

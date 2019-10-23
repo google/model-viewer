@@ -179,7 +179,7 @@ export class Renderer extends EventDispatcher {
       const {element, width, height, context} = scene;
       element[$tick](t, delta);
 
-      if (!scene.isVisible || !scene.isDirty || scene.paused) {
+      if (!scene.visible || !scene.isDirty || scene.paused) {
         continue;
       }
 

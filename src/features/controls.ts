@@ -292,7 +292,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
-      super.updated(changedProperties as Map<string, any>);
+      super.updated(changedProperties);
 
       const controls = this[$controls];
       const scene = (this as any)[$scene];

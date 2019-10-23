@@ -44,6 +44,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
+export const $isInRenderTree = Symbol('isInRenderTree');
 export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');
@@ -99,8 +100,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
   @property({converter: {fromAttribute: deserializeUrl}})
   src: string|null = null;
 
-  protected[$loaded]: boolean = false;
-  protected[$loadedTime]: number = 0;
+  protected[$isInRenderTree] = false;
+  protected[$loaded] = false;
+  protected[$loadedTime] = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
@@ -211,11 +213,23 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
+      const enterRenderTreeProgress = this[$progressTracker].beginActivity();
+
       this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
-            this[$scene].isVisible = entry.isIntersecting;
-            this.requestUpdate();
+            const oldValue = this[$isInRenderTree];
+            this[$isInRenderTree] = this[$scene].visible = entry.isIntersecting;
+            this.requestUpdate($isInRenderTree, oldValue);
+
+            if (this[$isInRenderTree]) {
+              // Wait a microtask to give other properties a chance to respond
+              // to the state change, then resolve progress on entering the
+              // render tree:
+              Promise.resolve().then(() => {
+                enterRenderTreeProgress(1);
+              });
+            }
           }
         }
       }, {
@@ -226,7 +240,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this[$scene].isVisible = true;
+      this[$isInRenderTree] = this[$scene].visible = true;
+      this.requestUpdate($isInRenderTree, false);
     }
   }
 
@@ -281,7 +296,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space

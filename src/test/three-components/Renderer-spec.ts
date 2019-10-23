@@ -41,7 +41,7 @@ function createScene(): ModelScene&TestScene {
     height: 100,
     renderer,
   });
-  scene.isVisible = true;
+  scene.visible = true;
 
   scene.renderCount = 0;
   const drawImage = scene.context.drawImage;
@@ -103,15 +103,15 @@ suite('Renderer', () => {
       expect(!scene.isDirty).to.be.ok;
     });
 
-    test('does not render scenes marked as !isVisible', async function() {
-      scene.isVisible = false;
+    test('does not render scenes marked as not visible', async function() {
+      scene.visible = false;
       scene.isDirty = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
       expect(scene.isDirty).to.be.ok;
 
-      scene.isVisible = true;
+      scene.visible = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
