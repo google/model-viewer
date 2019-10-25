@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {_Math} from 'three/src/math/Math';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
@@ -56,12 +56,18 @@ export class RoughnessMipmapper {
       if (this[$tempTarget] != null) {
         this[$tempTarget]!.dispose();
       }
-      this[$tempTarget] = new WebGLRenderTarget(width, height);
+      this[$tempTarget] = new WebGLRenderTarget(
+          width, height, {depthBuffer: false, stencilBuffer: false});
     }
 
     if (width !== roughnessMap.image.width ||
         height !== roughnessMap.image.height) {
-      const newRoughnessTarget = new WebGLRenderTarget(width, height);
+      const newRoughnessTarget = new WebGLRenderTarget(width, height, {
+        minFilter: LinearMipMapLinearFilter,
+        depthBuffer: false,
+        stencilBuffer: false
+      });
+      newRoughnessTarget.texture.generateMipmaps = true;
       // Setting the render target causes the memory to be allocated.
       renderer.setRenderTarget(newRoughnessTarget);
       material.roughnessMap = newRoughnessTarget.texture;
@@ -80,12 +86,9 @@ export class RoughnessMipmapper {
     const texelSize = new Vector2(0, 0);
     for (let mip = 0; width >= 1 && height >= 1;
          ++mip, width /= 2, height /= 2) {
-      // rendering to a mip level is not allowed in webGL1. Instead we must set
+      // Rendering to a mip level is not allowed in webGL1. Instead we must set
       // up a secondary texture to write the result to, then use
-      // gl.copyTexImage2D to copy it back to the proper mipmap level. In this
-      // case roughnessMap does not need to be a renderTarget, since it will
-      // only be read from and copied to. The secondary texture will be a
-      // renderTarget, and we can reuse it by narrowing the viewport.
+      // gl.copyTexImage2D to copy it back to the proper mipmap level.
       texelSize.set(1.0 / width, 1.0 / height);
       this[$mipmapMaterial].uniforms.texelSize.value = texelSize;
 
@@ -94,7 +97,6 @@ export class RoughnessMipmapper {
       renderer.render(this[$scene], this[$flatCamera]);
       renderer.copyFramebufferToTexture(position, material.roughnessMap!, mip);
       this[$mipmapMaterial].uniforms.roughnessMap.value = material.roughnessMap;
-      this[$mipmapMaterial].needsUpdate = true;
     }
 
     if (roughnessMap !== material.roughnessMap) {
@@ -105,29 +107,32 @@ export class RoughnessMipmapper {
     renderer.autoClear = autoClear;
 
     // debug
-    // const saveTarget =
-    //     (target: WebGLRenderTarget, filename: string) => {
-    //       const {width, height} = target;
-    //       const output = document.createElement('canvas');
-    //       output.width = width;
-    //       output.height = height;
-    //       const ctx = output.getContext('2d')!;
-    //       const img = ctx.getImageData(0, 0, width, height);
-    //       renderer.readRenderTargetPixels(
-    //           target, 0, 0, width, height, img.data);
-    //       ctx.putImageData(img, 0, 0);
-    //       const a = document.createElement('a');
-    //       a.href =
-    //           output.toDataURL().replace('image/png', 'image/octet-stream');
-    //       a.download = filename;
-    //       a.click();
-    //     }
+    const saveTarget =
+        (target: WebGLRenderTarget, filename: string) => {
+          const {width, height} = target;
+          const output = document.createElement('canvas');
+          output.width = width;
+          output.height = height;
 
-    // const roughnessTarget = new WebGLRenderTarget(
-    //     roughnessMap!.image.width, roughnessMap!.image.height);
-    // roughnessTarget.texture = roughnessMap!;
-    // saveTarget(roughnessTarget, 'roughness.png');
-    // saveTarget(this[$tempTarget]!, 'temp.png');
+          const ctx = output.getContext('2d')!;
+          const img = ctx.getImageData(0, 0, width, height);
+          renderer.readRenderTargetPixels(
+              target, 0, 0, width, height, img.data);
+          ctx.putImageData(img, 0, 0);
+
+          output.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+
+            URL.revokeObjectURL(url);
+          });
+        }
+
+    saveTarget(this[$tempTarget]!, 'temp.png');
   }
 }
 
@@ -175,7 +180,7 @@ void main() {
   avgNormal *= 0.25;
   float r2 = dot(avgNormal, avgNormal);
   float invLambda = sqrt(r2)*(1.0-r2)/(3.0-r2);
-  alpha = sqrt(alpha * alpha + 500.0*invLambda);
+  alpha = sqrt(alpha * alpha + 20.0*invLambda);
   gl_FragColor.g = clamp(sqrt(alpha), 0.0, 1.0);
 }
       `,
