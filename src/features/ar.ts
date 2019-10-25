@@ -35,7 +35,11 @@ export const openIOSARQuickLook = (() => {
   };
 })();
 
-export const openARViewer = (() => {
+/**
+ * Takes a URL and a title string, and attempts to launch Scene Viewer on the
+ * current device.
+ */
+export const openSceneViewer = (() => {
   const anchor = document.createElement('a');
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
@@ -56,9 +60,12 @@ export const openARViewer = (() => {
 
     title = encodeURIComponent(title);
     modelUrl.protocol = 'intent://';
+    // It's possible for a model URL to have meaningful query parameters
+    // already. Sure hope they aren't called 'link' or 'title' though 😅
+    modelUrl.search +=
+        (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
 
-    const intent = `${modelUrl.toString()}?link=${link}&title=${
-        title}#Intent;scheme=${
+    const intent = `${modelUrl.toString()}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 
