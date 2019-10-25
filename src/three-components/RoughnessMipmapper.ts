@@ -33,14 +33,15 @@ export class RoughnessMipmapper {
   }
 
   generateMipmaps(renderer: WebGLRenderer, material: MeshStandardMaterial) {
-    const {roughnessMap} = material;
-    if (roughnessMap == null || !roughnessMap.generateMipmaps ||
-        material.userData.roughnessUpdated) {
+    const {roughnessMap, normalMap} = material;
+    if (roughnessMap == null || normalMap == null ||
+        !roughnessMap.generateMipmaps || material.userData.roughnessUpdated) {
       return;
     }
     material.userData.roughnessUpdated = true;
 
-    let {width, height} = roughnessMap.image;
+    let width = Math.max(roughnessMap.image.width, normalMap.image.width);
+    let height = Math.max(roughnessMap.image.height, normalMap.image.height);
     if (!_Math.isPowerOfTwo(width) || !_Math.isPowerOfTwo(height)) {
       return;
     }
@@ -50,9 +51,6 @@ export class RoughnessMipmapper {
     renderer.setPixelRatio(1);
     renderer.autoClear = false;
 
-    width /= 2;
-    height /= 2;
-
     if (this[$tempTarget] == null || this[$tempTarget]!.width !== width ||
         this[$tempTarget]!.height !== height) {
       if (this[$tempTarget] != null) {
@@ -61,12 +59,26 @@ export class RoughnessMipmapper {
       this[$tempTarget] = new WebGLRenderTarget(width, height);
     }
 
+    if (width !== roughnessMap.image.width ||
+        height !== roughnessMap.image.height) {
+      const newRoughnessTarget = new WebGLRenderTarget(width, height);
+      // Setting the render target causes the memory to be allocated.
+      renderer.setRenderTarget(newRoughnessTarget);
+      material.roughnessMap = newRoughnessTarget.texture;
+      if (material.metalnessMap != null) {
+        material.metalnessMap = material.roughnessMap;
+      }
+      if (material.aoMap != null) {
+        material.aoMap = material.roughnessMap;
+      }
+    }
+
     this[$mipmapMaterial].uniforms.roughnessMap.value = roughnessMap;
-    this[$mipmapMaterial].uniforms.normalMap.value = material.normalMap;
+    this[$mipmapMaterial].uniforms.normalMap.value = normalMap;
 
     const position = new Vector2(0, 0);
     const texelSize = new Vector2(0, 0);
-    for (let mip = 1; width >= 1 && height >= 1;
+    for (let mip = 0; width >= 1 && height >= 1;
          ++mip, width /= 2, height /= 2) {
       // rendering to a mip level is not allowed in webGL1. Instead we must set
       // up a secondary texture to write the result to, then use
@@ -80,8 +92,13 @@ export class RoughnessMipmapper {
       renderer.setRenderTarget(this[$tempTarget]);
       renderer.setViewport(position.x, position.y, width, height);
       renderer.render(this[$scene], this[$flatCamera]);
-      renderer.copyFramebufferToTexture(position, roughnessMap, mip);
+      renderer.copyFramebufferToTexture(position, material.roughnessMap!, mip);
+      this[$mipmapMaterial].uniforms.roughnessMap.value = material.roughnessMap;
       this[$mipmapMaterial].needsUpdate = true;
+    }
+
+    if (roughnessMap !== material.roughnessMap) {
+      roughnessMap.dispose();
     }
 
     renderer.setPixelRatio(dpr);
@@ -147,8 +164,25 @@ uniform vec2 texelSize;
 void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   float roughness = gl_FragColor.g;
-  gl_FragColor.g = 0.0;
-  // gl_FragColor=vec4(1.0,0.0,0.0,0.5);
+  // float alpha = roughness*roughness;
+  // vec3 avgNormal;
+  // for(float x = -1.0; x < 2.0; x += 2.0){
+  //   for(float y = -1.0; y < 2.0; y += 2.0){
+  //     vec2 uv = vUv + vec2(x, y) * 0.25 * texelSize;
+  //     avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz);
+  //   }
+  // }
+  // avgNormal *= 0.25;
+  // float r2 = dot(avgNormal, avgNormal);
+  // float invLambda = sqrt(r2)*(1.0-r2)/(3.0-r2);
+  // alpha = sqrt(alpha * alpha + 200.0*invLambda);
+  // gl_FragColor.g = clamp(sqrt(alpha), 0.0, 1.0);
+  float sigma = 3.14 * roughness * roughness / (1.0 + roughness);
+  float normalLength = length(texture2D(normalMap, vUv).xyz) / length(texture2D(normalMap, vUv, -10.0).xyz);
+  float sigma2 = (1.0 - normalLength) / normalLength;// Toksvig
+  sigma += sqrt(sigma2);
+  roughness = (sigma + sqrt(sigma * sigma + 4.0 * 3.14 * sigma)) / (2.0 * 3.14);
+  gl_FragColor.g = clamp(roughness, 0.0, 1.0);
 }
       `,
 

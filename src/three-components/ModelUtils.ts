@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {Camera, Material, Object3D, Scene, Shader, Vector3} from 'three';
+import {FrontSide} from 'three';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
@@ -72,6 +73,10 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
       // TODO(elalish): remove this when we upgrade three.js to a version with
       // this fix: mrdoob/three.js#17795
       clone.vertexTangents = material.vertexTangents;
+      if (!clone.vertexTangents) {
+        clone.normalScale.y *= -1;
+      }
+      clone.side = FrontSide;
       return clone;
     };
 
