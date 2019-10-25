@@ -164,25 +164,19 @@ uniform vec2 texelSize;
 void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   float roughness = gl_FragColor.g;
-  // float alpha = roughness*roughness;
-  // vec3 avgNormal;
-  // for(float x = -1.0; x < 2.0; x += 2.0){
-  //   for(float y = -1.0; y < 2.0; y += 2.0){
-  //     vec2 uv = vUv + vec2(x, y) * 0.25 * texelSize;
-  //     avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz);
-  //   }
-  // }
-  // avgNormal *= 0.25;
-  // float r2 = dot(avgNormal, avgNormal);
-  // float invLambda = sqrt(r2)*(1.0-r2)/(3.0-r2);
-  // alpha = sqrt(alpha * alpha + 200.0*invLambda);
-  // gl_FragColor.g = clamp(sqrt(alpha), 0.0, 1.0);
-  float sigma = 3.14 * roughness * roughness / (1.0 + roughness);
-  float normalLength = length(texture2D(normalMap, vUv).xyz) / length(texture2D(normalMap, vUv, -10.0).xyz);
-  float sigma2 = (1.0 - normalLength) / normalLength;// Toksvig
-  sigma += sqrt(sigma2);
-  roughness = (sigma + sqrt(sigma * sigma + 4.0 * 3.14 * sigma)) / (2.0 * 3.14);
-  gl_FragColor.g = clamp(roughness, 0.0, 1.0);
+  float alpha = roughness*roughness;
+  vec3 avgNormal;
+  for(float x = -1.0; x < 2.0; x += 2.0){
+    for(float y = -1.0; y < 2.0; y += 2.0){
+      vec2 uv = vUv + vec2(x, y) * 0.25 * texelSize;
+      avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz);
+    }
+  }
+  avgNormal *= 0.25;
+  float r2 = dot(avgNormal, avgNormal);
+  float invLambda = sqrt(r2)*(1.0-r2)/(3.0-r2);
+  alpha = sqrt(alpha * alpha + 500.0*invLambda);
+  gl_FragColor.g = clamp(sqrt(alpha), 0.0, 1.0);
 }
       `,
 
