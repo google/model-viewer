@@ -205,7 +205,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           await this[$enterARWithWebXR]();
           break;
         case ARMode.AR_VIEWER:
-          openARViewer(this.src!, this.alt || '');
+          openSceneViewer(this.src!, this.alt || '');
           break;
         default:
           console.warn(
