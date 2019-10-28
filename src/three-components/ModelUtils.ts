@@ -74,6 +74,9 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
           specularGlossiness.cloneMaterial(material) :
           material.clone();
       clone.onBeforeCompile = updateShader;
+      // TODO(elalish): remove this when we upgrade three.js to a version with
+      // this fix: mrdoob/three.js#17795
+      clone.vertexTangents = material.vertexTangents;
       return clone;
     };
 

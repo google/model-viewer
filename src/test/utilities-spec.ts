@@ -14,7 +14,6 @@
  */
 
 import {clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
-import timerSpec from './utilities/timer-spec';
 
 const expect = chai.expect;
 
@@ -83,6 +82,4 @@ suite('utils', () => {
       expect(clamp(2.5, 2.0, 3.0)).to.be.equal(2.5);
     });
   });
-
-  timerSpec();
 });

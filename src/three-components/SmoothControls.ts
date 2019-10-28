@@ -581,6 +581,11 @@ export class SmoothControls extends EventDispatcher {
         this.adjustOrbit(deltaTheta, deltaPhi, deltaRadius, deltaFov);
 
     this[$isUserChange] = true;
+    // Always make sure that an initial event is triggered in case there is
+    // contention between user interaction and imperative changes. This initial
+    // event will give external observers that chance to observe that
+    // interaction occurred at all:
+    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
 
     return handled;
   }

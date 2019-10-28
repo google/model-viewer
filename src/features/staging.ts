@@ -89,19 +89,20 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$autoRotateTimer].tick(delta);
 
       if (this[$autoRotateTimer].hasStopped) {
-        const rotation =
-            this.turntableRotation + ROTATION_SPEED * delta * 0.001;
-        this[$scene].setPivotRotation(rotation);
+        this[$scene].setPivotRotation(
+            this[$scene].getPivotRotation() + ROTATION_SPEED * delta * 0.001);
         this[$needsRender]();
       }
     }
 
-    [$onCameraChange](_event: CustomEvent<CameraChangeDetails>) {
+    [$onCameraChange](event: CustomEvent<CameraChangeDetails>) {
       if (!this.autoRotate) {
         return;
       }
 
-      this[$autoRotateTimer].reset();
+      if (event.detail.source === 'user-interaction') {
+        this[$autoRotateTimer].reset();
+      }
     }
 
     get turntableRotation(): number {
@@ -110,6 +111,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     resetTurntableRotation() {
       this[$scene].setPivotRotation(0);
+      this[$needsRender]();
     }
   }
 

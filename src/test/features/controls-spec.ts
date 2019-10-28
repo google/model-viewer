@@ -371,25 +371,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.be.equal(false);
         });
 
-        test('plays the css animation when threshold elapses', async () => {
-          element.interactionPrompt = 'auto';
-
-          const computedStyle =
-              getComputedStyle((element as any)[$promptAnimatedContainer]);
-          expect(computedStyle.animationPlayState)
-              .to.be.match(/^paused(\, paused)?$/);
-
-          await timePasses(element.interactionPromptThreshold + 100);
-          expect(computedStyle.animationPlayState)
-              .to.be.match(/^running(\, running)?$/);
-        });
-
-        test('has a css animation', () => {
-          const computedStyle =
-              getComputedStyle((element as any)[$promptAnimatedContainer]);
-          expect(computedStyle.animationName).to.not.be.equal('none');
-        });
-
         suite('when configured to be basic', () => {
           setup(async () => {
             element.interactionPromptStyle = 'basic';

@@ -61,7 +61,7 @@
           <template>
 <!-- Import the component -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
-<script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+<script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 <!-- Use it like any other HTML element -->
 <model-viewer src="examples/assets/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls background-color="#455A64"></model-viewer>
           </template>
@@ -244,6 +244,16 @@
               prompt will only be activated if the element has first received
               focus. The interaction prompt will only display if camera-controls
               are enabled. Defaults to "auto".</p>
+            </li>
+            <li>
+              <div>interaction-prompt-style</div>
+              <p>Configures the presentation style of the interaction-prompt when
+              it is raised. The two allowed values are "wiggle" and "basic". When
+              set to "wiggle", the prompt will animate from horizontally and the
+              model will appear to be rotated as though the prompt is interacting
+              with it. When set to "basic", the prompt is not animated, and instead
+              simply appears until it is dismissed by user interaction.
+              Defaults to "wiggle".</p>
             </li>
             <li>
               <div>interaction-prompt-threshold</div>
