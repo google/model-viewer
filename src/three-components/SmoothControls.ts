@@ -366,11 +366,18 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Sets the non-interpolated camera parameters
+   * Sets the near and far planes of the camera.
    */
-  updateIntrinsics(nearPlane: number, farPlane: number, aspect: number) {
+  updateNearFar(nearPlane: number, farPlane: number) {
     this.camera.near = Math.max(nearPlane, farPlane / 1000);
     this.camera.far = farPlane;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Sets the aspect ratio of the camera
+   */
+  updateAspect(aspect: number) {
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
   }

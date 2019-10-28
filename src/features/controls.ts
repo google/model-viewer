@@ -145,8 +145,7 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
-const $updateCamera = Symbol('updateCamera');
-const $setIntrinsics = Symbol('set$setIntrinsics');
+const $setRadius = Symbol('set$setRadius');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -248,7 +247,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$controls] = new SmoothControls(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
-    protected[$zoomAdjustedFieldOfView]: number|null = null;
+    protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -348,7 +347,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$setIntrinsics](style[2]);
+      this[$setRadius](style[2]);
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -436,41 +435,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     * Set the camera's radius and field of view to properly frame the scene
-     * based on changes to the model or aspect ratio, and maintains the
-     * relative camera zoom state.
+     * Updates the camera's near and far planes to enclose the scene when
+     * orbiting at the supplied radius.
      */
-    [$updateCamera]() {
-      const controls = this[$controls];
-      const {framedFieldOfView, model} = this[$scene];
-
-      this[$setIntrinsics](this.getCameraOrbit().radius);
-
-      if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW && model.hasModel()) {
-        if (this[$zoomAdjustedFieldOfView] == null) {
-          this[$zoomAdjustedFieldOfView] = framedFieldOfView;
-        } else {
-          const zoom = controls.getFieldOfView() / framedFieldOfView;
-          this[$zoomAdjustedFieldOfView] = framedFieldOfView * zoom;
-        }
-        controls.applyOptions({maximumFieldOfView: framedFieldOfView});
-        this.requestUpdate('fieldOfView', this.fieldOfView);
-      }
-
-      controls.jumpToGoal();
-    }
-
-    /**
-     * Updates the camera's intrinsics to enclose the scene when orbiting at the
-     * supplied radius.
-     */
-    [$setIntrinsics](radius: number) {
-      const {model, aspect} = this[$scene];
-      const maximumRadius = Math.max(model.idealCameraDistance, radius);
+    [$setRadius](radius: number) {
+      const {idealCameraDistance} = this[$scene].model;
+      const maximumRadius = Math.max(idealCameraDistance, radius);
 
       const near = 0;
       const far = 2 * maximumRadius;
-      this[$controls].updateIntrinsics(near, far, aspect);
+      this[$controls].updateNearFar(near, far);
     }
 
     [$updateAria]() {
@@ -511,16 +485,32 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onResize](event: any) {
+      const controls = this[$controls];
+      const oldFramedFieldOfView = this[$scene].framedFieldOfView;
+
       super[$onResize](event);
-      this[$updateCamera]();
+
+      const newFramedFieldOfView = this[$scene].framedFieldOfView;
+      const zoom = controls.getFieldOfView() / oldFramedFieldOfView;
+      this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
+      controls.applyOptions({maximumFieldOfView: newFramedFieldOfView});
+      controls.updateAspect(this[$scene].aspect);
+      this.requestUpdate('fieldOfView', this.fieldOfView);
+      controls.jumpToGoal();
     }
 
     [$onModelLoad](event: any) {
       super[$onModelLoad](event);
-      this[$updateCamera]();
+
+      const controls = this[$controls];
+      const {framedFieldOfView} = this[$scene];
+      this[$zoomAdjustedFieldOfView] = framedFieldOfView;
+      controls.applyOptions({maximumFieldOfView: framedFieldOfView});
+
+      this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
-      this[$controls].jumpToGoal();
+      controls.jumpToGoal();
     }
 
     [$onFocus]() {
