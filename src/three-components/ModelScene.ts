@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
-import {Mesh} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -52,7 +51,7 @@ const $paused = Symbol('paused');
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
-export default class ModelScene extends Scene {
+export class ModelScene extends Scene {
   private[$paused]: boolean = false;
 
   public aspect = 1;

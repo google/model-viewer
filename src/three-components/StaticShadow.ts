@@ -15,7 +15,7 @@
 
 import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, RGBAFormat, Vector3, WebGLRenderTarget} from 'three';
 import {WebGLRenderer} from 'three';
-import ModelScene from './ModelScene';
+import {ModelScene} from './ModelScene';
 
 export interface ShadowGenerationConfig {
   textureWidth?: number;
