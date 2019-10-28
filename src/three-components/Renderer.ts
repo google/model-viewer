@@ -59,7 +59,7 @@ export class Renderer extends EventDispatcher {
   public width: number = 0;
   public height: number = 0;
 
-  private debugger: Debugger|null = null;
+  protected debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
