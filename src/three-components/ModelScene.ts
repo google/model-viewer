@@ -84,7 +84,6 @@ export class ModelScene extends Scene {
     this.renderer = renderer;
 
     this.model = new Model();
-    // this.shadow = new StaticShadow();
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -231,10 +230,10 @@ export class ModelScene extends Scene {
     this.shadowIntensity = shadowIntensity;
     if (shadowIntensity > 0 && this.model.hasModel()) {
       if (this.shadow == null) {
-        this.shadow = new Shadow(this);
-        // this.showShadowHelper();
+        this.shadow = new Shadow(this.model, this.pivot);
+        this.showShadowHelper();
       } else {
-        this.shadow.setScene(this);
+        this.shadow.setModel(this.model);
       }
       this.shadow.setIntensity(shadowIntensity);
     }

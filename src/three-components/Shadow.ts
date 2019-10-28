@@ -13,24 +13,34 @@
  * limitations under the License.
  */
 
-import {DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial} from 'three';
+import {Box3, DirectionalLight, Mesh, Object3D, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
 
-import ModelScene from './ModelScene';
+import Model from './Model';
 
-// Nothing within shadowOffset of the bottom of the model casts a shadow
+// Nothing within Offset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
-const SHADOW_OFFSET = 0.001;
-const BASE_SHADOW_OPACITY = 0.1;
+const OFFSET = 0.001;
+const BASE_OPACITY = 0.1;
 // The softness of the shadow is controlled with this resolution parameter. The
 // lower the resolution, the softer the shadow.
-const MAX_SHADOW_RESOLUTION = 64;
+const MAX_RESOLUTION = 64;
+// Animated models are not in general contained in their bounding box, as this
+// is calculated only for their resting pose. We create a cubic shadow volume
+// for animated models sized to their largest bounding box dimesion multiplied
+// by this scale factor.
+const ANIMATION_SCALING = 2;
 
+/**
+ *
+ */
 export class Shadow extends DirectionalLight {
   private shadowMaterial = new ShadowMaterial;
   private floor: Mesh;
+  private boundingBox = new Box3;
+  private size = new Vector3;
   public needsUpdate = false;
 
-  constructor(private scene: ModelScene) {
+  constructor(private model: Model, pivot: Object3D) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -40,22 +50,34 @@ export class Shadow extends DirectionalLight {
     this.floor = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
     this.floor.receiveShadow = true;
     this.floor.castShadow = false;
-    scene.pivot.add(this.floor);
-    scene.pivot.add(this);
-    this.target = scene.pivot;
 
-    this.setScene(scene);
+    pivot.add(this.floor);
+    pivot.add(this);
+    this.target = pivot;
+
+    this.setModel(model);
   }
 
-  setScene(scene: ModelScene) {
-    this.scene = scene;
-    const {boundingBox, size} = scene.model;
+  setModel(model: Model) {
+    this.model = model;
     const {camera} = this.shadow;
 
-    const shadowOffset = size.y * SHADOW_OFFSET;
-
     this.floor.rotateX(-Math.PI / 2);
+    this.boundingBox.copy(model.boundingBox);
+    this.size.copy(model.size);
+    const {boundingBox, size} = this;
+
+    if (this.model.animationNames.length > 0) {
+      const maxDimension = Math.max(size.x, size.y, size.z) * ANIMATION_SCALING;
+      size.y = maxDimension;
+      boundingBox.expandByVector(
+          size.subScalar(maxDimension).multiplyScalar(-0.5));
+      boundingBox.max.y = maxDimension;
+      size.set(maxDimension, maxDimension, maxDimension);
+    }
+
     boundingBox.getCenter(this.floor.position);
+    const shadowOffset = size.y * OFFSET;
     // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
     // to stay inside the shadow camera.
     this.floor.position.y -= size.y / 2 - 2 * shadowOffset;
@@ -65,12 +87,17 @@ export class Shadow extends DirectionalLight {
     camera.near = 0;
     camera.far = size.y;
 
-    this.setMapSize(MAX_SHADOW_RESOLUTION);
+    this.setMapSize(MAX_RESOLUTION);
   }
 
   setMapSize(maxMapSize: number) {
-    const {boundingBox, size} = this.scene.model;
     const {camera, mapSize} = this.shadow;
+    const {boundingBox, size} = this;
+
+    if (this.model.animationNames.length > 0) {
+      maxMapSize *= ANIMATION_SCALING;
+    }
+
     const width =
         size.x > size.z ? maxMapSize : Math.floor(maxMapSize * size.x / size.z);
     const height =
@@ -94,7 +121,7 @@ export class Shadow extends DirectionalLight {
   }
 
   setIntensity(intensity: number) {
-    this.shadowMaterial.opacity = intensity * BASE_SHADOW_OPACITY;
+    this.shadowMaterial.opacity = intensity * BASE_OPACITY;
     if (intensity > 0) {
       this.visible = true;
       this.floor.visible = true;
@@ -105,7 +132,7 @@ export class Shadow extends DirectionalLight {
   }
 
   getIntensity(): number {
-    return this.shadowMaterial.opacity / BASE_SHADOW_OPACITY;
+    return this.shadowMaterial.opacity / BASE_OPACITY;
   }
 
   setRotation(radiansY: number) {
