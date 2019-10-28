@@ -19,7 +19,7 @@ import {Mesh} from 'three';
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
-import Model from './Model.js';
+import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import StaticShadow from './StaticShadow.js';
@@ -42,6 +42,8 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
+
+const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 
 const $paused = Symbol('paused');
 
@@ -67,6 +69,7 @@ export default class ModelScene extends Scene {
   public context: CanvasRenderingContext2D;
   public exposure = 1;
   public model: Model;
+  public framedFieldOfView = DEFAULT_FOV_DEG;
   public skyboxMesh: Mesh;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
@@ -149,6 +152,7 @@ export default class ModelScene extends Scene {
       this.canvas.style.width = `${this.width}px`;
       this.canvas.style.height = `${this.height}px`;
       this.aspect = this.width / this.height;
+      this.frameModel();
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -167,16 +171,20 @@ export default class ModelScene extends Scene {
   }
 
   /**
+   * Set's the framedFieldOfView based on the aspect ratio of the window in
+   * order to keep the model fully visible at any camera orientation.
+   */
+  frameModel() {
+    const vertical = DEFAULT_TAN_FOV *
+        Math.max(1, this.model.fieldOfViewAspect / this.aspect);
+    this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
+  }
+
+  /**
    * Returns the size of the corresponding canvas element.
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  resetModelPose() {
-    this.model.position.set(0, 0, 0);
-    this.model.rotation.set(0, 0, 0);
-    this.model.scale.set(1, 1, 1);
   }
 
   /**
@@ -216,6 +224,7 @@ export default class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
+    this.frameModel();
     this.updateStaticShadow();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }

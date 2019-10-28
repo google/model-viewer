@@ -21,7 +21,6 @@ import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelL
 import {normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
-import {DEFAULT_FOV_DEG} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -127,7 +126,6 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
-const HALF_FIELD_OF_VIEW_RADIANS = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
@@ -144,7 +142,6 @@ export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
-const $framedFieldOfView = Symbol('framedFieldOfView');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -251,8 +248,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$controls] = new SmoothControls(
         this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
 
-    protected[$framedFieldOfView]: number|null = null;
-    protected[$zoomAdjustedFieldOfView]: number = DEFAULT_FOV_DEG;
+    protected[$zoomAdjustedFieldOfView]: number|null = null;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
 
@@ -348,7 +344,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       const fov = style[0] * 180 / Math.PI;
-      this[$controls].applyOptions({maximumFieldOfView: fov});
       this[$controls].setFieldOfView(fov);
     }
 
@@ -447,23 +442,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     [$updateCamera]() {
       const controls = this[$controls];
-      const {model, aspect} = this[$scene];
+      const {framedFieldOfView, model} = this[$scene];
 
       this[$setIntrinsics](this.getCameraOrbit().radius);
 
-      if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW) {
-        const zoom = (this[$framedFieldOfView] != null) ?
-            controls.getFieldOfView() / this[$framedFieldOfView]! :
-            1;
-
-        const vertical = Math.tan(HALF_FIELD_OF_VIEW_RADIANS) *
-            Math.max(1, model.fieldOfViewAspect / aspect);
-        this[$framedFieldOfView] = 2 * Math.atan(vertical) * 180 / Math.PI;
-
-        const maximumFieldOfView = this[$framedFieldOfView]!;
-        controls.applyOptions({maximumFieldOfView});
-        // TODO(#835): Move computation of this value to Model or ModelScene
-        this[$zoomAdjustedFieldOfView] = this[$framedFieldOfView]! * zoom;
+      if (this.fieldOfView === DEFAULT_FIELD_OF_VIEW && model.hasModel()) {
+        if (this[$zoomAdjustedFieldOfView] == null) {
+          this[$zoomAdjustedFieldOfView] = framedFieldOfView;
+        } else {
+          const zoom = controls.getFieldOfView() / framedFieldOfView;
+          this[$zoomAdjustedFieldOfView] = framedFieldOfView * zoom;
+        }
+        controls.applyOptions({maximumFieldOfView: framedFieldOfView});
         this.requestUpdate('fieldOfView', this.fieldOfView);
       }
 
@@ -478,7 +468,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {model, aspect} = this[$scene];
       const maximumRadius = Math.max(model.idealCameraDistance, radius);
 
-      this[$controls].applyOptions({maximumRadius});
       const near = 0;
       const far = 2 * maximumRadius;
       this[$controls].updateIntrinsics(near, far, aspect);

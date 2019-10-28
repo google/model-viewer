@@ -49,7 +49,7 @@ export interface SmoothControlsOptions {
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumRadius: 0,
-  maximumRadius: 2,
+  maximumRadius: Infinity,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
