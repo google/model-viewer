@@ -22,7 +22,7 @@ import {resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {Debugger} from './Debugger.js';
-import ModelScene from './ModelScene.js';
+import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
 
@@ -102,11 +102,9 @@ export class Renderer extends EventDispatcher {
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
-      if (options != null && options.debug) {
-        this.debugger = new Debugger(this);
-      } else {
-        this.renderer.debug = {checkShaderErrors: false};
-      }
+      this.debugger =
+          options != null && !!options.debug ? new Debugger(this) : null;
+      this.renderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
@@ -137,12 +135,20 @@ export class Renderer extends EventDispatcher {
     if (this.canRender && this.scenes.size > 0) {
       this.renderer.setAnimationLoop((time: number) => this.render(time));
     }
+
+    if (this.debugger != null) {
+      this.debugger.addScene(scene);
+    }
   }
 
   unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
     if (this.canRender && this.scenes.size === 0) {
       (this.renderer.setAnimationLoop as any)(null);
+    }
+
+    if (this.debugger != null) {
+      this.debugger.removeScene(scene);
     }
   }
 

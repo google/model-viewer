@@ -1,5 +1,6 @@
 import {Mesh, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
 
+import {ModelScene} from './ModelScene';
 import {Renderer} from './Renderer';
 
 export interface ModelViewerRendererDebugDetails {
@@ -15,6 +16,10 @@ export interface ModelViewerRendererDebugDetails {
   };
 }
 
+export interface ModelViewerSceneDetails {
+  scene: ModelScene
+}
+
 /**
  * This Debugger exposes internal details of the <model-viewer> rendering
  * substructure so that external tools can more easily inspect and operate on
@@ -26,7 +31,11 @@ export interface ModelViewerRendererDebugDetails {
  */
 export class Debugger {
   constructor(renderer: Renderer) {
+    // Force WebGL shader debugging on:
     renderer.renderer.debug = {checkShaderErrors: true};
+    // Announce debug details at microtask timing to give the `Renderer`
+    // constructor time to complete its initialization, just to be on the safe
+    // side:
     Promise.resolve().then(() => {
       self.dispatchEvent(new CustomEvent<ModelViewerRendererDebugDetails>(
           'model-viewer-renderer-debug', {
@@ -44,5 +53,15 @@ export class Debugger {
             }
           }));
     });
+  }
+
+  addScene(scene: ModelScene) {
+    self.dispatchEvent(new CustomEvent<ModelViewerSceneDetails>(
+        'model-viewer-scene-added-debug', {detail: {scene}}));
+  }
+
+  removeScene(scene: ModelScene) {
+    self.dispatchEvent(new CustomEvent<ModelViewerSceneDetails>(
+        'model-viewer-scene-removed-debug', {detail: {scene}}));
   }
 }

@@ -49,7 +49,7 @@ const $paused = Symbol('paused');
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
-export default class ModelScene extends Scene {
+export class ModelScene extends Scene {
   private[$paused]: boolean = false;
 
   public aspect = 1;

@@ -14,7 +14,7 @@
  */
 
 import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
-import ModelScene from '../../three-components/ModelScene.js';
+import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
 const expect = chai.expect;
