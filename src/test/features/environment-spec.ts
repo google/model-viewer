@@ -19,8 +19,8 @@ import {MeshStandardMaterial} from 'three';
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$resetRenderer, $scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
-import ModelScene from '../../three-components/ModelScene.js';
-import {assetPath, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {ModelScene} from '../../three-components/ModelScene.js';
+import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -162,6 +162,20 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await timePasses();
         expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
+
+  test('only generates an environment when in the render tree', async () => {
+    let environmentChangeCount = 0;
+    const environmentChangeHandler = () => environmentChangeCount++;
+    element.addEventListener('environment-change', environmentChangeHandler);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    await rafPasses();
+    expect(environmentChangeCount).to.be.equal(0);
+    element.style.display = 'block';
+    await waitForEvent(element, 'environment-change');
+    expect(environmentChangeCount).to.be.equal(1);
+    element.removeEventListener('environment-change', environmentChangeHandler);
+  });
 
   suite('with no background-image property', () => {
     let environmentChanges = 0;
@@ -315,7 +329,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.src = MODEL_URL;
       document.body.appendChild(element);
       await waitForEvent(element, 'load');
-      scene.isVisible = true;
+      scene.visible = true;
     });
 
     teardown(() => {

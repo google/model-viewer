@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $progressTracker, $scene, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
@@ -302,7 +302,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {src} = this;
 
       return !!src && !CachingGLTFLoader.hasFinishedLoading(src) &&
-          (this.preload || this[$shouldRevealModel]) && this[$scene].isVisible;
+          (this.preload || this[$shouldRevealModel]) && this[$isInRenderTree];
     }
 
     async[$updateLoadingAndVisibility]() {

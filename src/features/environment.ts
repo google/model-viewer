@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 import {Color, Texture} from 'three';
 
-import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
@@ -70,7 +70,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
-    updated(changedProperties: Map<string, any>) {
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('shadowIntensity')) {
@@ -84,7 +84,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('environmentImage') ||
           changedProperties.has('backgroundImage') ||
           changedProperties.has('backgroundColor') ||
-          changedProperties.has('experimentalPmrem')) {
+          changedProperties.has('experimentalPmrem') ||
+          changedProperties.has($isInRenderTree)) {
         this[$updateEnvironment]();
       }
     }
@@ -98,6 +99,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateEnvironment]() {
+      if (!this[$isInRenderTree]) {
+        return;
+      }
+
       const {backgroundImage, environmentImage} = this;
       let {backgroundColor} = this;
 
