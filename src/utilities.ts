@@ -181,6 +181,26 @@ export const resolveDpr: () => number = (() => {
 
 
 /**
+ * Debug mode is enabled when one of the two following conditions is true:
+ *
+ *  1. A 'model-viewer-debug-mode' query parameter is present in the current
+ *     search string
+ *  2. There is a global object ModelViewerElement with a debugMode property set
+ *     to true
+ */
+export const isDebugMode = (() => {
+  const debugQueryParameterName = 'model-viewer-debug-mode';
+  const debugQueryParameter =
+      new RegExp(`[\?&]${debugQueryParameterName}(&|$)`);
+
+  return () => ((self as any).ModelViewerElement &&
+                (self as any).ModelViewerElement.debugMode) ||
+      (self.location && self.location.search &&
+       self.location.search.match(debugQueryParameter));
+})();
+
+
+/**
  * Returns the first key in a Map in iteration order.
  *
  * NOTE(cdata): This is necessary because IE11 does not implement iterator

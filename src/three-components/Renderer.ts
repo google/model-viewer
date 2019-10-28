@@ -21,9 +21,14 @@ import {$tick} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
+import {Debugger} from './Debugger.js';
 import ModelScene from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
+
+export interface RendererOptions {
+  debug?: boolean;
+}
 
 export interface ContextLostEvent extends Event {
   type: 'contextlost';
@@ -54,6 +59,7 @@ export class Renderer extends EventDispatcher {
   public width: number = 0;
   public height: number = 0;
 
+  private debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
@@ -65,7 +71,7 @@ export class Renderer extends EventDispatcher {
     return this.renderer != null && this.context != null;
   }
 
-  constructor() {
+  constructor(options?: RendererOptions) {
     super();
 
     const webGlOptions = {alpha: false, antialias: true};
@@ -95,6 +101,10 @@ export class Renderer extends EventDispatcher {
       this.renderer.gammaFactor = 2.2;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
+
+      if (options == null || options.debug === false) {
+        this.debugger = new Debugger(this);
+      }
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
