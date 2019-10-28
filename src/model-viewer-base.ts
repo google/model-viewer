@@ -20,12 +20,12 @@ import {Event as ThreeEvent} from 'three';
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
-import ModelScene from './three-components/ModelScene.js';
+import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {debounce, deserializeUrl, isDebugMode, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
-let renderer = new Renderer();
+let renderer = new Renderer({debug: isDebugMode()});
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;

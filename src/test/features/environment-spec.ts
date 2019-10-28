@@ -19,7 +19,7 @@ import {MeshStandardMaterial} from 'three';
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$resetRenderer, $scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
-import ModelScene from '../../three-components/ModelScene.js';
+import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
