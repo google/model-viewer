@@ -102,8 +102,10 @@ export class Renderer extends EventDispatcher {
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
 
-      if (options == null || options.debug === false) {
+      if (options != null && options.debug) {
         this.debugger = new Debugger(this);
+      } else {
+        this.renderer.debug = {checkShaderErrors: false};
       }
 
       // ACESFilmicToneMapping appears to be the most "saturated",

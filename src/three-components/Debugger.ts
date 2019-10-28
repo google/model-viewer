@@ -1,4 +1,4 @@
-import {Mesh, OrthographicCamera, PlaneBufferGeometry, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
+import {Mesh, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
 
 import {Renderer} from './Renderer';
 
@@ -10,6 +10,7 @@ export interface ModelViewerRendererDebugDetails {
     OrthographicCamera: Constructor<OrthographicCamera>;
     WebGLRenderTarget: Constructor<WebGLRenderTarget>;
     Texture: Constructor<Texture>;
+    Scene: Constructor<Scene>;
     Mesh: Constructor<Mesh>;
   };
 }
@@ -25,7 +26,7 @@ export interface ModelViewerRendererDebugDetails {
  */
 export class Debugger {
   constructor(renderer: Renderer) {
-    renderer.renderer.debug = {checkShaderErrors: false};
+    renderer.renderer.debug = {checkShaderErrors: true};
     Promise.resolve().then(() => {
       self.dispatchEvent(new CustomEvent<ModelViewerRendererDebugDetails>(
           'model-viewer-renderer-debug', {
@@ -35,6 +36,7 @@ export class Debugger {
                 ShaderMaterial,
                 Texture,
                 Mesh,
+                Scene,
                 PlaneBufferGeometry,
                 OrthographicCamera,
                 WebGLRenderTarget

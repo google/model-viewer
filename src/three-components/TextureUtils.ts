@@ -56,6 +56,10 @@ const userData = {
 };
 
 export default class TextureUtils extends EventDispatcher {
+  get pmremGenerator() {
+    return this[$PMREMGenerator];
+  }
+
   private renderer: WebGLRenderer;
 
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
