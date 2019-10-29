@@ -356,17 +356,23 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.src = MODEL_URL;
       document.body.appendChild(element);
       await waitForEvent(element, 'load');
+      element.shadowIntensity = 1.0;
     });
 
     teardown(() => {
       document.body.removeChild(element);
     });
 
-    test('changes the opacity of the static shadow', async () => {
-      element.shadowIntensity = 1.0;
+    test('changes the opacity of the shadow', async () => {
       await timePasses();
       const newIntensity = scene.shadow!.getIntensity();
       expect(newIntensity).to.be.eq(1.0);
+    });
+
+    test('changing shadow-softness requires the shadow to update', async () => {
+      element.shadowSoftness = 0.0;
+      await timePasses();
+      expect(scene.shadow!.needsUpdate).to.be.eq(true);
     });
   });
 
