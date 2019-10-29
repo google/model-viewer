@@ -145,7 +145,7 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
-const $setRadius = Symbol('set$setRadius');
+const $setRadius = Symbol('setRadius');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -342,8 +342,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
-      const fov = style[0] * 180 / Math.PI;
-      this[$controls].setFieldOfView(fov);
+      this[$controls].setFieldOfView(style[0] * 180 / Math.PI);
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
