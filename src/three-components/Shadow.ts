@@ -32,7 +32,13 @@ const LOG_MIN_RESOLUTION = 6;
 const ANIMATION_SCALING = 2;
 
 /**
- *
+ * The Shadow class creates a shadow that fits a given model and follows a
+ * pivot. Assuming the model is also attached to this pivot, the shadow does not
+ * update due to pivot rotation/translation, provided the setRotation() method
+ * is called whenever the pivot rotates around the Y-axis. We assume the pivot
+ * is restricted to motion in the horizontal plane. The softness of the shadow
+ * is controlled by changing its resolution, making softer shadows faster, but
+ * less precise.
  */
 export class Shadow extends DirectionalLight {
   private shadowMaterial = new ShadowMaterial;
