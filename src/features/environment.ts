@@ -34,7 +34,6 @@ export interface EnvironmentInterface {
   backgroundImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
-  shadowSoftness: number;
   exposure: number;
 }
 
