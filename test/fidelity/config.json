@@ -500,10 +500,7 @@
       },
       "orbit": {
         "radius": 9
-      },
-      "exclude": [
-        "filament"
-      ]
+      }
     },
     {
       "name": "khronos-SpecGlossVsMetalRough",
