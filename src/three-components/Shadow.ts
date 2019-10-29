@@ -21,9 +21,10 @@ import Model from './Model';
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
 const OFFSET = 0.001;
 const BASE_OPACITY = 0.1;
-// The softness of the shadow is controlled with this resolution parameter. The
-// lower the resolution, the softer the shadow.
-const MAX_RESOLUTION = 64;
+// The softness [0, 1] of the shadow is mapped to a resolution between
+// 2^LOG_MAX_RESOLUTION and 2^LOG_MIN_RESOLUTION.
+const LOG_MAX_RESOLUTION = 9;
+const LOG_MIN_RESOLUTION = 6;
 // Animated models are not in general contained in their bounding box, as this
 // is calculated only for their resting pose. We create a cubic shadow volume
 // for animated models sized to their largest bounding box dimesion multiplied
@@ -40,7 +41,7 @@ export class Shadow extends DirectionalLight {
   private size = new Vector3;
   public needsUpdate = false;
 
-  constructor(private model: Model, pivot: Object3D) {
+  constructor(private model: Model, pivot: Object3D, softness: number) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -55,10 +56,16 @@ export class Shadow extends DirectionalLight {
     pivot.add(this);
     this.target = pivot;
 
-    this.setModel(model);
+    this.setModel(model, softness);
   }
 
-  setModel(model: Model) {
+  updateModel(model: Model, softness: number) {
+    if (this.model !== model) {
+      this.setModel(model, softness);
+    }
+  }
+
+  setModel(model: Model, softness: number) {
     this.model = model;
     const {camera} = this.shadow;
 
@@ -87,7 +94,15 @@ export class Shadow extends DirectionalLight {
     camera.near = 0;
     camera.far = size.y;
 
-    this.setMapSize(MAX_RESOLUTION);
+    this.setSoftness(softness);
+  }
+
+  setSoftness(softness: number) {
+    const resolution = Math.pow(
+        2,
+        LOG_MAX_RESOLUTION -
+            softness * (LOG_MAX_RESOLUTION - LOG_MIN_RESOLUTION));
+    this.setMapSize(resolution);
   }
 
   setMapSize(maxMapSize: number) {
@@ -99,9 +114,9 @@ export class Shadow extends DirectionalLight {
     }
 
     const width =
-        size.x > size.z ? maxMapSize : Math.floor(maxMapSize * size.x / size.z);
+        Math.floor(size.x > size.z ? maxMapSize : maxMapSize * size.x / size.z);
     const height =
-        size.x > size.z ? Math.floor(maxMapSize * size.z / size.x) : maxMapSize;
+        Math.floor(size.x > size.z ? maxMapSize * size.z / size.x : maxMapSize);
 
     mapSize.set(width, height);
     // These pads account for the softening radius around the shadow.

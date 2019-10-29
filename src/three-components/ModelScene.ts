@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, CameraHelper, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -57,6 +57,7 @@ export class ModelScene extends Scene {
   public renderer: Renderer;
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
+  public shadowSoftness = 1;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -219,6 +220,9 @@ export class ModelScene extends Scene {
    */
   onModelLoad(event: {url: string}) {
     this.setShadowIntensity(this.shadowIntensity);
+    if (this.shadow != null) {
+      this.shadow.updateModel(this.model, this.shadowSoftness);
+    }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
@@ -230,12 +234,22 @@ export class ModelScene extends Scene {
     this.shadowIntensity = shadowIntensity;
     if (shadowIntensity > 0 && this.model.hasModel()) {
       if (this.shadow == null) {
-        this.shadow = new Shadow(this.model, this.pivot);
-        this.showShadowHelper();
-      } else {
-        this.shadow.setModel(this.model);
+        this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
+        // this.showShadowHelper();
       }
       this.shadow.setIntensity(shadowIntensity);
+    }
+  }
+
+  /**
+   * Sets the shadow's softness by mapping a [0, 1] softness parameter to the
+   * shadow's resolution. This involves reallocation, so it should not be
+   * changed frequently. Softer shadows are cheaper to render.
+   */
+  setShadowSoftness(softness: number) {
+    this.shadowSoftness = softness;
+    if (this.shadow != null) {
+      this.shadow.setSoftness(softness);
     }
   }
 
@@ -243,12 +257,12 @@ export class ModelScene extends Scene {
    * Renders a box representing the shadow camera, which is helpful in
    * debugging.
    */
-  showShadowHelper() {
-    if (this.shadow != null) {
-      const helper = new CameraHelper(this.shadow.shadow.camera);
-      this.add(helper);
-    }
-  }
+  // showShadowHelper() {
+  //   if (this.shadow != null) {
+  //     const helper = new CameraHelper(this.shadow.shadow.camera);
+  //     this.add(helper);
+  //   }
+  // }
 
   createSkyboxMesh(): Mesh {
     const geometry = new BoxBufferGeometry(1, 1, 1);
