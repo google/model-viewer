@@ -138,10 +138,14 @@ export class CachingGLTFLoader {
     const gltf = await cache.get(url)!;
 
     if (gltf.scene != null) {
-      // Animations for objects without names target their UUID instead. When
-      // objects are cloned, they get new UUIDs which the animation can't find.
-      // To fix this, we assign their UUID as their name.
       gltf.scene.traverse((node: Object3D) => {
+        // Three.js seems to cull some animated models incorrectly. Since we
+        // expect to view our whole scene anyway, we turn off the frustum
+        // culling optimization here.
+        node.frustumCulled = false;
+        // Animations for objects without names target their UUID instead. When
+        // objects are cloned, they get new UUIDs which the animation can't
+        // find. To fix this, we assign their UUID as their name.
         if (!node.name) {
           node.name = node.uuid;
         }
