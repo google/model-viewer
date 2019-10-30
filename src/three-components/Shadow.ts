@@ -33,12 +33,16 @@ const ANIMATION_SCALING = 2;
 
 /**
  * The Shadow class creates a shadow that fits a given model and follows a
- * pivot. Assuming the model is also attached to this pivot, the shadow does not
- * update due to pivot rotation/translation, provided the setRotation() method
- * is called whenever the pivot rotates around the Y-axis. We assume the pivot
- * is restricted to motion in the horizontal plane. The softness of the shadow
- * is controlled by changing its resolution, making softer shadows faster, but
- * less precise.
+ * target. This shadow will follow the model without any updates needed so long
+ * as the shadow and model are both parented to the same object (call it the
+ * pivot) and this pivot is passed as the target parameter to the shadow's
+ * constructor. We also must constrain the pivot to motion within the horizontal
+ * plane and call the setRotation() method whenever the pivot's Y-axis rotation
+ * changes. For motion outside of the horizontal plane, this.needsUpdate must be
+ * set to true.
+ *
+ * The softness of the shadow is controlled by changing its resolution, making
+ * softer shadows faster, but less precise.
  */
 export class Shadow extends DirectionalLight {
   private shadowMaterial = new ShadowMaterial;
@@ -47,7 +51,7 @@ export class Shadow extends DirectionalLight {
   private size = new Vector3;
   public needsUpdate = false;
 
-  constructor(private model: Model, pivot: Object3D, softness: number) {
+  constructor(private model: Model, target: Object3D, softness: number) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -57,10 +61,9 @@ export class Shadow extends DirectionalLight {
     this.floor = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
     this.floor.receiveShadow = true;
     this.floor.castShadow = false;
+    this.add(this.floor);
 
-    pivot.add(this.floor);
-    pivot.add(this);
-    this.target = pivot;
+    this.target = target;
 
     this.setModel(model, softness);
   }
@@ -89,13 +92,13 @@ export class Shadow extends DirectionalLight {
       size.set(maxDimension, maxDimension, maxDimension);
     }
 
-    boundingBox.getCenter(this.floor.position);
     const shadowOffset = size.y * OFFSET;
+    this.position.y = boundingBox.max.y + shadowOffset;
+    boundingBox.getCenter(this.floor.position);
     // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
     // to stay inside the shadow camera.
-    this.floor.position.y -= size.y / 2 - 2 * shadowOffset;
+    this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
 
-    this.position.y = boundingBox.max.y + shadowOffset;
     this.up.set(0, 0, 1);
     camera.near = 0;
     camera.far = size.y;
