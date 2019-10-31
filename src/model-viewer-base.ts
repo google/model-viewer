@@ -402,7 +402,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$onContextLost](event: ContextLostEvent) {
     this.dispatchEvent(new CustomEvent(
         'error',
-        {detail: {type: 'webglcontextlost', sourceError: event.attachment}}));
+        {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
   }
 
   /**

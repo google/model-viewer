@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
@@ -39,7 +39,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
   class AnimationModelViewerElement extends ModelViewerElement {
     @property({type: Boolean}) autoplay: boolean = false;
     @property({type: String, attribute: 'animation-name'})
-    animationName: string|void = undefined;
+    animationName: string|undefined = undefined;
     @property({type: Number, attribute: 'animation-crossfade-duration'})
     animationCrossfadeDuration: number = 300;
 
@@ -50,7 +50,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     get availableAnimations(): Array<string> {
       if (this.loaded) {
-        return (this as any)[$scene].model.animationNames;
+        return this[$scene].model.animationNames;
       }
 
       return [];
@@ -61,11 +61,11 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get currentTime(): number {
-      return (this as any)[$scene].model.animationTime;
+      return this[$scene].model.animationTime;
     }
 
     set currentTime(value: number) {
-      (this as any)[$scene].model.animationTime = value;
+      this[$scene].model.animationTime = value;
     }
 
     pause() {
@@ -74,14 +74,16 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$paused] = true;
+      this[$renderer].renderer.shadowMap.autoUpdate = false;
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
     play() {
       if (this[$paused] && this.availableAnimations.length > 0) {
         this[$paused] = false;
+        this[$renderer].renderer.shadowMap.autoUpdate = true;
 
-        if (!(this as any)[$scene].model.hasActiveAnimation) {
+        if (!this[$scene].model.hasActiveAnimation) {
           this[$changeAnimation]();
         }
 
@@ -105,7 +107,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {model} = (this as any)[$scene];
+      const {model} = this[$scene];
       model.updateAnimation(delta / MILLISECONDS_PER_SECOND);
 
       this[$needsRender]();
@@ -128,13 +130,13 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       // the current one (if any is playing). Otherwise, we might lose
       // the reference to the scene root and running actions start to
       // throw exceptions and/or behave in unexpected ways:
-      (this as any)[$scene].model.stopAnimation();
+      this[$scene].model.stopAnimation();
 
       return super[$updateSource]();
     }
 
     [$changeAnimation]() {
-      const {model} = (this as any)[$scene];
+      const {model} = this[$scene];
 
       model.playAnimation(
           this.animationName,
