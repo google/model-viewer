@@ -208,6 +208,32 @@ suite('ModelViewerElementBase', () => {
           expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
         });
       });
+
+      suite('toBlob', () => {
+        test('produces a blob', async () => {
+          const blob = await element.toBlob();
+          expect(blob).to.not.be.null;
+        });
+
+        test('can convert blob to object URL', async () => {
+          const blob = await element.toBlob();
+          const objectUrl = URL.createObjectURL(blob);
+          const objectUrlMatcher = /^blob\:https?:\//;
+          expect(objectUrlMatcher.test(objectUrl)).to.be.true;
+        });
+
+        test('has size', async () => {
+          const blob = await element.toBlob();
+          expect(blob.size).to.be.greaterThan(0);
+        });
+
+        test('uses fallbacks on unsupported browsers', async () => {
+          // Emulate unsupported browser
+
+          const blob = await element.toBlob();
+          expect(blob).to.not.be.null;
+        });
+      });
     });
 
     suite('orchestrates rendering', () => {
