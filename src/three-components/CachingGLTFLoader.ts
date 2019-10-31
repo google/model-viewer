@@ -142,6 +142,7 @@ export class CachingGLTFLoader {
       // objects are cloned, they get new UUIDs which the animation can't find.
       // To fix this, we assign their UUID as their name.
       gltf.scene.traverse((node: Object3D) => {
+        node.castShadow = true;
         if (!node.name) {
           node.name = node.uuid;
         }

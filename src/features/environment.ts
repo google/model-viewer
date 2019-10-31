@@ -21,12 +21,11 @@ import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
+const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateToneMapping = Symbol('updateToneMapping');
-const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
@@ -61,6 +60,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'shadow-intensity'})
     shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
 
+    @property({type: Number, attribute: 'shadow-softness'})
+    shadowSoftness: number = DEFAULT_SHADOW_SOFTNESS;
+
     @property({
       type: Number,
     })
@@ -74,11 +76,18 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('shadowIntensity')) {
-        this[$updateShadow]();
+        this[$scene].setShadowIntensity(this.shadowIntensity);
+        this[$needsRender]();
+      }
+
+      if (changedProperties.has('shadowSoftness')) {
+        this[$scene].setShadowSoftness(this.shadowSoftness);
+        this[$needsRender]();
       }
 
       if (changedProperties.has('exposure')) {
-        this[$updateToneMapping]();
+        this[$scene].exposure = this.exposure;
+        this[$needsRender]();
       }
 
       if (changedProperties.has('environmentImage') ||
@@ -181,16 +190,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-change'));
 
-      this[$needsRender]();
-    }
-
-    private[$updateShadow]() {
-      this[$scene].shadow.intensity = this.shadowIntensity;
-      this[$needsRender]();
-    }
-
-    private[$updateToneMapping]() {
-      this[$scene].exposure = this.exposure;
       this[$needsRender]();
     }
   }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {Event} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
@@ -101,6 +101,9 @@ export class Renderer extends EventDispatcher {
       this.renderer.gammaFactor = 2.2;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = PCFSoftShadowMap;
+      this.renderer.shadowMap.autoUpdate = false;
 
       this.debugger =
           options != null && !!options.debug ? new Debugger(this) : null;
@@ -209,10 +212,17 @@ export class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
-      const {exposure} = scene;
+      const {exposure, shadow} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+
+      const shadowNeedsUpdate = this.renderer.shadowMap.needsUpdate;
+      if (shadow != null) {
+        this.renderer.shadowMap.needsUpdate =
+            shadowNeedsUpdate || shadow.needsUpdate;
+        shadow.needsUpdate = false;
+      }
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
