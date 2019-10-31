@@ -314,11 +314,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal('always-allow');
           });
 
-      test('sets max radius greater than the camera framed distance', () => {
+      test('sets max radius to at least the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
             element[$scene].model.position);
-        expect(controls.options.maximumRadius)
-            .to.be.greaterThan(cameraDistance);
+        expect(controls.options.maximumRadius).to.be.at.least(cameraDistance);
       });
 
       test('disables interaction if disabled after enabled', async () => {
