@@ -24,7 +24,7 @@ import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, isDebugMode, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
-import {dataURLToBlob} from './utilities/data-conversion.js';
+import {dataUrlToBlob} from './utilities/data-conversion.js';
 
 let renderer = new Renderer({debug: isDebugMode()});
 
@@ -329,7 +329,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
     return new Promise((resolve, reject) => {
       if (!this[$canvas].toBlob) {
-         return resolve(dataURLToBlob(this[$canvas].toDataURL(mimeType)));
+         return resolve(dataUrlToBlob(this[$canvas].toDataURL(mimeType)));
       }
 
       this[$canvas].toBlob((blob) => {
