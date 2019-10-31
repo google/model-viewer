@@ -145,7 +145,7 @@ export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
-const $setRadius = Symbol('set$setRadius');
+const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
@@ -342,12 +342,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
-      const fov = style[0] * 180 / Math.PI;
-      this[$controls].setFieldOfView(fov);
+      this[$controls].setFieldOfView(style[0] * 180 / Math.PI);
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$setRadius](style[2]);
+      this[$updateCameraForRadius](style[2]);
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -438,7 +437,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * Updates the camera's near and far planes to enclose the scene when
      * orbiting at the supplied radius.
      */
-    [$setRadius](radius: number) {
+    [$updateCameraForRadius](radius: number) {
       const {idealCameraDistance} = this[$scene].model;
       const maximumRadius = Math.max(idealCameraDistance, radius);
 
@@ -488,6 +487,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const controls = this[$controls];
       const oldFramedFieldOfView = this[$scene].framedFieldOfView;
 
+      // The super of $onResize will update the scene's framedFieldOfView, so we
+      // compare the before and after to calculate the proper zoom.
       super[$onResize](event);
 
       const newFramedFieldOfView = this[$scene].framedFieldOfView;

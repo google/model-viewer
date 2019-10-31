@@ -260,14 +260,12 @@ export class FilamentViewer extends LitElement {
     const modelRadius =
         Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
     const far = 2 * Math.max(modelRadius, orbit.radius);
-    // This hack is because Filament.js seems to have a bug where small near
-    // plane values start to inexplicably zoom the camera.
-    const near = Math.max(far / 1000, 0.01);
+    const near = far / 1000;
 
     this[$camera].setProjectionFov(
         verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
     this[$camera].lookAt(eye, center, up);
-    this[$camera].setExposure(1.0, 1.2, 100);
+    this[$camera].setExposureDirect(1.0);
   }
 }
