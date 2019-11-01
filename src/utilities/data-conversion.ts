@@ -18,31 +18,33 @@
  * into a Blob of the same contents.
  */
 export const dataUrlToBlob =
-  (base64DataUrl: string) : Blob => {
-    const sliceSize = 512;
-    const typeMatch = base64DataUrl.match(/data:(.*);/);
+  async (base64DataUrl: string) : Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const sliceSize = 512;
+      const typeMatch = base64DataUrl.match(/data:(.*);/);
 
-    if (!typeMatch) {
-      throw new Error(`${base64DataUrl} is not a valid data Url`);
-    }
-
-    const type = typeMatch[1];
-    const base64 = base64DataUrl.replace(/data:image\/\w+;base64,/, '');
-
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
+      if (!typeMatch) {
+        return reject(new Error(`${base64DataUrl} is not a valid data Url`));
       }
 
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
+      const type = typeMatch[1];
+      const base64 = base64DataUrl.replace(/data:image\/\w+;base64,/, '');
 
-    return new Blob(byteArrays, {type});
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+
+      for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+
+      resolve(new Blob(byteArrays, {type}));
+    });
   };

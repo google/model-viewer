@@ -327,9 +327,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!this[$canvas].toBlob) {
-         return resolve(dataUrlToBlob(this[$canvas].toDataURL(mimeType)));
+         return resolve(await dataUrlToBlob(this[$canvas].toDataURL(mimeType)));
       }
 
       this[$canvas].toBlob((blob) => {
