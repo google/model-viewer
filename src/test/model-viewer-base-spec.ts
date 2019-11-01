@@ -209,7 +209,7 @@ suite('ModelViewerElementBase', () => {
         });
       });
 
-      suite.only('toBlob', () => {
+      suite('toBlob', () => {
         test('produces a blob', async () => {
           const blob = await element.toBlob();
           expect(blob).to.not.be.null;
