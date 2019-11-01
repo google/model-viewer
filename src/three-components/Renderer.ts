@@ -242,8 +242,8 @@ export class Renderer extends EventDispatcher {
           heightDPR,
           0,
           0,
-          widthDPR,
-          heightDPR);
+          width,
+          height);
 
       scene.isDirty = false;
     }
