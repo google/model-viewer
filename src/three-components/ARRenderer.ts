@@ -56,7 +56,7 @@ export class ARRenderer extends EventDispatcher {
 
   constructor(parentRenderer: Renderer) {
     super();
-    const inputContext: WebGLRenderingContext = parentRenderer.context!;
+    const inputContext: WebGLRenderingContext = parentRenderer.context3D!;
 
     // The parentRenderer is a Renderer object which has-a ARRenderer. We need
     // to save a reference so we can restore state once the AR session is done.

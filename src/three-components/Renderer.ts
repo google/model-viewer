@@ -53,8 +53,8 @@ const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
  */
 export class Renderer extends EventDispatcher {
   public renderer!: WebGLRenderer;
-  public context!: WebGLRenderingContext|null;
-  public canvas: HTMLCanvasElement;
+  public context3D!: WebGLRenderingContext|null;
+  public canvas3D: HTMLCanvasElement;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -68,7 +68,7 @@ export class Renderer extends EventDispatcher {
       this[$onWebGLContextLost](event);
 
   get canRender() {
-    return this.renderer != null && this.context != null;
+    return this.renderer != null && this.context3D != null;
   }
 
   constructor(options?: RendererOptions) {
@@ -81,20 +81,20 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.addEventListener(
+    this.canvas3D = document.createElement('canvas');
+    this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
-      this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
+      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
 
       // Patch the gl context's extension functions before passing
       // it to three.
-      WebGLUtils.applyExtensionCompatibility(this.context);
+      WebGLUtils.applyExtensionCompatibility(this.context3D);
 
       this.renderer = new WebGLRenderer({
-        canvas: this.canvas,
-        context: this.context,
+        canvas: this.canvas3D,
+        context: this.context3D,
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;
@@ -113,7 +113,7 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.renderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
-      this.context = null;
+      this.context3D = null;
       console.warn(error);
     }
 
@@ -237,7 +237,7 @@ export class Renderer extends EventDispatcher {
       context.drawImage(
           this.renderer.domElement,
           0,
-          this.canvas.height - heightDPR,
+          this.canvas3D.height - heightDPR,
           widthDPR,
           heightDPR,
           0,
@@ -264,7 +264,7 @@ export class Renderer extends EventDispatcher {
 
     this.scenes.clear();
 
-    this.canvas.removeEventListener(
+    this.canvas3D.removeEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
   }
 
