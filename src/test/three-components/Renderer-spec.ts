@@ -45,8 +45,8 @@ function createScene(): ModelScene&TestScene {
 
   scene.renderCount = 0;
   const drawImage = scene.context.drawImage;
-  (scene.context as any).drawImage = (...args: any[]) => {
-    (scene.renderCount as number)++;
+  scene.context.drawImage = (...args: any[]) => {
+    scene.renderCount!++;
     (drawImage as any).call(scene.context, ...args);
   };
 
