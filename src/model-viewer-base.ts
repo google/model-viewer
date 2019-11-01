@@ -328,8 +328,17 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
     return new Promise(async (resolve, reject) => {
+      if ((this[$canvas] as any).msToBlob) {
+        // NOTE: msToBlob only returns image/png
+        // so ensure mimeType is not specified (defaults to image/png)
+        // or is image/png, otherwise fallback to using toDataURL on IE.
+        if (!mimeType || mimeType === 'image/png') {
+          return resolve((this[$canvas] as any).msToBlob());
+        }
+      }
+
       if (!this[$canvas].toBlob) {
-         return resolve(await dataUrlToBlob(this[$canvas].toDataURL(mimeType)));
+        return resolve(await dataUrlToBlob(this[$canvas].toDataURL(mimeType, qualityArgument)));
       }
 
       this[$canvas].toBlob((blob) => {
