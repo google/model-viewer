@@ -17,7 +17,7 @@ import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
-import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
+import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 
@@ -209,7 +209,7 @@ suite('ModelViewerElementBase', () => {
         });
       });
 
-      suite('toBlob', () => {
+      suite.only('toBlob', () => {
         test('produces a blob', async () => {
           const blob = await element.toBlob();
           expect(blob).to.not.be.null;
@@ -229,9 +229,23 @@ suite('ModelViewerElementBase', () => {
 
         test('uses fallbacks on unsupported browsers', async () => {
           // Emulate unsupported browser
+          const restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
 
           const blob = await element.toBlob();
           expect(blob).to.not.be.null;
+
+          restoreCanvasToBlob();
+        });
+
+        test('blobs on supported and unsupported browsers are equivalent', async () => {
+          const restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          const unsupportedBrowserBlob = await element.toBlob();
+
+          restoreCanvasToBlob();
+
+          const supportedBrowserBlob = await element.toBlob();
+
+          expect(unsupportedBrowserBlob).to.eql(supportedBrowserBlob)
         });
       });
     });
