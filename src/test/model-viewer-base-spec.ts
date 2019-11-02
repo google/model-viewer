@@ -245,7 +245,13 @@ suite('ModelViewerElementBase', () => {
 
           const supportedBrowserBlob = await element.toBlob();
 
-          expect(unsupportedBrowserBlob).to.eql(supportedBrowserBlob)
+          const supportedBrowserResponse = new Response(supportedBrowserBlob);
+          const unsupportedBrowserResponse = new Response(unsupportedBrowserBlob);
+
+          const supportedBrowserArrayBuffer = await supportedBrowserResponse.arrayBuffer();
+          const unsupportedBrowserArrayBuffer = await unsupportedBrowserResponse.arrayBuffer();
+
+          expect(unsupportedBrowserArrayBuffer).to.eql(supportedBrowserArrayBuffer);
         });
       });
     });
