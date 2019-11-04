@@ -271,12 +271,12 @@ export class PMREMGenerator {
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurMaterial]));
     const uniforms = this[$blurMaterial].uniforms;
 
-    uniforms.envMap.value = equirectangular;
-    uniforms.copyEquirectangular.value = true;
-    uniforms.texelSize.value = new Vector2(
+    uniforms['envMap'].value = equirectangular;
+    uniforms['copyEquirectangular'].value = true;
+    uniforms['texelSize'].value = new Vector2(
         1.0 / equirectangular.image.width, 1.0 / equirectangular.image.height);
-    uniforms.inputEncoding.value = encodings[equirectangular.encoding];
-    uniforms.outputEncoding.value = encodings[equirectangular.encoding];
+    uniforms['inputEncoding'].value = encodings[equirectangular.encoding];
+    uniforms['outputEncoding'].value = encodings[equirectangular.encoding];
 
     this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
@@ -368,15 +368,15 @@ export class PMREMGenerator {
     }
     weights = weights.map(w => w / sum);
 
-    blurUniforms.envMap.value = targetIn.texture;
-    blurUniforms.copyEquirectangular.value = false;
-    blurUniforms.samples.value = samples;
-    blurUniforms.weights.value = weights;
-    blurUniforms.latitudinal.value = direction === 'latitudinal';
-    blurUniforms.dTheta.value = radiansPerPixel;
-    blurUniforms.mipInt.value = LOD_MAX - lodIn;
-    blurUniforms.inputEncoding.value = encodings[targetIn.texture.encoding];
-    blurUniforms.outputEncoding.value = encodings[targetIn.texture.encoding];
+    blurUniforms['envMap'].value = targetIn.texture;
+    blurUniforms['copyEquirectangular'].value = false;
+    blurUniforms['samples'].value = samples;
+    blurUniforms['weights'].value = weights;
+    blurUniforms['latitudinal'].value = direction === 'latitudinal';
+    blurUniforms['dTheta'].value = radiansPerPixel;
+    blurUniforms['mipInt'].value = LOD_MAX - lodIn;
+    blurUniforms['inputEncoding'].value = encodings[targetIn.texture.encoding];
+    blurUniforms['outputEncoding'].value = encodings[targetIn.texture.encoding];
 
     const outputSize = this[$sizeLod][lodOut];
     const x = 3 * Math.max(0, SIZE_MAX - 2 * outputSize);
@@ -399,19 +399,19 @@ class BlurMaterial extends RawShaderMaterial {
 
     super({
 
-      defines: {n: maxSamples},
+      defines: {'n': maxSamples},
 
       uniforms: {
-        envMap: {value: null},
-        copyEquirectangular: {value: false},
-        texelSize: {value: texelSize},
-        samples: {value: 1},
-        weights: {value: weights},
-        latitudinal: {value: false},
-        dTheta: {value: 0},
-        mipInt: {value: 0},
-        inputEncoding: {value: encodings[LinearEncoding]},
-        outputEncoding: {value: encodings[LinearEncoding]}
+        'envMap': {value: null},
+        'copyEquirectangular': {value: false},
+        'texelSize': {value: texelSize},
+        'samples': {value: 1},
+        'weights': {value: weights},
+        'latitudinal': {value: false},
+        'dTheta': {value: 0},
+        'mipInt': {value: 0},
+        'inputEncoding': {value: encodings[LinearEncoding]},
+        'outputEncoding': {value: encodings[LinearEncoding]}
       },
 
       vertexShader: `

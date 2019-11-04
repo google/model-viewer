@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {Event} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
-import {resolveDpr} from '../utilities.js';
+import {isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
-import ModelScene from './ModelScene.js';
+import {Debugger} from './Debugger.js';
+import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
+
+export interface RendererOptions {
+  debug?: boolean;
+}
 
 export interface ContextLostEvent extends Event {
   type: 'contextlost';
@@ -54,6 +59,7 @@ export class Renderer extends EventDispatcher {
   public width: number = 0;
   public height: number = 0;
 
+  protected debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
@@ -65,7 +71,7 @@ export class Renderer extends EventDispatcher {
     return this.renderer != null && this.context != null;
   }
 
-  constructor() {
+  constructor(options?: RendererOptions) {
     super();
 
     const webGlOptions = {alpha: false, antialias: true};
@@ -96,6 +102,13 @@ export class Renderer extends EventDispatcher {
       this.renderer.gammaFactor = 2.2;
       this.renderer.physicallyCorrectLights = true;
       this.renderer.setPixelRatio(resolveDpr());
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = PCFSoftShadowMap;
+      this.renderer.shadowMap.autoUpdate = false;
+
+      this.debugger =
+          options != null && !!options.debug ? new Debugger(this) : null;
+      this.renderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
@@ -126,12 +139,20 @@ export class Renderer extends EventDispatcher {
     if (this.canRender && this.scenes.size > 0) {
       this.renderer.setAnimationLoop((time: number) => this.render(time));
     }
+
+    if (this.debugger != null) {
+      this.debugger.addScene(scene);
+    }
   }
 
   unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
     if (this.canRender && this.scenes.size === 0) {
       (this.renderer.setAnimationLoop as any)(null);
+    }
+
+    if (this.debugger != null) {
+      this.debugger.removeScene(scene);
     }
   }
 
@@ -180,7 +201,7 @@ export class Renderer extends EventDispatcher {
       const {element, width, height, context} = scene;
       element[$tick](t, delta);
 
-      if (!scene.isVisible || !scene.isDirty || scene.paused) {
+      if (!scene.visible || !scene.isDirty || scene.paused) {
         continue;
       }
 
@@ -192,10 +213,17 @@ export class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
-      const {exposure} = scene;
+      const {exposure, shadow} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
       this.renderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+
+      const shadowNeedsUpdate = this.renderer.shadowMap.needsUpdate;
+      if (shadow != null) {
+        this.renderer.shadowMap.needsUpdate =
+            shadowNeedsUpdate || shadow.needsUpdate;
+        shadow.needsUpdate = false;
+      }
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
@@ -247,4 +275,4 @@ export class Renderer extends EventDispatcher {
   }
 }
 
-export let sceneRenderer = new Renderer();
+export let sceneRenderer = new Renderer({debug: isDebugMode()});

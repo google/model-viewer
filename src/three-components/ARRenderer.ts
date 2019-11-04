@@ -15,7 +15,7 @@
 
 import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
 import {assertIsArCandidate} from '../utilities.js';
-import ModelScene from './ModelScene.js';
+import {ModelScene} from './ModelScene.js';
 import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';

@@ -16,17 +16,16 @@
 import {property} from 'lit-element';
 import {Color, Texture} from 'three';
 
-import ModelViewerElementBase, {$container, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
+const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateToneMapping = Symbol('updateToneMapping');
-const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
@@ -61,6 +60,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'shadow-intensity'})
     shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
 
+    @property({type: Number, attribute: 'shadow-softness'})
+    shadowSoftness: number = DEFAULT_SHADOW_SOFTNESS;
+
     @property({
       type: Number,
     })
@@ -70,21 +72,29 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
-    updated(changedProperties: Map<string, any>) {
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('shadowIntensity')) {
-        this[$updateShadow]();
+        this[$scene].setShadowIntensity(this.shadowIntensity);
+        this[$needsRender]();
+      }
+
+      if (changedProperties.has('shadowSoftness')) {
+        this[$scene].setShadowSoftness(this.shadowSoftness);
+        this[$needsRender]();
       }
 
       if (changedProperties.has('exposure')) {
-        this[$updateToneMapping]();
+        this[$scene].exposure = this.exposure;
+        this[$needsRender]();
       }
 
       if (changedProperties.has('environmentImage') ||
           changedProperties.has('backgroundImage') ||
           changedProperties.has('backgroundColor') ||
-          changedProperties.has('experimentalPmrem')) {
+          changedProperties.has('experimentalPmrem') ||
+          changedProperties.has($isInRenderTree)) {
         this[$updateEnvironment]();
       }
     }
@@ -98,6 +108,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateEnvironment]() {
+      if (!this[$isInRenderTree]) {
+        return;
+      }
+
       const {backgroundImage, environmentImage} = this;
       let {backgroundColor} = this;
 
@@ -176,16 +190,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-change'));
 
-      this[$needsRender]();
-    }
-
-    private[$updateShadow]() {
-      this[$scene].shadow.intensity = this.shadowIntensity;
-      this[$needsRender]();
-    }
-
-    private[$updateToneMapping]() {
-      this[$scene].exposure = this.exposure;
       this[$needsRender]();
     }
   }

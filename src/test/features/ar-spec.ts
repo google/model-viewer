@@ -14,10 +14,10 @@
  */
 
 import {IS_IOS} from '../../constants.js';
-import {ARInterface, ARMixin} from '../../features/ar.js';
+import {ARInterface, ARMixin, openSceneViewer} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
-import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, spy, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -40,6 +40,28 @@ suite('ModelViewerElementBase with ARMixin', () => {
     });
 
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
+
+    suite('openSceneViewer', () => {
+      test('preserves query parameters in model URLs', () => {
+        const intentUrls: Array<string> = [];
+        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
+          value: function() {
+            intentUrls.push((this as HTMLAnchorElement).href);
+          }
+        });
+
+        openSceneViewer(
+            'https://example.com/model.gltf?token=foo', 'Example model');
+
+        expect(intentUrls.length).to.be.equal(1);
+
+        const url = new URL(intentUrls[0]);
+
+        expect(url.search).to.match(/[\?&]token=foo(&|$)/);
+
+        restoreAnchorClick();
+      });
+    });
 
     suite('quick-look-browsers', () => {
       // TODO(#624,#625): We cannot implement these tests without the ability

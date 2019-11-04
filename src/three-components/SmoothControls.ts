@@ -49,7 +49,7 @@ export interface SmoothControlsOptions {
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   minimumRadius: 0,
-  maximumRadius: 2,
+  maximumRadius: Infinity,
   minimumPolarAngle: Math.PI / 8,
   maximumPolarAngle: Math.PI - Math.PI / 8,
   minimumAzimuthalAngle: -Infinity,
@@ -366,11 +366,18 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Sets the non-interpolated camera parameters
+   * Sets the near and far planes of the camera.
    */
-  updateIntrinsics(nearPlane: number, farPlane: number, aspect: number) {
+  updateNearFar(nearPlane: number, farPlane: number) {
     this.camera.near = Math.max(nearPlane, farPlane / 1000);
     this.camera.far = farPlane;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Sets the aspect ratio of the camera
+   */
+  updateAspect(aspect: number) {
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
   }
