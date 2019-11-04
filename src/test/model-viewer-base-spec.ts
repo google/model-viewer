@@ -243,6 +243,11 @@ suite('ModelViewerElementBase', () => {
         });
 
         test('blobs on supported and unsupported browsers are equivalent', async () => {
+          // Skip test on IE11 since it doesn't have Response to fetch arrayBuffer
+          if (IS_IE11) {
+            return;
+          }
+
           let restoreCanvasToBlob = () => {};
           try {
             restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
@@ -256,6 +261,8 @@ suite('ModelViewerElementBase', () => {
 
           const supportedBrowserBlob = await element.toBlob();
 
+          // Blob.prototype.arrayBuffer is not available in Edge / Safari
+          // Using Response to get arrayBuffer instead
           const supportedBrowserResponse = new Response(supportedBrowserBlob);
           const unsupportedBrowserResponse = new Response(unsupportedBrowserBlob);
 
