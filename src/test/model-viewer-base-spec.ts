@@ -229,7 +229,12 @@ suite('ModelViewerElementBase', () => {
 
         test('uses fallbacks on unsupported browsers', async () => {
           // Emulate unsupported browser
-          const restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          let restoreCanvasToBlob = () => {};
+          try {
+            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          } catch (error) {
+            // Ignored...
+          }
 
           const blob = await element.toBlob();
           expect(blob).to.not.be.null;
@@ -238,7 +243,13 @@ suite('ModelViewerElementBase', () => {
         });
 
         test('blobs on supported and unsupported browsers are equivalent', async () => {
-          const restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          let restoreCanvasToBlob = () => {};
+          try {
+            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          } catch (error) {
+            // Ignored...
+          }
+
           const unsupportedBrowserBlob = await element.toBlob();
 
           restoreCanvasToBlob();
