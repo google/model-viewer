@@ -218,7 +218,7 @@ suite('ModelViewerElementBase', () => {
         test('can convert blob to object URL', async () => {
           const blob = await element.toBlob();
           const objectUrl = URL.createObjectURL(blob);
-          const objectUrlMatcher = /^blob\:https?:\//;
+          const objectUrlMatcher = /^blob\:/;
           expect(objectUrlMatcher.test(objectUrl)).to.be.true;
         });
 
