@@ -15,6 +15,7 @@
 
 import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {_Math} from 'three/src/math/Math';
+import {roughness2variance, variance2roughness, varianceDefines} from './shader-chunk/common.glsl';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
 const $scene = Symbol('scene');
@@ -107,32 +108,32 @@ export class RoughnessMipmapper {
     renderer.autoClear = autoClear;
 
     // debug
-    const saveTarget =
-        (target: WebGLRenderTarget, filename: string) => {
-          const {width, height} = target;
-          const output = document.createElement('canvas');
-          output.width = width;
-          output.height = height;
+    // const saveTarget =
+    //     (target: WebGLRenderTarget, filename: string) => {
+    //       const {width, height} = target;
+    //       const output = document.createElement('canvas');
+    //       output.width = width;
+    //       output.height = height;
 
-          const ctx = output.getContext('2d')!;
-          const img = ctx.getImageData(0, 0, width, height);
-          renderer.readRenderTargetPixels(
-              target, 0, 0, width, height, img.data);
-          ctx.putImageData(img, 0, 0);
+    //       const ctx = output.getContext('2d')!;
+    //       const img = ctx.getImageData(0, 0, width, height);
+    //       renderer.readRenderTargetPixels(
+    //           target, 0, 0, width, height, img.data);
+    //       ctx.putImageData(img, 0, 0);
 
-          output.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
+    //       output.toBlob(function(blob) {
+    //         const url = URL.createObjectURL(blob);
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
+    //         const a = document.createElement('a');
+    //         a.href = url;
+    //         a.download = filename;
+    //         a.click();
 
-            URL.revokeObjectURL(url);
-          });
-        }
+    //         URL.revokeObjectURL(url);
+    //       });
+    //     }
 
-    saveTarget(this[$tempTarget]!, 'temp.png');
+    // saveTarget(this[$tempTarget]!, 'temp.png');
   }
 }
 
@@ -166,22 +167,23 @@ varying vec2 vUv;
 uniform sampler2D roughnessMap;
 uniform sampler2D normalMap;
 uniform vec2 texelSize;
+${varianceDefines}
+${roughness2variance}
+${variance2roughness}
 void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   float roughness = gl_FragColor.g;
-  float alpha = roughness*roughness;
+  float variance = roughness2variance(roughness);
   vec3 avgNormal;
   for(float x = -1.0; x < 2.0; x += 2.0){
     for(float y = -1.0; y < 2.0; y += 2.0){
       vec2 uv = vUv + vec2(x, y) * 0.25 * texelSize;
-      avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz);
+      avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz - 0.5);
     }
   }
   avgNormal *= 0.25;
-  float r2 = dot(avgNormal, avgNormal);
-  float invLambda = sqrt(r2)*(1.0-r2)/(3.0-r2);
-  alpha = sqrt(alpha * alpha + 20.0*invLambda);
-  gl_FragColor.g = clamp(sqrt(alpha), 0.0, 1.0);
+  variance += 2.0 * (1.0 - length(avgNormal));
+  gl_FragColor.g = variance2roughness(variance);
 }
       `,
 

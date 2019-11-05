@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {getFaceChunk, getUVChunk} from './common.glsl.js';
+import {getFaceChunk, getUVChunk, roughness2variance, variance2mip, varianceDefines} from './common.glsl.js';
 
 export const bilinearCubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel 8.0
@@ -62,32 +62,38 @@ export const cubeUVChunk = /* glsl */ `
 #ifdef ENVMAP_TYPE_CUBE_UV
 
 ${bilinearCubeUVChunk}
+${varianceDefines}
+${roughness2variance}
+${variance2mip}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
-  float filterMip = 0.0;
-  if (roughness >= 0.74) {
-    filterMip = (1.0 - roughness) / (1.0 - 0.74) - 6.0;
-  } else if (roughness >= 0.6) {
-    filterMip = (0.74 - roughness) / (0.74 - 0.6) - 5.0;
-  } else if (roughness >= 0.48) {
-    filterMip = (0.6 - roughness) / (0.6 - 0.48) - 4.0;
-  } else if (roughness >= 0.36) {
-    filterMip = (0.48 - roughness) / (0.48 - 0.36) - 3.0;
-  } else if (roughness >= 0.25) {
-    filterMip = (0.36 - roughness) / (0.36 - 0.25) - 2.0;
-  } else if (roughness >= 0.12) {
-    filterMip = (0.25 - roughness) / (0.25 - 0.12) - 1.0;
-  }
+  // float filterMip = 0.0;
+  // if (roughness >= 0.74) {
+  //   filterMip = (1.0 - roughness) / (1.0 - 0.74) - 6.0;
+  // } else if (roughness >= 0.6) {
+  //   filterMip = (0.74 - roughness) / (0.74 - 0.6) - 5.0;
+  // } else if (roughness >= 0.48) {
+  //   filterMip = (0.6 - roughness) / (0.6 - 0.48) - 4.0;
+  // } else if (roughness >= 0.36) {
+  //   filterMip = (0.48 - roughness) / (0.48 - 0.36) - 3.0;
+  // } else if (roughness >= 0.25) {
+  //   filterMip = (0.36 - roughness) / (0.36 - 0.25) - 2.0;
+  // } else if (roughness >= 0.12) {
+  //   filterMip = (0.25 - roughness) / (0.25 - 0.12) - 1.0;
+  // }
 
-  roughness = min(roughness, 0.12);
-  float sigma = 4 * roughness * roughness;
+  // roughness = min(roughness, 0.12);
+  // float sigma = 4.0 * roughness * roughness;
 
-  // // Add anti-aliasing mipmap contribution
-  // vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
-  // sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
+  // // // Add anti-aliasing mipmap contribution
+  // // vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
+  // // sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
 
-  float mip =
-      clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
+  // float mip =
+  //     clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
+
+  float sigma2 = roughness2variance(roughness);
+  float mip = clamp(variance2mip(sigma2), -2.0, cubeUV_maxMipLevel);
   float mipF = fract(mip);
   float mipInt = floor(mip);
 
