@@ -353,7 +353,6 @@ export class PMREMGenerator {
           sigmaRadians}, is too large and will clip, as it requested ${
           samples} samples when the maximum is set to ${MAX_SAMPLES}`);
     }
-    console.log('samples = ', samples);
 
     let weights = [];
     let sum = 0;
