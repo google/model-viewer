@@ -24,6 +24,7 @@ import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, isDebugMode, resolveDpr} from './utilities.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
+import {dataUrlToBlob} from './utilities/data-conversion.js';
 
 let renderer = new Renderer({debug: isDebugMode()});
 
@@ -323,6 +324,31 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   toDataURL(type?: string, encoderOptions?: number): string {
     return this[$canvas].toDataURL(type, encoderOptions);
+  }
+
+  async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
+    return new Promise(async (resolve, reject) => {
+      if ((this[$canvas] as any).msToBlob) {
+        // NOTE: msToBlob only returns image/png
+        // so ensure mimeType is not specified (defaults to image/png)
+        // or is image/png, otherwise fallback to using toDataURL on IE.
+        if (!mimeType || mimeType === 'image/png') {
+          return resolve((this[$canvas] as any).msToBlob());
+        }
+      }
+
+      if (!this[$canvas].toBlob) {
+        return resolve(await dataUrlToBlob(this[$canvas].toDataURL(mimeType, qualityArgument)));
+      }
+
+      this[$canvas].toBlob((blob) => {
+        if (!blob) {
+          return reject(new Error('Unable to retrieve canvas blob'));
+        }
+
+        resolve(blob);
+      }, mimeType, qualityArgument);
+    });
   }
 
   get[$ariaLabel]() {
