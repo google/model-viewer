@@ -65,24 +65,26 @@ ${bilinearCubeUVChunk}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
   float filterMip = 0.0;
-  if (roughness >= 0.7) {
-    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 5.0;
-  } else if (roughness >= 0.5) {
-    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 4.0;
-  } else if (roughness >= 0.32) {
-    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 3.0;
-  } else if (roughness >= 0.22) {
-    filterMip = (0.32 - roughness) / (0.32 - 0.22) - 2.0;
-  } else if (roughness >= 0.15) {
-    filterMip = (0.22 - roughness) / (0.22 - 0.15) - 1.0;
+  if (roughness >= 0.74) {
+    filterMip = (1.0 - roughness) / (1.0 - 0.74) - 6.0;
+  } else if (roughness >= 0.6) {
+    filterMip = (0.74 - roughness) / (0.74 - 0.6) - 5.0;
+  } else if (roughness >= 0.48) {
+    filterMip = (0.6 - roughness) / (0.6 - 0.48) - 4.0;
+  } else if (roughness >= 0.36) {
+    filterMip = (0.48 - roughness) / (0.48 - 0.36) - 3.0;
+  } else if (roughness >= 0.25) {
+    filterMip = (0.36 - roughness) / (0.36 - 0.25) - 2.0;
+  } else if (roughness >= 0.12) {
+    filterMip = (0.25 - roughness) / (0.25 - 0.12) - 1.0;
   }
 
-  roughness = min(roughness, 0.15);
-  float sigma = PI * roughness * roughness / (1.0 + roughness);
+  roughness = min(roughness, 0.12);
+  float sigma = 4 * roughness * roughness;
 
-  // Add anti-aliasing mipmap contribution
-  vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
-  sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
+  // // Add anti-aliasing mipmap contribution
+  // vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
+  // sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
 
   float mip =
       clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
