@@ -76,7 +76,7 @@ const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
 
-export interface LoadingInterface {
+export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
   preload: boolean;

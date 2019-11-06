@@ -31,8 +31,11 @@ const $autoRotateTimer = Symbol('autoRotateTimer');
 const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
 
-export interface StagingInterface {
+export declare interface StagingInterface {
   autoRotate: boolean;
+  autoRotateDelay: number;
+  readonly turntableRotation: number;
+  resetTurntableRotation(): void;
 }
 
 export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
