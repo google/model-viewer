@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 
 import EnvironmentScene from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
@@ -45,6 +45,7 @@ const $roughness = Symbol('roughness');
 const $sigma = Symbol('sigma');
 const $sizeLod = Symbol('sizeLod');
 const $lodPlanes = Symbol('lodPlanes');
+const $axisDirections = Symbol('axisDirections');
 const $blurMaterial = Symbol('blurMaterial');
 const $flatCamera = Symbol('flatCamera');
 const $pingPongRenderTarget = Symbol('pingP$pingPongRenderTarget');
@@ -74,6 +75,7 @@ export class PMREMGenerator {
   private[$sigma]: Array<number> = [];
   private[$sizeLod]: Array<number> = [];
   private[$lodPlanes]: Array<BufferGeometry> = [];
+  private[$axisDirections]: Array<Vector3> = [];
 
   private[$blurMaterial] = new BlurMaterial(MAX_SAMPLES);
   private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
@@ -141,6 +143,21 @@ export class PMREMGenerator {
         lod--;
       }
     }
+    // Golden Ratio
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const invPhi = 1 / phi;
+    // Vertices of a dodecahedron (except the opposites, which represent the
+    // same axis), used as axis directions evenly spread on a sphere.
+    this[$axisDirections].push(new Vector3(1, 1, 1));
+    this[$axisDirections].push(new Vector3(-1, 1, 1));
+    this[$axisDirections].push(new Vector3(1, 1, -1));
+    this[$axisDirections].push(new Vector3(-1, 1, -1));
+    this[$axisDirections].push(new Vector3(0, phi, invPhi));
+    this[$axisDirections].push(new Vector3(0, phi, -invPhi));
+    this[$axisDirections].push(new Vector3(invPhi, 0, phi));
+    this[$axisDirections].push(new Vector3(-invPhi, 0, phi));
+    this[$axisDirections].push(new Vector3(phi, invPhi, 0));
+    this[$axisDirections].push(new Vector3(-phi, invPhi, 0));
   }
 
   /**
@@ -273,7 +290,7 @@ export class PMREMGenerator {
 
     uniforms['envMap'].value = equirectangular;
     uniforms['copyEquirectangular'].value = true;
-    uniforms['texelSize'].value = new Vector2(
+    uniforms['texelSize'].value.set(
         1.0 / equirectangular.image.width, 1.0 / equirectangular.image.height);
     uniforms['inputEncoding'].value = encodings[equirectangular.encoding];
     uniforms['outputEncoding'].value = encodings[equirectangular.encoding];
@@ -298,7 +315,9 @@ export class PMREMGenerator {
       const sigma = Math.sqrt(
           this[$sigma][i] * this[$sigma][i] -
           this[$sigma][i - 1] * this[$sigma][i - 1]);
-      this[$blur](cubeUVRenderTarget, i - 1, i, sigma);
+      const poleAxis =
+          this[$axisDirections][(i - 1) % this[$axisDirections].length];
+      this[$blur](cubeUVRenderTarget, i - 1, i, sigma, poleAxis);
     }
 
     this[$pingPongRenderTarget].dispose();
@@ -313,14 +332,15 @@ export class PMREMGenerator {
    */
   private[$blur](
       cubeUVRenderTarget: WebGLRenderTarget, lodIn: number, lodOut: number,
-      sigma: number) {
+      sigma: number, poleAxis?: Vector3) {
     this[$halfBlur](
         cubeUVRenderTarget,
         this[$pingPongRenderTarget],
         lodIn,
         lodOut,
         sigma,
-        'latitudinal');
+        'latitudinal',
+        poleAxis);
 
     this[$halfBlur](
         this[$pingPongRenderTarget],
@@ -328,12 +348,14 @@ export class PMREMGenerator {
         lodOut,
         lodOut,
         sigma,
-        'longitudinal');
+        'longitudinal',
+        poleAxis);
   }
 
   private[$halfBlur](
       targetIn: WebGLRenderTarget, targetOut: WebGLRenderTarget, lodIn: number,
-      lodOut: number, sigmaRadians: number, direction: string) {
+      lodOut: number, sigmaRadians: number, direction: string,
+      poleAxis?: Vector3) {
     if (direction !== 'latitudinal' && direction !== 'longitudinal') {
       console.error(
           'blur direction must be either latitudinal or longitudinal!');
@@ -373,6 +395,9 @@ export class PMREMGenerator {
     blurUniforms['samples'].value = samples;
     blurUniforms['weights'].value = weights;
     blurUniforms['latitudinal'].value = direction === 'latitudinal';
+    if (poleAxis) {
+      blurUniforms['poleAxis'].value = poleAxis;
+    }
     blurUniforms['dTheta'].value = radiansPerPixel;
     blurUniforms['mipInt'].value = LOD_MAX - lodIn;
     blurUniforms['inputEncoding'].value = encodings[targetIn.texture.encoding];
@@ -396,6 +421,7 @@ class BlurMaterial extends RawShaderMaterial {
   constructor(maxSamples: number) {
     const weights = new Float32Array(maxSamples);
     const texelSize = new Vector2(1, 1);
+    const poleAxis = new Vector3(0, 1, 0);
 
     super({
 
@@ -410,6 +436,7 @@ class BlurMaterial extends RawShaderMaterial {
         'latitudinal': {value: false},
         'dTheta': {value: 0},
         'mipInt': {value: 0},
+        'poleAxis': {value: poleAxis},
         'inputEncoding': {value: encodings[LinearEncoding]},
         'outputEncoding': {value: encodings[LinearEncoding]}
       },
@@ -440,6 +467,7 @@ uniform float weights[n];
 uniform bool latitudinal;
 uniform float dTheta;
 uniform float mipInt;
+uniform vec3 poleAxis;
 #define RECIPROCAL_PI 0.31830988618
 #define RECIPROCAL_PI2 0.15915494
 ${texelIO} 
@@ -467,31 +495,20 @@ void main() {
     vec3 bm = mix(bl, br, f.x);
     gl_FragColor.rgb = mix(tm, bm, f.y);
   } else {
-    float xz = length(vOutputDirection.xz);
     for (int i = 0; i < n; i++) {
       if (i >= samples)
         break;
       for (int dir = -1; dir < 2; dir += 2) {
         if (i == 0 && dir == 1)
           continue;
-        vec3 sampleDirection = vOutputDirection;
-        if (latitudinal) {
-          float diTheta = dTheta * float(dir * i) / xz;
-          mat2 R =
-              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-          sampleDirection.xz = R * sampleDirection.xz;
-        } else {
-          float diTheta = dTheta * float(dir * i);
-          mat2 R =
-              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-          vec2 xzY = R * vec2(xz, sampleDirection.y);
-          if (xzY.x < 0.0) {
-            sampleDirection = vec3(0.0, sign(sampleDirection.y), 0.0);
-          } else {
-            sampleDirection.xz *= xzY.x / xz;
-            sampleDirection.y = xzY.y;
-          }
-        }
+        vec3 axis = latitudinal ? poleAxis : cross(poleAxis, vOutputDirection);
+        axis = normalize(axis);
+        float theta = dTheta * float(dir * i);
+        float cosTheta = cos(theta);
+        // Rodrigues' axis-angle rotation
+        vec3 sampleDirection = vOutputDirection * cosTheta 
+            + cross(axis, vOutputDirection) * sin(theta) 
+            + axis * dot(axis, vOutputDirection) * (1.0 - cosTheta);
         gl_FragColor.rgb +=
             weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
       }
