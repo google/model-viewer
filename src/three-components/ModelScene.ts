@@ -306,7 +306,7 @@ uniform sampler2D envMap;
           shader.fragmentShader.replace('uniform samplerCube tCube;', samplerUV)
               .replace(
                   'vec4 texColor = textureCube( tCube, vec3( tFlip * vWorldDirection.x, vWorldDirection.yz ) );',
-                  'gl_FragColor = textureCubeUV( envMap, vWorldDirection, 0.0 );')
+                  'gl_FragColor = textureCubeUV( envMap, vWorldDirection, 0.0, 0.0 );')
               .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
     };
     const skyboxMesh = new Mesh(geometry, material);
