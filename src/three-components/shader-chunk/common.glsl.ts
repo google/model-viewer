@@ -137,6 +137,7 @@ vec4 linearToOutputTexel(vec4 value){
 `;
 
 export const varianceDefines = /* glsl */ `
+#define rInf 2.0
 #define vInf 2.0
 #define mInf -3.0
 #define r0 1.0
@@ -164,7 +165,9 @@ export const varianceDefines = /* glsl */ `
 export const roughness2variance = /* glsl */ `
 float roughness2variance(float roughness) {
   float variance = 0.0;
-  if (roughness >= r1) {
+  if (roughness >= r0) {
+    variance = (rInf - roughness) * (v0 - vInf) / (rInf - r0) + vInf;
+  } else if (roughness >= r1) {
     variance = (r0 - roughness) * (v1 - v0) / (r0 - r1) + v0;
   } else if (roughness >= r2) {
     variance = (r1 - roughness) * (v2 - v1) / (r1 - r2) + v1;
@@ -185,7 +188,9 @@ float roughness2variance(float roughness) {
 export const variance2roughness = /* glsl */ `
 float variance2roughness(float variance) {
   float roughness = 0.0;
-  if (variance >= v1) {
+  if (variance >= v0) {
+    roughness = (vInf - variance) * (r0 - rInf) / (vInf - v0) + rInf;
+  } else if (variance >= v1) {
     roughness = (v0 - variance) * (r1 - r0) / (v0 - v1) + r0;
   } else if (variance >= v2) {
     roughness = (v1 - variance) * (r2 - r1) / (v1 - v2) + r1;
