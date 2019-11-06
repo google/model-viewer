@@ -68,7 +68,7 @@ ${variance2mip}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness, float normalVariance) {
   float sigma2 = roughness2variance(roughness) + normalVariance;
-  float mip = clamp(variance2mip(sigma2), -2.0, cubeUV_maxMipLevel);
+  float mip = clamp(variance2mip(sigma2), mInf, cubeUV_maxMipLevel);
   float mipF = fract(mip);
   float mipInt = floor(mip);
 

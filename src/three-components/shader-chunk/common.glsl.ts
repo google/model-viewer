@@ -137,6 +137,8 @@ vec4 linearToOutputTexel(vec4 value){
 `;
 
 export const varianceDefines = /* glsl */ `
+#define vInf 2.0
+#define mInf -3.0
 #define r0 1.0
 #define v0 0.74
 #define m0 -2.0
@@ -203,7 +205,9 @@ float variance2roughness(float variance) {
 export const variance2mip = /* glsl */ `
 float variance2mip(float variance) {
   float mip = 0.0;
-  if (variance >= v1) {
+  if (variance >= v0) {
+    mip = (vInf - variance) * (m0 - mInf) / (vInf - v0) + mInf;
+  } else if (variance >= v1) {
     mip = (v0 - variance) * (m1 - m0) / (v0 - v1) + m0;
   } else if (variance >= v2) {
     mip = (v1 - variance) * (m2 - m1) / (v1 - v2) + m1;

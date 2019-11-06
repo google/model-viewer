@@ -23,11 +23,11 @@ const LOD_MIN = 4;
 const LOD_MAX = 8;
 // The roughness values associated with the extra mips. These must match
 // cube_uv_reflection_fragment.glsl.js.
-const EXTRA_LOD_ROUGHNESS = [0.224, 0.36, 0.48, 0.6, 0.74, 1.0];
+const EXTRA_LOD_ROUGHNESS = [0.224, 0.36, 0.48, 0.6, 0.74, 1.0, 2.0];
 // The standard deviations (radians) associated with the extra mips. These are
 // chosen to approximate a Trowbridge-Reitz distribution function times the
 // geometric shadowing function.
-const EXTRA_LOD_SIGMA = [0.2, 0.39, 0.55, 0.67, 0.77, 0.86];
+const EXTRA_LOD_SIGMA = [0.2, 0.39, 0.55, 0.67, 0.77, 0.86, Infinity];
 const SIZE_MAX = Math.pow(2, LOD_MAX);
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 
@@ -366,9 +366,13 @@ export class PMREMGenerator {
     const blurUniforms = this[$blurMaterial].uniforms;
 
     const pixels = this[$sizeLod][lodIn] - 1;
-    const radiansPerPixel = Math.PI / (2 * pixels);
+    const radiansPerPixel = isFinite(sigmaRadians) ?
+        Math.PI / (2 * pixels) :
+        2 * Math.PI / (2 * MAX_SAMPLES - 1);
     const sigmaPixels = sigmaRadians / radiansPerPixel;
-    const samples = 1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels);
+    const samples = isFinite(sigmaRadians) ?
+        1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels) :
+        MAX_SAMPLES;
 
     if (samples > MAX_SAMPLES) {
       console.warn(`sigmaRadians, ${
