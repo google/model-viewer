@@ -23,7 +23,7 @@ const MILLISECONDS_PER_SECOND = 1000.0
 const $changeAnimation = Symbol('changeAnimation');
 const $paused = Symbol('paused');
 
-export interface AnimationInterface {
+export declare interface AnimationInterface {
   autoplay: boolean;
   animationName: string|void;
   animationCrossfadeDuration: number;
