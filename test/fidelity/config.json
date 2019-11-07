@@ -628,6 +628,20 @@
       }
     },
     {
+      "name": "DirectionalLightTest",
+      "model": "../../../../examples/assets/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "lighting": "../../../../examples/assets/spot.hdr",
+      "dimensions": {
+        "width": 1024
+      },
+      "target": {
+        "y": 3.8
+      },
+      "orbit": {
+        "radius": 20
+      }
+    },
+    {
       "name": "AlphaBlendLitmusTest",
       "model": "../../../../examples/assets/alpha-blend-litmus.glb",
       "orbit": {

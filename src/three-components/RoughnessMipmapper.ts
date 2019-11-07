@@ -91,6 +91,9 @@ export class RoughnessMipmapper {
       // up a secondary texture to write the result to, then use
       // gl.copyTexImage2D to copy it back to the proper mipmap level.
       texelSize.set(1.0 / width, 1.0 / height);
+      if (mip == 0) {
+        texelSize.set(0.0, 0.0);
+      }
       this[$mipmapMaterial].uniforms.texelSize.value = texelSize;
 
       renderer.setRenderTarget(this[$tempTarget]);

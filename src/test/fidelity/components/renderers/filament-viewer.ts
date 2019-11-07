@@ -167,10 +167,21 @@ export class FilamentViewer extends LitElement {
 
     await fetchFilamentAssets([modelUrl, iblUrl, skyboxUrl]);
 
-    this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
-    this[$scene].setIndirectLight(this[$ibl]);
-    this[$ibl].setIntensity(1.0);
-    this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+    if (lightingBaseName === 'spot') {
+      const light = self.Filament.EntityManager.get().create();
+      self.Filament.LightManager
+          .Builder(self.Filament.LightManager$Type.DIRECTIONAL)
+          .color([1, 1, 1])
+          .intensity(1)
+          .direction([-1, 0, 0])
+          .build(this[$engine], light);
+      this[$scene].addEntity(light);
+    } else {
+      this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
+      this[$scene].setIndirectLight(this[$ibl]);
+      this[$ibl].setIntensity(1.0);
+      this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+    }
 
     this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
     this[$scene].setSkybox(this[$skybox]);
