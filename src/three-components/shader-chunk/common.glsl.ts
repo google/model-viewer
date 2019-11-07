@@ -137,7 +137,7 @@ vec4 linearToOutputTexel(vec4 value){
 `;
 
 export const varianceDefines = /* glsl */ `
-#define rInf 1.2
+#define rInf 2.0
 #define mInf -3.0
 #define r0 1.0
 #define v0 0.74

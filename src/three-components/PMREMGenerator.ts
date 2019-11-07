@@ -18,7 +18,7 @@ import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding
 import EnvironmentScene from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {saveTarget} from './WebGLUtils.js';
+// import {saveTarget} from './WebGLUtils.js';
 
 const LOD_MIN = 4;
 const LOD_MAX = 8;
@@ -215,7 +215,7 @@ export class PMREMGenerator {
     this[$applyPMREM](cubeUVRenderTarget);
 
     // debug
-    saveTarget(cubeUVRenderTarget, 'PMREM.png');
+    // saveTarget(cubeUVRenderTarget, 'PMREM.png');
 
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
@@ -510,6 +510,8 @@ void main() {
         if (i == 0 && dir == 1)
           continue;
         vec3 axis = latitudinal ? poleAxis : cross(poleAxis, vOutputDirection);
+        if (all(equal(axis, vec3(0.0))))
+          axis = cross(vec3(0.0, 1.0, 0.0), vOutputDirection);
         axis = normalize(axis);
         float theta = dTheta * float(dir * i);
         float cosTheta = cos(theta);
