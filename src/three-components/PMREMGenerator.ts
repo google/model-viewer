@@ -18,6 +18,7 @@ import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding
 import EnvironmentScene from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
 import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
+import {saveTarget} from './WebGLUtils.js';
 
 const LOD_MIN = 4;
 const LOD_MAX = 8;
@@ -212,6 +213,9 @@ export class PMREMGenerator {
 
     const cubeUVRenderTarget = this[$equirectangularToCubeUV](equirectangular);
     this[$applyPMREM](cubeUVRenderTarget);
+
+    // debug
+    saveTarget(cubeUVRenderTarget, 'PMREM.png');
 
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;

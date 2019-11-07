@@ -108,31 +108,6 @@ export class RoughnessMipmapper {
     renderer.autoClear = autoClear;
 
     // debug
-    // const saveTarget =
-    //     (target: WebGLRenderTarget, filename: string) => {
-    //       const {width, height} = target;
-    //       const output = document.createElement('canvas');
-    //       output.width = width;
-    //       output.height = height;
-
-    //       const ctx = output.getContext('2d')!;
-    //       const img = ctx.getImageData(0, 0, width, height);
-    //       renderer.readRenderTargetPixels(
-    //           target, 0, 0, width, height, img.data);
-    //       ctx.putImageData(img, 0, 0);
-
-    //       output.toBlob(function(blob) {
-    //         const url = URL.createObjectURL(blob);
-
-    //         const a = document.createElement('a');
-    //         a.href = url;
-    //         a.download = filename;
-    //         a.click();
-
-    //         URL.revokeObjectURL(url);
-    //       });
-    //     }
-
     // saveTarget(this[$tempTarget]!, 'temp.png');
   }
 }
