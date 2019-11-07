@@ -9,9 +9,9 @@ material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );
 
 vec3 dxy = max(abs(dFdx(geometryNormal)), abs(dFdy(geometryNormal)));
 float sigma = max(max(dxy.x, dxy.y), dxy.z);
-float normalVariance = sigma * sigma + roughness2variance(roughnessFactor);
+roughnessFactor += sigma;
 
-material.specularRoughness = clamp( variance2roughness(normalVariance), 0.04, 1.0 );
+material.specularRoughness = clamp(roughnessFactor, 0.0, 1.0);
 
 #ifdef REFLECTIVITY
 

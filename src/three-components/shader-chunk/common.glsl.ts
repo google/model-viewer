@@ -137,8 +137,7 @@ vec4 linearToOutputTexel(vec4 value){
 `;
 
 export const varianceDefines = /* glsl */ `
-#define rInf 2.0
-#define vInf 2.0
+#define rInf 1.2
 #define mInf -3.0
 #define r0 1.0
 #define v0 0.74
@@ -158,6 +157,7 @@ export const varianceDefines = /* glsl */ `
 #define r5 0.224
 #define v5 0.04
 #define m5 3.0
+#define r6 0.125
 #define v6 0.0156
 #define m6 4.0
 `
@@ -165,9 +165,7 @@ export const varianceDefines = /* glsl */ `
 export const roughness2variance = /* glsl */ `
 float roughness2variance(float roughness) {
   float variance = 0.0;
-  if (roughness >= r0) {
-    variance = (rInf - roughness) * (v0 - vInf) / (rInf - r0) + vInf;
-  } else if (roughness >= r1) {
+  if (roughness >= r1) {
     variance = (r0 - roughness) * (v1 - v0) / (r0 - r1) + v0;
   } else if (roughness >= r2) {
     variance = (r1 - roughness) * (v2 - v1) / (r1 - r2) + v1;
@@ -188,9 +186,7 @@ float roughness2variance(float roughness) {
 export const variance2roughness = /* glsl */ `
 float variance2roughness(float variance) {
   float roughness = 0.0;
-  if (variance >= v0) {
-    roughness = (vInf - variance) * (r0 - rInf) / (vInf - v0) + rInf;
-  } else if (variance >= v1) {
+  if (variance >= v1) {
     roughness = (v0 - variance) * (r1 - r0) / (v0 - v1) + r0;
   } else if (variance >= v2) {
     roughness = (v1 - variance) * (r2 - r1) / (v1 - v2) + r1;
@@ -207,25 +203,25 @@ float variance2roughness(float variance) {
 }
 `;
 
-export const variance2mip = /* glsl */ `
-float variance2mip(float variance) {
+export const roughness2mip = /* glsl */ `
+float roughness2mip(float roughness) {
   float mip = 0.0;
-  if (variance >= v0) {
-    mip = (vInf - variance) * (m0 - mInf) / (vInf - v0) + mInf;
-  } else if (variance >= v1) {
-    mip = (v0 - variance) * (m1 - m0) / (v0 - v1) + m0;
-  } else if (variance >= v2) {
-    mip = (v1 - variance) * (m2 - m1) / (v1 - v2) + m1;
-  } else if (variance >= v3) {
-    mip = (v2 - variance) * (m3 - m2) / (v2 - v3) + m2;
-  } else if (variance >= v4) {
-    mip = (v3 - variance) * (m4 - m3) / (v3 - v4) + m3;
-  } else if (variance >= v5) {
-    mip = (v4 - variance) * (m5 - m4) / (v4 - v5) + m4;
-  } else if (variance >= v6) {
-    mip = (v5 - variance) * (m6 - m5) / (v5 - v6) + m5;
+  if (roughness >= r0) {
+    mip = (rInf - roughness) * (m0 - mInf) / (rInf - r0) + mInf;
+  } else if (roughness >= r1) {
+    mip = (r0 - roughness) * (m1 - m0) / (r0 - r1) + m0;
+  } else if (roughness >= r2) {
+    mip = (r1 - roughness) * (m2 - m1) / (r1 - r2) + m1;
+  } else if (roughness >= r3) {
+    mip = (r2 - roughness) * (m3 - m2) / (r2 - r3) + m2;
+  } else if (roughness >= r4) {
+    mip = (r3 - roughness) * (m4 - m3) / (r3 - r4) + m3;
+  } else if (roughness >= r5) {
+    mip = (r4 - roughness) * (m5 - m4) / (r4 - r5) + m4;
+  } else if (roughness >= r6) {
+    mip = (r5 - roughness) * (m6 - m5) / (r5 - r6) + m5;
   } else {
-    mip = -0.5 * log2(variance);
+    mip = -2.0 * log2(2.0 * roughness);
   }
   return mip;
 }

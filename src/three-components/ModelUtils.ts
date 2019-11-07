@@ -17,6 +17,8 @@ import {FrontSide} from 'three';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
+import {envmapChunk} from './shader-chunk/envmap_physical_pars_fragment.glsl.js';
+import {lightsMapsChunk} from './shader-chunk/lights_fragment_maps.glsl.js';
 import {lightsChunk} from './shader-chunk/lights_physical_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
@@ -41,7 +43,9 @@ const updateShader = (shader: Shader) => {
   shader.fragmentShader =
       shader.fragmentShader
           .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-          .replace('#include <lights_physical_fragment>', lightsChunk);
+          .replace('#include <lights_physical_fragment>', lightsChunk)
+          .replace('#include <lights_fragment_maps>', lightsMapsChunk)
+          .replace('#include <envmap_physical_pars_fragment>', envmapChunk);
 };
 
 /**
