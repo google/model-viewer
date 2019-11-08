@@ -13,6 +13,8 @@ vec3 dxy = max(abs(dFdx(geometryNormal)), abs(dFdy(geometryNormal)));
 float sigma = max(max(dxy.x, dxy.y), dxy.z);
 material.specularRoughness += sigma;
 
+material.specularRoughness = clamp(material.specularRoughness, 0.0525, 1.0);
+
 #ifdef REFLECTIVITY
 
 	material.specularColor = mix( vec3( MAXIMUM_SPECULAR_COEFFICIENT * pow2( reflectivity ) ), diffuseColor.rgb, metalnessFactor );
