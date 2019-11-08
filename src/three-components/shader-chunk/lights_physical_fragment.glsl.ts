@@ -7,13 +7,10 @@ export const lightsChunk = /* glsl */ `
 PhysicalMaterial material;
 material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );
 
-material.specularRoughness = clamp(roughnessFactor, 0.0525, 1.0);
-
+material.specularRoughness = max(roughnessFactor, 0.0525);
 vec3 dxy = max(abs(dFdx(geometryNormal)), abs(dFdy(geometryNormal)));
-float sigma = max(max(dxy.x, dxy.y), dxy.z);
-material.specularRoughness += sigma;
-
-material.specularRoughness = clamp(material.specularRoughness, 0.0525, 1.0);
+material.specularRoughness += max(max(dxy.x, dxy.y), dxy.z);
+material.specularRoughness = min(material.specularRoughness, 1.0);
 
 #ifdef REFLECTIVITY
 
