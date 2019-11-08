@@ -140,25 +140,25 @@ export const varianceDefines = /* glsl */ `
 #define rInf 2.0
 #define mInf -3.0
 #define r0 1.0
-#define v0 0.74
+#define v0 0.32
 #define m0 -2.0
-#define r1 0.74
-#define v1 0.6
+#define r1 0.73
+#define v1 0.25
 #define m1 -1.0
-#define r2 0.6
-#define v2 0.45
+#define r2 0.61
+#define v2 0.18
 #define m2 0.0
-#define r3 0.48
-#define v3 0.3
+#define r3 0.5
+#define v3 0.11
 #define m3 1.0
 #define r4 0.36
-#define v4 0.15
+#define v4 0.04
 #define m4 2.0
-#define r5 0.224
-#define v5 0.04
+#define r5 0.284
+#define v5 0.013
 #define m5 3.0
-#define r6 0.125
-#define v6 0.0156
+#define r6 0.21
+#define v6 0.0039
 #define m6 4.0
 `
 
@@ -176,8 +176,8 @@ float roughness2variance(float roughness) {
   } else if (roughness >= r5) {
     variance = (r4 - roughness) * (v5 - v4) / (r4 - r5) + v4;
   } else {
-    float sigma = 4.0 * roughness * roughness;
-    variance = sigma * sigma;
+    float roughness2 = roughness * roughness;
+    variance = 2.0 * roughness2 * roughness2;
   }
   return variance;
 }
@@ -197,7 +197,7 @@ float variance2roughness(float variance) {
   } else if (variance >= v5) {
     roughness = (v4 - variance) * (r5 - r4) / (v4 - v5) + r4;
   } else {
-    roughness = sqrt(sqrt(variance) / 4.0);
+    roughness = pow(0.5 * variance, 0.25);
   }
   return roughness;
 }
@@ -221,7 +221,7 @@ float roughness2mip(float roughness) {
   } else if (roughness >= r6) {
     mip = (r5 - roughness) * (m6 - m5) / (r5 - r6) + m5;
   } else {
-    mip = -2.0 * log2(2.0 * roughness);
+    mip = -2.0 * log2(1.19 * roughness);// 1.19 = 2^0.25
   }
   return mip;
 }
