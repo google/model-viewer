@@ -23,12 +23,12 @@ import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.gl
 const LOD_MIN = 4;
 const LOD_MAX = 8;
 // The roughness values associated with the extra mips. These must match
-// cube_uv_reflection_fragment.glsl.js.
-const EXTRA_LOD_ROUGHNESS = [0.284, 0.37, 0.5, 0.61, 0.73, 1.0, 2.0];
+// varianceDefines from common.glsl.js.
+const EXTRA_LOD_ROUGHNESS = [0.284, 0.37, 0.49, 0.61, 0.73, 1.0];
 // The standard deviations (radians) associated with the extra mips. These are
 // chosen to approximate a Trowbridge-Reitz distribution function times the
 // geometric shadowing function.
-const EXTRA_LOD_SIGMA = [0.11, 0.2, 0.33, 0.42, 0.5, 0.57, Infinity];
+const EXTRA_LOD_SIGMA = [0.11, 0.2, 0.33, 0.42, 0.5, 0.57];
 const SIZE_MAX = Math.pow(2, LOD_MAX);
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 

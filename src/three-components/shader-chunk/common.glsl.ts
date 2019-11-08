@@ -137,20 +137,12 @@ vec4 linearToOutputTexel(vec4 value){
 `;
 
 export const varianceDefines = /* glsl */ `
-#define rInf 2.0
-#define mInf -3.0
 #define r0 1.0
 #define v0 0.32
 #define m0 -2.0
 #define r1 0.73
 #define v1 0.25
 #define m1 -1.0
-#define r2 0.61
-#define v2 0.18
-#define m2 0.0
-#define r3 0.5
-#define v3 0.11
-#define m3 1.0
 #define r4 0.36
 #define v4 0.04
 #define m4 2.0
@@ -167,12 +159,8 @@ float roughness2variance(float roughness) {
   float variance = 0.0;
   if (roughness >= r1) {
     variance = (r0 - roughness) * (v1 - v0) / (r0 - r1) + v0;
-  } else if (roughness >= r2) {
-    variance = (r1 - roughness) * (v2 - v1) / (r1 - r2) + v1;
-  } else if (roughness >= r3) {
-    variance = (r2 - roughness) * (v3 - v2) / (r2 - r3) + v2;
   } else if (roughness >= r4) {
-    variance = (r3 - roughness) * (v4 - v3) / (r3 - r4) + v3;
+    variance = (r1 - roughness) * (v4 - v1) / (r1 - r4) + v1;
   } else if (roughness >= r5) {
     variance = (r4 - roughness) * (v5 - v4) / (r4 - r5) + v4;
   } else {
@@ -188,12 +176,8 @@ float variance2roughness(float variance) {
   float roughness = 0.0;
   if (variance >= v1) {
     roughness = (v0 - variance) * (r1 - r0) / (v0 - v1) + r0;
-  } else if (variance >= v2) {
-    roughness = (v1 - variance) * (r2 - r1) / (v1 - v2) + r1;
-  } else if (variance >= v3) {
-    roughness = (v2 - variance) * (r3 - r2) / (v2 - v3) + r2;
   } else if (variance >= v4) {
-    roughness = (v3 - variance) * (r4 - r3) / (v3 - v4) + r3;
+    roughness = (v1 - variance) * (r4 - r1) / (v1 - v4) + r1;
   } else if (variance >= v5) {
     roughness = (v4 - variance) * (r5 - r4) / (v4 - v5) + r4;
   } else {
@@ -206,16 +190,10 @@ float variance2roughness(float variance) {
 export const roughness2mip = /* glsl */ `
 float roughness2mip(float roughness) {
   float mip = 0.0;
-  if (roughness >= r0) {
-    mip = (rInf - roughness) * (m0 - mInf) / (rInf - r0) + mInf;
-  } else if (roughness >= r1) {
+  if (roughness >= r1) {
     mip = (r0 - roughness) * (m1 - m0) / (r0 - r1) + m0;
-  } else if (roughness >= r2) {
-    mip = (r1 - roughness) * (m2 - m1) / (r1 - r2) + m1;
-  } else if (roughness >= r3) {
-    mip = (r2 - roughness) * (m3 - m2) / (r2 - r3) + m2;
   } else if (roughness >= r4) {
-    mip = (r3 - roughness) * (m4 - m3) / (r3 - r4) + m3;
+    mip = (r1 - roughness) * (m4 - m1) / (r1 - r4) + m1;
   } else if (roughness >= r5) {
     mip = (r4 - roughness) * (m5 - m4) / (r4 - r5) + m4;
   } else if (roughness >= r6) {
