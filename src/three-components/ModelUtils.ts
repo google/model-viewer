@@ -76,7 +76,7 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
       // TODO(elalish): remove this when we upgrade three.js to a version with
       // this fix: mrdoob/three.js#17795
       clone.vertexTangents = material.vertexTangents;
-      if (!clone.vertexTangents) {
+      if (!clone.vertexTangents && clone.normalScale) {
         clone.normalScale.y *= -1;
       }
       clone.side = FrontSide;
