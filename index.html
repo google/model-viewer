@@ -63,7 +63,7 @@
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
 <script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 <!-- Use it like any other HTML element -->
-<model-viewer src="examples/assets/test-noAdd/bag1.glb" alt="A 3D model of an astronaut" interaction-prompt="none" camera-controls></model-viewer>
+<model-viewer src="examples/assets/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls background-color="#455A64"></model-viewer>
           </template>
         </example-snippet>
 
@@ -475,15 +475,6 @@
               of quality (such as image/jpeg and image/webp) you can also specify a
               value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i>
               defaults to 0.92 otherwise).</p>
-            </li>
-            <li>
-              <div>toBlob(mimeType, qualityArgument)</div>
-              <p>Returns a promise that resolves into a Blob object in the format
-              specified by the <i>mimeType</i> (defaults to image/png). A Blob object
-              represents a file-like object of immutable, raw data. You can also
-              specify a value between 0 and 1 for <i>qualityArgument</i> (Currently
-              only available on Chrome desktop and Firefox) which defaults to 0.92
-              and 0.8 for image/png and image/webp respectively.</p>
             </li>
           </ul>
 
