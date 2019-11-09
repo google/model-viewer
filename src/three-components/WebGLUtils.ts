@@ -79,6 +79,10 @@ export const applyExtensionCompatibility = (gl: WebGLRenderingContext) => {
   };
 };
 
+/**
+ * Debug method to save an offscreen render target to an image; filename should
+ * have a .png extension to ensure lossless transmission.
+ */
 export const saveTarget = (target: WebGLRenderTarget, filename: string) => {
   const {width, height} = target;
   const output = document.createElement('canvas');

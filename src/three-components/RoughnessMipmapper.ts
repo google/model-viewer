@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderTarget} from 'three';
 import {_Math} from 'three/src/math/Math';
+
+import {sceneRenderer} from './Renderer';
 import {roughness2variance, variance2roughness, varianceDefines} from './shader-chunk/common.glsl';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
@@ -33,7 +35,8 @@ export class RoughnessMipmapper {
         new Mesh(new PlaneBufferGeometry(2, 2), this[$mipmapMaterial]));
   }
 
-  generateMipmaps(renderer: WebGLRenderer, material: MeshStandardMaterial) {
+  generateMipmaps(material: MeshStandardMaterial) {
+    const renderer = sceneRenderer.renderer;
     const {roughnessMap, normalMap} = material;
     if (roughnessMap == null || normalMap == null ||
         !roughnessMap.generateMipmaps || material.userData.roughnessUpdated) {
@@ -109,9 +112,6 @@ export class RoughnessMipmapper {
 
     renderer.setPixelRatio(dpr);
     renderer.autoClear = autoClear;
-
-    // debug
-    // saveTarget(this[$tempTarget]!, 'temp.png');
   }
 }
 
@@ -160,7 +160,7 @@ void main() {
     }
   }
   avgNormal *= 0.25;
-  variance += 2.0 * (1.0 - length(avgNormal));
+  variance += 1.0 - length(avgNormal);
   gl_FragColor.g = variance2roughness(variance);
 }
       `,
