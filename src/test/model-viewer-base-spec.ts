@@ -17,7 +17,7 @@ import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
-import {assetPath, timePasses, until, waitForEvent} from './helpers.js';
+import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 
@@ -206,6 +206,70 @@ suite('ModelViewerElementBase', () => {
         test('produces a URL-compatible string', () => {
           const dataUrlMatcher = /^data\:image\//;
           expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
+        });
+      });
+
+      suite('toBlob', () => {
+        test('produces a blob', async () => {
+          const blob = await element.toBlob();
+          expect(blob).to.not.be.null;
+        });
+
+        test('can convert blob to object URL', async () => {
+          const blob = await element.toBlob();
+          const objectUrl = URL.createObjectURL(blob);
+          const objectUrlMatcher = /^blob\:/;
+          expect(objectUrlMatcher.test(objectUrl)).to.be.true;
+        });
+
+        test('has size', async () => {
+          const blob = await element.toBlob();
+          expect(blob.size).to.be.greaterThan(0);
+        });
+
+        test('uses fallbacks on unsupported browsers', async () => {
+          // Emulate unsupported browser
+          let restoreCanvasToBlob = () => {};
+          try {
+            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          } catch (error) {
+            // Ignored...
+          }
+
+          const blob = await element.toBlob();
+          expect(blob).to.not.be.null;
+
+          restoreCanvasToBlob();
+        });
+
+        test('blobs on supported and unsupported browsers are equivalent', async () => {
+          // Skip test on IE11 since it doesn't have Response to fetch arrayBuffer
+          if (IS_IE11) {
+            return;
+          }
+
+          let restoreCanvasToBlob = () => {};
+          try {
+            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+          } catch (error) {
+            // Ignored...
+          }
+
+          const unsupportedBrowserBlob = await element.toBlob();
+
+          restoreCanvasToBlob();
+
+          const supportedBrowserBlob = await element.toBlob();
+
+          // Blob.prototype.arrayBuffer is not available in Edge / Safari
+          // Using Response to get arrayBuffer instead
+          const supportedBrowserResponse = new Response(supportedBrowserBlob);
+          const unsupportedBrowserResponse = new Response(unsupportedBrowserBlob);
+
+          const supportedBrowserArrayBuffer = await supportedBrowserResponse.arrayBuffer();
+          const unsupportedBrowserArrayBuffer = await unsupportedBrowserResponse.arrayBuffer();
+
+          expect(unsupportedBrowserArrayBuffer).to.eql(supportedBrowserArrayBuffer);
         });
       });
     });

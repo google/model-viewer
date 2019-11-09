@@ -135,7 +135,7 @@ const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
 const $fullscreenchangeHandler = Symbol('fullscreenHandler');
 const $onFullscreenchange = Symbol('onFullscreen');
 
-export interface ARInterface {
+export declare interface ARInterface {
   ar: boolean;
   unstableWebxr: boolean;
   iosSrc: string|null;

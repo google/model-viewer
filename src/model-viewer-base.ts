@@ -23,6 +23,7 @@ import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTF
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, sceneRenderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
@@ -85,10 +86,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return this[$template];
   }
 
+  /** @export */
   static set modelCacheSize(value: number) {
     CachingGLTFLoader[$evictionPolicy].evictionThreshold = value;
   }
 
+  /** @export */
   static get modelCacheSize(): number {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
@@ -121,6 +124,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$contextLostHandler] = (event: ContextLostEvent) =>
       this[$onContextLost](event);
 
+  /** @export */
   get loaded() {
     return this[$getLoaded]();
   }
@@ -129,6 +133,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return sceneRenderer;
   }
 
+  /** @export */
   get modelIsVisible() {
     return this[$getModelIsVisible]();
   }
@@ -324,8 +329,36 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
   }
 
+  /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
     return this[$canvas].toDataURL(type, encoderOptions);
+  }
+
+  /** @export */
+  async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
+    return new Promise(async (resolve, reject) => {
+      if ((this[$canvas] as any).msToBlob) {
+        // NOTE: msToBlob only returns image/png
+        // so ensure mimeType is not specified (defaults to image/png)
+        // or is image/png, otherwise fallback to using toDataURL on IE.
+        if (!mimeType || mimeType === 'image/png') {
+          return resolve((this[$canvas] as any).msToBlob());
+        }
+      }
+
+      if (!this[$canvas].toBlob) {
+        return resolve(await dataUrlToBlob(
+            this[$canvas].toDataURL(mimeType, qualityArgument)));
+      }
+
+      this[$canvas].toBlob((blob) => {
+        if (!blob) {
+          return reject(new Error('Unable to retrieve canvas blob'));
+        }
+
+        resolve(blob);
+      }, mimeType, qualityArgument);
+    });
   }
 
   get[$ariaLabel]() {

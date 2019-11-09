@@ -29,11 +29,12 @@ const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
-export interface EnvironmentInterface {
+export declare interface EnvironmentInterface {
   environmentImage: string|null;
   backgroundImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
+  shadowSoftness: number;
   exposure: number;
 }
 

@@ -476,6 +476,15 @@
               value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i>
               defaults to 0.92 otherwise).</p>
             </li>
+            <li>
+              <div>toBlob(mimeType, qualityArgument)</div>
+              <p>Returns a promise that resolves into a Blob object in the format
+              specified by the <i>mimeType</i> (defaults to image/png). A Blob object
+              represents a file-like object of immutable, raw data. You can also
+              specify a value between 0 and 1 for <i>qualityArgument</i> (Currently
+              only available on Chrome desktop and Firefox) which defaults to 0.92
+              and 0.8 for image/png and image/webp respectively.</p>
+            </li>
           </ul>
 
         </div>

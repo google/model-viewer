@@ -170,7 +170,7 @@ const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
 const $syncCameraTarget = Symbol('syncCameraTarget');
 
-export interface ControlsInterface {
+export declare interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
   cameraTarget: string;
