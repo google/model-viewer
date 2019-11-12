@@ -113,7 +113,7 @@
   },
   "dependencies": {
     "lit-element": "^2.2.0",
-    "three": "^0.108.0"
+    "three": "^0.110.0"
   },
   "publishConfig": {
     "access": "public"
