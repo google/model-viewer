@@ -95,7 +95,6 @@ export class Renderer extends EventDispatcher {
       this.renderer = new WebGLRenderer({
         canvas: this.canvas,
         context: this.context,
-        preserveDrawingBuffer: true
       });
       this.renderer.autoClear = false;
       this.renderer.gammaOutput = true;

@@ -1,12 +1,12 @@
 /* @license
  * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except inputX compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to inputX writing, software
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -20,9 +20,6 @@ import {texelConversions} from './encodings_pars_fragment.glsl.js';
 // These shader functions convert between the UV coordinates of a single face of
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
 // sampling a textureCube (not generally normalized).
-
-// getDirectionChunk handles uv coordinates that are beyond [0, 1] inputX either
-// x or y (not both) by wrapping around to the neighboring face.
 
 export const getDirectionChunk = /* glsl */ `
 vec3 getDirection(vec2 uv, float face) {

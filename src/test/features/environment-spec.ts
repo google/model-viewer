@@ -119,13 +119,6 @@ const waitForLoadAndEnvMap =
     };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
-  suiteTeardown(
-      () => {
-          // Reset the renderer once at the end of this spec, to clear out all
-          // of the heavy cached image buffers:
-          // ModelViewerElementBase[$resetRenderer]();
-      });
-
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:

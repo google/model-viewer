@@ -21,9 +21,7 @@
   },
   "include": [
     "./src/**/*.ts",
-    "./src/**/*.js",
-    "./node_modules/three/src/**/*.ts",
-    "./node_modules/three/src/**/*.js"
+    "./src/**/*.js"
   ],
   "exclude": []
 }

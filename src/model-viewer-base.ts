@@ -68,11 +68,6 @@ export const $getModelIsVisible = Symbol('getModelIsVisible');
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
 
-  // static[$resetRenderer]() {
-  //   renderer.dispose();
-  //   renderer = new Renderer();
-  // }
-
   static get is() {
     return 'model-viewer';
   }
