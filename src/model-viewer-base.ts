@@ -43,7 +43,6 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
-// export const $resetRenderer = Symbol('resetRenderer') ;
 export const $isInRenderTree = Symbol('isInRenderTree');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');

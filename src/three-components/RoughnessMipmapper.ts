@@ -24,6 +24,13 @@ const $scene = Symbol('scene');
 const $flatCamera = Symbol('flatCamera');
 const $tempTarget = Symbol('tempTarget');
 
+/**
+ * The RoughnessMipmapper class allows for the custom generation of mipmaps for
+ * the roughness map of a MeshStandardMaterial. This custom mipmapping is based
+ * on the normal map, so that as normal variation is lost at deeper mip levels,
+ * that loss is encoded as increased roughness to keep reflections consistent
+ * across zoom levels and reduce aliasing.
+ */
 export class RoughnessMipmapper {
   private[$mipmapMaterial] = new MipmapMaterial;
   private[$scene] = new Scene;
@@ -87,17 +94,16 @@ export class RoughnessMipmapper {
     this[$mipmapMaterial].uniforms.normalMap.value = normalMap;
 
     const position = new Vector2(0, 0);
-    const texelSize = new Vector2(0, 0);
+    const texelSize = this[$mipmapMaterial].uniforms.texelSize.value
     for (let mip = 0; width >= 1 && height >= 1;
          ++mip, width /= 2, height /= 2) {
       // Rendering to a mip level is not allowed in webGL1. Instead we must set
-      // up a secondary texture to write the result to, then use
-      // gl.copyTexImage2D to copy it back to the proper mipmap level.
+      // up a secondary texture to write the result to, then copy it back to the
+      // proper mipmap level.
       texelSize.set(1.0 / width, 1.0 / height);
       if (mip == 0) {
         texelSize.set(0.0, 0.0);
       }
-      this[$mipmapMaterial].uniforms.texelSize.value = texelSize;
 
       renderer.setRenderTarget(this[$tempTarget]);
       renderer.setViewport(position.x, position.y, width, height);
@@ -150,17 +156,17 @@ ${roughness2variance}
 ${variance2roughness}
 void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
+  if (texelSize.x == 0.0) return;
   float roughness = gl_FragColor.g;
   float variance = roughness2variance(roughness);
   vec3 avgNormal;
-  for(float x = -1.0; x < 2.0; x += 2.0){
-    for(float y = -1.0; y < 2.0; y += 2.0){
+  for (float x = -1.0; x < 2.0; x += 2.0) {
+    for (float y = -1.0; y < 2.0; y += 2.0) {
       vec2 uv = vUv + vec2(x, y) * 0.25 * texelSize;
       avgNormal += normalize(texture2D(normalMap, uv, -1.0).xyz - 0.5);
     }
   }
-  avgNormal *= 0.25;
-  variance += 1.0 - length(avgNormal);
+  variance += 1.0 - 0.25 * length(avgNormal);
   gl_FragColor.g = variance2roughness(variance);
 }
       `,
