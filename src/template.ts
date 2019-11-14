@@ -107,7 +107,8 @@ canvas.show {
   width: 100%;
   height: 100%;
   position: absolute;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   background-color: var(--poster-color, #fff);
   background-image: var(--poster-image, none);

@@ -341,7 +341,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const scene = this[$scene];
     const {width, height} = scene;
     if (idealAspect === true) {
-      const idealHeight = width / scene.model.fieldOfViewAspect;
+      const idealHeight = Math.round(width / scene.model.fieldOfViewAspect);
       scene.setSize(width, idealHeight);
     }
     return new Promise<Blob>(async (resolve, reject) => {
