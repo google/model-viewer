@@ -211,19 +211,19 @@ suite('ModelViewerElementBase', () => {
 
       suite('toBlob', () => {
         test('produces a blob', async () => {
-          const blob = await element.toBlob();
+          const blob = await element.toBlob({});
           expect(blob).to.not.be.null;
         });
 
         test('can convert blob to object URL', async () => {
-          const blob = await element.toBlob();
+          const blob = await element.toBlob({});
           const objectUrl = URL.createObjectURL(blob);
           const objectUrlMatcher = /^blob\:/;
           expect(objectUrlMatcher.test(objectUrl)).to.be.true;
         });
 
         test('has size', async () => {
-          const blob = await element.toBlob();
+          const blob = await element.toBlob({});
           expect(blob.size).to.be.greaterThan(0);
         });
 
@@ -231,46 +231,56 @@ suite('ModelViewerElementBase', () => {
           // Emulate unsupported browser
           let restoreCanvasToBlob = () => {};
           try {
-            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+            restoreCanvasToBlob =
+                spy(HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
           } catch (error) {
             // Ignored...
           }
 
-          const blob = await element.toBlob();
+          const blob = await element.toBlob({});
           expect(blob).to.not.be.null;
 
           restoreCanvasToBlob();
         });
 
-        test('blobs on supported and unsupported browsers are equivalent', async () => {
-          // Skip test on IE11 since it doesn't have Response to fetch arrayBuffer
-          if (IS_IE11) {
-            return;
-          }
+        test(
+            'blobs on supported and unsupported browsers are equivalent',
+            async () => {
+              // Skip test on IE11 since it doesn't have Response to fetch
+              // arrayBuffer
+              if (IS_IE11) {
+                return;
+              }
 
-          let restoreCanvasToBlob = () => {};
-          try {
-            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
-          } catch (error) {
-            // Ignored...
-          }
+              let restoreCanvasToBlob = () => {};
+              try {
+                restoreCanvasToBlob = spy(
+                    HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
+              } catch (error) {
+                // Ignored...
+              }
 
-          const unsupportedBrowserBlob = await element.toBlob();
+              const unsupportedBrowserBlob = await element.toBlob({});
 
-          restoreCanvasToBlob();
+              restoreCanvasToBlob();
 
-          const supportedBrowserBlob = await element.toBlob();
+              const supportedBrowserBlob = await element.toBlob({});
 
-          // Blob.prototype.arrayBuffer is not available in Edge / Safari
-          // Using Response to get arrayBuffer instead
-          const supportedBrowserResponse = new Response(supportedBrowserBlob);
-          const unsupportedBrowserResponse = new Response(unsupportedBrowserBlob);
+              // Blob.prototype.arrayBuffer is not available in Edge / Safari
+              // Using Response to get arrayBuffer instead
+              const supportedBrowserResponse =
+                  new Response(supportedBrowserBlob);
+              const unsupportedBrowserResponse =
+                  new Response(unsupportedBrowserBlob);
 
-          const supportedBrowserArrayBuffer = await supportedBrowserResponse.arrayBuffer();
-          const unsupportedBrowserArrayBuffer = await unsupportedBrowserResponse.arrayBuffer();
+              const supportedBrowserArrayBuffer =
+                  await supportedBrowserResponse.arrayBuffer();
+              const unsupportedBrowserArrayBuffer =
+                  await unsupportedBrowserResponse.arrayBuffer();
 
-          expect(unsupportedBrowserArrayBuffer).to.eql(supportedBrowserArrayBuffer);
-        });
+              expect(unsupportedBrowserArrayBuffer)
+                  .to.eql(supportedBrowserArrayBuffer);
+            });
       });
     });
 

@@ -332,7 +332,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   /** @export */
-  async toBlob(mimeType?: string, qualityArgument?: number): Promise<Blob> {
+  async toBlob(options: {mimeType?: string, qualityArgument?: number}):
+      Promise<Blob> {
+    const {mimeType, qualityArgument} = options;
     return new Promise(async (resolve, reject) => {
       if ((this[$canvas] as any).msToBlob) {
         // NOTE: msToBlob only returns image/png
