@@ -332,32 +332,46 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   /** @export */
-  async toBlob(options: {mimeType?: string, qualityArgument?: number}):
-      Promise<Blob> {
-    const {mimeType, qualityArgument} = options;
-    return new Promise(async (resolve, reject) => {
-      if ((this[$canvas] as any).msToBlob) {
-        // NOTE: msToBlob only returns image/png
-        // so ensure mimeType is not specified (defaults to image/png)
-        // or is image/png, otherwise fallback to using toDataURL on IE.
-        if (!mimeType || mimeType === 'image/png') {
-          return resolve((this[$canvas] as any).msToBlob());
-        }
-      }
+  async toBlob(options: {
+    mimeType?: string,
+    qualityArgument?: number,
+    idealAspect?: boolean
+  }): Promise<Blob> {
+    const {mimeType, qualityArgument, idealAspect} = options;
+    const scene = this[$scene];
+    const {width, height} = scene;
+    if (idealAspect === true) {
+      const idealHeight = width / scene.model.fieldOfViewAspect;
+      scene.setSize(width, idealHeight);
+    }
+    return new Promise<Blob>(async (resolve, reject) => {
+             if ((this[$canvas] as any).msToBlob) {
+               // NOTE: msToBlob only returns image/png
+               // so ensure mimeType is not specified (defaults to image/png)
+               // or is image/png, otherwise fallback to using toDataURL on IE.
+               if (!mimeType || mimeType === 'image/png') {
+                 return resolve((this[$canvas] as any).msToBlob());
+               }
+             }
 
-      if (!this[$canvas].toBlob) {
-        return resolve(await dataUrlToBlob(
-            this[$canvas].toDataURL(mimeType, qualityArgument)));
-      }
+             if (!this[$canvas].toBlob) {
+               return resolve(await dataUrlToBlob(
+                   this[$canvas].toDataURL(mimeType, qualityArgument)));
+             }
 
-      this[$canvas].toBlob((blob) => {
-        if (!blob) {
-          return reject(new Error('Unable to retrieve canvas blob'));
-        }
+             this[$canvas].toBlob((blob) => {
+               if (!blob) {
+                 return reject(new Error('Unable to retrieve canvas blob'));
+               }
 
-        resolve(blob);
-      }, mimeType, qualityArgument);
-    });
+               resolve(blob);
+             }, mimeType, qualityArgument);
+           })
+        .finally(() => {
+          if (idealAspect === true) {
+            scene.setSize(width, height);
+          }
+        });
   }
 
   get[$ariaLabel]() {
