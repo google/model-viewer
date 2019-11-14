@@ -23,6 +23,21 @@ import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
 
+const expectBlobDimensions =
+    async (blob: Blob, width: number, height: number) => {
+  const img = await new Promise<HTMLImageElement>((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image;
+    img.onload = () => {
+      resolve(img);
+    };
+    img.src = url;
+  });
+
+  expect(img.width).to.be.equal(width);
+  expect(img.height).to.be.equal(height);
+};
+
 suite('ModelViewerElementBase', () => {
   test('is not registered as a custom element by default', () => {
     expect(customElements.get('model-viewer-base')).to.be.equal(undefined);
@@ -186,7 +201,7 @@ suite('ModelViewerElementBase', () => {
 
         // Avoid testing our memory ceiling in CI by limiting the size
         // of the screenshots we produce in these tests:
-        element.style.width = '64px';
+        element.style.width = '32px';
         element.style.height = '64px';
 
         document.body.appendChild(element);
@@ -281,6 +296,16 @@ suite('ModelViewerElementBase', () => {
               expect(unsupportedBrowserArrayBuffer)
                   .to.eql(supportedBrowserArrayBuffer);
             });
+
+        test('idealAspect gives the proper blob dimensions', async () => {
+          const basicBlob = await element.toBlob({});
+          const idealBlob = await element.toBlob({idealAspect: true});
+          console.log(element[$scene].model.fieldOfViewAspect);
+          const idealHeight =
+              Math.round(32 / element[$scene].model.fieldOfViewAspect);
+          await expectBlobDimensions(basicBlob, 32, 64);
+          await expectBlobDimensions(idealBlob, 32, idealHeight);
+        });
       });
     });
 
