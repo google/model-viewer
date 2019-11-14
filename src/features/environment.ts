@@ -115,6 +115,15 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const {backgroundImage, environmentImage} = this;
       let {backgroundColor} = this;
+      if (!backgroundColor) {
+        backgroundColor = DEFAULT_BACKGROUND_COLOR;
+      }
+      // Set the container node's background color so that it matches
+      // the background color configured for the scene. It's important
+      // to do this because we round the size of the canvas off to the
+      // nearest pixel, so it is possible (indeed likely) that there is
+      // a marginal gap around one or two edges of the canvas.
+      this[$container].style.backgroundColor = backgroundColor;
 
       if (this[$cancelEnvironmentUpdate] != null) {
         this[$cancelEnvironmentUpdate]!();
@@ -148,18 +157,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$scene].add(this[$scene].skyboxMesh);
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
-          if (!backgroundColor) {
-            backgroundColor = DEFAULT_BACKGROUND_COLOR;
-          }
 
           const parsedColor = new Color(backgroundColor);
           this[$scene].background = parsedColor;
-          // Set the container node's background color so that it matches
-          // the background color configured for the scene. It's important
-          // to do this because we round the size of the canvas off to the
-          // nearest pixel, so it is possible (indeed likely) that there is
-          // a marginal gap around one or two edges of the canvas.
-          this[$container].style.backgroundColor = backgroundColor;
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);
