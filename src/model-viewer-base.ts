@@ -19,6 +19,7 @@ import {Event as ThreeEvent} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
+import {rafPasses} from './test/helpers.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
@@ -338,11 +339,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     idealAspect?: boolean
   }): Promise<Blob> {
     const {mimeType, qualityArgument, idealAspect} = options;
-    const scene = this[$scene];
-    const {width, height} = scene;
+    const {width, height, model} = this[$scene];
     if (idealAspect === true) {
-      const idealHeight = Math.round(width / scene.model.fieldOfViewAspect);
-      scene.setSize(width, idealHeight);
+      const idealHeight = Math.round(width / model.fieldOfViewAspect);
+      this[$updateSize]({width, height: idealHeight});
+      await rafPasses();
     }
     return new Promise<Blob>(async (resolve, reject) => {
              if ((this[$canvas] as any).msToBlob) {
@@ -368,9 +369,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
              }, mimeType, qualityArgument);
            })
         .finally(() => {
-          if (idealAspect === true) {
-            scene.setSize(width, height);
-          }
+          this[$updateSize]({width, height});
         });
   }
 
