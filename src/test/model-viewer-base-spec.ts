@@ -226,19 +226,19 @@ suite('ModelViewerElementBase', () => {
 
       suite('toBlob', () => {
         test('produces a blob', async () => {
-          const blob = await element.toBlob({});
+          const blob = await element.toBlob();
           expect(blob).to.not.be.null;
         });
 
         test('can convert blob to object URL', async () => {
-          const blob = await element.toBlob({});
+          const blob = await element.toBlob();
           const objectUrl = URL.createObjectURL(blob);
           const objectUrlMatcher = /^blob\:/;
           expect(objectUrlMatcher.test(objectUrl)).to.be.true;
         });
 
         test('has size', async () => {
-          const blob = await element.toBlob({});
+          const blob = await element.toBlob();
           expect(blob.size).to.be.greaterThan(0);
         });
 
@@ -252,7 +252,7 @@ suite('ModelViewerElementBase', () => {
             // Ignored...
           }
 
-          const blob = await element.toBlob({});
+          const blob = await element.toBlob();
           expect(blob).to.not.be.null;
 
           restoreCanvasToBlob();
@@ -275,11 +275,11 @@ suite('ModelViewerElementBase', () => {
                 // Ignored...
               }
 
-              const unsupportedBrowserBlob = await element.toBlob({});
+              const unsupportedBrowserBlob = await element.toBlob();
 
               restoreCanvasToBlob();
 
-              const supportedBrowserBlob = await element.toBlob({});
+              const supportedBrowserBlob = await element.toBlob();
 
               // Blob.prototype.arrayBuffer is not available in Edge / Safari
               // Using Response to get arrayBuffer instead
@@ -298,7 +298,7 @@ suite('ModelViewerElementBase', () => {
             });
 
         test('idealAspect gives the proper blob dimensions', async () => {
-          const basicBlob = await element.toBlob({});
+          const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
           console.log(element[$scene].model.fieldOfViewAspect);
           const idealHeight =
