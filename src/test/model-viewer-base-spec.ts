@@ -15,7 +15,7 @@
 
 import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
-import {Constructor} from '../utilities.js';
+import {Constructor, resolveDpr} from '../utilities.js';
 
 import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
@@ -34,8 +34,9 @@ const expectBlobDimensions =
     img.src = url;
   });
 
-  expect(img.width).to.be.equal(width);
-  expect(img.height).to.be.equal(height);
+  const dpr = resolveDpr();
+  expect(img.width).to.be.equal(width * dpr);
+  expect(img.height).to.be.equal(height * dpr);
 };
 
 suite('ModelViewerElementBase', () => {
@@ -300,7 +301,6 @@ suite('ModelViewerElementBase', () => {
         test('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
-          console.log(element[$scene].model.fieldOfViewAspect);
           const idealHeight =
               Math.round(32 / element[$scene].model.fieldOfViewAspect);
           await expectBlobDimensions(basicBlob, 32, 64);
