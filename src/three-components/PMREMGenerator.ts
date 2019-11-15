@@ -23,11 +23,11 @@ const LOD_MIN = 4;
 const LOD_MAX = 8;
 // The roughness values associated with the extra mips. These must match
 // varianceDefines from common.glsl.js.
-const EXTRA_LOD_ROUGHNESS = [0.284, 0.37, 0.49, 0.61, 0.73, 1.0];
+const EXTRA_LOD_ROUGHNESS = [0.305, 0.4, 0.533, 0.666, 0.8, 1.0];
 // The standard deviations (radians) associated with the extra mips. These are
 // chosen to approximate a Trowbridge-Reitz distribution function times the
 // geometric shadowing function.
-const EXTRA_LOD_SIGMA = [0.11, 0.2, 0.33, 0.42, 0.5, 0.57];
+const EXTRA_LOD_SIGMA = [0.125, 0.215, 0.35, 0.446, 0.526, 0.582];
 const SIZE_MAX = Math.pow(2, LOD_MAX);
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 

@@ -135,19 +135,19 @@ vec4 linearToOutputTexel(vec4 value){
 
 export const varianceDefines = /* glsl */ `
 #define r0 1.0
-#define v0 0.32
+#define v0 0.339
 #define m0 -2.0
-#define r1 0.73
-#define v1 0.25
+#define r1 0.8
+#define v1 0.276
 #define m1 -1.0
-#define r4 0.36
-#define v4 0.04
+#define r4 0.4
+#define v4 0.046
 #define m4 2.0
-#define r5 0.284
-#define v5 0.013
+#define r5 0.305
+#define v5 0.016
 #define m5 3.0
 #define r6 0.21
-#define v6 0.0039
+#define v6 0.0038
 #define m6 4.0
 `
 
@@ -162,7 +162,7 @@ float roughness2variance(float roughness) {
     variance = (r4 - roughness) * (v5 - v4) / (r4 - r5) + v4;
   } else {
     float roughness2 = roughness * roughness;
-    variance = 2.0 * roughness2 * roughness2;
+    variance = 1.79 * roughness2 * roughness2;
   }
   return variance;
 }
@@ -178,7 +178,7 @@ float variance2roughness(float variance) {
   } else if (variance >= v5) {
     roughness = (v4 - variance) * (r5 - r4) / (v4 - v5) + r4;
   } else {
-    roughness = pow(0.5 * variance, 0.25);
+    roughness = pow(0.559 * variance, 0.25);// 0.559 = 1.0 / 1.79
   }
   return roughness;
 }
@@ -196,7 +196,7 @@ float roughness2mip(float roughness) {
   } else if (roughness >= r6) {
     mip = (r5 - roughness) * (m6 - m5) / (r5 - r6) + m5;
   } else {
-    mip = -2.0 * log2(1.19 * roughness);// 1.19 = 2^0.25
+    mip = -2.0 * log2(1.16 * roughness);// 1.16 = 1.79^0.25
   }
   return mip;
 }
