@@ -340,10 +340,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const mimeType = options ? options.mimeType : undefined;
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
-    const {width, height, model} = this[$scene];
+    const {width, height, model, aspect} = this[$scene];
     if (idealAspect === true) {
-      const idealHeight = Math.round(width / model.fieldOfViewAspect);
-      this[$updateSize]({width, height: idealHeight});
+      const idealWidth = model.fieldOfViewAspect > aspect ?
+          width :
+          Math.round(height * model.fieldOfViewAspect);
+      const idealHeight = model.fieldOfViewAspect > aspect ?
+          Math.round(width / model.fieldOfViewAspect) :
+          height;
+      this[$updateSize]({width: idealWidth, height: idealHeight});
       await new Promise(resolve => requestAnimationFrame(resolve));
     }
     try {
