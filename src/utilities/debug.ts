@@ -15,8 +15,8 @@
 
 import {CameraHelper, WebGLRenderTarget} from 'three';
 
-import {ModelScene} from './ModelScene';
-import {renderer} from './Renderer';
+import {ModelScene} from '../three-components/ModelScene';
+import {renderer} from '../three-components/Renderer';
 
 /**
  * Renders a box representing the shadow camera, which is helpful in
