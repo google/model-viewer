@@ -21,7 +21,7 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, sceneRenderer} from './three-components/Renderer.js';
+import {ContextLostEvent, renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
@@ -124,7 +124,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$renderer]() {
-    return sceneRenderer;
+    return renderer;
   }
 
   /** @export */
@@ -178,7 +178,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
       element: this,
       width,
       height,
-      renderer: sceneRenderer
+      renderer: renderer
     });
 
     this[$scene].addEventListener('model-load', (event) => {
@@ -202,7 +202,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         // Don't resize anything if in AR mode; otherwise the canvas
         // scaling to fullscreen on entering AR will clobber the flat/2d
         // dimensions of the element.
-        if (sceneRenderer.isPresenting) {
+        if (renderer.isPresenting) {
           return;
         }
 

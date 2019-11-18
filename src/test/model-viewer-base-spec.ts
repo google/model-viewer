@@ -162,7 +162,7 @@ suite('ModelViewerElementBase', () => {
       });
 
       test('dispatches a related error event', async () => {
-        const renderer = element[$renderer].renderer;
+        const renderer = element[$renderer].threeRenderer;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,
@@ -231,7 +231,8 @@ suite('ModelViewerElementBase', () => {
           // Emulate unsupported browser
           let restoreCanvasToBlob = () => {};
           try {
-            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
+            restoreCanvasToBlob =
+                spy(HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
           } catch (error) {
             // Ignored...
           }
@@ -242,35 +243,44 @@ suite('ModelViewerElementBase', () => {
           restoreCanvasToBlob();
         });
 
-        test('blobs on supported and unsupported browsers are equivalent', async () => {
-          // Skip test on IE11 since it doesn't have Response to fetch arrayBuffer
-          if (IS_IE11) {
-            return;
-          }
+        test(
+            'blobs on supported and unsupported browsers are equivalent',
+            async () => {
+              // Skip test on IE11 since it doesn't have Response to fetch
+              // arrayBuffer
+              if (IS_IE11) {
+                return;
+              }
 
-          let restoreCanvasToBlob = () => {};
-          try {
-            restoreCanvasToBlob = spy(HTMLCanvasElement.prototype, 'toBlob', { value: undefined });
-          } catch (error) {
-            // Ignored...
-          }
+              let restoreCanvasToBlob = () => {};
+              try {
+                restoreCanvasToBlob = spy(
+                    HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
+              } catch (error) {
+                // Ignored...
+              }
 
-          const unsupportedBrowserBlob = await element.toBlob();
+              const unsupportedBrowserBlob = await element.toBlob();
 
-          restoreCanvasToBlob();
+              restoreCanvasToBlob();
 
-          const supportedBrowserBlob = await element.toBlob();
+              const supportedBrowserBlob = await element.toBlob();
 
-          // Blob.prototype.arrayBuffer is not available in Edge / Safari
-          // Using Response to get arrayBuffer instead
-          const supportedBrowserResponse = new Response(supportedBrowserBlob);
-          const unsupportedBrowserResponse = new Response(unsupportedBrowserBlob);
+              // Blob.prototype.arrayBuffer is not available in Edge / Safari
+              // Using Response to get arrayBuffer instead
+              const supportedBrowserResponse =
+                  new Response(supportedBrowserBlob);
+              const unsupportedBrowserResponse =
+                  new Response(unsupportedBrowserBlob);
 
-          const supportedBrowserArrayBuffer = await supportedBrowserResponse.arrayBuffer();
-          const unsupportedBrowserArrayBuffer = await unsupportedBrowserResponse.arrayBuffer();
+              const supportedBrowserArrayBuffer =
+                  await supportedBrowserResponse.arrayBuffer();
+              const unsupportedBrowserArrayBuffer =
+                  await unsupportedBrowserResponse.arrayBuffer();
 
-          expect(unsupportedBrowserArrayBuffer).to.eql(supportedBrowserArrayBuffer);
-        });
+              expect(unsupportedBrowserArrayBuffer)
+                  .to.eql(supportedBrowserArrayBuffer);
+            });
       });
     });
 

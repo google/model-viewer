@@ -131,7 +131,7 @@ suite('Renderer', () => {
 
       test('updates effective DPR', async () => {
         const {element} = scene;
-        const initialDpr = renderer.renderer.getPixelRatio();
+        const initialDpr = renderer.threeRenderer.getPixelRatio();
         const {width, height} = scene.getSize();
 
         element[$onResize]({width, height});
@@ -141,7 +141,7 @@ suite('Renderer', () => {
 
         await new Promise(resolve => requestAnimationFrame(resolve));
 
-        const newDpr = renderer.renderer.getPixelRatio();
+        const newDpr = renderer.threeRenderer.getPixelRatio();
 
         expect(newDpr).to.be.equal(initialDpr + 1);
       });

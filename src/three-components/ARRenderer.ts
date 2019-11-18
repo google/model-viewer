@@ -64,7 +64,7 @@ export class ARRenderer extends EventDispatcher {
 
     // this.renderer is a three.js WebGLRenderer, it is shared with the parent
     // Renderer.
-    this.renderer = parentRenderer.renderer;
+    this.renderer = parentRenderer.threeRenderer;
 
     this.inputContext = inputContext;
 

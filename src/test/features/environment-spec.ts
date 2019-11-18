@@ -332,13 +332,13 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     test('changes the tone mapping exposure of the renderer', async () => {
       const originalToneMappingExposure =
-          scene.renderer.renderer.toneMappingExposure;
+          scene.renderer.threeRenderer.toneMappingExposure;
       element.exposure = 2.0;
       await timePasses();
       scene.renderer.render(performance.now());
 
       const newToneMappingExposure =
-          scene.renderer.renderer.toneMappingExposure;
+          scene.renderer.threeRenderer.toneMappingExposure;
 
       expect(newToneMappingExposure)
           .to.be.greaterThan(originalToneMappingExposure);
