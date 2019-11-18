@@ -27,7 +27,7 @@ const expectBlobDimensions =
     async (blob: Blob, width: number, height: number) => {
   const img = await new Promise<HTMLImageElement>((resolve) => {
     const url = URL.createObjectURL(blob);
-    const img = new Image;
+    const img = new Image();
     img.onload = () => {
       resolve(img);
     };

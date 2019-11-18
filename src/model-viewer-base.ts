@@ -19,7 +19,6 @@ import {Event as ThreeEvent} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
-import {rafPasses} from './test/helpers.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
@@ -345,7 +344,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     if (idealAspect === true) {
       const idealHeight = Math.round(width / model.fieldOfViewAspect);
       this[$updateSize]({width, height: idealHeight});
-      await rafPasses();
+      await new Promise(resolve => requestAnimationFrame(resolve));
     }
     try {
       return new Promise<Blob>(async (resolve, reject) => {

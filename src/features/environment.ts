@@ -113,11 +113,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {backgroundImage, environmentImage} = this;
-      let {backgroundColor} = this;
-      if (!backgroundColor) {
-        backgroundColor = DEFAULT_BACKGROUND_COLOR;
-      }
+      const {backgroundImage, backgroundColor, environmentImage} = this;
       // Set the container node's background color so that it matches
       // the background color configured for the scene. It's important
       // to do this because we round the size of the canvas off to the

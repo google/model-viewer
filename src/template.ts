@@ -110,7 +110,7 @@ canvas.show {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--poster-color, inherit);
+  background-color: var(--poster-color, #fff);
   background-image: var(--poster-image, none);
 }
 
