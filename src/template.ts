@@ -88,11 +88,13 @@ canvas.show {
 .slot.poster {
   opacity: 0;
   transition: opacity 0.3s 0.3s;
+  background-color: inherit;
 }
 
 .slot.poster.show {
   opacity: 1;
   transition: none;
+  background-color: inherit;
 }
 
 .slot.poster > * {
@@ -107,9 +109,10 @@ canvas.show {
   width: 100%;
   height: 100%;
   position: absolute;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--poster-color, #fff);
+  background-color: var(--poster-color, inherit);
   background-image: var(--poster-image, none);
 }
 
