@@ -22,13 +22,12 @@ import {renderer} from '../three-components/Renderer';
  * Renders a box representing the shadow camera, which is helpful in
  * debugging.
  */
-export const showShadowHelper =
-    (scene: ModelScene) => {
-      if (scene.shadow != null) {
-        const helper = new CameraHelper(scene.shadow.shadow.camera);
-        scene.add(helper);
-      }
-    }
+export const showShadowHelper = (scene: ModelScene) => {
+  if (scene.shadow != null) {
+    const helper = new CameraHelper(scene.shadow.shadow.camera);
+    scene.add(helper);
+  }
+};
 
 /**
  * Debug method to save an offscreen render target to an image; filename should
