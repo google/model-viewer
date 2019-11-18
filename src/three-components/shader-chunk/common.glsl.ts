@@ -133,6 +133,10 @@ vec4 linearToOutputTexel(vec4 value){
 }
 `;
 
+// These defines are used for the following three functions, but must be
+// declared only once, so ensure this is included just above where these
+// conversion functions are included. These values must agree with
+// EXTRA_LOD_ROUGHNESS and EXTRA_LOD_SIGMA from PMREMGenerator.
 export const varianceDefines = /* glsl */ `
 #define r0 1.0
 #define v0 0.339
@@ -151,8 +155,8 @@ export const varianceDefines = /* glsl */ `
 #define m6 4.0
 `
 
-export const roughness2variance = /* glsl */ `
-float roughness2variance(float roughness) {
+export const roughnessToVariance = /* glsl */ `
+float roughnessToVariance(float roughness) {
   float variance = 0.0;
   if (roughness >= r1) {
     variance = (r0 - roughness) * (v1 - v0) / (r0 - r1) + v0;
@@ -168,8 +172,8 @@ float roughness2variance(float roughness) {
 }
 `;
 
-export const variance2roughness = /* glsl */ `
-float variance2roughness(float variance) {
+export const varianceToRoughness = /* glsl */ `
+float varianceToRoughness(float variance) {
   float roughness = 0.0;
   if (variance >= v1) {
     roughness = (v0 - variance) * (r1 - r0) / (v0 - v1) + r0;
@@ -184,8 +188,8 @@ float variance2roughness(float variance) {
 }
 `;
 
-export const roughness2mip = /* glsl */ `
-float roughness2mip(float roughness) {
+export const roughnessToMip = /* glsl */ `
+float roughnessToMip(float roughness) {
   float mip = 0.0;
   if (roughness >= r1) {
     mip = (r0 - roughness) * (m1 - m0) / (r0 - r1) + m0;

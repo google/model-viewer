@@ -14,10 +14,10 @@
  */
 
 import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderTarget} from 'three';
-import {_Math} from 'three/src/math/Math';
+import {_Math as ThreeMath} from 'three/src/math/Math.js';
 
 import {sceneRenderer} from './Renderer';
-import {roughness2variance, variance2roughness, varianceDefines} from './shader-chunk/common.glsl';
+import {roughnessToVariance, varianceDefines, varianceToRoughness} from './shader-chunk/common.glsl';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
 const $scene = Symbol('scene');
@@ -53,7 +53,7 @@ export class RoughnessMipmapper {
 
     let width = Math.max(roughnessMap.image.width, normalMap.image.width);
     let height = Math.max(roughnessMap.image.height, normalMap.image.height);
-    if (!_Math.isPowerOfTwo(width) || !_Math.isPowerOfTwo(height)) {
+    if (!ThreeMath.isPowerOfTwo(width) || !ThreeMath.isPowerOfTwo(height)) {
       return;
     }
 
@@ -152,13 +152,13 @@ uniform sampler2D roughnessMap;
 uniform sampler2D normalMap;
 uniform vec2 texelSize;
 ${varianceDefines}
-${roughness2variance}
-${variance2roughness}
+${roughnessToVariance}
+${varianceToRoughness}
 void main() {
   gl_FragColor = texture2D(roughnessMap, vUv, -1.0);
   if (texelSize.x == 0.0) return;
   float roughness = gl_FragColor.g;
-  float variance = roughness2variance(roughness);
+  float variance = roughnessToVariance(roughness);
   vec3 avgNormal;
   for (float x = -1.0; x < 2.0; x += 2.0) {
     for (float y = -1.0; y < 2.0; y += 2.0) {
@@ -167,7 +167,7 @@ void main() {
     }
   }
   variance += 1.0 - 0.25 * length(avgNormal);
-  gl_FragColor.g = variance2roughness(variance);
+  gl_FragColor.g = varianceToRoughness(variance);
 }
       `,
 

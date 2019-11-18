@@ -127,7 +127,7 @@ export class CachingGLTFLoader {
     preloaded.set(url, true);
   }
 
-  protected roughnessMipmapper = new RoughnessMipmapper;
+  protected roughnessMipmapper = new RoughnessMipmapper();
 
   /**
    * Loads a glTF from the specified url and resolves a unique clone of the

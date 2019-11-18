@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-import {WebGLRenderTarget} from 'three';
-import {sceneRenderer} from './Renderer';
-
 export const assertContext =
     (context: WebGLRenderingContext|null): WebGLRenderingContext => {
       if (context == null) {
@@ -78,31 +75,3 @@ export const applyExtensionCompatibility = (gl: WebGLRenderingContext) => {
     return extension;
   };
 };
-
-/**
- * Debug method to save an offscreen render target to an image; filename should
- * have a .png extension to ensure lossless transmission.
- */
-export const saveTarget = (target: WebGLRenderTarget, filename: string) => {
-  const {width, height} = target;
-  const output = document.createElement('canvas');
-  output.width = width;
-  output.height = height;
-
-  const ctx = output.getContext('2d')!;
-  const img = ctx.getImageData(0, 0, width, height);
-  sceneRenderer.renderer.readRenderTargetPixels(
-      target, 0, 0, width, height, img.data);
-  ctx.putImageData(img, 0, 0);
-
-  output.toBlob(function(blob) {
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  });
-}

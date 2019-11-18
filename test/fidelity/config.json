@@ -630,7 +630,7 @@
     {
       "name": "DirectionalLightTest",
       "model": "../../../../examples/assets/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "lighting": "../../../../examples/assets/spot.hdr",
+      "lighting": "../../../../examples/assets/spot1Lux.hdr",
       "dimensions": {
         "width": 1024
       },

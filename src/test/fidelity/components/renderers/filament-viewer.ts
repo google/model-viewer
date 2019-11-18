@@ -167,7 +167,11 @@ export class FilamentViewer extends LitElement {
 
     await fetchFilamentAssets([modelUrl, iblUrl, skyboxUrl]);
 
-    if (lightingBaseName === 'spot') {
+    // This special case is for the DirectionalLightTest, where we compare the
+    // <model-viewer> IBL to the Filament directional light by using a special
+    // environment map with a single bright pixel that represents a 1 lux
+    // directional light.
+    if (lightingBaseName === 'spot1Lux') {
       const light = self.Filament.EntityManager.get().create();
       self.Filament.LightManager
           .Builder(self.Filament.LightManager$Type.DIRECTIONAL)

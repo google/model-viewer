@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {getFaceChunk, getUVChunk, roughness2mip, varianceDefines} from './common.glsl.js';
+import {getFaceChunk, getUVChunk, roughnessToMip, varianceDefines} from './common.glsl.js';
 
 export const bilinearCubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel 8.0
@@ -63,10 +63,10 @@ export const cubeUVChunk = /* glsl */ `
 
 ${bilinearCubeUVChunk}
 ${varianceDefines}
-${roughness2mip}
+${roughnessToMip}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
-  float mip = clamp(roughness2mip(roughness), m0, cubeUV_maxMipLevel);
+  float mip = clamp(roughnessToMip(roughness), m0, cubeUV_maxMipLevel);
   float mipF = fract(mip);
   float mipInt = floor(mip);
 

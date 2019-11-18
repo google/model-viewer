@@ -72,6 +72,8 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
           specularGlossiness.cloneMaterial(material) :
           material.clone();
       clone.onBeforeCompile = updateShader;
+      // This is a fix for NormalTangentMirrorTest. Remove when
+      // https://github.com/mrdoob/three.js/issues/11438 is solved.
       if (!clone.vertexTangents && clone.normalScale) {
         clone.normalScale.y *= -1;
       }

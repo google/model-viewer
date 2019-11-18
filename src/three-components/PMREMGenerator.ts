@@ -40,6 +40,9 @@ const MAX_SAMPLES = 20;
 const GENERATED_SIGMA = 0.04;
 const DEFAULT_NEAR = 0.1;
 const DEFAULT_FAR = 100;
+// Golden Ratio
+const PHI = (1 + Math.sqrt(5)) / 2;
+const INV_PHI = 1 / PHI;
 
 const $roughness = Symbol('roughness');
 const $sigma = Symbol('sigma');
@@ -48,8 +51,9 @@ const $lodPlanes = Symbol('lodPlanes');
 const $axisDirections = Symbol('axisDirections');
 const $blurMaterial = Symbol('blurMaterial');
 const $flatCamera = Symbol('flatCamera');
-const $pingPongRenderTarget = Symbol('pingP$pingPongRenderTarget');
+const $pingPongRenderTarget = Symbol('pingPongRenderTarget');
 
+const $allocateTargets = Symbol('allocateTargets');
 const $sceneToCubeUV = Symbol('sceneToCubeUV');
 const $equirectangularToCubeUV = Symbol('equirectangularToCubeUV');
 const $createRenderTarget = Symbol('createRenderTarget');
@@ -143,21 +147,18 @@ export class PMREMGenerator {
         lod--;
       }
     }
-    // Golden Ratio
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const invPhi = 1 / phi;
     // Vertices of a dodecahedron (except the opposites, which represent the
     // same axis), used as axis directions evenly spread on a sphere.
-    this[$axisDirections].push(new Vector3(1, 1, 1));
-    this[$axisDirections].push(new Vector3(-1, 1, 1));
-    this[$axisDirections].push(new Vector3(1, 1, -1));
-    this[$axisDirections].push(new Vector3(-1, 1, -1));
-    this[$axisDirections].push(new Vector3(0, phi, invPhi));
-    this[$axisDirections].push(new Vector3(0, phi, -invPhi));
-    this[$axisDirections].push(new Vector3(invPhi, 0, phi));
-    this[$axisDirections].push(new Vector3(-invPhi, 0, phi));
-    this[$axisDirections].push(new Vector3(phi, invPhi, 0));
-    this[$axisDirections].push(new Vector3(-phi, invPhi, 0));
+    this[$axisDirections].push(
+        new Vector3(1, 1, 1),
+        new Vector3(-1, 1, 1),
+        new Vector3(1, 1, -1),
+        new Vector3(-1, 1, -1),
+        new Vector3(0, PHI, -INV_PHI),
+        new Vector3(INV_PHI, 0, PHI),
+        new Vector3(-INV_PHI, 0, PHI),
+        new Vector3(PHI, INV_PHI, 0),
+        new Vector3(-PHI, INV_PHI, 0));
   }
 
   /**
@@ -169,11 +170,13 @@ export class PMREMGenerator {
     this.renderer.setPixelRatio(1);
     const defaultScene = new EnvironmentScene;
 
-    const cubeUVRenderTarget =
-        this[$sceneToCubeUV](defaultScene, DEFAULT_NEAR, DEFAULT_FAR);
+    const cubeUVRenderTarget = this[$allocateTargets]();
+    this[$sceneToCubeUV](
+        defaultScene, DEFAULT_NEAR, DEFAULT_FAR, cubeUVRenderTarget);
     this[$blur](cubeUVRenderTarget, 0, 0, GENERATED_SIGMA);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     defaultScene.dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
@@ -191,9 +194,11 @@ export class PMREMGenerator {
     const dpr = this.renderer.getPixelRatio();
     this.renderer.setPixelRatio(1);
 
-    const cubeUVRenderTarget = this[$sceneToCubeUV](scene, near, far);
+    const cubeUVRenderTarget = this[$allocateTargets]();
+    this[$sceneToCubeUV](scene, near, far, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
@@ -210,28 +215,35 @@ export class PMREMGenerator {
     equirectangular.minFilter = NearestFilter;
     equirectangular.generateMipmaps = false;
 
-    const cubeUVRenderTarget = this[$equirectangularToCubeUV](equirectangular);
+    const cubeUVRenderTarget = this[$allocateTargets](equirectangular);
+    this[$equirectangularToCubeUV](equirectangular, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
-  private[$sceneToCubeUV](scene: Scene, near: number, far: number):
-      WebGLRenderTarget {
+  private[$allocateTargets](equirectangular?: Texture): WebGLRenderTarget {
     const params = {
       magFilter: NearestFilter,
       minFilter: NearestFilter,
       generateMipmaps: false,
-      type: UnsignedByteType,
-      format: RGBEFormat,
-      encoding: RGBEEncoding,
+      type: equirectangular ? equirectangular.type : UnsignedByteType,
+      format: equirectangular ? equirectangular.format : RGBEFormat,
+      encoding: equirectangular ? equirectangular.encoding : RGBEEncoding,
+      depthBuffer: false,
       stencilBuffer: false
     };
-    const cubeUVRenderTarget = this[$createRenderTarget](params);
-    this[$pingPongRenderTarget] =
-        this[$createRenderTarget]({...params, depthBuffer: false});
+    const cubeUVRenderTarget = this[$createRenderTarget](
+        {...params, depthBuffer: (equirectangular ? false : true)});
+    this[$pingPongRenderTarget] = this[$createRenderTarget](params);
+    return cubeUVRenderTarget;
+  }
 
+  private[$sceneToCubeUV](
+      scene: Scene, near: number, far: number,
+      cubeUVRenderTarget: WebGLRenderTarget) {
     const fov = 90;
     const aspect = 1;
     const cubeCamera = new PerspectiveCamera(fov, aspect, near, far);
@@ -269,25 +281,10 @@ export class PMREMGenerator {
     this.renderer.toneMappingExposure = toneMappingExposure;
     this.renderer.gammaOutput = gammaOutput;
     scene.scale.z *= -1;
-
-    return cubeUVRenderTarget;
   }
 
-  private[$equirectangularToCubeUV](equirectangular: Texture):
-      WebGLRenderTarget {
-    const params = {
-      magFilter: NearestFilter,
-      minFilter: NearestFilter,
-      generateMipmaps: false,
-      type: equirectangular.type,
-      format: equirectangular.format,
-      encoding: equirectangular.encoding,
-      depthBuffer: false,
-      stencilBuffer: false
-    };
-    const cubeUVRenderTarget = this[$createRenderTarget](params);
-    this[$pingPongRenderTarget] = this[$createRenderTarget](params);
-
+  private[$equirectangularToCubeUV](
+      equirectangular: Texture, cubeUVRenderTarget: WebGLRenderTarget) {
     const scene = new Scene();
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurMaterial]));
     const uniforms = this[$blurMaterial].uniforms;
@@ -302,8 +299,6 @@ export class PMREMGenerator {
     this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
     this.renderer.render(scene, this[$flatCamera]);
-
-    return cubeUVRenderTarget;
   }
 
   private[$createRenderTarget](params: Object): WebGLRenderTarget {
@@ -323,8 +318,6 @@ export class PMREMGenerator {
           this[$axisDirections][(i - 1) % this[$axisDirections].length];
       this[$blur](cubeUVRenderTarget, i - 1, i, sigma, poleAxis);
     }
-
-    this[$pingPongRenderTarget].dispose();
   }
 
   /**

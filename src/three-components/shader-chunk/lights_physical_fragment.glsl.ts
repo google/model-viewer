@@ -7,6 +7,7 @@ export const lightsChunk = /* glsl */ `
 PhysicalMaterial material;
 material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );
 
+// (elalish) This block has been updated to add anti-aliasing.
 material.specularRoughness = max(roughnessFactor, 0.0525);// 0.0525 corresponds to the base mip of a 256 cubemap.
 vec3 dxy = max(abs(dFdx(geometryNormal)), abs(dFdy(geometryNormal)));
 material.specularRoughness += max(max(dxy.x, dxy.y), dxy.z);
