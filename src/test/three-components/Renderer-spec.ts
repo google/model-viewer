@@ -38,7 +38,6 @@ function createScene(): ModelScene&TestScene {
     canvas: element[$canvas],
     width: 200,
     height: 100,
-    renderer,
   });
   scene.visible = true;
 

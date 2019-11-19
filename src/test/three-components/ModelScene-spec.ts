@@ -18,7 +18,6 @@ import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {renderer} from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -44,7 +43,6 @@ suite('ModelScene', () => {
       canvas: element[$canvas],
       width: 200,
       height: 100,
-      renderer,
     });
   });
 

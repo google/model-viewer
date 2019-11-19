@@ -21,6 +21,7 @@ import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelL
 import {normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
+import {renderer} from '../three-components/Renderer.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -498,6 +499,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       controls.updateAspect(this[$scene].aspect);
       this.requestUpdate('fieldOfView', this.fieldOfView);
       controls.jumpToGoal();
+
+      // Immediately queue a render to happen at microtask timing. This is
+      // necessary because setting the width and height of the canvas has the
+      // side-effect of clearing it, and also if we wait for the next rAF to
+      // render again we might get hit with yet-another-resize, or worse we
+      // may not actually be marked as dirty and so render will just not
+      // happen. Queuing a render to happen here means we will render twice on
+      // a resize frame, but it avoids most of the visual artifacts associated
+      // with other potential mitigations for this problem. See discussion in
+      // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
+      // additional considerations.
+      Promise.resolve().then(() => {
+        renderer.render(performance.now());
+      });
     }
 
     [$onModelLoad](event: any) {

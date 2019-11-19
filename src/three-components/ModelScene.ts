@@ -19,7 +19,6 @@ import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
-import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {Shadow} from './Shadow.js';
 
@@ -32,7 +31,6 @@ export interface ModelSceneConfig {
   canvas: HTMLCanvasElement;
   width: number;
   height: number;
-  renderer: Renderer;
 }
 
 export type IlluminationRole = 'primary'|'secondary'
@@ -56,7 +54,6 @@ export class ModelScene extends Scene {
 
   public aspect = 1;
   public canvas: HTMLCanvasElement;
-  public renderer: Renderer;
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
@@ -77,7 +74,7 @@ export class ModelScene extends Scene {
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
-  constructor({canvas, element, width, height, renderer}: ModelSceneConfig) {
+  constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
@@ -85,7 +82,6 @@ export class ModelScene extends Scene {
     this.element = element;
     this.canvas = canvas;
     this.context = canvas.getContext('2d')!;
-    this.renderer = renderer;
 
     this.model = new Model();
 
@@ -153,20 +149,6 @@ export class ModelScene extends Scene {
       this.canvas.style.height = `${this.height}px`;
       this.aspect = this.width / this.height;
       this.frameModel();
-
-      // Immediately queue a render to happen at microtask timing. This is
-      // necessary because setting the width and height of the canvas has the
-      // side-effect of clearing it, and also if we wait for the next rAF to
-      // render again we might get hit with yet-another-resize, or worse we
-      // may not actually be marked as dirty and so render will just not
-      // happen. Queuing a render to happen here means we will render twice on
-      // a resize frame, but it avoids most of the visual artifacts associated
-      // with other potential mitigations for this problem. See discussion in
-      // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
-      // additional considerations.
-      Promise.resolve().then(() => {
-        this.renderer.render(performance.now());
-      });
     }
   }
 

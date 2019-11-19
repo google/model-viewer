@@ -177,7 +177,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
       element: this,
       width,
       height,
-      renderer: renderer
     });
 
     this[$scene].addEventListener('model-load', (event) => {
