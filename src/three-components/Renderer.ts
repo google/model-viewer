@@ -106,7 +106,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.shadowMap.autoUpdate = false;
 
       this.debugger =
-          options != null && !!options.debug ? new Debugger(this) : null;
+          options != null && !!options.debug ? new Debugger() : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",
