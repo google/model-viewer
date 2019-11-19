@@ -16,9 +16,10 @@
 import {Mesh, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
 
 import {ModelScene} from './ModelScene';
-import {renderer} from './Renderer';
+import {Renderer} from './Renderer';
 
 export interface ModelViewerRendererDebugDetails {
+  renderer: Renderer;
   THREE: {
     ShaderMaterial: Constructor<ShaderMaterial>;
     PlaneBufferGeometry: Constructor<PlaneBufferGeometry>;
@@ -44,7 +45,7 @@ export interface ModelViewerSceneDetails {
  * recommended to activate this unless needed.
  */
 export class Debugger {
-  constructor() {
+  constructor(renderer: Renderer) {
     // Force WebGL shader debugging on:
     renderer.threeRenderer.debug = {checkShaderErrors: true};
     // Announce debug details at microtask timing to give the `Renderer`
@@ -54,6 +55,7 @@ export class Debugger {
       self.dispatchEvent(new CustomEvent<ModelViewerRendererDebugDetails>(
           'model-viewer-renderer-debug', {
             detail: {
+              renderer,
               THREE: {
                 ShaderMaterial,
                 Texture,
