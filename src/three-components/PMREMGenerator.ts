@@ -85,7 +85,7 @@ export class PMREMGenerator {
   private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
   private[$pingPongRenderTarget]: WebGLRenderTarget;
 
-  constructor(private renderer: WebGLRenderer) {
+  constructor(private threeRenderer: WebGLRenderer) {
     let lod = LOD_MAX;
     for (let i = 0; i < TOTAL_LODS; i++) {
       const sizeLod = Math.pow(2, lod);
@@ -166,8 +166,8 @@ export class PMREMGenerator {
    * greyscale room with several boxes on the floor and several lit windows.
    */
   fromDefault(): WebGLRenderTarget {
-    const dpr = this.renderer.getPixelRatio();
-    this.renderer.setPixelRatio(1);
+    const dpr = this.threeRenderer.getPixelRatio();
+    this.threeRenderer.setPixelRatio(1);
     const defaultScene = new EnvironmentScene;
 
     const cubeUVRenderTarget = this[$allocateTargets]();
@@ -178,7 +178,7 @@ export class PMREMGenerator {
 
     this[$pingPongRenderTarget].dispose();
     defaultScene.dispose();
-    this.renderer.setPixelRatio(dpr);
+    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -191,15 +191,15 @@ export class PMREMGenerator {
   fromScene(
       scene: Scene, near: number = DEFAULT_NEAR,
       far: number = DEFAULT_FAR): WebGLRenderTarget {
-    const dpr = this.renderer.getPixelRatio();
-    this.renderer.setPixelRatio(1);
+    const dpr = this.threeRenderer.getPixelRatio();
+    this.threeRenderer.setPixelRatio(1);
 
     const cubeUVRenderTarget = this[$allocateTargets]();
     this[$sceneToCubeUV](scene, near, far, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
     this[$pingPongRenderTarget].dispose();
-    this.renderer.setPixelRatio(dpr);
+    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -208,8 +208,8 @@ export class PMREMGenerator {
    * (RGBFormat) or HDR (RGBEFormat).
    */
   fromEquirectangular(equirectangular: Texture): WebGLRenderTarget {
-    const dpr = this.renderer.getPixelRatio();
-    this.renderer.setPixelRatio(1);
+    const dpr = this.threeRenderer.getPixelRatio();
+    this.threeRenderer.setPixelRatio(1);
 
     equirectangular.magFilter = NearestFilter;
     equirectangular.minFilter = NearestFilter;
@@ -220,7 +220,7 @@ export class PMREMGenerator {
     this[$applyPMREM](cubeUVRenderTarget);
 
     this[$pingPongRenderTarget].dispose();
-    this.renderer.setPixelRatio(dpr);
+    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -250,16 +250,16 @@ export class PMREMGenerator {
     const upSign = [1, 1, 1, 1, -1, 1];
     const forwardSign = [1, 1, -1, -1, -1, 1];
 
-    const gammaOutput = this.renderer.gammaOutput;
-    const toneMapping = this.renderer.toneMapping;
-    const toneMappingExposure = this.renderer.toneMappingExposure;
+    const gammaOutput = this.threeRenderer.gammaOutput;
+    const toneMapping = this.threeRenderer.toneMapping;
+    const toneMappingExposure = this.threeRenderer.toneMappingExposure;
 
-    this.renderer.toneMapping = LinearToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.gammaOutput = false;
+    this.threeRenderer.toneMapping = LinearToneMapping;
+    this.threeRenderer.toneMappingExposure = 1.0;
+    this.threeRenderer.gammaOutput = false;
     scene.scale.z *= -1;
 
-    this.renderer.setRenderTarget(cubeUVRenderTarget);
+    this.threeRenderer.setRenderTarget(cubeUVRenderTarget);
     for (let i = 0; i < 6; i++) {
       const col = i % 3;
       if (col == 0) {
@@ -272,14 +272,14 @@ export class PMREMGenerator {
         cubeCamera.up.set(0, upSign[i], 0);
         cubeCamera.lookAt(0, 0, forwardSign[i]);
       }
-      this.renderer.setViewport(
+      this.threeRenderer.setViewport(
           col * SIZE_MAX, i > 2 ? SIZE_MAX : 0, SIZE_MAX, SIZE_MAX);
-      this.renderer.render(scene, cubeCamera);
+      this.threeRenderer.render(scene, cubeCamera);
     }
 
-    this.renderer.toneMapping = toneMapping;
-    this.renderer.toneMappingExposure = toneMappingExposure;
-    this.renderer.gammaOutput = gammaOutput;
+    this.threeRenderer.toneMapping = toneMapping;
+    this.threeRenderer.toneMappingExposure = toneMappingExposure;
+    this.threeRenderer.gammaOutput = gammaOutput;
     scene.scale.z *= -1;
   }
 
@@ -296,9 +296,9 @@ export class PMREMGenerator {
     uniforms['inputEncoding'].value = encodings[equirectangular.encoding];
     uniforms['outputEncoding'].value = encodings[equirectangular.encoding];
 
-    this.renderer.setRenderTarget(cubeUVRenderTarget);
-    this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
-    this.renderer.render(scene, this[$flatCamera]);
+    this.threeRenderer.setRenderTarget(cubeUVRenderTarget);
+    this.threeRenderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
+    this.threeRenderer.render(scene, this[$flatCamera]);
   }
 
   private[$createRenderTarget](params: Object): WebGLRenderTarget {
@@ -409,11 +409,11 @@ export class PMREMGenerator {
     const y = (lodOut === 0 ? 0 : 2 * SIZE_MAX) +
         2 * outputSize *
             (lodOut > LOD_MAX - LOD_MIN ? lodOut - LOD_MAX + LOD_MIN : 0);
-    this.renderer.autoClear = false;
+    this.threeRenderer.autoClear = false;
 
-    this.renderer.setRenderTarget(targetOut);
-    this.renderer.setViewport(x, y, 3 * outputSize, 2 * outputSize);
-    this.renderer.render(blurScene, this[$flatCamera]);
+    this.threeRenderer.setRenderTarget(targetOut);
+    this.threeRenderer.setViewport(x, y, 3 * outputSize, 2 * outputSize);
+    this.threeRenderer.render(blurScene, this[$flatCamera]);
   }
 };
 

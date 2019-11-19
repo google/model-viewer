@@ -56,7 +56,6 @@ export const $tick = Symbol('tick');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
-export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
@@ -125,10 +124,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /** @export */
   get loaded() {
     return this[$getLoaded]();
-  }
-
-  get[$renderer]() {
-    return renderer;
   }
 
   /** @export */
@@ -263,11 +258,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
-    this[$renderer].addEventListener(
+    renderer.addEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].registerScene(this[$scene]);
+    renderer.registerScene(this[$scene]);
     this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
@@ -291,11 +286,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
-    this[$renderer].removeEventListener(
+    renderer.removeEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].unregisterScene(this[$scene]);
+    renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();

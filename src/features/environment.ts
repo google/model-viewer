@@ -16,7 +16,8 @@
 import {property} from 'lit-element';
 import {Color, Texture} from 'three';
 
-import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $scene} from '../model-viewer-base.js';
+import {renderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
@@ -126,7 +127,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$cancelEnvironmentUpdate] = null;
       }
 
-      const {textureUtils} = this[$renderer];
+      const {textureUtils} = renderer;
 
       if (textureUtils == null) {
         return;

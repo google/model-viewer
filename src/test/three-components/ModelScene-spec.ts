@@ -15,10 +15,10 @@
 
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
-import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {Renderer} from '../../three-components/Renderer.js';
+import {renderer} from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -29,7 +29,6 @@ suite('ModelScene', () => {
   let scene: ModelScene;
   let dummyRadius: number;
   let dummyMesh: Mesh;
-  let renderer: Renderer;
   let ModelViewerElement = class extends ModelViewerElementBase {};
 
   customElements.define('model-viewer-modelscene', ModelViewerElement);
@@ -40,7 +39,6 @@ suite('ModelScene', () => {
     dummyRadius = 0.5;
     dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
-    renderer = element[$renderer];
     scene = new ModelScene({
       element: element,
       canvas: element[$canvas],

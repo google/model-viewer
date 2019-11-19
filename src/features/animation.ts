@@ -15,7 +15,8 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick, $updateSource} from '../model-viewer-base.js';
+import {renderer} from '../three-components/Renderer.js';
 import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
@@ -74,14 +75,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$paused] = true;
-      this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
+      renderer.threeRenderer.shadowMap.autoUpdate = false;
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
     play() {
       if (this[$paused] && this.availableAnimations.length > 0) {
         this[$paused] = false;
-        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
+        renderer.threeRenderer.shadowMap.autoUpdate = true;
 
         if (!this[$scene].model.hasActiveAnimation) {
           this[$changeAnimation]();

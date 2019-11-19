@@ -16,8 +16,9 @@
 import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
+import {renderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
@@ -244,7 +245,6 @@ configuration or device capabilities');
     }
 
     [$onFullscreenchange]() {
-      const renderer = this[$renderer];
       const scene = this[$scene];
       const isFullscreen = document.fullscreenElement === this;
 
@@ -266,7 +266,6 @@ configuration or device capabilities');
     }
 
     protected async[$enterARWithWebXR]() {
-      const renderer = this[$renderer];
       console.log('Attempting to present in AR...');
 
       try {
@@ -291,7 +290,6 @@ configuration or device capabilities');
         return;
       }
 
-      const renderer = this[$renderer];
       const unstableWebxrCandidate = this.unstableWebxr &&
           IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
       const arViewerCandidate = IS_ANDROID && this.ar;

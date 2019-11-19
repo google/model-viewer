@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {Renderer} from '../../three-components/Renderer.js';
+import {renderer} from '../../three-components/Renderer.js';
 
 const expect = chai.expect;
 
@@ -33,7 +33,6 @@ customElements.define('model-viewer-renderer', ModelViewerElement);
 
 function createScene(): ModelScene&TestScene {
   const element = new ModelViewerElement();
-  const renderer = element[$renderer];
   const scene: ModelScene&TestScene = new ModelScene({
     element: element,
     canvas: element[$canvas],
@@ -57,11 +56,9 @@ function createScene(): ModelScene&TestScene {
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
-  let renderer: Renderer;
 
   setup(() => {
     scene = createScene();
-    renderer = scene.renderer;
   });
 
   teardown(() => {
