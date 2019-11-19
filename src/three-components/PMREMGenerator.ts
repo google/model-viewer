@@ -57,6 +57,7 @@ const $allocateTargets = Symbol('allocateTargets');
 const $sceneToCubeUV = Symbol('sceneToCubeUV');
 const $equirectangularToCubeUV = Symbol('equirectangularToCubeUV');
 const $createRenderTarget = Symbol('createRenderTarget');
+const $setViewport = Symbol('setViewport');
 const $applyPMREM = Symbol('applyPMREM');
 const $blur = Symbol('blur');
 const $halfBlur = Symbol('halfBlur');
@@ -166,8 +167,6 @@ export class PMREMGenerator {
    * greyscale room with several boxes on the floor and several lit windows.
    */
   fromDefault(): WebGLRenderTarget {
-    const dpr = this.threeRenderer.getPixelRatio();
-    this.threeRenderer.setPixelRatio(1);
     const defaultScene = new EnvironmentScene;
 
     const cubeUVRenderTarget = this[$allocateTargets]();
@@ -178,7 +177,6 @@ export class PMREMGenerator {
 
     this[$pingPongRenderTarget].dispose();
     defaultScene.dispose();
-    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -191,15 +189,11 @@ export class PMREMGenerator {
   fromScene(
       scene: Scene, near: number = DEFAULT_NEAR,
       far: number = DEFAULT_FAR): WebGLRenderTarget {
-    const dpr = this.threeRenderer.getPixelRatio();
-    this.threeRenderer.setPixelRatio(1);
-
     const cubeUVRenderTarget = this[$allocateTargets]();
     this[$sceneToCubeUV](scene, near, far, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
     this[$pingPongRenderTarget].dispose();
-    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -208,9 +202,6 @@ export class PMREMGenerator {
    * (RGBFormat) or HDR (RGBEFormat).
    */
   fromEquirectangular(equirectangular: Texture): WebGLRenderTarget {
-    const dpr = this.threeRenderer.getPixelRatio();
-    this.threeRenderer.setPixelRatio(1);
-
     equirectangular.magFilter = NearestFilter;
     equirectangular.minFilter = NearestFilter;
     equirectangular.generateMipmaps = false;
@@ -220,7 +211,6 @@ export class PMREMGenerator {
     this[$applyPMREM](cubeUVRenderTarget);
 
     this[$pingPongRenderTarget].dispose();
-    this.threeRenderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
@@ -272,7 +262,7 @@ export class PMREMGenerator {
         cubeCamera.up.set(0, upSign[i], 0);
         cubeCamera.lookAt(0, 0, forwardSign[i]);
       }
-      this.threeRenderer.setViewport(
+      this[$setViewport](
           col * SIZE_MAX, i > 2 ? SIZE_MAX : 0, SIZE_MAX, SIZE_MAX);
       this.threeRenderer.render(scene, cubeCamera);
     }
@@ -297,7 +287,7 @@ export class PMREMGenerator {
     uniforms['outputEncoding'].value = encodings[equirectangular.encoding];
 
     this.threeRenderer.setRenderTarget(cubeUVRenderTarget);
-    this.threeRenderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
+    this[$setViewport](0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
     this.threeRenderer.render(scene, this[$flatCamera]);
   }
 
@@ -307,6 +297,11 @@ export class PMREMGenerator {
     cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
     cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
     return cubeUVRenderTarget;
+  }
+
+  private[$setViewport](x: number, y: number, width: number, height: number) {
+    const dpr = this.threeRenderer.getPixelRatio();
+    this.threeRenderer.setViewport(x / dpr, y / dpr, width / dpr, height / dpr);
   }
 
   private[$applyPMREM](cubeUVRenderTarget: WebGLRenderTarget) {
@@ -412,7 +407,7 @@ export class PMREMGenerator {
     this.threeRenderer.autoClear = false;
 
     this.threeRenderer.setRenderTarget(targetOut);
-    this.threeRenderer.setViewport(x, y, 3 * outputSize, 2 * outputSize);
+    this[$setViewport](x, y, 3 * outputSize, 2 * outputSize);
     this.threeRenderer.render(blurScene, this[$flatCamera]);
   }
 };
