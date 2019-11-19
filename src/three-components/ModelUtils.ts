@@ -16,7 +16,7 @@ import {Camera, Material, Object3D, Scene, Shader, Vector3} from 'three';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import {normalmapChunk} from './shader-chunk/normalmap_pars_fragment.glsl.js';
+import {lightsChunk} from './shader-chunk/lights_physical_fragment.glsl.js';
 
 // NOTE(cdata): What follows is a TypeScript-ified version of:
 // https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
@@ -40,10 +40,8 @@ const updateShader = (shader: Shader) => {
   shader.fragmentShader =
       shader.fragmentShader
           .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
-          .replace('#include <normalmap_pars_fragment>', normalmapChunk);
+          .replace('#include <lights_physical_fragment>', lightsChunk);
 };
-
-
 
 /**
  * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
@@ -74,9 +72,11 @@ export const cloneGltf = (gltf: Gltf): Gltf => {
           specularGlossiness.cloneMaterial(material) :
           material.clone();
       clone.onBeforeCompile = updateShader;
-      // TODO(elalish): remove this when we upgrade three.js to a version with
-      // this fix: mrdoob/three.js#17795
-      clone.vertexTangents = material.vertexTangents;
+      // This is a fix for NormalTangentMirrorTest. Remove when
+      // https://github.com/mrdoob/three.js/issues/11438 is solved.
+      if (!clone.vertexTangents && clone.normalScale) {
+        clone.normalScale.y *= -1;
+      }
       return clone;
     };
 

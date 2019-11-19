@@ -74,14 +74,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$paused] = true;
-      this[$renderer].renderer.shadowMap.autoUpdate = false;
+      this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
     play() {
       if (this[$paused] && this.availableAnimations.length > 0) {
         this[$paused] = false;
-        this[$renderer].renderer.shadowMap.autoUpdate = true;
+        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
 
         if (!this[$scene].model.hasActiveAnimation) {
           this[$changeAnimation]();

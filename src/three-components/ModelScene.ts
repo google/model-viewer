@@ -245,7 +245,7 @@ export class ModelScene extends Scene {
       if (this.shadow == null) {
         this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
         this.pivot.add(this.shadow);
-        // this.showShadowHelper();
+        // showShadowHelper(this);
       }
       this.shadow.setIntensity(shadowIntensity);
     }
@@ -262,17 +262,6 @@ export class ModelScene extends Scene {
       this.shadow.setSoftness(softness);
     }
   }
-
-  /**
-   * Renders a box representing the shadow camera, which is helpful in
-   * debugging.
-   */
-  // showShadowHelper() {
-  //   if (this.shadow != null) {
-  //     const helper = new CameraHelper(this.shadow.shadow.camera);
-  //     this.add(helper);
-  //   }
-  // }
 
   createSkyboxMesh(): Mesh {
     const geometry = new BoxBufferGeometry(1, 1, 1);

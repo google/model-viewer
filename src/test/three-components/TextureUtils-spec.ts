@@ -28,27 +28,27 @@ const EQUI_URL = assetPath('spruit_sunrise_1k_LDR.jpg');
 const HDR_EQUI_URL = assetPath('spruit_sunrise_1k_HDR.hdr');
 
 suite('TextureUtils', () => {
-  let renderer: WebGLRenderer;
+  let threeRenderer: WebGLRenderer;
 
   suiteSetup(() => {
-    // The renderer can retain state, so these tests have the possibility of
-    // getting different results in different orders. However, our use of the
-    // renderer *should* always return its state to what it was before to avoid
-    // this kind of problem (and many other headaches).
-    renderer = new WebGLRenderer({canvas});
-    renderer.debug.checkShaderErrors = true;
+    // The threeRenderer can retain state, so these tests have the possibility
+    // of getting different results in different orders. However, our use of the
+    // threeRenderer *should* always return its state to what it was before to
+    // avoid this kind of problem (and many other headaches).
+    threeRenderer = new WebGLRenderer({canvas});
+    threeRenderer.debug.checkShaderErrors = true;
   });
 
   suiteTeardown(() => {
     // Ensure we free up memory from loading large environment maps:
     Cache.clear();
-    renderer.dispose();
+    threeRenderer.dispose();
   });
 
   let textureUtils: TextureUtils;
 
   setup(() => {
-    textureUtils = new TextureUtils(renderer);
+    textureUtils = new TextureUtils(threeRenderer);
   });
 
   teardown(async () => {

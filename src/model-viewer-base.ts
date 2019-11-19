@@ -21,12 +21,10 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl, isDebugMode, resolveDpr} from './utilities.js';
+import {ContextLostEvent, renderer} from './three-components/Renderer.js';
+import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
-
-let renderer = new Renderer({debug: isDebugMode()});
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
@@ -46,7 +44,6 @@ const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $isInRenderTree = Symbol('isInRenderTree');
-export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
@@ -73,11 +70,6 @@ interface ToBlobOptions {
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
-
-  static[$resetRenderer]() {
-    renderer.dispose();
-    renderer = new Renderer();
-  }
 
   static get is() {
     return 'model-viewer';
@@ -185,8 +177,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] = new ModelScene(
-        {canvas: this[$canvas], element: this, width, height, renderer});
+    this[$scene] = new ModelScene({
+      canvas: this[$canvas],
+      element: this,
+      width,
+      height,
+      renderer: renderer
+    });
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();

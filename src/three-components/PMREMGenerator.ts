@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BufferAttribute, BufferGeometry, CubeUVReflectionMapping, LinearEncoding, LinearToneMapping, Mesh, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, RawShaderMaterial, RGBEEncoding, RGBEFormat, Scene, Texture, UnsignedByteType, Vector2, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 
 import EnvironmentScene from './EnvironmentScene.js';
 import {encodings, getDirectionChunk, texelIO} from './shader-chunk/common.glsl.js';
@@ -22,12 +22,12 @@ import {bilinearCubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.gl
 const LOD_MIN = 4;
 const LOD_MAX = 8;
 // The roughness values associated with the extra mips. These must match
-// cube_uv_reflection_fragment.glsl.js.
-const EXTRA_LOD_ROUGHNESS = [0.22, 0.32, 0.5, 0.7, 1.0];
+// varianceDefines from common.glsl.js.
+const EXTRA_LOD_ROUGHNESS = [0.305, 0.4, 0.533, 0.666, 0.8, 1.0];
 // The standard deviations (radians) associated with the extra mips. These are
 // chosen to approximate a Trowbridge-Reitz distribution function times the
 // geometric shadowing function.
-const EXTRA_LOD_SIGMA = [0.12, 0.25, 0.35, 0.43, 0.5];
+const EXTRA_LOD_SIGMA = [0.125, 0.215, 0.35, 0.446, 0.526, 0.582];
 const SIZE_MAX = Math.pow(2, LOD_MAX);
 const TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_ROUGHNESS.length;
 
@@ -40,15 +40,20 @@ const MAX_SAMPLES = 20;
 const GENERATED_SIGMA = 0.04;
 const DEFAULT_NEAR = 0.1;
 const DEFAULT_FAR = 100;
+// Golden Ratio
+const PHI = (1 + Math.sqrt(5)) / 2;
+const INV_PHI = 1 / PHI;
 
 const $roughness = Symbol('roughness');
 const $sigma = Symbol('sigma');
 const $sizeLod = Symbol('sizeLod');
 const $lodPlanes = Symbol('lodPlanes');
+const $axisDirections = Symbol('axisDirections');
 const $blurMaterial = Symbol('blurMaterial');
 const $flatCamera = Symbol('flatCamera');
-const $pingPongRenderTarget = Symbol('pingP$pingPongRenderTarget');
+const $pingPongRenderTarget = Symbol('pingPongRenderTarget');
 
+const $allocateTargets = Symbol('allocateTargets');
 const $sceneToCubeUV = Symbol('sceneToCubeUV');
 const $equirectangularToCubeUV = Symbol('equirectangularToCubeUV');
 const $createRenderTarget = Symbol('createRenderTarget');
@@ -74,6 +79,7 @@ export class PMREMGenerator {
   private[$sigma]: Array<number> = [];
   private[$sizeLod]: Array<number> = [];
   private[$lodPlanes]: Array<BufferGeometry> = [];
+  private[$axisDirections]: Array<Vector3> = [];
 
   private[$blurMaterial] = new BlurMaterial(MAX_SAMPLES);
   private[$flatCamera] = new OrthographicCamera(0, 1, 0, 1, 0, 1);
@@ -141,6 +147,18 @@ export class PMREMGenerator {
         lod--;
       }
     }
+    // Vertices of a dodecahedron (except the opposites, which represent the
+    // same axis), used as axis directions evenly spread on a sphere.
+    this[$axisDirections].push(
+        new Vector3(1, 1, 1),
+        new Vector3(-1, 1, 1),
+        new Vector3(1, 1, -1),
+        new Vector3(-1, 1, -1),
+        new Vector3(0, PHI, -INV_PHI),
+        new Vector3(INV_PHI, 0, PHI),
+        new Vector3(-INV_PHI, 0, PHI),
+        new Vector3(PHI, INV_PHI, 0),
+        new Vector3(-PHI, INV_PHI, 0));
   }
 
   /**
@@ -152,11 +170,13 @@ export class PMREMGenerator {
     this.renderer.setPixelRatio(1);
     const defaultScene = new EnvironmentScene;
 
-    const cubeUVRenderTarget =
-        this[$sceneToCubeUV](defaultScene, DEFAULT_NEAR, DEFAULT_FAR);
+    const cubeUVRenderTarget = this[$allocateTargets]();
+    this[$sceneToCubeUV](
+        defaultScene, DEFAULT_NEAR, DEFAULT_FAR, cubeUVRenderTarget);
     this[$blur](cubeUVRenderTarget, 0, 0, GENERATED_SIGMA);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     defaultScene.dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
@@ -174,9 +194,11 @@ export class PMREMGenerator {
     const dpr = this.renderer.getPixelRatio();
     this.renderer.setPixelRatio(1);
 
-    const cubeUVRenderTarget = this[$sceneToCubeUV](scene, near, far);
+    const cubeUVRenderTarget = this[$allocateTargets]();
+    this[$sceneToCubeUV](scene, near, far, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
@@ -193,26 +215,35 @@ export class PMREMGenerator {
     equirectangular.minFilter = NearestFilter;
     equirectangular.generateMipmaps = false;
 
-    const cubeUVRenderTarget = this[$equirectangularToCubeUV](equirectangular);
+    const cubeUVRenderTarget = this[$allocateTargets](equirectangular);
+    this[$equirectangularToCubeUV](equirectangular, cubeUVRenderTarget);
     this[$applyPMREM](cubeUVRenderTarget);
 
+    this[$pingPongRenderTarget].dispose();
     this.renderer.setPixelRatio(dpr);
     return cubeUVRenderTarget;
   }
 
-  private[$sceneToCubeUV](scene: Scene, near: number, far: number):
-      WebGLRenderTarget {
+  private[$allocateTargets](equirectangular?: Texture): WebGLRenderTarget {
     const params = {
       magFilter: NearestFilter,
       minFilter: NearestFilter,
       generateMipmaps: false,
-      type: UnsignedByteType,
-      format: RGBEFormat,
-      encoding: RGBEEncoding
+      type: equirectangular ? equirectangular.type : UnsignedByteType,
+      format: equirectangular ? equirectangular.format : RGBEFormat,
+      encoding: equirectangular ? equirectangular.encoding : RGBEEncoding,
+      depthBuffer: false,
+      stencilBuffer: false
     };
-    const cubeUVRenderTarget = this[$createRenderTarget](params);
+    const cubeUVRenderTarget = this[$createRenderTarget](
+        {...params, depthBuffer: (equirectangular ? false : true)});
     this[$pingPongRenderTarget] = this[$createRenderTarget](params);
+    return cubeUVRenderTarget;
+  }
 
+  private[$sceneToCubeUV](
+      scene: Scene, near: number, far: number,
+      cubeUVRenderTarget: WebGLRenderTarget) {
     const fov = 90;
     const aspect = 1;
     const cubeCamera = new PerspectiveCamera(fov, aspect, near, far);
@@ -250,30 +281,17 @@ export class PMREMGenerator {
     this.renderer.toneMappingExposure = toneMappingExposure;
     this.renderer.gammaOutput = gammaOutput;
     scene.scale.z *= -1;
-
-    return cubeUVRenderTarget;
   }
 
-  private[$equirectangularToCubeUV](equirectangular: Texture):
-      WebGLRenderTarget {
-    const params = {
-      magFilter: NearestFilter,
-      minFilter: NearestFilter,
-      generateMipmaps: false,
-      type: equirectangular.type,
-      format: equirectangular.format,
-      encoding: equirectangular.encoding
-    };
-    const cubeUVRenderTarget = this[$createRenderTarget](params);
-    this[$pingPongRenderTarget] = this[$createRenderTarget](params);
-
+  private[$equirectangularToCubeUV](
+      equirectangular: Texture, cubeUVRenderTarget: WebGLRenderTarget) {
     const scene = new Scene();
     scene.add(new Mesh(this[$lodPlanes][0], this[$blurMaterial]));
     const uniforms = this[$blurMaterial].uniforms;
 
     uniforms['envMap'].value = equirectangular;
     uniforms['copyEquirectangular'].value = true;
-    uniforms['texelSize'].value = new Vector2(
+    uniforms['texelSize'].value.set(
         1.0 / equirectangular.image.width, 1.0 / equirectangular.image.height);
     uniforms['inputEncoding'].value = encodings[equirectangular.encoding];
     uniforms['outputEncoding'].value = encodings[equirectangular.encoding];
@@ -281,8 +299,6 @@ export class PMREMGenerator {
     this.renderer.setRenderTarget(cubeUVRenderTarget);
     this.renderer.setViewport(0, 0, 3 * SIZE_MAX, 2 * SIZE_MAX);
     this.renderer.render(scene, this[$flatCamera]);
-
-    return cubeUVRenderTarget;
   }
 
   private[$createRenderTarget](params: Object): WebGLRenderTarget {
@@ -298,10 +314,10 @@ export class PMREMGenerator {
       const sigma = Math.sqrt(
           this[$sigma][i] * this[$sigma][i] -
           this[$sigma][i - 1] * this[$sigma][i - 1]);
-      this[$blur](cubeUVRenderTarget, i - 1, i, sigma);
+      const poleAxis =
+          this[$axisDirections][(i - 1) % this[$axisDirections].length];
+      this[$blur](cubeUVRenderTarget, i - 1, i, sigma, poleAxis);
     }
-
-    this[$pingPongRenderTarget].dispose();
   }
 
   /**
@@ -313,14 +329,15 @@ export class PMREMGenerator {
    */
   private[$blur](
       cubeUVRenderTarget: WebGLRenderTarget, lodIn: number, lodOut: number,
-      sigma: number) {
+      sigma: number, poleAxis?: Vector3) {
     this[$halfBlur](
         cubeUVRenderTarget,
         this[$pingPongRenderTarget],
         lodIn,
         lodOut,
         sigma,
-        'latitudinal');
+        'latitudinal',
+        poleAxis);
 
     this[$halfBlur](
         this[$pingPongRenderTarget],
@@ -328,12 +345,14 @@ export class PMREMGenerator {
         lodOut,
         lodOut,
         sigma,
-        'longitudinal');
+        'longitudinal',
+        poleAxis);
   }
 
   private[$halfBlur](
       targetIn: WebGLRenderTarget, targetOut: WebGLRenderTarget, lodIn: number,
-      lodOut: number, sigmaRadians: number, direction: string) {
+      lodOut: number, sigmaRadians: number, direction: string,
+      poleAxis?: Vector3) {
     if (direction !== 'latitudinal' && direction !== 'longitudinal') {
       console.error(
           'blur direction must be either latitudinal or longitudinal!');
@@ -344,9 +363,13 @@ export class PMREMGenerator {
     const blurUniforms = this[$blurMaterial].uniforms;
 
     const pixels = this[$sizeLod][lodIn] - 1;
-    const radiansPerPixel = Math.PI / (2 * pixels);
+    const radiansPerPixel = isFinite(sigmaRadians) ?
+        Math.PI / (2 * pixels) :
+        2 * Math.PI / (2 * MAX_SAMPLES - 1);
     const sigmaPixels = sigmaRadians / radiansPerPixel;
-    const samples = 1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels);
+    const samples = isFinite(sigmaRadians) ?
+        1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels) :
+        MAX_SAMPLES;
 
     if (samples > MAX_SAMPLES) {
       console.warn(`sigmaRadians, ${
@@ -373,6 +396,9 @@ export class PMREMGenerator {
     blurUniforms['samples'].value = samples;
     blurUniforms['weights'].value = weights;
     blurUniforms['latitudinal'].value = direction === 'latitudinal';
+    if (poleAxis) {
+      blurUniforms['poleAxis'].value = poleAxis;
+    }
     blurUniforms['dTheta'].value = radiansPerPixel;
     blurUniforms['mipInt'].value = LOD_MAX - lodIn;
     blurUniforms['inputEncoding'].value = encodings[targetIn.texture.encoding];
@@ -396,6 +422,7 @@ class BlurMaterial extends RawShaderMaterial {
   constructor(maxSamples: number) {
     const weights = new Float32Array(maxSamples);
     const texelSize = new Vector2(1, 1);
+    const poleAxis = new Vector3(0, 1, 0);
 
     super({
 
@@ -410,6 +437,7 @@ class BlurMaterial extends RawShaderMaterial {
         'latitudinal': {value: false},
         'dTheta': {value: 0},
         'mipInt': {value: 0},
+        'poleAxis': {value: poleAxis},
         'inputEncoding': {value: encodings[LinearEncoding]},
         'outputEncoding': {value: encodings[LinearEncoding]}
       },
@@ -440,6 +468,7 @@ uniform float weights[n];
 uniform bool latitudinal;
 uniform float dTheta;
 uniform float mipInt;
+uniform vec3 poleAxis;
 #define RECIPROCAL_PI 0.31830988618
 #define RECIPROCAL_PI2 0.15915494
 ${texelIO} 
@@ -467,31 +496,22 @@ void main() {
     vec3 bm = mix(bl, br, f.x);
     gl_FragColor.rgb = mix(tm, bm, f.y);
   } else {
-    float xz = length(vOutputDirection.xz);
     for (int i = 0; i < n; i++) {
       if (i >= samples)
         break;
       for (int dir = -1; dir < 2; dir += 2) {
         if (i == 0 && dir == 1)
           continue;
-        vec3 sampleDirection = vOutputDirection;
-        if (latitudinal) {
-          float diTheta = dTheta * float(dir * i) / xz;
-          mat2 R =
-              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-          sampleDirection.xz = R * sampleDirection.xz;
-        } else {
-          float diTheta = dTheta * float(dir * i);
-          mat2 R =
-              mat2(cos(diTheta), sin(diTheta), -sin(diTheta), cos(diTheta));
-          vec2 xzY = R * vec2(xz, sampleDirection.y);
-          if (xzY.x < 0.0) {
-            sampleDirection = vec3(0.0, sign(sampleDirection.y), 0.0);
-          } else {
-            sampleDirection.xz *= xzY.x / xz;
-            sampleDirection.y = xzY.y;
-          }
-        }
+        vec3 axis = latitudinal ? poleAxis : cross(poleAxis, vOutputDirection);
+        if (all(equal(axis, vec3(0.0))))
+          axis = cross(vec3(0.0, 1.0, 0.0), vOutputDirection);
+        axis = normalize(axis);
+        float theta = dTheta * float(dir * i);
+        float cosTheta = cos(theta);
+        // Rodrigues' axis-angle rotation
+        vec3 sampleDirection = vOutputDirection * cosTheta 
+            + cross(axis, vOutputDirection) * sin(theta) 
+            + axis * dot(axis, vOutputDirection) * (1.0 - cosTheta);
         gl_FragColor.rgb +=
             weights[i] * bilinearCubeUV(envMap, sampleDirection, mipInt);
       }

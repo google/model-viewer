@@ -94,7 +94,6 @@ canvas.show {
 .slot.poster.show {
   opacity: 1;
   transition: none;
-  background-color: inherit;
 }
 
 .slot.poster > * {
