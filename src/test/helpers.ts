@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 import {EventDispatcher, Texture} from 'three';
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
+import {ProgressCallback} from '../three-components/CachingGLTFLoader.js';
 import {deserializeUrl} from '../utilities.js';
 
 export const elementFromLocalPoint =
@@ -191,6 +193,20 @@ export const spy =
       };
     };
 
+/**
+ * A helper to Promise-ify a Three.js GLTFLoader
+ */
+export const loadWithLoader =
+    (url: string,
+     loader: GLTFLoader,
+     progressCallback: ProgressCallback = () => {}) => {
+      const onProgress = (event: ProgressEvent) => {
+        progressCallback!(event.loaded / event.total);
+      };
+      return new Promise<GLTF>((resolve, reject) => {
+        loader.load(url, resolve, onProgress, reject);
+      });
+    };
 
 /**
  * Helpers to assist in generating AST test fixtures
