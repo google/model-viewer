@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-interface Window {
-  mlWorld?: any
+declare interface Window {
+  Filament?: any;
 }
