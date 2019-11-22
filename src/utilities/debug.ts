@@ -16,7 +16,7 @@
 import {CameraHelper, WebGLRenderTarget} from 'three';
 
 import {ModelScene} from '../three-components/ModelScene';
-import {renderer} from '../three-components/Renderer';
+import {Renderer} from '../three-components/Renderer';
 
 /**
  * Renders a box representing the shadow camera, which is helpful in
@@ -41,7 +41,7 @@ export const saveTarget = (target: WebGLRenderTarget, filename: string) => {
 
   const ctx = output.getContext('2d')!;
   const img = ctx.getImageData(0, 0, width, height);
-  renderer.threeRenderer.readRenderTargetPixels(
+  Renderer.singleton.threeRenderer.readRenderTargetPixels(
       target, 0, 0, width, height, img.data);
   ctx.putImageData(img, 0, 0);
 

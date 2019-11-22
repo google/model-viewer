@@ -20,6 +20,7 @@ import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
@@ -119,6 +120,10 @@ const waitForLoadAndEnvMap =
     };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
+  suiteTeardown(() => {
+    Renderer.resetSingleton();
+  });
+
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:
