@@ -142,7 +142,6 @@ export class CachingGLTFLoader {
 
     if (gltf.scene != null) {
       gltf.scene.traverse((node: Object3D) => {
-        node.castShadow = true;
         // Three.js seems to cull some animated models incorrectly. Since we
         // expect to view our whole scene anyway, we turn off the frustum
         // culling optimization here.
@@ -156,6 +155,7 @@ export class CachingGLTFLoader {
         if (!(node as Mesh).isMesh) {
           return;
         }
+        node.castShadow = true;
         const mesh = node as Mesh;
         const materials =
             Array.isArray(mesh.material) ? mesh.material : [mesh.material];
