@@ -15,13 +15,13 @@
 
 import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
-import ModelViewerElementBase from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
-import Model from './Model.js';
+import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Renderer} from './Renderer.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
-import StaticShadow from './StaticShadow.js';
+import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -42,6 +42,8 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
+const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
+
 const $paused = Symbol('paused');
 
 /**
@@ -55,7 +57,9 @@ export class ModelScene extends Scene {
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public renderer: Renderer;
-  public shadow: StaticShadow;
+  public shadow: Shadow|null = null;
+  public shadowIntensity = 0;
+  public shadowSoftness = 1;
   public pivot: Object3D;
   public pivotCenter: Vector3;
   public width = 1;
@@ -66,6 +70,7 @@ export class ModelScene extends Scene {
   public context: CanvasRenderingContext2D;
   public exposure = 1;
   public model: Model;
+  public framedFieldOfView = DEFAULT_FOV_DEG;
   public skyboxMesh: Mesh;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
@@ -83,7 +88,6 @@ export class ModelScene extends Scene {
     this.renderer = renderer;
 
     this.model = new Model();
-    this.shadow = new StaticShadow();
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -148,6 +152,7 @@ export class ModelScene extends Scene {
       this.canvas.style.width = `${this.width}px`;
       this.canvas.style.height = `${this.height}px`;
       this.aspect = this.width / this.height;
+      this.frameModel();
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -166,16 +171,20 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Set's the framedFieldOfView based on the aspect ratio of the window in
+   * order to keep the model fully visible at any camera orientation.
+   */
+  frameModel() {
+    const vertical = DEFAULT_TAN_FOV *
+        Math.max(1, this.model.fieldOfViewAspect / this.aspect);
+    this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
+  }
+
+  /**
    * Returns the size of the corresponding canvas element.
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  resetModelPose() {
-    this.model.position.set(0, 0, 0);
-    this.model.rotation.set(0, 0, 0);
-    this.model.scale.set(1, 1, 1);
   }
 
   /**
@@ -202,6 +211,9 @@ export class ModelScene extends Scene {
     this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
     this.pivot.position.x += this.pivotCenter.x;
     this.pivot.position.z += this.pivotCenter.z;
+    if (this.shadow != null) {
+      this.shadow.setRotation(radiansY);
+    }
   }
 
   /**
@@ -215,31 +227,40 @@ export class ModelScene extends Scene {
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
-    this.updateStaticShadow();
+    this.frameModel();
+    this.setShadowIntensity(this.shadowIntensity);
+    if (this.shadow != null) {
+      this.shadow.updateModel(this.model, this.shadowSoftness);
+    }
+    this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
   /**
-   * Called to update the shadow rendering when the model changes.
+   * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
-  updateStaticShadow() {
-    if (!this.model.hasModel() || this.model.size.length() === 0) {
-      this.pivot.remove(this.shadow);
-      return;
+  setShadowIntensity(shadowIntensity: number) {
+    this.shadowIntensity = shadowIntensity;
+    if (shadowIntensity > 0 && this.model.hasModel()) {
+      if (this.shadow == null) {
+        this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
+        this.pivot.add(this.shadow);
+        // showShadowHelper(this);
+      }
+      this.shadow.setIntensity(shadowIntensity);
     }
+  }
 
-    // Remove and cache the current pivot rotation so that the shadow's
-    // capture is unrotated so it can be freely rotated when applied
-    // as a texture.
-    const currentRotation = this.pivot.rotation.y;
-    this.setPivotRotation(0);
-
-    this.shadow.render(this.renderer.renderer, this);
-
-    // Lazily add the shadow so we're only displaying it once it has
-    // a generated texture.
-    this.pivot.add(this.shadow);
-    this.setPivotRotation(currentRotation);
+  /**
+   * Sets the shadow's softness by mapping a [0, 1] softness parameter to the
+   * shadow's resolution. This involves reallocation, so it should not be
+   * changed frequently. Softer shadows are cheaper to render.
+   */
+  setShadowSoftness(softness: number) {
+    this.shadowSoftness = softness;
+    if (this.shadow != null) {
+      this.shadow.setSoftness(softness);
+    }
   }
 
   createSkyboxMesh(): Mesh {

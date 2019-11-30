@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {getFaceChunk, getUVChunk} from './common.glsl.js';
+import {getFaceChunk, getUVChunk, roughnessToMip, varianceDefines} from './common.glsl.js';
 
 export const bilinearCubeUVChunk = /* glsl */ `
 #define cubeUV_maxMipLevel 8.0
@@ -62,30 +62,11 @@ export const cubeUVChunk = /* glsl */ `
 #ifdef ENVMAP_TYPE_CUBE_UV
 
 ${bilinearCubeUVChunk}
+${varianceDefines}
+${roughnessToMip}
 
 vec4 textureCubeUV(sampler2D envMap, vec3 sampleDir, float roughness) {
-  float filterMip = 0.0;
-  if (roughness >= 0.7) {
-    filterMip = (1.0 - roughness) / (1.0 - 0.7) - 5.0;
-  } else if (roughness >= 0.5) {
-    filterMip = (0.7 - roughness) / (0.7 - 0.5) - 4.0;
-  } else if (roughness >= 0.32) {
-    filterMip = (0.5 - roughness) / (0.5 - 0.32) - 3.0;
-  } else if (roughness >= 0.22) {
-    filterMip = (0.32 - roughness) / (0.32 - 0.22) - 2.0;
-  } else if (roughness >= 0.15) {
-    filterMip = (0.22 - roughness) / (0.22 - 0.15) - 1.0;
-  }
-
-  roughness = min(roughness, 0.15);
-  float sigma = PI * roughness * roughness / (1.0 + roughness);
-
-  // Add anti-aliasing mipmap contribution
-  vec3 dxy = max(abs(dFdx(sampleDir)), abs(dFdy(sampleDir)));
-  sigma += 0.5 * max(max(dxy.x, dxy.y), dxy.z);
-
-  float mip =
-      clamp(-log2(sigma), cubeUV_minMipLevel, cubeUV_maxMipLevel) + filterMip;
+  float mip = clamp(roughnessToMip(roughness), m0, cubeUV_maxMipLevel);
   float mipF = fract(mip);
   float mipInt = floor(mip);
 

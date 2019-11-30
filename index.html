@@ -321,6 +321,12 @@
               shadow entirely. Defaults to 0.</p>
             </li>
             <li>
+              <div>shadow-softness</div>
+              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
+              Softness should not be changed every frame as it incurs a 
+              performance cost. Softer shadows render faster. Defaults to 1.</p>
+            </li>
+            <li>
               <div>unstable-webxr</div>
               <p>Enables the ability to view the model in AR via the
               experimental <a
@@ -469,6 +475,15 @@
               of quality (such as image/jpeg and image/webp) you can also specify a
               value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i>
               defaults to 0.92 otherwise).</p>
+            </li>
+            <li>
+              <div>toBlob(mimeType, qualityArgument)</div>
+              <p>Returns a promise that resolves into a Blob object in the format
+              specified by the <i>mimeType</i> (defaults to image/png). A Blob object
+              represents a file-like object of immutable, raw data. You can also
+              specify a value between 0 and 1 for <i>qualityArgument</i> (Currently
+              only available on Chrome desktop and Firefox) which defaults to 0.92
+              and 0.8 for image/png and image/webp respectively.</p>
             </li>
           </ul>
 

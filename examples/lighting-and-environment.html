@@ -221,12 +221,12 @@
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Control shadow visibility with <span class="attribute">shadow-intensity</span></h2>
+          <h2 class="demo-title">Control shadow with <span class="attribute">shadow-intensity</span> and <span class="attribute">shadow-softness</span></h2>
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-9" highlight-as="html">
           <template>
-<model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="assets/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" background-color="#ff0077" environment-image="assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="assets/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = $('#shadow-intensity-demo');

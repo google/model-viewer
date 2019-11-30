@@ -21,9 +21,6 @@ import {texelConversions} from './encodings_pars_fragment.glsl.js';
 // a cubemap, the 0-5 integer index of a cube face, and the direction vector for
 // sampling a textureCube (not generally normalized).
 
-// getDirectionChunk handles uv coordinates that are beyond [0, 1] in either x
-// or y (not both) by wrapping around to the neighboring face.
-
 export const getDirectionChunk = /* glsl */ `
 vec3 getDirection(vec2 uv, float face) {
     uv = 2.0 * uv - 1.0;
@@ -133,5 +130,78 @@ vec4 linearToOutputTexel(vec4 value){
     }else{
         return LinearToGamma(value, 2.2);
     }
+}
+`;
+
+// These defines are used for the following three functions, but must be
+// declared only once, so ensure this is included just above where these
+// conversion functions are included. These values must agree with
+// EXTRA_LOD_ROUGHNESS and EXTRA_LOD_SIGMA from PMREMGenerator.
+export const varianceDefines = /* glsl */ `
+#define r0 1.0
+#define v0 0.339
+#define m0 -2.0
+#define r1 0.8
+#define v1 0.276
+#define m1 -1.0
+#define r4 0.4
+#define v4 0.046
+#define m4 2.0
+#define r5 0.305
+#define v5 0.016
+#define m5 3.0
+#define r6 0.21
+#define v6 0.0038
+#define m6 4.0
+`
+
+export const roughnessToVariance = /* glsl */ `
+float roughnessToVariance(float roughness) {
+  float variance = 0.0;
+  if (roughness >= r1) {
+    variance = (r0 - roughness) * (v1 - v0) / (r0 - r1) + v0;
+  } else if (roughness >= r4) {
+    variance = (r1 - roughness) * (v4 - v1) / (r1 - r4) + v1;
+  } else if (roughness >= r5) {
+    variance = (r4 - roughness) * (v5 - v4) / (r4 - r5) + v4;
+  } else {
+    float roughness2 = roughness * roughness;
+    variance = 1.79 * roughness2 * roughness2;
+  }
+  return variance;
+}
+`;
+
+export const varianceToRoughness = /* glsl */ `
+float varianceToRoughness(float variance) {
+  float roughness = 0.0;
+  if (variance >= v1) {
+    roughness = (v0 - variance) * (r1 - r0) / (v0 - v1) + r0;
+  } else if (variance >= v4) {
+    roughness = (v1 - variance) * (r4 - r1) / (v1 - v4) + r1;
+  } else if (variance >= v5) {
+    roughness = (v4 - variance) * (r5 - r4) / (v4 - v5) + r4;
+  } else {
+    roughness = pow(0.559 * variance, 0.25);// 0.559 = 1.0 / 1.79
+  }
+  return roughness;
+}
+`;
+
+export const roughnessToMip = /* glsl */ `
+float roughnessToMip(float roughness) {
+  float mip = 0.0;
+  if (roughness >= r1) {
+    mip = (r0 - roughness) * (m1 - m0) / (r0 - r1) + m0;
+  } else if (roughness >= r4) {
+    mip = (r1 - roughness) * (m4 - m1) / (r1 - r4) + m1;
+  } else if (roughness >= r5) {
+    mip = (r4 - roughness) * (m5 - m4) / (r4 - r5) + m4;
+  } else if (roughness >= r6) {
+    mip = (r5 - roughness) * (m6 - m5) / (r5 - r6) + m5;
+  } else {
+    mip = -2.0 * log2(1.16 * roughness);// 1.16 = 1.79^0.25
+  }
+  return mip;
 }
 `;

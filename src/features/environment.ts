@@ -21,20 +21,20 @@ import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
+const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateToneMapping = Symbol('updateToneMapping');
-const $updateShadow = Symbol('updateShadow');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
-export interface EnvironmentInterface {
+export declare interface EnvironmentInterface {
   environmentImage: string|null;
   backgroundImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
+  shadowSoftness: number;
   exposure: number;
 }
 
@@ -61,6 +61,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'shadow-intensity'})
     shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
 
+    @property({type: Number, attribute: 'shadow-softness'})
+    shadowSoftness: number = DEFAULT_SHADOW_SOFTNESS;
+
     @property({
       type: Number,
     })
@@ -74,11 +77,18 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('shadowIntensity')) {
-        this[$updateShadow]();
+        this[$scene].setShadowIntensity(this.shadowIntensity);
+        this[$needsRender]();
+      }
+
+      if (changedProperties.has('shadowSoftness')) {
+        this[$scene].setShadowSoftness(this.shadowSoftness);
+        this[$needsRender]();
       }
 
       if (changedProperties.has('exposure')) {
-        this[$updateToneMapping]();
+        this[$scene].exposure = this.exposure;
+        this[$needsRender]();
       }
 
       if (changedProperties.has('environmentImage') ||
@@ -103,8 +113,13 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {backgroundImage, environmentImage} = this;
-      let {backgroundColor} = this;
+      const {backgroundImage, backgroundColor, environmentImage} = this;
+      // Set the container node's background color so that it matches
+      // the background color configured for the scene. It's important
+      // to do this because we round the size of the canvas off to the
+      // nearest pixel, so it is possible (indeed likely) that there is
+      // a marginal gap around one or two edges of the canvas.
+      this[$container].style.backgroundColor = backgroundColor;
 
       if (this[$cancelEnvironmentUpdate] != null) {
         this[$cancelEnvironmentUpdate]!();
@@ -138,18 +153,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$scene].add(this[$scene].skyboxMesh);
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
-          if (!backgroundColor) {
-            backgroundColor = DEFAULT_BACKGROUND_COLOR;
-          }
 
           const parsedColor = new Color(backgroundColor);
           this[$scene].background = parsedColor;
-          // Set the container node's background color so that it matches
-          // the background color configured for the scene. It's important
-          // to do this because we round the size of the canvas off to the
-          // nearest pixel, so it is possible (indeed likely) that there is
-          // a marginal gap around one or two edges of the canvas.
-          this[$container].style.backgroundColor = backgroundColor;
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);
@@ -181,16 +187,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
       this.dispatchEvent(new CustomEvent('environment-change'));
 
-      this[$needsRender]();
-    }
-
-    private[$updateShadow]() {
-      this[$scene].shadow.intensity = this.shadowIntensity;
-      this[$needsRender]();
-    }
-
-    private[$updateToneMapping]() {
-      this[$scene].exposure = this.exposure;
       this[$needsRender]();
     }
   }

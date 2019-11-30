@@ -33,6 +33,11 @@ const basepath = (urlString: string): string => {
 
 const IS_BINARY_RE = /\.glb$/;
 
+interface BoundingBox {
+  min: [number, number, number];
+  max: [number, number, number];
+}
+
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $ibl = Symbol('ibl');
@@ -42,6 +47,7 @@ const $renderer = Symbol('renderer');
 const $camera = Symbol('camera');
 const $view = Symbol('view');
 const $canvas = Symbol('canvas');
+const $boundingBox = Symbol('boundingBox');
 const $currentAsset = Symbol('currentAsset');
 
 const $initialize = Symbol('initialize');
@@ -67,6 +73,7 @@ export class FilamentViewer extends LitElement {
   private[$currentAsset]: any = null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
+  private[$boundingBox]: BoundingBox|null = null;
 
   constructor() {
     super();
@@ -160,10 +167,25 @@ export class FilamentViewer extends LitElement {
 
     await fetchFilamentAssets([modelUrl, iblUrl, skyboxUrl]);
 
-    this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
-    this[$scene].setIndirectLight(this[$ibl]);
-    this[$ibl].setIntensity(1.0);
-    this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+    // This special case is for the DirectionalLightTest, where we compare the
+    // <model-viewer> IBL to the Filament directional light by using a special
+    // environment map with a single bright pixel that represents a 1 lux
+    // directional light.
+    if (lightingBaseName === 'spot1Lux') {
+      const light = self.Filament.EntityManager.get().create();
+      self.Filament.LightManager
+          .Builder(self.Filament.LightManager$Type.DIRECTIONAL)
+          .color([1, 1, 1])
+          .intensity(1)
+          .direction([-1, 0, 0])
+          .build(this[$engine], light);
+      this[$scene].addEntity(light);
+    } else {
+      this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
+      this[$scene].setIndirectLight(this[$ibl]);
+      this[$ibl].setIntensity(1.0);
+      this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+    }
 
     this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
     this[$scene].setSkybox(this[$skybox]);
@@ -182,6 +204,7 @@ export class FilamentViewer extends LitElement {
     finalize();
     loader.delete();
 
+    this[$boundingBox] = this[$currentAsset].getBoundingBox() as BoundingBox;
     this[$scene].addEntities(this[$currentAsset].getEntities());
 
     this[$updateSize]();
@@ -242,14 +265,22 @@ export class FilamentViewer extends LitElement {
       orbit.radius * Math.cos(phi) + target.y,
       radiusSinPhi * Math.cos(theta) + target.z
     ];
+    if (orbit.radius <= 0) {
+      center[0] = eye[0] - Math.sin(phi) * Math.sin(theta);
+      center[1] = eye[1] - Math.cos(phi);
+      center[2] = eye[2] - Math.sin(phi) * Math.cos(theta);
+    }
 
-    const near = orbit.radius / 10.0;
-    const far = orbit.radius * 10.0;
+    const {min, max} = this[$boundingBox]!;
+    const modelRadius =
+        Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
+    const far = 2 * Math.max(modelRadius, orbit.radius);
+    const near = far / 1000;
 
     this[$camera].setProjectionFov(
         verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
     this[$camera].lookAt(eye, center, up);
-    this[$camera].setExposure(1.0, 1.2, 100);
+    this[$camera].setExposureDirect(1.0);
   }
 }

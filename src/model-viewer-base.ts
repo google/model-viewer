@@ -21,11 +21,10 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl, isDebugMode, resolveDpr} from './utilities.js';
+import {ContextLostEvent, renderer} from './three-components/Renderer.js';
+import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
-
-let renderer = new Renderer({debug: isDebugMode()});
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
@@ -45,7 +44,6 @@ const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $isInRenderTree = Symbol('isInRenderTree');
-export const $resetRenderer = Symbol('resetRenderer');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
@@ -63,16 +61,15 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 
+interface ToBlobOptions {
+  mimeType?: string, qualityArgument?: number, idealAspect?: boolean
+}
+
 /**
  * Definition for a basic <model-viewer> element.
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
-
-  static[$resetRenderer]() {
-    renderer.dispose();
-    renderer = new Renderer();
-  }
 
   static get is() {
     return 'model-viewer';
@@ -87,10 +84,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return this[$template];
   }
 
+  /** @export */
   static set modelCacheSize(value: number) {
     CachingGLTFLoader[$evictionPolicy].evictionThreshold = value;
   }
 
+  /** @export */
   static get modelCacheSize(): number {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
@@ -123,6 +122,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$contextLostHandler] = (event: ContextLostEvent) =>
       this[$onContextLost](event);
 
+  /** @export */
   get loaded() {
     return this[$getLoaded]();
   }
@@ -131,6 +131,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return renderer;
   }
 
+  /** @export */
   get modelIsVisible() {
     return this[$getModelIsVisible]();
   }
@@ -176,8 +177,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] = new ModelScene(
-        {canvas: this[$canvas], element: this, width, height, renderer});
+    this[$scene] = new ModelScene({
+      canvas: this[$canvas],
+      element: this,
+      width,
+      height,
+      renderer: renderer
+    });
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -321,8 +327,54 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
   }
 
+  /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
     return this[$canvas].toDataURL(type, encoderOptions);
+  }
+
+  /** @export */
+  async toBlob(options?: ToBlobOptions): Promise<Blob> {
+    const mimeType = options ? options.mimeType : undefined;
+    const qualityArgument = options ? options.qualityArgument : undefined;
+    const idealAspect = options ? options.idealAspect : undefined;
+    const {width, height, model, aspect} = this[$scene];
+    if (idealAspect === true) {
+      const idealWidth = model.fieldOfViewAspect > aspect ?
+          width :
+          Math.round(height * model.fieldOfViewAspect);
+      const idealHeight = model.fieldOfViewAspect > aspect ?
+          Math.round(width / model.fieldOfViewAspect) :
+          height;
+      this[$updateSize]({width: idealWidth, height: idealHeight});
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    try {
+      return new Promise<Blob>(async (resolve, reject) => {
+        if ((this[$canvas] as any).msToBlob) {
+          // NOTE: msToBlob only returns image/png
+          // so ensure mimeType is not specified (defaults to image/png)
+          // or is image/png, otherwise fallback to using toDataURL on IE.
+          if (!mimeType || mimeType === 'image/png') {
+            return resolve((this[$canvas] as any).msToBlob());
+          }
+        }
+
+        if (!this[$canvas].toBlob) {
+          return resolve(await dataUrlToBlob(
+              this[$canvas].toDataURL(mimeType, qualityArgument)));
+        }
+
+        this[$canvas].toBlob((blob) => {
+          if (!blob) {
+            return reject(new Error('Unable to retrieve canvas blob'));
+          }
+
+          resolve(blob);
+        }, mimeType, qualityArgument);
+      })
+    } finally {
+      this[$updateSize]({width, height});
+    };
   }
 
   get[$ariaLabel]() {
@@ -402,7 +454,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$onContextLost](event: ContextLostEvent) {
     this.dispatchEvent(new CustomEvent(
         'error',
-        {detail: {type: 'webglcontextlost', sourceError: event.attachment}}));
+        {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
   }
 
   /**

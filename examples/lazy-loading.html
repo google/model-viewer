@@ -167,12 +167,12 @@
         </div>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-<model-viewer id="toggle-poster" reveal="interaction" auto-rotate poster="assets/poster-astronaut.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer id="toggle-poster" reveal="interaction" auto-rotate poster="assets/poster-astronaut2.png" src="assets/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
   const posters = ['poster-astronaut2.png', 'poster-astronaut3.png', 'poster-astronaut4.png'];
   let i = 0;
   setInterval(() =>
-    $('#toggle-poster').setAttribute('poster', `assets/${posters[i++ % 2]}`), 2000);
+    $('#toggle-poster').setAttribute('poster', `assets/${posters[++i % 3]}`), 2000);
 </script>
 
           </template>

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import {Mesh, Object3D, Scene} from 'three';
+import {Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {cloneGltf, Gltf} from './ModelUtils.js';
+import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -126,6 +127,8 @@ export class CachingGLTFLoader {
     preloaded.set(url, true);
   }
 
+  protected roughnessMipmapper = new RoughnessMipmapper();
+
   /**
    * Loads a glTF from the specified url and resolves a unique clone of the
    * glTF. If the glTF has already been loaded, makes a clone of the cached
@@ -138,13 +141,30 @@ export class CachingGLTFLoader {
     const gltf = await cache.get(url)!;
 
     if (gltf.scene != null) {
-      // Animations for objects without names target their UUID instead. When
-      // objects are cloned, they get new UUIDs which the animation can't find.
-      // To fix this, we assign their UUID as their name.
       gltf.scene.traverse((node: Object3D) => {
+        node.castShadow = true;
+        // Three.js seems to cull some animated models incorrectly. Since we
+        // expect to view our whole scene anyway, we turn off the frustum
+        // culling optimization here.
+        node.frustumCulled = false;
+        // Animations for objects without names target their UUID instead. When
+        // objects are cloned, they get new UUIDs which the animation can't
+        // find. To fix this, we assign their UUID as their name.
         if (!node.name) {
           node.name = node.uuid;
         }
+        if (!(node as Mesh).isMesh) {
+          return;
+        }
+        const mesh = node as Mesh;
+        const materials =
+            Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(material => {
+          if ((material as any).isMeshStandardMaterial) {
+            this.roughnessMipmapper.generateMipmaps(
+                material as MeshStandardMaterial);
+          }
+        });
       });
     }
 

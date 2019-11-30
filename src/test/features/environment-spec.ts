@@ -17,7 +17,7 @@ import {Color, Material, Mesh, Scene} from 'three';
 import {MeshStandardMaterial} from 'three';
 
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
-import ModelViewerElementBase, {$resetRenderer, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import Model from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
@@ -119,12 +119,6 @@ const waitForLoadAndEnvMap =
     };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
-  suiteTeardown(() => {
-    // Reset the renderer once at the end of this spec, to clear out all
-    // of the heavy cached image buffers:
-    ModelViewerElementBase[$resetRenderer]();
-  });
-
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:
@@ -338,13 +332,13 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     test('changes the tone mapping exposure of the renderer', async () => {
       const originalToneMappingExposure =
-          scene.renderer.renderer.toneMappingExposure;
+          scene.renderer.threeRenderer.toneMappingExposure;
       element.exposure = 2.0;
       await timePasses();
       scene.renderer.render(performance.now());
 
       const newToneMappingExposure =
-          scene.renderer.renderer.toneMappingExposure;
+          scene.renderer.threeRenderer.toneMappingExposure;
 
       expect(newToneMappingExposure)
           .to.be.greaterThan(originalToneMappingExposure);
@@ -363,11 +357,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
 
     test('changes the opacity of the static shadow', async () => {
-      const originalOpacity = (scene.shadow.material as Material).opacity;
       element.shadowIntensity = 1.0;
       await timePasses();
-      const newOpacity = (scene.shadow.material as Material).opacity;
-      expect(newOpacity).to.be.greaterThan(originalOpacity);
+      const newIntensity = scene.shadow!.getIntensity();
+      expect(newIntensity).to.be.eq(1.0);
     });
   });
 
