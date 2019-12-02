@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
@@ -48,7 +48,7 @@ function createScene(): ModelScene&TestScene {
     (drawImage as any).call(scene.context, ...args);
   };
 
-  Renderer.singleton.registerScene(scene);
+  element[$renderer].registerScene(scene);
 
   return scene;
 }
