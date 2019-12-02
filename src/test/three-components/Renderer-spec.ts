@@ -15,7 +15,7 @@
 
 import ModelViewerElementBase, {$canvas, $onResize} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {renderer} from '../../three-components/Renderer.js';
+import {Renderer} from '../../three-components/Renderer.js';
 
 const expect = chai.expect;
 
@@ -48,13 +48,14 @@ function createScene(): ModelScene&TestScene {
     (drawImage as any).call(scene.context, ...args);
   };
 
-  renderer.registerScene(scene);
+  Renderer.singleton.registerScene(scene);
 
   return scene;
 }
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
+  const renderer = Renderer.singleton;
 
   setup(() => {
     scene = createScene();

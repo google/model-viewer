@@ -19,7 +19,7 @@ import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {renderer} from '../../three-components/Renderer.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 
 
@@ -134,7 +134,7 @@ suite('ARRenderer', () => {
 
   setup(() => {
     element = new ModelViewerElementBase();
-    arRenderer = new ARRenderer(renderer);
+    arRenderer = new ARRenderer(Renderer.singleton);
   });
 
   teardown(async () => {

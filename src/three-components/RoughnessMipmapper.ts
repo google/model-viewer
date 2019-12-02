@@ -16,7 +16,7 @@
 import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderTarget} from 'three';
 import {_Math as ThreeMath} from 'three/src/math/Math.js';
 
-import {renderer} from './Renderer';
+import {Renderer} from './Renderer';
 import {roughnessToVariance, varianceDefines, varianceToRoughness} from './shader-chunk/common.glsl';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
@@ -43,7 +43,7 @@ export class RoughnessMipmapper {
   }
 
   generateMipmaps(material: MeshStandardMaterial) {
-    const {threeRenderer} = renderer;
+    const {threeRenderer} = Renderer.singleton;
     const {roughnessMap, normalMap} = material;
     if (roughnessMap == null || normalMap == null ||
         !roughnessMap.generateMipmaps || material.userData.roughnessUpdated) {

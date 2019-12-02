@@ -15,7 +15,7 @@
 
 import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$canvas, $scene} from '../model-viewer-base.js';
-import {renderer} from '../three-components/Renderer.js';
+import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, resolveDpr} from '../utilities.js';
 
 import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
@@ -179,7 +179,7 @@ suite('ModelViewerElementBase', () => {
       });
 
       test('dispatches a related error event', async () => {
-        const {threeRenderer} = renderer;
+        const {threeRenderer} = Renderer.singleton;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,

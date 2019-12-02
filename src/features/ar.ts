@@ -16,9 +16,8 @@
 import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$container, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {renderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
@@ -255,9 +254,9 @@ configuration or device capabilities');
       }
 
       if (document.fullscreenElement !== this &&
-          renderer.presentedScene === scene) {
+          this[$renderer].presentedScene === scene) {
         try {
-          renderer.stopPresenting();
+          this[$renderer].stopPresenting();
         } catch (error) {
           console.warn('Unexpected error while stopping AR presentation');
           console.error(error);
@@ -269,7 +268,7 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        await renderer.present(this[$scene]);
+        await this[$renderer].present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -291,7 +290,7 @@ configuration or device capabilities');
       }
 
       const unstableWebxrCandidate = this.unstableWebxr &&
-          IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
+          IS_WEBXR_AR_CANDIDATE && await this[$renderer].supportsPresentation();
       const arViewerCandidate = IS_ANDROID && this.ar;
       const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
           this[$canLaunchQuickLook] && !!this.iosSrc;

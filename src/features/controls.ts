@@ -17,11 +17,10 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
-import {renderer} from '../three-components/Renderer.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -511,7 +510,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
       // additional considerations.
       Promise.resolve().then(() => {
-        renderer.render(performance.now());
+        this[$renderer].render(performance.now());
       });
     }
 

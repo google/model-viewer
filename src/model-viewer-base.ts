@@ -21,7 +21,7 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, renderer} from './three-components/Renderer.js';
+import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
@@ -56,6 +56,7 @@ export const $tick = Symbol('tick');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $onUserModelOrbit = Symbol('onUserModelOrbit');
+export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
@@ -126,6 +127,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return this[$getLoaded]();
   }
 
+  get[$renderer]() {
+    return Renderer.singleton;
+  }
+
   /** @export */
   get modelIsVisible() {
     return this[$getModelIsVisible]();
@@ -172,12 +177,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] = new ModelScene({
-      canvas: this[$canvas],
-      element: this,
-      width,
-      height,
-    });
+    this[$scene] =
+        new ModelScene({canvas: this[$canvas], element: this, width, height});
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -200,7 +201,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         // Don't resize anything if in AR mode; otherwise the canvas
         // scaling to fullscreen on entering AR will clobber the flat/2d
         // dimensions of the element.
-        if (renderer.isPresenting) {
+        if (this[$renderer].isPresenting) {
           return;
         }
 
@@ -257,11 +258,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
-    renderer.addEventListener(
+    this[$renderer].addEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    renderer.registerScene(this[$scene]);
+    this[$renderer].registerScene(this[$scene]);
     this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
@@ -285,11 +286,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
-    renderer.removeEventListener(
+    this[$renderer].removeEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    renderer.unregisterScene(this[$scene]);
+    this[$renderer].unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
