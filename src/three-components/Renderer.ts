@@ -39,6 +39,7 @@ export const $arRenderer = Symbol('arRenderer');
 
 const $onWebGLContextLost = Symbol('onWebGLContextLost');
 const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
+const $singleton = Symbol('singleton');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -52,6 +53,17 @@ const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
+  static[$singleton] = new Renderer({debug: isDebugMode()});
+
+  static get singleton() {
+    return this[$singleton];
+  }
+
+  static resetSingleton() {
+    this[$singleton].dispose();
+    this[$singleton] = new Renderer({debug: isDebugMode()});
+  }
+
   public threeRenderer!: WebGLRenderer;
   public context!: WebGLRenderingContext|null;
   public canvas: HTMLCanvasElement;
@@ -275,5 +287,3 @@ export class Renderer extends EventDispatcher {
         {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
   }
 }
-
-export let renderer = new Renderer({debug: isDebugMode()});
