@@ -291,7 +291,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       const controls = this[$controls];
-      const scene = (this as any)[$scene];
+      const scene = this[$scene];
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
@@ -470,7 +470,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
             polarTrient !== lastPolarTrient) {
-          const {canvas} = (this as any)[$scene];
+          const {canvas} = this[$scene];
           const azimuthalQuadrantLabel =
               AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
           const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
@@ -515,7 +515,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onFocus]() {
-      const {canvas} = (this as any)[$scene];
+      const {canvas} = this[$scene];
 
       if (!isFinite(this[$focusedTime])) {
         this[$focusedTime] = performance.now();
