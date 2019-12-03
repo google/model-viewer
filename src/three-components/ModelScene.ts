@@ -15,7 +15,7 @@
 
 import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
-import ModelViewerElementBase, {$needsRender} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
@@ -149,6 +149,20 @@ export class ModelScene extends Scene {
       this.canvas.style.height = `${this.height}px`;
       this.aspect = this.width / this.height;
       this.frameModel();
+
+      // Immediately queue a render to happen at microtask timing. This is
+      // necessary because setting the width and height of the canvas has the
+      // side-effect of clearing it, and also if we wait for the next rAF to
+      // render again we might get hit with yet-another-resize, or worse we
+      // may not actually be marked as dirty and so render will just not
+      // happen. Queuing a render to happen here means we will render twice on
+      // a resize frame, but it avoids most of the visual artifacts associated
+      // with other potential mitigations for this problem. See discussion in
+      // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
+      // additional considerations.
+      Promise.resolve().then(() => {
+        this.element[$renderer].render(performance.now());
+      });
     }
   }
 
