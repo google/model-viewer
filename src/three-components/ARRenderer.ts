@@ -14,7 +14,9 @@
  */
 
 import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
+
 import {assertIsArCandidate} from '../utilities.js';
+
 import {ModelScene} from './ModelScene.js';
 import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
@@ -37,8 +39,7 @@ const matrix4 = new Matrix4();
 const vector3 = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
-  public renderer: WebGLRenderer;
-  public parentRenderer: Renderer;
+  public threeRenderer: WebGLRenderer;
   public inputContext: WebGLRenderingContext;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
@@ -54,19 +55,10 @@ export class ARRenderer extends EventDispatcher {
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
-  constructor(parentRenderer: Renderer) {
+  constructor(private renderer: Renderer) {
     super();
-    const inputContext: WebGLRenderingContext = parentRenderer.context!;
-
-    // The parentRenderer is a Renderer object which has-a ARRenderer. We need
-    // to save a reference so we can restore state once the AR session is done.
-    this.parentRenderer = parentRenderer;
-
-    // this.renderer is a three.js WebGLRenderer, it is shared with the parent
-    // Renderer.
-    this.renderer = parentRenderer.threeRenderer;
-
-    this.inputContext = inputContext;
+    this.threeRenderer = renderer.threeRenderer;
+    this.inputContext = renderer.context!;
 
     this.camera.matrixAutoUpdate = false;
 
@@ -75,7 +67,7 @@ export class ARRenderer extends EventDispatcher {
   }
 
   initializeRenderer() {
-    this.renderer.setPixelRatio(1);
+    this.threeRenderer.setPixelRatio(1);
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -84,7 +76,8 @@ export class ARRenderer extends EventDispatcher {
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar');
 
-    const gl: WebGLRenderingContext = assertContext(this.renderer.getContext());
+    const gl: WebGLRenderingContext =
+        assertContext(this.threeRenderer.getContext());
 
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
@@ -104,9 +97,9 @@ export class ARRenderer extends EventDispatcher {
 
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
-    (this.renderer as any)
+    (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    this.renderer.setSize(
+    this.threeRenderer.setSize(
         session.renderState.baseLayer!.framebufferWidth,
         session.renderState.baseLayer!.framebufferHeight,
         false);
@@ -193,7 +186,7 @@ export class ARRenderer extends EventDispatcher {
     // The offscreen WebXR framebuffer is now invalid, switch
     // back to the default framebuffer for canvas output.
     // TODO: this method should be added to three.js's exported interface.
-    (this.renderer as any).setFramebuffer(null);
+    (this.threeRenderer as any).setFramebuffer(null);
 
     // Trigger a parent renderer update. TODO(klausw): are these all
     // necessary and sufficient?
@@ -201,11 +194,11 @@ export class ARRenderer extends EventDispatcher {
       this.dolly.remove(this[$presentedScene]!);
       this[$presentedScene]!.isDirty = true;
     }
-    // The parentRenderer's render method automatically updates
+    // The renderer's render method automatically updates
     // the device pixel ratio, but only updates the three.js renderer
     // size if there's a size mismatch. Reset the size to force that
     // to refresh.
-    this.parentRenderer.setRendererSize(1, 1);
+    this.renderer.setRendererSize(1, 1);
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
@@ -326,7 +319,7 @@ export class ARRenderer extends EventDispatcher {
 
     for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
-      this.renderer.setViewport(
+      this.threeRenderer.setViewport(
           viewport.x, viewport.y, viewport.width, viewport.height);
       this.camera.projectionMatrix.fromArray(view.projectionMatrix);
       const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
@@ -342,8 +335,8 @@ export class ARRenderer extends EventDispatcher {
 
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-      // this.renderer.clearDepth();
-      this.renderer.render(this.scene, this.camera);
+      // this.threeRenderer.clearDepth();
+      this.threeRenderer.render(this.scene, this.camera);
     }
   }
 }

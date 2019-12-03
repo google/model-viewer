@@ -16,7 +16,7 @@
 import {LinearMipMapLinearFilter, Mesh, MeshStandardMaterial, NoBlending, OrthographicCamera, PlaneBufferGeometry, RawShaderMaterial, Scene, Vector2, WebGLRenderTarget} from 'three';
 import {_Math as ThreeMath} from 'three/src/math/Math.js';
 
-import {renderer} from './Renderer';
+import {Renderer} from './Renderer';
 import {roughnessToVariance, varianceDefines, varianceToRoughness} from './shader-chunk/common.glsl';
 
 const $mipmapMaterial = Symbol('mipmapMaterial');
@@ -43,7 +43,7 @@ export class RoughnessMipmapper {
   }
 
   generateMipmaps(material: MeshStandardMaterial) {
-    const {threeRenderer} = renderer;
+    const {threeRenderer} = Renderer.singleton;
     const {roughnessMap, normalMap} = material;
     if (roughnessMap == null || normalMap == null ||
         !roughnessMap.generateMipmaps || material.userData.roughnessUpdated) {
@@ -57,9 +57,7 @@ export class RoughnessMipmapper {
       return;
     }
 
-    const dpr = threeRenderer.getPixelRatio();
     const autoClear = threeRenderer.autoClear;
-    threeRenderer.setPixelRatio(1);
     threeRenderer.autoClear = false;
 
     if (this[$tempTarget] == null || this[$tempTarget]!.width !== width ||
@@ -90,9 +88,11 @@ export class RoughnessMipmapper {
       }
     }
 
+    threeRenderer.setRenderTarget(this[$tempTarget]);
     this[$mipmapMaterial].uniforms.roughnessMap.value = roughnessMap;
     this[$mipmapMaterial].uniforms.normalMap.value = normalMap;
 
+    const dpr = threeRenderer.getPixelRatio();
     const position = new Vector2(0, 0);
     const texelSize = this[$mipmapMaterial].uniforms.texelSize.value
     for (let mip = 0; width >= 1 && height >= 1;
@@ -105,8 +105,8 @@ export class RoughnessMipmapper {
         texelSize.set(0.0, 0.0);
       }
 
-      threeRenderer.setRenderTarget(this[$tempTarget]);
-      threeRenderer.setViewport(position.x, position.y, width, height);
+      threeRenderer.setViewport(
+          position.x, position.y, width / dpr, height / dpr);
       threeRenderer.render(this[$scene], this[$flatCamera]);
       threeRenderer.copyFramebufferToTexture(
           position, material.roughnessMap!, mip);
@@ -117,7 +117,6 @@ export class RoughnessMipmapper {
       roughnessMap.dispose();
     }
 
-    threeRenderer.setPixelRatio(dpr);
     threeRenderer.autoClear = autoClear;
   }
 }

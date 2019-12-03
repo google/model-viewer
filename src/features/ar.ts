@@ -244,7 +244,6 @@ configuration or device capabilities');
     }
 
     [$onFullscreenchange]() {
-      const renderer = this[$renderer];
       const scene = this[$scene];
       const isFullscreen = document.fullscreenElement === this;
 
@@ -255,9 +254,9 @@ configuration or device capabilities');
       }
 
       if (document.fullscreenElement !== this &&
-          renderer.presentedScene === scene) {
+          this[$renderer].presentedScene === scene) {
         try {
-          renderer.stopPresenting();
+          this[$renderer].stopPresenting();
         } catch (error) {
           console.warn('Unexpected error while stopping AR presentation');
           console.error(error);
@@ -266,11 +265,10 @@ configuration or device capabilities');
     }
 
     protected async[$enterARWithWebXR]() {
-      const renderer = this[$renderer];
       console.log('Attempting to present in AR...');
 
       try {
-        await renderer.present(this[$scene]);
+        await this[$renderer].present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -291,9 +289,8 @@ configuration or device capabilities');
         return;
       }
 
-      const renderer = this[$renderer];
       const unstableWebxrCandidate = this.unstableWebxr &&
-          IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
+          IS_WEBXR_AR_CANDIDATE && await this[$renderer].supportsPresentation();
       const arViewerCandidate = IS_ANDROID && this.ar;
       const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
           this[$canLaunchQuickLook] && !!this.iosSrc;

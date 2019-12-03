@@ -21,7 +21,7 @@ import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, renderer} from './three-components/Renderer.js';
+import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
 import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
@@ -128,7 +128,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$renderer]() {
-    return renderer;
+    return Renderer.singleton;
   }
 
   /** @export */
@@ -177,13 +177,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] = new ModelScene({
-      canvas: this[$canvas],
-      element: this,
-      width,
-      height,
-      renderer: renderer
-    });
+    this[$scene] =
+        new ModelScene({canvas: this[$canvas], element: this, width, height});
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -206,7 +201,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         // Don't resize anything if in AR mode; otherwise the canvas
         // scaling to fullscreen on entering AR will clobber the flat/2d
         // dimensions of the element.
-        if (renderer.isPresenting) {
+        if (this[$renderer].isPresenting) {
           return;
         }
 

@@ -14,7 +14,8 @@
  */
 
 import {IS_IE11} from '../constants.js';
-import ModelViewerElementBase, {$canvas, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $scene} from '../model-viewer-base.js';
+import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, resolveDpr} from '../utilities.js';
 
 import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
@@ -178,16 +179,16 @@ suite('ModelViewerElementBase', () => {
       });
 
       test('dispatches a related error event', async () => {
-        const renderer = element[$renderer].threeRenderer;
+        const {threeRenderer} = Renderer.singleton;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,
         // so we simulate the scenario.
         // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
-        if (renderer.context != null && !IS_IE11) {
-          renderer.forceContextLoss();
+        if (threeRenderer.context != null && !IS_IE11) {
+          threeRenderer.forceContextLoss();
         } else {
-          renderer.domElement.dispatchEvent(
+          threeRenderer.domElement.dispatchEvent(
               new CustomEvent('webglcontextlost'));
         }
         const event = await errorEventDispatches;
