@@ -60,17 +60,14 @@ export default class TextureUtils extends EventDispatcher {
     return this[$PMREMGenerator];
   }
 
-  private renderer: WebGLRenderer;
-
   private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
   private[$PMREMGenerator]: PMREMGenerator;
 
   private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
 
-  constructor(renderer: WebGLRenderer) {
+  constructor(threeRenderer: WebGLRenderer) {
     super();
-    this.renderer = renderer;
-    this[$PMREMGenerator] = new PMREMGenerator(this.renderer);
+    this[$PMREMGenerator] = new PMREMGenerator(threeRenderer);
   }
 
   async load(

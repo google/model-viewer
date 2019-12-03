@@ -177,13 +177,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] = new ModelScene({
-      canvas: this[$canvas],
-      element: this,
-      width,
-      height,
-      renderer: Renderer.singleton
-    });
+    this[$scene] =
+        new ModelScene({canvas: this[$canvas], element: this, width, height});
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -206,7 +201,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         // Don't resize anything if in AR mode; otherwise the canvas
         // scaling to fullscreen on entering AR will clobber the flat/2d
         // dimensions of the element.
-        if (Renderer.singleton.isPresenting) {
+        if (this[$renderer].isPresenting) {
           return;
         }
 

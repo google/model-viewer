@@ -33,13 +33,11 @@ customElements.define('model-viewer-renderer', ModelViewerElement);
 
 function createScene(): ModelScene&TestScene {
   const element = new ModelViewerElement();
-  const renderer = element[$renderer];
   const scene: ModelScene&TestScene = new ModelScene({
     element: element,
     canvas: element[$canvas],
     width: 200,
     height: 100,
-    renderer,
   });
   scene.visible = true;
 
@@ -50,18 +48,17 @@ function createScene(): ModelScene&TestScene {
     (drawImage as any).call(scene.context, ...args);
   };
 
-  renderer.registerScene(scene);
+  element[$renderer].registerScene(scene);
 
   return scene;
 }
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
-  let renderer: Renderer;
+  const renderer = Renderer.singleton;
 
   setup(() => {
     scene = createScene();
-    renderer = scene.renderer;
   });
 
   teardown(() => {

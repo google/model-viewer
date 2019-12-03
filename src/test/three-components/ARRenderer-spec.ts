@@ -19,7 +19,6 @@ import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 
 
@@ -53,7 +52,6 @@ customElements.define('model-viewer-element', ModelViewerElementBase);
 
 suite('ARRenderer', () => {
   let element: ModelViewerElementBase;
-  let renderer: Renderer;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
@@ -135,8 +133,7 @@ suite('ARRenderer', () => {
 
   setup(() => {
     element = new ModelViewerElementBase();
-    renderer = element[$renderer];
-    arRenderer = new ARRenderer(renderer);
+    arRenderer = new ARRenderer(element[$renderer]);
   });
 
   teardown(async () => {
