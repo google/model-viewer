@@ -86,6 +86,10 @@ export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
+const DEFAULT_CAMERA_ORBIT_MIN = '-inf 22.5deg 0';
+const DEFAULT_CAMERA_ORBIT_MAX = 'inf 157.5deg inf';
+const DEFAULT_FIELD_OF_VIEW_MIN = '10deg';
+const DEFAULT_FIELD_OF_VIEW_MAX = '45deg';
 
 export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   return {
@@ -217,6 +221,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         {type: String, attribute: 'field-of-view', hasChanged: () => true})
     fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
 
+    @property({type: String, attribute: 'camera-orbit-min'})
+    cameraOrbitMin: string = DEFAULT_CAMERA_ORBIT_MIN;
+
+    @property({type: String, attribute: 'camera-orbit-max'})
+    cameraOrbitMax: string = DEFAULT_CAMERA_ORBIT_MAX;
+
+    @property({type: String, attribute: 'field-of-view-min'})
+    fieldOfViewMin: string = DEFAULT_FIELD_OF_VIEW_MIN;
+
+    @property({type: String, attribute: 'field-of-view-max'})
+    fieldOfViewMax: string = DEFAULT_FIELD_OF_VIEW_MAX;
+
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
 
@@ -331,6 +347,42 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
         controls.applyOptions({interactionPolicy});
+      }
+
+      if (changedProperties.has('cameraOrbitMin')) {
+        const cameraOrbitMin =
+            parseExpressions(this.cameraOrbitMin)[0]
+                .terms as [NumberNode<'rad'>, NumberNode<'rad'>, NumberNode<'m'>];
+        this[$controls].applyOptions({
+          minimumAzimuthalAngle: cameraOrbitMin[0].number,
+          minimumPolarAngle: cameraOrbitMin[1].number,
+          minimumRadius: cameraOrbitMin[2].number
+        });
+      }
+
+      if (changedProperties.has('cameraOrbitMax')) {
+        const cameraOrbitMax =
+            parseExpressions(this.cameraOrbitMax)[0]
+                .terms as [NumberNode<'rad'>, NumberNode<'rad'>, NumberNode<'m'>];
+        this[$controls].applyOptions({
+          maximumAzimuthalAngle: cameraOrbitMax[0].number,
+          maximumPolarAngle: cameraOrbitMax[1].number,
+          maximumRadius: cameraOrbitMax[2].number
+        });
+      }
+
+      if (changedProperties.has('fieldOfViewMin')) {
+        const fieldOfViewMin = parseExpressions(this.fieldOfViewMin)[0]
+                                   .terms as [NumberNode<'deg'>];
+        this[$controls].applyOptions(
+            {minimumFieldOfView: fieldOfViewMin[0].number});
+      }
+
+      if (changedProperties.has('fieldOfViewMax')) {
+        const fieldOfViewMax = parseExpressions(this.fieldOfViewMax)[0]
+                                   .terms as [NumberNode<'deg'>];
+        this[$controls].applyOptions(
+            {maximumFieldOfView: fieldOfViewMax[0].number});
       }
 
       if (this[$jumpCamera] === true) {
