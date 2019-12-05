@@ -111,7 +111,8 @@ const updateScreenshots = async (config) => {
         continue;
       }
 
-      if (scripts != null && scripts.setup != null) {
+      if (scripts != null && scripts.setup != null &&
+          !lighting.includes('spot1Lux')) {
         const setup = path.join(rendererDirectory, scripts.setup);
         console.log(`🚧 Running setup script: ${scripts.setup}`);
         await run(
