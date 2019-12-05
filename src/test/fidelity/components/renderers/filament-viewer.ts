@@ -49,6 +49,7 @@ const $view = Symbol('view');
 const $canvas = Symbol('canvas');
 const $boundingBox = Symbol('boundingBox');
 const $currentAsset = Symbol('currentAsset');
+const $directionalLight = Symbol('this[$directionalLight]');
 
 const $initialize = Symbol('initialize');
 const $updateScenario = Symbol('scenario');
@@ -71,6 +72,7 @@ export class FilamentViewer extends LitElement {
   private[$ibl]: any = null;
   private[$skybox]: any = null;
   private[$currentAsset]: any = null;
+  private[$directionalLight]: any = null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
   private[$boundingBox]: BoundingBox|null = null;
@@ -156,6 +158,7 @@ export class FilamentViewer extends LitElement {
     }
 
     if (this[$ibl] != null) {
+      this[$scene].setIndirectLight(null);
       this[$engine].destroyIndirectLight(this[$ibl]);
       this[$ibl] = null;
     }
@@ -165,30 +168,45 @@ export class FilamentViewer extends LitElement {
       this[$skybox] = null;
     }
 
-    await fetchFilamentAssets([modelUrl, iblUrl, skyboxUrl]);
+    if (this[$directionalLight] != null) {
+      this[$scene].remove(this[$directionalLight]);
+      this[$engine].destroyEntity(this[$directionalLight]);
+      this[$directionalLight] = null;
+    }
+
+    await fetchFilamentAssets([modelUrl]);
 
     // This special case is for the DirectionalLightTest, where we compare the
     // <model-viewer> IBL to the Filament directional light by using a special
     // environment map with a single bright pixel that represents a 1 lux
     // directional light.
     if (lightingBaseName === 'spot1Lux') {
-      const light = self.Filament.EntityManager.get().create();
+      this[$directionalLight] = self.Filament.EntityManager.get().create();
+      const x = 597;
+      const y = 213;
+      const theta = (x + 0.5) * Math.PI / 512;
+      const phi = (y + 0.5) * Math.PI / 512;
+      const lightDirection = [
+        Math.sin(phi) * Math.cos(theta),
+        -Math.cos(phi),
+        Math.sin(phi) * Math.sin(theta)
+      ];
       self.Filament.LightManager
           .Builder(self.Filament.LightManager$Type.DIRECTIONAL)
           .color([1, 1, 1])
           .intensity(1)
-          .direction([-1, 0, 0])
-          .build(this[$engine], light);
-      this[$scene].addEntity(light);
+          .direction(lightDirection)
+          .build(this[$engine], this[$directionalLight]);
+      this[$scene].addEntity(this[$directionalLight]);
     } else {
+      await fetchFilamentAssets([iblUrl, skyboxUrl]);
       this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
       this[$scene].setIndirectLight(this[$ibl]);
       this[$ibl].setIntensity(1.0);
       this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+      this[$scene].setSkybox(this[$skybox]);
     }
-
-    this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-    this[$scene].setSkybox(this[$skybox]);
 
     const loader = this[$engine].createAssetLoader();
     this[$currentAsset] = IS_BINARY_RE.test(modelUrl) ?
