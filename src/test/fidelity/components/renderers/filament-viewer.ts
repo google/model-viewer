@@ -158,6 +158,7 @@ export class FilamentViewer extends LitElement {
     }
 
     if (this[$ibl] != null) {
+      this[$scene].setIndirectLight(null);
       this[$engine].destroyIndirectLight(this[$ibl]);
       this[$ibl] = null;
     }
@@ -168,7 +169,7 @@ export class FilamentViewer extends LitElement {
     }
 
     if (this[$directionalLight] != null) {
-      // this[$scene].remove(this[$directionalLight]);
+      this[$scene].remove(this[$directionalLight]);
       this[$engine].destroyEntity(this[$directionalLight]);
       this[$directionalLight] = null;
     }
