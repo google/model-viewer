@@ -14,6 +14,7 @@
  */
 
 import {AnimationMixin} from './features/animation.js';
+import {AnnotationMixin} from './features/annotation.js';
 import {ARMixin} from './features/ar.js';
 import {ControlsMixin} from './features/controls.js';
 import {EnvironmentMixin} from './features/environment.js';
@@ -27,9 +28,11 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-export const ModelViewerElement = MagicLeapMixin(
-    StagingMixin(EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(
-        AnimationMixin(FocusVisiblePolyfillMixin(ModelViewerElementBase))))))));
+export {Vector3} from 'three';
+
+export const ModelViewerElement = MagicLeapMixin(AnnotationMixin(StagingMixin(
+    EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
+        FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
