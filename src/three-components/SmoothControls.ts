@@ -360,6 +360,13 @@ export class SmoothControls extends EventDispatcher {
         options.minimumFieldOfView != null) {
       this.setFieldOfView(Math.exp(this[$goalLogFov]));
     }
+    // Prevent interpolation in the case that any target spherical values
+    // changed (preserving OrbitalControls behavior):
+    if (this[$isStationary]()) {
+      return;
+    }
+    this[$spherical].copy(this[$goalSpherical]);
+    this[$moveCamera]();
   }
 
   /**
