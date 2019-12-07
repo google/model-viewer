@@ -18,12 +18,13 @@ import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
-import {normalizeUnit} from '../styles/conversions.js';
+import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
 // being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
@@ -231,7 +232,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         ],
         keywords: {auto: [null, null, null]}
       },
-      observeEffects: true,
       updateHandler: $syncCameraOrbitMin
     })
     @property({type: String, attribute: 'camera-orbit-min'})
@@ -246,23 +246,26 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         ],
         keywords: {auto: [null, null, null]}
       },
-      observeEffects: true,
       updateHandler: $syncCameraOrbitMax
     })
     @property({type: String, attribute: 'camera-orbit-max'})
     cameraOrbitMax: string = 'auto';
 
     @style({
-      intrinsics: {basis: [numberNode(10, 'deg')], keywords: {auto: [null]}},
-      observeEffects: true,
+      intrinsics: {
+        basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
+        keywords: {auto: [null]}
+      },
       updateHandler: $syncFieldOfViewMin
     })
     @property({type: String, attribute: 'field-of-view-min'})
     fieldOfViewMin: string = 'auto';
 
     @style({
-      intrinsics: {basis: [numberNode(45, 'deg')], keywords: {auto: [null]}},
-      observeEffects: true,
+      intrinsics: {
+        basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
+        keywords: {auto: [null]}
+      },
       updateHandler: $syncFieldOfViewMax
     })
     @property({type: String, attribute: 'field-of-view-max'})
@@ -417,12 +420,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       })
     }
 
-    [$syncFieldOfViewMin](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$controls].applyOptions({minimumFieldOfView: style[0]})
+    [$syncFieldOfViewMin](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$controls].applyOptions(
+          {minimumFieldOfView: style[0] * 180 / Math.PI})
     }
 
-    [$syncFieldOfViewMax](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$controls].applyOptions({maximumFieldOfView: style[0]})
+    [$syncFieldOfViewMax](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$controls].applyOptions(
+          {maximumFieldOfView: style[0] * 180 / Math.PI})
     }
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
