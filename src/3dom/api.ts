@@ -46,7 +46,7 @@ export declare interface ThreeDOMGlobalScope extends Worker {
       type: string, listener: EventListenerOrEventListenerObject,
       options?: boolean|EventListenerOptions): void;
 
-  ModelGraph: Constructor<Model>;
+  Model: Constructor<Model>;
   Scene: Constructor<Scene>;
   Node: Constructor<Node>;
   Mesh: Constructor<Mesh>;
