@@ -181,6 +181,10 @@ export declare interface ControlsInterface {
   cameraOrbit: string;
   cameraTarget: string;
   fieldOfView: string;
+  cameraOrbitMin: string;
+  cameraOrbitMax: string;
+  fieldOfViewMin: string;
+  fieldOfViewMax: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;

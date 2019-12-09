@@ -120,10 +120,8 @@ export const step = (edge: number, value: number): number => {
  * @return {Number} value clamped within lowerLimit..upperLimit
  */
 export const clamp =
-    (value: number, lowerLimit: number, upperLimit: number): number => Math.max(
-        lowerLimit === -Infinity ? value : lowerLimit,
-        Math.min(upperLimit === Infinity ? value : upperLimit, value));
-
+    (value: number, lowerLimit: number, upperLimit: number): number =>
+        Math.max(lowerLimit, Math.min(upperLimit, value));
 
 
 // The DPR we use for a "capped" scenario (see resolveDpr below):

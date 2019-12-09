@@ -266,6 +266,44 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.equal(cameraOrbit);
         });
       });
+
+      suite('min/max extents', () => {
+        setup(async () => {
+          element.cameraOrbit = `0deg 90deg 1.5m`;
+          await timePasses();
+          settleControls(controls);
+        });
+
+        test('jumps to cameraOrbitMax when outside', async () => {
+          element.cameraOrbitMax = `-2rad 1rad 1m`;
+          await timePasses();
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(element.cameraOrbitMax);
+        });
+
+        test('jumps to cameraOrbitMin when outside', async () => {
+          element.cameraOrbitMin = `2rad 2rad 2m`;
+          await timePasses();
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(element.cameraOrbitMin);
+        });
+
+        test('jumps to fieldOfViewMax when outside', async () => {
+          element.fieldOfViewMax = `30deg`;
+          await timePasses();
+          const fov = Math.round(element.getFieldOfView());
+          expect(`${fov}deg`).to.equal(element.fieldOfViewMax);
+        });
+
+        test('jumps to fieldOfViewMin when outside', async () => {
+          element.fieldOfViewMin = `60deg`;
+          await timePasses();
+          const fov = Math.round(element.getFieldOfView());
+          expect(`${fov}deg`).to.equal(element.fieldOfViewMin);
+        });
+      });
     });
 
     suite('camera-controls', () => {
