@@ -98,7 +98,10 @@ export class ExampleSnippet extends UpdatingElement {
       const content = template.content.cloneNode(true) as DocumentFragment;
 
       if (this.inertScript) {
-        const scripts = Array.from(content.querySelectorAll('script'));
+        const scripts =
+            Array.from(content.querySelectorAll('script')).filter(script => {
+              script.getAttribute('type') !== 'scene-graph-worklet';
+            });
         for (const script of scripts) {
           script.parentNode!.removeChild(script);
         }

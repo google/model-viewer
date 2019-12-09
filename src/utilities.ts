@@ -20,6 +20,11 @@ export type Constructor<T = object> = {
   prototype: T
 };
 
+export const getLocallyUniqueId = (() => {
+  let id = 0;
+  return () => id++;
+})();
+
 export const deserializeUrl = (url: string|null): string|null =>
     (url != null && url !== 'null') ? toFullUrl(url) : null;
 
