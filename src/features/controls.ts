@@ -96,6 +96,16 @@ export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
+const minFieldOfViewIntrinsics = {
+  basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
+  keywords: {auto: [null]}
+};
+
+const maxFieldOfViewIntrinsics = {
+  basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
+  keywords: {auto: [null]}
+};
+
 export const cameraOrbitIntrinsics = (() => {
   const defaultTerms =
       parseExpressions(DEFAULT_CAMERA_ORBIT)[0]
@@ -113,6 +123,24 @@ export const cameraOrbitIntrinsics = (() => {
     };
   };
 })();
+
+const minCameraOrbitIntrinsics = {
+  basis: [
+    numberNode(-Infinity, 'rad'),
+    numberNode(Math.PI / 8, 'rad'),
+    numberNode(0, 'm')
+  ],
+  keywords: {auto: [null, null, null]}
+};
+
+const maxCameraOrbitIntrinsics = {
+  basis: [
+    numberNode(Infinity, 'rad'),
+    numberNode(Math.PI - Math.PI / 8, 'rad'),
+    numberNode(Infinity, 'm')
+  ],
+  keywords: {auto: [null, null, null]}
+};
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   const center = element[$scene].model.boundingBox.getCenter(new Vector3);
@@ -171,20 +199,20 @@ const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
 const $syncCameraTarget = Symbol('syncCameraTarget');
 
-const $syncCameraOrbitMin = Symbol('syncCameraOrbitMin');
-const $syncCameraOrbitMax = Symbol('syncCameraOrbitMax');
-const $syncFieldOfViewMin = Symbol('syncFieldOfViewMin');
-const $syncFieldOfViewMax = Symbol('syncFieldOfViewMax');
+const $syncMinCameraOrbit = Symbol('syncMinCameraOrbit');
+const $syncMaxCameraOrbit = Symbol('syncMaxCameraOrbit');
+const $syncMinFieldOfView = Symbol('syncMinFieldOfView');
+const $syncMaxFieldOfView = Symbol('syncMaxFieldOfView');
 
 export declare interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
   cameraTarget: string;
   fieldOfView: string;
-  cameraOrbitMin: string;
-  cameraOrbitMax: string;
-  fieldOfViewMin: string;
-  fieldOfViewMax: string;
+  minCameraOrbit: string;
+  maxCameraOrbit: string;
+  minFieldOfView: string;
+  maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
@@ -228,52 +256,32 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
 
     @style({
-      intrinsics: {
-        basis: [
-          numberNode(-Infinity, 'rad'),
-          numberNode(Math.PI / 8, 'rad'),
-          numberNode(0, 'm')
-        ],
-        keywords: {auto: [null, null, null]}
-      },
-      updateHandler: $syncCameraOrbitMin
+      intrinsics: minCameraOrbitIntrinsics,
+      updateHandler: $syncMinCameraOrbit
     })
-    @property({type: String, attribute: 'camera-orbit-min'})
-    cameraOrbitMin: string = 'auto';
+    @property({type: String, attribute: 'min-camera-orbit'})
+    minCameraOrbit: string = 'auto';
 
     @style({
-      intrinsics: {
-        basis: [
-          numberNode(Infinity, 'rad'),
-          numberNode(Math.PI - Math.PI / 8, 'rad'),
-          numberNode(Infinity, 'm')
-        ],
-        keywords: {auto: [null, null, null]}
-      },
-      updateHandler: $syncCameraOrbitMax
+      intrinsics: maxCameraOrbitIntrinsics,
+      updateHandler: $syncMaxCameraOrbit
     })
     @property({type: String, attribute: 'camera-orbit-max'})
-    cameraOrbitMax: string = 'auto';
+    maxCameraOrbit: string = 'auto';
 
     @style({
-      intrinsics: {
-        basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
-        keywords: {auto: [null]}
-      },
-      updateHandler: $syncFieldOfViewMin
+      intrinsics: minFieldOfViewIntrinsics,
+      updateHandler: $syncMinFieldOfView
     })
     @property({type: String, attribute: 'field-of-view-min'})
-    fieldOfViewMin: string = 'auto';
+    minFieldOfView: string = 'auto';
 
     @style({
-      intrinsics: {
-        basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
-        keywords: {auto: [null]}
-      },
-      updateHandler: $syncFieldOfViewMax
+      intrinsics: maxFieldOfViewIntrinsics,
+      updateHandler: $syncMaxFieldOfView
     })
     @property({type: String, attribute: 'field-of-view-max'})
-    fieldOfViewMax: string = 'auto';
+    maxFieldOfView: string = 'auto';
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
@@ -408,30 +416,30 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
-    [$syncCameraOrbitMin](style: EvaluatedStyle<SphericalIntrinsics>) {
+    [$syncMinCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
       this[$controls].applyOptions({
         minimumAzimuthalAngle: style[0],
         minimumPolarAngle: style[1],
         minimumRadius: style[2]
-      })
+      });
     }
 
-    [$syncCameraOrbitMax](style: EvaluatedStyle<SphericalIntrinsics>) {
+    [$syncMaxCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
       this[$controls].applyOptions({
         maximumAzimuthalAngle: style[0],
         maximumPolarAngle: style[1],
         maximumRadius: style[2]
-      })
+      });
     }
 
-    [$syncFieldOfViewMin](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+    [$syncMinFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
-          {minimumFieldOfView: style[0] * 180 / Math.PI})
+          {minimumFieldOfView: style[0] * 180 / Math.PI});
     }
 
-    [$syncFieldOfViewMax](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+    [$syncMaxFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
-          {maximumFieldOfView: style[0] * 180 / Math.PI})
+          {maximumFieldOfView: style[0] * 180 / Math.PI});
     }
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {

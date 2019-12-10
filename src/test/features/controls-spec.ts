@@ -274,34 +274,34 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(controls);
         });
 
-        test('jumps to cameraOrbitMax when outside', async () => {
-          element.cameraOrbitMax = `-2rad 1rad 1m`;
+        test('jumps to maxCameraOrbit when outside', async () => {
+          element.maxCameraOrbit = `-2rad 1rad 1m`;
           await timePasses();
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-              .to.equal(element.cameraOrbitMax);
+              .to.equal(element.maxCameraOrbit);
         });
 
-        test('jumps to cameraOrbitMin when outside', async () => {
-          element.cameraOrbitMin = `2rad 2rad 2m`;
+        test('jumps to minCameraOrbit when outside', async () => {
+          element.minCameraOrbit = `2rad 2rad 2m`;
           await timePasses();
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-              .to.equal(element.cameraOrbitMin);
+              .to.equal(element.minCameraOrbit);
         });
 
-        test('jumps to fieldOfViewMax when outside', async () => {
-          element.fieldOfViewMax = `30deg`;
+        test('jumps to maxFieldOfView when outside', async () => {
+          element.maxFieldOfView = `30deg`;
           await timePasses();
           const fov = Math.round(element.getFieldOfView());
-          expect(`${fov}deg`).to.equal(element.fieldOfViewMax);
+          expect(`${fov}deg`).to.equal(element.maxFieldOfView);
         });
 
-        test('jumps to fieldOfViewMin when outside', async () => {
-          element.fieldOfViewMin = `60deg`;
+        test('jumps to minFieldOfView when outside', async () => {
+          element.minFieldOfView = `60deg`;
           await timePasses();
           const fov = Math.round(element.getFieldOfView());
-          expect(`${fov}deg`).to.equal(element.fieldOfViewMin);
+          expect(`${fov}deg`).to.equal(element.minFieldOfView);
         });
       });
     });
