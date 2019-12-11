@@ -266,21 +266,21 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       intrinsics: maxCameraOrbitIntrinsics,
       updateHandler: $syncMaxCameraOrbit
     })
-    @property({type: String, attribute: 'camera-orbit-max'})
+    @property({type: String, attribute: 'max-camera-orbit'})
     maxCameraOrbit: string = 'auto';
 
     @style({
       intrinsics: minFieldOfViewIntrinsics,
       updateHandler: $syncMinFieldOfView
     })
-    @property({type: String, attribute: 'field-of-view-min'})
+    @property({type: String, attribute: 'min-field-of-view'})
     minFieldOfView: string = 'auto';
 
     @style({
       intrinsics: maxFieldOfViewIntrinsics,
       updateHandler: $syncMaxFieldOfView
     })
-    @property({type: String, attribute: 'field-of-view-max'})
+    @property({type: String, attribute: 'max-field-of-view'})
     maxFieldOfView: string = 'auto';
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
