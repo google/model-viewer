@@ -356,13 +356,10 @@ export class SmoothControls extends EventDispatcher {
     // Re-evaluates clamping based on potentially new values for min/max
     // polar, azimuth and radius:
     this.setOrbit();
+    this.setFieldOfView(Math.exp(this[$goalLogFov]));
     // Prevent interpolation in the case that any target spherical values
     // changed (preserving OrbitalControls behavior):
-    if (this[$isStationary]()) {
-      return;
-    }
-    this[$spherical].copy(this[$goalSpherical]);
-    this[$moveCamera]();
+    this.jumpToGoal();
   }
 
   /**

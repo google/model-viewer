@@ -45,7 +45,7 @@ export const openSceneViewer = (() => {
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
-  return (gltfSrc: string, title: string) => {
+  return (gltfSrc: string, title: string, arScale: string) => {
     // If the fallback has ever been invoked this session, bounce early:
     if (fallbackInvoked) {
       return;
@@ -74,6 +74,10 @@ export const openSceneViewer = (() => {
     // already. Sure hope they aren't called 'link' or 'title' though 😅
     modelUrl.search +=
         (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
+
+    if (arScale === 'fixed') {
+      modelUrl.search += `&resizable=false`;
+    }
 
     const intent = `${modelUrl.toString()}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
@@ -135,8 +139,9 @@ const $onExitFullscreenButtonClick = Symbol('onExitFullscreenButtonClick');
 const $fullscreenchangeHandler = Symbol('fullscreenHandler');
 const $onFullscreenchange = Symbol('onFullscreen');
 
-export interface ARInterface {
+export declare interface ARInterface {
   ar: boolean;
+  arScale: string;
   unstableWebxr: boolean;
   iosSrc: string|null;
   quickLookBrowsers: string;
@@ -148,6 +153,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<ARInterface>&T => {
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
+
+    @property({type: String, attribute: 'ar-scale'}) arScale: string =
+      'auto';
 
     @property({type: Boolean, attribute: 'unstable-webxr'})
     unstableWebxr: boolean = false;
@@ -215,7 +223,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           await this[$enterARWithWebXR]();
           break;
         case ARMode.AR_VIEWER:
-          openSceneViewer(this.src!, this.alt || '');
+          openSceneViewer(this.src!, this.alt || '', this.arScale);
           break;
         default:
           console.warn(
@@ -244,7 +252,6 @@ configuration or device capabilities');
     }
 
     [$onFullscreenchange]() {
-      const renderer = this[$renderer];
       const scene = this[$scene];
       const isFullscreen = document.fullscreenElement === this;
 
@@ -255,9 +262,9 @@ configuration or device capabilities');
       }
 
       if (document.fullscreenElement !== this &&
-          renderer.presentedScene === scene) {
+          this[$renderer].presentedScene === scene) {
         try {
-          renderer.stopPresenting();
+          this[$renderer].stopPresenting();
         } catch (error) {
           console.warn('Unexpected error while stopping AR presentation');
           console.error(error);
@@ -266,11 +273,10 @@ configuration or device capabilities');
     }
 
     protected async[$enterARWithWebXR]() {
-      const renderer = this[$renderer];
       console.log('Attempting to present in AR...');
 
       try {
-        await renderer.present(this[$scene]);
+        await this[$renderer].present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -291,9 +297,8 @@ configuration or device capabilities');
         return;
       }
 
-      const renderer = this[$renderer];
       const unstableWebxrCandidate = this.unstableWebxr &&
-          IS_WEBXR_AR_CANDIDATE && await renderer.supportsPresentation();
+          IS_WEBXR_AR_CANDIDATE && await this[$renderer].supportsPresentation();
       const arViewerCandidate = IS_ANDROID && this.ar;
       const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
           this[$canLaunchQuickLook] && !!this.iosSrc;

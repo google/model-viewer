@@ -29,11 +29,12 @@ const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
-export interface EnvironmentInterface {
+export declare interface EnvironmentInterface {
   environmentImage: string|null;
-  backgroundImage: string|null;
+  skyboxImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
+  shadowSoftness: number;
   exposure: number;
 }
 
@@ -49,10 +50,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({
       type: String,
-      attribute: 'background-image',
+      attribute: 'skybox-image',
       converter: {fromAttribute: deserializeUrl}
     })
-    backgroundImage: string|null = null;
+    skyboxImage: string|null = null;
 
     @property({type: String, attribute: 'background-color'})
     backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
@@ -91,7 +92,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('environmentImage') ||
-          changedProperties.has('backgroundImage') ||
+          changedProperties.has('skyboxImage') ||
           changedProperties.has('backgroundColor') ||
           changedProperties.has('experimentalPmrem') ||
           changedProperties.has($isInRenderTree)) {
@@ -112,8 +113,13 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {backgroundImage, environmentImage} = this;
-      let {backgroundColor} = this;
+      const {skyboxImage, backgroundColor, environmentImage} = this;
+      // Set the container node's background color so that it matches
+      // the background color configured for the scene. It's important
+      // to do this because we round the size of the canvas off to the
+      // nearest pixel, so it is possible (indeed likely) that there is
+      // a marginal gap around one or two edges of the canvas.
+      this[$container].style.backgroundColor = backgroundColor;
 
       if (this[$cancelEnvironmentUpdate] != null) {
         this[$cancelEnvironmentUpdate]!();
@@ -130,7 +136,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         const {environmentMap, skybox} =
             await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  backgroundImage,
+                  skyboxImage,
                   environmentImage,
                   {progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
@@ -147,18 +153,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$scene].add(this[$scene].skyboxMesh);
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
-          if (!backgroundColor) {
-            backgroundColor = DEFAULT_BACKGROUND_COLOR;
-          }
 
           const parsedColor = new Color(backgroundColor);
           this[$scene].background = parsedColor;
-          // Set the container node's background color so that it matches
-          // the background color configured for the scene. It's important
-          // to do this because we round the size of the canvas off to the
-          // nearest pixel, so it is possible (indeed likely) that there is
-          // a marginal gap around one or two edges of the canvas.
-          this[$container].style.backgroundColor = backgroundColor;
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);

@@ -34,7 +34,7 @@ const DEFAULT_HOLOGRAM_INLINE_SCALE = 0.65;
 // should work:
 const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
 
-export interface MagicLeapInterface {
+export declare interface MagicLeapInterface {
   magicLeap: boolean;
 }
 

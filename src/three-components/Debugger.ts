@@ -15,8 +15,10 @@
 
 import {Mesh, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
 
-import {ModelScene} from './ModelScene';
-import {Renderer} from './Renderer';
+import {Constructor} from '../utilities.js';
+
+import {ModelScene} from './ModelScene.js';
+import {Renderer} from './Renderer.js';
 
 export interface ModelViewerRendererDebugDetails {
   renderer: Renderer;
@@ -47,7 +49,7 @@ export interface ModelViewerSceneDetails {
 export class Debugger {
   constructor(renderer: Renderer) {
     // Force WebGL shader debugging on:
-    renderer.renderer.debug = {checkShaderErrors: true};
+    renderer.threeRenderer.debug = {checkShaderErrors: true};
     // Announce debug details at microtask timing to give the `Renderer`
     // constructor time to complete its initialization, just to be on the safe
     // side:
