@@ -159,13 +159,13 @@
               Takes any valid CSS color string.</p>
             </li>
             <li>
-              <div>background-image</div>
+              <div>skybox-image</div>
               <p>Sets the background image of the scene when viewed inline.
               Takes a URL to an <a
               href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular
               projection image</a> that's used for the skybox, as well as
               applied as an environment map on the model. Supports png, jpg and
-              hdr (recommended) images. Setting background-image supercedes
+              hdr (recommended) images. Setting skybox-image supercedes
               background-color.</p>
             </li>
             <li>
@@ -212,7 +212,7 @@
             <li>
               <div>environment-image</div>
               <p>Controls the environmental reflection of the model. Normally if
-              background-image is set, that image will also be used for the
+              skybox-image is set, that image will also be used for the
               environment-image. Use environment-image to only set the reflection
               without affecting the background.</p>
             </li>
@@ -511,7 +511,7 @@
             <li>
               <div>environment-change</div>
               <p>Fired when the environment has changed. If the environment is
-              derived from background-image or environment-image, the image will
+              derived from skybox-image or environment-image, the image will
               have loaded by the time this event fires.</p>
             </li>
             <li>
