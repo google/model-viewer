@@ -18,12 +18,13 @@ import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
-import {normalizeUnit} from '../styles/conversions.js';
+import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
 // being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
@@ -95,6 +96,16 @@ export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
+const minFieldOfViewIntrinsics = {
+  basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
+  keywords: {auto: [null]}
+};
+
+const maxFieldOfViewIntrinsics = {
+  basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
+  keywords: {auto: [null]}
+};
+
 export const cameraOrbitIntrinsics = (() => {
   const defaultTerms =
       parseExpressions(DEFAULT_CAMERA_ORBIT)[0]
@@ -112,6 +123,24 @@ export const cameraOrbitIntrinsics = (() => {
     };
   };
 })();
+
+const minCameraOrbitIntrinsics = {
+  basis: [
+    numberNode(-Infinity, 'rad'),
+    numberNode(Math.PI / 8, 'rad'),
+    numberNode(0, 'm')
+  ],
+  keywords: {auto: [null, null, null]}
+};
+
+const maxCameraOrbitIntrinsics = {
+  basis: [
+    numberNode(Infinity, 'rad'),
+    numberNode(Math.PI - Math.PI / 8, 'rad'),
+    numberNode(Infinity, 'm')
+  ],
+  keywords: {auto: [null, null, null]}
+};
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   const center = element[$scene].model.boundingBox.getCenter(new Vector3);
@@ -170,11 +199,20 @@ const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
 const $syncCameraTarget = Symbol('syncCameraTarget');
 
+const $syncMinCameraOrbit = Symbol('syncMinCameraOrbit');
+const $syncMaxCameraOrbit = Symbol('syncMaxCameraOrbit');
+const $syncMinFieldOfView = Symbol('syncMinFieldOfView');
+const $syncMaxFieldOfView = Symbol('syncMaxFieldOfView');
+
 export declare interface ControlsInterface {
   cameraControls: boolean;
   cameraOrbit: string;
   cameraTarget: string;
   fieldOfView: string;
+  minCameraOrbit: string;
+  maxCameraOrbit: string;
+  minFieldOfView: string;
+  maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
@@ -216,6 +254,34 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property(
         {type: String, attribute: 'field-of-view', hasChanged: () => true})
     fieldOfView: string = DEFAULT_FIELD_OF_VIEW;
+
+    @style({
+      intrinsics: minCameraOrbitIntrinsics,
+      updateHandler: $syncMinCameraOrbit
+    })
+    @property({type: String, attribute: 'min-camera-orbit'})
+    minCameraOrbit: string = 'auto';
+
+    @style({
+      intrinsics: maxCameraOrbitIntrinsics,
+      updateHandler: $syncMaxCameraOrbit
+    })
+    @property({type: String, attribute: 'max-camera-orbit'})
+    maxCameraOrbit: string = 'auto';
+
+    @style({
+      intrinsics: minFieldOfViewIntrinsics,
+      updateHandler: $syncMinFieldOfView
+    })
+    @property({type: String, attribute: 'min-field-of-view'})
+    minFieldOfView: string = 'auto';
+
+    @style({
+      intrinsics: maxFieldOfViewIntrinsics,
+      updateHandler: $syncMaxFieldOfView
+    })
+    @property({type: String, attribute: 'max-field-of-view'})
+    maxFieldOfView: string = 'auto';
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
@@ -291,7 +357,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       const controls = this[$controls];
-      const scene = (this as any)[$scene];
+      const scene = this[$scene];
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
@@ -348,6 +414,32 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
       this[$updateCameraForRadius](style[2]);
       this[$controls].setOrbit(style[0], style[1], style[2]);
+    }
+
+    [$syncMinCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      this[$controls].applyOptions({
+        minimumAzimuthalAngle: style[0],
+        minimumPolarAngle: style[1],
+        minimumRadius: style[2]
+      });
+    }
+
+    [$syncMaxCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      this[$controls].applyOptions({
+        maximumAzimuthalAngle: style[0],
+        maximumPolarAngle: style[1],
+        maximumRadius: style[2]
+      });
+    }
+
+    [$syncMinFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$controls].applyOptions(
+          {minimumFieldOfView: style[0] * 180 / Math.PI});
+    }
+
+    [$syncMaxFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$controls].applyOptions(
+          {maximumFieldOfView: style[0] * 180 / Math.PI});
     }
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
@@ -470,7 +562,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
             polarTrient !== lastPolarTrient) {
-          const {canvas} = (this as any)[$scene];
+          const {canvas} = this[$scene];
           const azimuthalQuadrantLabel =
               AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
           const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
@@ -515,7 +607,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onFocus]() {
-      const {canvas} = (this as any)[$scene];
+      const {canvas} = this[$scene];
 
       if (!isFinite(this[$focusedTime])) {
         this[$focusedTime] = performance.now();
