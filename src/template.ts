@@ -109,6 +109,7 @@ canvas.show {
   height: 100%;
   position: absolute;
   border: none;
+  padding: 0;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
