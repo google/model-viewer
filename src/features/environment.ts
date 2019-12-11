@@ -31,7 +31,7 @@ const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 
 export declare interface EnvironmentInterface {
   environmentImage: string|null;
-  backgroundImage: string|null;
+  skyboxImage: string|null;
   backgroundColor: string;
   shadowIntensity: number;
   shadowSoftness: number;
@@ -50,10 +50,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({
       type: String,
-      attribute: 'background-image',
+      attribute: 'skybox-image',
       converter: {fromAttribute: deserializeUrl}
     })
-    backgroundImage: string|null = null;
+    skyboxImage: string|null = null;
 
     @property({type: String, attribute: 'background-color'})
     backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
@@ -92,7 +92,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('environmentImage') ||
-          changedProperties.has('backgroundImage') ||
+          changedProperties.has('skyboxImage') ||
           changedProperties.has('backgroundColor') ||
           changedProperties.has('experimentalPmrem') ||
           changedProperties.has($isInRenderTree)) {
@@ -113,7 +113,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {backgroundImage, backgroundColor, environmentImage} = this;
+      const {skyboxImage, backgroundColor, environmentImage} = this;
       // Set the container node's background color so that it matches
       // the background color configured for the scene. It's important
       // to do this because we round the size of the canvas off to the
@@ -136,7 +136,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         const {environmentMap, skybox} =
             await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  backgroundImage,
+                  skyboxImage,
                   environmentImage,
                   {progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
