@@ -191,20 +191,6 @@
               </span>
             </li>
             <li>
-              <div>camera-orbit-min</div>
-              <p>Set the minimum orbital values of the camera. Takes values in
-              the same form as camera-orbit, but does not support env().
-              Defaults to "-Infinity 22.5deg 0". Note "Infinity" is not an
-              accepted keyword, but the default can still be obtained by passing
-              "auto".</p>
-            </li>
-            <li>
-              <div>camera-orbit-max</div>
-              <p>Set the maximum orbital values of the camera, just like
-              camera-orbit-min above. Defaults to "Infinity 157.5deg
-              Infinity".</p>
-            </li>
-            <li>
               <div>camera-target</div>
               <p>Set the starting and/or subsequent point the camera orbits
               around. Accepts values of the form "$X $Y $Z", like "0m 1.5m
@@ -237,18 +223,6 @@
               to "auto", which sets either the vertical or horizontal field of
               view to 45 degrees depending on the dimensions of the model and the
               aspect ratio of the canvas.</p>
-            </li>
-            <li>
-              <div>field-of-view-min</div>
-              <p>Set the minimum field of view of the camera, corresponding to
-              maximum zoom-in. Takes values in the same form as field-of-view,
-              but does not support env(). Defaults to "10deg". </p>
-            </li>
-            <li>
-              <div>field-of-view-max</div>
-              <p>Set the maximum field of view of the camera, corresponding to
-              maximum zoom-out, just like field-of-view-min above. Defaults to
-              "45deg". </p>
             </li>
             <li>
               <div>interaction-policy</div>
@@ -310,6 +284,31 @@
               inclusion of the <a
               href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
               library.</p>
+            </li>
+            <li>
+              <div>max-camera-orbit</div>
+              <p>Set the maximum orbital values of the camera. Takes values in
+                the same form as camera-orbit, but does not support env().
+                Defaults to "Infinity 157.5deg Infinity". Note "Infinity" is not an
+                accepted keyword, but the default can still be obtained by passing
+                "auto".</p>
+            </li>
+            <li>
+              <div>max-field-of-view</div>
+              <p>Set the maximum field of view of the camera, corresponding to
+                maximum zoom-out. Takes values in the same form as field-of-view,
+                but does not support env(). Defaults to "45deg". </p>
+            </li>
+            <li>
+              <div>min-camera-orbit</div>
+              <p>Set the minimum orbital values of the camera, just like
+                max-camera-orbit above. Defaults to "-Infinity 22.5deg 0".</p>
+            </li>
+            <li>
+              <div>min-field-of-view</div>
+              <p>Set the minimum field of view of the camera, corresponding to
+                maximum zoom-in, just like max-field-of-view above. Defaults to
+                "10deg". </p>
             </li>
             <li>
               <div>poster</div>
