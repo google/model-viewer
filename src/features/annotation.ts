@@ -47,7 +47,7 @@ class Hotspot extends CSS2DObject {
 export declare interface AnnotationInterface {
   hiddenOpacity: number;
   hiddenAngle: string;
-  addHotspot(position: Vector3, normal: Vector3): void;
+  addHotspot(element: HTMLElement, position: Vector3, normal: Vector3): void;
 }
 
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -118,16 +118,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    addHotspot(position: Vector3, normal: Vector3) {
-      const element = document.createElement('div');
-      const {style} = element;
-      element.className = 'hotspot';
-      style.width = '20px';
-      style.height = '20px';
-      style.borderRadius = '10px';
-      style.webkitBorderRadius = '10px';
-      style.background = 'blue';
-
+    addHotspot(element: HTMLElement, position: Vector3, normal: Vector3) {
+      element.classList.add('hotspot');
       const hotspot = new Hotspot(element, position, normal);
       this[$scene].pivot.add(hotspot);
     }

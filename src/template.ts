@@ -251,6 +251,17 @@ canvas.show {
 #default-exit-fullscreen-button > svg {
   fill: #fff;
 }
+
+.hotspot {
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  webkit-border-radius: 10px;
+  border: none;
+  background-color: blue;
+}
+
 </style>
 <div class="container">
   <canvas tabindex="1"
