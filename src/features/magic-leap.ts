@@ -104,12 +104,11 @@ export const MagicLeapMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${DEFAULT_HOLOGRAM_INLINE_SCALE} ${
                 DEFAULT_HOLOGRAM_INLINE_SCALE} ${
                 DEFAULT_HOLOGRAM_INLINE_SCALE}`);
-        this[$mlModel]!.setAttribute('scrollable', 'true');
         this[$mlModel]!.setAttribute('z-offset', DEFAULT_HOLOGRAM_Z_OFFSET);
         this[$mlModel]!.setAttribute('extractable', 'true');
         this[$mlModel]!.setAttribute('extracted-scale', '1');
         this[$mlModel]!.setAttribute(
-            'environment-lighting', 'color-intensity: 2;');
+            'environment-lighting', 'color-intensity: 5;');
 
         if (this.src != null) {
           this[$mlModel]!.setAttribute('src', this.src);
