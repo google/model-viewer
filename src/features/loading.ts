@@ -342,7 +342,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const posterContainerOpacity =
           parseFloat(self.getComputedStyle(posterContainerElement).opacity!);
 
-      defaultPosterElement.tabIndex = 1;
+      defaultPosterElement.removeAttribute('tabindex');
       defaultPosterElement.removeAttribute('aria-hidden');
       posterContainerElement.classList.add('show');
 
@@ -380,7 +380,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             // Ensure that the poster is no longer focusable or visible to
             // screen readers
             defaultPosterElement.setAttribute('aria-hidden', 'true');
-            defaultPosterElement.removeAttribute('tabindex');
+            defaultPosterElement.tabIndex = -1;
           });
         }, {once: true});
       }

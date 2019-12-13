@@ -261,8 +261,8 @@ export class ModelScene extends Scene {
 
   createSkyboxMesh(): Mesh {
     const geometry = new BoxBufferGeometry(1, 1, 1);
-    geometry.removeAttribute('normal');
-    geometry.removeAttribute('uv');
+    geometry.deleteAttribute('normal');
+    geometry.deleteAttribute('uv');
     const material = new ShaderMaterial({
       uniforms: {envMap: {value: null}, opacity: {value: 1.0}},
       vertexShader: ShaderLib.cube.vertexShader,
