@@ -29,7 +29,8 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 
-const DEFAULT_DRACO_LOADER_LOCATION =
+const DEFAULT_DRACO_DECODER_LOCATION =
+    // 'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
     'https://unpkg.com/three@0.110.0/examples/js/libs/draco/';
 
 const SPACE_KEY = 32;
@@ -265,7 +266,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
-          DEFAULT_DRACO_LOADER_LOCATION;
+          DEFAULT_DRACO_DECODER_LOCATION;
 
       CachingGLTFLoader.setDRACODecoderLocation(dracoDecoderLocation);
     }
