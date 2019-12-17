@@ -22,7 +22,7 @@ export const assertContext =
     };
 
 export const getContext =
-    (canvas: HTMLCanvasElement, options: WebGLContextAttributes):
+    (canvas: HTMLCanvasElement | OffscreenCanvas, options: WebGLContextAttributes):
         WebGLRenderingContext => assertContext(
             canvas.getContext('webgl', options) ||
             canvas.getContext('experimental-webgl', options) as
