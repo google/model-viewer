@@ -101,9 +101,13 @@ const minFieldOfViewIntrinsics = {
   keywords: {auto: [null]}
 };
 
-const maxFieldOfViewIntrinsics = {
-  basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
-  keywords: {auto: [null]}
+const maxFieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
+  const scene = element[$scene];
+
+  return {
+    basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
+    keywords: {auto: [numberNode(scene.framedFieldOfView, 'rad')]}
+  };
 };
 
 export const cameraOrbitIntrinsics = (() => {
@@ -586,9 +590,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const newFramedFieldOfView = this[$scene].framedFieldOfView;
       const zoom = controls.getFieldOfView() / oldFramedFieldOfView;
       this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
-      controls.applyOptions({maximumFieldOfView: newFramedFieldOfView});
+
       controls.updateAspect(this[$scene].aspect);
+
+      this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
+
       controls.jumpToGoal();
     }
 
@@ -598,8 +605,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const controls = this[$controls];
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;
-      controls.applyOptions({maximumFieldOfView: framedFieldOfView});
 
+      this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);

@@ -303,6 +303,42 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const fov = Math.round(element.getFieldOfView());
           expect(`${fov}deg`).to.equal(element.minFieldOfView);
         });
+
+        suite('when configured before model loads', () => {
+          let initiallyUnloadedElement: ModelViewerElementBase&
+              ControlsInterface;
+          let controls: SmoothControls;
+
+          setup(() => {
+            initiallyUnloadedElement = new ModelViewerElement();
+            controls =
+                (initiallyUnloadedElement as any)[$controls] as SmoothControls;
+          });
+
+          teardown(() => {
+            if (initiallyUnloadedElement.parentNode != null) {
+              initiallyUnloadedElement.parentNode.removeChild(
+                  initiallyUnloadedElement);
+            }
+          });
+
+          test('respects user-configured maxFieldOfView', async () => {
+            document.body.appendChild(initiallyUnloadedElement);
+
+            initiallyUnloadedElement.maxFieldOfView = '100deg';
+            initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
+
+            await waitForEvent(initiallyUnloadedElement, 'load');
+
+            initiallyUnloadedElement.fieldOfView = '100deg';
+
+            await timePasses();
+            settleControls(controls);
+
+            expect(initiallyUnloadedElement.getFieldOfView())
+                .to.be.closeTo(100, 0.001);
+          });
+        });
       });
     });
 
