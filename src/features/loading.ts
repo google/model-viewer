@@ -30,8 +30,7 @@ const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    // 'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
-    'https://unpkg.com/three@0.110.0/examples/js/libs/draco/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
