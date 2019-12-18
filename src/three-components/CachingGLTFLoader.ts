@@ -24,6 +24,21 @@ import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 
 export type ProgressCallback = (progress: number) => void;
 
+/**
+ * A helper to Promise-ify a Three.js GLTFLoader
+ */
+export const loadWithLoader =
+    (url: string,
+     loader: GLTFLoader,
+     progressCallback: ProgressCallback = () => {}) => {
+      const onProgress = (event: ProgressEvent) => {
+        progressCallback!(event.loaded / event.total);
+      };
+      return new Promise<GLTF>((resolve, reject) => {
+        loader.load(url, resolve, onProgress, reject);
+      });
+    };
+
 export const $releaseFromCache = Symbol('releaseFromCache');
 export interface CacheRetainedScene extends Scene {
   [$releaseFromCache]: () => void;
@@ -37,7 +52,6 @@ export const $evictionPolicy = Symbol('evictionPolicy');
 let dracoDecoderLocation: string;
 const dracoLoader = new DRACOLoader();
 const $loader = Symbol('loader');
-const $load = Symbol('load');
 
 export class CachingGLTFLoader {
   static setDRACODecoderLocation(url: string) {
@@ -120,7 +134,7 @@ export class CachingGLTFLoader {
    */
   async preload(url: string, progressCallback: ProgressCallback = () => {}) {
     if (!cache.has(url)) {
-      cache.set(url, this[$load](url, (progress: number) => {
+      cache.set(url, loadWithLoader(url, this[$loader], (progress: number) => {
                   progressCallback(progress * 0.9);
                 }));
     }
@@ -213,14 +227,5 @@ export class CachingGLTFLoader {
     }
 
     return model as CacheRetainedScene | null;
-  }
-
-  async[$load](url: string, progressCallback: ProgressCallback = () => {}) {
-    const onProgress = (event: ProgressEvent) => {
-      progressCallback!(event.loaded / event.total);
-    };
-    return new Promise<GLTF>((resolve, reject) => {
-      this[$loader].load(url, resolve, onProgress, reject);
-    });
   }
 }

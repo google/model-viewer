@@ -16,8 +16,9 @@
 import {Box3, Material, Scene, Vector3} from 'three';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import {loadWithLoader} from '../../three-components/CachingGLTFLoader.js';
 import {cloneGltf, reduceVertices} from '../../three-components/ModelUtils.js';
-import {assetPath, loadWithLoader} from '../helpers.js';
+import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
