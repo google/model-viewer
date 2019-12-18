@@ -327,10 +327,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (this[$modelIsReadyForReveal]) {
-        if (!this[$sourceUpdated]) {
-          this[$updateSource]();
-          this[$hidePoster]();
-        }
+        this[$updateSource]();
       } else {
         this[$showPoster]();
       }
@@ -397,9 +394,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal]) {
+      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
         this[$sourceUpdated] = true;
         await super[$updateSource]();
+        this[$hidePoster]();
       }
     }
   }

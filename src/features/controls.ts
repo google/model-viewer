@@ -595,14 +595,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
-
-      controls.jumpToGoal();
+      this.jumpCameraToGoal();
     }
 
     [$onModelLoad](event: any) {
       super[$onModelLoad](event);
 
-      const controls = this[$controls];
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;
 
@@ -610,7 +608,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
-      controls.jumpToGoal();
+      this.jumpCameraToGoal();
     }
 
     [$onFocus]() {

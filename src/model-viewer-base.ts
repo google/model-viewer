@@ -308,6 +308,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         (this.src == null || this.src !== this[$scene].model.url)) {
       this[$loaded] = false;
       this[$loadedTime] = 0;
+      this[$updateSource]();
       (async () => {
         const updateSourceProgress = this[$progressTracker].beginActivity();
         await this[$updateSource](
@@ -457,16 +458,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * sets the views to use the new model based off of the `preload`
    * attribute.
    */
-  async[$updateSource](
-      progressCallback: (progress: number) => void = () => {}) {
+  async[$updateSource]() {
+    const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
 
     try {
       this[$canvas].classList.add('show');
-      await this[$scene].setModelSource(source, progressCallback);
+      await this[$scene].setModelSource(
+          source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
       this[$canvas].classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
+    } finally {
+      updateSourceProgress(1.0);
     }
   }
 }
