@@ -309,12 +309,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$loaded] = false;
       this[$loadedTime] = 0;
       this[$updateSource]();
-      (async () => {
-        const updateSourceProgress = this[$progressTracker].beginActivity();
-        await this[$updateSource](
-            (progress: number) => updateSourceProgress(progress * 0.9));
-        updateSourceProgress(1.0);
-      })();
     }
 
     if (changedProperties.has('alt')) {

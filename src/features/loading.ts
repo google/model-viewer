@@ -233,9 +233,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('src')) {
+        if (!this[$modelIsReadyForReveal]) {
+          this[$lastReportedProgress] = 0;
+        }
+
         this[$posterDismissalSource] = null;
         this[$preloadAttempted] = false;
-        this[$lastReportedProgress] = 0;
         this[$sourceUpdated] = false;
       }
 
@@ -327,7 +330,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (this[$modelIsReadyForReveal]) {
-        this[$updateSource]();
+        await this[$updateSource]();
       } else {
         this[$showPoster]();
       }
