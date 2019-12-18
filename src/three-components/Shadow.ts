@@ -68,12 +68,6 @@ export class Shadow extends DirectionalLight {
     this.setModel(model, softness);
   }
 
-  updateModel(model: Model, softness: number) {
-    if (this.model !== model) {
-      this.setModel(model, softness);
-    }
-  }
-
   setModel(model: Model, softness: number) {
     this.model = model;
     const {camera} = this.shadow;
