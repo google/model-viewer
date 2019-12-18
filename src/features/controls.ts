@@ -106,7 +106,7 @@ const maxFieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
 
   return {
     basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
-    keywords: {auto: [numberNode(scene.framedFieldOfView, 'rad')]}
+    keywords: {auto: [numberNode(scene.framedFieldOfView, 'deg')]}
   };
 };
 
@@ -263,28 +263,32 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       intrinsics: minCameraOrbitIntrinsics,
       updateHandler: $syncMinCameraOrbit
     })
-    @property({type: String, attribute: 'min-camera-orbit'})
+    @property(
+        {type: String, attribute: 'min-camera-orbit', hasChanged: () => true})
     minCameraOrbit: string = 'auto';
 
     @style({
       intrinsics: maxCameraOrbitIntrinsics,
       updateHandler: $syncMaxCameraOrbit
     })
-    @property({type: String, attribute: 'max-camera-orbit'})
+    @property(
+        {type: String, attribute: 'max-camera-orbit', hasChanged: () => true})
     maxCameraOrbit: string = 'auto';
 
     @style({
       intrinsics: minFieldOfViewIntrinsics,
       updateHandler: $syncMinFieldOfView
     })
-    @property({type: String, attribute: 'min-field-of-view'})
+    @property(
+        {type: String, attribute: 'min-field-of-view', hasChanged: () => true})
     minFieldOfView: string = 'auto';
 
     @style({
       intrinsics: maxFieldOfViewIntrinsics,
       updateHandler: $syncMaxFieldOfView
     })
-    @property({type: String, attribute: 'max-field-of-view'})
+    @property(
+        {type: String, attribute: 'max-field-of-view', hasChanged: () => true})
     maxFieldOfView: string = 'auto';
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})

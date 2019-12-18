@@ -274,6 +274,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(controls);
         });
 
+        test('defaults maxFieldOfView to ideal value', async () => {
+          const scene = element[$scene];
+
+          element.fieldOfView = '180deg';
+          await timePasses();
+          settleControls(controls);
+          expect(element.getFieldOfView())
+              .to.be.closeTo(scene.framedFieldOfView, 0.001);
+        });
+
         test('jumps to maxCameraOrbit when outside', async () => {
           element.maxCameraOrbit = `-2rad 1rad 1m`;
           await timePasses();
