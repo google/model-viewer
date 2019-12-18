@@ -106,7 +106,7 @@ const maxFieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
 
   return {
     basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
-    keywords: {auto: [numberNode(scene.framedFieldOfView, 'rad')]}
+    keywords: {auto: [numberNode(scene.framedFieldOfView, 'deg')]}
   };
 };
 
