@@ -233,9 +233,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('src')) {
+        if (!this[$modelIsReadyForReveal]) {
+          this[$lastReportedProgress] = 0;
+        }
+
         this[$posterDismissalSource] = null;
         this[$preloadAttempted] = false;
-        this[$lastReportedProgress] = 0;
         this[$sourceUpdated] = false;
       }
 
@@ -327,10 +330,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (this[$modelIsReadyForReveal]) {
-        if (!this[$sourceUpdated]) {
-          this[$updateSource]();
-          this[$hidePoster]();
-        }
+        await this[$updateSource]();
       } else {
         this[$showPoster]();
       }
@@ -397,9 +397,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal]) {
+      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
         this[$sourceUpdated] = true;
         await super[$updateSource]();
+        this[$hidePoster]();
       }
     }
   }
