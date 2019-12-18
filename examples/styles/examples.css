@@ -301,7 +301,7 @@ model-viewer:focus {
   display: block;
   margin-bottom: 16px;
 }
-.demo-title + h4 {
+.demo-title + h4, h4 + h4 {
   margin-top: -24px;
   margin-bottom: 40px;
 }

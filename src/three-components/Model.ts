@@ -23,13 +23,15 @@ const $currentScene = Symbol('currentScene');
 
 export const DEFAULT_FOV_DEG = 45;
 
+const $loader = Symbol('loader');
+
 /**
  * An Object3D that can swap out its underlying
  * model.
  */
 export default class Model extends Object3D {
   private[$currentScene]: CacheRetainedScene|null = null;
-  private loader = new CachingGLTFLoader();
+  private[$loader] = new CachingGLTFLoader();
   private mixer = new AnimationMixer(null);
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
@@ -44,6 +46,10 @@ export default class Model extends Object3D {
   public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
+
+  get loader() {
+    return this[$loader];
+  }
 
   /**
    * Creates a model.

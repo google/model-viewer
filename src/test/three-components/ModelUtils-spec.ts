@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 import {Box3, Material, Scene, Vector3} from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {loadWithLoader} from '../../three-components/CachingGLTFLoader.js';
-import {cloneGltf, Gltf, reduceVertices} from '../../three-components/ModelUtils.js';
+import {cloneGltf, reduceVertices} from '../../three-components/ModelUtils.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
+
+
 
 const collectMaterials = (scene: Scene): Array<Material> => {
   const materials: Array<Material> = [];
@@ -41,7 +43,7 @@ const collectMaterials = (scene: Scene): Array<Material> => {
 suite('ModelUtils', () => {
   suite('cloneGltf', () => {
     let loader: any;
-    let gltf: Gltf;
+    let gltf: GLTF;
 
     setup(async () => {
       loader = new GLTFLoader();
