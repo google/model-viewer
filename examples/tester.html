@@ -108,7 +108,7 @@ model-viewer {
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-  <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none" src="assets/DamagedHelmet/DamagedHelmet.gltf" background-color="#e1e1e1" alt="A 3D model"></model-viewer>
+  <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none" src="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" background-color="#e1e1e1" alt="A 3D model"></model-viewer>
   <div id="instructions">
 	<h1>
 	  <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
@@ -121,17 +121,28 @@ model-viewer {
 	<label for="src">Model</label>
 	<select id="src">
 	  <option value="assets/Astronaut.glb">Astronaut</option>
-	  <option value="assets/shishkebab.glb">Shishkebab</option>
-	  <option value="assets/RobotExpressive.glb">Robot</option>
-	  <option value="assets/DamagedHelmet/DamagedHelmet.gltf" selected>DamagedHelmet</option>
-	  <option value="assets/BarramundiFish/glTF-Binary/BarramundiFish.glb">BarramundiFish</option>
+	  <option value="assets/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
+	  <option value="assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
+      <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
+      <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
+	  <option value="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
+	  <option value="assets/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
+	  <option value="assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
+	  <option value="assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb">Water Bottles</option>
+	  <option value="assets/RobotExpressive.glb">Robot Expressive</option>
+	  <option value="assets/alpha-blend-litmus.glb">Transparency Test</option>
+	  <option value="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf">Metal Rough Spheres</option>
 	</select><br/>
 	
 	<label for="skyboxImage">Skybox</label>
 	<select id="skyboxImage">
 	  <option value="" selected>none</option>
-	  <option value="assets/spruit_sunrise_1k_HDR.hdr">spruit_sunrise</option>
-	  <option value="assets/music_hall_01_1k.hdr">music_hall</option>
+	  <option value="assets/spruit_sunrise_1k_HDR.hdr">spruit sunrise HDR</option>
+	  <option value="assets/spruit_sunrise_1k_LDR.jpg">spruit sunrise JPG</option>
+	  <option value="assets/music_hall_01_1k.hdr">music hall</option>
+	  <option value="assets/whipple_creek_regional_park_04_1k.hdr">whipple creek</option>
+	  <option value="assets/aircraft_workshop_01_1k.hdr">aircraft workshop</option>
+	  <option value="assets/pillars_1k.hdr">pillars</option>
 	</select><br/>
 
 	<label for="exposure">Exposure</label>
@@ -212,9 +223,29 @@ model-viewer {
 
   <div class="footer">
     <ul>
+	  <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+
       <li class="attribution">
-        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+	  </li>
+	  
+	  <li class="attribution">
+		<a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+		licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+	  </li>
+
+      <li class="attribution">
+        <a href="https://hdrihaven.com/hdri/?h=small_hangar_01">small_hangar_01_1k.jpg</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+        licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
+      </li>
+
+      <li class="attribution">
+        <a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">whipple_creek_regional_park_04_1k.hdr</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+        licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
       </li>
     </ul>
     <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
