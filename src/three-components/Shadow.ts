@@ -64,7 +64,7 @@ export class Shadow extends DirectionalLight {
     this.floor.castShadow = false;
     this.add(this.floor);
 
-    this.up.set(0, 0, 1);
+    this.shadow.camera.up.set(0, 0, 1);
 
     this.target = target;
 
