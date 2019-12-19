@@ -102,6 +102,41 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         expect(preloadDispatched).to.be.false;
       });
 
+      suite('load', () => {
+        suite('when a model src changes after loading', () => {
+          setup(async () => {
+            element.src = ASTRONAUT_GLB_PATH;
+            await waitForEvent(element, 'load');
+          });
+
+          test('only dispatches load once per src change', async () => {
+            let loadCount = 0;
+            const onLoad = () => {
+              loadCount++;
+            };
+
+            element.addEventListener('load', onLoad);
+
+            try {
+              element.src = HORSE_GLB_PATH;
+
+              await waitForEvent(element, 'load');
+
+              element.src = ASTRONAUT_GLB_PATH;
+
+              await waitForEvent(element, 'load');
+
+              // Give any late-dispatching events a chance to dispatch
+              await timePasses(300);
+
+              expect(loadCount).to.be.equal(2);
+            } finally {
+              element.removeEventListener('load', onLoad);
+            }
+          });
+        });
+      });
+
       suite('preload', () => {
         suite('src changes quickly', () => {
           test(

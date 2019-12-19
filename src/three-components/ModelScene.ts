@@ -226,7 +226,7 @@ export class ModelScene extends Scene {
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
     if (this.shadow != null) {
-      this.shadow.updateModel(this.model, this.shadowSoftness);
+      this.shadow.setModel(this.model, this.shadowSoftness);
     }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});

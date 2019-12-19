@@ -59,26 +59,22 @@ export class Shadow extends DirectionalLight {
     this.castShadow = true;
 
     this.floor = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
+    this.floor.rotateX(-Math.PI / 2);
     this.floor.receiveShadow = true;
     this.floor.castShadow = false;
     this.add(this.floor);
+
+    this.up.set(0, 0, 1);
 
     this.target = target;
 
     this.setModel(model, softness);
   }
 
-  updateModel(model: Model, softness: number) {
-    if (this.model !== model) {
-      this.setModel(model, softness);
-    }
-  }
-
   setModel(model: Model, softness: number) {
     this.model = model;
     const {camera} = this.shadow;
 
-    this.floor.rotateX(-Math.PI / 2);
     this.boundingBox.copy(model.boundingBox);
     this.size.copy(model.size);
     const {boundingBox, size} = this;
@@ -99,7 +95,6 @@ export class Shadow extends DirectionalLight {
     // to stay inside the shadow camera.
     this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
 
-    this.up.set(0, 0, 1);
     camera.near = 0;
     camera.far = size.y;
 
@@ -115,8 +110,13 @@ export class Shadow extends DirectionalLight {
   }
 
   setMapSize(maxMapSize: number) {
-    const {camera, mapSize} = this.shadow;
+    const {camera, mapSize, map} = this.shadow;
     const {boundingBox, size} = this;
+
+    if (map != null) {
+      (map as any).dispose();
+      (this.shadow.map as any) = null;
+    }
 
     if (this.model.animationNames.length > 0) {
       maxMapSize *= ANIMATION_SCALING;
