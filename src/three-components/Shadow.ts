@@ -20,7 +20,7 @@ import Model from './Model';
 // Nothing within Offset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
 const OFFSET = 0.001;
-const BASE_OPACITY = 1.0;
+const BASE_OPACITY = 0.1;
 // The softness [0, 1] of the shadow is mapped to a resolution between
 // 2^LOG_MAX_RESOLUTION and 2^LOG_MIN_RESOLUTION.
 const LOG_MAX_RESOLUTION = 9;
@@ -86,7 +86,7 @@ export class Shadow extends DirectionalLight {
       size.y = maxDimension;
       boundingBox.expandByVector(
           size.subScalar(maxDimension).multiplyScalar(-0.5));
-      boundingBox.max.y = maxDimension;
+      boundingBox.max.y = boundingBox.min.y + maxDimension;
       size.set(maxDimension, maxDimension, maxDimension);
     }
 
