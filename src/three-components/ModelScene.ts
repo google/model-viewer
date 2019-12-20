@@ -14,9 +14,11 @@
  */
 
 import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {CameraHelper} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
+import {showShadowHelper} from '../utilities/debug.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
@@ -228,6 +230,9 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setModel(this.model, this.shadowSoftness);
     }
+    if (this.children.length > 1) {
+      (this.children[1] as CameraHelper).update();
+    }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
@@ -241,7 +246,7 @@ export class ModelScene extends Scene {
       if (this.shadow == null) {
         this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
         this.pivot.add(this.shadow);
-        // showShadowHelper(this);
+        showShadowHelper(this);
       }
       this.shadow.setIntensity(shadowIntensity);
     }
