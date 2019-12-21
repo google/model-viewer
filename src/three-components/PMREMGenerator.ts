@@ -137,10 +137,10 @@ export class PMREMGenerator {
         faceIndex.set(fill, faceIndexSize * vertices * face);
       }
       const planes = new BufferGeometry();
-      planes.addAttribute(
+      planes.setAttribute(
           'position', new BufferAttribute(position, positionSize));
-      planes.addAttribute('uv', new BufferAttribute(uv, uvSize));
-      planes.addAttribute(
+      planes.setAttribute('uv', new BufferAttribute(uv, uvSize));
+      planes.setAttribute(
           'faceIndex', new BufferAttribute(faceIndex, faceIndexSize));
       this[$lodPlanes].push(planes);
 

@@ -45,7 +45,7 @@ export const openSceneViewer = (() => {
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
-  return (gltfSrc: string, title: string) => {
+  return (gltfSrc: string, title: string, arScale: string) => {
     // If the fallback has ever been invoked this session, bounce early:
     if (fallbackInvoked) {
       return;
@@ -74,6 +74,10 @@ export const openSceneViewer = (() => {
     // already. Sure hope they aren't called 'link' or 'title' though 😅
     modelUrl.search +=
         (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
+
+    if (arScale === 'fixed') {
+      modelUrl.search += `&resizable=false`;
+    }
 
     const intent = `${modelUrl.toString()}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
@@ -137,6 +141,7 @@ const $onFullscreenchange = Symbol('onFullscreen');
 
 export declare interface ARInterface {
   ar: boolean;
+  arScale: string;
   unstableWebxr: boolean;
   iosSrc: string|null;
   quickLookBrowsers: string;
@@ -148,6 +153,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<ARInterface>&T => {
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
+
+    @property({type: String, attribute: 'ar-scale'}) arScale: string =
+      'auto';
 
     @property({type: Boolean, attribute: 'unstable-webxr'})
     unstableWebxr: boolean = false;
@@ -215,7 +223,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           await this[$enterARWithWebXR]();
           break;
         case ARMode.AR_VIEWER:
-          openSceneViewer(this.src!, this.alt || '');
+          openSceneViewer(this.src!, this.alt || '', this.arScale);
           break;
         default:
           console.warn(

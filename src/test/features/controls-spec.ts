@@ -266,6 +266,90 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.equal(cameraOrbit);
         });
       });
+
+      suite('min/max extents', () => {
+        setup(async () => {
+          element.cameraOrbit = `0deg 90deg 1.5m`;
+          await timePasses();
+          settleControls(controls);
+        });
+
+        test('defaults maxFieldOfView to ideal value', async () => {
+          const scene = element[$scene];
+
+          element.fieldOfView = '180deg';
+          await timePasses();
+          settleControls(controls);
+          expect(element.getFieldOfView())
+              .to.be.closeTo(scene.framedFieldOfView, 0.001);
+        });
+
+        test('jumps to maxCameraOrbit when outside', async () => {
+          element.maxCameraOrbit = `-2rad 1rad 1m`;
+          await timePasses();
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(element.maxCameraOrbit);
+        });
+
+        test('jumps to minCameraOrbit when outside', async () => {
+          element.minCameraOrbit = `2rad 2rad 2m`;
+          await timePasses();
+          const orbit = element.getCameraOrbit();
+          expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
+              .to.equal(element.minCameraOrbit);
+        });
+
+        test('jumps to maxFieldOfView when outside', async () => {
+          element.maxFieldOfView = `30deg`;
+          await timePasses();
+          const fov = Math.round(element.getFieldOfView());
+          expect(`${fov}deg`).to.equal(element.maxFieldOfView);
+        });
+
+        test('jumps to minFieldOfView when outside', async () => {
+          element.minFieldOfView = `60deg`;
+          await timePasses();
+          const fov = Math.round(element.getFieldOfView());
+          expect(`${fov}deg`).to.equal(element.minFieldOfView);
+        });
+
+        suite('when configured before model loads', () => {
+          let initiallyUnloadedElement: ModelViewerElementBase&
+              ControlsInterface;
+          let controls: SmoothControls;
+
+          setup(() => {
+            initiallyUnloadedElement = new ModelViewerElement();
+            controls =
+                (initiallyUnloadedElement as any)[$controls] as SmoothControls;
+          });
+
+          teardown(() => {
+            if (initiallyUnloadedElement.parentNode != null) {
+              initiallyUnloadedElement.parentNode.removeChild(
+                  initiallyUnloadedElement);
+            }
+          });
+
+          test('respects user-configured maxFieldOfView', async () => {
+            document.body.appendChild(initiallyUnloadedElement);
+
+            initiallyUnloadedElement.maxFieldOfView = '100deg';
+            initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
+
+            await waitForEvent(initiallyUnloadedElement, 'load');
+
+            initiallyUnloadedElement.fieldOfView = '100deg';
+
+            await timePasses();
+            settleControls(controls);
+
+            expect(initiallyUnloadedElement.getFieldOfView())
+                .to.be.closeTo(100, 0.001);
+          });
+        });
+      });
     });
 
     suite('camera-controls', () => {

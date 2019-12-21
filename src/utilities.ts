@@ -15,10 +15,10 @@
 
 import {HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
 
-export type Constructor<T = object> = {
+export type Constructor<T = object, U = object> = {
   new (...args: any[]): T,
   prototype: T
-};
+}&U;
 
 export const deserializeUrl = (url: string|null): string|null =>
     (url != null && url !== 'null') ? toFullUrl(url) : null;
@@ -120,10 +120,8 @@ export const step = (edge: number, value: number): number => {
  * @return {Number} value clamped within lowerLimit..upperLimit
  */
 export const clamp =
-    (value: number, lowerLimit: number, upperLimit: number): number => Math.max(
-        lowerLimit === -Infinity ? value : lowerLimit,
-        Math.min(upperLimit === Infinity ? value : upperLimit, value));
-
+    (value: number, lowerLimit: number, upperLimit: number): number =>
+        Math.max(lowerLimit, Math.min(upperLimit, value));
 
 
 // The DPR we use for a "capped" scenario (see resolveDpr below):

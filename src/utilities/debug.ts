@@ -25,6 +25,7 @@ import {Renderer} from '../three-components/Renderer';
 export const showShadowHelper = (scene: ModelScene) => {
   if (scene.shadow != null) {
     const helper = new CameraHelper(scene.shadow.shadow.camera);
+    helper.frustumCulled = false;
     scene.add(helper);
   }
 };

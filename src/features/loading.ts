@@ -29,6 +29,9 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 
+const DEFAULT_DRACO_DECODER_LOCATION =
+    'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
+
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
 
@@ -85,14 +88,75 @@ export declare interface LoadingInterface {
   dismissPoster(): void;
 }
 
+export declare interface LoadingStaticInterface {
+  dracoDecoderLocation: string;
+}
+
+interface ModelViewerGlobalConfig {
+  dracoDecoderLocation?: string;
+}
+
 /**
  * LoadingMixin implements features related to lazy loading, as well as
  * presentation details related to the pre-load / pre-render presentation of a
  * <model-viewer>
+ *
+ * This mixin implements support for models with DRACO-compressed meshes.
+ * The DRACO decoder will be loaded on-demand if a glTF that uses the DRACO mesh
+ * compression extension is encountered.
+ *
+ * By default, the DRACO decoder will be loaded from a Google CDN. It is
+ * possible to customize where the decoder is loaded from by defining a global
+ * configuration option for `<model-viewer>` like so:
+ *
+ * ```html
+ * <script>
+ * ModelViewerElement = self.ModelViewerElement || {};
+ * ModelViewerElement.dracoDecoderLocation =
+ *     'http://example.com/location/of/draco/decoder/files/';
+ * </script>
+ * ```
+ *
+ * Note that the above configuration strategy must be performed *before* the
+ * first `<model-viewer>` element is created in the browser. The configuration
+ * can be done anywhere, but the easiest way to ensure it is done at the right
+ * time is to do it in the `<head>` of the HTML document. This is the
+ * recommended way to set the location because it is most compatible with
+ * scenarios where the `<model-viewer>` library is lazily loaded.
+ *
+ * If you absolutely have to set the DRACO decoder location *after* the first
+ * `<model-viewer>` element is created, you can do it this way:
+ *
+ * ```html
+ * <script>
+ * const ModelViewerElement = customElements.get('model-viewer');
+ * ModelViewerElement.dracoDecoderLocation =
+ *     'http://example.com/location/of/draco/decoder/files/';
+ * </script>
+ * ```
+ *
+ * Note that the above configuration approach will not work until *after*
+ * `<model-viewer>` is defined in the browser. Also note that this configuration
+ * *must* be set *before* the first DRACO model is fully loaded.
+ *
+ * It is recommended that users who intend to take advantage of DRACO mesh
+ * compression consider whether or not it is acceptable for their use case to
+ * have code side-loaded from a Google CDN. If it is not acceptable, then the
+ * location must be customized before loading any DRACO models in order to cause
+ * the decoder to be loaded from an alternative, acceptable location.
  */
 export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T): Constructor<LoadingInterface>&T => {
+    ModelViewerElement:
+        T): Constructor<LoadingInterface, LoadingStaticInterface>&T => {
   class LoadingModelViewerElement extends ModelViewerElement {
+    static set dracoDecoderLocation(value: string) {
+      CachingGLTFLoader.setDRACODecoderLocation(value);
+    }
+
+    static get dracoDecoderLocation() {
+      return CachingGLTFLoader.getDRACODecoderLocation();
+    }
+
     /**
      * A URL pointing to the image to use as a poster in scenarios where the
      * <model-viewer> is not ready to reveal a rendered model to the viewer.
@@ -195,6 +259,17 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
     }, PROGRESS_BAR_UPDATE_THRESHOLD);
 
+    constructor(...args: Array<any>) {
+      super(...args);
+
+      const ModelViewerElement: ModelViewerGlobalConfig =
+          (self as any).ModelViewerElement || {};
+      const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
+          DEFAULT_DRACO_DECODER_LOCATION;
+
+      CachingGLTFLoader.setDRACODecoderLocation(dracoDecoderLocation);
+    }
+
     connectedCallback() {
       super.connectedCallback();
 
@@ -233,9 +308,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('src')) {
+        if (!this[$modelIsReadyForReveal]) {
+          this[$lastReportedProgress] = 0;
+        }
+
         this[$posterDismissalSource] = null;
         this[$preloadAttempted] = false;
-        this[$lastReportedProgress] = 0;
         this[$sourceUpdated] = false;
       }
 
@@ -327,10 +405,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (this[$modelIsReadyForReveal]) {
-        if (!this[$sourceUpdated]) {
-          this[$updateSource]();
-          this[$hidePoster]();
-        }
+        await this[$updateSource]();
       } else {
         this[$showPoster]();
       }
@@ -342,7 +417,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const posterContainerOpacity =
           parseFloat(self.getComputedStyle(posterContainerElement).opacity!);
 
-      defaultPosterElement.tabIndex = 1;
+      defaultPosterElement.removeAttribute('tabindex');
       defaultPosterElement.removeAttribute('aria-hidden');
       posterContainerElement.classList.add('show');
 
@@ -380,7 +455,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             // Ensure that the poster is no longer focusable or visible to
             // screen readers
             defaultPosterElement.setAttribute('aria-hidden', 'true');
-            defaultPosterElement.removeAttribute('tabindex');
+            defaultPosterElement.tabIndex = -1;
           });
         }, {once: true});
       }
@@ -397,9 +472,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal]) {
+      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
         this[$sourceUpdated] = true;
         await super[$updateSource]();
+        this[$hidePoster]();
       }
     }
   }

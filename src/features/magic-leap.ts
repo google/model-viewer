@@ -32,7 +32,7 @@ const DEFAULT_HOLOGRAM_INLINE_SCALE = 0.65;
 // NOTE(cdata): This probably needs to scale proportionally with the dimensions
 // of the inline model, but we need more experimentation to decide how that
 // should work:
-const DEFAULT_HOLOGRAM_Z_OFFSET = '500px';
+const DEFAULT_HOLOGRAM_Z_OFFSET = '150px';
 
 export declare interface MagicLeapInterface {
   magicLeap: boolean;
@@ -104,12 +104,11 @@ export const MagicLeapMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${DEFAULT_HOLOGRAM_INLINE_SCALE} ${
                 DEFAULT_HOLOGRAM_INLINE_SCALE} ${
                 DEFAULT_HOLOGRAM_INLINE_SCALE}`);
-        this[$mlModel]!.setAttribute('scrollable', 'true');
         this[$mlModel]!.setAttribute('z-offset', DEFAULT_HOLOGRAM_Z_OFFSET);
         this[$mlModel]!.setAttribute('extractable', 'true');
         this[$mlModel]!.setAttribute('extracted-scale', '1');
         this[$mlModel]!.setAttribute(
-            'environment-lighting', 'color-intensity: 2;');
+            'environment-lighting', 'color-intensity: 5;');
 
         if (this.src != null) {
           this[$mlModel]!.setAttribute('src', this.src);

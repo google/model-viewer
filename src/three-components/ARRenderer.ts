@@ -58,7 +58,7 @@ export class ARRenderer extends EventDispatcher {
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-    this.inputContext = renderer.context!;
+    this.inputContext = renderer.context3D!;
 
     this.camera.matrixAutoUpdate = false;
 

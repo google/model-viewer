@@ -74,12 +74,14 @@ export class ExampleSnippet extends UpdatingElement {
   readonly stamped: boolean = false;
 
   public stamp() {
-    if (this.stampTo == null || this.template == null) {
+    if (this.template == null) {
       return;
     }
 
     const root = this.getRootNode()!;
-    const stampTarget = (root as RootNode).getElementById(this.stampTo);
+    const stampTarget = this.stampTo == null ?
+        this :
+        (root as RootNode).getElementById(this.stampTo);
 
     if (stampTarget != null) {
       let parentNode;
@@ -147,7 +149,7 @@ export class ExampleSnippet extends UpdatingElement {
     if (!this.stamped && !this.lazy &&
         (changedProperties.has('stamp-to') ||
          changedProperties.has('template')) &&
-        this.template != null && this.stampTo != null) {
+        this.template != null) {
       this.stamp();
     }
   }

@@ -130,6 +130,14 @@
               on supported devices.</p>
             </li>
             <li>
+              <div>ar-scale</div>
+              <p>Controls the scaling behavior in AR mode in
+              <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>.
+              Set to "fixed" to disable scaling of the model, which sets it to
+              always be at 100% scale. Defaults to "auto" which allows the model to
+              be resized.</p>
+            </li>
+            <li>
               <div>auto-rotate</div>
               <p>Enables the auto-rotation of the model.</p>
             </li>
@@ -151,13 +159,13 @@
               Takes any valid CSS color string.</p>
             </li>
             <li>
-              <div>background-image</div>
+              <div>skybox-image</div>
               <p>Sets the background image of the scene when viewed inline.
               Takes a URL to an <a
               href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular
               projection image</a> that's used for the skybox, as well as
               applied as an environment map on the model. Supports png, jpg and
-              hdr (recommended) images. Setting background-image supercedes
+              hdr (recommended) images. Setting skybox-image supercedes
               background-color.</p>
             </li>
             <li>
@@ -204,7 +212,7 @@
             <li>
               <div>environment-image</div>
               <p>Controls the environmental reflection of the model. Normally if
-              background-image is set, that image will also be used for the
+              skybox-image is set, that image will also be used for the
               environment-image. Use environment-image to only set the reflection
               without affecting the background.</p>
             </li>
@@ -221,7 +229,7 @@
               this value changes from its initially configured value, the camera
               will interpolate from its current value to the new value. Defaults
               to "auto", which sets either the vertical or horizontal field of
-              view to 45 degrees depending on the dimenions of the model and the
+              view to 45 degrees depending on the dimensions of the model and the
               aspect ratio of the canvas.</p>
             </li>
             <li>
@@ -284,6 +292,31 @@
               inclusion of the <a
               href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
               library.</p>
+            </li>
+            <li>
+              <div>max-camera-orbit</div>
+              <p>Set the maximum orbital values of the camera. Takes values in
+                the same form as camera-orbit, but does not support env().
+                Defaults to "Infinity 157.5deg Infinity". Note "Infinity" is not an
+                accepted keyword, but the default can still be obtained by passing
+                "auto".</p>
+            </li>
+            <li>
+              <div>max-field-of-view</div>
+              <p>Set the maximum field of view of the camera, corresponding to
+                maximum zoom-out. Takes values in the same form as field-of-view,
+                but does not support env(). Defaults to "45deg". </p>
+            </li>
+            <li>
+              <div>min-camera-orbit</div>
+              <p>Set the minimum orbital values of the camera, just like
+                max-camera-orbit above. Defaults to "-Infinity 22.5deg 0".</p>
+            </li>
+            <li>
+              <div>min-field-of-view</div>
+              <p>Set the minimum field of view of the camera, corresponding to
+                maximum zoom-in, just like max-field-of-view above. Defaults to
+                "10deg". </p>
             </li>
             <li>
               <div>poster</div>
@@ -477,13 +510,18 @@
               defaults to 0.92 otherwise).</p>
             </li>
             <li>
-              <div>toBlob(mimeType, qualityArgument)</div>
-              <p>Returns a promise that resolves into a Blob object in the format
-              specified by the <i>mimeType</i> (defaults to image/png). A Blob object
-              represents a file-like object of immutable, raw data. You can also
-              specify a value between 0 and 1 for <i>qualityArgument</i> (Currently
-              only available on Chrome desktop and Firefox) which defaults to 0.92
-              and 0.8 for image/png and image/webp respectively.</p>
+              <div>toBlob(options: {mimeType, qualityArgument, idealAspect})</div>
+              <p>Returns a promise that resolves into a Blob object in the
+              format specified by the <i>mimeType</i> (defaults to image/png). A
+              Blob object represents a file-like object of immutable, raw data.
+              You can also specify a value between 0 and 1 for
+              <i>qualityArgument</i> (Currently only available on Chrome desktop
+              and Firefox) which defaults to 0.92 and 0.8 for image/png and
+              image/webp respectively. By setting idealAspect to true, the blob
+              will be captured at the ideal poster aspect ratio instead of the
+              canvas aspect ratio. This allows for easy poster creation, where a
+              single poster will match the render seamlessly at any canvas
+              aspect ratio.</p>
             </li>
           </ul>
 
@@ -503,7 +541,7 @@
             <li>
               <div>environment-change</div>
               <p>Fired when the environment has changed. If the environment is
-              derived from background-image or environment-image, the image will
+              derived from skybox-image or environment-image, the image will
               have loaded by the time this event fires.</p>
             </li>
             <li>
