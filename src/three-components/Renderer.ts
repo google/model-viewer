@@ -28,6 +28,7 @@ import * as WebGLUtils from './WebGLUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
+  isTransparent?: boolean;
 }
 
 export interface ContextLostEvent extends Event {
@@ -40,6 +41,7 @@ export const $arRenderer = Symbol('arRenderer');
 const $onWebGLContextLost = Symbol('onWebGLContextLost');
 const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
 const $singleton = Symbol('singleton');
+const $singletonWithTransparency = Symbol('singletonWithTransparency');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -54,14 +56,22 @@ const $singleton = Symbol('singleton');
  */
 export class Renderer extends EventDispatcher {
   static[$singleton] = new Renderer({debug: isDebugMode()});
+  static[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
 
   static get singleton() {
     return this[$singleton];
   }
 
+  static get singletonWithTransparency() {
+    return this[$singletonWithTransparency];
+  }
+
   static resetSingleton() {
     this[$singleton].dispose();
     this[$singleton] = new Renderer({debug: isDebugMode()});
+
+    this[$singletonWithTransparency].dispose();
+    this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -70,6 +80,7 @@ export class Renderer extends EventDispatcher {
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
+  public isTransparent: boolean = false;
 
   protected debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
@@ -86,7 +97,9 @@ export class Renderer extends EventDispatcher {
   constructor(options?: RendererOptions) {
     super();
 
-    const webGlOptions = {alpha: false, antialias: true};
+    this.isTransparent = options != null && !!options.isTransparent;
+
+    const webGlOptions = {alpha: this.isTransparent, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_WEBXR_AR_CANDIDATE) {
@@ -247,12 +260,15 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.clearDepth();
+      this.threeRenderer.clear(this.isTransparent, true, false);
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
+      if (this.isTransparent) {
+        context.clearRect(0, 0, widthDPR, heightDPR);
+      }
       context.drawImage(
           this.threeRenderer.domElement,
           0,

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {BackSide, BoxBufferGeometry, Camera, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -101,7 +101,6 @@ export class ModelScene extends Scene {
     this.pivot.add(this.model);
 
     this.setSize(width, height);
-    this.background = new Color(0xffffff);
 
     this.model.addEventListener(
         'model-load', (event: any) => this.onModelLoad(event));

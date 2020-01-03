@@ -154,8 +154,14 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
 
-          const parsedColor = new Color(backgroundColor);
-          this[$scene].background = parsedColor;
+          // Update background color
+          if (backgroundColor === 'transparent') {
+            delete this[$scene].background;
+          }
+          else {
+            const parsedColor = new Color(backgroundColor);
+            this[$scene].background = parsedColor;
+          }
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);
