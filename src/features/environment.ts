@@ -126,6 +126,25 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$cancelEnvironmentUpdate] = null;
       }
 
+      // Update background color before to get texture utils because renderer singleton depends on background transparency
+      if (skyboxImage == null)
+      {
+        if (backgroundColor === 'transparent' && this[$scene].background) {
+          this.disconnectedCallback();
+          delete this[$scene].background;
+          this.connectedCallback();
+        }
+        else {
+          const mustUpdateRenderer = this[$scene].background == null;
+          mustUpdateRenderer && this.disconnectedCallback();
+
+          const parsedColor = new Color(backgroundColor);
+          this[$scene].background = parsedColor;
+
+          mustUpdateRenderer && this.connectedCallback();
+        }
+      }
+
       const {textureUtils} = this[$renderer];
 
       if (textureUtils == null) {
@@ -153,15 +172,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$scene].add(this[$scene].skyboxMesh);
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
-
-          // Update background color
-          if (backgroundColor === 'transparent') {
-            delete this[$scene].background;
-          }
-          else {
-            const parsedColor = new Color(backgroundColor);
-            this[$scene].background = parsedColor;
-          }
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);
