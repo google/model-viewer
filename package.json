@@ -3,7 +3,9 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lerna run test",
+    "test:ci": "lerna run test:ci",
+    "bootstrap": "lerna bootstrap --ci"
   },
   "repository": {
     "type": "git",
@@ -14,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/GoogleWebComponents/model-viewer/issues"
   },
-  "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme"
+  "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
+  "devDependencies": {
+    "lerna": "^3.20.2"
+  }
 }
