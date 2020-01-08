@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; Animation</title>
+  <title>&lt;model-viewer&gt; Interactive Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -45,118 +45,112 @@
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
   <style>
-label {
-  display: inline-block;
-  width: 100px;
-  height: 24px;
-}
+    body, html {
+      height: 100%;
+    }
 
-input {
-  vertical-align: middle;
-}
+    label {
+      display: inline-block;
+      width: 120px;
+      height: 24px;
+    }
 
-  input.number {
-    border: 0;
-    background: transparent;
-    font-size: 16px;
-    width: 32px;
-    outline: none;
-  }
+    input {
+      vertical-align: middle;
+    }
 
-select {
-  font-size: 14px;
-}
+    input.number {
+      border: 0;
+      background: transparent;
+      font-size: 16px;
+      width: 32px;
+      outline: none;
+    }
 
-model-viewer {
-  width: 100%;
-  height: 100%;
-}
+    select {
+      font-size: 14px;
+    }
 
-#instructions {
-  position: absolute;
-  top: 10px;
-  left: 30px;
-}
+    #container {
+      display: flex;
+      height: 100%;
+    }
 
-#controls {
-  position: absolute;
-  bottom: 20px;
-  left: 30px;
-}
+    model-viewer {
+      flex-grow: 1;
+      height: 100%;
+    }
 
-/* Nokia 8810 */
+    #instructions {
+      width: 320px;
+      margin-top: 10px;
+      margin-left: 30px;
+      margin-bottom: 20px;
+    }
 
-@media screen and (max-width: 320px) {
-  #instructions {
-    display: none;
-  }
-  #controls {
-    display: none;
-  }
-}
+    /* Nokia 8810 */
+
+    @media screen and (max-width: 320px) {
+      #instructions {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <div class="sample">
-    <div id="demo-container-1" class="demo"></div>
-    <div class="content">
-      <div class="wrapper">
-        <div class="heading">
-          <h2 class="demo-title">Testable example</h2>
-          <h4></h4>
-        </div>
-        <example-snippet stamp-to="demo-container-1" highlight-as="html">
-          <template>
-  <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none" src="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" background-color="#e1e1e1" alt="A 3D model"></model-viewer>
-  <div id="instructions">
-	<h1>
-	  <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
-	</h1>
-	Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">GLB</a> for model.<br/>
-	Drop a <a href="https://hdrihaven.com/" target="_blank">HDR</a> for background.
+  <div id="container">
+    <div id="instructions">
+    <h1>
+      <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
+    </h1>
+    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">GLB</a> for the model.<br/>
+    Drop an <a href="https://hdrihaven.com/" target="_blank">HDR</a> for the skybox.<br/><br/>
+
+    <label for="src">Model:</label>
+    <select id="src">
+      <option value="assets/Astronaut.glb">Astronaut</option>
+      <option value="assets/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
+      <option value="assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
+        <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
+        <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
+      <option value="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
+      <option value="assets/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
+      <option value="assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
+      <option value="assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb">Water Bottles</option>
+      <option value="assets/RobotExpressive.glb">Robot Expressive</option>
+      <option value="assets/alpha-blend-litmus.glb">Transparency Test</option>
+      <option value="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf">Metal Rough Spheres</option>
+    </select><br/>
+    
+    <label for="skyboxImage">Skybox:</label>
+    <select id="skyboxImage">
+      <option value="" selected>none</option>
+      <option value="assets/spruit_sunrise_1k_HDR.hdr">spruit sunrise HDR</option>
+      <option value="assets/spruit_sunrise_1k_LDR.jpg">spruit sunrise JPG</option>
+      <option value="assets/music_hall_01_1k.hdr">music hall</option>
+      <option value="assets/whipple_creek_regional_park_04_1k.hdr">whipple creek</option>
+      <option value="assets/aircraft_workshop_01_1k.hdr">aircraft workshop</option>
+      <option value="assets/pillars_1k.hdr">pillars</option>
+    </select><br/>
+
+    <label for="exposure">Exposure:</label>
+    <input id="exposure" type="range" step="0.01" min="0" max="2" value="1">
+    <input id="exposureValue" value="1" class="number"><br/>
+
+    <label for="shadowIntensity">Shadow:</label>
+    <input id="shadowIntensity" type="range" step="0.01" min="0" max="1" value="0">
+    <input id="shadowIntensityValue" value="0" class="number"><br/>
+
+    <label for="autoRotate">Auto-rotate:</label>
+    <input id="autoRotate" type="checkbox"><br/>
+    
+    </div> 
+    <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none" 
+      src="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" background-color="#e1e1e1" alt="A 3D model">
+    </model-viewer>
   </div>
-  <div id="controls">
 
-	<label for="src">Model</label>
-	<select id="src">
-	  <option value="assets/Astronaut.glb">Astronaut</option>
-	  <option value="assets/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
-	  <option value="assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
-      <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
-      <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
-	  <option value="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
-	  <option value="assets/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
-	  <option value="assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
-	  <option value="assets/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb">Water Bottles</option>
-	  <option value="assets/RobotExpressive.glb">Robot Expressive</option>
-	  <option value="assets/alpha-blend-litmus.glb">Transparency Test</option>
-	  <option value="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf">Metal Rough Spheres</option>
-	</select><br/>
-	
-	<label for="skyboxImage">Skybox</label>
-	<select id="skyboxImage">
-	  <option value="" selected>none</option>
-	  <option value="assets/spruit_sunrise_1k_HDR.hdr">spruit sunrise HDR</option>
-	  <option value="assets/spruit_sunrise_1k_LDR.jpg">spruit sunrise JPG</option>
-	  <option value="assets/music_hall_01_1k.hdr">music hall</option>
-	  <option value="assets/whipple_creek_regional_park_04_1k.hdr">whipple creek</option>
-	  <option value="assets/aircraft_workshop_01_1k.hdr">aircraft workshop</option>
-	  <option value="assets/pillars_1k.hdr">pillars</option>
-	</select><br/>
-
-	<label for="exposure">Exposure</label>
-	<input id="exposure" type="range" step="0.01" min="0" max="2" value="1">
-	<input id="exposureValue" value="1" class="number"><br/>
-
-	<label for="shadowIntensity">Shadow</label>
-	<input id="shadowIntensity" type="range" step="0.01" min="0" max="1" value="0">
-	<input id="shadowIntensityValue" value="0" class="number"><br/>
-
-	<label for="autoRotate">Auto rotate</label>
-	<input id="autoRotate" type="checkbox"><br/>
-	
-  </div> 
   <script>
   (() => {
     const viewer = document.getElementById('loading-demo');
@@ -214,12 +208,6 @@ model-viewer {
 	});
   })();
   </script>
-          </template>
-        </example-snippet>
-      </div>
-    </div>
-  </div>
-
 
   <div class="footer">
     <ul>
