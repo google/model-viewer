@@ -228,6 +228,10 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setModel(this.model, this.shadowSoftness);
     }
+    // Uncomment if using showShadowHelper below
+    // if (this.children.length > 1) {
+    //   (this.children[1] as CameraHelper).update();
+    // }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
