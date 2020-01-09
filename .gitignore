@@ -1,14 +1,4 @@
-renderers/*
-node_modules/*
-dist/*
-lib/*
-fidelity/*
-test/fidelity/results/*
-examples/built/*
-examples/assets/glTF-Sample-Models
-**/*.sw*
+.vscode
+*.swp
 .DS_Store
-.idea
-*.iml
-test/fidelity/renderers/filament/cmgen
-test/fidelity/renderers/filament/ktx
+node_modules
