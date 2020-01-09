@@ -28,8 +28,6 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-export {Vector3} from 'three';
-
 export const ModelViewerElement = MagicLeapMixin(AnnotationMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
         FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));

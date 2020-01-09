@@ -21,8 +21,9 @@ import {_Math as ThreeMath} from 'three/src/math/Math.js';
 
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
+import {normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
-import {numberNode} from '../styles/parsers.js';
+import {numberNode, NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
 
 const DEFAULT_HIDDEN_OPACITY = 0.25;
@@ -35,19 +36,25 @@ const $hiddenAngle = Symbol('hiddenAngle');
 const $syncHiddenAngle = Symbol('syncHiddenAngle');
 
 class Hotspot extends CSS2DObject {
-  public normal: Vector3;
+  public normal = new Vector3();
 
-  constructor(element: HTMLElement, position: Vector3, normal: Vector3) {
+  constructor(element: HTMLElement) {
     super(element);
-    this.position.copy(position);
-    this.normal = normal;
+    const positionNodes = parseExpressions(element.dataset.position!)[0].terms;
+    const normalNodes = parseExpressions(element.dataset.normal!)[0].terms;
+    for (let i = 0; i < 3; ++i) {
+      this.position.setComponent(
+          i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
+      this.normal.setComponent(
+          i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
+    }
   }
 }
 
 export declare interface AnnotationInterface {
   hiddenOpacity: number;
   hiddenAngle: string;
-  addHotspot(element: HTMLElement, position: Vector3, normal: Vector3): void;
+  addHotspot(element: HTMLElement): void;
 }
 
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -72,9 +79,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
       const {domElement} = this[$annotationRenderer];
-      // for (let i = 0; i < this.children.length; ++i) {
-      //   this.addHotspot(this.children[i]);
-      // }
+      for (let i = 0; i < this.children.length; ++i) {
+        const child = this.children[i];
+        if (child instanceof HTMLElement)
+          this.addHotspot(child);
+      }
       domElement.style.pointerEvents = 'none';
       this.appendChild(domElement);
     }
@@ -120,9 +129,10 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    addHotspot(element: HTMLElement, position: Vector3, normal: Vector3) {
-      // element.classList.add('hotspot');
-      const hotspot = new Hotspot(element, position, normal);
+    addHotspot(element: HTMLElement) {
+      if (!element.dataset.position || !element.dataset.normal)
+        return;
+      const hotspot = new Hotspot(element);
       this[$scene].pivot.add(hotspot);
     }
   }

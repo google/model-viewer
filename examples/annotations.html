@@ -72,17 +72,10 @@
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
 <model-viewer id="hotspot-demo" camera-controls src="assets/Astronaut.glb" background-color="#eeeeee" alt="A 3D model of an astronaut.">
-  <button id="visor"></button>
-  <button id="hand" style="background-color:red"></button>
-  <button id="foot"></button>
+  <button id="visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
+  <button id="hand" data-position="-0.55 0.95 0.1" data-normal="-1 0 1" style="background-color:red"></button>
+  <button id="foot" data-position="0.16 0.11 0.15" data-normal="0 1 0.3"></button>
 </model-viewer>
-<script type="module">
-    import {Vector3} from "../dist/model-viewer.js";
-    const modelViewer = document.querySelector('#hotspot-demo');
-    modelViewer.addHotspot(document.querySelector('#visor'), new Vector3(0, 1.75, 0.35), new Vector3(0, 0, 1));// visor
-    modelViewer.addHotspot(document.querySelector('#hand'), new Vector3(-0.55, 0.95, 0.1),  new Vector3(-1, 0, 1));// hand
-    modelViewer.addHotspot(document.querySelector('#foot'), new Vector3(0.16, 0.11, 0.15),  new Vector3(0, 1, 0.3));// foot
-</script>
           </template>
         </example-snippet>
       </div>
