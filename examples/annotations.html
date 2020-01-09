@@ -46,17 +46,6 @@
   <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
-<style>
-  button{
-    pointer-events: auto;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    webkit-border-radius: 10px;
-    border: none;
-    background-color: blue;
-  }
-</style>
 <body>
 
   <div class="sample">
@@ -71,6 +60,18 @@
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
+<style>
+  button{
+    pointer-events: auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    webkit-border-radius: 10px;
+    border: none;
+    background-color: blue;
+    opacity: 0;
+  }
+</style>
 <model-viewer id="hotspot-demo" camera-controls src="assets/Astronaut.glb" background-color="#eeeeee" alt="A 3D model of an astronaut.">
   <button id="visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
   <button id="hand" data-position="-0.55 0.95 0.1" data-normal="-1 0 1" style="background-color:red"></button>

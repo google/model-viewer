@@ -253,7 +253,6 @@ canvas.show {
 #default-exit-fullscreen-button > svg {
   fill: #fff;
 }
-
 </style>
 <div class="container">
   <canvas tabindex="1"
