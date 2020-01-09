@@ -71,10 +71,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     connectedCallback() {
       super.connectedCallback();
-      const {style} = this[$annotationRenderer].domElement;
-      style.pointerEvents = 'none';
-      this.shadowRoot!.querySelector('.slot.default')!.appendChild(
-          this[$annotationRenderer].domElement);
+      const {domElement} = this[$annotationRenderer];
+      // for (let i = 0; i < this.children.length; ++i) {
+      //   this.addHotspot(this.children[i]);
+      // }
+      domElement.style.pointerEvents = 'none';
+      this.appendChild(domElement);
     }
 
     disconnectedCallback() {
@@ -119,7 +121,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     addHotspot(element: HTMLElement, position: Vector3, normal: Vector3) {
-      element.classList.add('hotspot');
+      // element.classList.add('hotspot');
       const hotspot = new Hotspot(element, position, normal);
       this[$scene].pivot.add(hotspot);
     }
