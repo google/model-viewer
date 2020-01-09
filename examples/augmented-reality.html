@@ -42,7 +42,7 @@
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
   <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+  <script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>
 
 </head>
 <body>
@@ -59,7 +59,7 @@
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer src="assets/Astronaut.glb" ar camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
+<model-viewer src="assets/Astronaut.glb" ar ar-scale="auto" camera-controls alt="A 3D model of an astronaut" background-color="#222" ios-src="assets/Astronaut.usdz" magic-leap unstable-webxr></model-viewer>
           </template>
         </example-snippet>
 
@@ -70,6 +70,14 @@
             <p>Enable the ability to launch
             <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
             on supported devices.</p>
+          </li>
+          <li>
+            <div>ar-scale</div>
+            <p>Controls the scaling behavior in AR mode in
+            <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>.
+            Set to "fixed" to disable scaling of the model, which sets it to
+            always be at 100% scale. Defaults to "auto" which allows the model to
+            be resized.</p>
           </li>
           <li>
             <div>ios-src</div>

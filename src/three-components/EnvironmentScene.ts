@@ -22,7 +22,7 @@ export default class EnvironmentScene extends Scene {
     this.position.y = -3.5;
 
     const geometry = new BoxBufferGeometry();
-    geometry.removeAttribute('uv');
+    geometry.deleteAttribute('uv');
 
     const roomMaterial =
         new MeshStandardMaterial({metalness: 0, side: BackSide});

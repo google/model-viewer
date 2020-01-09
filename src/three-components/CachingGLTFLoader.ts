@@ -14,23 +14,27 @@
  */
 
 import {Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
-import {cloneGltf, Gltf} from './ModelUtils.js';
+import {cloneGltf} from './ModelUtils.js';
 import {RoughnessMipmapper} from './RoughnessMipmapper.js';
 
 export type ProgressCallback = (progress: number) => void;
 
+/**
+ * A helper to Promise-ify a Three.js GLTFLoader
+ */
 export const loadWithLoader =
     (url: string,
-     loader: any,
+     loader: GLTFLoader,
      progressCallback: ProgressCallback = () => {}) => {
       const onProgress = (event: ProgressEvent) => {
         progressCallback!(event.loaded / event.total);
       };
-      return new Promise<Gltf>((resolve, reject) => {
+      return new Promise<GLTF>((resolve, reject) => {
         loader.load(url, resolve, onProgress, reject);
       });
     };
@@ -40,12 +44,25 @@ export interface CacheRetainedScene extends Scene {
   [$releaseFromCache]: () => void;
 }
 
-const cache = new Map<string, Promise<Gltf>>();
+const cache = new Map<string, Promise<GLTF>>();
 const preloaded = new Map<string, boolean>();
 
 export const $evictionPolicy = Symbol('evictionPolicy');
 
+let dracoDecoderLocation: string;
+const dracoLoader = new DRACOLoader();
+const $loader = Symbol('loader');
+
 export class CachingGLTFLoader {
+  static setDRACODecoderLocation(url: string) {
+    dracoDecoderLocation = url;
+    dracoLoader.setDecoderPath(url);
+  }
+
+  static getDRACODecoderLocation() {
+    return dracoDecoderLocation;
+  }
+
   static[$evictionPolicy]: CacheEvictionPolicy =
       new CacheEvictionPolicy(CachingGLTFLoader);
 
@@ -101,7 +118,11 @@ export class CachingGLTFLoader {
     return !!preloaded.get(url);
   }
 
-  protected loader: GLTFLoader = new GLTFLoader();
+  constructor() {
+    this[$loader].setDRACOLoader(dracoLoader);
+  }
+
+  protected[$loader]: GLTFLoader = new GLTFLoader();
 
   protected get[$evictionPolicy](): CacheEvictionPolicy {
     return (this.constructor as typeof CachingGLTFLoader)[$evictionPolicy];
@@ -113,7 +134,7 @@ export class CachingGLTFLoader {
    */
   async preload(url: string, progressCallback: ProgressCallback = () => {}) {
     if (!cache.has(url)) {
-      cache.set(url, loadWithLoader(url, this.loader, (progress: number) => {
+      cache.set(url, loadWithLoader(url, this[$loader], (progress: number) => {
                   progressCallback(progress * 0.9);
                 }));
     }

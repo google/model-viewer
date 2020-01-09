@@ -66,7 +66,7 @@
       modelViewer.style.height = `${scenario.dimensions.height}px`;
 
       modelViewer.src = scenario.model;
-      modelViewer.backgroundImage = scenario.lighting;
+      modelViewer.skyboxImage = scenario.lighting;
       const {theta, phi, radius} = scenario.orbit;
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;

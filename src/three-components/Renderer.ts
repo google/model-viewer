@@ -16,7 +16,7 @@
 import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {Event} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP, HAS_OFFSCREEN_CANVAS} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -65,8 +65,8 @@ export class Renderer extends EventDispatcher {
   }
 
   public threeRenderer!: WebGLRenderer;
-  public context!: WebGLRenderingContext|null;
-  public canvas: HTMLCanvasElement;
+  public context3D!: WebGLRenderingContext|null;
+  public canvas3D: HTMLCanvasElement | OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -80,7 +80,7 @@ export class Renderer extends EventDispatcher {
       this[$onWebGLContextLost](event);
 
   get canRender() {
-    return this.threeRenderer != null && this.context != null;
+    return this.threeRenderer != null && this.context3D != null;
   }
 
   constructor(options?: RendererOptions) {
@@ -93,20 +93,25 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.addEventListener(
+    if (HAS_OFFSCREEN_CANVAS && OFFSCREEN_CANVAS_SUPPORT_BITMAP) {
+      this.canvas3D = new OffscreenCanvas(0, 0);
+    } else {
+      this.canvas3D = document.createElement('canvas');
+    }
+
+    this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
-      this.context = WebGLUtils.getContext(this.canvas, webGlOptions);
+      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
 
       // Patch the gl context's extension functions before passing
       // it to three.
-      WebGLUtils.applyExtensionCompatibility(this.context);
+      WebGLUtils.applyExtensionCompatibility(this.context3D);
 
       this.threeRenderer = new WebGLRenderer({
-        canvas: this.canvas,
-        context: this.context,
+        canvas: this.canvas3D,
+        context: this.context3D,
       });
       this.threeRenderer.autoClear = false;
       this.threeRenderer.gammaOutput = true;
@@ -125,7 +130,7 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
-      this.context = null;
+      this.context3D = null;
       console.warn(error);
     }
 
@@ -251,7 +256,7 @@ export class Renderer extends EventDispatcher {
       context.drawImage(
           this.threeRenderer.domElement,
           0,
-          this.canvas.height - heightDPR,
+          this.canvas3D.height - heightDPR,
           widthDPR,
           heightDPR,
           0,
@@ -278,7 +283,7 @@ export class Renderer extends EventDispatcher {
 
     this.scenes.clear();
 
-    this.canvas.removeEventListener(
+    this.canvas3D.removeEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
   }
 

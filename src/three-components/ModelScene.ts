@@ -226,8 +226,12 @@ export class ModelScene extends Scene {
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
     if (this.shadow != null) {
-      this.shadow.updateModel(this.model, this.shadowSoftness);
+      this.shadow.setModel(this.model, this.shadowSoftness);
     }
+    // Uncomment if using showShadowHelper below
+    // if (this.children.length > 1) {
+    //   (this.children[1] as CameraHelper).update();
+    // }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
@@ -261,8 +265,8 @@ export class ModelScene extends Scene {
 
   createSkyboxMesh(): Mesh {
     const geometry = new BoxBufferGeometry(1, 1, 1);
-    geometry.removeAttribute('normal');
-    geometry.removeAttribute('uv');
+    geometry.deleteAttribute('normal');
+    geometry.deleteAttribute('uv');
     const material = new ShaderMaterial({
       uniforms: {envMap: {value: null}, opacity: {value: 1.0}},
       vertexShader: ShaderLib.cube.vertexShader,

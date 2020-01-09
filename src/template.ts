@@ -108,6 +108,8 @@ canvas.show {
   width: 100%;
   height: 100%;
   position: absolute;
+  border: none;
+  padding: 0;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -273,7 +275,7 @@ canvas.show {
         will have their <slot> elements removed by ShadyCSS -->
   <div class="slot poster">
     <slot name="poster">
-      <div id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></div>
+      <button type="button" id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></button>
     </slot>
   </div>
 
