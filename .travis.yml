@@ -39,7 +39,9 @@ cache:
   directories:
   - packages/model-viewer/examples/assets/glTF-Sample-Models
 after_success:
-- ./packages/model-viewer/scripts/run-fidelity-check.sh
+- pushd ./packages/model-viewer
+- ./scripts/run-fidelity-check.sh
+- popd
 before_deploy:
 - lerna run create-legacy-bundles
 - cd ${TRAVIS_BUILD_DIR}/packages/model-viewer
