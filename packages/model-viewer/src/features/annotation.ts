@@ -35,6 +35,8 @@ const $updateHotspots = Symbol('updateHotspots');
 const $hiddenAngle = Symbol('hiddenAngle');
 const $syncHiddenAngle = Symbol('syncHiddenAngle');
 const $nextHotspotIndex = Symbol('nextHotspotIndex');
+const $hotspotMap = Symbol('hotspotMap');
+const $observer = Symbol('observer');
 
 class Hotspot extends CSS2DObject {
   public normal: Vector3;
@@ -45,12 +47,22 @@ class Hotspot extends CSS2DObject {
     slot.name = element.slot;
     wrapper.appendChild(slot);
     super(wrapper);
-    const positionNodes = parseExpressions(element.dataset.position!)[0].terms;
-    const normalNodes = parseExpressions(element.dataset.normal!)[0].terms;
     this.normal = new Vector3();
+    this.updatePosition(element);
+    this.updateNormal(element);
+  }
+
+  updatePosition(element: HTMLElement) {
+    const positionNodes = parseExpressions(element.dataset.position!)[0].terms;
     for (let i = 0; i < 3; ++i) {
       this.position.setComponent(
           i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
+    }
+  }
+
+  updateNormal(element: HTMLElement) {
+    const normalNodes = parseExpressions(element.dataset.normal!)[0].terms;
+    for (let i = 0; i < 3; ++i) {
       this.normal.setComponent(
           i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
     }
@@ -82,6 +94,37 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     private[$annotationRenderer] = new CSS2DRenderer();
     private[$hiddenAngle] = DEFAULT_HIDDEN_ANGLE;
     private[$nextHotspotIndex] = 0;
+    private[$hotspotMap] = new Map();
+    private[$observer] =
+        new MutationObserver((mutations) => {mutations.forEach((mutation) => {
+                               switch (mutation.type) {
+                                 case 'childList':
+                                   mutation.addedNodes.forEach((node) => {
+                                     this.addHotspot(node);
+                                   });
+                                   mutation.removedNodes.forEach((node) => {
+                                     this.removeHotspot(node);
+                                   });
+                                   break;
+                                 case 'attributes':
+                                   const {target} = mutation;
+                                   const hotspot =
+                                       this[$hotspotMap].get(target);
+                                   if (!hotspot) {
+                                     this.addHotspot(target);
+                                     break;
+                                   }
+                                   switch (mutation.attributeName) {
+                                     case 'data-position':
+                                       hotspot.updatePosition(target);
+                                       break;
+                                     case 'data-normal':
+                                       hotspot.updateNormal(target);
+                                       break;
+                                   }
+                                   break;
+                               }
+                             })});
 
     connectedCallback() {
       super.connectedCallback();
@@ -93,15 +136,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
 
       for (let i = 0; i < this.children.length; ++i) {
-        const child = this.children[i];
-        if (child instanceof HTMLElement) {
-          this.addHotspot(child);
-        }
+        this.addHotspot(this.children[i]);
       }
+
+      this[$observer].observe(
+          this, {childList: true, attributes: true, subtree: true});
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
+      this[$observer].disconnect();
     }
 
     updated(changedProperties: Map<string, any>) {
@@ -141,12 +185,22 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    addHotspot(element: HTMLElement) {
-      if (!element.dataset.position || !element.dataset.normal)
+    addHotspot(element: Node) {
+      if (!(element instanceof HTMLElement) || element.parentNode != this ||
+          !element.dataset.position || !element.dataset.normal)
         return;
       element.slot = `hotspot-${this[$nextHotspotIndex]++}`;
       const hotspot = new Hotspot(element);
+      this[$hotspotMap].set(element, hotspot);
       this[$scene].pivot.add(hotspot);
+    }
+
+    removeHotspot(element: Node) {
+      const hotspot = this[$hotspotMap].get(element);
+      if (!hotspot)
+        return;
+      this[$scene].pivot.remove(hotspot);
+      this[$hotspotMap].delete(element);
     }
   }
 
