@@ -36,12 +36,17 @@ const $hiddenAngle = Symbol('hiddenAngle');
 const $syncHiddenAngle = Symbol('syncHiddenAngle');
 
 class Hotspot extends CSS2DObject {
-  public normal = new Vector3();
+  public normal: Vector3;
 
   constructor(element: HTMLElement) {
-    super(element);
+    const wrapper = document.createElement('div');
+    const slot = document.createElement('slot');
+    slot.name = element.slot;
+    wrapper.appendChild(slot);
+    super(wrapper);
     const positionNodes = parseExpressions(element.dataset.position!)[0].terms;
     const normalNodes = parseExpressions(element.dataset.normal!)[0].terms;
+    this.normal = new Vector3();
     for (let i = 0; i < 3; ++i) {
       this.position.setComponent(
           i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
@@ -79,13 +84,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
       const {domElement} = this[$annotationRenderer];
+      domElement.style.pointerEvents = 'none';
+      this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
+
       for (let i = 0; i < this.children.length; ++i) {
         const child = this.children[i];
-        if (child instanceof HTMLElement)
+        if (child instanceof HTMLElement) {
+          child.slot = `hotspot-${i}`;
           this.addHotspot(child);
+        }
       }
-      domElement.style.pointerEvents = 'none';
-      this.appendChild(domElement);
     }
 
     disconnectedCallback() {
