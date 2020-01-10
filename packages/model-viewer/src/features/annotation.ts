@@ -85,6 +85,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
       const {domElement} = this[$annotationRenderer];
       domElement.style.pointerEvents = 'none';
+      domElement.style.position = 'absolute';
+      domElement.style.top = '0';
       this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
 
       for (let i = 0; i < this.children.length; ++i) {
