@@ -34,6 +34,7 @@ const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
 const $hiddenAngle = Symbol('hiddenAngle');
 const $syncHiddenAngle = Symbol('syncHiddenAngle');
+const $nextHotspotIndex = Symbol('nextHotspotIndex');
 
 class Hotspot extends CSS2DObject {
   public normal: Vector3;
@@ -80,19 +81,20 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$annotationRenderer] = new CSS2DRenderer();
     private[$hiddenAngle] = DEFAULT_HIDDEN_ANGLE;
+    private[$nextHotspotIndex] = 0;
 
     connectedCallback() {
       super.connectedCallback();
       const {domElement} = this[$annotationRenderer];
-      domElement.style.pointerEvents = 'none';
-      domElement.style.position = 'absolute';
-      domElement.style.top = '0';
+      const {style} = domElement;
+      style.pointerEvents = 'none';
+      style.position = 'absolute';
+      style.top = '0';
       this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
 
       for (let i = 0; i < this.children.length; ++i) {
         const child = this.children[i];
         if (child instanceof HTMLElement) {
-          child.slot = `hotspot-${i}`;
           this.addHotspot(child);
         }
       }
@@ -142,6 +144,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     addHotspot(element: HTMLElement) {
       if (!element.dataset.position || !element.dataset.normal)
         return;
+      element.slot = `hotspot-${this[$nextHotspotIndex]++}`;
       const hotspot = new Hotspot(element);
       this[$scene].pivot.add(hotspot);
     }
