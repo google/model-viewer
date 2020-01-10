@@ -33,7 +33,6 @@
     "build": "tsc && rollup -c --environment NODE_ENV:production",
     "build:dev": "tsc && rollup -c --environment NODE_ENV:development",
     "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js",
-    "prepare": "npm run fetch-samples",
     "prepublishOnly": "npm run build && npm run create-legacy-bundles",
     "test": "npm run clean && npm run build && npm run wct-local-chrome",
     "test:ci": "./scripts/ci-run-tests.sh",
@@ -43,7 +42,6 @@
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "update-screenshots": "node ./scripts/update-screenshots.js ./test/fidelity/config.json",
-    "fetch-samples": "./scripts/fetch-khronos-gltf-samples.sh",
     "serve": "ws",
     "dev": "concurrently \"npm run watch\" \"npm run serve\"",
     "watch": "cross-os x-watch",
@@ -71,6 +69,7 @@
     "3d"
   ],
   "devDependencies": {
+    "@google/model-viewer-shared-assets": "^0.0.1",
     "@jsantell/event-target": "^1.1.2",
     "@magicleap/prismatic": "^2.0.2",
     "@polymer/iron-demo-helpers": "^3.0.2",
@@ -105,6 +104,7 @@
     "rollup": "^0.66.0",
     "rollup-plugin-cleanup": "^3.0.0-beta.1",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-replace": "^2.2.0",
     "typescript": "3.6.3",
     "wct-browser-legacy": "^1.0.1",
     "web-component-tester": "^6.9.2"

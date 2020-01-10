@@ -37,20 +37,10 @@ after_success:
 - popd
 before_deploy:
 - lerna run create-legacy-bundles
-- cd ${TRAVIS_BUILD_DIR}/packages/model-viewer
-- touch .nojekyll
-- echo 'node_modules/*' > .gitignore
-- echo '!node_modules/@webcomponents' >> .gitignore
-- echo '!node_modules/focus-visible' >> .gitignore
-- echo '!node_modules/intersection-observer' >> .gitignore
-- echo '!node_modules/@magicleap' >> .gitignore
-- echo '!node_modules/fullscreen-polyfill' >> .gitignore
-- echo '!node_modules/resize-observer-polyfill' >> .gitignore
-- echo '!node_modules/filament' >> .gitignore
-- git log -n 1 > VERSION
+- ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 deploy:
   - provider: pages
-    local_dir: ${TRAVIS_BUILD_DIR}/packages/model-viewer
+    local_dir: ${TRAVIS_BUILD_DIR}/packages/modelviewer.dev
     skip-cleanup: true
     preserve-history: true
     github-token: $GITHUB_TOKEN

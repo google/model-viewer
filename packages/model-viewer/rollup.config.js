@@ -15,32 +15,17 @@
 
 const path = require('path');
 const resolve = require('rollup-plugin-node-resolve');
+const replace = require('rollup-plugin-replace');
 const cleanup = require('rollup-plugin-cleanup');
 
-const {NODE_ENV} = process.env;
-const addPath = files => files.map(f => path.join(__dirname, f));
-
-// Tag well-known warnings so we can silence them.
-const IGNORE_WARNINGS = {
-  // Some third party code emits warnings from parsing their
-  // UMD/commonjs exporting.
-  THIS_IS_UNDEFINED: addPath(['node_modules/marked/lib/marked.js']),
-  // Some third party libraries may have optional modules.
-  MISSING_EXPORT: addPath(['lib/third_party/three/GLTFLoader.js']),
-};
-
 const onwarn = (warning, warn) => {
-  const filesToIgnore = IGNORE_WARNINGS[warning.code];
-  if (filesToIgnore && filesToIgnore.indexOf(warning.id) !== -1) {
-    return;
+  // Suppress non-actionable warning caused by TypeScript boilerplate:
+  if (warning.code !== 'THIS_IS_UNDEFINED') {
+    warn(warning);
   }
-
-  warn(warning);
 };
 
-const plugins = [
-  resolve(),
-];
+const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
 const outputOptions = [{
   input: './lib/model-viewer.js',
@@ -156,26 +141,6 @@ if (NODE_ENV !== 'development') {
         },
         watch: {
           include: '{lib/test/fidelity/**,lib/third_party/**}',
-        },
-        plugins,
-        onwarn,
-      },
-      {
-        input: './lib/documentation/components/example-snippet.js',
-        output: {
-          file: './examples/built/dependencies.js',
-          format: 'esm',
-          name: 'DocumentationDependencies'
-        },
-        plugins,
-        onwarn,
-      },
-      {
-        input: './lib/documentation/components/example-snippet.js',
-        output: {
-          file: './examples/built/dependencies-umd.js',
-          format: 'umd',
-          name: 'DocumentationDependencies'
         },
         plugins,
         onwarn,
