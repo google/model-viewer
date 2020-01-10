@@ -57,6 +57,7 @@ before_deploy:
 - git log -n 1 > VERSION
 deploy:
   - provider: pages
+    local_dir: ${TRAVIS_BUILD_DIR}/packages/model-viewer
     skip-cleanup: true
     preserve-history: true
     github-token: $GITHUB_TOKEN
