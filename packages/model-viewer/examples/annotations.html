@@ -61,6 +61,10 @@
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
 <style>
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
   button{
     pointer-events: auto;
     width: 20px;
