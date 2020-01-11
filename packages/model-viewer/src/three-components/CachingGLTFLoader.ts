@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
+import {BackSide, FrontSide, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
+import {DoubleSide} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -161,6 +162,7 @@ export class CachingGLTFLoader {
 
     const gltf = await cache.get(url)!;
 
+    const duplicate: Mesh[] = [];
     if (gltf.scene != null) {
       gltf.scene.traverse((node: Object3D) => {
         // Three.js seems to cull some animated models incorrectly. Since we
@@ -178,15 +180,38 @@ export class CachingGLTFLoader {
         }
         node.castShadow = true;
         const mesh = node as Mesh;
+        let transparent = false;
         const materials =
             Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         materials.forEach(material => {
           if ((material as any).isMeshStandardMaterial) {
+            if (material.transparent && material.side === DoubleSide) {
+              transparent = true;
+              material.side = FrontSide;
+            }
             this.roughnessMipmapper.generateMipmaps(
                 material as MeshStandardMaterial);
           }
         });
+
+        if (transparent) {
+          duplicate.push(mesh);
+        }
       });
+    }
+
+    for (let i = 0; i < duplicate.length; i++) {
+      const mesh = duplicate[i];
+      const material = Array.isArray(mesh.material) ?
+          mesh.material.map((material) => {
+            const backMaterial = material.clone();
+            backMaterial.side = BackSide;
+            return backMaterial;
+          }) :
+          mesh.material.clone();
+      const meshBack = new Mesh(mesh.geometry, material);
+      meshBack.renderOrder = -1;
+      mesh.add(meshBack);
     }
 
     const clone = cloneGltf(gltf);
