@@ -95,36 +95,36 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     private[$hiddenAngle] = DEFAULT_HIDDEN_ANGLE;
     private[$nextHotspotIndex] = 0;
     private[$hotspotMap] = new Map();
-    private[$observer] =
-        new MutationObserver((mutations) => {mutations.forEach((mutation) => {
-                               switch (mutation.type) {
-                                 case 'childList':
-                                   mutation.addedNodes.forEach((node) => {
-                                     this.addHotspot(node);
-                                   });
-                                   mutation.removedNodes.forEach((node) => {
-                                     this.removeHotspot(node);
-                                   });
-                                   break;
-                                 case 'attributes':
-                                   const {target} = mutation;
-                                   const hotspot =
-                                       this[$hotspotMap].get(target);
-                                   if (!hotspot) {
-                                     this.addHotspot(target);
-                                     break;
-                                   }
-                                   switch (mutation.attributeName) {
-                                     case 'data-position':
-                                       hotspot.updatePosition(target);
-                                       break;
-                                     case 'data-normal':
-                                       hotspot.updateNormal(target);
-                                       break;
-                                   }
-                                   break;
-                               }
-                             })});
+    private[$observer] = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        switch (mutation.type) {
+          case 'childList':
+            mutation.addedNodes.forEach((node) => {
+              this.addHotspot(node);
+            });
+            mutation.removedNodes.forEach((node) => {
+              this.removeHotspot(node);
+            });
+            break;
+          case 'attributes':
+            const {target} = mutation;
+            const hotspot = this[$hotspotMap].get(target);
+            if (!hotspot) {
+              this.addHotspot(target);
+              break;
+            }
+            switch (mutation.attributeName) {
+              case 'data-position':
+                hotspot.updatePosition(target);
+                break;
+              case 'data-normal':
+                hotspot.updateNormal(target);
+                break;
+            }
+            break;
+        }
+      });
+    });
 
     connectedCallback() {
       super.connectedCallback();
