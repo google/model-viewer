@@ -205,6 +205,9 @@ export class CachingGLTFLoader {
     // convex meshes. Sorting artifacts can still appear when you can see
     // through more than two layers of a given mesh, but this can usually be
     // mitigated by the author splitting the mesh into mostly convex regions.
+    // The performance cost is not too great as the same shader is reused and
+    // the same number of fragments are processed; only the vertex shader is run
+    // twice.
     for (let i = 0; i < duplicate.length; i++) {
       const mesh = duplicate[i];
       const material = Array.isArray(mesh.material) ?
