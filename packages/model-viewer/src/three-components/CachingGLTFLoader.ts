@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
+import {BackSide, FrontSide, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {DoubleSide} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -162,7 +162,7 @@ export class CachingGLTFLoader {
 
     const gltf = await cache.get(url)!;
 
-    const duplicate: Mesh[] = [];
+    const meshesToDuplicate: Mesh[] = [];
     if (gltf.scene != null) {
       gltf.scene.traverse((node: Object3D) => {
         // Three.js seems to cull some animated models incorrectly. Since we
@@ -195,7 +195,7 @@ export class CachingGLTFLoader {
         });
 
         if (transparent) {
-          duplicate.push(mesh);
+          meshesToDuplicate.push(mesh);
         }
       });
     }
@@ -207,20 +207,19 @@ export class CachingGLTFLoader {
     // mitigated by the author splitting the mesh into mostly convex regions.
     // The performance cost is not too great as the same shader is reused and
     // the same number of fragments are processed; only the vertex shader is run
-    // twice.
-    for (let i = 0; i < duplicate.length; i++) {
-      const mesh = duplicate[i];
-      const material = Array.isArray(mesh.material) ?
-          mesh.material.map((material) => {
-            const backMaterial = material.clone();
-            backMaterial.side = BackSide;
-            return backMaterial;
-          }) :
-          mesh.material.clone();
-      if (!Array.isArray(mesh.material)) {
-        (material as Material).side = BackSide;
-      }
-      const meshBack = new Mesh(mesh.geometry, material);
+    // twice. @see https://threejs.org/examples/webgl_materials_physical_transparency.html
+    for (const mesh of meshesToDuplicate) {
+      const materials =
+          Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      const duplicateMaterials = materials.map((material) => {
+        const backMaterial = material.clone();
+        backMaterial.side = BackSide;
+        return backMaterial;
+      });
+      const duplicateMaterial = Array.isArray(mesh.material) ?
+          duplicateMaterials :
+          duplicateMaterials[0];
+      const meshBack = new Mesh(mesh.geometry, duplicateMaterial);
       meshBack.renderOrder = -1;
       mesh.add(meshBack);
     }
