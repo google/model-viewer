@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, FrontSide, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
+import {BackSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {DoubleSide} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -200,6 +200,11 @@ export class CachingGLTFLoader {
       });
     }
 
+    // We duplicate transparent, double-sided meshes and render the back face
+    // before the front face. This creates perfect triangle sorting for all
+    // convex meshes. Sorting artifacts can still appear when you can see
+    // through more than two layers of a given mesh, but this can usually be
+    // mitigated by the author splitting the mesh into mostly convex regions.
     for (let i = 0; i < duplicate.length; i++) {
       const mesh = duplicate[i];
       const material = Array.isArray(mesh.material) ?
@@ -209,6 +214,9 @@ export class CachingGLTFLoader {
             return backMaterial;
           }) :
           mesh.material.clone();
+      if (!Array.isArray(mesh.material)) {
+        (material as Material).side = BackSide;
+      }
       const meshBack = new Mesh(mesh.geometry, material);
       meshBack.renderOrder = -1;
       mesh.add(meshBack);
