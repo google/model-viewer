@@ -55,22 +55,39 @@ const $singletonWithTransparency = Symbol('singletonWithTransparency');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  static[$singleton] = new Renderer({debug: isDebugMode()});
-  static[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
+  protected static[$singleton]: Renderer|null = null;
+  protected static[$singletonWithTransparency]: Renderer|null = null;
 
-  static get singleton() {
-    return this[$singleton];
+  static get singleton(): Renderer {
+    let singleton = this[$singleton];
+    if (!singleton) {
+      singleton = new Renderer({debug: isDebugMode()});
+      this[$singleton] = singleton;
+    }
+
+    return singleton;
   }
 
-  static get singletonWithTransparency() {
-    return this[$singletonWithTransparency];
+  static get singletonWithTransparency(): Renderer {
+    let singletonWithTransparency = this[$singletonWithTransparency];
+    if (!singletonWithTransparency) {
+        singletonWithTransparency = new Renderer({debug: isDebugMode(), isTransparent: true});
+        this[$singletonWithTransparency] = singletonWithTransparency;
+    }
+    return singletonWithTransparency;
   }
 
   static resetSingleton() {
-    this[$singleton].dispose();
+    const singleton = this[$singleton];
+    if (singleton) {
+      singleton.dispose();
+    }
     this[$singleton] = new Renderer({debug: isDebugMode()});
 
-    this[$singletonWithTransparency].dispose();
+    const singletonWithTransparency = this[$singletonWithTransparency];
+    if (singletonWithTransparency) {
+      singletonWithTransparency.dispose();
+    }
     this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
   }
 
