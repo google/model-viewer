@@ -57,10 +57,10 @@
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
   <model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="assets/Astronaut.glb" background-color="#222" alt="A 3D model of an astronaut">
-      <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
-          👋 Activate AR
-      </button>
-  </model-viewer>
+    <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
+        👋 Activate AR
+    </button>
+</model-viewer>
           </template>
         </example-snippet>
 
@@ -70,6 +70,25 @@
 
         <img class="eg-image" src="./assets/eg-default-ar-button.jpg" alt="Image displaying the default <model-viewer> button of a box with slits cut out in the lower-right, next to the example astronaut model." />
         <img class="eg-image" src="./assets/eg-custom-ar-button.jpg" alt="Image displaying <model-viewer> with a custom button reading '👋 Activate AR'." / >
+      </div>
+    </div>
+  </div>
+
+  <div class="sample" style="background: linear-gradient(#ffffff, #ada996);">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Transparent Background</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+            <model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="assets/Astronaut.glb" background-color="transparent" alt="A 3D model of an astronaut">
+</model-viewer>
+          </template>
+        </example-snippet>
+
       </div>
     </div>
   </div>
