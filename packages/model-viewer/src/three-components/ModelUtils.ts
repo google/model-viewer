@@ -71,6 +71,9 @@ export const cloneGltf = (gltf: FullGLTF): FullGLTF => {
       clone.normalScale.y *= -1;
     }
     clone.shadowSide = FrontSide;
+    if (clone.transparent) {
+      clone.depthWrite = false;
+    }
     return clone;
   };
 
