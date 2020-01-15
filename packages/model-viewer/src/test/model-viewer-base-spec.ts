@@ -117,30 +117,30 @@ suite('ModelViewerElementBase', () => {
 
       test('eventually dispatches a load event', async () => {
         const sourceLoads = waitForEvent(element, 'load');
-        element.src = assetPath('Astronaut.glb');
+        element.src = assetPath('models/Astronaut.glb');
         await sourceLoads;
       });
 
 
       suite('that changes before the model loads', () => {
         test('it loads the second value on microtask timing', async () => {
-          element.src = assetPath('Astronaut.glb');
+          element.src = assetPath('models/Astronaut.glb');
           await timePasses();
-          element.src = assetPath('Horse.glb');
+          element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
           expect(element[$scene].model.userData.url)
-              .to.be.equal(assetPath('Horse.glb'));
+              .to.be.equal(assetPath('models/Horse.glb'));
         });
 
         test('it loads the second value on task timing', async () => {
-          element.src = assetPath('Astronaut.glb');
+          element.src = assetPath('models/Astronaut.glb');
           await timePasses(1);
-          element.src = assetPath('Horse.glb');
+          element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
           expect(element[$scene].model.userData.url)
-              .to.be.equal(assetPath('Horse.glb'));
+              .to.be.equal(assetPath('models/Horse.glb'));
         });
       });
     });
@@ -209,7 +209,7 @@ suite('ModelViewerElementBase', () => {
         document.body.appendChild(element);
 
         const modelLoads = waitForEvent(element, 'load');
-        element.src = assetPath('cube.gltf');
+        element.src = assetPath('models/cube.gltf');
         await modelLoads;
       });
 
@@ -323,7 +323,7 @@ suite('ModelViewerElementBase', () => {
         for (let element of elements) {
           element.style.position = 'relative';
           element.style.marginBottom = '100vh';
-          element.src = assetPath('cube.gltf');
+          element.src = assetPath('models/cube.gltf');
           document.body.appendChild(element);
         }
 

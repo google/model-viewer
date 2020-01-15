@@ -36,7 +36,7 @@ after_success:
 - ./scripts/run-fidelity-check.sh
 - popd
 before_deploy:
-- lerna run create-legacy-bundles
+- npm run build:legacy-support
 - ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 deploy:
   - provider: pages

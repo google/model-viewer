@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-const path = require('path');
 const resolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-replace');
 const cleanup = require('rollup-plugin-cleanup');
+const {NODE_ENV} = process.env;
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:
@@ -91,60 +91,7 @@ if (NODE_ENV !== 'development') {
         plugins,
         onwarn,
       },
-      {
-        input: './lib/test/fidelity/components/image-comparison-app.js',
-        output: {
-          file: './dist/image-comparison-app.js',
-          sourcemap: true,
-          format: 'iife',
-          name: 'ImageComparisonApp'
-        },
-        watch: {
-          include: '{lib/test/fidelity/**,lib/third_party/**}',
-        },
-        plugins,
-        onwarn,
-      },
-      {
-        input: './lib/test/fidelity/components/renderer-harness.js',
-        output: {
-          file: './dist/renderer-harness.js',
-          sourcemap: true,
-          format: 'esm',
-        },
-        watch: {
-          include: '{lib/test/fidelity/**,lib/third_party/**}',
-        },
-        plugins,
-        onwarn
-      },
-      {
-        input: './lib/test/fidelity/components/renderers/filament-viewer.js',
-        output: {
-          file: './dist/filament-viewer.js',
-          sourcemap: true,
-          format: 'esm',
-        },
-        watch: {
-          include: '{lib/test/fidelity/**,lib/third_party/**}',
-        },
-        plugins,
-        onwarn
-      },
-      {
-        input: './lib/test/fidelity/image-comparison-worker.js',
-        output: {
-          file: './dist/image-comparison-worker.js',
-          sourcemap: true,
-          format: 'iife',
-          name: 'ImageComparisonWorker'
-        },
-        watch: {
-          include: '{lib/test/fidelity/**,lib/third_party/**}',
-        },
-        plugins,
-        onwarn,
-      });
+  );
 }
 
 export default outputOptions;

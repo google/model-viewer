@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
     "build": "tsc && rollup -c",
-    "prepare": "ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets"
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
+    "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js"
   },
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
@@ -25,6 +26,7 @@
     "resize-observer-polyfill": "^1.5.0"
   },
   "devDependencies": {
+    "polymer-build": "^3.1.4",
     "rollup": "^1.29.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
