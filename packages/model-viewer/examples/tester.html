@@ -112,8 +112,8 @@
       <option value="assets/Astronaut.glb">Astronaut</option>
       <option value="assets/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
       <option value="assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
-        <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
-        <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
+      <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
+      <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
       <option value="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
       <option value="assets/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
       <option value="assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
@@ -144,16 +144,57 @@
 
     <label for="autoRotate">Auto-rotate:</label>
     <input id="autoRotate" type="checkbox"><br/>
+
+    <button onclick="createPoster()">Create Poster</button><br/>
+    <button id="display" onclick="reloadScene()">Display Poster</button><br/>
+    <button id="download" onclick="downloadPoster()">Download Poster</button><br/>
     
     </div> 
-    <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none" 
+    <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"
       src="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" background-color="#e1e1e1" alt="A 3D model">
     </model-viewer>
   </div>
 
   <script>
-  (() => {
-    const viewer = document.getElementById('loading-demo');
+const viewer = document.getElementById('loading-demo');
+
+let posterUrl = null;
+const a = document.createElement('a');
+const downloadButton = document.getElementById('download');
+const displayButton = document.getElementById('display');
+downloadButton.disabled = true;
+displayButton.disabled = true;
+let orbitString = '';
+  
+async function createPoster() {
+  const orbit = viewer.getCameraOrbit();
+  orbitString = `${orbit.theta}rad ${orbit.phi}rad auto`;
+  viewer.fieldOfView = 'auto';
+  viewer.jumpCameraToGoal();
+  await new Promise(resolve => requestAnimationFrame(() => resolve()));
+  URL.revokeObjectURL(posterUrl);
+  const blob = await viewer.toBlob({mimeType:"image/jpeg", idealAspect: true});
+  posterUrl = URL.createObjectURL(blob);
+  downloadButton.disabled = false;
+  displayButton.disabled = false;
+}
+
+function reloadScene() {
+  viewer.poster = posterUrl;
+  viewer.reveal = "interaction";
+  viewer.cameraOrbit = orbitString;
+  const src = viewer.src;
+  viewer.src = null;
+  viewer.src = src;
+}
+
+function downloadPoster() {
+  a.href = posterUrl;
+  a.download = 'poster.jpg';
+  a.click();
+}
+
+(() => {
 	viewer.addEventListener('dragover', (event) => {
 	event.preventDefault();
 	});
@@ -205,7 +246,7 @@
 		checkbox.addEventListener('change', (event) => {
 		viewer[property] = checkbox.checked;
 		});
-	});
+  });
   })();
   </script>
 

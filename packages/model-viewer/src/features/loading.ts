@@ -379,8 +379,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     get[$shouldAttemptPreload](): boolean {
       const {src} = this;
 
-      return !!src && !CachingGLTFLoader.hasFinishedLoading(src) &&
-          (this.preload || this[$shouldRevealModel]) && this[$isInRenderTree];
+      return !!src && (this.preload || this[$shouldRevealModel]) &&
+          this[$isInRenderTree];
     }
 
     async[$updateLoadingAndVisibility]() {
