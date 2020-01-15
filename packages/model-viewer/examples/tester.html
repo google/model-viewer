@@ -47,6 +47,7 @@
   <style>
     body, html {
       height: 100%;
+      font-size: 10pt;
     }
 
     label {
@@ -107,13 +108,13 @@
     Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">GLB</a> for the model.<br/>
     Drop an <a href="https://hdrihaven.com/" target="_blank">HDR</a> for the skybox.<br/><br/>
 
-    <label for="src">Model:</label>
+    <label for="src">src:</label>
     <select id="src">
       <option value="assets/Astronaut.glb">Astronaut</option>
       <option value="assets/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
       <option value="assets/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
       <option value="assets/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
-      <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
+      <option value="assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb">Damaged Helmet</option>
       <option value="assets/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
       <option value="assets/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
       <option value="assets/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
@@ -123,9 +124,9 @@
       <option value="assets/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf">Metal Rough Spheres</option>
     </select><br/>
     
-    <label for="skyboxImage">Skybox:</label>
-    <select id="skyboxImage">
-      <option value="" selected>none</option>
+    <label for="environmentImage">environment-image:</label>
+    <select id="environmentImage">
+      <option value="" selected>default</option>
       <option value="assets/spruit_sunrise_1k_HDR.hdr">spruit sunrise HDR</option>
       <option value="assets/spruit_sunrise_1k_LDR.jpg">spruit sunrise JPG</option>
       <option value="assets/music_hall_01_1k.hdr">music hall</option>
@@ -134,20 +135,36 @@
       <option value="assets/pillars_1k.hdr">pillars</option>
     </select><br/>
 
-    <label for="exposure">Exposure:</label>
+    <label for="useSkybox">use as skybox:</label>
+    <input id="useSkybox" type="checkbox"><br/>
+
+    <label for="backgroundColor">background-color:</label>
+    <input id="backgroundColor" value="#e1e1e1" class="string"><br/>
+
+    <label for="exposure">exposure:</label>
     <input id="exposure" type="range" step="0.01" min="0" max="2" value="1">
     <input id="exposureValue" value="1" class="number"><br/>
 
-    <label for="shadowIntensity">Shadow:</label>
+    <label for="shadowIntensity">shadow-intensity:</label>
     <input id="shadowIntensity" type="range" step="0.01" min="0" max="1" value="0">
     <input id="shadowIntensityValue" value="0" class="number"><br/>
 
-    <label for="autoRotate">Auto-rotate:</label>
+    <label for="shadowSoftness">shadow-softness:</label>
+    <input id="shadowSoftness" type="range" step="0.01" min="0" max="1" value="1">
+    <input id="shadowSoftnessValue" value="1" class="number"><br/>
+
+    <label for="autoRotate">auto-rotate:</label>
     <input id="autoRotate" type="checkbox"><br/>
 
+    To create a seamless poster:<br/>
+    Orient model and resize window to desired size (small is recommended), then click:<br/>
     <button onclick="createPoster()">Create Poster</button><br/>
+    Then resize window to any aspect ratio and click:<br/>
     <button id="display" onclick="reloadScene()">Display Poster</button><br/>
+    Click the model to dismiss the poster and interact. To save your poster, click:<br/>
     <button id="download" onclick="downloadPoster()">Download Poster</button><br/>
+    camera-orbit:
+    <div id="cameraOrbit">'auto auto auto'</div>
     
     </div> 
     <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"

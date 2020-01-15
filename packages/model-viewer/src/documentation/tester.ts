@@ -40,13 +40,30 @@ viewer.addEventListener('error', (event) => {
   viewer.src = 'assets/Astronaut.glb';
 });
 
-(['src', 'skyboxImage'] as Array<'src'|'skyboxImage'>).forEach((property) => {
-  document.getElementById(`${property}`)!.addEventListener('input', (event) => {
-    viewer[property] = (event.target as HTMLInputElement).value;
-  });
+(['src', 'environmentImage', 'backgroundColor'] as
+ Array<'src'|'environmentImage'|'backgroundColor'>)
+    .forEach((property) => {
+      document.getElementById(`${property}`)!.addEventListener(
+          'input', (event) => {
+            viewer[property] = (event.target as HTMLInputElement).value;
+          });
+    });
+
+const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
+useSkybox.addEventListener('change', (_event) => {
+  const backgroundColor =
+      document.getElementById('backgroundColor') as HTMLInputElement;
+  if (useSkybox.checked) {
+    viewer.skyboxImage = viewer.environmentImage;
+    backgroundColor.disabled = true;
+  } else {
+    viewer.skyboxImage = null;
+    backgroundColor.disabled = false;
+  }
 });
 
-(['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
+(['exposure', 'shadowIntensity', 'shadowSoftness'] as
+ Array<'exposure'|'shadowIntensity'|'shadowSoftness'>)
     .forEach((property) => {
       const input = document.getElementById(`${property}`) as HTMLInputElement;
       const output =
@@ -74,11 +91,11 @@ const downloadButton = document.getElementById('download') as HTMLButtonElement;
 const displayButton = document.getElementById('display') as HTMLButtonElement;
 downloadButton.disabled = true;
 displayButton.disabled = true;
-let orbitString = '';
+const orbitString = document.getElementById('cameraOrbit') as HTMLDivElement;
 
 export async function createPoster() {
   const orbit = viewer.getCameraOrbit();
-  orbitString = `${orbit.theta}rad ${orbit.phi}rad auto`;
+  orbitString.textContent = `${orbit.theta}rad ${orbit.phi}rad auto`;
   viewer.fieldOfView = 'auto';
   viewer.jumpCameraToGoal();
   await new Promise(resolve => requestAnimationFrame(() => resolve()));
@@ -92,7 +109,7 @@ export async function createPoster() {
 export function reloadScene() {
   viewer.poster = posterUrl;
   viewer.reveal = 'interaction';
-  viewer.cameraOrbit = orbitString;
+  viewer.cameraOrbit = orbitString.textContent!;
   const src = viewer.src;
   viewer.src = null;
   viewer.src = src;
