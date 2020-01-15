@@ -17,6 +17,57 @@ import {ModelViewerElement} from '../model-viewer.js';
 
 const viewer = document.getElementById('loading-demo') as ModelViewerElement;
 
+viewer.addEventListener('dragover', (event) => {
+  event.preventDefault();
+});
+
+viewer.addEventListener('drop', (event) => {
+  event.preventDefault();
+  const file = event.dataTransfer!.files[0];
+  const filename = file.name.toLowerCase();
+  const target = event.target as ModelViewerElement;
+  if (filename.match(/\.(gltf|glb)$/)) {
+    target.src = URL.createObjectURL(file);
+  } else if (filename.match(/\.(hdr)$/)) {
+    target.skyboxImage = URL.createObjectURL(file) + '#.hdr';
+  } else if (filename.match(/\.(png|jpg)$/)) {
+    target.skyboxImage = URL.createObjectURL(file);
+  }
+});
+
+viewer.addEventListener('error', (event) => {
+  console.error((event as any).detail);
+  viewer.src = 'assets/Astronaut.glb';
+});
+
+(['src', 'skyboxImage'] as Array<'src'|'skyboxImage'>).forEach((property) => {
+  document.getElementById(`${property}`)!.addEventListener('input', (event) => {
+    viewer[property] = (event.target as HTMLInputElement).value;
+  });
+});
+
+(['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
+    .forEach((property) => {
+      const input = document.getElementById(`${property}`) as HTMLInputElement;
+      const output =
+          document.getElementById(`${property}Value`) as HTMLInputElement;
+      input.addEventListener('input', (event) => {
+        output.value = (event.target as HTMLInputElement).value;
+        viewer[property] = parseFloat(output.value);
+      });
+      output.addEventListener('input', (event) => {
+        input.value = (event.target as HTMLInputElement).value;
+        viewer[property] = parseFloat(output.value);
+      });
+    });
+
+(['autoRotate'] as Array<'autoRotate'>).forEach((property) => {
+  const checkbox = document.getElementById(`${property}`) as HTMLInputElement;
+  checkbox.addEventListener('change', (_event) => {
+    viewer[property] = checkbox.checked;
+  });
+});
+
 let posterUrl = '';
 const a = document.createElement('a');
 const downloadButton = document.getElementById('download') as HTMLButtonElement;
@@ -53,56 +104,6 @@ export function downloadPoster() {
   a.click();
 }
 
-(() => {
-  viewer.addEventListener('dragover', (event) => {
-    event.preventDefault();
-  });
-  viewer.addEventListener('drop', (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer!.files[0];
-    const filename = file.name.toLowerCase();
-    const target = event.target as ModelViewerElement;
-    if (filename.match(/\.(gltf|glb)$/)) {
-      target.src = URL.createObjectURL(file);
-    } else if (filename.match(/\.(hdr)$/)) {
-      target.skyboxImage = URL.createObjectURL(file) + '#.hdr';
-    } else if (filename.match(/\.(png|jpg)$/)) {
-      target.skyboxImage = URL.createObjectURL(file);
-    }
-  });
-  viewer.addEventListener('error', (event) => {
-    console.error((event as any).detail);
-    viewer.src = 'assets/Astronaut.glb';
-  });
-
-  (['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
-      .forEach((property) => {
-        document.getElementById(`${property}`)!.addEventListener(
-            'input', (event) => {
-              viewer.src = (event.target as HTMLInputElement).value;
-            });
-      });
-
-  (['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
-      .forEach((property) => {
-        const input =
-            document.getElementById(`${property}`) as HTMLInputElement;
-        const output =
-            document.getElementById(`${property}Value`) as HTMLInputElement;
-        input.addEventListener('input', (event) => {
-          output.value = (event.target as HTMLInputElement).value;
-          viewer[property] = parseFloat(output.value);
-        });
-        output.addEventListener('input', (event) => {
-          input.value = (event.target as HTMLInputElement).value;
-          viewer[property] = parseFloat(output.value);
-        });
-      });
-
-  (['autoRotate'] as Array<'autoRotate'>).forEach((property) => {
-    const checkbox = document.getElementById(`${property}`) as HTMLInputElement;
-    checkbox.addEventListener('change', (_event) => {
-      viewer[property] = checkbox.checked;
-    });
-  });
-})();
+(self as any).createPoster = createPoster;
+(self as any).reloadScene = reloadScene;
+(self as any).downloadPoster = downloadPoster;
