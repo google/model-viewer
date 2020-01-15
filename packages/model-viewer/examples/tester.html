@@ -155,101 +155,6 @@
     </model-viewer>
   </div>
 
-  <script>
-const viewer = document.getElementById('loading-demo');
-
-let posterUrl = null;
-const a = document.createElement('a');
-const downloadButton = document.getElementById('download');
-const displayButton = document.getElementById('display');
-downloadButton.disabled = true;
-displayButton.disabled = true;
-let orbitString = '';
-  
-async function createPoster() {
-  const orbit = viewer.getCameraOrbit();
-  orbitString = `${orbit.theta}rad ${orbit.phi}rad auto`;
-  viewer.fieldOfView = 'auto';
-  viewer.jumpCameraToGoal();
-  await new Promise(resolve => requestAnimationFrame(() => resolve()));
-  URL.revokeObjectURL(posterUrl);
-  const blob = await viewer.toBlob({mimeType:"image/jpeg", idealAspect: true});
-  posterUrl = URL.createObjectURL(blob);
-  downloadButton.disabled = false;
-  displayButton.disabled = false;
-}
-
-function reloadScene() {
-  viewer.poster = posterUrl;
-  viewer.reveal = "interaction";
-  viewer.cameraOrbit = orbitString;
-  const src = viewer.src;
-  viewer.src = null;
-  viewer.src = src;
-}
-
-function downloadPoster() {
-  a.href = posterUrl;
-  a.download = 'poster.jpg';
-  a.click();
-}
-
-(() => {
-	viewer.addEventListener('dragover', (event) => {
-	event.preventDefault();
-	});
-	viewer.addEventListener('drop', (event) => {
-	event.preventDefault();
-	const file = event.dataTransfer.files[0];
-	const filename = file.name.toLowerCase();
-	if (filename.match(/\.(gltf|glb)$/)) {
-		event.target.src = URL.createObjectURL(file);
-	} else if (filename.match(/\.(hdr)$/)) {
-		event.target.skyboxImage = URL.createObjectURL(file) + '#.hdr';
-	} else if (filename.match(/\.(png|jpg)$/)) {
-		event.target.skyboxImage = URL.createObjectURL(file);
-	}
-	});
-	viewer.addEventListener('error', (event) => {
-	console.error(event.detail);
-	viewer.src = 'assets/Astronaut.glb';
-	});
-
-	['src', 'skyboxImage']
-	.forEach((property) => {
-		const input = document.getElementById(`${property}`);
-		const output = document.getElementById(`${property}Value`);
-		input.addEventListener('input', (event) => {
-		viewer[property] = event.target.value;
-		});
-	});
-
-	['exposure', 'shadowIntensity']
-	.forEach((property) => {
-		const input = document.getElementById(`${property}`);
-		const output = document.getElementById(`${property}Value`);
-		input.addEventListener('input', (event) => {
-		const value = parseFloat(event.target.value);
-		output.value = value;
-		viewer[property] = value;
-		});
-		output.addEventListener('input', (event) => {
-		const value = parseFloat(event.target.value);
-		input.value = value;
-		viewer[property] = value;
-		});
-	});
-
-	['autoRotate']
-	.forEach((property) => {
-		const checkbox = document.getElementById(`${property}`);
-		checkbox.addEventListener('change', (event) => {
-		viewer[property] = checkbox.checked;
-		});
-  });
-  })();
-  </script>
-
   <div class="footer">
     <ul>
 	  <li class="attribution">
@@ -281,6 +186,7 @@ function downloadPoster() {
     <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
   </div>
 
+  <script type="module" src="./built/tester.js"></script>
   <script src="./scripts/helpers.js"></script>
 
   <!-- Documentation-specific dependencies: -->

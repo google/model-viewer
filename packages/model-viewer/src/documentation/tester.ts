@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import {ModelViewerElement} from '../../model-viewer.js';
+import {ModelViewerElement} from '../model-viewer.js';
 
 const viewer = document.getElementById('loading-demo') as ModelViewerElement;
 
-let posterUrl = null;
+let posterUrl = '';
 const a = document.createElement('a');
 const downloadButton = document.getElementById('download') as HTMLButtonElement;
 const displayButton = document.getElementById('display') as HTMLButtonElement;
@@ -25,7 +25,7 @@ downloadButton.disabled = true;
 displayButton.disabled = true;
 let orbitString = '';
 
-async function createPoster() {
+export async function createPoster() {
   const orbit = viewer.getCameraOrbit();
   orbitString = `${orbit.theta}rad ${orbit.phi}rad auto`;
   viewer.fieldOfView = 'auto';
@@ -38,7 +38,7 @@ async function createPoster() {
   displayButton.disabled = false;
 }
 
-function reloadScene() {
+export function reloadScene() {
   viewer.poster = posterUrl;
   viewer.reveal = 'interaction';
   viewer.cameraOrbit = orbitString;
@@ -47,7 +47,7 @@ function reloadScene() {
   viewer.src = src;
 }
 
-function downloadPoster() {
+export function downloadPoster() {
   a.href = posterUrl;
   a.download = 'poster.jpg';
   a.click();
@@ -59,7 +59,7 @@ function downloadPoster() {
   });
   viewer.addEventListener('drop', (event) => {
     event.preventDefault();
-    const file = event.dataTransfer.files[0];
+    const file = event.dataTransfer!.files[0];
     const filename = file.name.toLowerCase();
     const target = event.target as ModelViewerElement;
     if (filename.match(/\.(gltf|glb)$/)) {
@@ -75,31 +75,33 @@ function downloadPoster() {
     viewer.src = 'assets/Astronaut.glb';
   });
 
-  document.getElementById('src')!.addEventListener('input', (event) => {
-    viewer.src = (event.target as HTMLInputElement).value;
-  });
+  (['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
+      .forEach((property) => {
+        document.getElementById(`${property}`)!.addEventListener(
+            'input', (event) => {
+              viewer.src = (event.target as HTMLInputElement).value;
+            });
+      });
 
-  document.getElementById('skyboxImage')!.addEventListener('input', (event) => {
-    viewer.skyboxImage = (event.target as HTMLInputElement).value;
-  });
+  (['exposure', 'shadowIntensity'] as Array<'exposure'|'shadowIntensity'>)
+      .forEach((property) => {
+        const input =
+            document.getElementById(`${property}`) as HTMLInputElement;
+        const output =
+            document.getElementById(`${property}Value`) as HTMLInputElement;
+        input.addEventListener('input', (event) => {
+          output.value = (event.target as HTMLInputElement).value;
+          viewer[property] = parseFloat(output.value);
+        });
+        output.addEventListener('input', (event) => {
+          input.value = (event.target as HTMLInputElement).value;
+          viewer[property] = parseFloat(output.value);
+        });
+      });
 
-  ['exposure', 'shadowIntensity'].forEach((property) => {
-    const input = document.getElementById(`${property}`) as HTMLInputElement;
-    const output =
-        document.getElementById(`${property}Value`) as HTMLInputElement;
-    input.addEventListener('input', (event) => {
-      output.value = (event.target as HTMLInputElement).value;
-      viewer[property] = parseFloat(output.value);
-    });
-    output.addEventListener('input', (event) => {
-      input.value = (event.target as HTMLInputElement).value;
-      viewer[property] = parseFloat(output.value);
-    });
-  });
-
-  ['autoRotate'].forEach((property) => {
+  (['autoRotate'] as Array<'autoRotate'>).forEach((property) => {
     const checkbox = document.getElementById(`${property}`) as HTMLInputElement;
-    checkbox.addEventListener('change', (event) => {
+    checkbox.addEventListener('change', (_event) => {
       viewer[property] = checkbox.checked;
     });
   });

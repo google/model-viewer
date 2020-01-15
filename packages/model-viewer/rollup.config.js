@@ -179,6 +179,16 @@ if (NODE_ENV !== 'development') {
         },
         plugins,
         onwarn,
+      },
+      {
+        input: './lib/documentation/tester.js',
+        output: {
+          file: './examples/built/tester.js',
+          sourcemap: true,
+          format: 'esm',
+        },
+        plugins,
+        onwarn
       });
 }
 
