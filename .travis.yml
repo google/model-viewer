@@ -7,11 +7,7 @@ matrix:
   include:
   - env: TEST_TYPE=unit
     addons:
-      apt:
-        sources:
-          - google-chrome
-        packages:
-          - google-chrome-stable
+      chrome: stable
       sauce_connect:
         username:
           secure: T6i5WwsonrYsgiKE+F0p8oigYsMk92bv2NC/zjtqTMxFymJEcIGLcLsZwR1lD74cJgUwB8KueFlnIZERvhNCjY1iHflekXtcddA5aN3XGsOgjM4yQ+ZKm6EsWsGCeUGoGSqtaeHp/QE3N4IoMtvhVaQrrf7rrqVRUaShML38JEfkFS+LfprIykd+8QfODX855yjJV8w8/Y7KVI79pEs7jjTsFtjkZiWb4tcbeZ5N54Ju1P+D2BXoJ0AmreBZSYS12fqUNl/fezAnEt3JFDpgvxGDXIhbY2MostBaCCIj5w1ua0VGP5vgH8A67p9AJarz0aXHdepNDsFs4ubBOpqQclOF/1l2gKNyAxnqEf/78awzF05cFQAQkbc7c0hpNAwk708bCo5ERQz43kYDcuCDYfagn1XOSfKAjKhRXgO1J2eSxERM4SwRx67ntSBEmsUfpGy97ISI4R17Yv5DLbGT5rB+ZIX+ttIbXGr3Y0uHFGGdsqb/BiViCTFjIGYRMvj4Vu1sOb+5LhBSwzfNJQg+19Zt8SNTEBbcM07gon+bb75uAeUZY1TUyItoKJ65Na9EXPPOY93BjSfXwnUrtOATV7/cziwLRj30nCd0KF/Jg6OTiOcCJsamWIj3NSh+PMO58zpyOvwXXOPhqWn6t22VGmylS6Stta28F08KJHIfNAY=
