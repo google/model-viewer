@@ -13,7 +13,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@google/model-viewer": "^0.8.1",
-    "@google/model-viewer-shared-assets": "^0.0.1",
     "@magicleap/prismatic": "^2.0.2",
     "@types/prismjs": "^1.9.0",
     "@types/resize-observer-browser": "^0.1.2",
@@ -26,6 +25,7 @@
     "resize-observer-polyfill": "^1.5.0"
   },
   "devDependencies": {
+    "@google/model-viewer-shared-assets": "^0.0.1",
     "polymer-build": "^3.1.4",
     "rollup": "^1.29.0",
     "rollup-plugin-node-resolve": "^5.2.0",

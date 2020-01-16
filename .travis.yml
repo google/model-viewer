@@ -30,10 +30,6 @@ script:
 cache:
   directories:
   - packages/shared-assets/models/glTF-Sample-Models
-after_success:
-- pushd ./packages/render-fidelity-tools
-- ./scripts/run-fidelity-check.sh
-- popd
 before_deploy:
 - npm run build:legacy-support
 - ./packages/modelviewer.dev/scripts/ci-before-deploy.sh

@@ -22,7 +22,7 @@
   <title>Filament Fidelity Tests</title>
 
   <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
   <style>
     body { margin: 0; }
@@ -36,9 +36,9 @@
     </filament-viewer>
   </renderer-harness>
 
-  <script src="../../../../node_modules/filament/filament.js"></script>
-  <script type="module" src="../../../../dist/renderer-harness.js"></script>
-  <script type="module" src="../../../../dist/filament-viewer.js"></script>
+  <script src="../../../node_modules/filament/filament.js"></script>
+  <script type="module" src="../../../dist/renderer-harness.js"></script>
+  <script type="module" src="../../../dist/filament-viewer.js"></script>
   <script>
     harness.addEventListener('scenario-change', () => {
       filamentViewer.addEventListener('model-visibility', (event) => {

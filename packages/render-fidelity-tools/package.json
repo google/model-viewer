@@ -5,7 +5,9 @@
   "version": "0.0.1",
   "description": "<model-viewer> rendering fidelity test suite and tools",
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0",
+    "test": "node --experimental-modules ./lib/workflows/test-fidelity.js ./test/config.json",
+    "test:ci": "./scripts/ci-check-fidelity.sh",
+    "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
     "clean": "rm -rf ./dist ./lib"
@@ -14,7 +16,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@google/model-viewer": "^0.8.1",
-    "@google/model-viewer-shared-assets": "^0.0.1",
     "@magicleap/prismatic": "^2.0.2",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
@@ -34,11 +35,12 @@
     "lit-element": "^2.2.1",
     "mkdirp": "^0.5.1",
     "pngjs": "^3.3.3",
-    "puppeteer": "^1.11.0",
+    "puppeteer": "^2.0.0",
     "resize-observer-polyfill": "^1.5.0",
     "rimraf": "^2.6.2"
   },
   "devDependencies": {
+    "@google/model-viewer-shared-assets": "^0.0.1",
     "polymer-build": "^3.1.4",
     "rollup": "^1.29.0",
     "rollup-plugin-node-resolve": "^5.2.0",

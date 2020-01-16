@@ -18,4 +18,4 @@ Command                         | Description
 ------------------------------- | -----------
 `npm run build`                 | Build artifacts required to run testing and review tools
 `npm run test`                  | Run a render fidelity check comparing `<model-viewer>` to other renderers
-`npm run update-screenshots     | Update the "golden" screenshots for all renderers
+`npm run update-screenshots`    | Update the "golden" screenshots for all renderers

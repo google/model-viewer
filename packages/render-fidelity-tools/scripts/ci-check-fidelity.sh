@@ -17,5 +17,5 @@
 
 if [[ "${TEST_TYPE}" = "fidelity" || ("${TRAVIS_BRANCH}" = "master" && "${TRAVIS_PULL_REQUEST}" = "false") ]]; then
   npm run build
-  npm run check-fidelity
+  npm run test
 fi
