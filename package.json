@@ -8,7 +8,8 @@
     "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
     "clean": "./node_modules/.bin/lerna run clean --stream",
     "build": "./node_modules/.bin/lerna run build --stream",
-    "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream"
+    "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
   "devDependencies": {
+    "http-server": "^0.12.1",
     "lerna": "^3.20.2"
   }
 }
