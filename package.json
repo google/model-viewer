@@ -6,6 +6,7 @@
     "test": "./node_modules/.bin/lerna run test --stream",
     "test:ci": "./node_modules/.bin/lerna run test:ci --stream",
     "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
+    "clean": "./node_modules/.bin/lerna run clean --stream",
     "build": "./node_modules/.bin/lerna run build --stream",
     "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream"
   },

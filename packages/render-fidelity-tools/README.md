@@ -17,5 +17,6 @@ The following commands are available when developing modelviewer.dev:
 Command                         | Description
 ------------------------------- | -----------
 `npm run build`                 | Build artifacts required to run testing and review tools
+`npm run clean`                 | Deletes all build artifacts
 `npm run test`                  | Run a render fidelity check comparing `<model-viewer>` to other renderers
 `npm run update-screenshots`    | Update the "golden" screenshots for all renderers

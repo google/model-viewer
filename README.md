@@ -54,5 +54,6 @@ Command                        | Description
 `npm run build`                | Runs the build step for all sub-projects
 `npm run build:legacy-support` | Builds JS bundles that have IE11 support
 `npm run test`                 | Runs tests in all sub-projects that have them
+`npm run clean`                | Removes built artifacts from all sub-projects
 
 You should now be ready to work on any of the `<model-viewer>` projects!
