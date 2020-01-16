@@ -281,6 +281,28 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
             expect(picked).to.be.equal(canvas);
           });
+
+          test('when src is reset, poster is dismissable', async () => {
+            const posterElement = (element as any)[$defaultPosterElement];
+            const canvasElement = element[$canvas];
+
+            element.reveal = 'interaction';
+            element.src = null;
+            element.src = ASTRONAUT_GLB_PATH;
+
+            await timePasses();
+
+            posterElement.focus();
+
+            expect(element.shadowRoot!.activeElement)
+                .to.be.equal(posterElement);
+
+            dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
+
+            await until(() => {
+              return element.shadowRoot!.activeElement === canvasElement;
+            });
+          });
         });
       });
     });
