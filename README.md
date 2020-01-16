@@ -6,12 +6,15 @@ all of its related projects.
 The repository is organized into sub-directories containing the various projects.
 Check out the README.md files for specific projects to get more details:
 
- - [`<model-viewer>`](packages/model-viewer) - The `<model-viewer>` web component
- - [modelviewer.dev](packages/modelviewer.dev) - The source for the `<model-viewer>` documentation website
- - [render-fidelity-tools](packages/render-fidelity-tools) - Tools for testing how well `<model-viewer>` renders models
- - [shared-assets](packages/shared-assets) - 3D models, environment maps and other assets shared across many sub-projects
+👩‍🚀 **[`<model-viewer>`](packages/model-viewer)** • The `<model-viewer>` web component (probably what you are looking for)
 
-## Installing
+🌐 **[modelviewer.dev](packages/modelviewer.dev)** • The source for the `<model-viewer>` documentation website
+
+🖼 **[render-fidelity-tools](packages/render-fidelity-tools)** • Tools for testing how well `<model-viewer>` renders models
+
+🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
+
+## Installing `<model-viewer>`
 
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
@@ -51,6 +54,5 @@ Command                        | Description
 `npm run build`                | Runs the build step for all sub-projects
 `npm run build:legacy-support` | Builds JS bundles that have IE11 support
 `npm run test`                 | Runs tests in all sub-projects that have them
-`npm run test:ci`              | Runs tests under particular CI conditions
 
 You should now be ready to work on any of the `<model-viewer>` projects!
