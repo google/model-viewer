@@ -75,13 +75,13 @@ export class Renderer extends EventDispatcher {
   static resetSingleton() {
     if (this[$singleton] != null) {
       (this[$singleton] as Renderer).dispose();
+      this[$singleton] = new Renderer({debug: isDebugMode()});
     }
-    this[$singleton] = new Renderer({debug: isDebugMode()});
 
     if (this[$singletonWithTransparency] != null) {
       (this[$singletonWithTransparency] as Renderer).dispose();
+      this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
     }
-    this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
   }
 
   public threeRenderer!: WebGLRenderer;
