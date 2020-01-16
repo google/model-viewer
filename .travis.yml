@@ -16,10 +16,7 @@ matrix:
   - env: TEST_TYPE=fidelity
     addons:
       apt:
-        sources:
-          - google-chrome
-        packages:
-          - google-chrome-stable
+        chrome: stable
 env:
   global:
     - secure: wmSM5h6HpDL7+rnd3KqaMNUtU7Rp5jv6P0/5wLJDb3lAtkersEaTrnFa4r8bWmhPq0KOXHcktmHQepatPn+1Ib9iP9RFzwMhM76OiLmV1M+cl8MNfNGRAMljbR9IzyzHzX0UwepPQpMxmc8O3RkF27wm8mCIUmbv9AJWh9adzfZrsErcngc8egrXAJuqiADENCkXUYj7mOP122c2SRD5G8oWA2dgrn6Vqw4vDqikUTxJsGFt/udU7E3xMT/tYPcPiGKKm+xULHZkTkL0l3sObletlI+CNssSE66ygKsYuFiBXVMPh0QbPQo/v3YSYHISszeHPKXMkvZu7x30CYCg6jLHX9mCfjXbd4Al4nu5n58U6Lp+h5ZI/c0iwFqQE9uFwc4/RivQXQAtBUU8vnSoKDtD8bFql8Y9Ki1PX3eTXdRGSARmE9gCOx4rmNT/42GbzXA+vzNRyXWo3IL6sFRjgl7xdsV/Twtl0I+GmUJV0x7LYgQm+P01kT3NmbnYyWe2oHGJGSL/pDqusjT+9oxzniF60qBLSsIlYaC69uY4pklaTCrFdm4eeFFCb8kExA5oDRu42PTd8Ws8tkGVQOi9ZjCK0p9HU5Mi11JfiZd9n2WZ9vSV852V6HE/CMmFvctgIEaBRoHmgLGjvAb7o1JK99MovCT8GSyIBob9NIEhGgA=
