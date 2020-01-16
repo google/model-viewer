@@ -16,7 +16,6 @@
 const ALERT_THRESHOLD = 0.1;
 
 import {resolve, join} from 'path';
-// const path = require('path');
 const [candidateResultsDirectory, goldenResultsDirectory] =
     process.argv.slice(2);
 

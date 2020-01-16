@@ -60,39 +60,3 @@ export const rendererScreenshot = async(
     server.close();
   }
 };
-
-// const renderer = process.argv[2];
-// const scenarioName = process.argv[3];
-// let dimensions: Partial<Dimensions> = {};
-// dimensions.width = parseInt(process.argv[4], 10);
-// dimensions.height = parseInt(process.argv[5], 10);
-// const outputFile = process.argv[6];
-
-// const server = HTTPServer.createServer({root: './'});
-// server.listen(9030);
-
-// const screenshotCreator = new ArtifactCreator(
-//     config,
-//     rootDirectory,
-//     `http://localhost:9040/test/fidelity/renderers/${renderer}/`);
-
-// if (scenarioName == null) {
-//   console.error(' Scenario name not specified!');
-//   process.exit(1);
-// }
-
-// if (outputFile == null) {
-//   console.error(' Output file not specified!');
-//   process.exit(1);
-// }
-
-// (async () => {
-//   try {
-//     await screenshotCreator.captureScreenshot(
-//         renderer, scenarioName, dimensions, outputFile);
-//   } catch (error) {
-//     console.error(error);
-//   } finally {
-//     server.close();
-//   }
-// })();

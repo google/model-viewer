@@ -288,7 +288,6 @@ export class FilamentViewer extends LitElement {
       center[2] = eye[2] - Math.sin(phi) * Math.cos(theta);
     }
 
-    console.log()
     const {min, max} = this[$boundingBox]!;
     const modelRadius =
         Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);

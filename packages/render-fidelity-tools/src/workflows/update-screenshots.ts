@@ -141,15 +141,6 @@ const updateScreenshots = async (config: ImageComparisonConfig) => {
             goldenPath,
             width,
             height);
-
-        // await run('node', [
-        //   './scripts/renderer-screenshot.js',
-        //   rendererName,
-        //   scenarioName,
-        //   width,
-        //   height,
-        //   goldenPath
-        // ]);
       } catch (error) {
         throw new Error(`Failed to update ${rendererDescription} screenshot: ${
             error.message}`);

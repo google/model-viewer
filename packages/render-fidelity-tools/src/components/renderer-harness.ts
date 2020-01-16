@@ -35,7 +35,6 @@ export class RendererConfiguration extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    console.log('Renderer harness connected');
     const {queryParameters} = this;
     this.configUrl = queryParameters.config || '../../config.json';
     this.scenarioName = queryParameters.scenario || null;
@@ -54,7 +53,6 @@ export class RendererConfiguration extends LitElement {
 
   async updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
-    console.log(changedProperties);
 
     if (changedProperties.has('configUrl')) {
       if (this.configUrl == null) {
@@ -66,7 +64,6 @@ export class RendererConfiguration extends LitElement {
 
     if (changedProperties.has('scenarioName') ||
         changedProperties.has('config')) {
-      console.log('Scenario name', this.scenarioName);
       if (this.scenarioName == null || this.config == null) {
         this.scenario = null;
       } else {

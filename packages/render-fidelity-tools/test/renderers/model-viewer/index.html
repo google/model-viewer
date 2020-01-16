@@ -55,7 +55,6 @@
   <script>
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
-      console.log('scenario-change', scenario);
 
       modelViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
