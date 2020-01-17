@@ -50,8 +50,8 @@ suite('LoadingStatusAnnouncer', () => {
 
     suite('that has a src', () => {
       test('sets initial status', async () => {
-        element.poster = assetPath('Astronaut.png');
-        element.src = assetPath('Astronaut.glb');
+        element.poster = assetPath('../screenshot.png');
+        element.src = assetPath('models/Astronaut.glb');
 
         loadingStatusAnnouncer.registerInstance(element);
 
@@ -65,7 +65,7 @@ suite('LoadingStatusAnnouncer', () => {
 
       suite('after the model loads', () => {
         test('sets the finished status', async () => {
-          element.src = assetPath('Astronaut.glb');
+          element.src = assetPath('models/Astronaut.glb');
 
           loadingStatusAnnouncer.registerInstance(element);
 
@@ -94,7 +94,7 @@ suite('LoadingStatusAnnouncer', () => {
         });
 
         test('sets finished status when all models are loaded', async () => {
-          element.src = otherElement.src = assetPath('Astronaut.glb');
+          element.src = otherElement.src = assetPath('models/Astronaut.glb');
 
           loadingStatusAnnouncer.registerInstance(element);
           loadingStatusAnnouncer.registerInstance(otherElement);
@@ -112,11 +112,11 @@ suite('LoadingStatusAnnouncer', () => {
 
         suite('one model is already loaded', () => {
           test('eventually sets finished status', async () => {
-            element.src = assetPath('Astronaut.glb');
+            element.src = assetPath('models/Astronaut.glb');
 
             await until(() => element.loaded);
 
-            otherElement.src = assetPath('Astronaut.glb');
+            otherElement.src = assetPath('models/Astronaut.glb');
 
             loadingStatusAnnouncer.registerInstance(element);
             loadingStatusAnnouncer.registerInstance(otherElement);
@@ -137,8 +137,8 @@ suite('LoadingStatusAnnouncer', () => {
           test('eventually sets finished status', async () => {
             const errorOccurs = waitForEvent(element, 'error');
 
-            element.src = assetPath('DOES_NOT_EXIST.glb');
-            otherElement.src = assetPath('Astronaut.glb');
+            element.src = assetPath('models/DOES_NOT_EXIST.glb');
+            otherElement.src = assetPath('models/Astronaut.glb');
 
             loadingStatusAnnouncer.registerInstance(element);
             loadingStatusAnnouncer.registerInstance(otherElement);

@@ -20,8 +20,8 @@ import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, unt
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
-const HORSE_GLB_PATH = assetPath('Horse.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
@@ -51,7 +51,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
-        element.poster = assetPath('poster.png');
+        element.poster = assetPath('../screenshot.png');
 
         // Wait at least a microtask for size calculations
         await timePasses();
@@ -65,7 +65,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         }
       });
 
-      test('creates a poster element that captures interactions', () => {
+      test('creates a poster element that captures interactions', async () => {
         const picked = pickShadowDescendant(element);
         expect(picked).to.be.ok;
         // TODO(cdata): Leaky internal details here:

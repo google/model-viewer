@@ -157,7 +157,7 @@ suite('ARRenderer', () => {
     }
 
     setup(async () => {
-      element.src = assetPath('Astronaut.glb');
+      element.src = assetPath('models/Astronaut.glb');
       await waitForEvent(element, 'load');
       modelScene = element[$scene];
       stubWebXrInterface(arRenderer);

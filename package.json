@@ -3,10 +3,13 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
-    "test": "lerna run test --stream",
-    "test:ci": "lerna run test:ci --stream",
-    "bootstrap": "lerna bootstrap --ci",
-    "build": "lerna run build --stream"
+    "test": "./node_modules/.bin/lerna run test --stream",
+    "test:ci": "./node_modules/.bin/lerna run test:ci --stream",
+    "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
+    "clean": "./node_modules/.bin/lerna run clean --stream",
+    "build": "./node_modules/.bin/lerna run build --stream",
+    "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1"
   },
   "repository": {
     "type": "git",
@@ -14,11 +17,15 @@
   },
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "bugs": {
     "url": "https://github.com/GoogleWebComponents/model-viewer/issues"
   },
   "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
   "devDependencies": {
+    "http-server": "^0.12.1",
     "lerna": "^3.20.2"
   }
 }

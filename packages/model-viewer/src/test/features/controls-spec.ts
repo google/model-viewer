@@ -25,7 +25,7 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
-const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
@@ -81,7 +81,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls];
         document.body.appendChild(element);
-        element.src = assetPath('cube.gltf');
+        element.src = assetPath('models/cube.gltf');
 
         await waitForEvent(element, 'load');
         // NOTE(cdata): Sometimes the load event dispatches quickly enough to
@@ -360,7 +360,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls]
         document.body.appendChild(element);
-        element.src = assetPath('cube.gltf');
+        element.src = assetPath('models/cube.gltf');
         element.cameraControls = true;
 
         element.interactionPromptThreshold =

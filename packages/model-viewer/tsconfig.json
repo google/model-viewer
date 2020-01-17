@@ -20,8 +20,7 @@
     "declaration": true
   },
   "include": [
-    "./src/**/*.ts",
-    "./src/**/*.js"
+    "./src/**/*.ts"
   ],
   "exclude": []
 }
