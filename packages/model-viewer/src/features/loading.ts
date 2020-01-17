@@ -192,7 +192,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     *
+     * If provided, the callback will be passed each resource URL before a
+     * request is sent. The callback may return the original URL, or a new URL
+     * to override loading behavior. This behavior can be used to load assets
+     * from .ZIP files, drag-and-drop APIs, and Data URIs.
      */
     setURLModifier(callback: (url: string) => string) {
       loader[$loader].manager.setURLModifier(callback);
