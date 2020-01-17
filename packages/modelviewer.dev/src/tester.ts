@@ -22,52 +22,15 @@ const inputElement = document.querySelector('#input');
 const dropControl = new SimpleDropzone(viewer, inputElement);
 dropControl.on('drop', ({files}: any) => load(files));
 
-function load(fileMap: Map<string, File>) {
-  let rootPath: string;
-  Array.from(fileMap).forEach(([path, file]) => {
-    const filename = file.name.toLowerCase();
-    if (filename.match(/\.(gltf|glb)$/)) {
-      const blobURLs: Array<string> = [];
-      rootPath = path.replace(file.name, '');
-
-      viewer.setURLModifier((url: string) => {
-        const index = url.lastIndexOf('/');
-
-        const normalizedURL =
-            rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
-
-        if (fileMap.has(normalizedURL)) {
-          const blob = fileMap.get(normalizedURL);
-          const blobURL = URL.createObjectURL(blob);
-          blobURLs.push(blobURL);
-          return blobURL;
-        }
-
-        return url;
-      });
-
-      viewer.addEventListener('load', () => {
-        blobURLs.forEach(URL.revokeObjectURL);
-      });
-
-      const fileURL =
-          typeof file === 'string' ? file : URL.createObjectURL(file);
-      viewer.src = fileURL;
-
-    } else if (filename.match(/\.(hdr)$/)) {
-      viewer.environmentImage = URL.createObjectURL(file) + '#.hdr';
-    } else if (filename.match(/\.(png|jpg)$/)) {
-      viewer.environmentImage = URL.createObjectURL(file);
-    }
-  });
-}
-
 (['src', 'environmentImage', 'backgroundColor'] as
  Array<'src'|'environmentImage'|'backgroundColor'>)
     .forEach((property) => {
       document.getElementById(`${property}`)!.addEventListener(
           'input', (event) => {
             viewer[property] = (event.target as HTMLInputElement).value;
+            if (useSkybox.checked) {
+              viewer.skyboxImage = viewer.environmentImage;
+            }
           });
     });
 
@@ -146,3 +109,49 @@ export function downloadPoster() {
 (self as any).createPoster = createPoster;
 (self as any).reloadScene = reloadScene;
 (self as any).downloadPoster = downloadPoster;
+
+function load(fileMap: Map<string, File>) {
+  let rootPath: string;
+  Array.from(fileMap).forEach(([path, file]) => {
+    const filename = file.name.toLowerCase();
+    if (filename.match(/\.(gltf|glb)$/)) {
+      const blobURLs: Array<string> = [];
+      rootPath = path.replace(file.name, '');
+
+      viewer.setURLModifier((url: string) => {
+        const index = url.lastIndexOf('/');
+
+        const normalizedURL =
+            rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
+
+        if (fileMap.has(normalizedURL)) {
+          const blob = fileMap.get(normalizedURL);
+          const blobURL = URL.createObjectURL(blob);
+          blobURLs.push(blobURL);
+          return blobURL;
+        }
+
+        return url;
+      });
+
+      viewer.addEventListener('load', () => {
+        blobURLs.forEach(URL.revokeObjectURL);
+      });
+
+      const fileURL =
+          typeof file === 'string' ? file : URL.createObjectURL(file);
+      viewer.src = fileURL;
+    }
+  });
+
+  const file = fileMap.values().next().value;
+  const filename = file.name.toLowerCase();
+  if (filename.match(/\.(hdr)$/)) {
+    viewer.environmentImage = URL.createObjectURL(file) + '#.hdr';
+  } else if (filename.match(/\.(png|jpg)$/)) {
+    viewer.environmentImage = URL.createObjectURL(file);
+  }
+  if (useSkybox.checked) {
+    viewer.skyboxImage = viewer.environmentImage;
+  }
+}

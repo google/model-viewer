@@ -105,9 +105,9 @@
     <h1>
       <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
     </h1>
-    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">GLB</a> for the model.<br/>
-    Drop an <a href="https://hdrihaven.com/" target="_blank">HDR</a> for the skybox.<br/><br/>
-    <input type="file" id="input">
+    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">GLB or zipped GLTF</a> for the model =><br/>
+    Drop an <a href="https://hdrihaven.com/" target="_blank">HDR or JPG</a> for the skybox =><br/>
+    <input type="file" id="input"><br/><br/>
 
     <label for="src">src:</label>
     <select id="src">
@@ -155,7 +155,7 @@
     <input id="shadowSoftnessValue" value="1" class="number"><br/>
 
     <label for="autoRotate">auto-rotate:</label>
-    <input id="autoRotate" type="checkbox"><br/>
+    <input id="autoRotate" type="checkbox"><br/><br/>
 
     To create a seamless poster:<br/>
     Orient model and resize window to desired size (small is recommended), then click:<br/>
@@ -165,7 +165,7 @@
     Click the model to dismiss the poster and interact. To save your poster, click:<br/>
     <button id="download" onclick="downloadPoster()">Download Poster</button><br/>
     camera-orbit:
-    <div id="cameraOrbit">'auto auto auto'</div>
+    <div id="cameraOrbit"></div>
     
     </div> 
     <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"
