@@ -12,6 +12,12 @@ on [modelviewer.dev](https://modelviewer.dev).
 
 To get started, follow the instructions in [the main README.md file](../../README.md).
 
+In order to run `npm run update-screenshots`, you must have `imagemagick` installed.
+
+On OSX, you can install `imagemagick` with homebrew: `brew install imagemagick`
+
+On Debian/Ubuntu/Pop!_OS you can install `imagemagick` with `apt`: `sudo apt install imagemagick`
+
 The following commands are available when developing modelviewer.dev:
 
 Command                         | Description

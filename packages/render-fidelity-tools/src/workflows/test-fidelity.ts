@@ -31,7 +31,7 @@ const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
     `http://localhost:9030/test/renderers/model-viewer/`);
-const server = HTTPServer.createServer({root: './'});
+const server = HTTPServer.createServer({root: './', cache: -1});
 server.listen(9030);
 
 

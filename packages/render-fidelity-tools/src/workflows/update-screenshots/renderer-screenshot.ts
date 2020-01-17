@@ -36,7 +36,7 @@ export const rendererScreenshot = async(
     width: number = 10,
     height: number = 10): Promise<void> => {
   const dimensions = {width, height};
-  const server = HTTPServer.createServer({root: './'});
+  const server = HTTPServer.createServer({root: './', cache: -1});
 
   server.listen(9040);
 

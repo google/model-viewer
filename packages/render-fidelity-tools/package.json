@@ -10,7 +10,7 @@
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
-    "clean": "rm -rf ./dist ./lib"
+    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
   },
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
