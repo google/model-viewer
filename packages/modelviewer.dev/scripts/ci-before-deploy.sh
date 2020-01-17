@@ -37,10 +37,13 @@ mv ../render-fidelity-tools/test/results ./fidelity
 
 pushd ./node_modules/\@google
 
-mv $(readlink ./model-viewer) \
-  ./model-viewer
-mv $(readlink ./model-viewer-shared-assets) \
-  ./model-viewer-shared-assets
+MODEL_VIEWER_DIR=$(readlink ./model-viewer)
+SHARED_ASSETS_DIR=$(readlink ./model-viewer-shared-assets)
+
+rm ./model-viewer ./model-viewer-shared-assets
+
+mv $MODEL_VIEWER_DIR ./model-viewer
+mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
 
 popd
 
