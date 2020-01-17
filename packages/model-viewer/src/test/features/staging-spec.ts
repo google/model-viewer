@@ -20,7 +20,7 @@ import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
-const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
+const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;

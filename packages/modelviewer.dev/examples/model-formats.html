@@ -1,0 +1,256 @@
+<!--
+/* @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Format Support</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
+</head>
+<body>
+
+  <div class="sample">
+    <div id="demo-container-1" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Model Formats. </span>Learn how model formats work on different platforms. This page tests configurations of the model source.</h4>
+        <div class="heading">
+          <h2 class="demo-title">With a glTF model</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <template>
+<model-viewer camera-controls background-color="#222" alt="A 3D model of a sphere" src="../shared-assets/models/reflective-sphere.gltf">
+</model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">With a GLB model</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<model-viewer camera-controls
+    background-color="#ccc" alt="A 3D model of an astronaut" src="../shared-assets/models/Astronaut.glb">
+</model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-3" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">DRACO support</h2>
+          <h4>
+            &lt;model-viewer&gt; supports loading glTF models that
+            use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md" target="_blank">the DRACO mesh compression extension</a>.
+          </h4>
+          <h4>
+            In order to load such models, an auxilliary decoder is
+            required and will be loaded on-demand from a Google CDN when
+            a DRACO-compressed model is detected. See below to learn 
+            how to customize this behavior.
+          </h4>
+        </div>
+        <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <template>
+<model-viewer camera-controls background-color="#3cba54" alt="A 3D model of an astronaut" src="../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
+</model-viewer>
+          </template>
+        </example-snippet>
+        <div>
+          <p>
+            By default, the DRACO decoder will be loaded from a Google CDN
+            on-demand. The decoder is open source and distributed for free
+            under the Apache License 2.0.
+          </p>
+          <p>
+            It is possible to customize where the decoder is loaded from by
+            defining a global configuration option like so:
+          </p>
+          <example-snippet inert-script highlight-as="html">
+            <template>
+<script>
+ModelViewerElement = self.ModelViewerElement || {};
+ModelViewerElement.dracoDecoderLocation =
+    'http://example.com/location/of/draco/decoder/files/';
+</script>
+            </template>
+          </example-snippet>
+          <p>
+            When customizing the decoder location, you must make sure that
+            the configuration is set <strong>before</strong> the first &lt;model-viewer&gt;
+            element is created on the page. &lt;model-viewer&gt; will attempt to
+            load the decoder as soon as it loads a glTF that uses the DRACO
+            extension, so be careful to set the configuration early!
+          </p>
+          <p>
+            Another way to set the decoder location is to look up
+            the constructor for &lt;model-viewer&gt; and configure it directly:
+          </p>
+          <example-snippet inert-script highlight-as="html">
+            <template>
+<script>
+const ModelViewerElement = customElements.get('model-viewer');
+ModelViewerElement.dracoDecoderLocation = 
+    'http://example.com/location/of/draco/decoder/files/';
+</script>
+            </template>
+          </example-snippet>
+          <p>
+            Note that the direct configuration approach will only work
+            <strong>after</strong> &lt;model-viewer&gt; is defined in the
+            browser (in typical cases, after model-viewer.js has been loaded).
+          </p>
+          <p>
+            Keep in mind that the DRACO decoder is pretty large (more than 100KB),
+            so it is best only to use DRACO compressed models when the file size
+            savings are larger than the size of the decoder.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-4" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">With only a USDZ model</h2>
+          <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with poster to show a static image and the icon to enter augmented reality mode</h4>
+        </div>
+        <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <template>
+<model-viewer camera-controls background-color="#3cba54" alt="A 3D model of an astronaut" ios-src="../shared-assets/models/Astronaut.usdz">
+</model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-5" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">With no model</h2>
+          <h4>There's nothing to show, but also no error.</h4>
+        </div>
+        <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <template>
+<model-viewer background-color="#4885ed" alt="An invalid model" src="i-do-not-exist.glb">
+</model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-6" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Cycling between different models</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <template>
+<model-viewer id="toggle-model" src="../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" background-color="#eee" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
+<script>
+    const models = ['shishkebab.glb', 'Astronaut.glb'];
+    const toggleModel = document.querySelector('#toggle-model');
+    let i = 0;
+    setInterval(() => toggleModel.setAttribute('src', `../shared-assets/models/${models[i++ % 2]}`), 2000);
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <ul>
+      <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+  </div>
+
+  
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+</html>

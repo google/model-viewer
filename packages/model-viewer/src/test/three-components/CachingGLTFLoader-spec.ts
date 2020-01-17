@@ -17,7 +17,7 @@ import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
-const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
   suite('when loading a glTF', () => {

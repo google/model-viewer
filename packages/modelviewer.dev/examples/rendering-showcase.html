@@ -1,0 +1,121 @@
+<!--
+/* @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Rendering Showcase</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+
+  <style>
+    .grid {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-gap: 10px;
+        grid-template-rows: 1fr 2fr 3fr 4fr;
+        grid-template-columns: 1fr 2fr 3fr 4fr;
+    }
+    .grid model-viewer {
+        width: 100%;
+        height: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="sample">
+    <div class="content">
+
+      <div id="header">
+        <a class="icon-button icon-modelviewer" href="../index.html"></a>
+        <a class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/rendering-showcase.html"></a>
+      </div>
+
+      <div class="wrapper">
+
+        <div id="intro">
+          <h3>Rendering Showcase</h3>
+          <p>A &lt;model-viewer&gt; rendering quality and stress test. Checkout more tests: <a href="./list.html" >List of Elements</a> and <a href="./pbr.html">Physically Based Rendering w/ HDR Environments &amp; Radiance Maps</a>.</p>
+        </div>
+
+        <h2 class="demo-title">Demonstrates how &lt;model-viewer&gt; is capable of rendering
+        many simultaneously visible models at once</h2>
+
+      </div>
+    </div>
+    <div class="demo">
+      <iframe name="demo-iframe" src="./multiple-elements.html"></iframe>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="attribution">
+      <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+      licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+    </div>
+    <div class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+  </div>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+</html>

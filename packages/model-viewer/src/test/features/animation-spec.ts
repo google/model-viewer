@@ -19,8 +19,8 @@ import {assetPath, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const NON_ANIMATED_GLB_PATH = assetPath('Astronaut.glb');
-const ANIMATED_GLB_PATH = assetPath('RobotExpressive.glb');
+const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
+const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
 
 const animationIsPlaying = (element: any, animationName = null): boolean => {
   const {currentAnimationAction} = element[$scene].model;
