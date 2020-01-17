@@ -21,7 +21,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
-  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
@@ -75,7 +75,7 @@
     background-color: blue;
   }
 </style>
-<model-viewer id="hotspot-demo" camera-controls src="assets/Astronaut.glb" background-color="#eeeeee" alt="A 3D model of an astronaut.">
+<model-viewer id="hotspot-demo" camera-controls src="../shared-assets/models/Astronaut.glb" background-color="#eeeeee" alt="A 3D model of an astronaut.">
   <button id="visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
   <button id="hand" data-position="-0.55 0.95 0.1" data-normal="-1 0 1" style="background-color:red"></button>
   <button id="foot" data-position="0.16 0.11 0.15" data-normal="0 1 0.3"></button>
@@ -97,8 +97,6 @@
     <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
   </div>
 
-  <script src="./scripts/helpers.js"></script>
-
   <!-- Documentation-specific dependencies: -->
   <script type="module"
       src="./built/dependencies.js">
@@ -109,12 +107,12 @@
 
   <!-- Loads <model-viewer> only on modern browsers: -->
   <script type="module"
-      src="../dist/model-viewer.js">
+      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
   </script>
 
   <!-- Loads <model-viewer> only on old browsers like IE11: -->
   <script nomodule
-      src="../dist/model-viewer-legacy.js">
+      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>
