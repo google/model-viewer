@@ -144,14 +144,16 @@ function load(fileMap: Map<string, File>) {
     }
   });
 
-  const file = fileMap.values().next().value;
-  const filename = file.name.toLowerCase();
-  if (filename.match(/\.(hdr)$/)) {
-    viewer.environmentImage = URL.createObjectURL(file) + '#.hdr';
-  } else if (filename.match(/\.(png|jpg)$/)) {
-    viewer.environmentImage = URL.createObjectURL(file);
-  }
-  if (useSkybox.checked) {
-    viewer.skyboxImage = viewer.environmentImage;
+  if (fileMap.size === 1) {
+    const file = fileMap.values().next().value;
+    const filename = file.name.toLowerCase();
+    if (filename.match(/\.(hdr)$/)) {
+      viewer.environmentImage = URL.createObjectURL(file) + '#.hdr';
+    } else if (filename.match(/\.(png|jpg)$/)) {
+      viewer.environmentImage = URL.createObjectURL(file);
+    }
+    if (useSkybox.checked) {
+      viewer.skyboxImage = viewer.environmentImage;
+    }
   }
 }
