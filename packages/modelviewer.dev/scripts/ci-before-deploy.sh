@@ -33,12 +33,16 @@ echo '!node_modules/resize-observer-polyfill' >> .gitignore
 echo '!node_modules/filament' >> .gitignore
 echo '!node_modules/@google' >> .gitignore
 
-mv ../rendering-fidelity-tools/test/results ./fidelity
+mv ../render-fidelity-tools/test/results ./fidelity
 
-mv $(readlink ./node_modules/\@google/model-viewer) \
+pushd ./node_modules/\@google
+
+mv $(readlink ./model-viewer) \
   ./node_modules/\@google/model-viewer
-mv $(readlink ./node_modules/\@google/model-viewer-shared-assets) \
+mv $(readlink ./model-viewer-shared-assets) \
   ./node_modules/\@google/model-viewer-shared-assets
+
+popd
 
 git log -n 1 > VERSION
 
