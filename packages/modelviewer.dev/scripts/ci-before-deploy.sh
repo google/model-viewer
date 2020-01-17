@@ -38,9 +38,9 @@ mv ../render-fidelity-tools/test/results ./fidelity
 pushd ./node_modules/\@google
 
 mv $(readlink ./model-viewer) \
-  ./node_modules/\@google/model-viewer
+  ./model-viewer
 mv $(readlink ./model-viewer-shared-assets) \
-  ./node_modules/\@google/model-viewer-shared-assets
+  ./model-viewer-shared-assets
 
 popd
 
