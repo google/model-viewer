@@ -97,7 +97,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
         suite('with a src property', () => {
           setup(async () => {
-            element.src = assetPath('Astronaut.glb');
+            element.src = assetPath('models/Astronaut.glb');
             // Wait til microtask so that property changes can propagate
             await timePasses();
           });

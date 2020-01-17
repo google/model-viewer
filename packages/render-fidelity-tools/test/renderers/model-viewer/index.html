@@ -1,0 +1,78 @@
+<!--
+/* @license
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>&lt;model-viewer&gt; Fidelity Tests</title>
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../../../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../../../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <style>
+    body { margin: 0; }
+    model-viewer { --progress-bar-color: transparent; }
+  </style>
+</head>
+<body>
+  <renderer-harness id="harness">
+    <span slot="title">&lt;model-viewer&gt;</span>
+    <model-viewer id="modelViewer"
+        slot="renderer"
+        camera-controls
+        interaction-prompt="none">
+    </model-viewer>
+  </renderer-harness>
+  <script type="module" src="../../../dist/renderer-harness.js"></script>
+  <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
+  <script>
+    harness.addEventListener('scenario-change', () => {
+      const {scenario} = harness;
+
+      modelViewer.addEventListener('model-visibility', (event) => {
+        if (event.detail.visible) {
+          self.dispatchEvent(new CustomEvent('model-ready'));
+        }
+      }, { once: true });
+      
+      modelViewer.style.width = `${scenario.dimensions.width}px`;
+      modelViewer.style.height = `${scenario.dimensions.height}px`;
+
+      modelViewer.src = scenario.model;
+      modelViewer.skyboxImage = scenario.lighting;
+      const {theta, phi, radius} = scenario.orbit;
+      modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
+      const {x, y, z} = scenario.target;
+      modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
+      modelViewer.fieldOfView = `${scenario.verticalFoV}deg`;
+    });
+  </script>
+</body>
+</html>

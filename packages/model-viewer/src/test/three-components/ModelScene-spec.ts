@@ -50,7 +50,7 @@ suite('ModelScene', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource(assetPath('Astronaut.glb'));
+      await scene.setModelSource(assetPath('models/Astronaut.glb'));
       expect(fired).to.be.ok;
     });
   });

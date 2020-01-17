@@ -24,8 +24,8 @@ const expect = chai.expect;
 // Reuse the same canvas as to not stress the WebGL
 // context limit
 const canvas = document.createElement('canvas');
-const EQUI_URL = assetPath('spruit_sunrise_1k_LDR.jpg');
-const HDR_EQUI_URL = assetPath('spruit_sunrise_1k_HDR.hdr');
+const EQUI_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
+const HDR_EQUI_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 
 suite('TextureUtils', () => {
   let threeRenderer: WebGLRenderer;
