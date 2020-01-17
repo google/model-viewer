@@ -13,32 +13,55 @@
  * limitations under the License.
  */
 
+import {SimpleDropzone} from 'simple-dropzone';
+
 import {ModelViewerElement} from '../model-viewer.js';
 
 const viewer = document.getElementById('loading-demo') as ModelViewerElement;
 
-viewer.addEventListener('dragover', (event) => {
-  event.preventDefault();
-});
+const inputElement = document.querySelector('#input');
+const dropControl = new SimpleDropzone(viewer, inputElement);
+dropControl.on('drop', ({files}: any) => load(files));
 
-viewer.addEventListener('drop', (event) => {
-  event.preventDefault();
-  const file = event.dataTransfer!.files[0];
-  const filename = file.name.toLowerCase();
-  const target = event.target as ModelViewerElement;
-  if (filename.match(/\.(gltf|glb)$/)) {
-    target.src = URL.createObjectURL(file);
-  } else if (filename.match(/\.(hdr)$/)) {
-    target.skyboxImage = URL.createObjectURL(file) + '#.hdr';
-  } else if (filename.match(/\.(png|jpg)$/)) {
-    target.skyboxImage = URL.createObjectURL(file);
-  }
-});
+function load(fileMap: Map<string, File>) {
+  let rootPath: string;
+  Array.from(fileMap).forEach(([path, file]) => {
+    const filename = file.name.toLowerCase();
+    if (filename.match(/\.(gltf|glb)$/)) {
+      const blobURLs: Array<string> = [];
+      rootPath = path.replace(file.name, '');
 
-viewer.addEventListener('error', (event) => {
-  console.error((event as any).detail);
-  viewer.src = 'assets/Astronaut.glb';
-});
+      viewer.setURLModifier((url: string) => {
+        const index = url.lastIndexOf('/');
+
+        const normalizedURL =
+            rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
+
+        if (fileMap.has(normalizedURL)) {
+          const blob = fileMap.get(normalizedURL);
+          const blobURL = URL.createObjectURL(blob);
+          blobURLs.push(blobURL);
+          return blobURL;
+        }
+
+        return url;
+      });
+
+      viewer.addEventListener('load', () => {
+        blobURLs.forEach(URL.revokeObjectURL);
+      });
+
+      const fileURL =
+          typeof file === 'string' ? file : URL.createObjectURL(file);
+      viewer.src = fileURL;
+
+    } else if (filename.match(/\.(hdr)$/)) {
+      viewer.environmentImage = URL.createObjectURL(file) + '#.hdr';
+    } else if (filename.match(/\.(png|jpg)$/)) {
+      viewer.environmentImage = URL.createObjectURL(file);
+    }
+  });
+}
 
 (['src', 'environmentImage', 'backgroundColor'] as
  Array<'src'|'environmentImage'|'backgroundColor'>)

@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
-import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
+import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -86,6 +86,7 @@ export declare interface LoadingInterface {
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
+  setURLModifier(callback: (url: string) => string): void;
 }
 
 export declare interface LoadingStaticInterface {
@@ -188,6 +189,13 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     dismissPoster() {
       this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
       this.requestUpdate();
+    }
+
+    /**
+     *
+     */
+    setURLModifier(callback: (url: string) => string) {
+      loader[$loader].manager.setURLModifier(callback);
     }
 
     protected[$modelIsVisible] = false;
