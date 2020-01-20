@@ -51,7 +51,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
         });
 
         openSceneViewer(
-            'https://example.com/model.gltf?token=foo', 'Example model', 'auto');
+            'https://example.com/model.gltf?token=foo',
+            'Example model',
+            'auto');
 
         expect(intentUrls.length).to.be.equal(1);
 
@@ -78,7 +80,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         document.body.appendChild(element);
 
         element.unstableWebxr = true;
-        element.src = assetPath('Astronaut.glb');
+        element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');
       });
@@ -103,7 +105,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
 
-        element.src = assetPath('Astronaut.glb');
+        element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');
       });
@@ -122,7 +124,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           suite('with an ios-src', () => {
             setup(async () => {
-              element.iosSrc = assetPath('Astronaut.usdz');
+              element.iosSrc = assetPath('models/Astronaut.usdz');
               await timePasses();
             });
 
@@ -139,7 +141,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           suite('with an ios-src', () => {
             setup(async () => {
-              element.iosSrc = assetPath('Astronaut.usdz');
+              element.iosSrc = assetPath('models/Astronaut.usdz');
               await timePasses();
             });
 

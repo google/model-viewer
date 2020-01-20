@@ -25,13 +25,13 @@ import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ALT_BG_IMAGE_URL = assetPath('quick_1k.png');
-const BG_IMAGE_URL = assetPath('spruit_sunrise_1k_LDR.jpg');
-const HDR_BG_IMAGE_URL = assetPath('spruit_sunrise_1k_HDR.hdr');
-const MODEL_URL = assetPath('reflective-sphere.gltf');
-const UNLIT_MODEL_URL =
-    assetPath('glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
-const MULTI_MATERIAL_MODEL_URL = assetPath('Triangle.gltf');
+const ALT_BG_IMAGE_URL = assetPath('environments/grey.png');
+const BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
+const HDR_BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
+const MODEL_URL = assetPath('models/reflective-sphere.gltf');
+const UNLIT_MODEL_URL = assetPath(
+    'models/glTF-Sample-Models/2.0/UnlitTest/glTF-Binary/UnlitTest.glb');
+const MULTI_MATERIAL_MODEL_URL = assetPath('models/Triangle.gltf');
 
 const backgroundHasMap =
     (scene: ModelScene, url: string|null) => {
@@ -148,11 +148,9 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  test(
-      'has default background if no skybox-image or background-color',
-      () => {
-        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
-      });
+  test('has default background if no skybox-image or background-color', () => {
+    expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
+  });
 
   test(
       'has default background if no skybox-image or background-color when in DOM',
@@ -230,9 +228,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('applies the image as an environment map', async function() {
-        expect(modelUsingEnvMap(scene, {
-          url: element.skyboxImage
-        })).to.be.ok;
+        expect(modelUsingEnvMap(scene, {url: element.skyboxImage})).to.be.ok;
       });
 
       suite('and a background-color property', () => {
