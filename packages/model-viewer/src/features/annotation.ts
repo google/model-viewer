@@ -17,7 +17,6 @@
 import {property} from 'lit-element';
 import {Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import {_Math as ThreeMath} from 'three/src/math/Math.js';
 
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
@@ -26,9 +25,7 @@ import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
 import {numberNode, NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
 
-const DEFAULT_HIDDEN_OPACITY = 0.25;
 const DEFAULT_HIDDEN_ANGLE = Math.PI / 2;
-const TRANSITION_ANGLE = Math.PI / 8;
 
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
@@ -80,7 +77,6 @@ class Hotspot extends CSS2DObject {
 }
 
 export declare interface AnnotationInterface {
-  hiddenOpacity: number;
   hiddenAngle: string;
   updateHotspot(config: HotspotConfiguration): void;
 }
@@ -88,9 +84,6 @@ export declare interface AnnotationInterface {
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
-    @property({type: Number, attribute: 'hidden-opacity'})
-    hiddenOpacity: number = DEFAULT_HIDDEN_OPACITY;
-
     @style({
       intrinsics: {
         basis: [numberNode(DEFAULT_HIDDEN_ANGLE, 'rad')],
@@ -164,13 +157,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (object instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
           view.sub(object.position);
-          const opacity = 1 -
-              (1 - DEFAULT_HIDDEN_OPACITY) *
-                  ThreeMath.smoothstep(
-                      view.angleTo(object.normal),
-                      this[$hiddenAngle] - TRANSITION_ANGLE,
-                      this[$hiddenAngle]);
-          object.element.style.opacity = `${opacity}`;
+          if (view.angleTo(object.normal) > this[$hiddenAngle]) {
+            object.element.classList.add('hide');
+          } else {
+            object.element.classList.remove('hide');
+          }
         }
       }
     }

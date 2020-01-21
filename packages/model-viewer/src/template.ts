@@ -85,6 +85,15 @@ canvas.show {
   pointer-events: initial;
 }
 
+::slotted(*) {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.hide ::slotted(*) {
+  opacity: var(--min-opacity, 0.25);
+}
+
 .slot.poster {
   opacity: 0;
   transition: opacity 0.3s 0.3s;
