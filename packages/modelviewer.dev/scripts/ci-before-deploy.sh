@@ -43,6 +43,11 @@ SHARED_ASSETS_DIR=$(readlink ./model-viewer-shared-assets)
 rm ./model-viewer ./model-viewer-shared-assets
 
 mv $MODEL_VIEWER_DIR ./model-viewer
+
+pushd ./model-viewer
+echo 'node_modules/*' > .gitignore
+popd
+
 mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
 
 popd
