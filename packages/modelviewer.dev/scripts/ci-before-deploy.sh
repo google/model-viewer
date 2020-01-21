@@ -45,7 +45,8 @@ rm ./model-viewer ./model-viewer-shared-assets
 mv $MODEL_VIEWER_DIR ./model-viewer
 
 pushd ./model-viewer
-echo 'node_modules/*' > .gitignore
+echo '*' > .gitignore
+echo '!dist' >> .gitignore
 popd
 
 mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
