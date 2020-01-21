@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
 import {Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import {style} from '../decorators.js';
 import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
-import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
-import {numberNode, NumberNode, parseExpressions} from '../styles/parsers.js';
+import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
-
-const DEFAULT_HIDDEN_ANGLE = Math.PI / 2;
 
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
-const $hiddenAngle = Symbol('hiddenAngle');
-const $syncHiddenAngle = Symbol('syncHiddenAngle');
 const $hotspotMap = Symbol('hotspotMap');
 const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
@@ -77,25 +70,13 @@ class Hotspot extends CSS2DObject {
 }
 
 export declare interface AnnotationInterface {
-  hiddenAngle: string;
   updateHotspot(config: HotspotConfiguration): void;
 }
 
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
-    @style({
-      intrinsics: {
-        basis: [numberNode(DEFAULT_HIDDEN_ANGLE, 'rad')],
-        keywords: {auto: [null]}
-      },
-      updateHandler: $syncHiddenAngle
-    })
-    @property({type: String, attribute: 'hidden-angle'})
-    hiddenAngle: string = 'auto';
-
     private[$annotationRenderer] = new CSS2DRenderer();
-    private[$hiddenAngle] = DEFAULT_HIDDEN_ANGLE;
     private[$hotspotMap] = new Map();
     private[$observer] = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -135,10 +116,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
     }
 
-    [$syncHiddenAngle](style: EvaluatedStyle<Intrinsics<['rad']>>) {
-      this[$hiddenAngle] = style[0];
-    }
-
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
       this[$updateHotspots]();
@@ -157,7 +134,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (object instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
           view.sub(object.position);
-          if (view.angleTo(object.normal) > this[$hiddenAngle]) {
+          if (view.dot(object.normal) < 0) {
             object.element.classList.add('hide');
           } else {
             object.element.classList.remove('hide');
