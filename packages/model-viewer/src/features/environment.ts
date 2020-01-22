@@ -126,13 +126,13 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$cancelEnvironmentUpdate] = null;
       }
 
-      // Update background color before to get texture utils because renderer singleton depends on background transparency
+      // Update background color before to get texture utils because renderer depends on background transparency
       if (skyboxImage == null)
       {
         if (backgroundColor === 'transparent') {
           if (this[$scene].background != null) {
             this.disconnectedCallback();
-            delete this[$scene].background;
+            this[$scene].background = null;
             this.connectedCallback();  
           }
         }

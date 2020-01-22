@@ -40,8 +40,8 @@ export const $arRenderer = Symbol('arRenderer');
 
 const $onWebGLContextLost = Symbol('onWebGLContextLost');
 const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
-const $singleton = Symbol('singleton');
-const $singletonWithTransparency = Symbol('singletonWithTransparency');
+const $opaqueRenderer = Symbol('opaqueRenderer');
+const $transparentRenderer = Symbol('transparentRenderer');
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -55,32 +55,32 @@ const $singletonWithTransparency = Symbol('singletonWithTransparency');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  protected static[$singleton]: Renderer|null = null;
-  protected static[$singletonWithTransparency]: Renderer|null = null;
+  protected static[$opaqueRenderer]: Renderer|null = null;
+  protected static[$transparentRenderer]: Renderer|null = null;
 
-  static get singleton(): Renderer {
-    if (this[$singleton] == null) {
-      this[$singleton] = new Renderer({debug: isDebugMode()});
+  static get opaqueRenderer(): Renderer {
+    if (this[$opaqueRenderer] == null) {
+      this[$opaqueRenderer] = new Renderer({debug: isDebugMode()});
     }
-    return this[$singleton] as Renderer;
+    return this[$opaqueRenderer] as Renderer;
   }
 
-  static get singletonWithTransparency(): Renderer {
-    if (this[$singletonWithTransparency] == null) {
-        this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
+  static get transparentRenderer(): Renderer {
+    if (this[$transparentRenderer] == null) {
+        this[$transparentRenderer] = new Renderer({debug: isDebugMode(), isTransparent: true});
     }
-    return this[$singletonWithTransparency] as Renderer;
+    return this[$transparentRenderer] as Renderer;
   }
 
-  static resetSingleton() {
-    if (this[$singleton] != null) {
-      (this[$singleton] as Renderer).dispose();
-      this[$singleton] = new Renderer({debug: isDebugMode()});
+  static resetRenderers() {
+    if (this[$opaqueRenderer] != null) {
+      (this[$opaqueRenderer] as Renderer).dispose();
+      this[$opaqueRenderer] = new Renderer({debug: isDebugMode()});
     }
 
-    if (this[$singletonWithTransparency] != null) {
-      (this[$singletonWithTransparency] as Renderer).dispose();
-      this[$singletonWithTransparency] = new Renderer({debug: isDebugMode(), isTransparent: true});
+    if (this[$transparentRenderer] != null) {
+      (this[$transparentRenderer] as Renderer).dispose();
+      this[$transparentRenderer] = new Renderer({debug: isDebugMode(), isTransparent: true});
     }
   }
 

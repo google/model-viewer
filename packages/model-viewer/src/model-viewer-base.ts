@@ -128,7 +128,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$renderer]() {
-    return this[$scene].background ? Renderer.singleton : Renderer.singletonWithTransparency;
+    return this[$scene].background != null ? Renderer.opaqueRenderer : Renderer.transparentRenderer;
   }
 
   /** @export */

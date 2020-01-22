@@ -55,7 +55,7 @@ function createScene(): ModelScene&TestScene {
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
-  const renderer = Renderer.singleton;
+  const renderer = Renderer.opaqueRenderer;
 
   setup(() => {
     scene = createScene();

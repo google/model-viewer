@@ -121,7 +121,7 @@ const waitForLoadAndEnvMap =
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suiteTeardown(() => {
-    Renderer.resetSingleton();
+    Renderer.resetRenderers();
   });
 
   let nextId = 0;
@@ -332,7 +332,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
 
     test('changes the tone mapping exposure of the renderer', async () => {
-      const renderer = Renderer.singleton;
+      const renderer = Renderer.opaqueRenderer;
       const originalToneMappingExposure =
           renderer.threeRenderer.toneMappingExposure;
       element.exposure = 2.0;

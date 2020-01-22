@@ -43,7 +43,7 @@ export class RoughnessMipmapper {
   }
 
   generateMipmaps(material: MeshStandardMaterial) {
-    const {threeRenderer} = Renderer.singleton;
+    const {threeRenderer} = Renderer.opaqueRenderer;
     const {roughnessMap, normalMap} = material;
     if (roughnessMap == null || normalMap == null ||
         !roughnessMap.generateMipmaps || material.userData.roughnessUpdated) {
