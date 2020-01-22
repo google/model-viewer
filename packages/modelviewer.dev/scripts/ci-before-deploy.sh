@@ -33,7 +33,10 @@ echo '!node_modules/resize-observer-polyfill' >> .gitignore
 echo '!node_modules/filament' >> .gitignore
 echo '!node_modules/@google' >> .gitignore
 
-mv ../render-fidelity-tools/test/results ./fidelity
+mkdir -p ./fidelity
+mv ../render-fidelity-tools/test/results ./fidelity/results
+cp ../render-fidelity-tools/test/results-viewer.html ./fidelity/index.html
+cp ../render-fidelity-tools/dist/* ./dist/
 
 ln -s ./node_modules/\@google/model-viewer/dist ./dist
 
