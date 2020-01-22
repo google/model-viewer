@@ -36,6 +36,7 @@ interface HotspotConfiguration {
 }
 class Hotspot extends CSS2DObject {
   public normal: Vector3;
+  private referenceCount: number;
 
   constructor(config: HotspotConfiguration) {
     const wrapper = document.createElement('div');
@@ -46,6 +47,15 @@ class Hotspot extends CSS2DObject {
     this.normal = new Vector3(0, 1, 0);
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
+    this.referenceCount = 1;
+  }
+
+  increment() {
+    ++this.referenceCount;
+  }
+
+  decrement(): boolean {
+    return --this.referenceCount <= 0;
   }
 
   updatePosition(position?: string) {
@@ -112,10 +122,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$observer].disconnect();
     }
 
-    updated(changedProperties: Map<string, any>) {
-      super.updated(changedProperties);
-    }
-
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
       this[$updateHotspots]();
@@ -144,30 +150,38 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$addHotspot](node: Node) {
-      if (!(node instanceof HTMLElement && node.slot.includes('hotspot')))
+      if (!(node instanceof HTMLElement && node.slot.indexOf('hotspot') === 0))
         return;
-      const hotspot = new Hotspot({
-        name: node.slot,
-        position: node.dataset.position,
-        normal: node.dataset.normal
-      });
-      this[$hotspotMap].set(node, hotspot);
-      this[$scene].pivot.add(hotspot);
+      let hotspot = this[$hotspotMap].get(node.slot);
+      if (hotspot != null) {
+        hotspot.increment();
+      } else {
+        hotspot = new Hotspot({
+          name: node.slot,
+          position: node.dataset.position,
+          normal: node.dataset.normal
+        });
+        this[$hotspotMap].set(node.slot, hotspot);
+        this[$scene].pivot.add(hotspot);
+      }
     }
 
     [$removeHotspot](node: Node) {
-      const hotspot = this[$hotspotMap].get(node);
+      if (!(node instanceof HTMLElement))
+        return;
+      const hotspot = this[$hotspotMap].get(node.slot);
       if (!hotspot)
         return;
-      this[$scene].pivot.remove(hotspot);
-      this[$hotspotMap].delete(node);
+      if (hotspot.decrement()) {
+        this[$scene].pivot.remove(hotspot);
+        this[$hotspotMap].delete(node.slot);
+      }
     }
 
     updateHotspot(config: HotspotConfiguration) {
-      const element = this.querySelector(`[slot="${config.name}"]`);
-      if (element == null)
+      const hotspot = this[$hotspotMap].get(config.name);
+      if (hotspot == null)
         return;
-      const hotspot = this[$hotspotMap].get(element);
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
     }
