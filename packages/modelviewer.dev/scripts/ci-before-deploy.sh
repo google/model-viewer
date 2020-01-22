@@ -35,6 +35,8 @@ echo '!node_modules/@google' >> .gitignore
 
 mv ../render-fidelity-tools/test/results ./fidelity
 
+ln -s ./node_modules/\@google/model-viewer/dist ./dist
+
 pushd ./node_modules/\@google
 
 MODEL_VIEWER_DIR=$(readlink ./model-viewer)
