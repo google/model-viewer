@@ -1,37 +1,45 @@
 {
-  "name": "@google/model-viewer-docs",
+  "name": "@google/model-viewer-documentation",
   "private": true,
   "version": "0.0.1",
-  "description": "<model-viewer> web site and live documentation",
+  "description": "<model-viewer> website and live documentation",
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
-    "clean": "rm -rf ./examples/built ./lib",
-    "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
-    "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js"
+    "cleancss": "echo \"[cleancss] $INPUT_CSS_PATH\" && cleancss -d -o \"${INPUT_CSS_PATH/styles/dist}\" $INPUT_CSS_PATH",
+    "cleancss:all": "for CSS in ./styles/*.css; do INPUT_CSS_PATH=$CSS npm run cleancss; done",
+    "watch:tsc": "tsc -w",
+    "watch:rollup": "rollup -c -w",
+    "watch:cleancss": "chokidar --initial --verbose \"styles/*.css\" -c \"if [[ '{event}' = 'change' || '{event}' = 'add' ]]; then INPUT_CSS_PATH=\"{path}\" npm run cleancss; fi;\"",
+    "watch:cleancss:shared": "chokidar --verbose \"styles/shared/**/*.css\" -c \"if [[ '{event}' = 'change' || '{event}' = 'add' ]]; then npm run cleancss:all; fi;\"",
+    "clean": "rm -rf ./dist ./lib",
+    "serve": "eleventy --serve",
+    "dev": "npm-run-all --parallel watch:cleancss watch:cleancss:shared 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
   },
   "author": "DevXR Contributors",
-  "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
   },
-  "dependencies": {
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@11ty/eleventy": "^0.9.0",
     "@google/model-viewer": "^0.8.1",
+    "@google/model-viewer-shared-assets": "^0.0.1",
     "@magicleap/prismatic": "^2.0.2",
     "@types/prismjs": "^1.9.0",
     "@types/resize-observer-browser": "^0.1.2",
-    "@webcomponents/webcomponentsjs": "~2.1.3",
-    "focus-visible": "^5.0.1",
+    "@webcomponents/webcomponentsjs": "^2.4.0",
+    "chokidar-cli": "^2.1.0",
+    "clean-css-cli": "^4.3.0",
+    "focus-visible": "^5.0.2",
     "fullscreen-polyfill": "^1.0.2",
-    "intersection-observer": "^0.5.1",
+    "intersection-observer": "^0.7.0",
     "lit-element": "^2.2.1",
-    "prismjs": "^1.15.0",
-    "resize-observer-polyfill": "^1.5.0"
-  },
-  "devDependencies": {
-    "@google/model-viewer-shared-assets": "^0.0.1",
+    "npm-run-all": "^4.1.5",
     "polymer-build": "^3.1.4",
-    "rollup": "^1.29.0",
+    "prismjs": "^1.17.1",
+    "resize-observer-polyfill": "^1.5.1",
+    "rollup": "^1.27.12",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
     "typescript": "^3.7.4"

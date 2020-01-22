@@ -14,8 +14,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "./lib",
-    "rootDir": "./src",
+    "outDir": "lib",
     "experimentalDecorators": true,
     "noErrorTruncation": true,
     "declaration": true

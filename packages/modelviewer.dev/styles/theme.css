@@ -1,0 +1,105 @@
+@import 'shared/fonts.css';
+@import 'shared/vars.css';
+@import 'shared/elements.css';
+
+body {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: auto auto 1fr;
+  grid-column-gap: 0rem;
+  grid-template-areas:
+      "header demo"
+      "intro demo"
+      "footer footer";
+
+  font-size: var(--body-font-size);
+}
+
+#header {
+  grid-area: header;
+  padding: var(--padding);
+}
+
+#header > h1 {
+  display: inline-block;
+  background-image: url(../assets/images/model-viewer-logo.svg);
+  background-position: 0 50%;
+  background-size: var(--icon-size);
+  background-repeat: no-repeat;
+  padding: 0 0 0 36px;
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+#intro {
+  grid-area: intro;
+  padding: 0 var(--padding) var(--padding) var(--padding);
+}
+
+
+#intro > h1 {
+  text-align: center;
+  max-width: 380px;
+  margin: 0 auto var(--padding) auto;
+}
+
+#intro > nav {
+  margin-bottom: var(--padding);
+}
+
+#intro > nav ul,
+#intro > nav li {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+#intro > nav li {
+  display: inline-block;
+}
+
+#intro > nav a {
+  padding: 0 0.5rem;
+  font-size: 1.5rem;
+  line-height: 2.4rem;
+}
+
+#intro > nav a:before {
+  content: "";
+  border-radius: 1rem;
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  display: inline-block;
+  margin-right: .5rem;
+}
+
+#footer {
+  border-top: 1px solid #eee;
+  padding: var(--padding);
+  background-color: #f5f5f5;
+  grid-area: footer;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+ul.attributions {
+  margin: 0;
+  padding: 0;
+}
+
+ul.attributions > li {
+  display: block;
+}
+
+#demo {
+  position: relative;
+  grid-area: demo;
+  padding: var(--padding) var(--padding) var(--padding) 0;
+}
+

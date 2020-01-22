@@ -1,0 +1,20 @@
+:root {
+  --color-red: #FF4E42;
+  --color-light-yellow: hsl(58, 100%, 92%);
+  --color-yellow: hsl(58, 100%, 77%);
+  --body-font-size: 16px;
+  --body-line-height: 24px;
+  --text-color: #444;
+  --secondary-text-color: rgba(0,0,0,.5);
+  --icon-size: 24px;
+  --padding: 2rem;
+  --panel-width: 320px;
+  --border-style: 1px solid rgba(0,0,0,.1);
+  --gray-bg: rgba(0,0,0,.05);
+  --p-max-width: 680px;
+  --shadow: 4px 4px 0px rgba(0, 0, 0, .25);
+  --placeholder-color: rgba(0, 0, 0, .24);
+
+  --font-family-sans-serif: 'Rubik', 'Helvetica', sans-serif;
+  --font-family-monospace: 'Roboto Mono', monospace;
+} 

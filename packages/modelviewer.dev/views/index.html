@@ -1,0 +1,70 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>&lt;model-viewer&gt;</title>
+  <link rel="stylesheet" href="./theme.css">
+  <script src="./node_modules/focus-visible/dist/focus-visible.min.js"></script>
+</head>
+<body>
+  <header id="header"><h1><code>model-viewer</code></h1></header>
+  <section id="intro">
+    <h1>Easily display interactive 3D models on the web &amp; in AR</h1>
+    <nav>
+      <ul>
+        <li>
+          <a href="#">Github</a>
+        </li>
+        <li>
+          <a href="#">Documentation</a>
+        </li>
+        <li>
+          <a href="#">Recipes</a>
+        </li>
+      </ul>
+    </nav>
+    <h3><b>Quick start</b></h3>
+    <h3>Step 1: Import the component</h3>
+    <code-example language="html">
+      <script type="example">
+<script type="module"
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+<\/script>
+<script nomodule
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+<\/script>
+      </script>
+    </code-example>
+    <h3>Step 2: Use it like any other HTML element</h3>
+    <code-example language="html">
+      <script type="example">
+<model-viewer src="examples/assets/Astronaut.glb"
+    alt="A 3D model of an astronaut"
+    auto-rotate
+    camera-controls
+    background-color="#455A64">
+</model-viewer>
+      </script>
+    </code-example>
+  </section>
+  <section id="demo">
+    <iframe allow="vr" src="https://glitch.com/embed/#!/embed/model-viewer-demo?path=index.html&amp;previewSize=100&amp;attributionHidden=true" alt="model-viewer-demo on Glitch" style="height: 100%; width: 100%; border: 0;">
+    </iframe>
+  </section>
+  <footer id="footer">
+    <ul class="attributions">
+      <li>
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
+      </li>
+    </ul>
+    <dic class="legal-notice">
+      <div class="copyright"><b>© Copyright 2018 Google LLC</b></div>
+      <div class="license">Licensed under the Apache License 2.0</div>
+    </dic>
+    
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer/issues" target="_blank">Report a bug</a></div>
+  </footer>
+  <script src="./documentation.js" defer></script>
+</body>
+</html>

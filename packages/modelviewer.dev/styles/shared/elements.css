@@ -1,0 +1,67 @@
+@import 'vars.css';
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-family-sans-serif);
+  color: var(--text-color, #222);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--text-color, #222);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--color-red);
+}
+
+h1 {
+  font-weight: 400;
+  font-size: 2.25rem;
+  line-height: 2.8125rem;
+  margin: 0rem 0 1rem 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 2.4rem;
+  margin: 0;
+}
+
+h3 {
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  margin: 0 0 1rem 0;
+}
+
+b, strong {
+  font-weight: 500;
+}
+
+u {
+  border-bottom: 2px solid currentColor;
+  text-decoration: none;
+}
+
+code {
+  font-family: var(--font-family-monospace);
+}
+
+code-example {
+  margin: 0 calc(var(--padding)/-2) 1em;
+}
+
+:last-child  {
+  margin-bottom: 0;
+}
