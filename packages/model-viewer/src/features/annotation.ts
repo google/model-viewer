@@ -29,11 +29,22 @@ const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
+/**
+ * Hotspots are configured by slot name, and this name must begin with "hotspot"
+ * to be recognized. The position and normal strings are in the form of the
+ * camera-target attribute and default to "0m 0m 0m" and "0m 1m 0m",
+ * respectively.
+ */
 interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
 }
+
+/**
+ * The Hotspot object is a reference-counted slot. If decrement() returns true,
+ * it should be removed from the tree so it can be garbage-collected.
+ */
 class Hotspot extends CSS2DObject {
   public normal: Vector3;
   private referenceCount: number;
@@ -83,6 +94,13 @@ export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
 }
 
+/**
+ * AnnotationMixin implements a declarative API to add hotspots and annotations.
+ * Child elements of the <model-viewer> element that have a slot name that
+ * begins with "hotspot" and data-position and data-normal attributes in
+ * the format of the camera-target attribute will be added to the scene and
+ * track the specified model coordinates.
+ */
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
@@ -120,6 +138,20 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     disconnectedCallback() {
       super.disconnectedCallback();
       this[$observer].disconnect();
+    }
+
+    /**
+     * Since the data-position and data-normal attributes are not observed, use
+     * this method to move a hotspot. Keep in mind that all hotspots with the
+     * same slot name use a single location and the first definition takes
+     * precedence, until updated with this method.
+     */
+    updateHotspot(config: HotspotConfiguration) {
+      const hotspot = this[$hotspotMap].get(config.name);
+      if (hotspot == null)
+        return;
+      hotspot.updatePosition(config.position);
+      hotspot.updateNormal(config.normal);
     }
 
     [$tick](time: number, delta: number) {
@@ -176,14 +208,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].pivot.remove(hotspot);
         this[$hotspotMap].delete(node.slot);
       }
-    }
-
-    updateHotspot(config: HotspotConfiguration) {
-      const hotspot = this[$hotspotMap].get(config.name);
-      if (hotspot == null)
-        return;
-      hotspot.updatePosition(config.position);
-      hotspot.updateNormal(config.normal);
     }
   }
 
