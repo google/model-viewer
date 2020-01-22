@@ -51,6 +51,8 @@ echo 'node_modules/*' > .gitignore
 echo 'shared-assets' >> .gitignore
 popd
 
+mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
+
 pushd ./model-viewer-shared-assets
 echo 'node_modules/*' > .gitignore
 echo 'models/glTF-Sample-Models/*' >> .gitignore
@@ -61,9 +63,6 @@ echo '!models/glTF-Sample-Models/Duck' >> .gitignore
 echo '!models/glTF-Sample-Models/MetalRoughSpheres' >> .gitignore
 echo '!models/glTF-Sample-Models/AntiqueCamera' >> .gitignore
 popd
-
-mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
-
 popd
 
 git log -n 1 > VERSION
