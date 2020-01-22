@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
+import {AnimationClip, AnimationMixer, Box3, Object3D, Scene, Vector3} from 'three';
 
 import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {moveChildren, reduceVertices} from './ModelUtils.js';
@@ -32,11 +32,12 @@ const $loader = Symbol('loader');
 export default class Model extends Object3D {
   private[$currentScene]: CacheRetainedScene|null = null;
   private[$loader] = new CachingGLTFLoader();
-  private mixer = new AnimationMixer(null);
+  private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
-  private currentAnimationAction: AnimationAction|null = null;
+  // TODO: any is here because three stopped exporting AnimationAction.d.ts
+  private currentAnimationAction: any|null = null;
 
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
@@ -61,6 +62,7 @@ export default class Model extends Object3D {
     this.modelContainer.name = 'ModelContainer';
 
     this.add(this.modelContainer);
+    this.mixer = new AnimationMixer(this.modelContainer);
   }
 
   /**
@@ -69,31 +71,6 @@ export default class Model extends Object3D {
    */
   hasModel(): boolean {
     return !!this.modelContainer.children.length;
-  }
-
-  applyEnvironmentMap(map: Texture|null) {
-    // Note that unlit models (using MeshBasicMaterial) should not apply
-    // an environment map, even though `map` is the currently configured
-    // environment map.
-    this.modelContainer.traverse((obj: Object3D) => {
-      // There are some cases where `obj.material` is
-      // an array of materials.
-      const mesh: Mesh = obj as Mesh;
-
-      if (Array.isArray(mesh.material)) {
-        for (let material of (mesh.material as Array<Material>)) {
-          if ((material as any).isMeshBasicMaterial) {
-            continue;
-          }
-          (material as MeshStandardMaterial).envMap = map;
-          material.needsUpdate = true;
-        }
-      } else if (mesh.material && !(mesh.material as any).isMeshBasicMaterial) {
-        (mesh.material as MeshStandardMaterial).envMap = map;
-        (mesh.material as Material).needsUpdate = true;
-      }
-    });
-    this.dispatchEvent({type: 'envmap-change', value: map});
   }
 
   /**

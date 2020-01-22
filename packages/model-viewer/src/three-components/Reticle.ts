@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
+import {Camera, MathUtils as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
 /**
  * The Reticle class creates an object that repeatedly calls

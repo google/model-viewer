@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
-
+import {Cache, DataTextureLoader, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
-import {ProgressTracker} from '../utilities/progress-tracker.js';
 
-import {PMREMGenerator} from './PMREMGenerator.js';
+import {ProgressTracker} from '../utilities/progress-tracker.js';
+import EnvironmentScene from './EnvironmentScene.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
@@ -28,6 +27,8 @@ export interface EnvironmentMapAndSkybox {
 export interface EnvironmentGenerationConfig {
   progressTracker?: ProgressTracker;
 }
+
+const GENERATED_SIGMA = 0.04;
 
 // Enable three's loader cache so we don't create redundant
 // Image objects to decode images fetched over the network.
@@ -74,6 +75,7 @@ export default class TextureUtils extends EventDispatcher {
       url: string, progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
     try {
+      this[$PMREMGenerator].compileEquirectangularShader();
       const isHDR: boolean = HDR_FILE_RE.test(url);
       const loader: DataTextureLoader = isHDR ? hdrLoader : ldrLoader;
       const texture: Texture = await new Promise<Texture>(
@@ -203,7 +205,10 @@ export default class TextureUtils extends EventDispatcher {
    */
   private[$loadGeneratedEnvironmentMap](): Promise<WebGLRenderTarget> {
     if (this[$generatedEnvironmentMap] == null) {
-      this[$generatedEnvironmentMap] = this[$PMREMGenerator].fromDefault();
+      const defaultScene = new EnvironmentScene;
+      this[$generatedEnvironmentMap] =
+          this[$PMREMGenerator].fromScene(defaultScene, GENERATED_SIGMA);
+      defaultScene.dispose();
     }
 
     return Promise.resolve(this[$generatedEnvironmentMap]!);

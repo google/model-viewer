@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
-import {Event} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP, HAS_OFFSCREEN_CANVAS} from '../constants.js';
+import {HAS_OFFSCREEN_CANVAS, IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -66,7 +65,7 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
-  public canvas3D: HTMLCanvasElement | OffscreenCanvas;
+  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -114,7 +113,7 @@ export class Renderer extends EventDispatcher {
         context: this.context3D,
       });
       this.threeRenderer.autoClear = false;
-      this.threeRenderer.gammaOutput = true;
+      this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(resolveDpr());

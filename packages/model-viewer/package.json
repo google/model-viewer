@@ -107,7 +107,7 @@
   },
   "dependencies": {
     "lit-element": "^2.2.0",
-    "three": "^0.110.0",
+    "three": "^0.113.0",
     "@types/resize-observer-browser": "^0.1.2",
     "@types/webgl2": "^0.0.5"
   },
