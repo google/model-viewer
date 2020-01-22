@@ -56,12 +56,13 @@ mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
 pushd ./model-viewer-shared-assets
 echo 'node_modules/*' > .gitignore
 echo 'models/glTF-Sample-Models/*' >> .gitignore
-echo '!models/glTF-Sample-Models/BoomBox' >> .gitignore
-echo '!models/glTF-Sample-Models/FlightHelmet' >> .gitignore
-echo '!models/glTF-Sample-Models/DamagedHelmet' >> .gitignore
-echo '!models/glTF-Sample-Models/Duck' >> .gitignore
-echo '!models/glTF-Sample-Models/MetalRoughSpheres' >> .gitignore
-echo '!models/glTF-Sample-Models/AntiqueCamera' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/BoomBox' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/FlightHelmet' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/DamagedHelmet' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/Duck' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/MetalRoughSpheres' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/AntiqueCamera' >> .gitignore
 popd
 popd
 
