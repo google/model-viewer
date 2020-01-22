@@ -45,7 +45,7 @@ interface HotspotConfiguration {
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
  * it should be removed from the tree so it can be garbage-collected.
  */
-class Hotspot extends CSS2DObject {
+export class Hotspot extends CSS2DObject {
   public normal: Vector3;
   private referenceCount: number;
 
