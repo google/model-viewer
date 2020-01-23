@@ -1,0 +1,53 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>&lt;model-viewer&gt;</title>
+
+  <link rel="stylesheet" href="{% rootRelative 'theme.css' %}">
+  <link rel="stylesheet" href="{% rootRelative 'big-demo.css' %}">
+
+{% include polyfills %}
+
+</head>
+<body>
+  <header id="header">
+    <h1 class="model-viewer"><code>model-viewer</code></h1>
+  </header>
+
+{% comment %}
+This template is designed to support two primary regions of custom content:
+
+ - intro: headline copy, navigation etc
+ - body: the body text describing the demo, and a related code snippet
+
+Content used to populate this template should have a corresponding
+DOM structure e.g.,:
+
+<section id="intro">Cool demo</section>
+<section id="body">
+  <code-example stamp-to="demo">
+    <script type="example">
+<model-viewer>...</model-viewer>
+    </script>
+  </code-example>
+</section>
+{% endcomment %}
+
+{{ content }}
+  
+  <section id="demo"></section>
+  <footer id="footer">
+
+{% include attributions %}
+
+{% include legal-notice %}
+    
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer/issues" target="_blank">Report a bug</a></div>
+  </footer>
+
+  <script src="{% rootRelative 'documentation.js' %}" defer></script>
+
+{% include model-viewer %}
+</body>
+</html>

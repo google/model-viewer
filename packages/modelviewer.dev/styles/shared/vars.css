@@ -1,18 +1,22 @@
 :root {
   --color-red: #FF4E42;
   --color-light-yellow: hsl(58, 100%, 92%);
-  --color-yellow: hsl(58, 100%, 77%);
+  --color-yellow: hsl(46, 100%, 75%);
+  --color-light-blue: hsl(191, 61%, 71%);
+  --color-blue: hsl(191, 47%, 56%);
   --body-font-size: 16px;
   --body-line-height: 24px;
   --text-color: #444;
-  --secondary-text-color: rgba(0,0,0,.5);
+  --secondary-text-color: rgba(128, 40, 40, .75);
   --icon-size: 24px;
-  --padding: 2rem;
+  --padding: 3rem;
   --panel-width: 320px;
-  --border-style: 1px solid rgba(0,0,0,.1);
+  --border-linebreak: 1px solid rgba(128, 40, 40, .1);
+
   --gray-bg: rgba(0,0,0,.05);
   --p-max-width: 680px;
   --shadow: 4px 4px 0px rgba(0, 0, 0, .25);
+  --shadow-drawer: 0 0 8px rgba(0, 0, 0, 0.2);
   --placeholder-color: rgba(0, 0, 0, .24);
 
   --font-family-sans-serif: 'Rubik', 'Helvetica', sans-serif;

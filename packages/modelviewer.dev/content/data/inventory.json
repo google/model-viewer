@@ -1,0 +1,23 @@
+{
+  "authors": [
+    {
+      "name": "Poly",
+      "url": "https://poly.google.com/user/4aEd8rQgKu2"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "CC-BY",
+      "url": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  ],
+  "assets": [
+    {
+      "name": "Astronaut",
+      "filename": "Astronaut.*",
+      "author": "Poly",
+      "license": "CC-BY",
+      "url": "https://poly.google.com/view/dLHpzNdygsg"
+    }
+  ]
+}

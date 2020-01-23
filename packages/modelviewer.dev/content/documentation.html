@@ -1,0 +1,232 @@
+---
+layout: drawer-and-details
+title: Documentation
+attributions:
+  - Astronaut
+---
+<!-- Attributes -->
+<section class="api-type">
+  <header>
+    <i class="bookmark" id="attributes"></i>
+    <h1><span>Attributes</span><a href="#attributes">#</a></h1>
+  </header>
+
+  <section class="category">
+    <header>
+      <i class="bookmark" id="attributes/basic"></i>
+      <h2><span>Basic</span><a href="#attributes/basic">#</a></h2>
+    </header>
+
+    <section class="table">
+      <header>
+        <h3>Name</h3>
+        <h3>Default</h3>
+        <h3>Description</h3>
+      </header>
+
+      <!-- src -->
+      <div class="row">
+        <a href="#attributes/basic/src">
+          <i class="bookmark" id="attributes/basic/src"></i>
+          <code>src</code>
+        </a>
+        <code>-</code>
+        <span class="highlight-code">
+The URL of a 3D model. This parameter is required for
+<code>&lt;model-viewer&gt;</code> to render a 3D model in the browser. Only
+glTF/glB files are supported.
+        </span>
+      </div>
+      
+      <!-- alt -->
+      <div class="row">
+        <a href="#attributes/basic/alt">
+          <i class="bookmark" id="attributes/basic/alt"></i>
+          <code>alt</code>
+        </a>
+        <code>-</code>
+        <span class="highlight-code">
+Configures the model with custom text that will be used to describe the model
+to viewers who use a screen reader or otherwise depend on additional semantic
+context to understand what they are viewing.
+        </span>
+      </div>
+    </section>
+  </section>
+
+  <section class="category">
+    <header>
+      <i class="bookmark" id="attributes/animation"></i>
+      <h2><span>Animation</span><a href="#attributes/animation">#</a></h2>
+    </header>
+    <section class="table">
+      <header>
+        <h3>Name</h3>
+        <h3>Default</h3>
+        <h3>Description</h3>
+      </header>
+
+      <!-- animation-crossfade-duration -->
+      <div class="row">
+        <a href="#attributes/animation/animation-crossfade-duration">
+          <i class="bookmark" id="attributes/animation/animation-crossfade-duration"></i>
+          <code>animation-crossfade-duration</code>
+        </a>
+        <code>300</code>
+        <span class="highlight-code">
+When the current animation is changed, <code>&lt;model-viewer&gt;</code>
+automatically crossfades between the previous and next animations. This
+attribute controls how long the crossfade is in milliseconds.
+        </span>
+      </div>
+
+      <!-- animation-name -->
+      <div class="row">
+        <a href="#attributes/animation/animation-name">
+          <i class="bookmark" id="attributes/animation/animation-name"></i>
+          <code>animation-name</code>
+        </a>
+        <code>-</code>
+        <span class="highlight-code">
+Selects an animation to play by name. This animation will play when the
+<code>.play()</code> method is invoked, or when the
+<code>&lt;model-viewer&gt;</code> is configured to <code>autoplay</code>. If no
+<code>animation-name</code> is specified, <code>&lt;model-viewer&gt;</code>
+always picks the first animation it finds in the model.
+        </span>
+      </div>
+
+      <!-- autoplay -->
+      <div class="row">
+        <a href="#attributes/animation/autoplay">
+          <i class="bookmark" id="attributes/animation/autoplay"></i>
+          <code>autoplay</code>
+        </a>
+        <code>false</code>
+        <span class="highlight-code">
+If this is <code>true</code> and a model has animations, an animation will
+automatically begin to play when this attribute is set (or when the property is
+set to <code>true</code>). If no <code>animation-name</code> is specified,
+plays the first animation.
+        </span>
+      </div>
+    </section>
+  </section>
+
+  <section class="category">
+    <header>
+      <i class="bookmark" id="attributes/camera"></i>
+      <h2><span>Camera</span><a href="#attributes/camera">#</a></h2>
+    </header>
+    <section class="table">
+      <header>
+        <h3>Name</h3>
+        <h3>Default</h3>
+        <h3>Description</h3>
+      </header>
+
+      <!-- camera-controls -->
+      <div class="row">
+        <a href="#attributes/camera/camera-controls">
+          <i class="bookmark" id="attributes/camera/camera-controls"></i>
+          <code>camera-controls</code>
+        </a>
+        <code>false</code>
+        <span class="highlight-code">
+Enables controls via mouse, touch and keyboard when in flat view.
+        </span>
+      </div>
+
+      <!-- camera-orbit -->
+      <div class="row">
+        <a href="#attributes/camera/camera-orbit">
+          <i class="bookmark" id="attributes/camera/camera-orbit"></i>
+          <code>camera-orbit</code>
+        </a>
+        <code>0deg 75deg 105%</code>
+        <span class="highlight-code">
+          <p>
+Set the starting and/or subsequent orbital position of the camera. You can
+control the azimuthal and polar angles, and the distance from the model.
+Accepts values of the form <code>$angle $angle $distance</code>, like
+<code>10deg 75deg 1.5m</code>. Also supports units in radians
+(<code>rad</code>) for angles and centimeters (<code>cm</code>) or millimeters
+(<code>mm</code>) for camera distance. Camera distance can also be set as a
+percentage (<code>%</code>), where <code>100%</code> gives the model tight
+framing within any window based on all possible theta and phi values. Any time
+this value changes from its initially configured value, the camera will
+interpolate from its current position to the new value. Any value set to
+<code>auto</code> will revert to the default.
+          </p>
+          <p>
+For <code>camera-orbit</code>, <code>camera-target</code> and
+<code>field-of-view</code>, parts of the property value can be configured with
+CSS-like functions. The CSS <code>calc()</code> function is supported for these
+values, as well as a specialized form of the <code>env()</code> function. You
+can use <code>env(window-scroll-y)</code> anywhere in the expression to get a
+number from 0-1 that corresponds to the current top-level scroll position of
+the current frame. For example, a value like
+<code>calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m</code> cause the
+camera to orbit horizontally around the model as the user scrolls down the page.
+          </p>
+        </span>
+      </div>
+
+      <!-- max-camera-orbit -->
+      <div class="row">
+        <a href="#attributes/camera/max-camera-orbit">
+          <i class="bookmark" id="attributes/camera/max-camera-orbit"></i>
+          <code>max-camera-orbit</code>
+        </a>
+        <code>auto 157.5deg auto</code>
+        <span class="highlight-code">
+Set the maximum orbital values of the camera. Takes values in the same form as
+<code>camera-orbit</code>, but does not support <code>env()</code>. Specifying
+<code>auto</code> for the first or third terms leaves those values unbounded.
+        </span>
+      </div>
+
+      <!-- camera-target -->
+      <div class="row">
+        <a href="#attributes/camera/camera-target">
+          <i class="bookmark" id="attributes/camera/camera-target"></i>
+          <code>camera-target</code>
+        </a>
+        <code>auto auto auto</code>
+        <span class="highlight-code">
+Set the starting and/or subsequent point the camera orbits around. Accepts
+values of the form <code>$X $Y $Z</code>, like <code>0m 1.5m -0.5m</code>. Also 
+supports units in centimeters (<code>cm</code>) or millimeters
+(<code>mm</code>). A special value <code>auto</code> can be used, which sets the
+target to the center of the model's bounding box in that dimension. Any time
+this value changes from its initially configured value, the camera will
+interpolate from its current position to the new value. Defaults to 
+<code>auto auto auto</code>. Enables controls via mouse, touch and keyboard
+when in flat view.
+        </span>
+      </div>
+
+      <!-- field-of-view -->
+      <div class="row">
+        <a href="#attributes/camera/field-of-view">
+          <i class="bookmark" id="attributes/camera/field-of-view"></i>
+          <code>field-of-view</code>
+        </a>
+        <code>auto</code>
+        <span class="highlight-code">
+Used to configure the vertical field of view of the camera. Accepts values
+units in both degrees and radians (e.g., <code>30deg</code> or
+<code>0.5rad</code>). Accepts any value between 10 and 45 degrees. Any time
+this value changes from its initially configured value, the camera will
+interpolate from its current value to the new value. Defaults to
+<code>auto</code>, which sets either the vertical or horizontal field of view
+to 45 degrees depending on the dimensions of the model and the aspect ratio
+of the canvas.
+        </span>
+      </div>
+
+
+    </section>
+  </section>
+
+</section>

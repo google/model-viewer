@@ -1,0 +1,21 @@
+.icon {
+  display: inline-block;
+  width: 56px;
+  height: 56px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 24px;
+  background-position: center;
+}
+
+.menu.icon {
+  background-image: url('../../assets/images/menu-24px.svg');
+}
+
+.github.icon {
+  background-image: url('../../assets/images/github-24px.svg');
+}
+
+.twitter.icon {
+  background-image: url('../../assets/images/twitter-400px.svg');
+}

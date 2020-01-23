@@ -1,26 +1,9 @@
 @import 'shared/fonts.css';
 @import 'shared/vars.css';
 @import 'shared/elements.css';
+@import 'shared/icons.css';
 
-body {
-  display: grid;
-  grid-template-columns: 50% 50%;
-  grid-template-rows: auto auto 1fr;
-  grid-column-gap: 0rem;
-  grid-template-areas:
-      "header demo"
-      "intro demo"
-      "footer footer";
-
-  font-size: var(--body-font-size);
-}
-
-#header {
-  grid-area: header;
-  padding: var(--padding);
-}
-
-#header > h1 {
+h1.model-viewer {
   display: inline-block;
   background-image: url(../assets/images/model-viewer-logo.svg);
   background-position: 0 50%;
@@ -34,72 +17,65 @@ body {
   line-height: 24px;
 }
 
-#intro {
-  grid-area: intro;
-  padding: 0 var(--padding) var(--padding) var(--padding);
-}
-
-
-#intro > h1 {
-  text-align: center;
-  max-width: 380px;
-  margin: 0 auto var(--padding) auto;
-}
-
-#intro > nav {
-  margin-bottom: var(--padding);
-}
-
-#intro > nav ul,
-#intro > nav li {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-#intro > nav li {
-  display: inline-block;
-}
-
-#intro > nav a {
-  padding: 0 0.5rem;
-  font-size: 1.5rem;
-  line-height: 2.4rem;
-}
-
-#intro > nav a:before {
-  content: "";
-  border-radius: 1rem;
-  width: 1rem;
-  height: 1rem;
-  background: currentColor;
-  display: inline-block;
-  margin-right: .5rem;
-}
-
 #footer {
+  grid-area: footer;
   border-top: 1px solid #eee;
   padding: var(--padding);
   background-color: #f5f5f5;
-  grid-area: footer;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   font-size: 0.85rem;
+  text-align: center;
+
+  display: grid;
+  grid-template-columns: calc(100%/3) calc(100%/3) calc(100%/3);
 }
 
-ul.attributions {
+#footer > :first-child {
+  text-align: left;
+}
+
+#footer > :last-child {
+  text-align: right;
+}
+
+#footer > ul {
   margin: 0;
   padding: 0;
 }
 
-ul.attributions > li {
+#footer > ul > li {
   display: block;
 }
 
-#demo {
-  position: relative;
-  grid-area: demo;
-  padding: var(--padding) var(--padding) var(--padding) 0;
+.highlight-code code {
+  background-color: var(--color-light-yellow);
+  color: rgba(53, 28, 28, 0.85);
+  font-weight: 100;
+  border-radius: 3px;
+  padding: 0 0.1em;
 }
 
+@media (max-width: 1024px) {
+  body {
+    --padding: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    --padding: 1.5rem;
+  }
+
+  #footer {
+    grid-template-columns: auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  #footer > :not(:last-child) {
+    margin-bottom: 1em;
+  }
+
+  #footer > :first-child,
+  #footer > :last-child {
+    text-align: center;
+  }
+}

@@ -88,6 +88,8 @@ pre {
 
   @property({attribute: 'alt', type: String}) alt: string = '';
 
+  @property({type: String, attribute: 'stamp-to'}) stampTo: string|null = null;
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -132,11 +134,25 @@ pre {
     return `Empty ${language} example`;
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<string|symbol, any>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('alt') && this.alt === '') {
       this.alt = this[$alt];
+    }
+
+    if ((changedProperties.has('stampTo') ||
+         changedProperties.has($exampleTextElement)) &&
+        this.stampTo != null && this[$exampleTextElement] != null) {
+      const root = this.getRootNode() as Document | ShadowRoot;
+      const stampTarget = root.querySelector(this.stampTo);
+
+      console.log(stampTarget);
+      if (stampTarget != null) {
+        const template = document.createElement('template');
+        template.innerHTML = this.exampleText;
+        stampTarget.appendChild(template.content.cloneNode(true));
+      }
     }
   }
 

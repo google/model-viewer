@@ -1,0 +1,47 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>&lt;model-viewer&gt; {{ title }}</title>
+  <link rel="stylesheet" href="{% rootRelative 'theme.css' %}">
+  <link rel="stylesheet" href="{% rootRelative 'drawer-and-details.css' %}">
+
+{% include polyfills %}
+
+</head>
+<body>
+
+  <header id="toolbar">
+    <button id="menu-button" class="menu icon" aria-label="Toggle menu"></button>
+    <h1>{{ title }}</h1>
+    <a class="github icon"
+        href="https://github.com/GoogleWebComponents/model-viewer"
+        target="_blank"
+        aria-label="Model-Viewer on Github"></a>
+  </header>
+
+  <section id="drawer">
+    <a href="{% rootRelative '/' %}"><h1 class="model-viewer"><code>model-viewer</code></h1></a>
+    {% include drawer-links %}
+  </section>
+
+  <section id="body">
+
+{{ content }}
+
+    <footer id="footer">
+
+{% include attributions %}
+
+{% include legal-notice %}
+    
+      <div><a href="https://github.com/GoogleWebComponents/model-viewer/issues" target="_blank">Report a bug</a></div>
+    </footer>
+
+  </section>
+
+  <script src="{% rootRelative 'documentation.js' %}" defer></script>
+
+{% include model-viewer %}
+</body>
+</html>

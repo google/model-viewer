@@ -1,0 +1,9 @@
+<!-- Loads <model-viewer> only on modern browsers: -->
+<script type="module"
+  src="{% rootRelative 'node_modules/@google/model-viewer/dist/model-viewer.js' %}">
+</script>
+
+<!-- Loads <model-viewer> only on old browsers like IE11: -->
+<script nomodule
+  src="{% rootRelative 'node_modules/@google/model-viewer/dist/model-viewer-legacy.js' %}">
+</script>

@@ -20,7 +20,8 @@ a {
   text-decoration: underline;
 }
 
-a:hover {
+a:hover,
+a:active {
   color: var(--color-red);
 }
 
@@ -59,7 +60,11 @@ code {
 }
 
 code-example {
-  margin: 0 calc(var(--padding)/-2) 1em;
+  margin: 0 calc(var(--padding)/-3) 1em;
+}
+
+button {
+  cursor: pointer;
 }
 
 :last-child  {

@@ -14,7 +14,7 @@
     "watch:cleancss:shared": "chokidar --verbose \"styles/shared/**/*.css\" -c \"if [[ '{event}' = 'change' || '{event}' = 'add' ]]; then npm run cleancss:all; fi;\"",
     "clean": "rm -rf ./dist ./lib",
     "serve": "eleventy --serve",
-    "dev": "npm-run-all --parallel watch:cleancss watch:cleancss:shared 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
+    "dev": "tsc && npm-run-all --parallel watch:cleancss watch:cleancss:shared 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
   },
   "author": "DevXR Contributors",
   "engines": {
