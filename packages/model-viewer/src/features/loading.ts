@@ -86,11 +86,11 @@ export declare interface LoadingInterface {
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
-  setURLModifier(callback: (url: string) => string): void;
 }
 
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
+  mapURLs(callback: (url: string) => string): void;
 }
 
 interface ModelViewerGlobalConfig {
@@ -159,6 +159,16 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
+     * If provided, the callback will be passed each resource URL before a
+     * request is sent. The callback may return the original URL, or a new URL
+     * to override loading behavior. This behavior can be used to load assets
+     * from .ZIP files, drag-and-drop APIs, and Data URIs.
+     */
+    static mapURLs(callback: (url: string) => string) {
+      loader[$loader].manager.setURLModifier(callback);
+    }
+
+    /**
      * A URL pointing to the image to use as a poster in scenarios where the
      * <model-viewer> is not ready to reveal a rendered model to the viewer.
      */
@@ -189,16 +199,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     dismissPoster() {
       this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
       this.requestUpdate();
-    }
-
-    /**
-     * If provided, the callback will be passed each resource URL before a
-     * request is sent. The callback may return the original URL, or a new URL
-     * to override loading behavior. This behavior can be used to load assets
-     * from .ZIP files, drag-and-drop APIs, and Data URIs.
-     */
-    setURLModifier(callback: (url: string) => string) {
-      loader[$loader].manager.setURLModifier(callback);
     }
 
     protected[$modelIsVisible] = false;

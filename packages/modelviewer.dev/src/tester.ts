@@ -28,6 +28,14 @@ dropControl.on('drop', ({files}: any) => load(files));
       document.getElementById(`${property}`)!.addEventListener(
           'input', (event) => {
             viewer[property] = (event.target as HTMLInputElement).value;
+            if (viewer.environmentImage === '') {
+              useSkybox.disabled = true;
+              useSkybox.checked = false;
+              viewer.skyboxImage = null;
+              backgroundColor.disabled = false;
+            } else {
+              useSkybox.disabled = false;
+            }
             if (useSkybox.checked) {
               viewer.skyboxImage = viewer.environmentImage;
             }
@@ -35,9 +43,9 @@ dropControl.on('drop', ({files}: any) => load(files));
     });
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
+const backgroundColor =
+    document.getElementById('backgroundColor') as HTMLInputElement;
 useSkybox.addEventListener('change', (_event) => {
-  const backgroundColor =
-      document.getElementById('backgroundColor') as HTMLInputElement;
   if (useSkybox.checked) {
     viewer.skyboxImage = viewer.environmentImage;
     backgroundColor.disabled = true;
@@ -118,7 +126,7 @@ function load(fileMap: Map<string, File>) {
       const blobURLs: Array<string> = [];
       rootPath = path.replace(file.name, '');
 
-      viewer.setURLModifier((url: string) => {
+      ModelViewerElement.mapURLs((url: string) => {
         const index = url.lastIndexOf('/');
 
         const normalizedURL =

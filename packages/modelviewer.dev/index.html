@@ -445,6 +445,12 @@
               is set or the .play() method is invoked.</p>
             </li>
             <li>
+              <div>ModelViewer.dracoDecoderLocation</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s
+              DRACO decoder location URL. By default, the DRACO decoder will be
+              loaded from a Google CDN.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -511,6 +517,14 @@
               the next update instead of interpolating the motion over time.</p>
             </li>
             <li>
+              <div>ModelViewer.mapURLs(callback)</div>
+              <p>If provided, the callback will be passed each resource URL
+              before a request is sent. The callback may return the original
+              URL, or a new URL to override loading behavior. This behavior can
+              be used to load assets from .ZIP files, drag-and-drop APIs, and
+              Data URIs. This is a static method.</p>
+            </li>
+            <li>
               <div>play()</div>
               <p>Causes animations to be played. Use the autoplay attribute if
               you want animations to be played automatically. If there are no
@@ -529,14 +543,6 @@
               is enabled. The new value of the turntable rotation will be 0 after
               this method is invoked, but the model may not update until the next
               render frame.</p>
-            </li>
-            <li>
-              <div>setURLModifier(callback)</div>
-              <p>If provided, the callback will be passed each resource URL
-              before a request is sent. The callback may return the original
-              URL, or a new URL to override loading behavior. This behavior can
-              be used to load assets from .ZIP files, drag-and-drop APIs, and
-              Data URIs.</p>
             </li>
             <li>
               <div>toDataURL(type, encoderOptions)</div>
