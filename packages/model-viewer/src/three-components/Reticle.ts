@@ -37,7 +37,7 @@ export default class Reticle extends Object3D {
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
     let material = new MeshBasicMaterial({color: 0xffffff});
     // Orient the geometry so its position is flat on a horizontal surface
-    geometry.applyMatrix(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
+    geometry.applyMatrix4(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
 
     this.ring = new Mesh(geometry, material);
 
