@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FrontSide, Material, Object3D, Scene, Vector3} from 'three';
+import {Material, Object3D, Scene, Vector3} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
@@ -30,17 +30,13 @@ export const cloneGltf = (gltf: GLTF): GLTF => {
   const clone:
       GLTF = {...gltf, scene: SkeletonUtils.clone(gltf.scene!) as Scene};
 
-  const specularGlossiness =
-      (gltf.parser as any).extensions['KHR_materials_pbrSpecularGlossiness'];
   /**
    * Creates a clone of the given material, and applies a patch to the
    * shader program.
    */
   const cloneAndPatchMaterial = (material: Material): Material => {
-    const clone = (material as any).isGLTFSpecularGlossinessMaterial ?
-        specularGlossiness.cloneMaterial(material) :
-        material.clone();
-    clone.shadowSide = FrontSide;
+    const clone = material.clone();
+    // clone.shadowSide = FrontSide;
     if (clone.transparent) {
       clone.depthWrite = false;
     }
@@ -51,10 +47,6 @@ export const cloneGltf = (gltf: GLTF): GLTF => {
     // Set a high renderOrder while we're here to ensure the model
     // always renders on top of the skysphere
     node.renderOrder = 1000;
-
-    if (specularGlossiness != null && node.isMesh) {
-      node.onBeforeRender = specularGlossiness.refreshUniforms;
-    }
 
     // Materials aren't cloned when cloning meshes; geometry
     // and materials are copied by reference. This is necessary
