@@ -62,6 +62,12 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     scene = element[$scene];
   });
 
+  teardown(() => {
+    if (element.parentNode != null) {
+      element.parentNode.removeChild(element);
+    }
+  });
+
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   suite('a model-viewer element with a hotspot', () => {
