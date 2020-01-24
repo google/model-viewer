@@ -89,8 +89,6 @@
       margin-bottom: 20px;
     }
 
-    /* Nokia 8810 */
-
     @media screen and (max-width: 320px) {
       #instructions {
         display: none;
@@ -105,7 +103,7 @@
     <h1>
       <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
     </h1>
-    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">glB or glTF</a> for the model =><br/>
+    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">glTF or GLB</a> for the model =><br/>
     Drop an <a href="https://hdrihaven.com/" target="_blank">HDR or JPG</a> for the skybox =><br/>
     <input type="file" id="input" multiple><br/><br/>
 
@@ -205,6 +203,7 @@
   </div>
 
   <script type="module" src="./built/tester.js"></script>
+  <script nomodule src="./built/tester-umd.js"></script>
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"
@@ -212,16 +211,6 @@
   </script>
   <script nomodule
       src="./built/dependencies-legacy.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on modern browsers: -->
-      <script type="module"
-      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

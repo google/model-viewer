@@ -16,7 +16,7 @@
 const fs = require('fs').promises;
 const {jsTransform} = require('polymer-build/lib/js-transform');
 
-const bundlesToTransform = ['./examples/built/dependencies-umd.js'];
+const bundlesToTransform = ['./examples/built/dependencies-umd.js', './examples/built/tester-umd.js'];
 
 console.log('Generating legacy bundles for IE11 compatibility...');
 
