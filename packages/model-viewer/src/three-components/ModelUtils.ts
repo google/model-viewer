@@ -30,9 +30,8 @@ export const cloneGltf = (gltf: GLTF): GLTF => {
   const clone:
       GLTF = {...gltf, scene: SkeletonUtils.clone(gltf.scene!) as Scene};
 
-  const specularGlossiness = gltf.asset.extensions ?
-      gltf.asset.extensions['KHR_materials_pbrSpecularGlossiness'] :
-      null;
+  const specularGlossiness =
+      (gltf.parser as any).extensions['KHR_materials_pbrSpecularGlossiness'];
   /**
    * Creates a clone of the given material, and applies a patch to the
    * shader program.
