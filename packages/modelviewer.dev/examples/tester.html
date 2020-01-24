@@ -1,0 +1,216 @@
+<!--
+/* @license
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Interactive Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../shared-assets/models/favicon.png"/>
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+  <style>
+    body, html {
+      height: 100%;
+      font-size: 10pt;
+    }
+
+    label {
+      display: inline-block;
+      width: 120px;
+      height: 24px;
+    }
+
+    input {
+      vertical-align: middle;
+    }
+
+    input.number {
+      border: 0;
+      background: transparent;
+      font-size: 16px;
+      width: 32px;
+      outline: none;
+    }
+
+    select {
+      font-size: 14px;
+    }
+
+    #container {
+      display: flex;
+      height: 100%;
+    }
+
+    model-viewer {
+      flex-grow: 1;
+      height: 100%;
+    }
+
+    #instructions {
+      width: 320px;
+      margin-top: 10px;
+      margin-left: 30px;
+      margin-bottom: 20px;
+    }
+
+    @media screen and (max-width: 320px) {
+      #instructions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <div id="instructions">
+    <h1>
+      <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
+    </h1>
+    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">glTF or GLB</a> for the model =><br/>
+    Drop an <a href="https://hdrihaven.com/" target="_blank">HDR or JPG</a> for the skybox =><br/>
+    <input type="file" id="input" multiple><br/><br/>
+
+    <label for="src">src:</label>
+    <select id="src">
+      <option value="../shared-assets/models/Astronaut.glb">Astronaut</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb">Damaged Helmet</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb">Water Bottles</option>
+      <option value="../shared-assets/models/RobotExpressive.glb">Robot Expressive</option>
+      <option value="../shared-assets/models/alpha-blend-litmus.glb">Transparency Test</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf">Metal Rough Spheres</option>
+    </select><br/>
+    
+    <label for="environmentImage">environment-image:</label>
+    <select id="environmentImage">
+      <option value="" selected>default</option>
+      <option value="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr">spruit sunrise HDR</option>
+      <option value="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg">spruit sunrise JPG</option>
+      <option value="../assets/music_hall_01_1k.hdr">music hall</option>
+      <option value="../assets/whipple_creek_regional_park_04_1k.hdr">whipple creek</option>
+      <option value="../shared-assets/environments/aircraft_workshop_01_1k.hdr">aircraft workshop</option>
+      <option value="../assets/pillars_1k.hdr">pillars</option>
+    </select><br/>
+
+    <label for="useSkybox">use as skybox:</label>
+    <input id="useSkybox" type="checkbox" disabled="true"><br/>
+
+    <label for="backgroundColor">background-color:</label>
+    <input id="backgroundColor" value="#e1e1e1" class="string"><br/>
+
+    <label for="exposure">exposure:</label>
+    <input id="exposure" type="range" step="0.01" min="0" max="2" value="1">
+    <input id="exposureValue" value="1" class="number"><br/>
+
+    <label for="shadowIntensity">shadow-intensity:</label>
+    <input id="shadowIntensity" type="range" step="0.01" min="0" max="1" value="0">
+    <input id="shadowIntensityValue" value="0" class="number"><br/>
+
+    <label for="shadowSoftness">shadow-softness:</label>
+    <input id="shadowSoftness" type="range" step="0.01" min="0" max="1" value="1">
+    <input id="shadowSoftnessValue" value="1" class="number"><br/>
+
+    <label for="autoRotate">auto-rotate:</label>
+    <input id="autoRotate" type="checkbox"><br/><br/>
+
+    To create a seamless poster:<br/>
+    Orient model and resize window to desired size (small is recommended), then click:<br/>
+    <button onclick="createPoster()">Create Poster</button><br/>
+    Then resize window to any aspect ratio and click:<br/>
+    <button id="display" onclick="reloadScene()">Display Poster</button><br/>
+    Click the model to dismiss the poster and interact. To save your poster, click:<br/>
+    <button id="download" onclick="downloadPoster()">Download Poster</button><br/>
+    camera-orbit:
+    <div id="cameraOrbit"></div>
+    
+    </div> 
+    <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"
+      src="../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" background-color="#e1e1e1" alt="A 3D model">
+    </model-viewer>
+  </div>
+
+  <div class="footer">
+    <ul>
+	  <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+	  </li>
+	  
+	  <li class="attribution">
+		<a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+		licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+	  </li>
+
+      <li class="attribution">
+        <a href="https://hdrihaven.com/hdri/?h=small_hangar_01">small_hangar_01_1k.jpg</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+        licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
+      </li>
+
+      <li class="attribution">
+        <a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">whipple_creek_regional_park_04_1k.hdr</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+        licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+  </div>
+
+  <script type="module" src="./built/tester.js"></script>
+  <script nomodule src="./built/tester-umd.js"></script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+</body>
+</html>

@@ -33,12 +33,41 @@ echo '!node_modules/resize-observer-polyfill' >> .gitignore
 echo '!node_modules/filament' >> .gitignore
 echo '!node_modules/@google' >> .gitignore
 
-mv ../rendering-fidelity-tools/test/results ./fidelity
+ln -s ./node_modules/\@google/model-viewer/dist ./dist
 
-mv $(readlink ./node_modules/\@google/model-viewer) \
-  ./node_modules/\@google/model-viewer
-mv $(readlink ./node_modules/\@google/model-viewer-shared-assets) \
-  ./node_modules/\@google/model-viewer-shared-assets
+mkdir -p ./fidelity
+mv ../render-fidelity-tools/test/results ./fidelity/results
+cp ../render-fidelity-tools/test/results-viewer.html ./fidelity/index.html
+cp ../render-fidelity-tools/dist/* ./dist/
+
+pushd ./node_modules/\@google
+
+MODEL_VIEWER_DIR=$(readlink ./model-viewer)
+SHARED_ASSETS_DIR=$(readlink ./model-viewer-shared-assets)
+
+rm ./model-viewer ./model-viewer-shared-assets
+
+mv $MODEL_VIEWER_DIR ./model-viewer
+
+pushd ./model-viewer
+echo 'node_modules/*' > .gitignore
+echo 'shared-assets' >> .gitignore
+popd
+
+mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
+
+pushd ./model-viewer-shared-assets
+echo 'node_modules/*' > .gitignore
+echo 'models/glTF-Sample-Models/*' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/BoomBox' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/FlightHelmet' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/DamagedHelmet' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/Duck' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/MetalRoughSpheres' >> .gitignore
+echo '!models/glTF-Sample-Models/2.0/AntiqueCamera' >> .gitignore
+popd
+popd
 
 git log -n 1 > VERSION
 
