@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material, Object3D, Scene, Vector3} from 'three';
+import {FrontSide, Material, Object3D, Scene, Vector3} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
@@ -36,7 +36,7 @@ export const cloneGltf = (gltf: GLTF): GLTF => {
    */
   const cloneAndPatchMaterial = (material: Material): Material => {
     const clone = material.clone();
-    // clone.shadowSide = FrontSide;
+    clone.shadowSide = FrontSide;
     if (clone.transparent) {
       clone.depthWrite = false;
     }

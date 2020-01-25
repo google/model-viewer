@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationClip, AnimationMixer, Box3, Object3D, Scene, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Scene, Vector3} from 'three';
 
 import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {moveChildren, reduceVertices} from './ModelUtils.js';
@@ -36,8 +36,7 @@ export default class Model extends Object3D {
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
-  // TODO: any is here because three stopped exporting AnimationAction.d.ts
-  private currentAnimationAction: any|null = null;
+  private currentAnimationAction: AnimationAction|null = null;
 
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
