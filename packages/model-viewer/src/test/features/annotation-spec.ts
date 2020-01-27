@@ -105,15 +105,15 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       });
 
       test('and removing it does not remove the slot', async () => {
-        hotspot.remove();
+        element.removeChild(hotspot);
         await timePasses();
 
         expect(scene.pivot.children.length).to.be.equal(numSlots);
       });
 
       test('but removing both does remove the slot', async () => {
-        hotspot.remove();
-        hotspot2.remove();
+        element.removeChild(hotspot);
+        element.removeChild(hotspot2);
         await timePasses();
 
         expect(scene.pivot.children.length).to.be.equal(numSlots - 1);
