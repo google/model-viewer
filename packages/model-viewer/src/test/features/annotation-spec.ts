@@ -80,7 +80,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot.setAttribute('data-position', '1m 1m 1m');
       hotspot.setAttribute('data-normal', '1m 0m 0m');
       element.appendChild(hotspot);
-      await timePasses(1000);
+      await timePasses();
       numSlots = scene.pivot.children.length;
     });
 
@@ -114,7 +114,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       test('but removing both does remove the slot', async () => {
         hotspot.remove();
         hotspot2.remove();
-        await timePasses(1000);
+        await timePasses();
 
         expect(scene.pivot.children.length).to.be.equal(numSlots - 1);
       });
