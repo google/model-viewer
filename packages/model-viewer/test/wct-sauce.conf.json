@@ -36,12 +36,6 @@
         {
           "browserName": "MicrosoftEdge",
           "platform": "Windows 10",
-          "version": "18.17763",
-          "screenResolution": "1280x1024"
-        },
-        {
-          "browserName": "MicrosoftEdge",
-          "platform": "Windows 10",
           "version": "79.0",
           "screenResolution": "1280x1024"
         },
