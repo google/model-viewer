@@ -52,7 +52,7 @@ export const $evictionPolicy = Symbol('evictionPolicy');
 
 let dracoDecoderLocation: string;
 const dracoLoader = new DRACOLoader();
-const $loader = Symbol('loader');
+export const $loader = Symbol('loader');
 
 export class CachingGLTFLoader {
   static setDRACODecoderLocation(url: string) {

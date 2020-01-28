@@ -45,7 +45,28 @@ const outputOptions = [
     },
     plugins,
     onwarn,
-  }
+  },
+  {
+    input: './lib/tester.js',
+    output: {
+      file: './examples/built/tester.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'Tester'
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/tester.js',
+    output: {
+      file: './examples/built/tester-umd.js',
+      format: 'umd',
+      name: 'Tester'
+    },
+    plugins,
+    onwarn,
+  },
 ];
 
 export default outputOptions;

@@ -83,7 +83,9 @@
 
             <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
 
-            <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
+			<li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
+			
+			<li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
           </ul>
         </div>
 
@@ -443,6 +445,12 @@
               is set or the .play() method is invoked.</p>
             </li>
             <li>
+              <div>ModelViewer.dracoDecoderLocation</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s
+              DRACO decoder location URL. By default, the DRACO decoder will be
+              loaded from a Google CDN.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -462,12 +470,40 @@
 
           <ul class="list-attribute">
             <li>
+              <div>activateAR()</div>
+              <p>Activates AR. Note that for any mode that is not WebXR-based,
+              this method most likely has to be called synchronous from a user
+              interaction handler. Otherwise, attempts to activate modes that
+              require user interaction will most likely be ignored.</p>
+            </li>
+            <li>
+              <div>dismissPoster()</div>
+              <p>Dismisses the poster, causing the model to load and render if
+              necessary. This is currently effectively the same as interacting
+              with the poster via user input.</p>
+            </li>
+            <li>
               <div>getCameraOrbit()</div>
               <p>Returns the realtime orbital position of the camera. Azimuthal
               (theta) and polar (phi) angles are representred as radians, and the
               distance (radius) is represented in meters. This value may differ
               from the value configured with the camera-orbit attribute on account
               of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>getCameraOrbit()</div>
+              <p>Returns the realtime orbital position of the camera. Azimuthal
+              (theta) and polar (phi) angles are representred as radians, and the
+              distance (radius) is represented in meters. This value may differ
+              from the value configured with the camera-orbit attribute on account
+              of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>getCameraTarget()</div>
+              <p>Returns the realtime target position of the camera in meters.
+              This value may differ from the value configured with the
+              camera-target attribute on account of user interaction or camera
+              interpolation.</p>
             </li>
             <li>
               <div>getFieldOfView()</div>
@@ -479,6 +515,14 @@
               <div>jumpCameraToGoal()</div>
               <p>Changes the camera to its last configured goal state immediately on 
               the next update instead of interpolating the motion over time.</p>
+            </li>
+            <li>
+              <div>ModelViewer.mapURLs(callback)</div>
+              <p>If provided, the callback will be passed each resource URL
+              before a request is sent. The callback may return the original
+              URL, or a new URL to override loading behavior. This behavior can
+              be used to load assets from .ZIP files, drag-and-drop APIs, and
+              Data URIs. This is a static method.</p>
             </li>
             <li>
               <div>play()</div>
