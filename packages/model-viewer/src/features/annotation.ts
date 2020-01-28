@@ -25,6 +25,7 @@ import {Constructor} from '../utilities.js';
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
+const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
@@ -106,7 +107,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
   class AnnotationModelViewerElement extends ModelViewerElement {
     private[$annotationRenderer] = new CSS2DRenderer();
     private[$hotspotMap] = new Map();
-    private[$observer] = new MutationObserver((mutations) => {
+    private[$mutationCallback] = (mutations: Array<MutationRecord>) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
@@ -117,7 +118,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           });
         }
       });
-    });
+    };
+    private[$observer] = new MutationObserver(this[$mutationCallback]);
 
     connectedCallback() {
       super.connectedCallback();
@@ -132,12 +134,23 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$addHotspot](this.children[i]);
       }
 
-      this[$observer].observe(this, {childList: true});
+      const {ShadyDOM} = self as any;
+      if (ShadyDOM == null) {
+        this[$observer].observe(this, {childList: true});
+      } else {
+        this[$observer] =
+            ShadyDOM.observeChildren(this, this[$mutationCallback]);
+      }
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      this[$observer].disconnect();
+      const {ShadyDOM} = self as any;
+      if (ShadyDOM == null) {
+        this[$observer].disconnect();
+      } else {
+        ShadyDOM.unobserveChildren(this[$observer]);
+      }
     }
 
     /**
