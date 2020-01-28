@@ -134,22 +134,22 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$addHotspot](this.children[i]);
       }
 
-      const {ShadyDOM} = self as any;
-      if (ShadyDOM == null) {
+      const {ShadyCSS} = self as any;
+      if (ShadyCSS == null) {
         this[$observer].observe(this, {childList: true});
       } else {
         this[$observer] =
-            ShadyDOM.observeChildren(this, this[$mutationCallback]);
+            ShadyCSS.observeChildren(this, this[$mutationCallback]);
       }
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      const {ShadyDOM} = self as any;
-      if (ShadyDOM == null) {
+      const {ShadyCSS} = self as any;
+      if (ShadyCSS == null) {
         this[$observer].disconnect();
       } else {
-        ShadyDOM.unobserveChildren(this[$observer]);
+        ShadyCSS.unobserveChildren(this[$observer]);
       }
     }
 
