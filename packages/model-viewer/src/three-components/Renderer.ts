@@ -16,7 +16,7 @@
 import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {Event} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP, HAS_OFFSCREEN_CANVAS} from '../constants.js';
+import {HAS_OFFSCREEN_CANVAS, IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -66,7 +66,7 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
-  public canvas3D: HTMLCanvasElement | OffscreenCanvas;
+  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -86,7 +86,7 @@ export class Renderer extends EventDispatcher {
   constructor(options?: RendererOptions) {
     super();
 
-    const webGlOptions = {alpha: false, antialias: true};
+    const webGlOptions = {alpha: true, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_WEBXR_AR_CANDIDATE) {
@@ -247,12 +247,13 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.clearDepth();
+      this.threeRenderer.clear(true, true, false);
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
+      context.clearRect(0, 0, widthDPR, heightDPR);
       context.drawImage(
           this.threeRenderer.domElement,
           0,

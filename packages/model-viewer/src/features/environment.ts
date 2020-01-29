@@ -19,7 +19,7 @@ import {Color, Texture} from 'three';
 import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
-const DEFAULT_BACKGROUND_COLOR = '#ffffff';
+const DEFAULT_BACKGROUND_COLOR = '';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
@@ -154,7 +154,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           this[$scene].remove(this[$scene].skyboxMesh);
 
-          const parsedColor = new Color(backgroundColor);
+          const parsedColor = backgroundColor === DEFAULT_BACKGROUND_COLOR ?
+              null :
+              new Color(backgroundColor);
           this[$scene].background = parsedColor;
         }
 

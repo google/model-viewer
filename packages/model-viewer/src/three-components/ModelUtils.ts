@@ -16,6 +16,7 @@ import {FrontSide, Material, Object3D, Scene, Shader, Vector3} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
+import {alphaChunk} from './shader-chunk/alphatest_fragment.glsl.js';
 import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {lightsChunk} from './shader-chunk/lights_physical_fragment.glsl.js';
 import {shadowChunk} from './shader-chunk/shadowmap_pars_fragment.glsl.js';
@@ -37,7 +38,8 @@ const updateShader = (shader: Shader) => {
       shader.fragmentShader
           .replace('#include <cube_uv_reflection_fragment>', cubeUVChunk)
           .replace('#include <lights_physical_fragment>', lightsChunk)
-          .replace('#include <shadowmap_pars_fragment>', shadowChunk);
+          .replace('#include <shadowmap_pars_fragment>', shadowChunk)
+          .replace('#include <alphatest_fragment>', alphaChunk);
 };
 
 /**
@@ -73,6 +75,11 @@ export const cloneGltf = (gltf: FullGLTF): FullGLTF => {
     clone.shadowSide = FrontSide;
     if (clone.transparent) {
       clone.depthWrite = false;
+    }
+    // This little hack ignores alpha for opaque materials, in order to comply
+    // with the glTF spec.
+    if (!clone.alphaTest && !clone.transparent) {
+      clone.alphaTest = -0.5;
     }
     return clone;
   };
