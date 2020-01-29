@@ -41,6 +41,16 @@ template.innerHTML = `
   position: relative;
 }
 
+.annotation-container {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+}
+
+.annotation-wrapper {
+  pointer-events: auto;
+}
+
 canvas {
   width: 100%;
   height: 100%;
@@ -83,6 +93,15 @@ canvas.show {
 
 .slot > * {
   pointer-events: initial;
+}
+
+::slotted(*) {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.hide ::slotted(*) {
+  opacity: var(--min-opacity, 0.25);
 }
 
 .slot.poster {
