@@ -146,14 +146,14 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {domElement} = this[$annotationRenderer];
       domElement.classList.add('annotation-container');
       this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
-
-      for (let i = 0; i < this.children.length; ++i) {
-        this[$addHotspot](this.children[i]);
-      }
     }
 
     connectedCallback() {
       super.connectedCallback();
+
+      for (let i = 0; i < this.children.length; ++i) {
+        this[$addHotspot](this.children[i]);
+      }
 
       const {ShadyDOM} = self as any;
 
