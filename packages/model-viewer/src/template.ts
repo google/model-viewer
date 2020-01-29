@@ -126,6 +126,9 @@ canvas.show {
 #default-poster {
   width: 100%;
   height: 100%;
+  /* The default poster is a <button> so we need to set display
+   * to prevent it from being affected by text-align: */
+  display: block;
   position: absolute;
   border: none;
   padding: 0;
