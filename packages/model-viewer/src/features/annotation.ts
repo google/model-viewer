@@ -106,14 +106,17 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
     private[$annotationRenderer] = new CSS2DRenderer();
-    private[$hotspotMap] = new Map();
-    private[$mutationCallback] = (mutations: Array<MutationRecord>) => {
+    private[$hotspotMap] = new Map<string, Hotspot>();
+    private[$mutationCallback] = (mutations: Array<unknown>) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
+        // NOTE: Be wary that in ShadyDOM cases, the MutationRecord
+        // only has addedNodes and removedNodes (and no other details).
+        if (!(mutation instanceof MutationRecord) ||
+            mutation.type === 'childList') {
+          (mutation as MutationRecord).addedNodes.forEach((node) => {
             this[$addHotspot](node);
           });
-          mutation.removedNodes.forEach((node) => {
+          (mutation as MutationRecord).removedNodes.forEach((node) => {
             this[$removeHotspot](node);
           });
         }
@@ -134,22 +137,25 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$addHotspot](this.children[i]);
       }
 
-      const {ShadyCSS} = self as any;
-      if (ShadyCSS == null) {
+      const {ShadyDOM} = self as any;
+
+      if (ShadyDOM == null) {
         this[$observer].observe(this, {childList: true});
       } else {
         this[$observer] =
-            ShadyCSS.observeChildren(this, this[$mutationCallback]);
+            ShadyDOM.observeChildren(this, this[$mutationCallback]);
       }
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      const {ShadyCSS} = self as any;
-      if (ShadyCSS == null) {
+
+      const {ShadyDOM} = self as any;
+
+      if (ShadyDOM == null) {
         this[$observer].disconnect();
       } else {
-        ShadyCSS.unobserveChildren(this[$observer]);
+        ShadyDOM.unobserveChildren(this[$observer]);
       }
     }
 
@@ -161,8 +167,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     updateHotspot(config: HotspotConfiguration) {
       const hotspot = this[$hotspotMap].get(config.name);
-      if (hotspot == null)
+
+      if (hotspot == null) {
         return;
+      }
+
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
     }
@@ -195,9 +204,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$addHotspot](node: Node) {
-      if (!(node instanceof HTMLElement && node.slot.indexOf('hotspot') === 0))
+      if (!(node instanceof HTMLElement && node.slot.indexOf('hotspot') === 0)) {
         return;
+      }
+
       let hotspot = this[$hotspotMap].get(node.slot);
+
       if (hotspot != null) {
         hotspot.increment();
       } else {
@@ -212,11 +224,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$removeHotspot](node: Node) {
-      if (!(node instanceof HTMLElement))
+      if (!(node instanceof HTMLElement)) {
         return;
+      }
+
       const hotspot = this[$hotspotMap].get(node.slot);
-      if (!hotspot)
+
+      if (!hotspot) {
         return;
+      }
+
       if (hotspot.decrement()) {
         this[$scene].pivot.remove(hotspot);
         this[$hotspotMap].delete(node.slot);
