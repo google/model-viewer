@@ -52,6 +52,7 @@ export class Hotspot extends CSS2DObject {
 
   constructor(config: HotspotConfiguration) {
     const wrapper = document.createElement('div');
+    wrapper.classList.add('annotation-wrapper');
     const slot = document.createElement('slot');
     slot.name = config.name;
     wrapper.appendChild(slot);
@@ -62,14 +63,25 @@ export class Hotspot extends CSS2DObject {
     this.referenceCount = 1;
   }
 
+  /**
+   * Call this when adding elements to the same slot to keep track.
+   */
   increment() {
     ++this.referenceCount;
   }
 
+  /**
+   * Call this when removing elements from the slot; returns true when the slot
+   * is unused.
+   */
   decrement(): boolean {
     return --this.referenceCount <= 0;
   }
 
+  /**
+   * Change the position of the hotspot to the input string, in the same format
+   * as the data-position attribute.
+   */
   updatePosition(position?: string) {
     if (position == null)
       return;
@@ -80,6 +92,10 @@ export class Hotspot extends CSS2DObject {
     }
   }
 
+  /**
+   * Change the hotspot's normal to the input string, in the same format as the
+   * data-normal attribute.
+   */
   updateNormal(normal?: string) {
     if (normal == null)
       return;
@@ -124,18 +140,20 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
 
-    connectedCallback() {
-      super.connectedCallback();
+    constructor(...args: Array<any>) {
+      super(...args);
+
       const {domElement} = this[$annotationRenderer];
-      const {style} = domElement;
-      style.pointerEvents = 'none';
-      style.position = 'absolute';
-      style.top = '0';
+      domElement.classList.add('annotation-container');
       this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
 
       for (let i = 0; i < this.children.length; ++i) {
         this[$addHotspot](this.children[i]);
       }
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
 
       const {ShadyDOM} = self as any;
 
@@ -204,7 +222,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$addHotspot](node: Node) {
-      if (!(node instanceof HTMLElement && node.slot.indexOf('hotspot') === 0)) {
+      if (!(node instanceof HTMLElement &&
+            node.slot.indexOf('hotspot') === 0)) {
         return;
       }
 

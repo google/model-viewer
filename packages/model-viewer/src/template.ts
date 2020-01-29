@@ -41,6 +41,16 @@ template.innerHTML = `
   position: relative;
 }
 
+.annotation-container {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+}
+
+.annotation-wrapper {
+  pointer-events: auto;
+}
+
 canvas {
   width: 100%;
   height: 100%;
