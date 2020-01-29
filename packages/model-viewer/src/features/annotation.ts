@@ -109,10 +109,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     private[$hotspotMap] = new Map<string, Hotspot>();
     private[$mutationCallback] = (mutations: Array<unknown>) => {
       mutations.forEach((mutation) => {
-        // NOTE: In ShadyDOM cases, the mutation won't be an instance of
-        // MutationRecord and and so will not have a type property; mutations in
-        // ShadyDOM cases only occur for child list changes so checking the type
-        // is not required. Be wary that in ShadyDOM cases, the MutationRecord
+        // NOTE: Be wary that in ShadyDOM cases, the MutationRecord
         // only has addedNodes and removedNodes (and no other details).
         if (!(mutation instanceof MutationRecord) ||
             mutation.type === 'childList') {
