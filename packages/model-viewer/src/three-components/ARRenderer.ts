@@ -28,6 +28,7 @@ const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
+const $viewerRefSpace = Symbol('viewerRefSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $outputContext = Symbol('outputContext');
@@ -52,6 +53,7 @@ export class ARRenderer extends EventDispatcher {
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRCoordinateSystem|null = null;
+  private[$viewerRefSpace]: XRCoordinateSystem|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
@@ -74,7 +76,7 @@ export class ARRenderer extends EventDispatcher {
     assertIsArCandidate();
 
     const session: XRSession =
-        await navigator.xr!.requestSession!('immersive-ar');
+        await navigator.xr!.requestSession!('immersive-ar', {requiredFeatures: ['hit-test']});
 
     const gl: WebGLRenderingContext =
         assertContext(this.threeRenderer.getContext());
@@ -151,6 +153,7 @@ export class ARRenderer extends EventDispatcher {
     // @TODO #293, handle WebXR API changes
     this[$refSpace] =
         await (this[$currentSession]!.requestReferenceSpace('local') as any);
+    this[$viewerRefSpace] = await (this[$currentSession]!.requestReferenceSpace('viewer') as any);
 
     this[$tick]();
   }
@@ -223,33 +226,13 @@ export class ARRenderer extends EventDispatcher {
     if (this[$currentSession] == null) {
       return;
     }
-
-    if (this.raycaster == null) {
-      this.raycaster = new Raycaster();
-    }
-
     // NOTE: Currently rays will be cast from the middle of the screen.
     // Eventually we might use input coordinates for this.
-    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
-    const ray = this.raycaster.ray;
-    let xrray: XRRay =
-        new XRRay(ray.origin as DOMPointInit, ray.direction as DOMPointInit);
 
-    let hits;
-    try {
-      hits = await (this[$currentSession] as any)
-                 .requestHitTest(xrray, this[$refSpace]);
-    } catch (e) {
-      // Spec says this should no longer throw on invalid requests:
-      // https://github.com/immersive-web/hit-test/issues/24
-      // But in practice, it will still happen, so just ignore:
-      // https://github.com/immersive-web/hit-test/issues/37
-    }
-
-    if (hits && hits.length) {
+    // Just reuse the hit matrix that the reticle has computed.
+    if (this.reticle && this.reticle.hitMatrix) {
       const presentedScene = this[$presentedScene]!;
-      const hit = hits[0];
-      const hitMatrix = matrix4.fromArray(hit.hitMatrix);
+      const hitMatrix = this.reticle.hitMatrix;
 
       this.dolly.position.setFromMatrixPosition(hitMatrix);
 
@@ -330,7 +313,7 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
       // before render.
-      this.reticle.update(this[$currentSession]!, this[$refSpace] as any);
+      this.reticle.update(this[$currentSession]!, frame, this[$viewerRefSpace] as any, this[$refSpace] as any);
       this.processXRInput(frame);
 
       // NOTE: Clearing depth caused issues on Samsung devices

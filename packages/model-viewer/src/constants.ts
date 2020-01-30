@@ -20,7 +20,7 @@ export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
     self.XRSession != null && navigator.xr.supportsSession != null;
 
 export const HAS_WEBXR_HIT_TEST_API =
-    HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTest;
+    HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTestSource;
 
 export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 

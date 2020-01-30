@@ -19,7 +19,7 @@ declare type Constructor<T = object> = {
 };
 
 declare type XRReferenceSpaceType =
-    'local' | 'local-floor' | 'bounded-floor' | 'unbounded';
+    'local' | 'local-floor' | 'bounded-floor' | 'unbounded' | 'viewer';
 
 declare interface XRFrameOfReferenceOptions {
   disableStageEmulation?: boolean;
@@ -50,8 +50,12 @@ declare interface XRSessionCreationOptions {
   outputContext: XRPresentationContext;
 }
 
-declare interface XRHitResult {
-  readonly hitMatrix: Float32Array;
+declare interface XRHitTestSource {
+  cancel(): void;
+}
+
+declare interface XRHitTestResult {
+  getPose(baseSpace: XRSpace): XRPose | null;
 }
 
 declare interface XR extends EventTarget {
@@ -116,6 +120,7 @@ declare interface XRFrame {
   readonly session: XRSession;
   getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose;
   getPose(space: XRSpace, referenceSpace: XRReferenceSpace): XRPose;
+  getHitTestResults(hitTestSource: XRHitTestSource): Array<XRHitTestResult>;
 }
 
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
@@ -134,12 +139,16 @@ declare interface XRRenderStateInit {
   baseLayer?: XRWebGLLayer;
 }
 
+declare interface XRHitTestOptionsInit {
+  space: XRSpace;
+  ray?: XRRay;
+}
+
 declare interface XRSession extends EventTarget {
   renderState: XRRenderState;
   updateRenderState(state?: XRRenderStateInit): any;
   requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
-  requestHitTest(ray: XRRay, frameOfReference: XRFrameOfReference):
-      Promise<XRHitResult[]>;
+  requestHitTestSource(options: XRHitTestOptionsInit) : Promise<XRHitTestSource>;
   inputSources: Array<XRInputSource>;
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;
@@ -176,7 +185,6 @@ declare interface Window {
   XRSession?: Constructor<XRSession>;
   XRDevice?: Constructor<XRDevice>;
   XR?: Constructor<XR>;
-  XRHitResult?: Constructor<XRHitResult>;
 }
 
 declare interface Navigator {
