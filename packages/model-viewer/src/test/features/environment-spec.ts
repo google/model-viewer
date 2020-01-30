@@ -168,13 +168,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
       });
 
-      suite('and a background-color property', () => {
-        setup(async () => {
-          element.backgroundColor = '#ff0077';
-          await timePasses();
-        });
-      });
-
       suite('on a model with multi-material meshes', () => {
         setup(async () => {
           let onLoad = waitForEvent(element, 'load');
@@ -187,38 +180,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
               expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
             });
       });
-    });
-  });
-
-  suite('with a background-color property', () => {
-    suite('and a src property', () => {
-      setup(async () => {
-        let onLoad = waitForLoadAndEnvMap(element);
-        element.src = MODEL_URL;
-        element.backgroundColor = '#ff0077';
-        document.body.appendChild(element);
-        await onLoad;
-      });
-
-      teardown(() => {
-        document.body.removeChild(element);
-      });
-
-      test('displays background with the correct color', async function() {
-        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
-      });
-
-      test('applies a generated environment map on model', async function() {
-        expect(modelUsingEnvMap(scene, null)).to.be.ok;
-      });
-
-      test(
-          'displays background with correct color after attaching to DOM',
-          async function() {
-            document.body.appendChild(element);
-            await timePasses();
-            expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
-          });
     });
   });
 
