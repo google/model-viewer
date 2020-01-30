@@ -141,7 +141,7 @@ export class Shadow extends DirectionalLight {
 
     this.updateMatrixWorld();
     camera.updateProjectionMatrix();
-    (this.shadow as any).updateMatrices(this);
+    this.shadow.updateMatrices(this);
 
     this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
@@ -164,6 +164,6 @@ export class Shadow extends DirectionalLight {
 
   setRotation(radiansY: number) {
     this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
-    (this.shadow as any).updateMatrices(this);
+    this.shadow.updateMatrices(this);
   }
 }

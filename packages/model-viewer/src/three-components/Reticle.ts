@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
+import {Camera, MathUtils as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
 
 /**
  * The Reticle class creates an object that repeatedly calls
@@ -37,7 +37,7 @@ export default class Reticle extends Object3D {
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
     let material = new MeshBasicMaterial({color: 0xffffff});
     // Orient the geometry so its position is flat on a horizontal surface
-    geometry.applyMatrix(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
+    geometry.applyMatrix4(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
 
     this.ring = new Mesh(geometry, material);
 

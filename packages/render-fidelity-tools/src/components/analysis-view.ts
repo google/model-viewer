@@ -48,7 +48,7 @@ export class AnalysisView extends LitElement {
     const channel = new MessageChannel();
 
     this.port = channel.port1;
-    this.worker = new Worker('../../dist/image-comparison-worker.js');
+    this.worker = new Worker('../dist/image-comparison-worker.js');
     this.worker.postMessage('connect', [channel.port2]);
     this.port.onmessage = (event) => this.onMessage(event);
     this.port.start();

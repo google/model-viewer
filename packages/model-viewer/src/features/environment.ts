@@ -104,7 +104,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$onModelLoad](event);
 
       if (this[$currentEnvironmentMap] != null) {
-        this[$applyEnvironmentMap](this[$currentEnvironmentMap]!);
+        this[$applyEnvironmentMap](this[$currentEnvironmentMap]);
       }
     }
 
@@ -144,16 +144,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
             });
 
         if (skybox != null) {
-          const material = this[$scene].skyboxMaterial();
-          // This hack causes ShaderMaterial to populate the correct
-          // envMapTexelToLinear function.
-          (material as any).envMap = skybox.texture;
-          material.uniforms.envMap.value = skybox.texture;
-          material.needsUpdate = true;
-          this[$scene].add(this[$scene].skyboxMesh);
+          this[$scene].background = skybox.texture;
         } else {
-          this[$scene].remove(this[$scene].skyboxMesh);
-
           const parsedColor = backgroundColor === DEFAULT_BACKGROUND_COLOR ?
               null :
               new Color(backgroundColor);
@@ -186,7 +178,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     private[$applyEnvironmentMap](environmentMap: Texture|null) {
       this[$currentEnvironmentMap] = environmentMap;
-      this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
+      this[$scene].environment = this[$currentEnvironmentMap];
       this.dispatchEvent(new CustomEvent('environment-change'));
 
       this[$needsRender]();

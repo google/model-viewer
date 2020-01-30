@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, EventDispatcher, PCFSoftShadowMap, WebGLRenderer} from 'three';
-import {Event} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
 import {HAS_OFFSCREEN_CANVAS, IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
@@ -113,8 +112,8 @@ export class Renderer extends EventDispatcher {
         canvas: this.canvas3D,
         context: this.context3D,
       });
-      this.threeRenderer.autoClear = false;
-      this.threeRenderer.gammaOutput = true;
+      this.threeRenderer.autoClear = true;
+      this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(resolveDpr());
@@ -247,7 +246,6 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.clear(true, true, false);
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
