@@ -83,9 +83,11 @@
 
             <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
 
-			<li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
+            <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
+
+            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
 			
-			<li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
+			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
           </ul>
         </div>
 
@@ -398,6 +400,10 @@
               to be used to force the prompt to be hidden. Defaults to flex.</p>
             </li>
             <li>
+              <div>--min-opacity</div>
+              <p>Sets the opacity of hidden hotspots. Defaults to 0.25.</p>
+            </li>
+            <li>
               <div>--poster-color</div>
               <p>Sets the background-color of the poster. Falls back to
               --background-color if set. Defaults to #fff.</p>
@@ -566,6 +572,14 @@
               canvas aspect ratio. This allows for easy poster creation, where a
               single poster will match the render seamlessly at any canvas
               aspect ratio.</p>
+            </li>
+            <li>
+              <div>updateHotspot({name, position, normal})</div>
+              <p>Updates the position and/or normal of the hotspot associated
+              with slot = name. The position and normal are given in the same
+              string format as the hotspot attributes data-position and
+              data-normal, which are also in the same format as the
+              camera-target attribute.</p>
             </li>
           </ul>
 

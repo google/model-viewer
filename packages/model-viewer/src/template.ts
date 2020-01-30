@@ -41,6 +41,16 @@ template.innerHTML = `
   position: relative;
 }
 
+.annotation-container {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+}
+
+.annotation-wrapper {
+  pointer-events: auto;
+}
+
 canvas {
   width: 100%;
   height: 100%;
@@ -85,6 +95,15 @@ canvas.show {
   pointer-events: initial;
 }
 
+::slotted(*) {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.hide ::slotted(*) {
+  opacity: var(--min-opacity, 0.25);
+}
+
 .slot.poster {
   opacity: 0;
   transition: opacity 0.3s 0.3s;
@@ -107,6 +126,9 @@ canvas.show {
 #default-poster {
   width: 100%;
   height: 100%;
+  /* The default poster is a <button> so we need to set display
+   * to prevent it from being affected by text-align: */
+  display: block;
   position: absolute;
   border: none;
   padding: 0;
