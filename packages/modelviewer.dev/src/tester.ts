@@ -22,8 +22,7 @@ const inputElement = document.querySelector('#input');
 const dropControl = new SimpleDropzone(viewer, inputElement);
 dropControl.on('drop', ({files}: any) => load(files));
 
-(['src', 'environmentImage', 'backgroundColor'] as
- Array<'src'|'environmentImage'|'backgroundColor'>)
+(['src', 'environmentImage'] as Array<'src'|'environmentImage'>)
     .forEach((property) => {
       document.getElementById(`${property}`)!.addEventListener(
           'input', (event) => {
@@ -32,7 +31,6 @@ dropControl.on('drop', ({files}: any) => load(files));
               useSkybox.disabled = true;
               useSkybox.checked = false;
               viewer.skyboxImage = null;
-              backgroundColor.disabled = false;
             } else {
               useSkybox.disabled = false;
             }
@@ -43,15 +41,11 @@ dropControl.on('drop', ({files}: any) => load(files));
     });
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
-const backgroundColor =
-    document.getElementById('backgroundColor') as HTMLInputElement;
 useSkybox.addEventListener('change', (_event) => {
   if (useSkybox.checked) {
     viewer.skyboxImage = viewer.environmentImage;
-    backgroundColor.disabled = true;
   } else {
     viewer.skyboxImage = null;
-    backgroundColor.disabled = false;
   }
 });
 
