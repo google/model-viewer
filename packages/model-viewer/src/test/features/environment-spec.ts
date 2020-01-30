@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, Scene, Texture} from 'three';
+import {Texture} from 'three';
 
 import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
@@ -32,14 +32,6 @@ const MULTI_MATERIAL_MODEL_URL = assetPath('models/Triangle.gltf');
 const backgroundHasMap =
     (scene: ModelScene, url: string|null) => {
       return textureMatchesMeta((scene.background as Texture), {url: url});
-    }
-
-const backgroundHasColor =
-    (scene: Scene, hex: string) => {
-      if (!scene.background || !(scene.background as any).isColor) {
-        return false;
-      }
-      return (scene.background as Color).getHexString() === hex;
     }
 
 const modelUsingEnvMap =
@@ -87,18 +79,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  test('has default background if no skybox-image or background-color', () => {
-    expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
-  });
-
-  test(
-      'has default background if no skybox-image or background-color when in DOM',
-      async () => {
-        document.body.appendChild(element);
-        await timePasses();
-        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
-      });
-
   test('only generates an environment when in the render tree', async () => {
     let environmentChangeCount = 0;
     const environmentChangeHandler = () => environmentChangeCount++;
@@ -130,10 +110,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
       teardown(() => {
         document.body.removeChild(element);
-      });
-
-      test('displays default background', async function() {
-        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
 
       test('applies a generated environment map on model', async function() {
@@ -233,7 +209,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     setup(async () => {
       let onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
-      element.setAttribute('background-color', '#ff0077');
       element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
       document.body.appendChild(element);
       await onLoad;
@@ -260,11 +235,10 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     });
   });
 
-  suite('with background-color and skybox-image properties', () => {
+  suite('with skybox-image property', () => {
     setup(async () => {
       let onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
-      element.setAttribute('background-color', '#ff0077');
       element.setAttribute('skybox-image', HDR_BG_IMAGE_URL);
       document.body.appendChild(element);
       await onLoad;
@@ -318,8 +292,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
           expect(modelUsingEnvMap(scene, ALT_BG_IMAGE_URL)).to.be.ok;
         });
 
-        test('displays background with background-color', async function() {
-          expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
+        test('removes the background', async function() {
+          expect(scene.background).to.be.null;
         });
       });
     });
@@ -331,8 +305,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await envMapChanged;
       });
 
-      test('displays background with background-color', async function() {
-        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
+      test('removes the background', async function() {
+        expect(scene.background).to.be.null;
       });
 
       test('reapplies generated environment map on model', async function() {
