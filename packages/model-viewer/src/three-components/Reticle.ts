@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Math as ThreeMath, Matrix4, Mesh, MeshBasicMaterial, Object3D, RingGeometry, Vector3,} from 'three';
+import {Camera, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, RingGeometry, Vector3,} from 'three';
 
 /**
  * The Reticle class creates an object that repeatedly calls
@@ -39,7 +39,7 @@ export default class Reticle extends Object3D {
     let geometry = new RingGeometry(0.1, 0.11, 24, 1);
     let material = new MeshBasicMaterial({color: 0xffffff});
     // Orient the geometry so its position is flat on a horizontal surface
-    geometry.applyMatrix(new Matrix4().makeRotationX(ThreeMath.degToRad(-90)));
+    geometry.applyMatrix4(new Matrix4().makeRotationX(MathUtils.degToRad(-90)));
 
     this.ring = new Mesh(geometry, material);
 
@@ -60,17 +60,21 @@ export default class Reticle extends Object3D {
    * @param {XRFRame} frame
    * @param {XRFrameOfReference} frameOfRef
    */
-  async update(_session: XRSession, _frame: XRFrame, _viewerReferenceSpace: XRReferenceSpace, _frameOfRef: XRReferenceSpace) {
-    if(!this.hitTestSourceRequest) {
-      this.hitTestSourceRequest = _session.requestHitTestSource({space: _viewerReferenceSpace})
-                                          .then(hitTestSource => {
-                                            this.hitTestSource = hitTestSource;
-                                          });
-    } else if(this.hitTestSource){
+  async update(
+      _session: XRSession, _frame: XRFrame,
+      _viewerReferenceSpace: XRReferenceSpace, _frameOfRef: XRReferenceSpace) {
+    if (!this.hitTestSourceRequest) {
+      this.hitTestSourceRequest =
+          _session.requestHitTestSource({space: _viewerReferenceSpace})
+              .then(hitTestSource => {
+                this.hitTestSource = hitTestSource;
+              });
+    } else if (this.hitTestSource) {
       const hitTestResults = _frame.getHitTestResults(this.hitTestSource);
       if (hitTestResults.length) {
         const hit = hitTestResults[0];
-        this._hitMatrix = new Matrix4().fromArray(hit.getPose(_frameOfRef)!.transform.matrix);
+        this._hitMatrix =
+            new Matrix4().fromArray(hit.getPose(_frameOfRef)!.transform.matrix);
 
         // Now apply the position from the hitMatrix onto our model
         this.position.setFromMatrixPosition(this._hitMatrix);

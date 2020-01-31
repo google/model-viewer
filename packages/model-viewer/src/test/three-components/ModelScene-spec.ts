@@ -67,7 +67,7 @@ suite('ModelScene', () => {
     });
 
     test('model is not scaled', () => {
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
+      dummyMesh.geometry.applyMatrix4(new Matrix4().makeScale(1, 3, 10));
       scene.model.setObject(dummyMesh);
 
       scene.setSize(1000, 500);

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import {BackSide, FrontSide, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
-import {DoubleSide} from 'three';
+import {BackSide, DoubleSide, FrontSide, Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {cloneGltf} from './ModelUtils.js';
-import {RoughnessMipmapper} from './RoughnessMipmapper.js';
+import {Renderer} from './Renderer.js';
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -149,7 +149,8 @@ export class CachingGLTFLoader {
     preloaded.set(url, true);
   }
 
-  protected roughnessMipmapper = new RoughnessMipmapper();
+  protected roughnessMipmapper =
+      new RoughnessMipmapper(Renderer.singleton.threeRenderer);
 
   /**
    * Loads a glTF from the specified url and resolves a unique clone of the
