@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster, RingGeometry, Vector3,} from 'three';
+import {Camera, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, RingGeometry, Vector3,} from 'three';
 
 /**
  * The Reticle class creates an object that repeatedly calls
@@ -23,7 +23,9 @@ import {Camera, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, Raycaster
 export default class Reticle extends Object3D {
   private ring: Mesh;
   private camera: Camera;
-  private raycaster: Raycaster|null = null;
+  private hitTestSource: XRHitTestSource|null = null;
+  private hitTestSourceRequest: Promise<void>|null = null;
+  private _hitMatrix: Matrix4|null = null;
 
   /**
    * @param {XRSession} xrSession
@@ -47,42 +49,49 @@ export default class Reticle extends Object3D {
     this.camera = camera;
   }
 
+  get hitMatrix(): Matrix4|null {
+    return this._hitMatrix;
+  }
+
   /**
    * Fires a hit test in the middle of the screen and places the reticle
    * upon the surface if found.
    *
-   * @param {XRSession} session
+   * @param {XRFRame} frame
    * @param {XRFrameOfReference} frameOfRef
    */
-  async update(session: XRSession, frameOfRef: XRFrameOfReference) {
-    this.raycaster = this.raycaster || new Raycaster();
-    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
-    const ray = this.raycaster.ray;
-    let xrray: XRRay = new XRRay(ray.origin, ray.direction);
+  async update(
+      _session: XRSession, _frame: XRFrame,
+      _viewerReferenceSpace: XRReferenceSpace, _frameOfRef: XRReferenceSpace) {
+    if (!this.hitTestSourceRequest) {
+      this.hitTestSourceRequest =
+          _session.requestHitTestSource({space: _viewerReferenceSpace})
+              .then(hitTestSource => {
+                this.hitTestSource = hitTestSource;
+              });
+    } else if (this.hitTestSource) {
+      const hitTestResults = _frame.getHitTestResults(this.hitTestSource);
+      if (hitTestResults.length) {
+        const hit = hitTestResults[0];
+        this._hitMatrix =
+            new Matrix4().fromArray(hit.getPose(_frameOfRef)!.transform.matrix);
 
-    let hits: Array<XRHitResult>;
+        // Now apply the position from the hitMatrix onto our model
+        this.position.setFromMatrixPosition(this._hitMatrix);
 
-    try {
-      hits = await session.requestHitTest(xrray, frameOfRef);
-    } catch (error) {
-      hits = [];
-    }
+        // Rotate the anchor to face the camera
+        const targetPos =
+            new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
+        const angle = Math.atan2(
+            targetPos.x - this.position.x, targetPos.z - this.position.z);
+        this.rotation.set(0, angle, 0);
 
-    if (hits.length) {
-      const hit = hits[0];
-      const hitMatrix = new Matrix4().fromArray(hit.hitMatrix as any);
-
-      // Now apply the position from the hitMatrix onto our model
-      this.position.setFromMatrixPosition(hitMatrix);
-
-      // Rotate the anchor to face the camera
-      const targetPos =
-          new Vector3().setFromMatrixPosition(this.camera.matrixWorld);
-      const angle = Math.atan2(
-          targetPos.x - this.position.x, targetPos.z - this.position.z);
-      this.rotation.set(0, angle, 0);
-
-      this.visible = true;
+        this.visible = true;
+      } else {
+        this._hitMatrix = null;
+      }
+    } else {
+      this._hitMatrix = null;
     }
   }
 }
