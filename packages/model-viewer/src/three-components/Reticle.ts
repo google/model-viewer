@@ -60,9 +60,9 @@ export default class Reticle extends Object3D {
    * @param {XRFRame} frame
    * @param {XRFrameOfReference} frameOfRef
    */
-  async update(_session: XRSession, _frame: XRFrame, _viewerReferenceSpace: XRFrameOfReference, _frameOfRef: XRFrameOfReference) {
+  async update(_session: XRSession, _frame: XRFrame, _viewerReferenceSpace: XRReferenceSpace, _frameOfRef: XRReferenceSpace) {
     if(!this.hitTestSourceRequest) {
-      this.hitTestSourceRequest = _session.requestHitTestSource({space: _viewerReferenceSpace as any})
+      this.hitTestSourceRequest = _session.requestHitTestSource({space: _viewerReferenceSpace})
                                           .then(hitTestSource => {
                                             this.hitTestSource = hitTestSource;
                                           });
@@ -70,7 +70,7 @@ export default class Reticle extends Object3D {
       const hitTestResults = _frame.getHitTestResults(this.hitTestSource);
       if (hitTestResults.length) {
         const hit = hitTestResults[0];
-        this._hitMatrix = new Matrix4().fromArray(hit.getPose(_frameOfRef as any)!.transform.matrix);
+        this._hitMatrix = new Matrix4().fromArray(hit.getPose(_frameOfRef)!.transform.matrix);
 
         // Now apply the position from the hitMatrix onto our model
         this.position.setFromMatrixPosition(this._hitMatrix);

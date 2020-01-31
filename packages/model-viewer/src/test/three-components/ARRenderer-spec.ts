@@ -82,13 +82,7 @@ suite('ARRenderer', () => {
 
         async requestReferenceSpace(_type: XRReferenceSpaceType):
             Promise<XRReferenceSpace> {
-          return {
-            originOffset: {
-              position: {} as DOMPointReadOnly,
-              orientation: {} as DOMPointReadOnly,
-              matrix: new Float32Array()
-            }
-          } as XRReferenceSpace;
+          return {} as XRReferenceSpace;
         }
 
         get inputSources(): Array<XRInputSource> {
