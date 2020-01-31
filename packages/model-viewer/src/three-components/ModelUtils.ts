@@ -19,24 +19,8 @@ import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {alphaChunk} from './shader-chunk/alphatest_fragment.glsl.js';
 
 /**
- * This is a patch to Three.js' handling of PMREM environments. This patch
- * has to be applied after cloning because Three.js does not seem to clone
- * the onBeforeCompile method.
- */
-const updateShader = (shader: Shader) => {
-  shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <alphatest_fragment>', alphaChunk);
-};
-
-/**
  * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
  * objects.
- *
- * NOTE(cdata): This is necessary due to limitations of the Three.js clone
- * routine on scenes. Without it, models with skeletal animations will not be
- * cloned properly.
- *
- * @see https://github.com/mrdoob/three.js/issues/5878
  */
 export const cloneGltf = (gltf: GLTF): GLTF => {
   const clone:
@@ -48,8 +32,18 @@ export const cloneGltf = (gltf: GLTF): GLTF => {
    */
   const cloneAndPatchMaterial = (material: Material): Material => {
     const clone = material.clone();
-    clone.onBeforeCompile = updateShader;
+    // This allows us to patch three's materials, on top of patches already
+    // made, for instance GLTFLoader patches SpecularGlossiness materials.
+    const oldOnBeforeCompile = material.onBeforeCompile;
+    clone.onBeforeCompile = (shader: Shader) => {
+      oldOnBeforeCompile(shader, undefined as any);
+      shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <alphatest_fragment>', alphaChunk);
+    };
+    // This makes shadows better for non-manifold meshes
     clone.shadowSide = FrontSide;
+    // This improves transparent rendering and can be removed whenever
+    // https://github.com/mrdoob/three.js/pull/18235 finally lands.
     if (clone.transparent) {
       clone.depthWrite = false;
     }
