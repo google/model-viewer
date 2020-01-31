@@ -34,6 +34,7 @@ import './utilities/focus-visible-spec.js';
 import './utilities/progress-tracker-spec.js';
 import './utilities/timer-spec.js';
 import './features/animation-spec.js';
+import './features/annotation-spec.js';
 import './features/staging-spec.js';
 import './features/controls-spec.js';
 import './features/environment-spec.js';

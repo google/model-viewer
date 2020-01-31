@@ -364,20 +364,6 @@
       }
     },
     {
-      "name": "khronos-Monster",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Monster/glTF-Binary/Monster.glb",
-      "target": {
-        "x": -5,
-        "y": 15,
-        "z": 20
-      },
-      "orbit": {
-        "theta": -30,
-        "phi": 60,
-        "radius": 55
-      }
-    },
-    {
       "name": "khronos-MorphPrimitivesTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphPrimitivesTest/glTF-Binary/MorphPrimitivesTest.glb",
       "dimensions": {
