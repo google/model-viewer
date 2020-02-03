@@ -85,7 +85,7 @@ export class Renderer extends EventDispatcher {
   constructor(options?: RendererOptions) {
     super();
 
-    const webGlOptions = {alpha: false, antialias: true};
+    const webGlOptions = {alpha: true, antialias: true};
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_WEBXR_AR_CANDIDATE) {
@@ -112,7 +112,7 @@ export class Renderer extends EventDispatcher {
         canvas: this.canvas3D,
         context: this.context3D,
       });
-      this.threeRenderer.autoClear = false;
+      this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
@@ -246,12 +246,12 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.clearDepth();
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
+      context.clearRect(0, 0, widthDPR, heightDPR);
       context.drawImage(
           this.threeRenderer.domElement,
           0,

@@ -392,6 +392,7 @@ code {
 .demo model-viewer {
   width: 100%;
   height: 100%;
+  background-color: #eee;
 }
 .content {
   grid-area: content;
