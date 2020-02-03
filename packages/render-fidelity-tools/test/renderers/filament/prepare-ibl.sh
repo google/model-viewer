@@ -88,7 +88,7 @@ fetchCmgen() {
     exit 1
   fi
 
-  FILAMENT_DISTRIBUTION_URL="https://github.com/google/filament/releases/download/v1.3.1/filament-20190808-$FILAMENT_PLATFORM.tgz"
+  FILAMENT_DISTRIBUTION_URL="https://github.com/google/filament/releases/download/v1.4.5/filament-20200127-$FILAMENT_PLATFORM.tgz"
 
   pushd $TMPDIR
   curl -L $FILAMENT_DISTRIBUTION_URL -o filament.tgz
@@ -122,7 +122,7 @@ if [ "$REGENERATE_IBL" = true ] || [ ! -d $IBL_OUTPUT_PATH ]; then
     IBL_INPUT_FILE="$IBL_DIR/$IBL_BASENAME.png"
   fi
 
-  $CMGEN_BIN --format=ktx -x $IBL_DIR $IBL_INPUT_FILE
+  $CMGEN_BIN --format=ktx -x $IBL_OUTPUT_PATH $IBL_INPUT_FILE
 fi
 
 set +e
