@@ -61,6 +61,7 @@ canvas {
   width: 100%;
   height: 100%;
   display: none;
+  pointer-events: none;
   /* NOTE(cdata): Chrome 76 and below apparently have a bug
    * that causes our canvas not to display pixels unless it is
    * on its own render layer
