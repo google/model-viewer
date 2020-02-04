@@ -15,21 +15,30 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
+import {defineMaterial} from './material.js';
 import {defineThreeDOMElement} from './three-dom-element.js';
 
-suite('api/three-dom-element', () => {
-  suite('defineThreeDOMElement', () => {
+const ThreeDOMElement = defineThreeDOMElement();
+
+suite('api/material', () => {
+  suite('defineMaterial', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineThreeDOMElement();
-      const instance = new GeneratedConstructor(new FakeModelKernel());
+      const GeneratedConstructor = defineMaterial(ThreeDOMElement);
+      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+        pbrMetallicRoughness: {id: 1, baseColorFactor: [0, 0, 0, 1]},
+        id: 0
+      });
 
       expect(instance).to.be.ok;
     });
 
     test('produces elements with the correct owner model', () => {
       const kernel = new FakeModelKernel();
-      const GeneratedConstructor = defineThreeDOMElement();
-      const instance = new GeneratedConstructor(kernel);
+      const GeneratedConstructor = defineMaterial(ThreeDOMElement);
+      const instance = new GeneratedConstructor(kernel, {
+        pbrMetallicRoughness: {id: 1, baseColorFactor: [0, 0, 0, 1]},
+        id: 0
+      });
 
       expect(instance.ownerModel).to.be.equal(kernel.model);
     });

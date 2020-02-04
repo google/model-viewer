@@ -34,6 +34,12 @@ export type ThreeDOMElementConstructor = Constructor<ThreeDOMElementInterface>&
 export function defineThreeDOMElement(): ThreeDOMElementConstructor {
   const $ownerModel = Symbol('ownerModel');
 
+  /**
+   * The basic implementation for all 3DOM scene graph participants.
+   * Scene graph nodes are distinguished by their "owner" Model. All scene
+   * graph nodes have an owner Model associated with them except for the
+   * sole Model in the scene graph, whose ownerModel property is not defined.
+   */
   class ThreeDOMElement implements ThreeDOMElementInterface {
     protected[$ownerModel]: Model;
 
@@ -45,6 +51,10 @@ export function defineThreeDOMElement(): ThreeDOMElementConstructor {
       this[$ownerModel] = kernel.model;
     }
 
+    /**
+     * The Model of provenance for this scene graph element, or undefined if
+     * element is itself a Model.
+     */
     get ownerModel() {
       return this[$ownerModel];
     }
