@@ -51,6 +51,12 @@ template.innerHTML = `
   pointer-events: auto;
 }
 
+.input {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 canvas {
   width: 100%;
   height: 100%;
@@ -277,10 +283,11 @@ canvas.show {
 }
 </style>
 <div class="container">
-  <canvas tabindex="1"
-    aria-label="A depiction of a 3D model"
-    aria-live="polite">
-  </canvas>
+  <div class="input" tabindex="1"
+      aria-label="A depiction of a 3D model"
+      aria-live="polite">
+    <canvas></canvas>
+  </div>
 
   <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
         will have their <slot> elements removed by ShadyCSS -->

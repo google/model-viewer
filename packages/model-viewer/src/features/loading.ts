@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $getLoaded, $getModelIsVisible, $input, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
@@ -460,7 +460,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             // the canvas that has just been revealed
             if (root &&
                 (root as Document | ShadowRoot).activeElement === this) {
-              this[$canvas].focus();
+              this[$input].focus();
             }
 
             // Ensure that the poster is no longer focusable or visible to

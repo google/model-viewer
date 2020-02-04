@@ -14,7 +14,7 @@
  */
 
 import {IS_IE11} from '../constants.js';
-import ModelViewerElementBase, {$canvas, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$input, $scene} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, resolveDpr} from '../utilities.js';
 
@@ -64,11 +64,11 @@ suite('ModelViewerElementBase', () => {
 
     suite('with alt text', () => {
       let element: ModelViewerElementBase;
-      let canvas: HTMLCanvasElement;
+      let input: HTMLDivElement;
 
       setup(() => {
         element = new ModelViewerElement();
-        canvas = element[$canvas];
+        input = element[$input];
         document.body.appendChild(element);
       });
 
@@ -78,17 +78,16 @@ suite('ModelViewerElementBase', () => {
         }
       });
 
-      test('gives the canvas a related aria-label', async () => {
+      test('gives the input a related aria-label', async () => {
         const altText = 'foo';
-        const canvas = element[$canvas];
         element.alt = altText;
         await timePasses();
-        expect(canvas.getAttribute('aria-label')).to.be.equal(altText);
+        expect(input.getAttribute('aria-label')).to.be.equal(altText);
       });
 
       suite('that is removed', () => {
-        test('reverts canvas to default aria-label', async () => {
-          const defaultAriaLabel = canvas.getAttribute('aria-label');
+        test('reverts input to default aria-label', async () => {
+          const defaultAriaLabel = input.getAttribute('aria-label');
           const altText = 'foo';
 
           element.alt = altText;
@@ -96,7 +95,7 @@ suite('ModelViewerElementBase', () => {
           element.alt = null;
           await timePasses();
 
-          expect(canvas.getAttribute('aria-label'))
+          expect(input.getAttribute('aria-label'))
               .to.be.equal(defaultAriaLabel);
         });
       });

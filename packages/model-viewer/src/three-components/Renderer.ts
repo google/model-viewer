@@ -146,7 +146,7 @@ export class Renderer extends EventDispatcher {
     this.height = height;
   }
 
-  registerScene(scene: ModelScene): number {
+  registerScene(scene: ModelScene) {
     this.scenes.add(scene);
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
@@ -155,10 +155,9 @@ export class Renderer extends EventDispatcher {
     if (this.debugger != null) {
       this.debugger.addScene(scene);
     }
-    return this.scenes.size;
   }
 
-  unregisterScene(scene: ModelScene): number {
+  unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
     if (this.canRender && this.scenes.size === 0) {
       (this.threeRenderer.setAnimationLoop as any)(null);
@@ -167,7 +166,6 @@ export class Renderer extends EventDispatcher {
     if (this.debugger != null) {
       this.debugger.removeScene(scene);
     }
-    return this.scenes.size;
   }
 
   get numberOfScenes(): number {

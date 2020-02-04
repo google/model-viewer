@@ -14,7 +14,7 @@
  */
 
 import {$defaultPosterElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$input} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -176,10 +176,10 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   'model-visibility',
                   (event: any) => event.detail.visible);
 
-              const canvas = element[$canvas];
+              const input = element[$input];
               const picked = pickShadowDescendant(element);
 
-              expect(picked).to.be.equal(canvas);
+              expect(picked).to.be.equal(input);
             });
           });
 
@@ -192,10 +192,10 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               await waitForEvent(element, 'preload');
               await timePasses(POSTER_TRANSITION_TIME + 100);
 
-              const canvas = element[$canvas];
+              const input = element[$input];
               const picked = pickShadowDescendant(element);
 
-              expect(picked).to.not.be.equal(canvas);
+              expect(picked).to.not.be.equal(input);
             });
 
             suite('when focused', () => {
@@ -207,7 +207,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                     const posterElement =
                         (element as any)[$defaultPosterElement];
-                    const canvasElement = element[$canvas];
+                    const inputElement = element[$input];
 
                     await waitForEvent(element, 'preload');
 
@@ -223,8 +223,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                         posterElement, 'keydown', {keyCode: 13});
 
                     await until(() => {
-                      return element.shadowRoot!.activeElement ===
-                          canvasElement;
+                      return element.shadowRoot!.activeElement === inputElement;
                     });
                   });
             });
@@ -275,16 +274,16 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                 event => event.detail.visible === true);
           });
 
-          test('allows the canvas to be interactive', async () => {
-            const canvas = element[$canvas];
+          test('allows the input to be interactive', async () => {
+            const input = element[$input];
             const picked = pickShadowDescendant(element);
 
-            expect(picked).to.be.equal(canvas);
+            expect(picked).to.be.equal(input);
           });
 
           test('when src is reset, poster is dismissable', async () => {
             const posterElement = (element as any)[$defaultPosterElement];
-            const canvasElement = element[$canvas];
+            const inputElement = element[$input];
 
             element.reveal = 'interaction';
             element.src = null;
@@ -300,7 +299,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
 
             await until(() => {
-              return element.shadowRoot!.activeElement === canvasElement;
+              return element.shadowRoot!.activeElement === inputElement;
             });
           });
         });
