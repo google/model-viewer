@@ -31,6 +31,7 @@ const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
+const $selectCanvas = Symbol('selectCanvas');
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
@@ -262,7 +263,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].registerScene(this[$scene]);
+    const numberOfScenes = this[$renderer].registerScene(this[$scene]);
+    this[$selectCanvas](numberOfScenes);
     this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
@@ -290,7 +292,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].unregisterScene(this[$scene]);
+    const numberOfScenes = this[$renderer].unregisterScene(this[$scene]);
+    this[$selectCanvas](numberOfScenes);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
@@ -385,6 +388,16 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return true;
   }
 
+  [$selectCanvas](numberOfScenes: number) {
+    if (numberOfScenes === 1) {
+      this.shadowRoot!.querySelector('.container')!.appendChild(
+          this[$renderer].canvas3D);
+      this[$canvas].classList.remove('show');
+    } else {
+      this[$renderer].canvas3D.classList.remove('show');
+    }
+  }
+
   /**
    * Called on initialization and when the resize observer fires.
    */
@@ -456,12 +469,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
 
+    const canvas = this[$renderer].numberOfScenes === 1 ?
+        this[$renderer].canvas3D :
+        this[$canvas];
     try {
-      this[$canvas].classList.add('show');
+      canvas.classList.add('show');
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
-      this[$canvas].classList.remove('show');
+      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
       updateSourceProgress(1.0);

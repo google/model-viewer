@@ -17,13 +17,14 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -319,7 +320,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$shouldPromptUserToInteract] = true;
 
     protected[$controls] = new SmoothControls(
-        this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
+        this[$scene].getCamera() as PerspectiveCamera, this[$container]);
 
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();

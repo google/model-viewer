@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
-import {HAS_OFFSCREEN_CANVAS, IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -65,7 +65,7 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
-  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
+  public canvas3D: HTMLCanvasElement;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -92,11 +92,7 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    if (HAS_OFFSCREEN_CANVAS && OFFSCREEN_CANVAS_SUPPORT_BITMAP) {
-      this.canvas3D = new OffscreenCanvas(0, 0);
-    } else {
-      this.canvas3D = document.createElement('canvas');
-    }
+    this.canvas3D = document.createElement('canvas');
 
     this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
@@ -150,7 +146,7 @@ export class Renderer extends EventDispatcher {
     this.height = height;
   }
 
-  registerScene(scene: ModelScene) {
+  registerScene(scene: ModelScene): number {
     this.scenes.add(scene);
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
@@ -159,9 +155,10 @@ export class Renderer extends EventDispatcher {
     if (this.debugger != null) {
       this.debugger.addScene(scene);
     }
+    return this.scenes.size;
   }
 
-  unregisterScene(scene: ModelScene) {
+  unregisterScene(scene: ModelScene): number {
     this.scenes.delete(scene);
     if (this.canRender && this.scenes.size === 0) {
       (this.threeRenderer.setAnimationLoop as any)(null);
@@ -170,6 +167,11 @@ export class Renderer extends EventDispatcher {
     if (this.debugger != null) {
       this.debugger.removeScene(scene);
     }
+    return this.scenes.size;
+  }
+
+  get numberOfScenes(): number {
+    return this.scenes.size;
   }
 
   async supportsPresentation() {
@@ -249,19 +251,21 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
-      const widthDPR = width * dpr;
-      const heightDPR = height * dpr;
-      context.clearRect(0, 0, widthDPR, heightDPR);
-      context.drawImage(
-          this.threeRenderer.domElement,
-          0,
-          this.canvas3D.height - heightDPR,
-          widthDPR,
-          heightDPR,
-          0,
-          0,
-          widthDPR,
-          heightDPR);
+      if (this.scenes.size > 1) {
+        const widthDPR = width * dpr;
+        const heightDPR = height * dpr;
+        context.clearRect(0, 0, widthDPR, heightDPR);
+        context.drawImage(
+            this.threeRenderer.domElement,
+            0,
+            this.canvas3D.height - heightDPR,
+            widthDPR,
+            heightDPR,
+            0,
+            0,
+            widthDPR,
+            heightDPR);
+      }
 
       scene.isDirty = false;
     }
