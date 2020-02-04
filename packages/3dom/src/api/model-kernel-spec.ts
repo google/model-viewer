@@ -2,9 +2,9 @@ import {ConstructedWithArguments, Constructor, Material, Model, PBRMetallicRough
 import {SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness} from '../protocol.js';
 import {getLocallyUniqueId} from '../utilities.js';
 
-import {defineModelKernel, ModelKernel, ModelKernelConstructor} from './kernel.js';
+import {defineModelKernel, ModelKernel, ModelKernelConstructor} from './model-kernel.js';
 
-suite('kernel', () => {
+suite('model-kernel', () => {
   suite('defineModelKernel', () => {
     let FakeModel: Constructor<Model>&
         ConstructedWithArguments<[ModelKernel, SerializedModel]>;
@@ -89,7 +89,7 @@ suite('kernel', () => {
         kernel.deactivate();
       });
 
-      suite('with a Model containing a Material', () => {
+      suite('with a Model cntaining a Material', () => {
         let kernel: ModelKernel;
 
         setup(() => {
