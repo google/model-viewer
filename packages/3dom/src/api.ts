@@ -79,19 +79,19 @@ export declare interface ThreeDOMGlobalScope extends Worker {
    * A reference to Model constructor. Supports instanceof checks; this class is
    * not directly constructable.
    */
-  Model: Constructor<Model>;
+  Model: Constructor<unknown[], Model>;
 
   /**
    * A reference to Material constructor. Supports instanceof checks; this class
    * is not directly constructable.
    */
-  Material: Constructor<Material>;
+  Material: Constructor<unknown[], Material>;
 
   /**
    * A reference to PBRMetallicRoughness constructor. Supports instanceof
    * checks; this class is not directly constructable.
    */
-  PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+  PBRMetallicRoughness: Constructor<unknown[], PBRMetallicRoughness>;
 }
 
 /**
@@ -107,9 +107,10 @@ export declare interface ThreeDOMEventMap {
  */
 export declare interface ThreeDOMElement {
   /**
-   * A 3DOM element always has a reference to its model of provenance.
+   * A 3DOM element always has a reference to its Model of provenance unless it
+   * is the root of the scene graph (implictly the Model).
    */
-  readonly ownerModel: Model;
+  readonly ownerModel?: Model;
 }
 
 /**
@@ -137,8 +138,6 @@ export declare interface Model extends ThreeDOMElement {
   /**
    * An ordered set of unique Materials found in this model. The Materials are
    * listed in scene graph traversal order.
-   *
-   * TODO(147833840): Define traversal order.
    */
   readonly materials: Readonly<Material[]>;
 }
@@ -183,10 +182,24 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
  * A constructor is the class or function that produces an object of a given
  * type when invoked with `new`.
  */
-export declare interface Constructor<T = object> {
-  new(...args: unknown[]): T;
-  prototype: T;
-}
+export declare type Constructor<T = object, U = object> = {
+  new (...args: any[]): T; prototype: T;
+} & U;
+
+export declare type ConstructedWithArguments<T extends any[] = any[]> = {
+  new (...args: T): unknown;
+};
+
+// export type ModelConstructor =
+//     Constructor<Model>&ConstructedWithArguments<[string, number]>;
+
+// class Test implements Model {
+//   readonly materials = Object.freeze([]);
+//   constructor(public name: string, public id: number) {
+//   }
+// }
+
+// const t: ModelConstructor = Test;
 
 /**
  * An RGBA-encoded color, with channels represented as floating point values

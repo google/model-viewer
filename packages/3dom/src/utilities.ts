@@ -12,3 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+/**
+ * Produces a "locally" unique ID. This ID is only guaranteed to be unique
+ * over the lifetime of the function and in the current execution context.
+ */
+export const getLocallyUniqueId = (() => {
+  let id = 0;
+  return () => id++;
+})();

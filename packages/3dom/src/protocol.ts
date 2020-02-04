@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2020 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,57 +15,74 @@
 
 import {RGBA} from './api.js';
 
+/**
+ * The protocol between 3DOM execution contexts is strictly defined.
+ * Only specific types of messages are allowed, and their types are
+ * all included in the ThreeDOMMessageType map.
+ */
 export const ThreeDOMMessageType = {
+  // Used when the host execution context and scene graph execution context
+  // are negotiating a connection
   HANDSHAKE: 1,
+
+  // Notification sent to the host execution context to indicate that the
+  // scene graph execution context has finished initializing
   CONTEXT_INITIALIZED: 2,
+
+  // A message that indicates that a custom script is meant to be imported
+  // into the scene graph execution context
   IMPORT_SCRIPT: 3,
+
+  // A notification from the host execution context that the main Model has
+  // changed, including the sparse, serialized scene graph of the new Model
   MODEL_CHANGED: 4,
+
+  // A request from the scene graph execution context to mutate some detail
+  // of the backing host scene graph
   MUTATE: 5
 };
 
+/**
+ * A map of scene graph element types to interfaces for the serialized
+ * representation of those types.
+ */
 export declare interface SerializedElementMap {
-  'model-graph': SerializedModelGraph;
-  'scene': SerializedScene;
-  'node': SerializedNode;
-  'mesh': SerializedMesh;
-  'primitive': SerializedPrimitive;
+  'model': SerializedModel;
   'material': SerializedMaterial;
   'pbr-metallic-roughness': SerializedPBRMetallicRoughness;
 }
 
+/**
+ * The serialized form of a ThreeDOMElement
+ * @see api.ts
+ */
 export declare interface SerializedThreeDOMElement {
   id: number;
   name?: string;
 }
 
-export declare interface SerializedScene extends SerializedThreeDOMElement {
-  nodes?: Array<SerializedNode>;
-}
-
-export declare interface SerializedNode extends SerializedThreeDOMElement {
-  mesh?: SerializedMesh;
-  children?: Array<SerializedNode>;
-}
-
+/**
+ * The serialized form of a PBRMetallicRoughness
+ * @see api.ts
+ */
 export declare interface SerializedPBRMetallicRoughness extends
     SerializedThreeDOMElement {
   baseColorFactor: RGBA;
 }
 
+/**
+ * The serialized form of a Material
+ * @see api.ts
+ */
 export declare interface SerializedMaterial extends SerializedThreeDOMElement {
   pbrMetallicRoughness: SerializedPBRMetallicRoughness;
 }
 
-export declare interface SerializedPrimitive extends SerializedThreeDOMElement {
-  material?: SerializedMaterial;
-}
-
-export declare interface SerializedMesh extends SerializedThreeDOMElement {
-  primitives?: Array<SerializedPrimitive>;
-}
-
-export declare interface SerializedModelGraph extends
-    SerializedThreeDOMElement {
+/**
+ * The serialized form of a Model
+ * @see api.ts
+ */
+export declare interface SerializedModel extends SerializedThreeDOMElement {
   modelUri: string;
-  scene: SerializedScene;
+  materials: Array<SerializedMaterial>;
 }
