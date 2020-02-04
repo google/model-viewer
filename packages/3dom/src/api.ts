@@ -79,19 +79,19 @@ export declare interface ThreeDOMGlobalScope extends Worker {
    * A reference to Model constructor. Supports instanceof checks; this class is
    * not directly constructable.
    */
-  Model: Constructor<unknown[], Model>;
+  Model: Constructor<Model>;
 
   /**
    * A reference to Material constructor. Supports instanceof checks; this class
    * is not directly constructable.
    */
-  Material: Constructor<unknown[], Material>;
+  Material: Constructor<Material>;
 
   /**
    * A reference to PBRMetallicRoughness constructor. Supports instanceof
    * checks; this class is not directly constructable.
    */
-  PBRMetallicRoughness: Constructor<unknown[], PBRMetallicRoughness>;
+  PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
 }
 
 /**
@@ -182,24 +182,13 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
  * A constructor is the class or function that produces an object of a given
  * type when invoked with `new`.
  */
-export declare type Constructor<T = object, U = object> = {
+export declare type Constructor<T = object> = {
   new (...args: any[]): T; prototype: T;
-} & U;
+};
 
 export declare type ConstructedWithArguments<T extends any[] = any[]> = {
   new (...args: T): unknown;
 };
-
-// export type ModelConstructor =
-//     Constructor<Model>&ConstructedWithArguments<[string, number]>;
-
-// class Test implements Model {
-//   readonly materials = Object.freeze([]);
-//   constructor(public name: string, public id: number) {
-//   }
-// }
-
-// const t: ModelConstructor = Test;
 
 /**
  * An RGBA-encoded color, with channels represented as floating point values
