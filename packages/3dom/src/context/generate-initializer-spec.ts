@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {generateInitializer} from './initialize.js'
+import {generateInitializer} from './generate-initializer.js'
 
-suite('initialize', () => {
+suite('context/generate-initializer', () => {
   suite('generateInitializer', () => {
     test('yields a string of JS that can be evaluated', () => {
       const implementationString = generateInitializer();
