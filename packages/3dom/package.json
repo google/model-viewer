@@ -25,6 +25,7 @@
     "build": "tsc",
     "watch:tsc": "tsc -w",
     "clean": "rm -rf ./lib",
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production",
     "dev": "tsc && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
   },
   "keywords": [
