@@ -74,6 +74,7 @@ export class Renderer extends EventDispatcher {
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
+  private offscreenCanvas: OffscreenCanvas|null = null;
 
   private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
       this[$onWebGLContextLost](event);
@@ -99,8 +100,9 @@ export class Renderer extends EventDispatcher {
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
       if (USE_OFFSCREEN_CANVAS) {
-        const offscreenCanvas = this.canvas3D.transferControlToOffscreen();
-        this.context3D = WebGLUtils.getContext(offscreenCanvas, webGlOptions);
+        this.offscreenCanvas = this.canvas3D.transferControlToOffscreen();
+        this.context3D =
+            WebGLUtils.getContext(this.offscreenCanvas, webGlOptions);
       } else {
         this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
       }
@@ -206,6 +208,14 @@ export class Renderer extends EventDispatcher {
     return this[$arRenderer] != null && this[$arRenderer].isPresenting;
   }
 
+  expandTo(width: number, height: number) {
+    if (width > this.width || height > this.height) {
+      const maxWidth = Math.max(width, this.width);
+      const maxHeight = Math.max(height, this.height);
+      this.setRendererSize(maxWidth, maxHeight);
+    }
+  }
+
   render(t: number) {
     if (!this.canRender || this.isPresenting) {
       return;
@@ -228,12 +238,6 @@ export class Renderer extends EventDispatcher {
 
       const camera = scene.getCamera();
 
-      if (width > this.width || height > this.height) {
-        const maxWidth = Math.max(width, this.width);
-        const maxHeight = Math.max(height, this.height);
-        this.setRendererSize(maxWidth, maxHeight);
-      }
-
       const {exposure, shadow} = scene;
       const exposureIsNumber =
           typeof exposure === 'number' && !(self as any).isNaN(exposure);
@@ -255,19 +259,26 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.render(scene, camera);
 
       if (!this.onlyOneScene) {
-        const widthDPR = width * dpr;
-        const heightDPR = height * dpr;
-        context.clearRect(0, 0, widthDPR, heightDPR);
-        context.drawImage(
-            this.threeRenderer.domElement,
-            0,
-            this.canvas3D.height - heightDPR,
-            widthDPR,
-            heightDPR,
-            0,
-            0,
-            widthDPR,
-            heightDPR);
+        if (USE_OFFSCREEN_CANVAS) {
+          const contextBitmap = context as ImageBitmapRenderingContext;
+          const bitmap = this.offscreenCanvas!.transferToImageBitmap();
+          contextBitmap.transferFromImageBitmap(bitmap);
+        } else {
+          const context2D = context as CanvasRenderingContext2D;
+          const widthDPR = width * dpr;
+          const heightDPR = height * dpr;
+          context2D.clearRect(0, 0, widthDPR, heightDPR);
+          context2D.drawImage(
+              this.threeRenderer.domElement,
+              0,
+              this.canvas3D.height - heightDPR,
+              widthDPR,
+              heightDPR,
+              0,
+              0,
+              widthDPR,
+              heightDPR);
+        }
       }
 
       scene.isDirty = false;

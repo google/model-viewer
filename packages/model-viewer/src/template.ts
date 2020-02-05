@@ -58,8 +58,7 @@ template.innerHTML = `
 }
 
 canvas {
-  width: 100%;
-  height: 100%;
+  position: absolute;
   display: none;
   pointer-events: none;
   /* NOTE(cdata): Chrome 76 and below apparently have a bug

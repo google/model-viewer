@@ -15,6 +15,7 @@
 
 import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
+import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
@@ -63,7 +64,7 @@ export class ModelScene extends Scene {
   public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
-  public context: CanvasRenderingContext2D;
+  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext;
   public exposure = 1;
   public model: Model;
   public framedFieldOfView = DEFAULT_FOV_DEG;
@@ -79,7 +80,11 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    this.context = canvas.getContext('2d')!;
+    if (USE_OFFSCREEN_CANVAS) {
+      this.context = canvas.getContext('bitmaprenderer')!;
+    } else {
+      this.context = canvas.getContext('2d')!;
+    }
 
     this.model = new Model();
 
@@ -131,19 +136,21 @@ export class ModelScene extends Scene {
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
    */
-  setSize(width: number, height: number) {
-    if (width !== this.width || height !== this.height) {
-      this.width = Math.max(width, 1);
-      this.height = Math.max(height, 1);
-      // In practice, invocations of setSize are throttled at the element level,
-      // so no need to throttle here:
-      const dpr = resolveDpr();
-      this.canvas.width = this.width * dpr;
-      this.canvas.height = this.height * dpr;
-      this.canvas.style.width = `${this.width}px`;
-      this.canvas.style.height = `${this.height}px`;
+  setSize(clipWidth: number, clipHeight: number) {
+    if (clipWidth !== this.width || clipHeight !== this.height) {
+      this.width = Math.max(clipWidth, 1);
+      this.height = Math.max(clipHeight, 1);
+
+      this.canvas.style.clip = `rect(0px,${this.width}px,${this.height}px,0px)`;
       this.aspect = this.width / this.height;
       this.frameModel();
+
+      const renderer = this.element[$renderer];
+      renderer.expandTo(this.width, this.height);
+      const {width, height} = renderer;
+      const dpr = resolveDpr();
+      this.canvas.width = width * dpr;
+      this.canvas.height = height * dpr;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -156,7 +163,7 @@ export class ModelScene extends Scene {
       // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
       // additional considerations.
       Promise.resolve().then(() => {
-        this.element[$renderer].render(performance.now());
+        renderer.render(performance.now());
       });
     }
   }
