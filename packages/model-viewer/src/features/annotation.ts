@@ -198,10 +198,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      // check that camera position has changed (or an update is required)
+      // check if camera position or field of view have changed (or an update is required)
       const view = this[$scene].activeCamera.position.clone();
-      if (this.view && view.distanceTo(this.view) === 0) return;
+      const fov = this[$scene].activeCamera.fov;
+      if (this.view && view.distanceTo(this.view) === 0 && this.fov === fov) return;
       this.view = view;
+      this.fov = fov;
 
       this[$updateHotspots]();
       this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
