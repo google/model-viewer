@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import {Scene} from 'three';
+import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 import {Material, Model, PBRMetallicRoughness, RGBA, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
 import {ModelKernel} from './api/model-kernel.js';
 import {SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness} from './protocol.js';
@@ -92,4 +95,18 @@ export class FakeModelKernel implements ModelKernel {
   }
   deactivate(): void {
   }
+}
+
+export const createFakeGLTF = () => {
+  const scene = new Scene();
+
+  return {
+    animations: [],
+    scene,
+    scenes: [scene],
+    cameras: [],
+    asset: {},
+    parser: {} as unknown as GLTFParser,
+    userData: {}
+  };
 }

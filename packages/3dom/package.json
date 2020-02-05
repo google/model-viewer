@@ -2,32 +2,28 @@
   "name": "@google/3dom",
   "version": "0.0.1",
   "description": "An isolated scene graph facade for web-based 3D libraries",
-  "repository": "https://github.com/GoogleWebComponents/model-viewer",
+  "repository": "https://github.com/google/model-viewer",
   "bugs": {
-    "url": "https://github.com/GoogleWebComponents/model-viewer/issues"
+    "url": "https://github.com/google/model-viewer/issues"
   },
-  "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
+  "homepage": "https://github.com/google/model-viewer#readme",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
   },
   "author": "DevXR constributors",
-  "main": "./lib/3dom.js",
-  "module": "./lib/3dom.js",
+  "main": "./lib/api.js",
+  "module": "./lib/api.js",
   "files": [
     "src",
-    "lib",
-    "dist/3dom.js",
-    "dist/3dom-legacy.js"
+    "lib"
   ],
   "scripts": {
     "test": "karma start --single-run",
     "test:watch": "karma start",
-    "build": "tsc && rollup -c",
+    "build": "tsc",
     "watch:tsc": "tsc -w",
-    "watch:rollup": "rollup -c -w",
-    "clean": "rm -rf ./dist ./lib",
-    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /test/ -c-1",
+    "clean": "rm -rf ./lib",
     "dev": "tsc && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
   },
   "keywords": [
@@ -39,12 +35,9 @@
   ],
   "devDependencies": {
     "@open-wc/karma-esm": "^2.11.1",
-    "@rollup/plugin-node-resolve": "^7.1.1",
-    "@rollup/plugin-replace": "^2.2.0",
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.5",
     "chai": "^4.1.2",
-    "http-server": "^0.12.1",
     "karma": "^4.0.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -52,16 +45,12 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-sauce-launcher": "^2.0.2",
     "karma-sourcemap-loader": "^0.3.7",
-    "lit-html": "^1.1.2",
     "mocha": "^5.2.0",
     "polymer-build": "^3.1.1",
-    "rollup": "^1.31.0",
-    "typescript": "3.6.3"
+    "typescript": "^3.7.5"
   },
   "dependencies": {
-    "three": "^0.113.1",
-    "@types/resize-observer-browser": "^0.1.2",
-    "@types/webgl2": "^0.0.5"
+    "three": "^0.113.1"
   },
   "publishConfig": {
     "access": "public"

@@ -28,9 +28,7 @@ function patchContext(this: Window, allowList: typeof ALLOWLISTED_GLOBALS) {
   // Crawl up the prototype chain until we get to EventTarget so that we
   // don't go overboard deleting fundamental properties of things:
   while (context && context.constructor != EventTarget) {
-    console.log('Crawl up prototype chain');
     Object.getOwnPropertyNames(context).forEach((property) => {
-      console.log(property);
       if (allowList.hasOwnProperty(property) && allowList[property] === true) {
         // Skip allowed property
         return;
@@ -45,7 +43,6 @@ function patchContext(this: Window, allowList: typeof ALLOWLISTED_GLOBALS) {
 
     context = Object.getPrototypeOf(context);
   }
-  console.log('done');
 }
 
 /**

@@ -13,4 +13,21 @@
  * limitations under the License.
  */
 
-export const version = '0.0.1';
+
+import {Object3D} from 'three/src/core/Object3D.js';
+
+import {createFakeGLTF} from '../../test-helpers.js';
+
+import {ModelGraft} from './model-graft.js';
+import {ThreeDOMElement} from './three-dom-element.js';
+
+suite('facade/three-js/three-dom-element', () => {
+  suite('ThreeDOMElement', () => {
+    test('has a reference to a Model', () => {
+      const graft = new ModelGraft('', createFakeGLTF());
+      const object3D = new Object3D();
+      const element = new ThreeDOMElement(graft, object3D);
+      expect(element.ownerModel).to.be.equal(graft.model);
+    });
+  });
+});
