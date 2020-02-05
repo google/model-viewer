@@ -65,7 +65,8 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
-  public canvas3D: HTMLCanvasElement;
+  public canvasElement: HTMLCanvasElement;
+  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -74,7 +75,6 @@ export class Renderer extends EventDispatcher {
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
-  private offscreenCanvas: OffscreenCanvas|null = null;
 
   private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
       this[$onWebGLContextLost](event);
@@ -93,19 +93,18 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    this.canvas3D = document.createElement('canvas');
+    this.canvasElement = document.createElement('canvas');
+
+    this.canvas3D = USE_OFFSCREEN_CANVAS ?
+        this.canvasElement.transferControlToOffscreen() :
+        this.canvasElement;
 
     this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
-    // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+
     try {
-      if (USE_OFFSCREEN_CANVAS) {
-        this.offscreenCanvas = this.canvas3D.transferControlToOffscreen();
-        this.context3D =
-            WebGLUtils.getContext(this.offscreenCanvas, webGlOptions);
-      } else {
-        this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
-      }
+      // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
 
       // Patch the gl context's extension functions before passing
       // it to three.
@@ -255,13 +254,14 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.setViewport(0, 0, width, height);
+      this.threeRenderer.setViewport(0, this.height - height, width, height);
       this.threeRenderer.render(scene, camera);
 
       if (!this.onlyOneScene) {
         if (USE_OFFSCREEN_CANVAS) {
           const contextBitmap = context as ImageBitmapRenderingContext;
-          const bitmap = this.offscreenCanvas!.transferToImageBitmap();
+          const bitmap =
+              (this.canvas3D as OffscreenCanvas).transferToImageBitmap();
           contextBitmap.transferFromImageBitmap(bitmap);
         } else {
           const context2D = context as CanvasRenderingContext2D;
@@ -271,7 +271,7 @@ export class Renderer extends EventDispatcher {
           context2D.drawImage(
               this.threeRenderer.domElement,
               0,
-              this.canvas3D.height - heightDPR,
+              0,
               widthDPR,
               heightDPR,
               0,

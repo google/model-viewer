@@ -395,15 +395,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$selectCanvas]() {
     if (this[$renderer].onlyOneScene) {
-      this[$input].appendChild(this[$renderer].canvas3D);
+      this[$input].appendChild(this[$renderer].canvasElement);
       this[$canvas].classList.remove('show');
     } else {
-      this[$renderer].canvas3D.classList.remove('show');
+      this[$renderer].canvasElement.classList.remove('show');
     }
   }
 
   get[$displayCanvas]() {
-    return this[$renderer].onlyOneScene ? this[$renderer].canvas3D :
+    return this[$renderer].onlyOneScene ? this[$renderer].canvasElement :
                                           this[$canvas];
   }
 
@@ -460,14 +460,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
-    if (this[$renderer].onlyOneScene) {
-      const canvas = this[$renderer].canvas3D;
-      const dpr = resolveDpr();
-      canvas.width = e.width * dpr;
-      canvas.height = e.height * dpr;
-      canvas.style.width = `${e.width}px`;
-      canvas.style.height = `${e.height}px`;
-    }
     this[$needsRender]();
   }
 
