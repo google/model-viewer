@@ -162,6 +162,9 @@ export class CachingGLTFLoader {
     await this.preload(url, progressCallback);
 
     const gltf = await cache.get(url)!;
+    if (gltf == null) {
+      return null;
+    }
 
     const meshesToDuplicate: Mesh[] = [];
     if (gltf.scene != null) {
