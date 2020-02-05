@@ -42,10 +42,9 @@ export const IS_MOBILE = (() => {
   return check;
 })();
 
-export const HAS_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas);
-export const OFFSCREEN_CANVAS_SUPPORT_BITMAP =
-    Boolean((self as any).OffscreenCanvas) &&
-    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap);
+export const USE_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas) &&
+    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap) &&
+    Boolean((self as any).OffscreenCanvas.prototype.transferControlToOffscreen);
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 

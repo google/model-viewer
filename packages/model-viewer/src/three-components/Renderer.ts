@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -98,7 +98,12 @@ export class Renderer extends EventDispatcher {
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
     // Need to support both 'webgl' and 'experimental-webgl' (IE11).
     try {
-      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
+      if (USE_OFFSCREEN_CANVAS) {
+        const offscreenCanvas = this.canvas3D.transferControlToOffscreen();
+        this.context3D = WebGLUtils.getContext(offscreenCanvas, webGlOptions);
+      } else {
+        this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
+      }
 
       // Patch the gl context's extension functions before passing
       // it to three.
@@ -168,8 +173,8 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  get numberOfScenes(): number {
-    return this.scenes.size;
+  get onlyOneScene(): boolean {
+    return this.scenes.size === 1;
   }
 
   async supportsPresentation() {
@@ -249,7 +254,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, camera);
 
-      if (this.scenes.size > 1) {
+      if (!this.onlyOneScene) {
         const widthDPR = width * dpr;
         const heightDPR = height * dpr;
         context.clearRect(0, 0, widthDPR, heightDPR);

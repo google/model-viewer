@@ -394,7 +394,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$selectCanvas]() {
-    if (this[$renderer].numberOfScenes === 1) {
+    if (this[$renderer].onlyOneScene) {
       this[$input].appendChild(this[$renderer].canvas3D);
       this[$canvas].classList.remove('show');
     } else {
@@ -403,8 +403,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$displayCanvas]() {
-    return this[$renderer].numberOfScenes === 1 ? this[$renderer].canvas3D :
-                                                  this[$canvas];
+    return this[$renderer].onlyOneScene ? this[$renderer].canvas3D :
+                                          this[$canvas];
   }
 
   /**
@@ -460,7 +460,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
-    if (this[$renderer].numberOfScenes === 1) {
+    if (this[$renderer].onlyOneScene) {
       const canvas = this[$renderer].canvas3D;
       const dpr = resolveDpr();
       canvas.width = e.width * dpr;
