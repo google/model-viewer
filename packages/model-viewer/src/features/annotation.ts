@@ -192,10 +192,17 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
+      delete this.view;
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
+
+      // check that camera position has changed (or an update is required)
+      const view = this[$scene].activeCamera.position.clone();
+      if (this.view && view.distanceTo(this.view) === 0) return;
+      this.view = view;
+
       this[$updateHotspots]();
       this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
     }
@@ -203,6 +210,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onResize](e: {width: number, height: number}) {
       super[$onResize](e);
       this[$annotationRenderer].setSize(e.width, e.height);
+      delete this.view;
     }
 
     [$updateHotspots]() {
@@ -212,10 +220,19 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (object instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
           view.sub(object.position);
+          const hidden = object.element.classList.contains('hide');
           if (view.dot(object.normal) < 0) {
-            object.element.classList.add('hide');
-          } else {
+            if (!hidden) {
+              object.element.classList.add('hide');
+              if (object.element.firstElementChild) {
+                object.element.firstElementChild.assignedNodes().forEach($el => ($el.dataset.occluded = 1));
+              }
+            }
+          } else if (hidden) {
             object.element.classList.remove('hide');
+            if (object.element.firstElementChild) {
+              object.element.firstElementChild.assignedNodes().forEach($el => ($el.dataset.occluded = 0));
+            }
           }
         }
       }
@@ -240,6 +257,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].pivot.add(hotspot);
       }
+      delete this.view;
     }
 
     [$removeHotspot](node: Node) {
