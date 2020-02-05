@@ -28,7 +28,7 @@ module.exports = function(config) {
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
       {
-        pattern: 'node_modules/@jsantell/event-target/dist/event-target.js',
+        pattern: 'node_modules/@jsantell/event-target/dist/EventTarget.js',
         watched: false
       },
       {pattern: 'lib/**/*-spec.js', watched: true, type: 'module'},
@@ -74,29 +74,35 @@ module.exports = function(config) {
       //   version: '11',
       //   platform: 'Windows 8.1',
       // },
-      'Edge 79': {
+      'Edge (latest)': {
         base: 'SauceLabs',
         browserName: 'microsoftedge',
-        version: '79.0',
+        version: 'latest',
         platform: 'Windows 10',
       },
-      'Safari 12.1': {
+      'Safari (latest - 1)': {
         base: 'SauceLabs',
         browserName: 'safari',
-        version: '12.1',
+        version: 'latest-1',
         platform: 'macOS 10.13',
       },
-      'Safari 13.0': {
+      'Safari (latest)': {
         base: 'SauceLabs',
         browserName: 'safari',
-        version: '13.0',
+        version: 'latest',
         platform: 'macOS 10.13',
       },
-      'Firefox 68.0': {
+      'Firefox (latest)': {
         base: 'SauceLabs',
         browserName: 'firefox',
         platform: 'Windows 10',
-        version: '68.0'
+        version: 'latest'
+      },
+      'Firefox (latest - 1)': {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        platform: 'Windows 10',
+        version: 'latest-1'
       }
     };
 
