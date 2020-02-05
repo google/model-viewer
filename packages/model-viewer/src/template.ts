@@ -47,10 +47,6 @@ template.innerHTML = `
   top: 0;
 }
 
-.annotation-wrapper {
-  pointer-events: auto;
-}
-
 canvas {
   width: 100%;
   height: 100%;
