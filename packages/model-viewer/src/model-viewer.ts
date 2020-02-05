@@ -34,7 +34,9 @@ export const ModelViewerElement = MagicLeapMixin(AnnotationMixin(StagingMixin(
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
-customElements.define('model-viewer', ModelViewerElement);
+if (!customElements.get('model-viewer')) {
+  customElements.define('model-viewer', ModelViewerElement);
+}
 
 declare global {
   interface HTMLElementTagNameMap {
