@@ -75,8 +75,8 @@ export class ARRenderer extends EventDispatcher {
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
-    const session: XRSession =
-        await navigator.xr!.requestSession!('immersive-ar', {requiredFeatures: ['hit-test']});
+    const session: XRSession = await navigator.xr!.requestSession!(
+        'immersive-ar', {requiredFeatures: ['hit-test']});
 
     const gl: WebGLRenderingContext =
         assertContext(this.threeRenderer.getContext());
@@ -148,8 +148,10 @@ export class ARRenderer extends EventDispatcher {
       this[$postSessionCleanup]();
     }, {once: true});
 
-    this[$refSpace] = await this[$currentSession]!.requestReferenceSpace('local');
-    this[$viewerRefSpace] = await this[$currentSession]!.requestReferenceSpace('viewer');
+    this[$refSpace] =
+        await this[$currentSession]!.requestReferenceSpace('local');
+    this[$viewerRefSpace] =
+        await this[$currentSession]!.requestReferenceSpace('viewer');
 
     this[$tick]();
   }
@@ -304,7 +306,11 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
       // before render.
-      this.reticle.update(this[$currentSession]!, frame, this[$viewerRefSpace]!, this[$refSpace]!);
+      this.reticle.update(
+          this[$currentSession]!,
+          frame,
+          this[$viewerRefSpace]!,
+          this[$refSpace]!);
       this.processXRInput(frame);
 
       // NOTE: Clearing depth caused issues on Samsung devices

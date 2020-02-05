@@ -183,12 +183,14 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
  * type when invoked with `new`.
  */
 export declare type Constructor<T = object> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): T; prototype: T;
 };
 
-export declare type ConstructedWithArguments<T extends any[] = any[]> = {
-  new (...args: T): unknown;
-};
+export declare type ConstructedWithArguments<T extends unknown[] = unknown[]> =
+    {
+      new (...args: T): unknown;
+    };
 
 /**
  * An RGBA-encoded color, with channels represented as floating point values

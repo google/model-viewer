@@ -67,11 +67,13 @@ export class ModelGraft {
   }
 
   getNodeByInternalId(id: number): ThreeDOMElement|null {
-    if (!this[$nodesByInternalId].has(id)) {
+    const node = this[$nodesByInternalId].get(id);
+
+    if (node == null) {
       return null;
     }
 
-    return this[$nodesByInternalId].get(id)!;
+    return node;
   }
 
   adopt(node: ThreeDOMElement) {

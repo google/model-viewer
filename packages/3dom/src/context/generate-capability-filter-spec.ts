@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {generateCapabilityFilter} from './generate-capability-filter.js'
+import {generateCapabilityFilter} from './generate-capability-filter.js';
 
 suite('context/generate-capability-filter', () => {
   suite('generateCapabilityFilter', () => {

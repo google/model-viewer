@@ -19,16 +19,72 @@ import {generateAPI} from './context/generate-api.js';
 import {generateCapabilityFilter} from './context/generate-capability-filter.js';
 import {generateContextPatch} from './context/generate-context-patch.js';
 import {generateInitializer} from './context/generate-initializer.js';
+import {ModelGraft as ThreeJSModelGraft} from './facade/three-js/model-graft.js';
 import {ThreeDOMMessageType} from './protocol.js';
-// import {ModelGraft as ThreeJSModelGraft} from './three/model-graft.js';
+
+const $modelGraft = Symbol('modelGraft');
+const $port = Symbol('port');
+const $mutate = Symbol('mutate');
+
+const $messageEventHandler = Symbol('messageEventHandler');
+const $onMessageEvent = Symbol('onMessageEvent');
+
+/**
+ * A ModelGraftManipulator is an internal construct intended to consolidate
+ * any mutations that operate on the backing scene graph. It can be thought
+ * of as a host execution context counterpart to the ModelKernel in the scene
+ * graph execution context.
+ */
+class ModelGraftManipulator {
+  protected[$port]: MessagePort;
+  protected[$modelGraft]: AnyModelGraft;
+
+  protected[$messageEventHandler] = (event: MessageEvent) =>
+      this[$onMessageEvent](event);
+
+  constructor(modelGraft: AnyModelGraft, port: MessagePort) {
+    this[$modelGraft] = modelGraft;
+    this[$port] = port;
+    this[$port].addEventListener('message', this[$messageEventHandler]);
+    this[$port].start();
+  }
+
+  /**
+   * Clean up internal state so that the ModelGraftManipulator can be properly
+   * garbage collected.
+   */
+  dispose() {
+    this[$port].removeEventListener('message', this[$messageEventHandler]);
+    this[$port].close();
+  }
+
+  [$onMessageEvent](event: MessageEvent) {
+    const {data} = event;
+    if (data && data.type) {
+      if (data.type === ThreeDOMMessageType.MUTATE) {
+        this[$mutate](data.id, data.property, data.value);
+      }
+    }
+  }
+
+  [$mutate](id: number, property: string, value: unknown) {
+    // TODO: Manipulations probably need to be validated against
+    // allowed capabilities here. We already do this on the scene graph
+    // execution context side, but it would be safer to do it on both sides
+    const node = this[$modelGraft].getNodeByInternalId(id);
+    if (node != null && property in node) {
+      (node as unknown as {[index: string]: unknown})[property] = value;
+    }
+  }
+}
+
 
 const ALL_CAPABILITIES: Readonly<Array<ThreeDOMCapability>> =
     Object.freeze(['messaging', 'material-properties', 'fetch']);
 
 // TODO: Export an abstract interface for ModelGraft someday when we
 // want to support multiple rendering backends
-// export type AnyModelGraft = ThreeJSModelGraft;
-export type AnyModelGraft = any;
+export type AnyModelGraft = ThreeJSModelGraft;
 
 /**
  * Constructs and returns a string representing a fully-formed scene graph
@@ -108,12 +164,17 @@ export class ThreeDOMExecutionContext {
     port.postMessage(
         {
           type: ThreeDOMMessageType.MODEL_CHANGED,
-          model: modelGraft != null ? modelGraft.toJSON() : null
+          model: modelGraft != null && modelGraft.model != null ?
+              modelGraft.model.toJSON() :
+              null
         },
         [port2]);
 
-    if (this[$modelGraftManipulator] != null) {
-      this[$modelGraftManipulator]!.dispose();
+    const modelGraftManipulator = this[$modelGraftManipulator];
+
+    if (modelGraftManipulator != null) {
+      modelGraftManipulator.dispose();
+      this[$modelGraftManipulator] = null;
     }
 
     if (modelGraft != null) {
@@ -133,8 +194,8 @@ export class ThreeDOMExecutionContext {
    */
   async eval(scriptSource: string): Promise<void> {
     const port = await this[$workerInitializes];
-    const url =
-        URL.createObjectURL(new Blob([scriptSource], {type: 'text/javascript'}))
+    const url = URL.createObjectURL(
+        new Blob([scriptSource], {type: 'text/javascript'}));
     port.postMessage({type: ThreeDOMMessageType.IMPORT_SCRIPT, url});
   }
 
@@ -146,68 +207,14 @@ export class ThreeDOMExecutionContext {
   async terminate() {
     this[$worker].terminate();
 
-    if (this[$modelGraftManipulator] != null) {
-      this[$modelGraftManipulator]!.dispose();
+    const modelGraftManipulator = this[$modelGraftManipulator];
+
+    if (modelGraftManipulator != null) {
+      modelGraftManipulator.dispose();
       this[$modelGraftManipulator] = null;
     }
 
     const port = await this[$workerInitializes];
     port.close();
-  }
-}
-
-const $modelGraft = Symbol('modelGraft');
-const $port = Symbol('port');
-const $mutate = Symbol('mutate');
-
-const $messageEventHandler = Symbol('messageEventHandler');
-const $onMessageEvent = Symbol('onMessageEvent');
-
-/**
- * A ModelGraftManipulator is an internal construct intended to consolidate
- * any mutations that operate on the backing scene graph. It can be thought
- * of as a host execution context counterpart to the ModelKernel in the scene
- * graph execution context.
- */
-class ModelGraftManipulator {
-  protected[$port]: MessagePort;
-  protected[$modelGraft]: AnyModelGraft;
-
-  protected[$messageEventHandler] = (event: MessageEvent) =>
-      this[$onMessageEvent](event);
-
-  constructor(modelGraft: AnyModelGraft, port: MessagePort) {
-    this[$modelGraft] = modelGraft;
-    this[$port] = port;
-    this[$port].addEventListener('message', this[$messageEventHandler]);
-    this[$port].start();
-  }
-
-  /**
-   * Clean up internal state so that the ModelGraftManipulator can be properly
-   * garbage collected.
-   */
-  dispose() {
-    this[$port].removeEventListener('message', this[$messageEventHandler]);
-    this[$port].close();
-  }
-
-  [$onMessageEvent](event: MessageEvent) {
-    const {data} = event;
-    if (data && data.type) {
-      if (data.type === ThreeDOMMessageType.MUTATE) {
-        this[$mutate](data.id, data.property, data.value);
-      }
-    }
-  }
-
-  [$mutate](id: number, property: string, value: any) {
-    // TODO: Manipulations probably need to be validated against
-    // allowed capabilities here. We already do this on the scene graph
-    // execution context side, but it would be safer to do it on both sides
-    const node = this[$modelGraft].getNodeByInternalId(id);
-    if (node != null && property in node) {
-      (node as any)[property] = value;
-    }
   }
 }

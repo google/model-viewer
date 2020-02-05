@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {generateInitializer} from './generate-initializer.js'
+import {generateInitializer} from './generate-initializer.js';
 
 suite('context/generate-initializer', () => {
   suite('generateInitializer', () => {

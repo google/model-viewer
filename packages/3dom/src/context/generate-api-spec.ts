@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {generateAPI} from './generate-api.js'
+import {generateAPI} from './generate-api.js';
 
 suite('context/generate-api', () => {
   suite('generateAPI', () => {

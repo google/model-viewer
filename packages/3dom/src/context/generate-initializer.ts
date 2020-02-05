@@ -28,7 +28,7 @@ import {SerializedModel, ThreeDOMMessageType} from '../protocol.js';
 export interface PreservedContext {
   postMessage: typeof self.postMessage;
   addEventListener: typeof self.addEventListener;
-  importScripts: (...scripts: Array<string>) => any;
+  importScripts: (...scripts: Array<string>) => unknown;
 }
 
 
@@ -58,7 +58,7 @@ function initialize(
           switch (data.type) {
             // Instantiate a new ModelKernel, and notify the execution context
             // of the new Model with a 'model-change' event:
-            case ThreeDOMMessageType.MODEL_CHANGED:
+            case ThreeDOMMessageType.MODEL_CHANGED: {
               const previousModel =
                   currentKernel != null ? currentKernel.model : undefined;
               const serialized: SerializedModel|null = data.model;
@@ -84,8 +84,9 @@ function initialize(
               this.dispatchEvent(modelChangeEvent as ModelChangeEvent);
 
               break;
+            }
             // Import an external script into the execution context:
-            case ThreeDOMMessageType.IMPORT_SCRIPT:
+            case ThreeDOMMessageType.IMPORT_SCRIPT: {
               const url = data.url as string;
 
               if (url) {
@@ -93,6 +94,7 @@ function initialize(
               }
 
               break;
+            }
           }
         }
       });

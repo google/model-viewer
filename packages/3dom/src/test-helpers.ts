@@ -37,7 +37,7 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   setBaseColorFactor(_value: RGBA) {
     return Promise.resolve();
   }
-};
+}
 
 export class FakeMaterial implements Material {
   readonly pbrMetallicRoughness = new FakePBRMetallicRoughness(
@@ -53,7 +53,7 @@ export class FakeMaterial implements Material {
   get ownerModel() {
     return this.kernel.model;
   }
-};
+}
 
 export class FakeModel implements Model {
   readonly materials: Readonly<Array<Material>>;
@@ -68,7 +68,7 @@ export class FakeModel implements Model {
     }
     this.materials = Object.freeze(materials);
   }
-};
+}
 
 export const FakeThreeDOMElementMap = {
   'model': FakeModel,
@@ -77,14 +77,17 @@ export const FakeThreeDOMElementMap = {
 };
 
 export class FakeModelKernel implements ModelKernel {
-  readonly model: Model = {} as any;
+  readonly model: Model = {} as unknown as Model;
 
-  async mutate(_element: ThreeDOMElement, _property: string, _value: any):
+  async mutate(_element: ThreeDOMElement, _property: string, _value: unknown):
       Promise<void> {
+    return Promise.resolve();
   }
   deserialize<T extends keyof ThreeDOMElementMap>(
       type: T, serialized: SerializedElementMap[T]): ThreeDOMElementMap[T] {
     const ElementConstructor = FakeThreeDOMElementMap[type];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const element = new ElementConstructor(this, serialized as any);
 
     return element as unknown as ThreeDOMElementMap[T];
@@ -94,6 +97,7 @@ export class FakeModelKernel implements ModelKernel {
     return [];
   }
   deactivate(): void {
+    // Noop
   }
 }
 
@@ -109,4 +113,4 @@ export const createFakeGLTF = () => {
     parser: {} as unknown as GLTFParser,
     userData: {}
   };
-}
+};

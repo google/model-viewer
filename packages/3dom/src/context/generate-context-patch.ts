@@ -22,20 +22,19 @@ import {ALLOWLISTED_GLOBALS} from './allowlist.js';
  *
  * @see https://github.com/ampproject/worker-dom/blob/master/src/worker-thread/index.amp.ts
  */
-function patchContext(this: Window, allowList: typeof ALLOWLISTED_GLOBALS) {
-  let context = this;
-
+function patchContext(context: {}, allowList: typeof ALLOWLISTED_GLOBALS) {
   // Crawl up the prototype chain until we get to EventTarget so that we
   // don't go overboard deleting fundamental properties of things:
   while (context && context.constructor != EventTarget) {
     Object.getOwnPropertyNames(context).forEach((property) => {
+      // eslint-disable-next-line no-prototype-builtins
       if (allowList.hasOwnProperty(property) && allowList[property] === true) {
         // Skip allowed property
         return;
       }
 
       try {
-        delete (context as any)[property];
+        delete (context as {[index: string]: unknown})[property];
       } catch (e) {
         console.warn(e);
       }
@@ -56,4 +55,4 @@ function patchContext(this: Window, allowList: typeof ALLOWLISTED_GLOBALS) {
  * it.
  */
 export const generateContextPatch = (allowList: {[index: string]: boolean}) =>
-    `(${patchContext.toString()}).call(self, ${JSON.stringify(allowList)});`;
+    `(${patchContext.toString()})(self, ${JSON.stringify(allowList)});`;

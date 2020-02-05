@@ -19,9 +19,10 @@ import {SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBR
 export interface ModelKernelInterface {
   readonly model: Model;
 
-  mutate(element: ThreeDOMElement, property: string, value: any): Promise<void>;
+  mutate(element: ThreeDOMElement, property: string, value: unknown):
+      Promise<void>;
   deserialize<T extends keyof ThreeDOMElementMap>(
-      type: T, serialized: SerializedElementMap[T]): ThreeDOMElementMap[T]
+      type: T, serialized: SerializedElementMap[T]): ThreeDOMElementMap[T];
   getElementsByType<T extends keyof ThreeDOMElementMap>(type: T):
       Array<ThreeDOMElementMap[T]>;
   deactivate(): void;
@@ -101,8 +102,11 @@ export function defineModelKernel(
     protected[$model]: Model;
 
     constructor(port: MessagePort, serialized: SerializedModel) {
-      for (const type in constructorsByType) {
-        this[$elementsByType].set(type as keyof ThreeDOMElementMap, new Set());
+      const types =
+          Object.keys(constructorsByType) as Array<keyof ThreeDOMElementMap>;
+
+      for (const type of types) {
+        this[$elementsByType].set(type, new Set());
       }
 
       this[$port] = port;
@@ -130,7 +134,7 @@ export function defineModelKernel(
      * TODO: How to enforce allowed mutations?
      * TODO: How to validate values?
      */
-    async mutate(element: ThreeDOMElement, property: string, value: any):
+    async mutate(element: ThreeDOMElement, property: string, value: unknown):
         Promise<void> {
       if (!this[$localIdsByElement].has(element)) {
         throw new Error('Cannot mutate unknown element');
@@ -141,7 +145,8 @@ export function defineModelKernel(
       return new Promise((resolve, _reject) => {
         this[$port].postMessage(
             {type: ThreeDOMMessageType.MUTATE, id, property, value});
-        resolve();  // TODO
+        // TODO: Actually wait for confirmation from host context
+        resolve();
       });
     }
 
@@ -159,11 +164,16 @@ export function defineModelKernel(
 
       const {id} = serialized;
       const ElementConstructor = constructorsByType[type];
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const element = new ElementConstructor(this, serialized as any);
 
       this[$elementsByLocalId].set(id, element);
       this[$localIdsByElement].set(element, id);
 
+      // We know that the all accepted types have been pre-populated in the
+      // [$elementsByType] map:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this[$elementsByType].get(type)!.add(element);
 
       return element as ThreeDOMElementMap[T];
@@ -182,6 +192,7 @@ export function defineModelKernel(
         return [];
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return Array.from(this[$elementsByType].get(type)!) as
           Array<ThreeDOMElementMap[T]>;
     }
@@ -203,8 +214,9 @@ export function defineModelKernel(
      * TODO: Handle future messages from the host execution context
      */
     protected[$onMessageEvent](_event: MessageEvent) {
+      // TODO
     }
   }
 
   return ModelKernel;
-};
+}

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js'
+import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Color} from 'three/src/math/Color.js';
 
 import {createFakeGLTF} from '../../test-helpers.js';

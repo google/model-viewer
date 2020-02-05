@@ -34,7 +34,7 @@ const $materials = Symbol('materials');
  * scene graph.
  */
 export class Model extends ThreeDOMElement {
-  protected[$modelUri]: string = '';
+  protected[$modelUri] = '';
   protected[$materials]: Array<Material> = [];
   protected[$gltf]: GLTF;
 
@@ -82,7 +82,8 @@ export class Model extends ThreeDOMElement {
     const serialized: Partial<SerializedModel> = super.toJSON();
 
     serialized.modelUri = this[$modelUri];
-    serialized.materials = this[$materials].map(material => material.toJSON());
+    serialized.materials =
+        this[$materials].map((material) => material.toJSON());
 
     return serialized as SerializedModel;
   }

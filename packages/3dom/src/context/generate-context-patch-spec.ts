@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {generateContextPatch} from './generate-context-patch.js'
+import {generateContextPatch} from './generate-context-patch.js';
 
-const invokeInFakeContext = (code: string, self: any) => {
+const invokeInFakeContext = (code: string, self: unknown) => {
   return new Function('self', code)(self);
 };
 
@@ -45,7 +45,7 @@ suite('context/generate-context-patch', () => {
           foo = 'foo';
           bar = 'bar';
           baz() {
-            return 'baz'
+            return 'baz';
           }
         }
 
