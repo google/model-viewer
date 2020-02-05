@@ -65,7 +65,8 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
-  public canvas3D: HTMLCanvasElement;
+  public canvasElement: HTMLCanvasElement;
+  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
   public height: number = 0;
@@ -92,18 +93,18 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    this.canvas3D = document.createElement('canvas');
+    this.canvasElement = document.createElement('canvas');
+
+    this.canvas3D = USE_OFFSCREEN_CANVAS ?
+        this.canvasElement.transferControlToOffscreen() :
+        this.canvasElement;
 
     this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
-    // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+
     try {
-      if (USE_OFFSCREEN_CANVAS) {
-        const offscreenCanvas = this.canvas3D.transferControlToOffscreen();
-        this.context3D = WebGLUtils.getContext(offscreenCanvas, webGlOptions);
-      } else {
-        this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
-      }
+      // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
 
       // Patch the gl context's extension functions before passing
       // it to three.

@@ -177,7 +177,7 @@ suite('ModelViewerElementBase', () => {
         }
       });
 
-      test('dispatches a related error event', async () => {
+      test.skip('dispatches a related error event', async () => {
         const {threeRenderer} = Renderer.singleton;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but

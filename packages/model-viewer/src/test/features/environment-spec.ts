@@ -51,9 +51,9 @@ const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
 };
 
 suite('ModelViewerElementBase with EnvironmentMixin', () => {
-  suiteTeardown(() => {
-    Renderer.resetSingleton();
-  });
+  // suiteTeardown(() => {
+  //   Renderer.resetSingleton();
+  // });
 
   let nextId = 0;
   let tagName: string;
