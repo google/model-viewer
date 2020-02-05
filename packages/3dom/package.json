@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "test": "karma start --single-run",
+    "test:ci": "npm run test",
     "test:watch": "karma start",
     "build": "tsc",
     "watch:tsc": "tsc -w",
