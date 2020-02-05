@@ -27,7 +27,10 @@ module.exports = function(config) {
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
-      {pattern: 'dist/3dom.js', watched: true, type: 'module'},
+      {
+        pattern: 'node_modules/@jsantell/event-target/dist/event-target.js',
+        watched: false
+      },
       {pattern: 'lib/**/*-spec.js', watched: true, type: 'module'},
     ],
 
@@ -65,12 +68,12 @@ module.exports = function(config) {
     }
 
     const sauceLaunchers = {
-      'IE11': {
-        base: 'SauceLabs',
-        browserName: 'internet explorer',
-        version: '11',
-        platform: 'Windows 8.1',
-      },
+      // 'IE11': {
+      //   base: 'SauceLabs',
+      //   browserName: 'internet explorer',
+      //   version: '11',
+      //   platform: 'Windows 8.1',
+      // },
       'Edge 79': {
         base: 'SauceLabs',
         browserName: 'microsoftedge',
