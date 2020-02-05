@@ -1,9 +1,8 @@
-#!/ usr / bin / env bash
+#!/usr/bin/env bash
 
-CHANGED_TYPESCRIPT_FILES =
-    $(git diff - index-- cached-- name - only HEAD | grep.*\.ts)
+CHANGED_TYPESCRIPT_FILES=$(git diff-index --cached --name-only HEAD | grep '.*\.ts')
 
-        if[!"$CHANGED_TYPESCRIPT_FILES"]; then
+if [ ! "$CHANGED_TYPESCRIPT_FILES" ]; then
   exit 0
 fi
 
@@ -17,9 +16,10 @@ $CHANGED_TYPESCRIPT_FILES
 
 echo "$MESSAGE"
 
-#Stash unstaged changes...
+# Stash unstaged changes...
 git stash -k -- $CHANGED_TYPESCRIPT_FILES
 
-for file in `git diff-index --cached --name-only HEAD | grep .*\.ts`;
-do
-./ node_modules /.bin / clang - format - i $file git add $file done
+for file in `git diff-index --cached --name-only HEAD | grep .*\.ts`; do
+  ./node_modules/.bin/clang-format -i $file
+  git add $file
+done
