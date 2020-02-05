@@ -48,6 +48,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       document.body.appendChild(element);
 
       await waitForEvent(element, 'load');
+      await rafPasses();
     });
 
     teardown(() => {
