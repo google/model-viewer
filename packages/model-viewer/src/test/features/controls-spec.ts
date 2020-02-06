@@ -472,6 +472,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         setup(async () => {
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';
+          await timePasses();
           await rafPasses();
         });
 
