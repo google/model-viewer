@@ -335,38 +335,54 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
     const {width, height, model, aspect} = this[$scene];
+    const dpr = resolveDpr();
+    let outputWidth = width * dpr;
+    let outputHeight = height * dpr;
+    let offsetX = 0;
+    let offsetY = 0;
     if (idealAspect === true) {
-      const idealWidth = model.fieldOfViewAspect > aspect ?
-          width :
-          Math.round(height * model.fieldOfViewAspect);
-      const idealHeight = model.fieldOfViewAspect > aspect ?
-          Math.round(width / model.fieldOfViewAspect) :
-          height;
-      this[$renderer].setRendererSize(idealWidth, idealHeight);
-      this[$renderer].canvasElement.style.width = `${idealWidth}px`;
-      this[$renderer].canvasElement.style.height = `${idealHeight}px`;
-      this[$scene].setSize(idealWidth, idealHeight);
-      this[$needsRender]();
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      if (model.fieldOfViewAspect > aspect) {
+        const oldHeight = outputHeight;
+        outputHeight = Math.round(outputWidth / model.fieldOfViewAspect);
+        offsetY = (oldHeight - outputHeight) / 2;
+      } else {
+        const oldWidth = outputWidth;
+        outputWidth = Math.round(outputHeight * model.fieldOfViewAspect);
+        offsetX = (oldWidth - outputWidth) / 2;
+      }
     }
     const canvas = this[$displayCanvas];
+    const blobCanvas = document.createElement('canvas');
+    blobCanvas.width = outputWidth;
+    blobCanvas.height = outputHeight;
     try {
       return new Promise<Blob>(async (resolve, reject) => {
-        if ((canvas as any).msToBlob) {
+        const blobContext = blobCanvas.getContext('2d');
+        blobContext!.drawImage(
+            canvas,
+            offsetX,
+            offsetY,
+            outputWidth,
+            outputHeight,
+            0,
+            0,
+            outputWidth,
+            outputHeight);
+        if ((blobCanvas as any).msToBlob) {
           // NOTE: msToBlob only returns image/png
           // so ensure mimeType is not specified (defaults to image/png)
           // or is image/png, otherwise fallback to using toDataURL on IE.
           if (!mimeType || mimeType === 'image/png') {
-            return resolve((canvas as any).msToBlob());
+            return resolve((blobCanvas as any).msToBlob());
           }
         }
 
-        if (!canvas.toBlob) {
-          return resolve(
-              await dataUrlToBlob(canvas.toDataURL(mimeType, qualityArgument)));
+        if (!blobCanvas.toBlob) {
+          return resolve(await dataUrlToBlob(
+              blobCanvas.toDataURL(mimeType, qualityArgument)));
         }
 
-        canvas.toBlob((blob) => {
+        blobCanvas.toBlob((blob) => {
           if (!blob) {
             return reject(new Error('Unable to retrieve canvas blob'));
           }
