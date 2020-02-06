@@ -28,6 +28,8 @@ rules:
   indent: off
   max-len: off
   block-spacing: off
+  # Remove if we switch away from clang-format:
+  keyword-spacing: off
 
   "@typescript-eslint/explicit-member-accessibility": [error, {"accessibility": "no-public"}]
 

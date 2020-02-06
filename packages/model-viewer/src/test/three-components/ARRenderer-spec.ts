@@ -43,9 +43,8 @@ class MockXRFrame implements XRFrame {
     return {} as XRPose;
   }
 
-  getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
-    return {} as XRViewerPose
-  }
+  getViewerPose(_referenceSpace?: XRReferenceSpace):
+  XRViewerPose{return {} as XRViewerPose}
 
   getHitTestResults(_xrHitTestSource: XRHitTestSource) {
     return [];
@@ -71,7 +70,8 @@ suite('ARRenderer', () => {
         public renderState: XRRenderState = {baseLayer: {} as XRLayer} as
             XRRenderState;
 
-        public hitTestSources: Set<XRHitTestSource> = new Set<XRHitTestSource>();
+        public hitTestSources: Set<XRHitTestSource> =
+            new Set<XRHitTestSource>();
 
         updateRenderState(_object: any) {
         }
@@ -89,10 +89,9 @@ suite('ARRenderer', () => {
           return inputSources;
         }
 
-        async requestHitTestSource(_options: XRHitTestOptionsInit): Promise<XRHitTestSource> {
-          const result = {
-            cancel: () => {}
-          };
+        async requestHitTestSource(_options: XRHitTestOptionsInit):
+            Promise<XRHitTestSource> {
+          const result = {cancel: () => {}};
 
           this.hitTestSources.add(result);
 
