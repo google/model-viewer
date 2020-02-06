@@ -164,7 +164,10 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
-    suite('when losing the GL context', () => {
+    suite.skip('when losing the GL context', () => {
+      // We're skipping this test for now, as losing the context that was
+      // created with transferControlToOffscreen() causes the Chrome tab to
+      // crash.
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
@@ -177,7 +180,7 @@ suite('ModelViewerElementBase', () => {
         }
       });
 
-      test.skip('dispatches a related error event', async () => {
+      test('dispatches a related error event', async () => {
         const {threeRenderer} = Renderer.singleton;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
