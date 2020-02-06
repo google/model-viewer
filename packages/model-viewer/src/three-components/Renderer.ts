@@ -212,6 +212,8 @@ export class Renderer extends EventDispatcher {
       const maxWidth = Math.max(width, this.width);
       const maxHeight = Math.max(height, this.height);
       this.setRendererSize(maxWidth, maxHeight);
+      this.canvasElement.style.width = `${maxWidth}px`;
+      this.canvasElement.style.height = `${maxHeight}px`;
     }
   }
 
