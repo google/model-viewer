@@ -23,6 +23,7 @@ import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
 
 const $annotationRenderer = Symbol('annotationRenderer');
+const $annotationView = Symbol('annotationView');
 const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
@@ -121,6 +122,8 @@ export declare interface AnnotationInterface {
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
+    // NOTE: not sure how to define this to also accept Vector3 ~~ fumble
+    private[$annotationView] = new Map<string, string|number|any>();
     private[$annotationRenderer] = new CSS2DRenderer();
     private[$hotspotMap] = new Map<string, Hotspot>();
     private[$mutationCallback] = (mutations: Array<unknown>) => {
@@ -192,29 +195,44 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
-      delete this.view;
+      // force the annotation view to update
+      this[$annotationView].set('update', 1);
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      // check if camera position or field of view have changed (or an update is required)
-      const view = this[$scene].activeCamera.position.clone();
-      const fov = this[$scene].activeCamera.fov;
-      if (this.view && view.distanceTo(this.view) === 0 && this.fov === fov) return;
-      this.view = view;
-      this.fov = fov;
+      // NOTE: checks the current annotation view against camera for
+      // position / field-of-view updates (or alternatively a forced update)
+      // QUESTION: is this already implemented elsewhere?
+      const position = this[$annotationView].get('position');
+      if (!position
+        || this[$annotationView].get('update')
+        || this[$scene].activeCamera.position.distanceTo(position) !== 0
+        || this[$scene].camera.getEffectiveFOV() !== this[$annotationView].get('fov')) {
+        
+        // resets the current annotation view
+        this[$annotationView].set('update', 0);
+        this[$annotationView].set('position', this[$scene].camera.position.clone());
+        this[$annotationView].set('fov', this[$scene].camera.getEffectiveFOV());
 
-      this[$updateHotspots]();
-      this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+        this[$updateHotspots]();
+        this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+      }
     }
 
     [$onResize](e: {width: number, height: number}) {
       super[$onResize](e);
       this[$annotationRenderer].setSize(e.width, e.height);
-      delete this.view;
+      // force the annotation view to update
+      this[$annotationView].set('update', 1);
     }
 
+    /**
+     * Checks hotspot normals against the current camera target to
+     * detect occlusion: where a change has occured, triggers a
+     * bubbling 'hotspot-change' event on any slotted elements
+     */
     [$updateHotspots]() {
       const {children} = this[$scene].pivot;
       for (let i = 0, l = children.length; i < l; i++) {
@@ -222,19 +240,19 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (object instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
           view.sub(object.position);
-          const hidden = object.element.classList.contains('hide');
-          if (view.dot(object.normal) < 0) {
-            if (!hidden) {
+          const hide = view.dot(object.normal) < 0;
+          if (hide !== object.element.classList.contains('hide')) {
+            const slot = <HTMLSlotElement>object.element.firstElementChild;
+            const event = new CustomEvent('hotspot-change', {
+              bubbles: true,
+              detail: { hide },
+            });
+            if (hide) {
               object.element.classList.add('hide');
-              if (object.element.firstElementChild) {
-                object.element.firstElementChild.assignedNodes().forEach($el => ($el.dataset.occluded = 1));
-              }
+            } else {
+              object.element.classList.remove('hide');
             }
-          } else if (hidden) {
-            object.element.classList.remove('hide');
-            if (object.element.firstElementChild) {
-              object.element.firstElementChild.assignedNodes().forEach($el => ($el.dataset.occluded = 0));
-            }
+            slot.assignedNodes().forEach((node: Node) => node.dispatchEvent(event));
           }
         }
       }
@@ -259,7 +277,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].pivot.add(hotspot);
       }
-      delete this.view;
+      // force the annotation view to update
+      this[$annotationView].set('update', 1);
     }
 
     [$removeHotspot](node: Node) {
