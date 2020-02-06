@@ -130,6 +130,10 @@ const $modelGraftManipulator = Symbol('modelGraftManipulator');
  * scene graph execution context has been established.
  */
 export class ThreeDOMExecutionContext {
+  get worker() {
+    return this[$worker];
+  }
+
   protected[$worker]: Worker;
   protected[$workerInitializes]: Promise<MessagePort>;
   protected[$modelGraftManipulator]: ModelGraftManipulator|null = null;

@@ -113,7 +113,7 @@ export function defineModelKernel(
       this[$port].addEventListener('message', this[$messageEventHandler]);
       this[$port].start();
 
-      this[$model] = new Model(this, serialized);
+      this[$model] = this.deserialize('model', serialized);
     }
 
     /**

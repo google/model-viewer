@@ -46,15 +46,21 @@ export function defineModel(ThreeDOMElement: Constructor<ThreeDOMElement>):
     protected[$kernel]: ModelKernel;
     protected[$materials]: Readonly<Array<Material>> = Object.freeze([]);
 
-    constructor(kernel: ModelKernel, _serialized: SerializedModel) {
+    constructor(kernel: ModelKernel, serialized: SerializedModel) {
       super(kernel);
       this[$kernel] = kernel;
+
+      for (const material of serialized.materials) {
+        this[$kernel].deserialize('material', material);
+      }
     }
 
     /**
      * The set of Material elements in the graph, in sparse traversal order.
      * Note that this set will include any Materials that are not part of the
      * currently activate scene.
+     *
+     * TODO: This value needs to be sensitive to scene graph order
      */
     get materials() {
       return this[$kernel].getElementsByType('material');

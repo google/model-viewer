@@ -101,7 +101,6 @@ function initialize(
 
       globalPort.start();
 
-      console.log('Posting handshake response');
       // Notify the host execution context that the scene graph execution
       // is ready:
       globalPort.postMessage({type: ThreeDOMMessageType.CONTEXT_INITIALIZED});

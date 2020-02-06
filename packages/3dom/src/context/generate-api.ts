@@ -27,19 +27,11 @@ ${definePBRMetallicRoughness.toString()}
 
 var ThreeDOMElement = defineThreeDOMElement();
 var Model = defineModel(ThreeDOMElement);
-var Scene = defineScene(ThreeDOMElement);
-var Node = defineNode(ThreeDOMElement);
-var Mesh = defineMesh(ThreeDOMElement);
-var Primitive = definePrimitive(ThreeDOMElement);
 var Material = defineMaterial(ThreeDOMElement);
 var PBRMetallicRoughness = definePBRMetallicRoughness(ThreeDOMElement);
 
 var ModelKernel = defineModelKernel(
   Model,
-  Scene,
-  Node,
-  Mesh,
-  Primitive,
   Material,
   PBRMetallicRoughness
 );
@@ -48,9 +40,5 @@ var ModelKernel = defineModelKernel(
 // so that author code can use instanceof checks
 self.ThreeDOMElement = ThreeDOMElement;
 self.Model = Model;
-self.Scene = Scene;
-self.Node = Node;
-self.Mesh = Mesh;
-self.Primitive = Primitive;
 self.Material = Material;
 self.PBRMetallicRoughness = PBRMetallicRoughness;`;

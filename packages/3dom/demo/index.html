@@ -1,0 +1,195 @@
+<!--
+/* @license
+ * Copyright 2020 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <title>3DOM Demo</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+body,
+html {
+  margin: 0;
+  height: 100%;
+}
+
+#ui {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+}
+
+button {
+  font-size: 2em;
+  margin: 0 0.25em;
+}
+  </style>
+</head>
+<body>
+  <div id="container">
+  </div>
+  <div id="ui">
+    <button data-color="1,0,0,1">Red</button>
+    <button data-color="0,1,0,1">Green</button>
+    <button data-color="0,0,1,1">Blue</button>
+  </div>
+  <script type="3DOM">
+console.log('Hello, 3DOM!');
+
+self.addEventListener('model-change', () => {
+  console.log('Got a new model:', self.model);
+
+  const material = self.model.materials[0];
+
+  self.addEventListener('message', (event) => {
+    switch(event.data.action) {
+      case 'change-color':
+        console.log('Changing color to:', event.data.payload);
+        material.pbrMetallicRoughness.setBaseColorFactor(event.data.payload);
+        break;
+    }
+  });
+});
+  </script>
+
+  <script type="module">
+import { ModelGraft } from '../lib/facade/three-js/model-graft.js';
+import { ThreeDOMExecutionContext } from '../lib/context.js';
+
+import { Scene, sRGBEncoding, ACESFilmicToneMapping, UnsignedByteType, PMREMGenerator, PerspectiveCamera, WebGLRenderer } from '../node_modules/three/build/three.module.js';
+
+import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from '../node_modules/three/examples/jsm/loaders/RGBELoader.js';
+import { RoughnessMipmapper } from '../node_modules/three/examples/jsm/utils/RoughnessMipmapper.js';
+
+class ThreeDOMDemo {
+  constructor() {
+    this.container = document.querySelector('#container');
+
+    this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20);
+    this.camera.position.set(-1.8, 0.6, 2.7);
+    this.scene = new Scene();
+
+    this.renderer = new WebGLRenderer({ antialias: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.toneMapping = ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.8;
+    this.renderer.outputEncoding = sRGBEncoding;
+
+    this.container.appendChild(this.renderer.domElement);
+
+    this.pmremGenerator = new PMREMGenerator(this.renderer);
+    this.pmremGenerator.compileEquirectangularShader();
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.minDistance = 2;
+    this.controls.maxDistance = 10
+    this.controls.target.set(0, 1, 0);
+    this.controls.update();
+
+    this.textureLoader = new RGBELoader();
+    this.textureLoader.setDataType(UnsignedByteType)
+      .setPath('../shared-assets/environments/')
+      .load('lightroom_14b.hdr', (environmentTexture) => {
+        const environmentMap = this.pmremGenerator
+          .fromEquirectangular(environmentTexture).texture;
+
+        this.scene.environment = environmentMap;
+
+        environmentTexture.dispose();
+        this.pmremGenerator.dispose();
+      });
+
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader
+      .setPath('../shared-assets/models/')
+    this.gltfLoader.load('Astronaut.glb', (gltf) => {
+      const roughnessMipmapper = new RoughnessMipmapper(this.renderer);
+      gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          roughnessMipmapper.generateMipmaps(child.material);
+        }
+      });
+      roughnessMipmapper.dispose();
+
+      this.scene.add(gltf.scene);
+
+      this.activate3DOM(gltf);
+    });
+
+    window.addEventListener('resize', () => this.updateSize(), false);
+
+    this.render();
+  }
+
+  updateSize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  render() {
+    this.renderer.render(this.scene, this.camera);
+
+    requestAnimationFrame(() => {
+      this.render();
+    });
+  }
+
+  activate3DOM(gltf) {
+    const script = document.querySelector('script[type="3DOM"]');
+    const scriptText = script.textContent;
+
+    const context = new ThreeDOMExecutionContext();
+    const graft = new ModelGraft('../shared-assets/models/Astronaut.glb', gltf);
+
+    context.eval(scriptText);
+    context.changeModel(graft);
+
+    document.querySelector('#ui').addEventListener('click', (event) => {
+      const colorString = event.target.dataset.color;
+
+      if (!colorString) {
+        return;
+      }
+
+      const color = colorString.split(',')
+          .map(numberString => parseFloat(numberString));
+
+      // Forward interaction details to the <model-viewer> worklet:
+      context.worker.postMessage({
+        action: 'change-color',
+        payload: color
+      });
+    });
+  }
+}
+
+self.demo = new ThreeDOMDemo();
+  </script>
+</body>
+</html>

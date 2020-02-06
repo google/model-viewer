@@ -19,6 +19,7 @@
     "lib"
   ],
   "scripts": {
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
     "test:watch": "karma start",
@@ -36,6 +37,7 @@
     "3d"
   ],
   "devDependencies": {
+    "@google/model-viewer-shared-assets": "*",
     "@jsantell/event-target": "^1.1.2",
     "@open-wc/karma-esm": "^2.11.1",
     "@types/chai": "^4.2.7",
