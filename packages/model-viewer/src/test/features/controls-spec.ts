@@ -476,7 +476,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await rafPasses();
         });
 
-        test(
+        // TODO(elalish) This test is flaky on iOS and Safari.
+        test.skip(
             'has initial aria-label set to alt before interaction',
             async () => {
               const input: HTMLDivElement = element[$input];
