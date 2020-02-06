@@ -2,6 +2,7 @@ renderers/*
 node_modules/*
 shared-assets
 dist/*
+release/*
 lib/*
 **/*.sw*
 .DS_Store

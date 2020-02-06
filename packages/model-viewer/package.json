@@ -36,6 +36,7 @@
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
     "build": "tsc && rollup -c --environment NODE_ENV:production",
     "build:dev": "tsc && rollup -c --environment NODE_ENV:development",
+    "build:release": "mkdir -p release; cp LICENSE POLYFILLS.md README.md package-lock.json package.json screenshot.png release; cp -r dist release/dist; cp -r lib release/lib",
     "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js",
     "prepublishOnly": "npm run build && npm run create-legacy-bundles",
     "test": "npm run clean && npm run build && npm run wct-local-chrome",
