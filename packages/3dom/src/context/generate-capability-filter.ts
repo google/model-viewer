@@ -23,17 +23,23 @@ import {ThreeDOMCapability, ThreeDOMGlobalScope} from '../api.js';
 function filterMaterialProperties(this: ThreeDOMGlobalScope) {
   const errorMessage = 'Capability "material-properties" not allowed';
 
-  Object.defineProperty(this.PBRMetallicRoughness, 'setBaseColorFactor', {
-    value: () => Promise.reject(new Error(errorMessage)),
-    configurable: false,
-    writable: false
-  });
+  Object.defineProperty(
+      this.PBRMetallicRoughness.prototype, 'setBaseColorFactor', {
+        value: () => {
+          console.log('thorw!');
+          throw new Error(errorMessage);
+        },
+        configurable: false,
+        writable: false
+      });
 }
 
 /**
  * Given a 3DOM execution context, patch any methods, classes or other APIs
  * related to Web Messaging so that they throw or are otherwise rendered
  * impotent.
+ *
+ * TODO: We probably need to crawl up the prototype chain on this one
  */
 function filterMessaging(this: ThreeDOMGlobalScope) {
   const errorMessage = 'Capability "messaging" not allowed';
@@ -45,6 +51,7 @@ function filterMessaging(this: ThreeDOMGlobalScope) {
   Object.defineProperties(this, {
     postMessage: {value: rejectInvocation, configurable: false},
     MessageChannel: {value: rejectInvocation, configurable: false},
+    MessageEvent: {value: rejectInvocation, configurable: false},
     onmessage: {
       set() {
         rejectInvocation();
@@ -74,7 +81,7 @@ function filterFetch(this: ThreeDOMGlobalScope) {
   Object.defineProperties(this, {
     fetch: {
       value: () => {
-        return Promise.reject(new Error('Capability "fetch" not allowed'));
+        throw new Error('Capability "fetch" not allowed');
       },
       configurable: false
     }

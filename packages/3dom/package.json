@@ -12,22 +12,24 @@
     "node": ">=6.0.0"
   },
   "author": "DevXR constributors",
-  "main": "./lib/api.js",
-  "module": "./lib/api.js",
+  "main": "./lib/context.js",
+  "module": "./lib/context.js",
   "files": [
     "src",
     "lib"
   ],
   "scripts": {
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
+    "prepack": "rm $(find ./lib -name *-spec.* -o -name test-helpers.*) 2>/dev/null",
+    "build": "tsc",
+    "clean": "rm -rf ./lib",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "test:watch": "karma start",
-    "build": "tsc",
+    "watch:test": "karma start",
     "watch:tsc": "tsc -w",
-    "clean": "rm -rf ./lib",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /demo/ -c-1",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
-    "dev": "tsc && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:rollup' serve"
+    "dev": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:test -- --reporters dots' 'serve -- -s'"
   },
   "keywords": [
     "gltf",
@@ -38,11 +40,12 @@
   ],
   "devDependencies": {
     "@google/model-viewer-shared-assets": "*",
-    "@jsantell/event-target": "^1.1.2",
     "@open-wc/karma-esm": "^2.11.1",
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.5",
+    "@ungap/event-target": "^0.1.0",
     "chai": "^4.1.2",
+    "http-server": "^0.12.1",
     "karma": "^4.0.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -51,6 +54,7 @@
     "karma-sauce-launcher": "^2.0.2",
     "karma-sourcemap-loader": "^0.3.7",
     "mocha": "^5.2.0",
+    "npm-run-all": "^4.1.5",
     "polymer-build": "^3.1.1",
     "typescript": "^3.7.5"
   },

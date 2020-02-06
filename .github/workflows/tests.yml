@@ -1,13 +1,6 @@
 name: tests
 
 on: [push, pull_request]
-  # Only run on changes to 3dom package:
-  # push:
-  #   paths:
-  #   - 'packages/3dom/**/*'
-  # pull_request:
-  #   paths:
-  #   - 'packages/3dom/**/*'
 
 jobs:
   tests:
@@ -20,12 +13,12 @@ jobs:
         node-version: 12
 
     - name: NPM install
-      # ignore-scripts so that we skip postinstall, because postinstall runs
-      # bootstrap, and it's a little nicer to see that here as its own step
-      # when debugging.
-      run: npm ci --ignore-scripts
+      run: npm ci
 
-    - name: Lerna bootstrap
+    - name: Lint TypeScript sources
+      run: npm run lint
+
+    - name: Bootstrap packages
       run: npm run bootstrap
 
     - name: Build packages

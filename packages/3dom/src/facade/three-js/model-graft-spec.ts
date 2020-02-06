@@ -27,7 +27,7 @@ suite('facade/three-js/model-graft', () => {
         const object3D = new Object3D();
         const element = new ThreeDOMElement(graft, object3D);
 
-        expect(graft.getNodeByInternalId(element.internalID))
+        expect(graft.getElementByInternalId(element.internalID))
             .to.be.equal(element);
       });
     });

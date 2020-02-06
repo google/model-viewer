@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Scene} from 'three';
+import {EventDispatcher, Scene} from 'three';
 import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Material, Model, PBRMetallicRoughness, RGBA, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
@@ -114,3 +114,23 @@ export const createFakeGLTF = () => {
     userData: {}
   };
 };
+
+export type AnyEvent = Event|CustomEvent<unknown>|{[index: string]: string};
+export type PredicateFunction<T = void> = (value: T) => boolean;
+
+/**
+ * Adapted from ../../model-viewer/src/test/helpers.ts
+ */
+export const waitForEvent = <T extends AnyEvent = Event>(
+    target: EventTarget|EventDispatcher,
+    eventName: string,
+    predicate: PredicateFunction<T>|null = null): Promise<T> =>
+    new Promise((resolve) => {
+      function handler(event: AnyEvent) {
+        if (!predicate || predicate(event as T)) {
+          resolve(event as T);
+          target.removeEventListener(eventName, handler);
+        }
+      }
+      target.addEventListener(eventName, handler);
+    });

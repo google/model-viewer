@@ -25,7 +25,7 @@ import {ALLOWLISTED_GLOBALS} from './allowlist.js';
 function patchContext(context: {}, allowList: typeof ALLOWLISTED_GLOBALS) {
   // Crawl up the prototype chain until we get to EventTarget so that we
   // don't go overboard deleting fundamental properties of things:
-  while (context && context.constructor != EventTarget) {
+  while (context && context.constructor !== EventTarget) {
     Object.getOwnPropertyNames(context).forEach((property) => {
       // eslint-disable-next-line no-prototype-builtins
       if (allowList.hasOwnProperty(property) && allowList[property] === true) {

@@ -14,10 +14,6 @@
  */
 
 module.exports = function(config) {
-  const packages = config.packages ? config.packages.split(',') : [];
-  const fileEntries = [];
-  const defaultFileEntry = [];
-
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
   config.set({
     basePath: '',
@@ -27,12 +23,11 @@ module.exports = function(config) {
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
-      {
-        pattern: 'node_modules/@jsantell/event-target/dist/EventTarget.js',
-        watched: false
-      },
+      {pattern: 'node_modules/@ungap/event-target/min.js', watched: false},
       {pattern: 'lib/**/*-spec.js', watched: true, type: 'module'},
     ],
+    autoWatchBatchDelay: 1000,
+    restartOnFileChange: true,
 
     browserDisconnectTimeout: 300000,
     browserNoActivityTimeout: 360000,

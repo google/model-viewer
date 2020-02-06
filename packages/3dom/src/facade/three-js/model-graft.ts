@@ -19,7 +19,7 @@ import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
 const $model = Symbol('model');
-const $nodesByInternalId = Symbol('nodesByInternalId');
+const $elementsByInternalId = Symbol('elementsByInternalId');
 
 /**
  * ModelGraft
@@ -53,12 +53,13 @@ const $nodesByInternalId = Symbol('nodesByInternalId');
  * the host execution context counterpart to the ModelKernel in the scene graph
  * execution context.
  */
-export class ModelGraft {
+export class ModelGraft extends EventTarget {
   protected[$model]: Model;
 
-  readonly[$nodesByInternalId] = new Map<number, ThreeDOMElement>();
+  readonly[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
 
   constructor(modelUri: string, gltf: GLTF) {
+    super();
     this[$model] = new Model(this, modelUri, gltf);
   }
 
@@ -66,17 +67,31 @@ export class ModelGraft {
     return this[$model];
   }
 
-  getNodeByInternalId(id: number): ThreeDOMElement|null {
-    const node = this[$nodesByInternalId].get(id);
+  getElementByInternalId(id: number): ThreeDOMElement|null {
+    const element = this[$elementsByInternalId].get(id);
 
-    if (node == null) {
+    if (element == null) {
       return null;
     }
 
-    return node;
+    return element;
   }
 
-  adopt(node: ThreeDOMElement) {
-    this[$nodesByInternalId].set(node.internalID, node);
+  adopt(element: ThreeDOMElement) {
+    this[$elementsByInternalId].set(element.internalID, element);
+  }
+
+  mutate(id: number, property: string, value: unknown) {
+    // TODO: Manipulations probably need to be validated against
+    // allowed capabilities here. We already do this on the scene graph
+    // execution context side, but it would be safer to do it on both sides
+    const element = this.getElementByInternalId(id);
+
+    if (element != null && property in element) {
+      (element as unknown as {[index: string]: unknown})[property] = value;
+
+      this.dispatchEvent(
+          new CustomEvent('mutation', {detail: {element: element}}));
+    }
   }
 }

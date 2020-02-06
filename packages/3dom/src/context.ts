@@ -24,7 +24,6 @@ import {ThreeDOMMessageType} from './protocol.js';
 
 const $modelGraft = Symbol('modelGraft');
 const $port = Symbol('port');
-const $mutate = Symbol('mutate');
 
 const $messageEventHandler = Symbol('messageEventHandler');
 const $onMessageEvent = Symbol('onMessageEvent');
@@ -62,18 +61,8 @@ class ModelGraftManipulator {
     const {data} = event;
     if (data && data.type) {
       if (data.type === ThreeDOMMessageType.MUTATE) {
-        this[$mutate](data.id, data.property, data.value);
+        this[$modelGraft].mutate(data.id, data.property, data.value);
       }
-    }
-  }
-
-  [$mutate](id: number, property: string, value: unknown) {
-    // TODO: Manipulations probably need to be validated against
-    // allowed capabilities here. We already do this on the scene graph
-    // execution context side, but it would be safer to do it on both sides
-    const node = this[$modelGraft].getNodeByInternalId(id);
-    if (node != null && property in node) {
-      (node as unknown as {[index: string]: unknown})[property] = value;
     }
   }
 }
@@ -129,7 +118,7 @@ const $modelGraftManipulator = Symbol('modelGraftManipulator');
  * when it is created. The allowed capabilities cannot be changed after the
  * scene graph execution context has been established.
  */
-export class ThreeDOMExecutionContext {
+export class ThreeDOMExecutionContext extends EventTarget {
   get worker() {
     return this[$worker];
   }
@@ -139,6 +128,8 @@ export class ThreeDOMExecutionContext {
   protected[$modelGraftManipulator]: ModelGraftManipulator|null = null;
 
   constructor(capabilities: Array<ThreeDOMCapability>) {
+    super();
+
     const contextScriptSource = generateContextScriptSource(capabilities);
     const url = URL.createObjectURL(
         new Blob([contextScriptSource], {type: 'text/javascript'}));
@@ -150,6 +141,7 @@ export class ThreeDOMExecutionContext {
         if (event.data &&
             event.data.type === ThreeDOMMessageType.CONTEXT_INITIALIZED) {
           port1.removeEventListener('message', onMessageEvent);
+
           resolve(port1);
         }
       };
