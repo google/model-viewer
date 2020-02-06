@@ -41,12 +41,23 @@ function createScene(): ModelScene&TestScene {
   });
   scene.visible = true;
 
-  // scene.renderCount = 0;
-  // const drawImage = scene.context.drawImage;
-  // scene.context.drawImage = (...args: any[]) => {
-  //   scene.renderCount!++;
-  //   (drawImage as any).call(scene.context, ...args);
-  // };
+  scene.renderCount = 0;
+  const {context} = scene;
+  if (context instanceof CanvasRenderingContext2D) {
+    const drawImage = context.drawImage;
+    context.drawImage = (...args: any[]) => {
+      scene.renderCount!++;
+      (drawImage as any).call(context, ...args);
+    };
+  } else if (context instanceof ImageBitmapRenderingContext) {
+    const transferFromImageBitmap = context.transferFromImageBitmap;
+    context.transferFromImageBitmap = (...args: any[]) => {
+      scene.renderCount!++;
+      (transferFromImageBitmap as any).call(context, ...args);
+    }
+  } else {
+    expect(false).to.be.ok;
+  }
 
   element[$renderer].registerScene(scene);
 
@@ -76,44 +87,44 @@ suite('Renderer', () => {
       renderer.unregisterScene(otherScene);
     });
 
-    // test('renders only dirty scenes', async function() {
-    //   renderer.render(performance.now());
-    //   expect(scene.renderCount).to.be.equal(0);
-    //   expect(otherScene.renderCount).to.be.equal(0);
+    test('renders only dirty scenes', async function() {
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(0);
+      expect(otherScene.renderCount).to.be.equal(0);
 
-    //   scene.isDirty = true;
-    //   renderer.render(performance.now());
-    //   expect(scene.renderCount).to.be.equal(1);
-    //   expect(otherScene.renderCount).to.be.equal(0);
-    // });
+      scene.isDirty = true;
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(1);
+      expect(otherScene.renderCount).to.be.equal(0);
+    });
 
-    // test('marks scenes no longer dirty after rendering', async function() {
-    //   scene.isDirty = true;
+    test('marks scenes no longer dirty after rendering', async function() {
+      scene.isDirty = true;
 
-    //   renderer.render(performance.now());
+      renderer.render(performance.now());
 
-    //   expect(scene.renderCount).to.be.equal(1);
-    //   expect(!scene.isDirty).to.be.ok;
+      expect(scene.renderCount).to.be.equal(1);
+      expect(!scene.isDirty).to.be.ok;
 
-    //   renderer.render(performance.now());
-    //   expect(scene.renderCount).to.be.equal(1);
-    //   expect(!scene.isDirty).to.be.ok;
-    // });
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(1);
+      expect(!scene.isDirty).to.be.ok;
+    });
 
-    // test('does not render scenes marked as not visible', async function() {
-    //   scene.visible = false;
-    //   scene.isDirty = true;
+    test('does not render scenes marked as not visible', async function() {
+      scene.visible = false;
+      scene.isDirty = true;
 
-    //   renderer.render(performance.now());
-    //   expect(scene.renderCount).to.be.equal(0);
-    //   expect(scene.isDirty).to.be.ok;
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(0);
+      expect(scene.isDirty).to.be.ok;
 
-    //   scene.visible = true;
+      scene.visible = true;
 
-    //   renderer.render(performance.now());
-    //   expect(scene.renderCount).to.be.equal(1);
-    //   expect(!scene.isDirty).to.be.ok;
-    // });
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(1);
+      expect(!scene.isDirty).to.be.ok;
+    });
 
     suite('when resizing', () => {
       let originalDpr: number;

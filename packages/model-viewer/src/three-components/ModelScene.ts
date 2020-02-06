@@ -140,14 +140,11 @@ export class ModelScene extends Scene {
       this.width = Math.max(clipWidth, 1);
       this.height = Math.max(clipHeight, 1);
 
-      const clipRect = `rect(0px,${this.width}px,${this.height}px,0px)`;
-      this.canvas.style.clip = clipRect;
       this.aspect = this.width / this.height;
       this.frameModel();
 
       const renderer = this.element[$renderer];
       renderer.expandTo(this.width, this.height);
-      renderer.canvasElement.style.clip = clipRect;
       const {width, height} = renderer;
       this.canvas.width = width;
       this.canvas.height = height;
