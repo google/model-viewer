@@ -8,6 +8,7 @@
     "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
     "clean": "./node_modules/.bin/lerna run clean --stream",
     "build": "./node_modules/.bin/lerna run build --stream",
     "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
