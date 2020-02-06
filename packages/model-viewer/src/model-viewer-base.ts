@@ -342,7 +342,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       const idealHeight = model.fieldOfViewAspect > aspect ?
           Math.round(width / model.fieldOfViewAspect) :
           height;
-      this[$updateSize]({width: idealWidth, height: idealHeight});
+      this[$renderer].setRendererSize(idealWidth, idealHeight);
+      this[$renderer].canvasElement.style.width = `${idealWidth}px`;
+      this[$renderer].canvasElement.style.height = `${idealHeight}px`;
+      this[$scene].setSize(idealWidth, idealHeight);
+      this[$needsRender]();
       await new Promise(resolve => requestAnimationFrame(resolve));
     }
     const canvas = this[$displayCanvas];

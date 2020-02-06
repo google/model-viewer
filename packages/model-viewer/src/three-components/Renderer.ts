@@ -227,6 +227,11 @@ export class Renderer extends EventDispatcher {
 
     if (dpr !== this.threeRenderer.getPixelRatio()) {
       this.threeRenderer.setPixelRatio(dpr);
+      this.canvasElement.style.width = `${this.width}px`;
+      this.canvasElement.style.height = `${this.height}px`;
+      for (let scene of this.scenes) {
+        scene.isDirty = true;
+      }
     }
 
     for (let scene of this.scenes) {
