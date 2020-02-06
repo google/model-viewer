@@ -272,19 +272,17 @@ export class Renderer extends EventDispatcher {
           contextBitmap.transferFromImageBitmap(bitmap);
         } else {
           const context2D = context as CanvasRenderingContext2D;
-          const widthDPR = width * dpr;
-          const heightDPR = height * dpr;
-          context2D.clearRect(0, 0, widthDPR, heightDPR);
+          context2D.clearRect(0, 0, width, height);
           context2D.drawImage(
               this.threeRenderer.domElement,
               0,
               0,
-              widthDPR,
-              heightDPR,
+              width * dpr,
+              height * dpr,
               0,
               0,
-              widthDPR,
-              heightDPR);
+              width,
+              height);
         }
       }
 
