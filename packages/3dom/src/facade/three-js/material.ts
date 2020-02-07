@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial} from 'three/src/materials/Material.js';
+import {Material as ThreeMaterial} from 'three';
 
 import {SerializedMaterial} from '../../protocol.js';
 import {ModelGraft} from './model-graft.js';

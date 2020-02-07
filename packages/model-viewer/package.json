@@ -106,8 +106,9 @@
     "web-component-tester": "^6.9.2"
   },
   "dependencies": {
+    "@google/3dom": "0.0.1-alpha.1",
     "lit-element": "^2.2.0",
-    "three": "^0.113.1",
+    "three": "^0.113.2",
     "@types/resize-observer-browser": "^0.1.2",
     "@types/webgl2": "^0.0.5"
   },

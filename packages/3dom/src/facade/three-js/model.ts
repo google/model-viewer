@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+import {Material as ThreeMaterial} from 'three';
+import {Mesh as ThreeMesh} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {Material as ThreeMaterial} from 'three/src/materials/Material.js';
-import {Mesh as ThreeMesh} from 'three/src/objects/Mesh.js';
 
 import {SerializedModel} from '../../protocol.js';
 

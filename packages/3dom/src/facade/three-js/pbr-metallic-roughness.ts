@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {Material} from 'three/src/materials/Material.js';
-import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
+import {Material} from 'three';
+import {MeshStandardMaterial} from 'three';
 
 import {RGBA} from '../../api.js';
 import {SerializedPBRMetallicRoughness} from '../../protocol.js';

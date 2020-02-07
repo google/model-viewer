@@ -14,7 +14,7 @@
  */
 
 import {Material, Object3D} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';

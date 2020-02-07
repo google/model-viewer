@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';

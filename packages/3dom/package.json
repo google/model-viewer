@@ -1,6 +1,6 @@
 {
   "name": "@google/3dom",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.1",
   "description": "An isolated scene graph facade for web-based 3D libraries",
   "repository": "https://github.com/google/model-viewer",
   "bugs": {
@@ -59,7 +59,7 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "three": "^0.113.1"
+    "three": "^0.113.2"
   },
   "publishConfig": {
     "access": "public"

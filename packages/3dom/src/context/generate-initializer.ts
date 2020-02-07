@@ -66,6 +66,9 @@ function initialize(
 
               if (currentKernel != null) {
                 currentKernel.deactivate();
+              } else if (serialized == null) {
+                // Do not proceed if transitioning from null to null
+                break;
               }
 
               if (serialized != null) {
@@ -78,6 +81,7 @@ function initialize(
 
               const modelChangeEvent: Partial<ModelChangeEvent> =
                   new Event('model-change');
+
               modelChangeEvent.previousModel = previousModel;
               modelChangeEvent.model = this.model;
 
