@@ -56,7 +56,8 @@ function createScene(): ModelScene&TestScene {
       (transferFromImageBitmap as any).call(context, ...args);
     }
   } else {
-    expect(false).to.be.ok;
+    throw new Error(
+        'context is neither a CanvasRenderingContext2D nor an ImageBitmapRenderingContext.');
   }
 
   element[$renderer].registerScene(scene);
