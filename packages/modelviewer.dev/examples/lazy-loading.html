@@ -64,16 +64,6 @@
       transform: translate3d(-50%, -50%, 0);
       z-index: 100;
     }
-    #lazy-load-poster {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      background-image: url(../assets/poster-damagedhelmet.png);
-      background-size: cover;
-      background-position: 50% 50%;
-    }
   </style>
 </head>
 
@@ -128,8 +118,21 @@
         </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
+<style>
+  #lazy-load-poster {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: url(../assets/poster-damagedhelmet.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+</style>
 <!-- use unique asset to ensure lazy loading -->
-<model-viewer id="lazy-load" camera-controls reveal="interaction" poster="../assets/poster-damagedhelmet.png" src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
+<model-viewer id="lazy-load" camera-controls reveal="interaction" src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
   <div id="lazy-load-poster" slot="poster"></div>
   <div id="button-load" slot="poster">Load 3D Model</div>
 </model-viewer>
