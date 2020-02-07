@@ -14,7 +14,8 @@
  */
 
 import {ThreeDOMExecutionContext} from './context.js';
-import {waitForEvent} from './test-helpers.js';
+import {ModelGraft} from './facade/three-js/model-graft.js';
+import {createFakeGLTF, waitForEvent} from './test-helpers.js';
 
 suite('context', () => {
   suite('ThreeDOMExecutionContext', () => {
@@ -37,6 +38,22 @@ suite('context', () => {
           context.terminate();
         }
       }
+    });
+
+    suite('when the model changes', () => {
+      test('dispatches an event in the worker', async () => {
+        const modelGraft = new ModelGraft('', createFakeGLTF());
+        const context = new ThreeDOMExecutionContext(['messaging']);
+        const workerConfirmsEvent = waitForEvent(context.worker, 'message');
+
+        context.eval(`
+self.addEventListener('model-change', function() {
+  self.postMessage('model-change-confirmed');
+});`);
+        context.changeModel(modelGraft);
+
+        await workerConfirmsEvent;
+      });
     });
 
     suite('capabilities', () => {
