@@ -119,9 +119,38 @@ export function downloadPoster() {
   a.click();
 }
 
+export function addHotspot() {
+  viewer.addEventListener('click', onClick);
+}
+
+export function removeHotspot() {
+}
+
+let hotspotCounter = 0;
+
+function onClick(event: MouseEvent) {
+  const rect = viewer.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const hitResult = viewer.getHitResult(x, y);
+  if (hitResult.position === '') {
+    console.log('no hit result: mouse = ', x, ', ', y);
+    return;
+  }
+  const hotspot = document.createElement('button');
+  hotspot.slot = `hotspot-${hotspotCounter++}`;
+  hotspot.classList.add('hotspot');
+  hotspot.dataset.position = hitResult.position;
+  hotspot.dataset.normal = hitResult.normal;
+  viewer.appendChild(hotspot);
+  viewer.removeEventListener('click', onClick);
+}
+
 (self as any).createPoster = createPoster;
 (self as any).reloadScene = reloadScene;
 (self as any).downloadPoster = downloadPoster;
+(self as any).addHotspot = addHotspot;
+(self as any).removeHotspot = removeHotspot;
 
 function load(fileMap: Map<string, File>) {
   let rootPath: string;

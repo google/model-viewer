@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
+import {Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
@@ -27,8 +27,11 @@ const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
+const $pixelPosition = Symbol('pixelPosition')
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
+
+const raycaster = new Raycaster();
 
 /**
  * Hotspots are configured by slot name, and this name must begin with "hotspot"
@@ -40,6 +43,11 @@ interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
+}
+
+interface HitResult {
+  position: string;
+  normal: string;
 }
 
 /**
@@ -109,6 +117,7 @@ export class Hotspot extends CSS2DObject {
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
+  getHitResult(pixelX: number, pixelY: number): HitResult
 }
 
 /**
@@ -139,6 +148,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
+
+    private[$pixelPosition] = new Vector2();
 
     constructor(...args: Array<any>) {
       super(...args);
@@ -192,6 +203,25 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
+    }
+
+    getHitResult(pixelX: number, pixelY: number): HitResult {
+      const {width, height} = this[$scene];
+      this[$pixelPosition]
+          .set(pixelX / width, pixelY / height)
+          .multiplyScalar(2)
+          .subScalar(1);
+      this[$pixelPosition].y *= -1;
+      raycaster.setFromCamera(this[$pixelPosition], this[$scene].getCamera());
+      const hits = raycaster.intersectObject(this[$scene], true);
+      if (hits.length === 0) {
+        return {position: '', normal: ''};
+      }
+      const hit = hits[0];
+      const {x, y, z} = hit.point;
+      const hitPosition = `${x}m ${y}m ${z}m`;
+      const hitNormal = '0 0 1';
+      return {position: hitPosition, normal: hitNormal};
     }
 
     [$tick](time: number, delta: number) {
