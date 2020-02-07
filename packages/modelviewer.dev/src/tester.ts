@@ -37,8 +37,18 @@ dropControl.on('drop', ({files}: any) => load(files));
             if (useSkybox.checked) {
               viewer.skyboxImage = viewer.environmentImage;
             }
+            if (property === 'src') {
+              resetModel();
+            }
           });
     });
+
+function resetModel() {
+  viewer.reveal = 'auto';
+  viewer.dismissPoster();
+  downloadButton.disabled = true;
+  displayButton.disabled = true;
+}
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
 useSkybox.addEventListener('change', (_event) => {
@@ -144,7 +154,7 @@ function load(fileMap: Map<string, File>) {
       const fileURL =
           typeof file === 'string' ? file : URL.createObjectURL(file);
       viewer.src = fileURL;
-      viewer.poster = null;
+      resetModel();
     }
   });
 

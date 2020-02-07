@@ -315,7 +315,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('poster') && this.poster != null) {
         this[$defaultPosterElement].style.backgroundImage =
-            this.poster == null ? '' : `url(${this.poster})`;
+            `url(${this.poster})`;
       }
 
       if (changedProperties.has('src')) {
