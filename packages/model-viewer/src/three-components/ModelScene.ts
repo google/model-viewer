@@ -135,19 +135,18 @@ export class ModelScene extends Scene {
    * Receives the size of the 2D canvas element to make according
    * adjustments in the scene.
    */
-  setSize(clipWidth: number, clipHeight: number) {
-    if (clipWidth !== this.width || clipHeight !== this.height) {
-      this.width = Math.max(clipWidth, 1);
-      this.height = Math.max(clipHeight, 1);
+  setSize(width: number, height: number) {
+    if (width !== this.width || height !== this.height) {
+      this.width = Math.max(width, 1);
+      this.height = Math.max(height, 1);
 
       this.aspect = this.width / this.height;
       this.frameModel();
 
       const renderer = this.element[$renderer];
       renderer.expandTo(this.width, this.height);
-      const {width, height} = renderer;
-      this.canvas.width = width;
-      this.canvas.height = height;
+      this.canvas.width = renderer.width;
+      this.canvas.height = renderer.height;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the

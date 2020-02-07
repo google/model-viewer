@@ -174,7 +174,7 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  get onlyOneScene(): boolean {
+  get hasOnlyOneScene(): boolean {
     return this.scenes.size === 1;
   }
 
@@ -207,6 +207,10 @@ export class Renderer extends EventDispatcher {
     return this[$arRenderer] != null && this[$arRenderer].isPresenting;
   }
 
+  /**
+   * Expands the size of the renderer to the max of its current size and the
+   * incoming size.
+   */
   expandTo(width: number, height: number) {
     if (width > this.width || height > this.height) {
       const maxWidth = Math.max(width, this.width);
@@ -229,12 +233,12 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setPixelRatio(dpr);
       this.canvasElement.style.width = `${this.width}px`;
       this.canvasElement.style.height = `${this.height}px`;
-      for (let scene of this.scenes) {
+      for (const scene of this.scenes) {
         scene.isDirty = true;
       }
     }
 
-    for (let scene of this.scenes) {
+    for (const scene of this.scenes) {
       const {element, width, height, context} = scene;
       element[$tick](t, delta);
 
@@ -264,7 +268,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(0, this.height - height, width, height);
       this.threeRenderer.render(scene, camera);
 
-      if (!this.onlyOneScene) {
+      if (!this.hasOnlyOneScene) {
         if (USE_OFFSCREEN_CANVAS) {
           const contextBitmap = context as ImageBitmapRenderingContext;
           const bitmap =

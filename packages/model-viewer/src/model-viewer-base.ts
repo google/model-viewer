@@ -31,6 +31,9 @@ const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
+const blobCanvas = document.createElement('canvas');
+let blobContext: CanvasRenderingContext2D|null = null;
+
 const $selectCanvas = Symbol('selectCanvas');
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
@@ -334,6 +337,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const mimeType = options ? options.mimeType : undefined;
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
+
     const {width, height, model, aspect} = this[$scene];
     const dpr = resolveDpr();
     let outputWidth = width * dpr;
@@ -351,15 +355,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
         offsetX = (oldWidth - outputWidth) / 2;
       }
     }
-    const canvas = this[$displayCanvas];
-    const blobCanvas = document.createElement('canvas');
     blobCanvas.width = outputWidth;
     blobCanvas.height = outputHeight;
     try {
       return new Promise<Blob>(async (resolve, reject) => {
-        const blobContext = blobCanvas.getContext('2d');
+        if (blobContext == null) {
+          blobContext = blobCanvas.getContext('2d');
+        }
         blobContext!.drawImage(
-            canvas,
+            this[$displayCanvas],
             offsetX,
             offsetY,
             outputWidth,
@@ -414,7 +418,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$selectCanvas]() {
-    if (this[$renderer].onlyOneScene) {
+    if (this[$renderer].hasOnlyOneScene) {
       this[$input].appendChild(this[$renderer].canvasElement);
       this[$canvas].classList.remove('show');
     } else {
@@ -423,7 +427,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$displayCanvas]() {
-    return this[$renderer].onlyOneScene ? this[$renderer].canvasElement :
+    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
                                           this[$canvas];
   }
 
