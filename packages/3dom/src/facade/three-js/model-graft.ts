@@ -82,7 +82,7 @@ export class ModelGraft extends EventTarget {
   }
 
   mutate(id: number, property: string, value: unknown) {
-    // TODO: Manipulations probably need to be validated against
+    // TODO(#1005): Manipulations probably need to be validated against
     // allowed capabilities here. We already do this on the scene graph
     // execution context side, but it would be safer to do it on both sides
     const element = this.getElementByInternalId(id);

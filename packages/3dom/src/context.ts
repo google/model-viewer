@@ -71,7 +71,7 @@ class ModelGraftManipulator {
 const ALL_CAPABILITIES: Readonly<Array<ThreeDOMCapability>> =
     Object.freeze(['messaging', 'material-properties', 'fetch']);
 
-// TODO: Export an abstract interface for ModelGraft someday when we
+// TODO(#1004): Export an abstract interface for ModelGraft someday when we
 // want to support multiple rendering backends
 export type AnyModelGraft = ThreeJSModelGraft;
 

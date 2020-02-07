@@ -131,8 +131,7 @@ export function defineModelKernel(
      * successfully applied to the backing scene graph, and rejects if the
      * mutation failed or is otherwise not allowed.
      *
-     * TODO: How to enforce allowed mutations?
-     * TODO: How to validate values?
+     * TODO(#1006): How to validate values?
      */
     async mutate(element: ThreeDOMElement, property: string, value: unknown):
         Promise<void> {
@@ -145,7 +144,7 @@ export function defineModelKernel(
       return new Promise((resolve, _reject) => {
         this[$port].postMessage(
             {type: ThreeDOMMessageType.MUTATE, id, property, value});
-        // TODO: Actually wait for confirmation from host context
+        // TODO(#1007): Actually wait for confirmation from host context
         resolve();
       });
     }
@@ -153,8 +152,6 @@ export function defineModelKernel(
     /**
      * Deserializes a JSON representation of a scene graph element into a live
      * element that is backed by this ModelKernel.
-     *
-     * TODO: Update Model arrays for the given element type if needed
      */
     deserialize<T extends keyof ThreeDOMElementMap>(
         type: T, serialized: SerializedElementMap[T]): ThreeDOMElementMap[T] {
@@ -210,11 +207,8 @@ export function defineModelKernel(
       this[$port].removeEventListener('message', this[$messageEventHandler]);
     }
 
-    /**
-     * TODO: Handle future messages from the host execution context
-     */
     protected[$onMessageEvent](_event: MessageEvent) {
-      // TODO
+      // TODO(#1006): Handle future messages from the host execution context
     }
   }
 

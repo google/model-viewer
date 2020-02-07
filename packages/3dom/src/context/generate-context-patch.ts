@@ -17,7 +17,7 @@ import {ALLOWLISTED_GLOBALS} from './allowlist.js';
 
 /**
  * Adapted from WorkerDOM
- * TODO: The context could also be DedicatedWorkerGlobalScope, but the
+ * NOTE: The context could also be DedicatedWorkerGlobalScope, but the
  * TypeScript WebWorker lib seems to conflict with the dom lib
  *
  * @see https://github.com/ampproject/worker-dom/blob/master/src/worker-thread/index.amp.ts

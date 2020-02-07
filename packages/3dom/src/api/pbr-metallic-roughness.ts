@@ -70,13 +70,8 @@ export function definePBRMetallicRoughness(
      * @see ../api.ts
      */
     async setBaseColorFactor(color: RGBA) {
-      try {
-        await this[$kernel].mutate(this, 'baseColorFactor', color);
-        this[$baseColorFactor] = Object.freeze(color) as RGBA;
-      } catch (error) {
-        // Ignored...
-        // TODO: Don't ignore this?
-      }
+      await this[$kernel].mutate(this, 'baseColorFactor', color);
+      this[$baseColorFactor] = Object.freeze(color) as RGBA;
     }
   }
 

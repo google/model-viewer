@@ -72,7 +72,7 @@ export class Model extends ThreeDOMElement {
    * are listed in the order they appear during pre-order, depth-first traveral
    * of the scene graph.
    *
-   * TODO: How do we handle non-active scenes?
+   * TODO(#1003): How do we handle non-active scenes?
    */
   get materials() {
     return this[$materials];

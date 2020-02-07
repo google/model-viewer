@@ -38,7 +38,7 @@ function filterMaterialProperties(this: ThreeDOMGlobalScope) {
  * related to Web Messaging so that they throw or are otherwise rendered
  * impotent.
  *
- * TODO: We probably need to crawl up the prototype chain on this one
+ * TODO(#1001): We probably need to crawl up the prototype chain on this one
  */
 function filterMessaging(this: ThreeDOMGlobalScope) {
   const errorMessage = 'Capability "messaging" not allowed';

@@ -60,7 +60,7 @@ export function defineModel(ThreeDOMElement: Constructor<ThreeDOMElement>):
      * Note that this set will include any Materials that are not part of the
      * currently activate scene.
      *
-     * TODO: This value needs to be sensitive to scene graph order
+     * TODO(#1002): This value needs to be sensitive to scene graph order
      */
     get materials() {
       return this[$kernel].getElementsByType('material');
