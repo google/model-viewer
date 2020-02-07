@@ -55,7 +55,10 @@ suite('context/generate-context-patch', () => {
       test('deletes all globals by default', () => {
         const implementationString = generateContextPatch({});
         invokeInFakeContext(implementationString, fakeGlobal);
-        expect(fakeGlobal).to.be.deep.equal(EventTarget.prototype);
+        expect(fakeGlobal.foo).to.be.not.ok;
+        expect(fakeGlobal.bar).to.be.not.ok;
+        expect(fakeGlobal.baz).to.be.not.ok;
+        expect(fakeGlobal.addEventListener).to.be.ok;
       });
 
       test('retains explicitly allowed globals', () => {
