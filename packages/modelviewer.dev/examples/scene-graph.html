@@ -41,22 +41,8 @@
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-</head>
-<body>
 
-  <div class="sample">
-    <div id="demo-container-1" class="demo"></div>
-    <div class="content">
-      <div class="wrapper">
-        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
-        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph using a special kind of &lt;script&gt; tag</h4>
-        <div class="heading">
-          <h2 class="demo-title">Scene Graph Worklet</h2>
-          <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
-        </div>
-        <example-snippet stamp-to="demo-container-1" highlight-as="html">
-          <template>
-<style>
+  <style>
 #controls {
   position: absolute;
   display: flex;
@@ -73,7 +59,23 @@ button {
   font-size: 2em;
   margin: 0 0.25em;
 }
-</style>
+  </style>
+</head>
+<body>
+
+  <div class="sample">
+    <div id="demo-container-1" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph using a special kind of &lt;script&gt; tag</h4>
+        <div class="heading">
+          <h2 class="demo-title">Scene Graph Worklet</h2>
+          <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
+        </div>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <template>
+
 <model-viewer id="astronaut" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <script type="experimental-scene-graph-worklet" allow="messaging; material-properties">
 self.addEventListener('model-change', (event) => {

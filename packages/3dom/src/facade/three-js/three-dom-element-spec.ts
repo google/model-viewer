@@ -29,5 +29,27 @@ suite('facade/three-js/three-dom-element', () => {
       const element = new ThreeDOMElement(graft, object3D);
       expect(element.ownerModel).to.be.equal(graft.model);
     });
+
+    suite('names', () => {
+      test('ignores a Three.js-generated name', () => {
+        const graft = new ModelGraft('', createFakeGLTF());
+        const object3D = new Object3D();
+
+        object3D.name = 'generated';
+
+        const element = new ThreeDOMElement(graft, object3D);
+        expect(element.name).to.be.equal(undefined);
+      });
+
+      test('expresses a name stored in userData', () => {
+        const graft = new ModelGraft('', createFakeGLTF());
+        const object3D = new Object3D();
+
+        object3D.userData.name = 'original';
+
+        const element = new ThreeDOMElement(graft, object3D);
+        expect(element.name).to.be.equal('original');
+      });
+    });
   });
 });

@@ -24,6 +24,7 @@ module.exports = function(config) {
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
       {pattern: 'node_modules/@ungap/event-target/min.js', watched: false},
+      {pattern: 'shared-assets/models/Astronaut.glb', included: false},
       {pattern: 'lib/**/*-spec.js', watched: true, type: 'module'},
     ],
     autoWatchBatchDelay: 1000,
@@ -49,6 +50,8 @@ module.exports = function(config) {
     },
 
     reporters: ['mocha'],
+
+    mochaReporter: {output: 'autowatch'},
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
@@ -113,7 +116,6 @@ module.exports = function(config) {
       browserDisconnectTolerance: 1,
       reporters: ['saucelabs', 'mocha'],
 
-      // TODO(aomarks) Update the browser versions here.
       customLaunchers: sauceLaunchers,
       browsers: [...config.browsers, ...Object.keys(sauceLaunchers)],
     });

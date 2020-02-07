@@ -14,6 +14,12 @@
  */
 
 /**
+ * IMPORTANT NOTE: 3DOM is an experimental / radioactive API. It is very likely
+ * to change rapidly over time while we iterate on the design. Please try it out
+ * but also keep in mind that things might break without much notice!
+ */
+
+/**
  * The set of strings representing all potential capabilities that a 3DOM script
  * may have access to. Possible capabilities include:
  *

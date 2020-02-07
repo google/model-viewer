@@ -79,7 +79,7 @@ export function defineModelKernel(
   /**
    * A ModelKernel is the core business logic implementation for a distinct
    * Model that has been exposed to a script execution context. The ModelKernel
-   * is an internel detail, and should never be explicitly exposed to users of
+   * is an internal detail, and should never be explicitly exposed to users of
    * a Model.
    *
    * The ModelKernel primarily handles deserializing scene graph elements, and

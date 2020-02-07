@@ -26,7 +26,6 @@ function filterMaterialProperties(this: ThreeDOMGlobalScope) {
   Object.defineProperty(
       this.PBRMetallicRoughness.prototype, 'setBaseColorFactor', {
         value: () => {
-          console.log('thorw!');
           throw new Error(errorMessage);
         },
         configurable: false,

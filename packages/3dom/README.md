@@ -10,7 +10,7 @@ this goal, it uses a facade pattern that can be adapted for different backing
 APIs. Currently, only Three.js is has an implementation, but we hope to include
 more facades in the future.
 
-Although 3DOM was designed to support `<mnodel-viewer>`, you can use 3DOM with
+Although 3DOM was designed to support `<model-viewer>`, you can use 3DOM with
 any Three.js scene.
 
 ## Implementation example

@@ -21,21 +21,26 @@ import {RGBA} from './api.js';
  * all included in the ThreeDOMMessageType map.
  */
 export const ThreeDOMMessageType = {
+
+  // === Host -> Scene Graph ===
+
   // Used when the host execution context and scene graph execution context
   // are negotiating a connection
   HANDSHAKE: 1,
 
-  // Notification sent to the host execution context to indicate that the
-  // scene graph execution context has finished initializing
-  CONTEXT_INITIALIZED: 2,
-
   // A message that indicates that a custom script is meant to be imported
   // into the scene graph execution context
-  IMPORT_SCRIPT: 3,
+  IMPORT_SCRIPT: 2,
 
   // A notification from the host execution context that the main Model has
   // changed, including the sparse, serialized scene graph of the new Model
-  MODEL_CHANGED: 4,
+  MODEL_CHANGED: 3,
+
+  // === Scene Graph => Host ===
+
+  // Notification sent to the host execution context to indicate that the
+  // scene graph execution context has finished initializing
+  CONTEXT_INITIALIZED: 4,
 
   // A request from the scene graph execution context to mutate some detail
   // of the backing host scene graph

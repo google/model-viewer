@@ -29,7 +29,7 @@
     "watch:tsc": "tsc -w",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /demo/ -c-1",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
-    "dev": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:test -- --reporters dots' 'serve -- -s'"
+    "dev": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:test' 'serve -- -s'"
   },
   "keywords": [
     "gltf",

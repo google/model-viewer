@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {BufferGeometry} from 'three/src/core/BufferGeometry.js';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Color} from 'three/src/math/Color.js';
@@ -21,6 +22,8 @@ import {Mesh} from 'three/src/objects/Mesh.js';
 import {ThreeDOMExecutionContext} from './context.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
 import {createFakeGLTF, waitForEvent} from './test-helpers.js';
+
+const ASTRONAUT_GLB_URL = './base/shared-assets/models/Astronaut.glb';
 
 suite('end-to-end', () => {
   test('can operate on a scene graph via a custom script in a worker', async () => {
@@ -36,6 +39,28 @@ suite('end-to-end', () => {
         new ThreeDOMExecutionContext(['material-properties']);
     const graft = new ModelGraft('', gltf);
 
+    executionContext.changeModel(graft);
+
+    executionContext.eval(
+        'model.materials[0].pbrMetallicRoughness.setBaseColorFactor([0, 0, 1])');
+
+    await waitForEvent(graft, 'mutation');
+
+    expect(material.color.r).to.be.equal(0);
+    expect(material.color.b).to.be.equal(1);
+  });
+
+  test('can operate on the artifact of a Three.js GLTFLoader', async () => {
+    const gltf = await new Promise<GLTF>((resolve) => {
+      new GLTFLoader().load(ASTRONAUT_GLB_URL, (gltf) => resolve(gltf));
+    });
+
+    const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
+        MeshStandardMaterial;
+    const graft = new ModelGraft(ASTRONAUT_GLB_URL, gltf);
+
+    const executionContext =
+        new ThreeDOMExecutionContext(['material-properties']);
     executionContext.changeModel(graft);
 
     executionContext.eval(
