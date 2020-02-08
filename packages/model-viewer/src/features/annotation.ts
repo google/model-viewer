@@ -214,13 +214,21 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$pixelPosition].y *= -1;
       raycaster.setFromCamera(this[$pixelPosition], this[$scene].getCamera());
       const hits = raycaster.intersectObject(this[$scene], true);
+
       if (hits.length === 0) {
         return {position: '', normal: ''};
       }
       const hit = hits[0];
+
       const {x, y, z} = hit.point;
       const hitPosition = `${x}m ${y}m ${z}m`;
-      const hitNormal = '0 0 1';
+
+      let hitNormal = '0 1 0';
+      if (hit.face != null) {
+        const {x: nx, y: ny, z: nz} = hit.face.normal;
+        hitNormal = `${- nx} ${ny} ${- nz}`;
+      }
+
       return {position: hitPosition, normal: hitNormal};
     }
 

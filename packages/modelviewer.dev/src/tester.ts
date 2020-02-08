@@ -48,6 +48,10 @@ function resetModel() {
   viewer.dismissPoster();
   downloadButton.disabled = true;
   displayButton.disabled = true;
+  // remove hotspots
+  while (viewer.firstChild) {
+    viewer.removeChild(viewer.firstChild);
+  }
 }
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
@@ -123,26 +127,50 @@ export function addHotspot() {
   viewer.addEventListener('click', onClick);
 }
 
+let hotspotCounter = 0;
+let selectedHotspot: HTMLElement|undefined = undefined;
+
 export function removeHotspot() {
+  if (selectedHotspot != null) {
+    viewer.removeChild(selectedHotspot);
+  }
 }
 
-let hotspotCounter = 0;
+function select(hotspot: HTMLElement) {
+  for (let i = 0; i < viewer.children.length; i++) {
+    viewer.children[i].classList.remove('selected');
+  }
+  hotspot.classList.add('selected');
+  selectedHotspot = hotspot;
+}
 
 function onClick(event: MouseEvent) {
   const rect = viewer.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
   const hitResult = viewer.getHitResult(x, y);
+
   if (hitResult.position === '') {
     console.log('no hit result: mouse = ', x, ', ', y);
     return;
   }
+
   const hotspot = document.createElement('button');
   hotspot.slot = `hotspot-${hotspotCounter++}`;
   hotspot.classList.add('hotspot');
   hotspot.dataset.position = hitResult.position;
   hotspot.dataset.normal = hitResult.normal;
   viewer.appendChild(hotspot);
+
+  select(hotspot);
+  hotspot.addEventListener('click', () => {select(hotspot)});
+
+  const label = document.createElement('div');
+  label.classList.add('annotation');
+  label.textContent = 'data-position:\r\n' + hitResult.position +
+      '\r\ndata-normal:\r\n' + hitResult.normal;
+  hotspot.appendChild(label);
+
   viewer.removeEventListener('click', onClick);
 }
 
