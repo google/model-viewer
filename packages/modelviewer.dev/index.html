@@ -512,6 +512,15 @@
               attribute on account of user interaction or camera interpolation.</p>
             </li>
             <li>
+              <div>getHitResult(pixelX, pixelY)</div>
+              <p>Returns the world position and normal of the point on the mesh
+              corresponding to the input pixel coordinates given relative to the
+              model-viewer element. The position and normal are returned as strings in
+              the format suitable for putting in a hotspot's data-position and
+              data-normal attributes. If the mesh is not hit, position returns the
+              empty string.</p>
+            </li>
+            <li>
               <div>jumpCameraToGoal()</div>
               <p>Changes the camera to its last configured goal state immediately on 
               the next update instead of interpolating the motion over time.</p>

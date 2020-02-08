@@ -205,6 +205,14 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       hotspot.updateNormal(config.normal);
     }
 
+    /**
+     * This method returns the world position and normal of the point on the
+     * mesh corresponding to the input pixel coordinates given relative to the
+     * model-viewer element. The position and normal are returned as strings in
+     * the format suitable for putting in a hotspot's data-position and
+     * data-normal attributes. If the mesh is not hit, position returns the
+     * empty string.
+     */
     getHitResult(pixelX: number, pixelY: number): HitResult {
       const {width, height} = this[$scene];
       this[$pixelPosition]
