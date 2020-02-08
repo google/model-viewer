@@ -40,7 +40,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   let element: InstanceType<typeof ModelViewerElement>;
 
   setup(() => {
-    tagName = `model-viewer-staging-${nextId++}`;
+    tagName = `model-viewer-scene-graph-${nextId++}`;
     ModelViewerElement = class extends SceneGraphMixin
     (ModelViewerElementBase) {
       static get is() {
