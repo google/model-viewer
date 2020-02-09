@@ -12,6 +12,26 @@ jobs:
       with:
         node-version: 12
 
+    - name: Cache node modules
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+
+    - name: Cache glTF sample models
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-gltf-sample-models
+      with:
+        path: packages/shared-assets/models/glTF-Sample-Models
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('packages/shared-assets/models/glTF-Sample-Models/.git/ORIG_HEAD') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+
     - name: NPM install
       run: npm ci
 
