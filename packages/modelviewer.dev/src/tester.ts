@@ -37,8 +37,18 @@ dropControl.on('drop', ({files}: any) => load(files));
             if (useSkybox.checked) {
               viewer.skyboxImage = viewer.environmentImage;
             }
+            if (property === 'src') {
+              resetModel();
+            }
           });
     });
+
+function resetModel() {
+  viewer.reveal = 'auto';
+  viewer.dismissPoster();
+  downloadButton.disabled = true;
+  displayButton.disabled = true;
+}
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
 useSkybox.addEventListener('change', (_event) => {
@@ -87,7 +97,7 @@ export async function createPoster() {
   viewer.jumpCameraToGoal();
   await new Promise(resolve => requestAnimationFrame(() => resolve()));
   URL.revokeObjectURL(posterUrl);
-  const blob = await viewer.toBlob({mimeType: 'image/jpeg', idealAspect: true});
+  const blob = await viewer.toBlob({mimeType: 'image/png', idealAspect: true});
   posterUrl = URL.createObjectURL(blob);
   downloadButton.disabled = false;
   displayButton.disabled = false;
@@ -97,6 +107,7 @@ export function reloadScene() {
   viewer.poster = posterUrl;
   viewer.reveal = 'interaction';
   viewer.cameraOrbit = orbitString.textContent!;
+  viewer.jumpCameraToGoal();
   const src = viewer.src;
   viewer.src = null;
   viewer.src = src;
@@ -104,7 +115,7 @@ export function reloadScene() {
 
 export function downloadPoster() {
   a.href = posterUrl;
-  a.download = 'poster.jpg';
+  a.download = 'poster.png';
   a.click();
 }
 
@@ -143,6 +154,7 @@ function load(fileMap: Map<string, File>) {
       const fileURL =
           typeof file === 'string' ? file : URL.createObjectURL(file);
       viewer.src = fileURL;
+      resetModel();
     }
   });
 
