@@ -78,57 +78,57 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         expect(element.worklet).to.not.be.ok;
       });
     });
+  });
 
-    suite('with a scene graph worklet script', () => {
-      test('eventually creates a new worklet', async () => {
-        const script = document.createElement('script');
-        script.type = 'experimental-scene-graph-worklet';
-        script.textContent = 'console.log("Hello, worklet!");';
+  suite('with a scene graph worklet script', () => {
+    test('eventually creates a new worklet', async () => {
+      const script = document.createElement('script');
+      script.type = 'experimental-scene-graph-worklet';
+      script.textContent = 'console.log("Hello, worklet!");';
 
-        element.appendChild(script);
+      element.appendChild(script);
 
-        await waitForEvent(element, 'worklet-created');
+      await waitForEvent(element, 'worklet-created');
 
-        expect(element.worklet).to.be.ok;
+      expect(element.worklet).to.be.ok;
+    });
+
+    suite('with a loaded model', () => {
+      setup(async () => {
+        element.src = ASTRONAUT_GLB_PATH;
+
+        await waitForEvent(element, 'load');
+        await rafPasses();
       });
 
-      suite('with a loaded model', () => {
-        setup(async () => {
-          element.src = ASTRONAUT_GLB_PATH;
+      test('allows the scene graph to be manipulated', async () => {
+        const scene = element[$scene] as ModelScene;
 
-          await waitForEvent(element, 'load');
-          await rafPasses();
-        });
+        const script = document.createElement('script');
 
-        test('allows the scene graph to be manipulated', async () => {
-          const scene = element[$scene] as ModelScene;
-
-          const script = document.createElement('script');
-
-          script.type = 'experimental-scene-graph-worklet';
-          script.setAttribute('allow', 'material-properties; messaging');
-          script.textContent = `
+        script.type = 'experimental-scene-graph-worklet';
+        script.setAttribute('allow', 'material-properties; messaging');
+        script.textContent = `
 self.addEventListener('model-change', function() {
   model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
   self.postMessage('done');
 });
 `;
 
-          element.appendChild(script);
+        element.appendChild(script);
 
-          await waitForEvent(element, 'worklet-created');
+        await waitForEvent(element, 'worklet-created');
 
-          await waitForEvent(element.worklet!, 'message');
+        await waitForEvent(element.worklet!, 'message');
 
-          expect(((scene.children[0]
-                       .children[0]
-                       .children[0]
-                       .children[0]
-                       .children[0] as Mesh)
-                      .material as MeshStandardMaterial)
-                     .color)
-              .to.include({r: 1, g: 0, b: 0});
-        });
+        expect(((scene.children[0]
+                     .children[0]
+                     .children[0]
+                     .children[0]
+                     .children[0] as Mesh)
+                    .material as MeshStandardMaterial)
+                   .color)
+            .to.include({r: 1, g: 0, b: 0});
       });
     });
   });
