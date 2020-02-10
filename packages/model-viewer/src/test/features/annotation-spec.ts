@@ -18,7 +18,7 @@ import {Vector3} from 'three';
 import {AnnotationInterface, AnnotationMixin, Hotspot} from '../../features/annotation';
 import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
 import {ModelScene} from '../../three-components/ModelScene';
-import {assetPath, timePasses, waitForEvent} from '../helpers';
+import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
@@ -85,7 +85,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot = document.createElement('div');
       hotspot.setAttribute('slot', 'hotspot-1');
       hotspot.setAttribute('data-position', '1m 1m 1m');
-      hotspot.setAttribute('data-normal', '1m 0m 0m');
+      hotspot.setAttribute('data-normal', '0m 0m 1m');
       element.appendChild(hotspot);
       await timePasses();
       numSlots = scene.pivot.children.length;
@@ -102,7 +102,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         hotspot2 = document.createElement('div');
         hotspot2.setAttribute('slot', 'hotspot-1');
         hotspot2.setAttribute('data-position', '0m 1m 2m');
-        hotspot2.setAttribute('data-normal', '0m 0m 1m');
+        hotspot2.setAttribute('data-normal', '1m 0m 0m');
         element.appendChild(hotspot2);
         await timePasses();
       });
@@ -115,16 +115,39 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         const {position, normal} =
             (scene.pivot.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
-        expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
+        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
       });
 
       test('updateHotspot does change the data', () => {
         element.updateHotspot(
-            {name: 'hotspot-1', position: '0m 1m 2m', normal: '0m 0m 1m'});
+            {name: 'hotspot-1', position: '0m 1m 2m', normal: '1m 0m 0m'});
         const {position, normal} =
             (scene.pivot.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(0, 1, 2));
-        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
+        expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
+      });
+
+      suite('with a camera', () => {
+        let wrapper: HTMLElement;
+
+        setup(() => {
+          const camera = element[$scene].getCamera();
+          camera.position.z = 2;
+          camera.updateMatrixWorld();
+          wrapper = (scene.pivot.children[numSlots - 1] as Hotspot).element;
+        });
+
+        test('the hotspot is visible', async () => {
+          await rafPasses();
+          expect(wrapper.classList.contains('hide')).to.be.false;
+        });
+
+        test('the hotspot is hidden after turning', async () => {
+          element[$scene].setPivotRotation(Math.PI);
+          element[$scene].updateMatrixWorld();
+          await rafPasses();
+          expect(wrapper.classList.contains('hide')).to.be.true;
+        });
       });
 
       test('and removing it does not remove the slot', async () => {
@@ -144,7 +167,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     });
   });
 
-  suite.only('a model-viewer element with a loaded cube', () => {
+  suite('a model-viewer element with a loaded cube', () => {
     let width = 0;
     let height = 0;
 
@@ -160,14 +183,14 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       await waitForEvent(element, 'load');
     });
 
-    test('gets expected hit result', async () => {
+    test('gets expected hit result', () => {
       const {position, normal} =
           element.positionAndNormalFromPoint(width / 2, height / 2);
       expect(position).to.be.deep.equal(new Vector3D(0, 0, 0.5));
       expect(normal).to.be.deep.equal(new Vector3D(0, 0, 1));
     });
 
-    test('gets expected hit result when turned', async () => {
+    test('gets expected hit result when turned', () => {
       element[$scene].setPivotRotation(-Math.PI / 2);
       element[$scene].updateMatrixWorld();
       const {position, normal} =

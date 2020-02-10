@@ -224,17 +224,19 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return {};
       }
       const hit = hits[0];
+      const worldToPivot =
+          new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
       const position = new Vector3D();
-      Object.assign(
-          position,
-          hit.point.applyMatrix4(
-              new Matrix4().getInverse(this[$scene].pivot.matrixWorld)));
+      Object.assign(position, hit.point.applyMatrix4(worldToPivot));
 
       if (hit.face == null) {
         return {position: position};
       }
       const normal = new Vector3D();
-      Object.assign(normal, hit.face.normal);
+      Object.assign(
+          normal,
+          hit.face.normal.applyMatrix4(hit.object.matrixWorld)
+              .applyMatrix4(worldToPivot));
       return {position: position, normal: normal};
     }
 
@@ -252,14 +254,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateHotspots]() {
       const {children} = this[$scene].pivot;
       for (let i = 0, l = children.length; i < l; i++) {
-        const object = children[i];
-        if (object instanceof Hotspot) {
+        const hotspot = children[i];
+        if (hotspot instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
-          view.sub(object.position);
-          if (view.dot(object.normal) < 0) {
-            object.element.classList.add('hide');
+          view.sub(hotspot.position);
+          const normalWorld = hotspot.normal.clone().transformDirection(
+              this[$scene].pivot.matrixWorld);
+          if (view.dot(normalWorld) < 0) {
+            hotspot.element.classList.add('hide');
           } else {
-            object.element.classList.remove('hide');
+            hotspot.element.classList.remove('hide');
           }
         }
       }
