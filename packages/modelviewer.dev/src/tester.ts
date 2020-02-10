@@ -148,9 +148,9 @@ function onClick(event: MouseEvent) {
   const rect = viewer.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  const hitResult = viewer.getHitResult(x, y);
+  const {position, normal} = viewer.positionAndNormalFromPoint(x, y);
 
-  if (hitResult.position === '') {
+  if (position == null) {
     console.log('no hit result: mouse = ', x, ', ', y);
     return;
   }
@@ -158,8 +158,10 @@ function onClick(event: MouseEvent) {
   const hotspot = document.createElement('button');
   hotspot.slot = `hotspot-${hotspotCounter++}`;
   hotspot.classList.add('hotspot');
-  hotspot.dataset.position = hitResult.position;
-  hotspot.dataset.normal = hitResult.normal;
+  hotspot.dataset.position = position.toString();
+  if (normal != null) {
+    hotspot.dataset.normal = normal.toString();
+  }
   viewer.appendChild(hotspot);
 
   select(hotspot);
@@ -167,8 +169,8 @@ function onClick(event: MouseEvent) {
 
   const label = document.createElement('div');
   label.classList.add('annotation');
-  label.textContent = 'data-position:\r\n' + hitResult.position +
-      '\r\ndata-normal:\r\n' + hitResult.normal;
+  label.textContent =
+      'data-position:\r\n' + position + '\r\ndata-normal:\r\n' + normal;
   hotspot.appendChild(label);
 
   viewer.removeEventListener('click', onClick);

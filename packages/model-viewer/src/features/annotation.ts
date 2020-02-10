@@ -17,7 +17,7 @@
 import {Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
@@ -43,11 +43,6 @@ interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
-}
-
-interface HitResult {
-  position: string;
-  normal: string;
 }
 
 /**
@@ -117,7 +112,8 @@ export class Hotspot extends CSS2DObject {
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
-  getHitResult(pixelX: number, pixelY: number): HitResult
+  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+      {position?: Vector3D, normal?: Vector3D}
 }
 
 /**
@@ -213,7 +209,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * data-normal attributes. If the mesh is not hit, position returns the
      * empty string.
      */
-    getHitResult(pixelX: number, pixelY: number): HitResult {
+    positionAndNormalFromPoint(pixelX: number, pixelY: number):
+        {position?: Vector3D, normal?: Vector3D} {
       const {width, height} = this[$scene];
       this[$pixelPosition]
           .set(pixelX / width, pixelY / height)
@@ -224,20 +221,18 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const hits = raycaster.intersectObject(this[$scene], true);
 
       if (hits.length === 0) {
-        return {position: '', normal: ''};
+        return {};
       }
       const hit = hits[0];
+      const position = new Vector3D();
+      Object.assign(position, hit.point);
 
-      const {x, y, z} = hit.point;
-      const hitPosition = `${x}m ${y}m ${z}m`;
-
-      let hitNormal = '0 1 0';
-      if (hit.face != null) {
-        const {x: nx, y: ny, z: nz} = hit.face.normal;
-        hitNormal = `${- nx} ${ny} ${- nz}`;
+      if (hit.face == null) {
+        return {position: position};
       }
-
-      return {position: hitPosition, normal: hitNormal};
+      const normal = new Vector3D();
+      Object.assign(normal, hit.face.normal);
+      return {position: position, normal: normal};
     }
 
     [$tick](time: number, delta: number) {
