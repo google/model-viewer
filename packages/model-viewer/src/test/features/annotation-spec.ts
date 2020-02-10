@@ -151,10 +151,11 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
     test('gets expect hit result', async () => {
       const camera = element[$scene].getCamera();
-      camera.position.z = -2;
+      camera.position.z = 2;
+      camera.updateMatrixWorld();
       const {position, normal} =
           element.positionAndNormalFromPoint(width / 2, height / 2);
-      expect(position).to.be.deep.equal(new Vector3D(0, 0, 1));
+      expect(position).to.be.deep.equal(new Vector3D(0, 0, 0.5));
       expect(normal).to.be.deep.equal(new Vector3D(0, 0, 1));
     });
   });
