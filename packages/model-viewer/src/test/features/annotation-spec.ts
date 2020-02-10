@@ -16,9 +16,9 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin, Hotspot} from '../../features/annotation';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base';
+import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
 import {ModelScene} from '../../three-components/ModelScene';
-import {timePasses} from '../helpers';
+import {assetPath, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
@@ -94,14 +94,30 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       setup(async () => {
         hotspot2 = document.createElement('div');
         hotspot2.setAttribute('slot', 'hotspot-1');
-        hotspot2.setAttribute('data-position', '1m 1m 1m');
-        hotspot2.setAttribute('data-normal', '1m 0m 0m');
+        hotspot2.setAttribute('data-position', '0m 1m 2m');
+        hotspot2.setAttribute('data-normal', '0m 0m 1m');
         element.appendChild(hotspot2);
         await timePasses();
       });
 
       test('does not change the slot', () => {
         expect(scene.pivot.children.length).to.be.equal(numSlots);
+      });
+
+      test('does not change the data', () => {
+        const {position, normal} =
+            (scene.pivot.children[numSlots - 1] as Hotspot);
+        expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
+        expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
+      });
+
+      test('updateHotspot does change the data', () => {
+        element.updateHotspot(
+            {name: 'hotspot-1', position: '0m 1m 2m', normal: '0m 0m 1m'});
+        const {position, normal} =
+            (scene.pivot.children[numSlots - 1] as Hotspot);
+        expect(position).to.be.deep.equal(new Vector3(0, 1, 2));
+        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
       });
 
       test('and removing it does not remove the slot', async () => {
@@ -118,6 +134,28 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
         expect(scene.pivot.children.length).to.be.equal(numSlots - 1);
       });
+    });
+  });
+
+  suite.only('a model-viewer element with a loaded cube', () => {
+    let width = 0;
+    let height = 0;
+
+    setup(async () => {
+      width = 200;
+      height = 300;
+      element.setAttribute('style', `width: ${width}px; height: ${height}px`);
+      element.src = assetPath('models/cube.gltf');
+      await waitForEvent(element, 'load');
+    });
+
+    test('gets expect hit result', async () => {
+      const camera = element[$scene].getCamera();
+      camera.position.z = -2;
+      const {position, normal} =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      expect(position).to.be.deep.equal(new Vector3D(0, 0, 1));
+      expect(normal).to.be.deep.equal(new Vector3D(0, 0, 1));
     });
   });
 });

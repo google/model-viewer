@@ -62,9 +62,8 @@ export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 
 export class Vector3D {
-  public x = 0;
-  public y = 0;
-  public z = 0;
+  constructor(public x = 0, public y = 0, public z = 0) {
+  }
   toString(): string {
     return `${this.x}m ${this.y}m ${this.z}m`;
   }
