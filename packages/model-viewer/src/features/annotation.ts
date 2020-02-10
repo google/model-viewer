@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Raycaster, Vector2, Vector3} from 'three';
+import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
@@ -225,7 +225,10 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
       const hit = hits[0];
       const position = new Vector3D();
-      Object.assign(position, hit.point);
+      Object.assign(
+          position,
+          hit.point.applyMatrix4(
+              new Matrix4().getInverse(this[$scene].pivot.matrixWorld)));
 
       if (hit.face == null) {
         return {position: position};

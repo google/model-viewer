@@ -40,6 +40,13 @@ const sceneContainsHotspot =
       return false;
     };
 
+const closeToVector3D = (a: Vector3D, b: Vector3D) => {
+  const delta = 0.001;
+  expect(a.x).to.be.closeTo(b.x, delta);
+  expect(a.y).to.be.closeTo(b.y, delta);
+  expect(a.z).to.be.closeTo(b.z, delta);
+};
+
 suite('ModelViewerElementBase with AnnotationMixin', () => {
   let nextId = 0;
   let tagName: string;
@@ -146,17 +153,27 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       height = 300;
       element.setAttribute('style', `width: ${width}px; height: ${height}px`);
       element.src = assetPath('models/cube.gltf');
-      await waitForEvent(element, 'load');
-    });
 
-    test('gets expect hit result', async () => {
       const camera = element[$scene].getCamera();
       camera.position.z = 2;
       camera.updateMatrixWorld();
+      await waitForEvent(element, 'load');
+    });
+
+    test('gets expected hit result', async () => {
       const {position, normal} =
           element.positionAndNormalFromPoint(width / 2, height / 2);
       expect(position).to.be.deep.equal(new Vector3D(0, 0, 0.5));
       expect(normal).to.be.deep.equal(new Vector3D(0, 0, 1));
+    });
+
+    test('gets expected hit result when turned', async () => {
+      element[$scene].setPivotRotation(-Math.PI / 2);
+      element[$scene].updateMatrixWorld();
+      const {position, normal} =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      closeToVector3D(position!, new Vector3D(0.5, 0, 0));
+      closeToVector3D(normal!, new Vector3D(1, 0, 0));
     });
   });
 });
