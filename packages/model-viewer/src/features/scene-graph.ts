@@ -170,7 +170,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onChildListMutation](records: Array<MutationRecord>) {
+      if (this.parentNode == null) {
+        // Ignore a lazily reported list of mutations if we are detached from
+        // the document...
+        return;
+      }
+
       let lastScriptElement: HTMLScriptElement|null = null;
+
       for (const record of records) {
         for (const node of Array.from(record.addedNodes)) {
           if (node instanceof HTMLScriptElement && node.textContent &&
@@ -222,7 +229,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateExecutionContextModel]() {
       const executionContext = this[$executionContext];
 
-      if (executionContext == null) {
+      if (executionContext == null || this.parentNode == null) {
+        // Ignore if we don't have a 3DOM script to run, or if we are currently
+        // detached from the document
         return;
       }
 
