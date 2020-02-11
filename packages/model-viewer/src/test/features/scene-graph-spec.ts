@@ -24,7 +24,7 @@ import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
-const ASTRONAUT_GLB_PATH = assetPath('models/astronaut.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
   if (IS_IE11) {
@@ -65,8 +65,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  // TODO(#1012): Unskip this test suite
-  suite.skip('without a scene graph worklet script', () => {
+  suite('without a scene graph worklet script', () => {
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;
@@ -81,8 +80,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
-  // TODO(#1012): Unskip this test suite
-  suite.skip('with a scene graph worklet script', () => {
+  suite('with a scene graph worklet script', () => {
     test('eventually creates a new worklet', async () => {
       const script = document.createElement('script');
       script.type = 'experimental-scene-graph-worklet';
