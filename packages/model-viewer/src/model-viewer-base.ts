@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
-import {Event as ThreeEvent} from 'three';
+import {Event as ThreeEvent, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
@@ -61,13 +61,16 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 
-export class Vector3D {
-  constructor(public x = 0, public y = 0, public z = 0) {
-  }
-  toString(): string {
-    return `${this.x}m ${this.y}m ${this.z}m`;
-  }
-}
+export const toVector3D = (v: Vector3) => {
+  return {
+    x: v.x,
+    y: v.y,
+    z: v.z,
+    toString() {
+      return `${this.x}m ${this.y}m ${this.z}m`;
+    }
+  };
+};
 
 interface ToBlobOptions {
   mimeType?: string, qualityArgument?: number, idealAspect?: boolean

@@ -17,7 +17,7 @@
 import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
@@ -112,8 +112,7 @@ export class Hotspot extends CSS2DObject {
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
-  positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position?: Vector3D, normal?: Vector3D}
+  positionAndNormalFromPoint(pixelX: number, pixelY: number)
 }
 
 /**
@@ -209,8 +208,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * data-normal attributes. If the mesh is not hit, position returns the
      * empty string.
      */
-    positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position?: Vector3D, normal?: Vector3D} {
+    positionAndNormalFromPoint(pixelX: number, pixelY: number) {
       const {width, height} = this[$scene];
       this[$pixelPosition]
           .set(pixelX / width, pixelY / height)
@@ -221,22 +219,19 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const hits = raycaster.intersectObject(this[$scene], true);
 
       if (hits.length === 0) {
-        return {};
+        return {position: null, normal: null};
       }
       const hit = hits[0];
       const worldToPivot =
           new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
-      const position = new Vector3D();
-      Object.assign(position, hit.point.applyMatrix4(worldToPivot));
+      const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
 
       if (hit.face == null) {
-        return {position: position};
+        return {position: position, normal: null};
       }
-      const normal = new Vector3D();
-      Object.assign(
-          normal,
-          hit.face.normal.applyMatrix4(hit.object.matrixWorld)
-              .applyMatrix4(worldToPivot));
+      const normal =
+          toVector3D(hit.face.normal.applyMatrix4(hit.object.matrixWorld)
+                         .applyMatrix4(worldToPivot));
       return {position: position, normal: normal};
     }
 

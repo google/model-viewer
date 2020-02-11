@@ -515,10 +515,11 @@
               <div>positionAndNormalFromPoint(pixelX, pixelY)</div>
               <p>Returns the world position and normal of the point on the mesh
               corresponding to the input pixel coordinates given relative to the
-              model-viewer element. The position and normal are returned as strings in
-              the format suitable for putting in a hotspot's data-position and
-              data-normal attributes. If the mesh is not hit, position returns the
-              empty string.</p>
+              model-viewer element. The position and normal are returned as
+              Vector3D, which has a method toString() that outputs a format
+              suitable for putting in a hotspot's data-position and data-normal
+              attributes. If the mesh is not hit, position and normal return
+              null.</p>
             </li>
             <li>
               <div>jumpCameraToGoal()</div>
