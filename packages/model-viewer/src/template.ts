@@ -101,7 +101,7 @@ canvas.show {
 }
 
 .hide ::slotted(*) {
-  opacity: var(--min-opacity, 0.25);
+  opacity: var(--min-hotspot-opacity, 0.25);
 }
 
 .slot.poster {

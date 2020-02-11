@@ -16,9 +16,9 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin, Hotspot} from '../../features/annotation';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base';
+import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
 import {ModelScene} from '../../three-components/ModelScene';
-import {timePasses} from '../helpers';
+import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
@@ -39,6 +39,13 @@ const sceneContainsHotspot =
       }
       return false;
     };
+
+const closeToVector3 = (a: Vector3D, b: Vector3) => {
+  const delta = 0.001;
+  expect(a.x).to.be.closeTo(b.x, delta);
+  expect(a.y).to.be.closeTo(b.y, delta);
+  expect(a.z).to.be.closeTo(b.z, delta);
+};
 
 suite('ModelViewerElementBase with AnnotationMixin', () => {
   let nextId = 0;
@@ -78,7 +85,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot = document.createElement('div');
       hotspot.setAttribute('slot', 'hotspot-1');
       hotspot.setAttribute('data-position', '1m 1m 1m');
-      hotspot.setAttribute('data-normal', '1m 0m 0m');
+      hotspot.setAttribute('data-normal', '0m 0m 1m');
       element.appendChild(hotspot);
       await timePasses();
       numSlots = scene.pivot.children.length;
@@ -94,7 +101,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       setup(async () => {
         hotspot2 = document.createElement('div');
         hotspot2.setAttribute('slot', 'hotspot-1');
-        hotspot2.setAttribute('data-position', '1m 1m 1m');
+        hotspot2.setAttribute('data-position', '0m 1m 2m');
         hotspot2.setAttribute('data-normal', '1m 0m 0m');
         element.appendChild(hotspot2);
         await timePasses();
@@ -102,6 +109,45 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
       test('does not change the slot', () => {
         expect(scene.pivot.children.length).to.be.equal(numSlots);
+      });
+
+      test('does not change the data', () => {
+        const {position, normal} =
+            (scene.pivot.children[numSlots - 1] as Hotspot);
+        expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
+        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
+      });
+
+      test('updateHotspot does change the data', () => {
+        element.updateHotspot(
+            {name: 'hotspot-1', position: '0m 1m 2m', normal: '1m 0m 0m'});
+        const {position, normal} =
+            (scene.pivot.children[numSlots - 1] as Hotspot);
+        expect(position).to.be.deep.equal(new Vector3(0, 1, 2));
+        expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
+      });
+
+      suite('with a camera', () => {
+        let wrapper: HTMLElement;
+
+        setup(() => {
+          const camera = element[$scene].getCamera();
+          camera.position.z = 2;
+          camera.updateMatrixWorld();
+          wrapper = (scene.pivot.children[numSlots - 1] as Hotspot).element;
+        });
+
+        test('the hotspot is visible', async () => {
+          await rafPasses();
+          expect(wrapper.classList.contains('hide')).to.be.false;
+        });
+
+        test('the hotspot is hidden after turning', async () => {
+          element[$scene].setPivotRotation(Math.PI);
+          element[$scene].updateMatrixWorld();
+          await rafPasses();
+          expect(wrapper.classList.contains('hide')).to.be.true;
+        });
       });
 
       test('and removing it does not remove the slot', async () => {
@@ -118,6 +164,39 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
         expect(scene.pivot.children.length).to.be.equal(numSlots - 1);
       });
+    });
+  });
+
+  suite('a model-viewer element with a loaded cube', () => {
+    let width = 0;
+    let height = 0;
+
+    setup(async () => {
+      width = 200;
+      height = 300;
+      element.setAttribute('style', `width: ${width}px; height: ${height}px`);
+      element.src = assetPath('models/cube.gltf');
+
+      const camera = element[$scene].getCamera();
+      camera.position.z = 2;
+      camera.updateMatrixWorld();
+      await waitForEvent(element, 'load');
+    });
+
+    test('gets expected hit result', () => {
+      const {position, normal} =
+          element.positionAndNormalFromPoint(width / 2, height / 2)!;
+      closeToVector3(position!, new Vector3(0, 0, 0.5));
+      closeToVector3(normal!, new Vector3(0, 0, 1));
+    });
+
+    test('gets expected hit result when turned', () => {
+      element[$scene].setPivotRotation(-Math.PI / 2);
+      element[$scene].updateMatrixWorld();
+      const {position, normal} =
+          element.positionAndNormalFromPoint(width / 2, height / 2)!;
+      closeToVector3(position!, new Vector3(0.5, 0, 0));
+      closeToVector3(normal!, new Vector3(1, 0, 0));
     });
   });
 });

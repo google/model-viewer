@@ -394,7 +394,7 @@
               to be used to force the prompt to be hidden. Defaults to flex.</p>
             </li>
             <li>
-              <div>--min-opacity</div>
+              <div>--min-hotspot-opacity</div>
               <p>Sets the opacity of hidden hotspots. Defaults to 0.25.</p>
             </li>
             <li>
@@ -510,6 +510,15 @@
               <p>Returns the realtime camera vertical field of view in degrees. 
               This value may differ from the value configured with the field-of-view 
               attribute on account of user interaction or camera interpolation.</p>
+            </li>
+            <li>
+              <div>positionAndNormalFromPoint(pixelX, pixelY)</div>
+              <p>Returns the world position and normal of the point on the mesh
+              corresponding to the input pixel coordinates given relative to the
+              model-viewer element. The position and normal are returned as
+              Vector3D, which has a method toString() that outputs a format
+              suitable for putting in a hotspot's data-position and data-normal
+              attributes. The function returns null if no object is hit.</p>
             </li>
             <li>
               <div>jumpCameraToGoal()</div>

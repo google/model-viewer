@@ -48,6 +48,10 @@ function resetModel() {
   viewer.dismissPoster();
   downloadButton.disabled = true;
   displayButton.disabled = true;
+  // remove hotspots
+  while (viewer.firstChild) {
+    viewer.removeChild(viewer.firstChild);
+  }
 }
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
@@ -119,9 +123,65 @@ export function downloadPoster() {
   a.click();
 }
 
+export function addHotspot() {
+  viewer.addEventListener('click', onClick);
+}
+
+let hotspotCounter = 0;
+let selectedHotspot: HTMLElement|undefined = undefined;
+
+export function removeHotspot() {
+  if (selectedHotspot != null) {
+    viewer.removeChild(selectedHotspot);
+  }
+}
+
+function select(hotspot: HTMLElement) {
+  for (let i = 0; i < viewer.children.length; i++) {
+    viewer.children[i].classList.remove('selected');
+  }
+  hotspot.classList.add('selected');
+  selectedHotspot = hotspot;
+}
+
+function onClick(event: MouseEvent) {
+  const rect = viewer.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const positionAndNormal = viewer.positionAndNormalFromPoint(x, y);
+
+  if (positionAndNormal == null) {
+    console.log('no hit result: mouse = ', x, ', ', y);
+    return;
+  }
+  const {position, normal} = positionAndNormal;
+
+  const hotspot = document.createElement('button');
+  hotspot.slot = `hotspot-${hotspotCounter++}`;
+  hotspot.classList.add('hotspot');
+  hotspot.dataset.position = position.toString();
+  if (normal != null) {
+    hotspot.dataset.normal = normal.toString();
+  }
+  viewer.appendChild(hotspot);
+
+  select(hotspot);
+  hotspot.addEventListener('click', () => {select(hotspot)});
+
+  const label = document.createElement('div');
+  label.classList.add('annotation');
+  label.textContent =
+      'data-position:\r\n' + position + '\r\ndata-normal:\r\n' + normal;
+  hotspot.appendChild(label);
+
+  viewer.removeEventListener('click', onClick);
+}
+
 (self as any).createPoster = createPoster;
 (self as any).reloadScene = reloadScene;
 (self as any).downloadPoster = downloadPoster;
+(self as any).addHotspot = addHotspot;
+(self as any).removeHotspot = removeHotspot;
 
 function load(fileMap: Map<string, File>) {
   let rootPath: string;
