@@ -148,12 +148,13 @@ function onClick(event: MouseEvent) {
   const rect = viewer.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  const {position, normal} = viewer.positionAndNormalFromPoint(x, y);
+  const positionAndNormal = viewer.positionAndNormalFromPoint(x, y);
 
-  if (position == null) {
+  if (positionAndNormal == null) {
     console.log('no hit result: mouse = ', x, ', ', y);
     return;
   }
+  const {position, normal} = positionAndNormal;
 
   const hotspot = document.createElement('button');
   hotspot.slot = `hotspot-${hotspotCounter++}`;

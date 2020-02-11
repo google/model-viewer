@@ -113,7 +113,7 @@ export class Hotspot extends CSS2DObject {
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D|null, normal: Vector3D|null}
+      {position: Vector3D, normal: Vector3D}|null
 }
 
 /**
@@ -210,7 +210,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * empty string.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D|null, normal: Vector3D|null} {
+        {position: Vector3D, normal: Vector3D}|null {
       const {width, height} = this[$scene];
       this[$pixelPosition]
           .set(pixelX / width, pixelY / height)
@@ -221,16 +221,17 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const hits = raycaster.intersectObject(this[$scene], true);
 
       if (hits.length === 0) {
-        return {position: null, normal: null};
+        return null;
       }
+
       const hit = hits[0];
+      if (hit.face == null) {
+        return null;
+      }
+
       const worldToPivot =
           new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
       const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
-
-      if (hit.face == null) {
-        return {position: position, normal: null};
-      }
       const normal =
           toVector3D(hit.face.normal.applyMatrix4(hit.object.matrixWorld)
                          .applyMatrix4(worldToPivot));

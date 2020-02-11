@@ -185,7 +185,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
     test('gets expected hit result', () => {
       const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2);
+          element.positionAndNormalFromPoint(width / 2, height / 2)!;
       closeToVector3(position!, new Vector3(0, 0, 0.5));
       closeToVector3(normal!, new Vector3(0, 0, 1));
     });
@@ -194,7 +194,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       element[$scene].setPivotRotation(-Math.PI / 2);
       element[$scene].updateMatrixWorld();
       const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2);
+          element.positionAndNormalFromPoint(width / 2, height / 2)!;
       closeToVector3(position!, new Vector3(0.5, 0, 0));
       closeToVector3(normal!, new Vector3(1, 0, 0));
     });
