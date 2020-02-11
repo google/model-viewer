@@ -61,6 +61,13 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 
+export interface Vector3D {
+  x: number
+  y: number
+  z: number
+  toString(): string
+}
+
 export const toVector3D = (v: Vector3) => {
   return {
     x: v.x,

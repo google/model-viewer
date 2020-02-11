@@ -17,7 +17,7 @@
 import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
@@ -112,7 +112,8 @@ export class Hotspot extends CSS2DObject {
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
-  positionAndNormalFromPoint(pixelX: number, pixelY: number)
+  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+      {position: Vector3D|null, normal: Vector3D|null}
 }
 
 /**
@@ -208,7 +209,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * data-normal attributes. If the mesh is not hit, position returns the
      * empty string.
      */
-    positionAndNormalFromPoint(pixelX: number, pixelY: number) {
+    positionAndNormalFromPoint(pixelX: number, pixelY: number):
+        {position: Vector3D|null, normal: Vector3D|null} {
       const {width, height} = this[$scene];
       this[$pixelPosition]
           .set(pixelX / width, pixelY / height)

@@ -40,7 +40,7 @@ const sceneContainsHotspot =
       return false;
     };
 
-const closeToVector3D = (a: Vector3D, b: Vector3D) => {
+const closeToVector3 = (a: Vector3D, b: Vector3) => {
   const delta = 0.001;
   expect(a.x).to.be.closeTo(b.x, delta);
   expect(a.y).to.be.closeTo(b.y, delta);
@@ -186,8 +186,8 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     test('gets expected hit result', () => {
       const {position, normal} =
           element.positionAndNormalFromPoint(width / 2, height / 2);
-      expect(position).to.be.deep.equal(new Vector3D(0, 0, 0.5));
-      expect(normal).to.be.deep.equal(new Vector3D(0, 0, 1));
+      closeToVector3(position!, new Vector3(0, 0, 0.5));
+      closeToVector3(normal!, new Vector3(0, 0, 1));
     });
 
     test('gets expected hit result when turned', () => {
@@ -195,8 +195,8 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       element[$scene].updateMatrixWorld();
       const {position, normal} =
           element.positionAndNormalFromPoint(width / 2, height / 2);
-      closeToVector3D(position!, new Vector3D(0.5, 0, 0));
-      closeToVector3D(normal!, new Vector3D(1, 0, 0));
+      closeToVector3(position!, new Vector3(0.5, 0, 0));
+      closeToVector3(normal!, new Vector3(1, 0, 0));
     });
   });
 });
