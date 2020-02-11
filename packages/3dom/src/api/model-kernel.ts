@@ -163,7 +163,7 @@ export function defineModelKernel(
           mutationId,
         });
 
-        // TODO(...): Add timeout to reject mutation:
+        // TODO(#1011): Add timeout to reject this mutation:
         this[$pendingMutations].set(mutationId, {
           resolve,
           reject,

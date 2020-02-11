@@ -26,7 +26,7 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/astronaut.glb');
 
-suite.only('ModelViewerElementBase with SceneGraphMixin', () => {
+suite('ModelViewerElementBase with SceneGraphMixin', () => {
   if (IS_IE11) {
     // TODO(#999): Unskip this suite when we support IE11 in 3DOM
     console.warn('Skipping this suite for IE11 only');
@@ -65,7 +65,8 @@ suite.only('ModelViewerElementBase with SceneGraphMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('without a scene graph worklet script', () => {
+  // TODO(#1012): Unskip this test suite
+  suite.skip('without a scene graph worklet script', () => {
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;
@@ -80,7 +81,8 @@ suite.only('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
-  suite('with a scene graph worklet script', () => {
+  // TODO(#1012): Unskip this test suite
+  suite.skip('with a scene graph worklet script', () => {
     test('eventually creates a new worklet', async () => {
       const script = document.createElement('script');
       script.type = 'experimental-scene-graph-worklet';
