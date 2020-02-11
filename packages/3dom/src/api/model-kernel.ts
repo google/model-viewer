@@ -155,6 +155,7 @@ export function defineModelKernel(
 
       return new Promise((resolve, reject) => {
         const mutationId = this[$nextMutationId]++;
+        // TODO(#1006): Validate mutations before sending to host context:
         this[$port].postMessage({
           type: ThreeDOMMessageType.MUTATE,
           id,
