@@ -58,7 +58,7 @@ function initialize(
           switch (data.type) {
             // Instantiate a new ModelKernel, and notify the execution context
             // of the new Model with a 'model-change' event:
-            case ThreeDOMMessageType.MODEL_CHANGED: {
+            case ThreeDOMMessageType.MODEL_CHANGE: {
               const previousModel =
                   currentKernel != null ? currentKernel.model : undefined;
               const serialized: SerializedModel|null = data.model;

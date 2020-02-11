@@ -34,18 +34,63 @@ export const ThreeDOMMessageType = {
 
   // A notification from the host execution context that the main Model has
   // changed, including the sparse, serialized scene graph of the new Model
-  MODEL_CHANGED: 3,
+  MODEL_CHANGE: 3,
+
+  // A notification that confirms or denies a request from the scene graph
+  // context to mutate the scene graph
+  MUTATION_RESULT: 4,
 
   // === Scene Graph => Host ===
 
   // Notification sent to the host execution context to indicate that the
   // scene graph execution context has finished initializing
-  CONTEXT_INITIALIZED: 4,
+  CONTEXT_INITIALIZED: 5,
 
   // A request from the scene graph execution context to mutate some detail
   // of the backing host scene graph
-  MUTATE: 5
+  MUTATE: 6
 };
+
+/**
+ * Messages exchanged between a scene graph context and the host context.
+ * They are distinguished by their type property.
+ */
+export declare interface ThreeDOMMessage {
+  type: number;
+}
+
+/**
+ * A message requesting that the scene graph context import a script by
+ * URL.
+ */
+export declare interface ImportScriptMessage extends ThreeDOMMessage {
+  url: string;
+}
+
+/**
+ * A message informing the scene graph context that the current global model
+ * has changed.
+ */
+export declare interface ModelChangedMessage extends ThreeDOMMessage {
+  model: SerializedModel;
+}
+
+/**
+ * A request from the scene graph context to mutate the scene graph. The
+ * mutation ID distinguishes this request so that a corresponding response
+ * can be handled in the future.
+ */
+export declare interface MutateMessage extends ThreeDOMMessage {
+  id: number;
+  property: string;
+  value: unknown;
+  mutationId: number;
+}
+
+export declare interface MutationResultMessage extends ThreeDOMMessage {
+  mutationId: number;
+  applied: boolean;
+}
 
 /**
  * A map of scene graph element types to interfaces for the serialized

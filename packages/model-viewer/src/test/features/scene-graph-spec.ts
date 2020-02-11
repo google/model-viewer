@@ -26,7 +26,7 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/astronaut.glb');
 
-suite('ModelViewerElementBase with SceneGraphMixin', () => {
+suite.only('ModelViewerElementBase with SceneGraphMixin', () => {
   if (IS_IE11) {
     // TODO(#999): Unskip this suite when we support IE11 in 3DOM
     console.warn('Skipping this suite for IE11 only');
@@ -110,8 +110,9 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         script.setAttribute('allow', 'material-properties; messaging');
         script.textContent = `
 self.addEventListener('model-change', function() {
-  model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
-  self.postMessage('done');
+  model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]).then(function() {
+    self.postMessage('done');
+  });
 });
 `;
 

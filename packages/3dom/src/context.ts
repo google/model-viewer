@@ -20,7 +20,7 @@ import {generateCapabilityFilter} from './context/generate-capability-filter.js'
 import {generateContextPatch} from './context/generate-context-patch.js';
 import {generateInitializer} from './context/generate-initializer.js';
 import {ModelGraft as ThreeJSModelGraft} from './facade/three-js/model-graft.js';
-import {ThreeDOMMessageType} from './protocol.js';
+import {MutateMessage, ThreeDOMMessageType} from './protocol.js';
 
 const $modelGraft = Symbol('modelGraft');
 const $port = Symbol('port');
@@ -61,7 +61,15 @@ class ModelGraftManipulator {
     const {data} = event;
     if (data && data.type) {
       if (data.type === ThreeDOMMessageType.MUTATE) {
-        this[$modelGraft].mutate(data.id, data.property, data.value);
+        let applied = false;
+        const {mutationId} = data as MutateMessage;
+        try {
+          this[$modelGraft].mutate(data.id, data.property, data.value);
+          applied = true;
+        } finally {
+          this[$port].postMessage(
+              {type: ThreeDOMMessageType.MUTATION_RESULT, applied, mutationId});
+        }
       }
     }
   }
@@ -159,7 +167,7 @@ export class ThreeDOMExecutionContext extends EventTarget {
 
     port.postMessage(
         {
-          type: ThreeDOMMessageType.MODEL_CHANGED,
+          type: ThreeDOMMessageType.MODEL_CHANGE,
           model: modelGraft != null && modelGraft.model != null ?
               modelGraft.model.toJSON() :
               null

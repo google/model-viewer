@@ -14,7 +14,7 @@
  */
 
 import {ConstructedWithArguments, Constructor, Material, Model, PBRMetallicRoughness, ThreeDOMElement, ThreeDOMElementMap} from '../api.js';
-import {SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, ThreeDOMMessageType} from '../protocol.js';
+import {MutationResultMessage, SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, ThreeDOMMessageType} from '../protocol.js';
 
 export interface ModelKernelInterface {
   readonly model: Model;
@@ -43,6 +43,11 @@ type MaterialConstructor = Constructor<Material>&
 type PBRMetallicRoughnessConstructor =
     Constructor<PBRMetallicRoughness>&ConstructedWithArguments<
         [ModelKernelInterface, SerializedPBRMetallicRoughness]>;
+
+interface Deferred {
+  resolve: () => void;
+  reject: () => void;
+}
 
 /**
  * A constructor factory for a ModelKernel class. The ModelKernel is defined
@@ -76,6 +81,9 @@ export function defineModelKernel(
   const $localIdsByElement = Symbol('localIdsByElement');
   const $elementsByType = Symbol('elementsByType');
 
+  const $pendingMutations = Symbol('pendingMutations');
+  const $nextMutationId = Symbol('nextMutationId');
+
   /**
    * A ModelKernel is the core business logic implementation for a distinct
    * Model that has been exposed to a script execution context. The ModelKernel
@@ -100,6 +108,10 @@ export function defineModelKernel(
     protected[$port]: MessagePort;
 
     protected[$model]: Model;
+
+    protected[$pendingMutations]: Map<number, Deferred> = new Map();
+
+    protected[$nextMutationId] = 0;
 
     constructor(port: MessagePort, serialized: SerializedModel) {
       const types =
@@ -141,11 +153,21 @@ export function defineModelKernel(
 
       const id = this[$localIdsByElement].get(element);
 
-      return new Promise((resolve, _reject) => {
-        this[$port].postMessage(
-            {type: ThreeDOMMessageType.MUTATE, id, property, value});
-        // TODO(#1007): Actually wait for confirmation from host context
-        resolve();
+      return new Promise((resolve, reject) => {
+        const mutationId = this[$nextMutationId]++;
+        this[$port].postMessage({
+          type: ThreeDOMMessageType.MUTATE,
+          id,
+          property,
+          value,
+          mutationId,
+        });
+
+        // TODO(...): Add timeout to reject mutation:
+        this[$pendingMutations].set(mutationId, {
+          resolve,
+          reject,
+        });
       });
     }
 
@@ -207,8 +229,23 @@ export function defineModelKernel(
       this[$port].removeEventListener('message', this[$messageEventHandler]);
     }
 
-    protected[$onMessageEvent](_event: MessageEvent) {
-      // TODO(#1006): Handle future messages from the host execution context
+    protected[$onMessageEvent](event: MessageEvent) {
+      const {data} = event;
+
+      switch (data && data.type) {
+        case ThreeDOMMessageType.MUTATION_RESULT: {
+          const message: MutationResultMessage = data;
+          const {applied, mutationId} = message;
+          const pendingMutation = this[$pendingMutations].get(mutationId);
+
+          this[$pendingMutations].delete(mutationId);
+
+          if (pendingMutation != null) {
+            applied ? pendingMutation.resolve() : pendingMutation.reject();
+          }
+          break;
+        }
+      }
     }
   }
 
