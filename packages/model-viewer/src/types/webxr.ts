@@ -32,7 +32,7 @@ declare interface XRHitTestSource {
 }
 
 declare interface XRHitTestResult {
-  getPose(baseSpace: XRSpace): XRPose | null;
+  getPose(baseSpace: XRSpace): XRPose|null;
 }
 
 declare interface XR extends EventTarget {
@@ -47,8 +47,7 @@ declare interface XRRigidTransform {
   readonly inverse: XRRigidTransform;
 }
 
-declare interface XRSpace extends EventTarget {
-}
+declare interface XRSpace extends EventTarget {}
 
 declare interface XRReferenceSpace extends XRSpace {
   getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
@@ -124,7 +123,7 @@ declare interface XRSession extends EventTarget {
   renderState: XRRenderState;
   updateRenderState(state?: XRRenderStateInit): any;
   requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
-  requestHitTestSource(options: XRHitTestOptionsInit) : Promise<XRHitTestSource>;
+  requestHitTestSource(options: XRHitTestOptionsInit): Promise<XRHitTestSource>;
   inputSources: Array<XRInputSource>;
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;

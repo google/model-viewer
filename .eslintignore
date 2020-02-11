@@ -1,0 +1,11 @@
+**/node_modules
+packages/*/dist
+packages/**/*.d.ts
+packages/*/src/*-css.ts
+
+packages/*/karma.*.js
+
+packages/model-viewer/**/*
+packages/modelviewer.dev/**/*
+packages/render-fidelity-tools/**/*
+packages/shared-assets/**/*

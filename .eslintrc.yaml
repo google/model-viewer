@@ -1,0 +1,65 @@
+extends:
+  - eslint:recommended
+  - google
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:wc/recommended
+globals:
+  goog: false
+env:
+  browser: true
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+  - mocha
+  - wc
+parserOptions:
+  ecmaVersion: 2017
+  sourceType: module
+settings:
+  wc:
+    elementBaseClasses: ["BaseElement", "LitElement", "FormElement"]
+rules:
+  # Rules temporally disabled
+  "@typescript-eslint/explicit-function-return-type": off
+
+  # Rules disabled in favor of clang-format
+  "@typescript-eslint/indent": off
+  indent: off
+  max-len: off
+  block-spacing: off
+  # Remove if we switch away from clang-format:
+  keyword-spacing: off
+
+  "@typescript-eslint/explicit-member-accessibility": [error, {"accessibility": "no-public"}]
+
+  no-new: warn
+  quotes: [error, single, {"avoidEscape": true}]
+  no-var: error
+  curly: error
+  no-floating-decimal: error
+  # tsc handles this for us, and eslint has false positives
+  no-unused-vars: error
+  "@typescript-eslint/no-unused-vars":  off
+
+  require-jsdoc: off
+  valid-jsdoc: off
+
+  prefer-const: error
+  comma-dangle: off
+
+  mocha/handle-done-callback: error
+  mocha/no-exclusive-tests: error
+  mocha/no-identical-title: error
+  mocha/no-nested-tests: error
+  mocha/no-pending-tests: error
+  mocha/no-skipped-tests: error
+overrides:
+  - files: ["packages/**/*.ts"]
+    rules:
+      no-unused-vars: off
+      no-invalid-this: off
+      new-cap: off
+  - files: ["packages/**/*-spec.ts"]
+    rules:
+      "@typescript-eslint/no-non-null-assertion": off
