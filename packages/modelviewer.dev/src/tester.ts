@@ -37,8 +37,22 @@ dropControl.on('drop', ({files}: any) => load(files));
             if (useSkybox.checked) {
               viewer.skyboxImage = viewer.environmentImage;
             }
+            if (property === 'src') {
+              resetModel();
+            }
           });
     });
+
+function resetModel() {
+  viewer.reveal = 'auto';
+  viewer.dismissPoster();
+  downloadButton.disabled = true;
+  displayButton.disabled = true;
+  // remove hotspots
+  while (viewer.firstChild) {
+    viewer.removeChild(viewer.firstChild);
+  }
+}
 
 const useSkybox = document.getElementById('useSkybox') as HTMLInputElement;
 useSkybox.addEventListener('change', (_event) => {
@@ -87,7 +101,7 @@ export async function createPoster() {
   viewer.jumpCameraToGoal();
   await new Promise(resolve => requestAnimationFrame(() => resolve()));
   URL.revokeObjectURL(posterUrl);
-  const blob = await viewer.toBlob({mimeType: 'image/jpeg', idealAspect: true});
+  const blob = await viewer.toBlob({mimeType: 'image/png', idealAspect: true});
   posterUrl = URL.createObjectURL(blob);
   downloadButton.disabled = false;
   displayButton.disabled = false;
@@ -97,6 +111,7 @@ export function reloadScene() {
   viewer.poster = posterUrl;
   viewer.reveal = 'interaction';
   viewer.cameraOrbit = orbitString.textContent!;
+  viewer.jumpCameraToGoal();
   const src = viewer.src;
   viewer.src = null;
   viewer.src = src;
@@ -104,13 +119,69 @@ export function reloadScene() {
 
 export function downloadPoster() {
   a.href = posterUrl;
-  a.download = 'poster.jpg';
+  a.download = 'poster.png';
   a.click();
+}
+
+export function addHotspot() {
+  viewer.addEventListener('click', onClick);
+}
+
+let hotspotCounter = 0;
+let selectedHotspot: HTMLElement|undefined = undefined;
+
+export function removeHotspot() {
+  if (selectedHotspot != null) {
+    viewer.removeChild(selectedHotspot);
+  }
+}
+
+function select(hotspot: HTMLElement) {
+  for (let i = 0; i < viewer.children.length; i++) {
+    viewer.children[i].classList.remove('selected');
+  }
+  hotspot.classList.add('selected');
+  selectedHotspot = hotspot;
+}
+
+function onClick(event: MouseEvent) {
+  const rect = viewer.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const positionAndNormal = viewer.positionAndNormalFromPoint(x, y);
+
+  if (positionAndNormal == null) {
+    console.log('no hit result: mouse = ', x, ', ', y);
+    return;
+  }
+  const {position, normal} = positionAndNormal;
+
+  const hotspot = document.createElement('button');
+  hotspot.slot = `hotspot-${hotspotCounter++}`;
+  hotspot.classList.add('hotspot');
+  hotspot.dataset.position = position.toString();
+  if (normal != null) {
+    hotspot.dataset.normal = normal.toString();
+  }
+  viewer.appendChild(hotspot);
+
+  select(hotspot);
+  hotspot.addEventListener('click', () => {select(hotspot)});
+
+  const label = document.createElement('div');
+  label.classList.add('annotation');
+  label.textContent =
+      'data-position:\r\n' + position + '\r\ndata-normal:\r\n' + normal;
+  hotspot.appendChild(label);
+
+  viewer.removeEventListener('click', onClick);
 }
 
 (self as any).createPoster = createPoster;
 (self as any).reloadScene = reloadScene;
 (self as any).downloadPoster = downloadPoster;
+(self as any).addHotspot = addHotspot;
+(self as any).removeHotspot = removeHotspot;
 
 function load(fileMap: Map<string, File>) {
   let rootPath: string;
@@ -143,6 +214,7 @@ function load(fileMap: Map<string, File>) {
       const fileURL =
           typeof file === 'string' ? file : URL.createObjectURL(file);
       viewer.src = fileURL;
+      resetModel();
     }
   });
 
