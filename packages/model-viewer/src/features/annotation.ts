@@ -87,8 +87,7 @@ export class Hotspot extends CSS2DObject {
    * as the data-position attribute.
    */
   updatePosition(position?: string) {
-    if (position == null)
-      return;
+    if (position == null) return;
     const positionNodes = parseExpressions(position)[0].terms;
     for (let i = 0; i < 3; ++i) {
       this.position.setComponent(
@@ -101,8 +100,7 @@ export class Hotspot extends CSS2DObject {
    * data-normal attribute.
    */
   updateNormal(normal?: string) {
-    if (normal == null)
-      return;
+    if (normal == null) return;
     const normalNodes = parseExpressions(normal)[0].terms;
     for (let i = 0; i < 3; ++i) {
       this.normal.setComponent(
@@ -250,18 +248,19 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       // position / field-of-view updates (or alternatively a forced update)
       // QUESTION: is this already implemented elsewhere?
       const position = this[$annotationView].get('position');
-      if (!position
-        || this[$annotationView].get('update')
-        || this[$scene].activeCamera.position.distanceTo(position) !== 0
-        || this[$scene].camera.getEffectiveFOV() !== this[$annotationView].get('fov')) {
-        
+      if (!position || this[$annotationView].get('update') ||
+          this[$scene].activeCamera.position.distanceTo(position) !== 0 ||
+          this[$scene].camera.getEffectiveFOV() !==
+              this[$annotationView].get('fov')) {
         // resets the current annotation view
         this[$annotationView].set('update', 0);
-        this[$annotationView].set('position', this[$scene].camera.position.clone());
+        this[$annotationView].set(
+            'position', this[$scene].camera.position.clone());
         this[$annotationView].set('fov', this[$scene].camera.getEffectiveFOV());
 
         this[$updateHotspots]();
-        this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+        this[$annotationRenderer].render(
+            this[$scene], this[$scene].activeCamera);
       }
     }
 
@@ -292,14 +291,15 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
             const slot = <HTMLSlotElement>hotspot.element.firstElementChild;
             const event = new CustomEvent('hotspot-change', {
               bubbles: true,
-              detail: { visible: !hidden },
+              detail: {visible: !hidden},
             });
             if (hidden) {
               hotspot.element.classList.add('hide');
             } else {
               hotspot.element.classList.remove('hide');
             }
-            slot.assignedNodes().forEach((node: Node) => node.dispatchEvent(event));
+            slot.assignedNodes().forEach(
+                (node: Node) => node.dispatchEvent(event));
           }
         }
       }
