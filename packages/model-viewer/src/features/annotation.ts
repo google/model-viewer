@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
+import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
@@ -28,8 +28,11 @@ const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
+const $pixelPosition = Symbol('pixelPosition')
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
+
+const raycaster = new Raycaster();
 
 /**
  * Hotspots are configured by slot name, and this name must begin with "hotspot"
@@ -110,6 +113,8 @@ export class Hotspot extends CSS2DObject {
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
+  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+      {position: Vector3D, normal: Vector3D}|null
 }
 
 /**
@@ -142,6 +147,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
+
+    private[$pixelPosition] = new Vector2();
 
     constructor(...args: Array<any>) {
       super(...args);
@@ -199,6 +206,43 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$annotationView].set('update', 1);
     }
 
+    /**
+     * This method returns the world position and normal of the point on the
+     * mesh corresponding to the input pixel coordinates given relative to the
+     * model-viewer element. The position and normal are returned as strings in
+     * the format suitable for putting in a hotspot's data-position and
+     * data-normal attributes. If the mesh is not hit, position returns the
+     * empty string.
+     */
+    positionAndNormalFromPoint(pixelX: number, pixelY: number):
+        {position: Vector3D, normal: Vector3D}|null {
+      const {width, height} = this[$scene];
+      this[$pixelPosition]
+          .set(pixelX / width, pixelY / height)
+          .multiplyScalar(2)
+          .subScalar(1);
+      this[$pixelPosition].y *= -1;
+      raycaster.setFromCamera(this[$pixelPosition], this[$scene].getCamera());
+      const hits = raycaster.intersectObject(this[$scene], true);
+
+      if (hits.length === 0) {
+        return null;
+      }
+
+      const hit = hits[0];
+      if (hit.face == null) {
+        return null;
+      }
+
+      const worldToPivot =
+          new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
+      const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
+      const normal =
+          toVector3D(hit.face.normal.applyMatrix4(hit.object.matrixWorld)
+                         .applyMatrix4(worldToPivot));
+      return {position: position, normal: normal};
+    }
+
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
@@ -236,21 +280,24 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateHotspots]() {
       const {children} = this[$scene].pivot;
       for (let i = 0, l = children.length; i < l; i++) {
-        const object = children[i];
-        if (object instanceof Hotspot) {
+        const hotspot = children[i];
+        if (hotspot instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
-          view.sub(object.position);
-          const hide = view.dot(object.normal) < 0;
-          if (hide !== object.element.classList.contains('hide')) {
-            const slot = <HTMLSlotElement>object.element.firstElementChild;
+          view.sub(hotspot.position);
+          const normalWorld = hotspot.normal.clone().transformDirection(
+              this[$scene].pivot.matrixWorld);
+          // test state hasn't already been applied before updating / event
+          const hidden = view.dot(normalWorld) < 0;
+          if (hidden !== hotspot.element.classList.contains('hide')) {
+            const slot = <HTMLSlotElement>hotspot.element.firstElementChild;
             const event = new CustomEvent('hotspot-change', {
               bubbles: true,
-              detail: { hide },
+              detail: { visible: !hidden },
             });
-            if (hide) {
-              object.element.classList.add('hide');
+            if (hidden) {
+              hotspot.element.classList.add('hide');
             } else {
-              object.element.classList.remove('hide');
+              hotspot.element.classList.remove('hide');
             }
             slot.assignedNodes().forEach((node: Node) => node.dispatchEvent(event));
           }

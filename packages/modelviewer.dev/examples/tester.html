@@ -89,6 +89,31 @@
       margin-bottom: 20px;
     }
 
+    .hotspot{
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      border: none;
+      background-color: blue;
+    }
+
+    .annotation{
+      background-color: #888888;
+      position: absolute;
+      transform: translate(10px, 10px);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .hotspot.selected{
+      background-color: red;
+    }
+
+    .hotspot:not(.selected) > .annotation{
+      display: none;
+    }
+
     @media screen and (max-width: 320px) {
       #instructions {
         display: none;
@@ -160,7 +185,13 @@
     Click the model to dismiss the poster and interact. To save your poster, click:<br/>
     <button id="download" onclick="downloadPoster()">Download Poster</button><br/>
     camera-orbit:
-    <div id="cameraOrbit"></div>
+		<div id="cameraOrbit"></div><br/><br/>
+		
+		To calculate hotspot locations, click:<br/>
+		<button onclick="addHotspot()">Add Hotspot</button><br/>
+		Then click on the model.<br/>
+		To remove a hotspot, select it, then click:<br/>
+		<button onclick="removeHotspot()">Remove Hotspot</button><br/>
     
     </div> 
     <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"

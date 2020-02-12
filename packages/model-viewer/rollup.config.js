@@ -26,6 +26,7 @@ const onwarn = (warning, warn) => {
 };
 
 const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+const watchFiles = ['lib/**', '../3dom/lib/**'];
 
 const outputOptions = [{
   input: './lib/model-viewer.js',
@@ -36,7 +37,7 @@ const outputOptions = [{
     name: 'ModelViewerElement'
   },
   watch: {
-    include: 'lib/**',
+    include: watchFiles,
   },
   plugins,
   onwarn,
@@ -60,7 +61,7 @@ if (NODE_ENV !== 'development') {
           name: 'ModelViewerElement'
         },
         watch: {
-          include: 'lib/**',
+          include: watchFiles,
         },
         plugins,
         onwarn,
@@ -73,7 +74,7 @@ if (NODE_ENV !== 'development') {
           name: 'ModelViewerElementUnitTests'
         },
         watch: {
-          include: 'lib/**',
+          include: watchFiles,
         },
         plugins,
         onwarn,
@@ -86,7 +87,7 @@ if (NODE_ENV !== 'development') {
           name: 'ModelViewerElementUnitTests'
         },
         watch: {
-          include: 'lib/**',
+          include: watchFiles,
         },
         plugins,
         onwarn,

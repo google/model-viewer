@@ -6,6 +6,6 @@
 	],
 	"settings": {
 		"git.ignoreLimitWarning": true,
-		"typescript.tsdk": "render-fidelity-tools/node_modules/typescript/lib"
+		"typescript.tsdk": "node_modules/typescript/lib"
 	}
 }

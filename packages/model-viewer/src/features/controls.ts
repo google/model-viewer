@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -222,7 +222,7 @@ export declare interface ControlsInterface {
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
-  getCameraTarget(): Vector3;
+  getCameraTarget(): Vector3D;
   getFieldOfView(): number;
   jumpCameraToGoal(): void;
 }
@@ -336,7 +336,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       return {theta, phi, radius};
     }
 
-    getCameraTarget(): Vector3 {
+    getCameraTarget(): Vector3D {
       return this[$controls].getTarget();
     }
 
@@ -511,7 +511,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$controls].update(time, delta);
-      const target = this.getCameraTarget();
+      const target = this[$controls].getTarget();
       if (!this[$scene].pivotCenter.equals(target)) {
         this[$scene].pivotCenter.copy(target);
         this[$scene].setPivotRotation(this[$scene].getPivotRotation());
