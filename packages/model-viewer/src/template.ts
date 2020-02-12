@@ -96,6 +96,10 @@ canvas.show {
   transition: opacity 0.5s;
 }
 
+.annotation-wrapper ::slotted(*) {
+  pointer-events: initial;
+}
+
 .hide ::slotted(*) {
   opacity: var(--min-hotspot-opacity, 0.25);
 }
