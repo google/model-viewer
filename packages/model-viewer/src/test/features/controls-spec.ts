@@ -454,6 +454,32 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.be.equal(false);
         });
 
+        suite('after it has been dismissed', () => {
+          let promptElement: HTMLElement;
+
+          setup(async () => {
+            promptElement = (element as any)[$promptElement];
+            element.interactionPrompt = 'auto';
+
+            await until(() => promptElement.classList.contains('visible'));
+
+            interactWith(element[$canvas]);
+
+            await until(
+                () => promptElement.classList.contains('visible') === false);
+
+            settleControls(controls);
+          });
+
+          test('can be reset and displayed again', async () => {
+            element.resetInteractionPrompt();
+
+            await timePasses(element.interactionPromptThreshold + 100);
+
+            expect(promptElement.classList.contains('visible')).to.be.true;
+          });
+        });
+
         suite('when configured to be basic', () => {
           setup(async () => {
             element.interactionPromptStyle = 'basic';
