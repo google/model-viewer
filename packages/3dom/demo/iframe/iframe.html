@@ -1,0 +1,68 @@
+<html>
+<head>
+  <style>
+    #controls {
+      position: absolute;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+    }
+
+    button {
+      font-size: 2em;
+      margin: 0 0.25em;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button data-color="1,0,0,1">Red</button>
+    <button data-color="0,1,0,1">Green</button>
+    <button data-color="0,0,1,1">Blue</button>
+  </div>
+  <script type="3DOM">
+    console.log('Hello from the 3DOM worker!');
+    self.addEventListener('model-change', (event) => {
+      const {model} = event;
+      const [material] = model.materials;
+      console.log('model-change received in the 3DOM worker!');
+
+
+      self.addEventListener('message', (event) => {
+        console.log('message from the main thread: ' + event.data);
+        switch(event.data.action) {
+          case 'change-color':
+            console.log('Changing color to:', event.data.payload);
+            material.pbrMetallicRoughness.setBaseColorFactor(event.data.payload);
+            break;
+        }
+      });
+    });
+  </script>
+  <script type="module" src="iframe.js"></script>
+  <script type="module">
+    function threeDOMReady(e) {
+      window.removeEventListener('3domready', threeDOMReady);
+      const executionContext = e.detail.executionContext;
+      document.querySelector('#controls').addEventListener('click', (event) => {
+        const colorString = event.target.dataset.color;
+        if (!colorString) {
+          return;
+        }
+        const color = colorString.split(',')
+            .map(numberString => parseFloat(numberString));
+        executionContext.worker.postMessage({
+          action: 'change-color',
+          payload: color
+        });
+      });
+    }
+    window.addEventListener('3domready', threeDOMReady);
+  </script>
+</body>
+</html>

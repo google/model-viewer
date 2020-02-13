@@ -135,6 +135,10 @@ export class ThreeDOMExecutionContext extends EventTarget {
   protected[$workerInitializes]: Promise<MessagePort>;
   protected[$modelGraftManipulator]: ModelGraftManipulator|null = null;
 
+  protected createWorker(url: string): Worker {
+    return new Worker(url);
+  }
+
   constructor(capabilities: Array<ThreeDOMCapability>) {
     super();
 
@@ -142,7 +146,7 @@ export class ThreeDOMExecutionContext extends EventTarget {
     const url = URL.createObjectURL(
         new Blob([contextScriptSource], {type: 'text/javascript'}));
 
-    this[$worker] = new Worker(url);
+    this[$worker] = this.createWorker(url);
     this[$workerInitializes] = new Promise<MessagePort>((resolve) => {
       const {port1, port2} = new MessageChannel();
       const onMessageEvent = (event: MessageEvent) => {

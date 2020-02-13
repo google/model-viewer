@@ -40,6 +40,8 @@ const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
 
 export interface SceneGraphInterface {
   worklet: Worker|null;
+  setThreeDOMExecutionContext:
+      (executionContext: ThreeDOMExecutionContext) => void;
 }
 
 /**
@@ -118,6 +120,15 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     get worklet() {
       const executionContext = this[$executionContext];
       return executionContext != null ? executionContext.worker : null;
+    }
+
+    setThreeDOMExecutionContext(executionContext: ThreeDOMExecutionContext) {
+      if (this[$executionContext] != null) {
+        this[$executionContext]!.terminate();
+        this[$executionContext] = null;
+      }
+      this[$executionContext] = executionContext;
+      this[$updateExecutionContextModel]();
     }
 
     connectedCallback() {
