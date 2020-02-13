@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {Hotspot, HotspotVisibilityDetails} from '../../../features/annotation/hotspot.js';
-import {timePasses, waitForEvent} from '../../helpers.js';
+import {waitForEvent} from '../../helpers.js';
 
 const expect = chai.expect;
 
@@ -51,7 +51,6 @@ suite('Hotspot', () => {
         host.shadowRoot!.appendChild(hotspot.element);
         assigned.slot = 'foo';
         assigned.setAttribute('data-visibility-attribute', 'bar');
-        await timePasses(500);
       });
 
       suite('when shown', () => {
