@@ -142,7 +142,14 @@ export class Hotspot extends CSS2DObject {
       const visibilityAttribute = element.dataset.visibilityAttribute;
 
       if (visibilityAttribute != null) {
-        element.toggleAttribute(`data-${visibilityAttribute}`, this[$visible]);
+        const attributeName = `data-${visibilityAttribute}`;
+
+        // NOTE: IE11 doesn't support toggleAttribute
+        if (this[$visible]) {
+          element.setAttribute(attributeName, '');
+        } else {
+          element.removeAttribute(attributeName);
+        }
       }
 
       if (notify) {
