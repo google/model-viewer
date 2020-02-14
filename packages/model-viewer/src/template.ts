@@ -91,16 +91,20 @@ canvas.show {
   pointer-events: initial;
 }
 
-::slotted(*) {
-  opacity: 1;
-  transition: opacity 0.5s;
+.annotation-wrapper ::slotted(*) {
+  opacity: var(--max-hotspot-opacity, 1);
+  transition: opacity 0.3s;
+}
+
+.pointer-tumbling .annotation-wrapper ::slotted(*) {
+  pointer-events: none;
 }
 
 .annotation-wrapper ::slotted(*) {
   pointer-events: initial;
 }
 
-.hide ::slotted(*) {
+.annotation-wrapper.hide ::slotted(*) {
   opacity: var(--min-hotspot-opacity, 0.25);
 }
 

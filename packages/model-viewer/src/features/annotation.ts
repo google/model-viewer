@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
-import {CSS2DObject, CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import {Matrix4, Raycaster, Vector2} from 'three';
+import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
-import {normalizeUnit} from '../styles/conversions.js';
-import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
+
+import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
 
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
@@ -32,83 +32,6 @@ const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
 const raycaster = new Raycaster();
-
-/**
- * Hotspots are configured by slot name, and this name must begin with "hotspot"
- * to be recognized. The position and normal strings are in the form of the
- * camera-target attribute and default to "0m 0m 0m" and "0m 1m 0m",
- * respectively.
- */
-interface HotspotConfiguration {
-  name: string;
-  position?: string;
-  normal?: string;
-}
-
-/**
- * The Hotspot object is a reference-counted slot. If decrement() returns true,
- * it should be removed from the tree so it can be garbage-collected.
- */
-export class Hotspot extends CSS2DObject {
-  public normal: Vector3;
-  private referenceCount: number;
-
-  constructor(config: HotspotConfiguration) {
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('annotation-wrapper');
-    const slot = document.createElement('slot');
-    slot.name = config.name;
-    wrapper.appendChild(slot);
-    super(wrapper);
-    this.normal = new Vector3(0, 1, 0);
-    this.updatePosition(config.position);
-    this.updateNormal(config.normal);
-    this.referenceCount = 1;
-  }
-
-  /**
-   * Call this when adding elements to the same slot to keep track.
-   */
-  increment() {
-    ++this.referenceCount;
-  }
-
-  /**
-   * Call this when removing elements from the slot; returns true when the slot
-   * is unused.
-   */
-  decrement(): boolean {
-    return --this.referenceCount <= 0;
-  }
-
-  /**
-   * Change the position of the hotspot to the input string, in the same format
-   * as the data-position attribute.
-   */
-  updatePosition(position?: string) {
-    if (position == null)
-      return;
-    const positionNodes = parseExpressions(position)[0].terms;
-    for (let i = 0; i < 3; ++i) {
-      this.position.setComponent(
-          i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
-    }
-  }
-
-  /**
-   * Change the hotspot's normal to the input string, in the same format as the
-   * data-normal attribute.
-   */
-  updateNormal(normal?: string) {
-    if (normal == null)
-      return;
-    const normalNodes = parseExpressions(normal)[0].terms;
-    for (let i = 0; i < 3; ++i) {
-      this.normal.setComponent(
-          i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
-    }
-  }
-}
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -259,9 +182,9 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           const normalWorld = hotspot.normal.clone().transformDirection(
               this[$scene].pivot.matrixWorld);
           if (view.dot(normalWorld) < 0) {
-            hotspot.element.classList.add('hide');
+            hotspot.hide();
           } else {
-            hotspot.element.classList.remove('hide');
+            hotspot.show();
           }
         }
       }
@@ -281,7 +204,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         hotspot = new Hotspot({
           name: node.slot,
           position: node.dataset.position,
-          normal: node.dataset.normal
+          normal: node.dataset.normal,
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].pivot.add(hotspot);
@@ -302,6 +225,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (hotspot.decrement()) {
         this[$scene].pivot.remove(hotspot);
         this[$hotspotMap].delete(node.slot);
+        hotspot.dispose();
       }
     }
   }
