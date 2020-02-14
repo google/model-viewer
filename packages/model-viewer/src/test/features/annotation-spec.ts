@@ -131,23 +131,33 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       suite('with a camera', () => {
         let wrapper: HTMLElement;
 
-        setup(() => {
+        setup(async () => {
+          const hotspotObject2D = scene.pivot.children[numSlots - 1] as Hotspot;
+          hotspotObject2D.hide();
+
+          await rafPasses();
+
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
-          wrapper = (scene.pivot.children[numSlots - 1] as Hotspot).element;
+
+          wrapper = hotspotObject2D.element;
         });
 
         test('the hotspot is visible', async () => {
-          await rafPasses();
+          await waitForEvent(hotspot2, 'hotspot-visibility');
           expect(wrapper.classList.contains('hide')).to.be.false;
         });
 
         test('the hotspot is hidden after turning', async () => {
+          await waitForEvent(hotspot2, 'hotspot-visibility');
+
           element[$scene].setPivotRotation(Math.PI);
           element[$scene].updateMatrixWorld();
-          await rafPasses();
-          expect(wrapper.classList.contains('hide')).to.be.true;
+
+          await waitForEvent(hotspot2, 'hotspot-visibility');
+
+          expect(!!wrapper.classList.contains('hide')).to.be.true;
         });
       });
 
