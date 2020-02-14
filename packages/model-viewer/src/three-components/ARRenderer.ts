@@ -293,7 +293,9 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
-    this.scene.environment = this[$presentedScene]!.environment;
+    if (this.scene.environment !== this[$presentedScene]!.environment) {
+      this.scene.environment = this[$presentedScene]!.environment;
+    }
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
