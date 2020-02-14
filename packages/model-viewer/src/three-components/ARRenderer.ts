@@ -293,6 +293,8 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
+    this.scene.environment = this[$presentedScene]!.environment;
+
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
       this.threeRenderer.setViewport(
@@ -318,5 +320,7 @@ export class ARRenderer extends EventDispatcher {
       // this.threeRenderer.clearDepth();
       this.threeRenderer.render(this.scene, this.camera);
     }
+
+    this.scene.environment = null;
   }
 }
