@@ -203,6 +203,7 @@ export class ARRenderer extends EventDispatcher {
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
+    this.scene.environment = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -291,6 +292,10 @@ export class ARRenderer extends EventDispatcher {
 
     if (pose == null) {
       return;
+    }
+
+    if (this.scene.environment !== this[$presentedScene]!.environment) {
+      this.scene.environment = this[$presentedScene]!.environment;
     }
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
