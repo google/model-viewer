@@ -203,6 +203,7 @@ export class ARRenderer extends EventDispatcher {
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
+    this.scene.environment = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -322,7 +323,5 @@ export class ARRenderer extends EventDispatcher {
       // this.threeRenderer.clearDepth();
       this.threeRenderer.render(this.scene, this.camera);
     }
-
-    this.scene.environment = null;
   }
 }
