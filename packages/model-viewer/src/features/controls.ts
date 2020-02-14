@@ -228,6 +228,7 @@ export declare interface ControlsInterface {
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
   jumpCameraToGoal(): void;
+  resetInteractionPrompt(): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -353,6 +354,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     jumpCameraToGoal() {
       this[$jumpCamera] = true;
       this.requestUpdate($jumpCamera, false);
+    }
+
+    resetInteractionPrompt() {
+      this[$lastPromptOffset] = 0;
+      this[$promptElementVisibleTime] = Infinity;
+      this[$userPromptedOnce] = false;
+      this[$waitingToPromptUser] =
+          this.interactionPrompt === InteractionPromptStrategy.AUTO &&
+          this.cameraControls;
+      this[$shouldPromptUserToInteract] = true;
     }
 
     connectedCallback() {
