@@ -205,7 +205,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           name: node.slot,
           position: node.dataset.position,
           normal: node.dataset.normal,
-          visibilityAttribute: node.dataset.visibilityAttribute
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].pivot.add(hotspot);

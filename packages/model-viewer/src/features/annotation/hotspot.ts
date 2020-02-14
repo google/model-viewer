@@ -17,7 +17,6 @@ export interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
-  visibilityAttribute?: string;
 }
 
 const $slot = Symbol('slot');
@@ -144,6 +143,7 @@ export class Hotspot extends CSS2DObject {
       }
 
       const element = node as HTMLElement;
+      // Visibility attribute can be configured per-node in the hotspot:
       const visibilityAttribute = element.dataset.visibilityAttribute;
 
       if (visibilityAttribute != null) {
