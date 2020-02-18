@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GoogleWebComponents/model-viewer.git"
+    "url": "git+https://github.com/google/model-viewer.git"
   },
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
@@ -30,9 +30,9 @@
     "node": ">=12.0.0"
   },
   "bugs": {
-    "url": "https://github.com/GoogleWebComponents/model-viewer/issues"
+    "url": "https://github.com/google/model-viewer/issues"
   },
-  "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
+  "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
