@@ -14,6 +14,8 @@ Check out the README.md files for specific projects to get more details:
 
 🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
 
+📦 **[3DOM](packages/3dom)** • A generic scene graph API that enables potentially untrusted scripts to operate on 3D models 
+
 ## Installing `<model-viewer>`
 
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
