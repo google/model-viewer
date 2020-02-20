@@ -18,6 +18,7 @@ import {Mesh as ThreeMesh} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {SerializedModel} from '../../protocol.js';
+import {Model as ModelInterface} from '../api.js';
 
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
@@ -25,7 +26,6 @@ import {ThreeDOMElement} from './three-dom-element.js';
 
 
 const $modelUri = Symbol('modelUri');
-const $gltf = Symbol('gltf');
 const $materials = Symbol('materials');
 
 /**
@@ -33,16 +33,14 @@ const $materials = Symbol('materials');
  * Currently, the model only bothers itself with the materials in the Three.js
  * scene graph.
  */
-export class Model extends ThreeDOMElement {
-  protected[$modelUri] = '';
-  protected[$materials]: Array<Material> = [];
-  protected[$gltf]: GLTF;
+export class Model extends ThreeDOMElement implements ModelInterface {
+  private[$modelUri] = '';
+  private[$materials]: Array<Material> = [];
 
   constructor(graft: ModelGraft, modelUri: string, gltf: GLTF) {
     super(graft, gltf);
 
     this[$modelUri] = modelUri;
-    this[$gltf] = gltf;
 
     const visitedMaterials = new Set();
 
@@ -73,6 +71,7 @@ export class Model extends ThreeDOMElement {
    * of the scene graph.
    *
    * TODO(#1003): How do we handle non-active scenes?
+   * TODO(#1002): Desctibe and enforce traversal order
    */
   get materials() {
     return this[$materials];

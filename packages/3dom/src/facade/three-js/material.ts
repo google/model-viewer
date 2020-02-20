@@ -16,8 +16,9 @@
 import {Material as ThreeMaterial} from 'three';
 
 import {SerializedMaterial} from '../../protocol.js';
-import {ModelGraft} from './model-graft.js';
+import {Material as MaterialInterface} from '../api.js';
 
+import {ModelGraft} from './model-graft.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -25,11 +26,10 @@ import {ThreeDOMElement} from './three-dom-element.js';
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 
 /**
- * GraftMaterial
- * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#material
+ * Material facade implementation for Three.js materials
  */
-export class Material extends ThreeDOMElement {
-  protected[$pbrMetallicRoughness]: PBRMetallicRoughness;
+export class Material extends ThreeDOMElement implements MaterialInterface {
+  private[$pbrMetallicRoughness]: PBRMetallicRoughness;
 
   constructor(graft: ModelGraft, material: ThreeMaterial) {
     super(graft, material);

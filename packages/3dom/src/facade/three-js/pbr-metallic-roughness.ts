@@ -18,18 +18,19 @@ import {MeshStandardMaterial} from 'three';
 
 import {RGBA} from '../../api.js';
 import {SerializedPBRMetallicRoughness} from '../../protocol.js';
-import {ModelGraft} from './model-graft.js';
+import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from '../api.js';
 
+import {ModelGraft} from './model-graft.js';
 import {$relatedObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $threeMaterial = Symbol('threeMaterial');
 
 /**
- * GraftPBRMetallicRoughness
- * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#pbrmetallicroughness
+ * PBR material properties facade implementation for Three.js materials
  */
-export class PBRMetallicRoughness extends ThreeDOMElement {
-  protected get[$threeMaterial](): MeshStandardMaterial {
+export class PBRMetallicRoughness extends ThreeDOMElement implements
+    PBRMetallicRoughnessInterface {
+  private get[$threeMaterial](): MeshStandardMaterial {
     return this[$relatedObject] as MeshStandardMaterial;
   }
 

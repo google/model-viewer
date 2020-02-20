@@ -15,6 +15,8 @@
 
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import {ModelGraft as ModelGraftInterface} from '../api.js';
+
 import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -53,10 +55,10 @@ const $elementsByInternalId = Symbol('elementsByInternalId');
  * the host execution context counterpart to the ModelKernel in the scene graph
  * execution context.
  */
-export class ModelGraft extends EventTarget {
-  protected[$model]: Model;
+export class ModelGraft extends EventTarget implements ModelGraftInterface {
+  private[$model]: Model;
 
-  readonly[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
+  private[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
 
   constructor(modelUri: string, gltf: GLTF) {
     super();
@@ -81,7 +83,7 @@ export class ModelGraft extends EventTarget {
     this[$elementsByInternalId].set(element.internalID, element);
   }
 
-  mutate(id: number, property: string, value: unknown) {
+  async mutate(id: number, property: string, value: unknown) {
     // TODO(#1005): Manipulations probably need to be validated against
     // allowed capabilities here. We already do this on the scene graph
     // execution context side, but it would be safer to do it on both sides

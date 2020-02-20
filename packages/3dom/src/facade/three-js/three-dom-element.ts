@@ -18,6 +18,8 @@ import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';
+import {ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
+
 import {ModelGraft} from './model-graft.js';
 
 export const $relatedObject = Symbol('relatedObject');
@@ -32,11 +34,11 @@ const $id = Symbol('id');
  * a common interface to these elements in support of convenient
  * serializability.
  */
-export class ThreeDOMElement {
-  protected[$graft]: ModelGraft;
-  protected[$relatedObject]: Object3D|Material|GLTF;
+export class ThreeDOMElement implements ThreeDOMElementInterface {
+  private[$graft]: ModelGraft;
+  private[$relatedObject]: Object3D|Material|GLTF;
 
-  protected[$id]: number = getLocallyUniqueId();
+  private[$id]: number = getLocallyUniqueId();
 
   constructor(graft: ModelGraft, relatedObject: Object3D|Material|GLTF) {
     this[$relatedObject] = relatedObject;
