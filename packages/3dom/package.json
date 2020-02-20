@@ -56,7 +56,7 @@
     "mocha": "^5.2.0",
     "npm-run-all": "^4.1.5",
     "polymer-build": "^3.1.1",
-    "typescript": "^3.7.5"
+    "typescript": "3.7.3"
   },
   "dependencies": {
     "three": "^0.113.2"
