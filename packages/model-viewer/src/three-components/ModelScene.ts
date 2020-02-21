@@ -235,8 +235,9 @@ export class ModelScene extends Scene {
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
   setShadowIntensity(shadowIntensity: number) {
+    shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
-    if (shadowIntensity > 0 && this.model.hasModel()) {
+    if (this.model.hasModel()) {
       if (this.shadow == null) {
         this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
         this.pivot.add(this.shadow);

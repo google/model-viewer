@@ -55,6 +55,22 @@ suite('ModelScene', () => {
     });
   });
 
+  suite('with a model', () => {
+    setup(async () => {
+      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+    });
+
+    suite('setShadowIntensity', () => {
+      test('can increase intensity and reset it to zero', () => {
+        scene.setShadowIntensity(1);
+        expect(scene.shadow).to.be.ok;
+        expect(scene.shadow!.getIntensity()).to.be.equal(1);
+        scene.setShadowIntensity(0);
+        expect(scene.shadow!.getIntensity()).to.be.equal(0);
+      });
+    });
+  });
+
   suite('setSize', () => {
     test('updates visual and buffer size', () => {
       scene.setSize(500, 200);
