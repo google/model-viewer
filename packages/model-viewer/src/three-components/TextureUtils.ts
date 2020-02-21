@@ -160,10 +160,18 @@ export default class TextureUtils extends EventDispatcher {
 
       let [environmentMap, skybox] =
           await Promise.all([environmentMapLoads, skyboxLoads]);
+
+      if (environmentMap == null) {
+        throw new Error('Failed to load environment map.');
+      }
+
+      environmentMap = environmentMap!;
+
       this[$addMetadata](environmentMap.texture, environmentMapUrl, 'PMREM');
       if (skybox != null) {
         this[$addMetadata](skybox.texture, skyboxUrl, 'PMREM');
       }
+
 
       return {environmentMap, skybox};
     } finally {
@@ -171,7 +179,11 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  private[$addMetadata](texture: Texture, url: string|null, mapping: string) {
+  private[$addMetadata](
+      texture: Texture|null, url: string|null, mapping: string) {
+    if (texture == null) {
+      return;
+    }
     (texture as any).userData = {
       ...userData,
       ...({

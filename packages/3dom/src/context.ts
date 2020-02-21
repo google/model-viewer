@@ -19,7 +19,7 @@ import {generateAPI} from './context/generate-api.js';
 import {generateCapabilityFilter} from './context/generate-capability-filter.js';
 import {generateContextPatch} from './context/generate-context-patch.js';
 import {generateInitializer} from './context/generate-initializer.js';
-import {ModelGraft as ThreeJSModelGraft} from './facade/three-js/model-graft.js';
+import {ModelGraft} from './facade/api.js';
 import {MutateMessage, ThreeDOMMessageType} from './protocol.js';
 
 const $modelGraft = Symbol('modelGraft');
@@ -36,12 +36,12 @@ const $onMessageEvent = Symbol('onMessageEvent');
  */
 class ModelGraftManipulator {
   protected[$port]: MessagePort;
-  protected[$modelGraft]: AnyModelGraft;
+  protected[$modelGraft]: ModelGraft;
 
   protected[$messageEventHandler] = (event: MessageEvent) =>
       this[$onMessageEvent](event);
 
-  constructor(modelGraft: AnyModelGraft, port: MessagePort) {
+  constructor(modelGraft: ModelGraft, port: MessagePort) {
     this[$modelGraft] = modelGraft;
     this[$port] = port;
     this[$port].addEventListener('message', this[$messageEventHandler]);
@@ -78,10 +78,6 @@ class ModelGraftManipulator {
 
 const ALL_CAPABILITIES: Readonly<Array<ThreeDOMCapability>> =
     Object.freeze(['messaging', 'material-properties', 'fetch']);
-
-// TODO(#1004): Export an abstract interface for ModelGraft someday when we
-// want to support multiple rendering backends
-export type AnyModelGraft = ThreeJSModelGraft;
 
 /**
  * Constructs and returns a string representing a fully-formed scene graph
@@ -161,7 +157,7 @@ export class ThreeDOMExecutionContext extends EventTarget {
     });
   }
 
-  async changeModel(modelGraft: AnyModelGraft|null): Promise<void> {
+  async changeModel(modelGraft: ModelGraft|null): Promise<void> {
     const port = await this[$workerInitializes];
     const {port1, port2} = new MessageChannel();
 
