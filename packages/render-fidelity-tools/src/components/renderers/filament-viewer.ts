@@ -14,6 +14,7 @@
  */
 
 import {resolveDpr} from '@google/model-viewer/lib/utilities.js';
+import * as Filament from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -31,11 +32,6 @@ const basepath = (urlString: string): string => {
 };
 
 const IS_BINARY_RE = /\.glb$/;
-
-interface BoundingBox {
-  min: [number, number, number];
-  max: [number, number, number];
-}
 
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
@@ -61,20 +57,20 @@ export class FilamentViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
 
   private[$rendering]: boolean = false;
-  private[$engine]: any = null;
-  private[$scene]: any = null;
-  private[$renderer]: any = null;
-  private[$swapChain]: any = null;
-  private[$camera]: any = null;
-  private[$view]: any = null;
+  private[$engine]: Filament.Engine;
+  private[$scene]: Filament.Scene;
+  private[$renderer]: Filament.Renderer;
+  private[$swapChain]: Filament.SwapChain;
+  private[$camera]: Filament.Camera;
+  private[$view]: Filament.View;
 
-  private[$ibl]: any = null;
-  private[$skybox]: any = null;
-  private[$currentAsset]: any = null;
-  private[$directionalLight]: any = null;
+  private[$ibl]: Filament.IndirectLight|null;
+  private[$skybox]: Filament.Skybox|null;
+  private[$currentAsset]: Filament.gltfio$FilamentAsset|null;
+  private[$directionalLight]: Filament.Entity|null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
-  private[$boundingBox]: BoundingBox = {min: [0, 0, 0], max: [0, 0, 0]};
+  private[$boundingBox]: Filament.Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
 
   constructor() {
     super();
@@ -117,14 +113,17 @@ export class FilamentViewer extends LitElement {
     const {Filament} = self;
 
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-    this[$engine] = Filament.Engine.create(this[$canvas]);
-    this[$scene] = this[$engine].createScene();
-    this[$swapChain] = this[$engine].createSwapChain();
-    this[$renderer] = this[$engine].createRenderer();
-    this[$camera] = this[$engine].createCamera();
-    this[$view] = this[$engine].createView();
-    this[$view].setCamera(this[$camera]);
-    this[$view].setScene(this[$scene]);
+    const engine = Filament.Engine.create(this[$canvas]);
+    const view = engine.createView();
+
+    this[$engine] = engine;
+    this[$scene] = engine.createScene();
+    this[$swapChain] = engine.createSwapChain();
+    this[$renderer] = engine.createRenderer();
+    this[$camera] = engine.createCamera();
+    this[$view] = view;
+    view.setCamera(this[$camera]);
+    view.setScene(this[$scene]);
 
     this[$updateSize]();
   }
@@ -144,7 +143,7 @@ export class FilamentViewer extends LitElement {
     console.log('Lighting:', lightingBaseName);
 
     if (this[$currentAsset] != null) {
-      const entities = this[$currentAsset].getEntities();
+      const entities = this[$currentAsset]!.getEntities();
       const size = entities.size();
 
       for (let i = 0; i < size; ++i) {
@@ -158,18 +157,18 @@ export class FilamentViewer extends LitElement {
 
     if (this[$ibl] != null) {
       this[$scene].setIndirectLight(null);
-      this[$engine].destroyIndirectLight(this[$ibl]);
+      this[$engine].destroyIndirectLight(this[$ibl]!);
       this[$ibl] = null;
     }
 
     if (this[$skybox] != null) {
-      this[$engine].destroySkybox(this[$skybox]);
+      this[$engine].destroySkybox(this[$skybox]!);
       this[$skybox] = null;
     }
 
     if (this[$directionalLight] != null) {
-      this[$scene].remove(this[$directionalLight]);
-      this[$engine].destroyEntity(this[$directionalLight]);
+      this[$scene].remove(this[$directionalLight]!);
+      this[$engine].destroyEntity(this[$directionalLight]!);
       this[$directionalLight] = null;
     }
 
@@ -180,7 +179,8 @@ export class FilamentViewer extends LitElement {
     // environment map with a single bright pixel that represents a 1 lux
     // directional light.
     if (lightingBaseName === 'spot1Lux') {
-      this[$directionalLight] = self.Filament.EntityManager.get().create();
+      const entity = self.Filament.EntityManager.get().create();
+      this[$directionalLight] = entity;
       const x = 597;
       const y = 213;
       const theta = (x + 0.5) * Math.PI / 512;
@@ -195,14 +195,15 @@ export class FilamentViewer extends LitElement {
           .color([1, 1, 1])
           .intensity(1)
           .direction(lightDirection)
-          .build(this[$engine], this[$directionalLight]);
-      this[$scene].addEntity(this[$directionalLight]);
+          .build(this[$engine], entity);
+      this[$scene].addEntity(entity);
     } else {
       await fetchFilamentAssets([iblUrl, skyboxUrl]);
-      this[$ibl] = this[$engine].createIblFromKtx(iblUrl);
-      this[$scene].setIndirectLight(this[$ibl]);
-      this[$ibl].setIntensity(1.0);
-      this[$ibl].setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+      const ibl = this[$engine].createIblFromKtx(iblUrl);
+      this[$scene].setIndirectLight(ibl);
+      this[$ibl] = ibl
+      ibl.setIntensity(1.0);
+      ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
       this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
       this[$scene].setSkybox(this[$skybox]);
     }
@@ -212,17 +213,17 @@ export class FilamentViewer extends LitElement {
         loader.createAssetFromBinary(modelUrl) :
         loader.createAssetFromJson(modelUrl);
 
-    const finalize = (await new Promise((resolve) => {
-                       console.log('Loading resources for', modelUrl);
-                       this[$currentAsset].loadResources(
-                           resolve, () => {}, basepath(modelUrl));
-                     })) as () => void;
+    const asset = this[$currentAsset]!;
 
-    finalize();
+    await new Promise((resolve) => {
+      console.log('Loading resources for', modelUrl);
+      asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
+    });
+
     loader.delete();
 
-    this[$boundingBox] = this[$currentAsset].getBoundingBox() as BoundingBox;
-    this[$scene].addEntities(this[$currentAsset].getEntities());
+    this[$boundingBox] = asset.getBoundingBox();
+    this[$scene].addEntities(asset.getEntities());
 
     this[$updateSize]();
 
@@ -238,9 +239,7 @@ export class FilamentViewer extends LitElement {
   private[$render]() {
     this[$rendering] = true;
 
-    if (this[$renderer] != null) {
-      this[$renderer].render(this[$swapChain], this[$view]);
-    }
+    this[$renderer]?.render(this[$swapChain], this[$view]);
 
     self.requestAnimationFrame(() => {
       if (this[$rendering]) {
@@ -294,10 +293,10 @@ export class FilamentViewer extends LitElement {
     const far = 2 * Math.max(modelRadius, orbit.radius);
     const near = far / 1000;
 
-    this[$camera].setProjectionFov(
-        verticalFoV, aspect, near, far, Fov!.VERTICAL);
+    const camera = this[$camera];
+    camera.setProjectionFov(verticalFoV, aspect, near, far, Fov!.VERTICAL);
     const up = [0, 1, 0];
-    this[$camera].lookAt(eye, center, up);
-    this[$camera].setExposureDirect(1.0);
+    camera.lookAt(eye, center, up);
+    camera.setExposureDirect(1.0);
   }
 }
