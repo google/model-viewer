@@ -195,7 +195,7 @@ export class ThreeDOMExecutionContext extends EventTarget {
   async eval(scriptSource: string): Promise<void> {
     await this.import(URL.createObjectURL(
         new Blob([scriptSource], {type: 'text/javascript'})));
-  }
+  } /* end eval marker (do not remove) */
 
   /**
    * Load a script by URL in the scene graph execution context. Generally works
