@@ -93,6 +93,30 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       expect(element.worklet).to.be.ok;
     });
 
+    suite('in an external script file', () => {
+      test('eventually creates a new worklet', async () => {
+        const scriptText = 'console.log("Hello, worklet!");';
+        const url = URL.createObjectURL(
+            new Blob([scriptText], {type: 'text/javascript'}));
+
+        const script = document.createElement('script');
+        script.type = 'experimental-scene-graph-worklet';
+        script.src = url;
+
+        try {
+          element.appendChild(script);
+
+          await waitForEvent(element, 'worklet-created');
+
+          expect(element.worklet).to.be.ok;
+        } finally {
+          if (url != null) {
+            URL.revokeObjectURL(url);
+          }
+        }
+      });
+    });
+
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;

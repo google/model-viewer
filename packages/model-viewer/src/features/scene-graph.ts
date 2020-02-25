@@ -37,6 +37,7 @@ const $updateExecutionContextModel = Symbol('updateExecutionContextModel');
 const $modelGraft = Symbol('modelGraft');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
 const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
+const $isValid3DOMScript = Symbol('isValid3DOMScript');
 
 export interface SceneGraphInterface {
   worklet: Worker|null;
@@ -128,7 +129,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const script = this.querySelector<HTMLScriptElement>(
           `script[type="${SCENE_GRAPH_SCRIPT_TYPE}"]:last-of-type`);
 
-      if (script != null && script.textContent) {
+      if (script != null && this[$isValid3DOMScript](script)) {
         this[$onScriptElementAdded](script);
       }
     }
@@ -169,6 +170,12 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$updateExecutionContextModel]();
     }
 
+    [$isValid3DOMScript](node: Node) {
+      return node instanceof HTMLScriptElement &&
+          (node.textContent || node.src) &&
+          node.getAttribute('type') === SCENE_GRAPH_SCRIPT_TYPE
+    }
+
     [$onChildListMutation](records: Array<MutationRecord>) {
       if (this.parentNode == null) {
         // Ignore a lazily reported list of mutations if we are detached from
@@ -180,9 +187,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       for (const record of records) {
         for (const node of Array.from(record.addedNodes)) {
-          if (node instanceof HTMLScriptElement && node.textContent &&
-              node.getAttribute('type') === SCENE_GRAPH_SCRIPT_TYPE) {
-            lastScriptElement = node;
+          if (this[$isValid3DOMScript](node)) {
+            lastScriptElement = node as HTMLScriptElement;
           }
         }
       }
@@ -193,8 +199,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onScriptElementAdded](script: HTMLScriptElement) {
-      if (!script.textContent ||
-          script.getAttribute('type') !== SCENE_GRAPH_SCRIPT_TYPE) {
+      if (!this[$isValid3DOMScript](script)) {
         return;
       }
 
@@ -206,22 +211,34 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                   (capability): capability is ThreeDOMCapability =>
                       VALID_CAPABILITIES.has(capability as ThreeDOMCapability));
 
-      this[$createExecutionContext](script.textContent, allowList);
+      if (script.src) {
+        this[$createExecutionContext](script.src, allowList);
+      } else {
+        this[$createExecutionContext](
+            script.textContent!, allowList, {eval: true});
+      }
     }
 
-    [$createExecutionContext](
-        scriptSource: string, capabilities: Array<ThreeDOMCapability>) {
-      const executionContext = this[$executionContext];
+    async[$createExecutionContext](
+        scriptSource: string, capabilities: Array<ThreeDOMCapability>,
+        options = {eval: false}) {
+      let executionContext = this[$executionContext];
 
       if (executionContext != null) {
         executionContext.terminate();
       }
 
-      this[$executionContext] = new ThreeDOMExecutionContext(capabilities);
-      this[$executionContext]!.eval(scriptSource);
+      this[$executionContext] = executionContext =
+          new ThreeDOMExecutionContext(capabilities);
 
       this.dispatchEvent(new CustomEvent(
           'worklet-created', {detail: {worklet: this.worklet}}));
+
+      if (options.eval) {
+        await executionContext.eval(scriptSource);
+      } else {
+        await executionContext.import(scriptSource);
+      }
 
       this[$updateExecutionContextModel]();
     }

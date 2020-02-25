@@ -40,6 +40,34 @@ suite('context', () => {
       }
     });
 
+    test('can import external script', async () => {
+      const context = new ThreeDOMExecutionContext(['messaging']);
+      const scriptText = 'self.postMessage("hello")';
+      const blob = new Blob([scriptText], {type: 'text/javascript'});
+      const url = URL.createObjectURL(blob);
+
+      try {
+        const scriptEvaluates = new Promise((resolve) => {
+          context.worker.addEventListener('message', (event) => {
+            expect(event.data).to.be.equal('hello');
+            resolve();
+          }, {once: true});
+        });
+
+        context.import(url);
+
+        await scriptEvaluates;
+      } finally {
+        if (context != null) {
+          context.terminate();
+        }
+
+        if (url != null) {
+          URL.revokeObjectURL(url);
+        }
+      }
+    });
+
     suite('when the model changes', () => {
       test('dispatches an event in the worker', async () => {
         const modelGraft = new ModelGraft('', createFakeGLTF());

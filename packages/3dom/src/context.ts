@@ -193,9 +193,17 @@ export class ThreeDOMExecutionContext extends EventTarget {
    * Workers, so for now all scripts must be valid non-module scripts.
    */
   async eval(scriptSource: string): Promise<void> {
+    await this.import(URL.createObjectURL(
+        new Blob([scriptSource], {type: 'text/javascript'})));
+  } /* end eval marker (do not remove) */
+
+  /**
+   * Load a script by URL in the scene graph execution context. Generally works
+   * the same as eval, but is generally safer because it allows you full control
+   * of the script text. Like eval, does not support module scripts.
+   */
+  async import(url: string): Promise<void> {
     const port = await this[$workerInitializes];
-    const url = URL.createObjectURL(
-        new Blob([scriptSource], {type: 'text/javascript'}));
     port.postMessage({type: ThreeDOMMessageType.IMPORT_SCRIPT, url});
   }
 
