@@ -193,9 +193,12 @@ export declare type Constructor<T = object> = {
   new (...args: any[]): T; prototype: T;
 };
 
+/**
+ * A constructor that accepts a specific set of arguments during construction
+ */
 export declare type ConstructedWithArguments<T extends unknown[] = unknown[]> =
     {
-      new (...args: T): unknown;
+      new (...args: T): object;
     };
 
 /**
