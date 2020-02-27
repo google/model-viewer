@@ -238,12 +238,14 @@ export class ModelScene extends Scene {
     shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
     if (this.model.hasModel()) {
-      if (this.shadow == null) {
+      if (this.shadow == null && shadowIntensity > 0) {
         this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
         this.pivot.add(this.shadow);
         // showShadowHelper(this);
       }
-      this.shadow.setIntensity(shadowIntensity);
+      if (this.shadow != null) {
+        this.shadow.setIntensity(shadowIntensity);
+      }
     }
   }
 
