@@ -47,10 +47,6 @@ template.innerHTML = `
   top: 0;
 }
 
-.annotation-wrapper {
-  pointer-events: auto;
-}
-
 .input {
   width: 100%;
   height: 100%;
@@ -102,12 +98,20 @@ canvas.show {
   pointer-events: initial;
 }
 
-::slotted(*) {
-  opacity: 1;
-  transition: opacity 0.5s;
+.annotation-wrapper ::slotted(*) {
+  opacity: var(--max-hotspot-opacity, 1);
+  transition: opacity 0.3s;
 }
 
-.hide ::slotted(*) {
+.pointer-tumbling .annotation-wrapper ::slotted(*) {
+  pointer-events: none;
+}
+
+.annotation-wrapper ::slotted(*) {
+  pointer-events: initial;
+}
+
+.annotation-wrapper.hide ::slotted(*) {
   opacity: var(--min-hotspot-opacity, 0.25);
 }
 

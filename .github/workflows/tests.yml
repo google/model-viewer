@@ -1,0 +1,53 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Get npm cache directory
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+
+    - name: Cache npm packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.npm-cache.outputs.dir }}
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: NPM install
+      run: npm ci
+
+    - name: Lint TypeScript sources
+      run: npm run lint
+
+    - name: Bootstrap packages
+      run: npm run bootstrap
+
+    - name: Build packages
+      run: npm run build
+
+    - name: Unit tests
+      env:
+        SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+        SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      run: |
+        # Don't run Sauce from a forked repo, since the code may not be trusted
+        # and therefore secrets like the Sauce password are not available.
+        # GITHUB_HEAD_REF is only defined when building a fork.
+        if [ ! "$GITHUB_HEAD_REF" ]; then
+          export USE_SAUCE=true
+          export SAUCE_BUILD_ID=model-viewer-tests-${GITHUB_EVENT_NAME}-${GITHUB_ACTION}-${GITHUB_SHA}
+          export SAUCE_TUNNEL_ID=${SAUCE_BUILD_ID}-tunnel
+        fi
+        npm run test:ci

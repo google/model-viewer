@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {FrontSide, Material, Object3D, Scene, Shader, Vector3} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {alphaChunk} from './shader-chunk/alphatest_fragment.glsl.js';

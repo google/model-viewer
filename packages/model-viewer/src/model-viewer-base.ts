@@ -178,7 +178,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     // NOTE(cdata): The canonical ShadyCSS examples suggest that the Shadow Root
     // should be created after the invocation of ShadyCSS.styleElement
-    this.attachShadow({mode: 'open', delegatesFocus: true});
+    this.attachShadow({mode: 'open'});
 
     const shadowRoot = this.shadowRoot!;
 

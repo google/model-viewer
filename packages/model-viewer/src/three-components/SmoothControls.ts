@@ -20,7 +20,7 @@ export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'zoom';
 
-interface Pointer {
+export interface Pointer {
   clientX: number, clientY: number,
 }
 
@@ -60,7 +60,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   interactionPolicy: 'always-allow'
 });
 
-const $velocity = Symbol('v');
+const $velocity = Symbol('velocity');
 
 // Internal orbital position state
 const $spherical = Symbol('spherical');
@@ -85,6 +85,7 @@ const $userAdjustOrbit = Symbol('userAdjustOrbit');
 const $isUserChange = Symbol('isUserChange');
 const $isStationary = Symbol('isMoving');
 const $moveCamera = Symbol('moveCamera');
+const $isUserPointing = Symbol('isUserPointing');
 
 // Pointer state
 const $pointerIsDown = Symbol('pointerIsDown');
@@ -147,6 +148,11 @@ export interface ChangeEvent extends ThreeEvent {
    * none
    */
   source: ChangeSource,
+}
+
+export interface PointerChangeEvent extends ThreeEvent {
+  type: 'pointer-change-start'|'pointer-change-end';
+  pointer: Pointer;
 }
 
 /**
@@ -220,6 +226,7 @@ export class SmoothControls extends EventDispatcher {
 
   private[$options]: SmoothControlsOptions;
   private[$isUserChange] = false;
+  private[$isUserPointing] = false;
 
   private[$spherical] = new Spherical();
   private[$goalSpherical] = new Spherical();
@@ -666,11 +673,17 @@ export class SmoothControls extends EventDispatcher {
     this[$lastPointerPosition].clientX = clientX;
     this[$lastPointerPosition].clientY = clientY;
 
+    if (this[$isUserPointing] === false) {
+      this[$isUserPointing] = true;
+      this.dispatchEvent({type: 'pointer-change-start', pointer: {...pointer}});
+    }
+
     return this[$userAdjustOrbit](deltaTheta, deltaPhi, 0, 0);
   }
 
   private[$handlePointerDown](event: MouseEvent|TouchEvent) {
     this[$pointerIsDown] = true;
+    this[$isUserPointing] = false;
 
     if (TOUCH_EVENT_RE.test(event.type)) {
       const {touches} = event as TouchEvent;
@@ -701,6 +714,13 @@ export class SmoothControls extends EventDispatcher {
   private[$handlePointerUp](_event: MouseEvent|TouchEvent) {
     this.element.style.cursor = 'grab';
     this[$pointerIsDown] = false;
+
+    if (this[$isUserPointing]) {
+      this.dispatchEvent({
+        type: 'pointer-change-end',
+        pointer: {...this[$lastPointerPosition]}
+      });
+    }
   }
 
   private[$handleWheel](event: Event) {

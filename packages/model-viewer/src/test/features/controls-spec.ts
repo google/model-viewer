@@ -15,7 +15,7 @@
 
 import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$input, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $input, $scene} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -452,6 +452,32 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const promptElement: HTMLElement = (element as any)[$promptElement];
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
+        });
+
+        suite('after it has been dismissed', () => {
+          let promptElement: HTMLElement;
+
+          setup(async () => {
+            promptElement = (element as any)[$promptElement];
+            element.interactionPrompt = 'auto';
+
+            await until(() => promptElement.classList.contains('visible'));
+
+            interactWith(element[$canvas]);
+
+            await until(
+                () => promptElement.classList.contains('visible') === false);
+
+            settleControls(controls);
+          });
+
+          test('can be reset and displayed again', async () => {
+            element.resetInteractionPrompt();
+
+            await timePasses(element.interactionPromptThreshold + 100);
+
+            expect(promptElement.classList.contains('visible')).to.be.true;
+          });
         });
 
         suite('when configured to be basic', () => {

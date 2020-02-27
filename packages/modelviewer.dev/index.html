@@ -398,6 +398,10 @@
               <p>Sets the opacity of hidden hotspots. Defaults to 0.25.</p>
             </li>
             <li>
+              <div>--max-hotspot-opacity</div>
+              <p>Sets the opacity of visible hotspots. Defaults to 1.</p>
+            </li>
+            <li>
               <div>--poster-color</div>
               <p>Sets the background-color of the poster. Falls back to
               --background-color if set. Defaults to #fff.</p>
@@ -552,6 +556,16 @@
               is enabled. The new value of the turntable rotation will be 0 after
               this method is invoked, but the model may not update until the next
               render frame.</p>
+            </li>
+            <li>
+              <div>resetInteractionPrompt()</div>
+              <p>Typically, the interaction prompt will only display once and then
+              stops displaying after the user interacts with the 3D model for the
+              first time. You can invoke this method in order to reset the interaction
+              prompt after it has already been displayed. Doing so will cause it to
+              display once again when the interaction-prompt display conditions have
+              been met.
+              </p>
             </li>
             <li>
               <div>toDataURL(type, encoderOptions)</div>
@@ -748,7 +762,7 @@
               <td><img class="icon-check"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
+              <td><img class="icon-check"></td>
             </tr>
             <tr>
               <td>:focus-visible</td>
