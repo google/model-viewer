@@ -75,8 +75,15 @@ export class ARRenderer extends EventDispatcher {
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
-    const session: XRSession = await navigator.xr!.requestSession!(
-        'immersive-ar', {requiredFeatures: ['hit-test']});
+    const session: XRSession =
+        await navigator.xr!.requestSession!('immersive-ar', {
+          requiredFeatures: ['hit-test'],
+          optionalFeatures: ['dom-overlay'],
+          domOverlay: {
+            root: document.querySelector('model-viewer')!.shadowRoot!
+                      .querySelector('div.annotation-container')
+          }
+        });
 
     const gl: WebGLRenderingContext =
         assertContext(this.threeRenderer.getContext());
@@ -261,7 +268,8 @@ export class ARRenderer extends EventDispatcher {
     // Get current input sources. For now, only 'screen' input is supported,
     // which is only added to the session's active input sources immediately
     // before `selectstart` and removed immediately after `selectend` event.
-    // If we have a 'screen' source here, it means the output canvas was tapped.
+    // If we have a 'screen' source here, it means the output canvas was
+    // tapped.
     const sources = Array.from(session.inputSources)
                         .filter(input => input.targetRayMode === 'screen');
 
