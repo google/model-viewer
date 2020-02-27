@@ -134,13 +134,15 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    disconnectedCallback() {
+    async disconnectedCallback() {
       super.disconnectedCallback();
 
       this[$mutationObserver].disconnect();
 
-      if (this[$executionContext] != null) {
-        this[$executionContext]!.terminate();
+      const executionContext = this[$executionContext];
+
+      if (executionContext != null) {
+        await executionContext.terminate();
         this[$executionContext] = null;
       }
     }
@@ -225,7 +227,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       let executionContext = this[$executionContext];
 
       if (executionContext != null) {
-        executionContext.terminate();
+        await executionContext.terminate();
       }
 
       this[$executionContext] = executionContext =
