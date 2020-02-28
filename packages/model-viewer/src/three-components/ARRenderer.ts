@@ -22,16 +22,20 @@ import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
+// This is necessary because our default shadowIntensity is very light to look
+// nice on a white background. It is invisible against a camera image unless it
+// is darkened.
+const AR_SHADOW_MULTIPLIER = 5;
+
 const $presentedScene = Symbol('presentedScene');
 
+const $lastTick = Symbol('lastTick');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
-
-const $outputContext = Symbol('outputContext');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
@@ -41,7 +45,6 @@ const vector3 = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
-  public inputContext: WebGLRenderingContext;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
   public scene: Scene = new Scene();
@@ -49,7 +52,7 @@ export class ARRenderer extends EventDispatcher {
   public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
-  private[$outputContext]: WebGLRenderingContext|null = null;
+  private[$lastTick]: number = performance.now();
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
@@ -60,7 +63,6 @@ export class ARRenderer extends EventDispatcher {
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-    this.inputContext = renderer.context3D!;
 
     this.camera.matrixAutoUpdate = false;
 
@@ -85,14 +87,11 @@ export class ARRenderer extends EventDispatcher {
           }
         });
 
-    const gl: WebGLRenderingContext =
-        assertContext(this.threeRenderer.getContext());
-
+    const gl = assertContext(this.renderer.context3D);
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
     // loss according to the spec, though current implementations don't do so.
     await gl.makeXRCompatible();
-    this[$outputContext] = gl;
 
     session.updateRenderState(
         {baseLayer: new XRWebGLLayer(session, gl, {alpha: true})});
@@ -201,7 +200,12 @@ export class ARRenderer extends EventDispatcher {
     if (this[$presentedScene] != null) {
       this.dolly.remove(this[$presentedScene]!);
       this[$presentedScene]!.isDirty = true;
+      const {shadow, shadowIntensity} = this[$presentedScene]!;
+      if (shadow != null) {
+        shadow.setIntensity(shadowIntensity);
+      }
     }
+    this.reticle.reset();
     // The renderer's render method automatically updates
     // the device pixel ratio, but only updates the three.js renderer
     // size if there's a size mismatch. Reset the size to force that
@@ -222,10 +226,6 @@ export class ARRenderer extends EventDispatcher {
    */
   get isPresenting(): boolean {
     return this[$presentedScene] != null;
-  }
-
-  get outputContext() {
-    return this[$outputContext];
   }
 
   async placeModel() {
@@ -288,7 +288,7 @@ export class ARRenderer extends EventDispatcher {
         (time, frame) => this[$onWebXRFrame](time, frame));
   }
 
-  [$onWebXRFrame](_time: number, frame: XRFrame) {
+  [$onWebXRFrame](time: number, frame: XRFrame) {
     const {session} = frame;
 
     const pose = frame.getViewerPose(this[$refSpace]!);
@@ -298,8 +298,17 @@ export class ARRenderer extends EventDispatcher {
 
     this[$tick]();
 
-    if (pose == null) {
+    if (pose == null || this[$presentedScene] == null) {
       return;
+    }
+
+    const delta = time - this[$lastTick];
+    this.renderer.preRender(this[$presentedScene]!, time, delta);
+    this[$lastTick] = time;
+
+    const {shadow, shadowIntensity} = this[$presentedScene]!;
+    if (shadow != null) {
+      shadow.setIntensity(shadowIntensity * AR_SHADOW_MULTIPLIER);
     }
 
     if (this.scene.environment !== this[$presentedScene]!.environment) {

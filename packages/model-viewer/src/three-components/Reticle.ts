@@ -53,28 +53,31 @@ export default class Reticle extends Object3D {
     return this._hitMatrix;
   }
 
+  reset() {
+    this.hitTestSourceRequest = null;
+    this.hitTestSource = null;
+    this._hitMatrix = null;
+  }
+
   /**
    * Fires a hit test in the middle of the screen and places the reticle
    * upon the surface if found.
-   *
-   * @param {XRFRame} frame
-   * @param {XRFrameOfReference} frameOfRef
    */
   async update(
-      _session: XRSession, _frame: XRFrame,
-      _viewerReferenceSpace: XRReferenceSpace, _frameOfRef: XRReferenceSpace) {
-    if (!this.hitTestSourceRequest) {
+      session: XRSession, frame: XRFrame,
+      viewerReferenceSpace: XRReferenceSpace, frameOfRef: XRReferenceSpace) {
+    if (this.hitTestSourceRequest == null) {
       this.hitTestSourceRequest =
-          _session.requestHitTestSource({space: _viewerReferenceSpace})
+          session.requestHitTestSource({space: viewerReferenceSpace})
               .then(hitTestSource => {
                 this.hitTestSource = hitTestSource;
               });
-    } else if (this.hitTestSource) {
-      const hitTestResults = _frame.getHitTestResults(this.hitTestSource);
-      if (hitTestResults.length) {
+    } else if (this.hitTestSource != null) {
+      const hitTestResults = frame.getHitTestResults(this.hitTestSource);
+      if (hitTestResults.length > 0) {
         const hit = hitTestResults[0];
         this._hitMatrix =
-            new Matrix4().fromArray(hit.getPose(_frameOfRef)!.transform.matrix);
+            new Matrix4().fromArray(hit.getPose(frameOfRef)!.transform.matrix);
 
         // Now apply the position from the hitMatrix onto our model
         this.position.setFromMatrixPosition(this._hitMatrix);

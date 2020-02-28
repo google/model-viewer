@@ -201,6 +201,23 @@ export class Renderer extends EventDispatcher {
     return this[$arRenderer] != null && this[$arRenderer].isPresenting;
   }
 
+  preRender(scene: ModelScene, t: number, delta: number) {
+    const {element, exposure, shadow} = scene;
+
+    element[$tick](t, delta);
+
+    const exposureIsNumber =
+        typeof exposure === 'number' && !(self as any).isNaN(exposure);
+    this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+
+    const shadowNeedsUpdate = this.threeRenderer.shadowMap.needsUpdate;
+    if (shadow != null) {
+      this.threeRenderer.shadowMap.needsUpdate =
+          shadowNeedsUpdate || shadow.needsUpdate;
+      shadow.needsUpdate = false;
+    }
+  }
+
   render(t: number) {
     if (!this.canRender || this.isPresenting) {
       return;
@@ -214,14 +231,17 @@ export class Renderer extends EventDispatcher {
     }
 
     for (let scene of this.scenes) {
-      const {element, width, height, context} = scene;
-      element[$tick](t, delta);
-
-      if (!scene.visible || !scene.isDirty || scene.paused) {
+      if (!scene.visible || scene.paused) {
         continue;
       }
 
-      const camera = scene.getCamera();
+      this.preRender(scene, t, delta);
+
+      if (!scene.isDirty) {
+        continue;
+      }
+
+      const {width, height, context} = scene;
 
       if (width > this.width || height > this.height) {
         const maxWidth = Math.max(width, this.width);
@@ -229,25 +249,12 @@ export class Renderer extends EventDispatcher {
         this.setRendererSize(maxWidth, maxHeight);
       }
 
-      const {exposure, shadow} = scene;
-      const exposureIsNumber =
-          typeof exposure === 'number' && !(self as any).isNaN(exposure);
-      this.threeRenderer.toneMappingExposure =
-          exposureIsNumber ? exposure : 1.0;
-
-      const shadowNeedsUpdate = this.threeRenderer.shadowMap.needsUpdate;
-      if (shadow != null) {
-        this.threeRenderer.shadowMap.needsUpdate =
-            shadowNeedsUpdate || shadow.needsUpdate;
-        shadow.needsUpdate = false;
-      }
-
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(0, 0, width, height);
-      this.threeRenderer.render(scene, camera);
+      this.threeRenderer.render(scene, scene.getCamera());
 
       const widthDPR = width * dpr;
       const heightDPR = height * dpr;
