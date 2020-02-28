@@ -41,7 +41,7 @@
         },
         {
           "browserName": "safari",
-          "appiumVersion": "1.13.0",
+          "appiumVersion": "1.15.0",
           "platformName": "iOS",
           "platformVersion": "13.0",
           "deviceName": "iPhone XS Simulator",
