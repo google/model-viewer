@@ -68,6 +68,12 @@ suite('ModelScene', () => {
         scene.setShadowIntensity(0);
         expect(scene.shadow!.getIntensity()).to.be.equal(0);
       });
+
+      test('shadow is only created when intensity is greater than zero', () => {
+        expect(scene.shadow).to.be.not.ok;
+        scene.setShadowIntensity(1);
+        expect(scene.shadow).to.be.ok;
+      });
     });
   });
 
