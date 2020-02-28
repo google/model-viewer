@@ -65,6 +65,14 @@ export function defineMaterial(ThreeDOMElement: Constructor<ThreeDOMElement>):
     get pbrMetallicRoughness() {
       return this[$pbrMetallicRoughness];
     }
+
+    /**
+     * The name of the material. Note that names are optional and not
+     * guaranteed to be unique.
+     */
+    get name() {
+      return this[$name];
+    }
   }
 
   return Material;

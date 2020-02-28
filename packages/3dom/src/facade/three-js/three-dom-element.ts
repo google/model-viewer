@@ -71,12 +71,17 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    */
   get name() {
     const relatedObject = this[$relatedObject];
-    if ((relatedObject as Object3D).isObject3D ||
-        (relatedObject as Material).isMaterial) {
-      return (relatedObject as Object3D | Material).userData ?
-          (relatedObject as Object3D | Material).userData.name :
-          null;
+
+    // NOTE: Some Three.js object names are modified from the names found in the
+    // glTF. Special casing is handled here, but might be better moved to
+    // subclasses down the road:
+    if ((relatedObject as Material).isMaterial) {
+      // Material names can be safely referenced directly from the Three.js
+      // object.
+      // @see: https://github.com/mrdoob/three.js/blob/790811db742ea9d7c54fe28f83865d7576f14134/examples/js/loaders/GLTFLoader.js#L2162
+      return (relatedObject as Material).name;
     }
+
     return null;
   }
 
