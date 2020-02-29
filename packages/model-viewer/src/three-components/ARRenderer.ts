@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer,} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
+import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {ModelScene} from './ModelScene.js';
@@ -30,6 +31,7 @@ const AR_SHADOW_MULTIPLIER = 5;
 const $presentedScene = Symbol('presentedScene');
 
 const $lastTick = Symbol('lastTick');
+const $turntableRotation = Symbol('turntableRotation');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
@@ -47,17 +49,16 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public scene: Scene = new Scene();
-  public dolly: Object3D = new Object3D();
   public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
-  private[$lastTick]: number = performance.now();
+  private[$lastTick]: number|null = null;
+  private[$turntableRotation]: number|null = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
-  private[$presentedScene]: ModelScene|null = null;
+  public[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
   constructor(private renderer: Renderer) {
@@ -65,9 +66,6 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer = renderer.threeRenderer;
 
     this.camera.matrixAutoUpdate = false;
-
-    this.scene.add(this.reticle);
-    this.scene.add(this.dolly);
   }
 
   initializeRenderer() {
@@ -144,8 +142,13 @@ export class ARRenderer extends EventDispatcher {
     }
 
     scene.setCamera(this.camera);
+    scene.add(this.reticle);
 
     this[$presentedScene] = scene;
+    this[$lastTick] = performance.now();
+    const element = scene.element as ModelViewerElement;
+    this[$turntableRotation] = element.turntableRotation;
+    element.resetTurntableRotation();
 
     this.initializeRenderer();
 
@@ -199,9 +202,10 @@ export class ARRenderer extends EventDispatcher {
     // necessary and sufficient?
     const scene = this[$presentedScene];
     if (scene != null) {
-      this.dolly.remove(scene);
+      scene.remove(this.reticle);
       scene.isDirty = true;
       scene.setCamera(scene.camera);
+      scene.setPivotRotation(this[$turntableRotation]!);
       const {shadow, shadowIntensity} = scene;
       if (shadow != null) {
         shadow.setIntensity(shadowIntensity);
@@ -216,7 +220,6 @@ export class ARRenderer extends EventDispatcher {
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
-    this.scene.environment = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -239,17 +242,14 @@ export class ARRenderer extends EventDispatcher {
 
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
-      const presentedScene = this[$presentedScene]!;
+      const scene = this[$presentedScene]!;
       const hitMatrix = this.reticle.hitMatrix;
 
-      this.dolly.position.setFromMatrixPosition(hitMatrix);
+      scene.pivot.position.setFromMatrixPosition(hitMatrix);
 
       // Orient the dolly/model to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      this.dolly.lookAt(camPosition.x, this.dolly.position.y, camPosition.z);
-      this.dolly.rotateY(-presentedScene.pivot.rotation.y);
-
-      this.dolly.add(presentedScene);
+      scene.pivot.lookAt(camPosition.x, scene.pivot.position.y, camPosition.z);
 
       this.dispatchEvent({type: 'modelmove'});
     }
@@ -300,21 +300,18 @@ export class ARRenderer extends EventDispatcher {
 
     this[$tick]();
 
-    if (pose == null || this[$presentedScene] == null) {
+    const scene = this[$presentedScene];
+    if (pose == null || scene == null) {
       return;
     }
 
-    const delta = time - this[$lastTick];
-    this.renderer.preRender(this[$presentedScene]!, time, delta);
+    const delta = time - this[$lastTick]!;
+    this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
-    const {shadow, shadowIntensity} = this[$presentedScene]!;
+    const {shadow, shadowIntensity} = scene;
     if (shadow != null) {
       shadow.setIntensity(shadowIntensity * AR_SHADOW_MULTIPLIER);
-    }
-
-    if (this.scene.environment !== this[$presentedScene]!.environment) {
-      this.scene.environment = this[$presentedScene]!.environment;
     }
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
@@ -340,7 +337,7 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
       // this.threeRenderer.clearDepth();
-      this.threeRenderer.render(this.scene, this.camera);
+      this.threeRenderer.render(scene, this.camera);
     }
   }
 }

@@ -16,7 +16,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 import {Timer} from '../utilities/timer.js';
 
@@ -85,7 +85,8 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (!this.autoRotate || !this.modelIsVisible) {
+      if (!this.autoRotate || !this.modelIsVisible ||
+          this[$renderer].isPresenting) {
         return;
       }
 
