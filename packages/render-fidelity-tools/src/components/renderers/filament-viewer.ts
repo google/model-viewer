@@ -14,14 +14,17 @@
  */
 
 import {resolveDpr} from '@google/model-viewer/lib/utilities.js';
-import * as Filament from 'filament';
+import {Camera, Engine, IndirectLight, Renderer, Scene, SwapChain, View} from 'filament';
+import {Entity, EntityManager, gltfio$FilamentAsset, Skybox} from 'filament';
+import {Camera$Fov, LightManager, LightManager$Type} from 'filament';
+import {Aabb, fetch, init} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
 
 const fetchFilamentAssets = async(assets: Array<string>): Promise<void> =>
     new Promise((resolve) => {
-      self.Filament.fetch(assets, () => resolve(), () => {});
+      fetch(assets, () => resolve(), () => {});
     });
 
 const basepath = (urlString: string): string => {
@@ -57,25 +60,25 @@ export class FilamentViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
 
   private[$rendering]: boolean = false;
-  private[$engine]: Filament.Engine;
-  private[$scene]: Filament.Scene;
-  private[$renderer]: Filament.Renderer;
-  private[$swapChain]: Filament.SwapChain;
-  private[$camera]: Filament.Camera;
-  private[$view]: Filament.View;
+  private[$engine]: Engine;
+  private[$scene]: Scene;
+  private[$renderer]: Renderer;
+  private[$swapChain]: SwapChain;
+  private[$camera]: Camera;
+  private[$view]: View;
 
-  private[$ibl]: Filament.IndirectLight|null;
-  private[$skybox]: Filament.Skybox|null;
-  private[$currentAsset]: Filament.gltfio$FilamentAsset|null;
-  private[$directionalLight]: Filament.Entity|null;
+  private[$ibl]: IndirectLight|null;
+  private[$skybox]: Skybox|null;
+  private[$currentAsset]: gltfio$FilamentAsset|null;
+  private[$directionalLight]: Entity|null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
-  private[$boundingBox]: Filament.Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
+  private[$boundingBox]: Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
 
   constructor() {
     super();
 
-    self.Filament.init([], () => {
+    init([], () => {
       this[$initialize]();
     });
   }
@@ -110,10 +113,8 @@ export class FilamentViewer extends LitElement {
   }
 
   private[$initialize]() {
-    const {Filament} = self;
-
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-    const engine = Filament.Engine.create(this[$canvas]);
+    const engine = Engine.create(this[$canvas]!);
     const view = engine.createView();
 
     this[$engine] = engine;
@@ -179,8 +180,8 @@ export class FilamentViewer extends LitElement {
     // environment map with a single bright pixel that represents a 1 lux
     // directional light.
     if (lightingBaseName === 'spot1Lux') {
-      const entity = self.Filament.EntityManager.get().create();
-      this[$directionalLight] = entity;
+      const directionalLight = EntityManager.get().create();
+      this[$directionalLight] = directionalLight;
       const x = 597;
       const y = 213;
       const theta = (x + 0.5) * Math.PI / 512;
@@ -190,13 +191,12 @@ export class FilamentViewer extends LitElement {
         -Math.cos(phi),
         Math.sin(phi) * Math.sin(theta)
       ];
-      self.Filament.LightManager
-          .Builder(self.Filament.LightManager$Type.DIRECTIONAL)
+      LightManager.Builder(LightManager$Type.DIRECTIONAL)
           .color([1, 1, 1])
           .intensity(1)
           .direction(lightDirection)
-          .build(this[$engine], entity);
-      this[$scene].addEntity(entity);
+          .build(this[$engine], directionalLight);
+      this[$scene].addEntity(directionalLight);
     } else {
       await fetchFilamentAssets([iblUrl, skyboxUrl]);
       const ibl = this[$engine].createIblFromKtx(iblUrl);
@@ -239,7 +239,9 @@ export class FilamentViewer extends LitElement {
   private[$render]() {
     this[$rendering] = true;
 
-    this[$renderer]?.render(this[$swapChain], this[$view]);
+    if (this[$renderer] != null) {
+      this[$renderer].render(this[$swapChain], this[$view]);
+    }
 
     self.requestAnimationFrame(() => {
       if (this[$rendering]) {
@@ -254,7 +256,7 @@ export class FilamentViewer extends LitElement {
       return;
     }
 
-    const Fov = self.Filament.Camera$Fov;
+    const Fov = Camera$Fov;
     const canvas = this[$canvas]!;
     const {dimensions, target, orbit, verticalFoV} = this.scenario;
 
