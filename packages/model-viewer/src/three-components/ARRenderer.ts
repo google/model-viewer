@@ -143,22 +143,22 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.model.scale.set(1, 1, 1);
+    scene.setCamera(this.camera);
 
     this[$presentedScene] = scene;
 
     this.initializeRenderer();
 
-    this[$currentSession] = await this.resolveARSession();
-    this[$currentSession]!.addEventListener('end', () => {
+    const currentSession = await this.resolveARSession();
+    currentSession.addEventListener('end', () => {
       this[$postSessionCleanup]();
     }, {once: true});
 
-    this[$refSpace] =
-        await this[$currentSession]!.requestReferenceSpace('local');
+    this[$refSpace] = await currentSession.requestReferenceSpace('local');
     this[$viewerRefSpace] =
-        await this[$currentSession]!.requestReferenceSpace('viewer');
+        await currentSession.requestReferenceSpace('viewer');
 
+    this[$currentSession] = currentSession;
     this[$tick]();
   }
 
@@ -197,10 +197,12 @@ export class ARRenderer extends EventDispatcher {
 
     // Trigger a parent renderer update. TODO(klausw): are these all
     // necessary and sufficient?
-    if (this[$presentedScene] != null) {
-      this.dolly.remove(this[$presentedScene]!);
-      this[$presentedScene]!.isDirty = true;
-      const {shadow, shadowIntensity} = this[$presentedScene]!;
+    const scene = this[$presentedScene];
+    if (scene != null) {
+      this.dolly.remove(scene);
+      scene.isDirty = true;
+      scene.setCamera(scene.camera);
+      const {shadow, shadowIntensity} = scene;
       if (shadow != null) {
         shadow.setIntensity(shadowIntensity);
       }
