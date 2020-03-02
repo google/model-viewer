@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Raycaster, Vector2} from 'three';
+import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
@@ -178,7 +178,9 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         const hotspot = children[i];
         if (hotspot instanceof Hotspot) {
           const view = this[$scene].activeCamera.position.clone();
-          view.sub(hotspot.position);
+          const target =
+              new Vector3().setFromMatrixPosition(hotspot.matrixWorld);
+          view.sub(target);
           const normalWorld = hotspot.normal.clone().transformDirection(
               this[$scene].pivot.matrixWorld);
           if (view.dot(normalWorld) < 0) {

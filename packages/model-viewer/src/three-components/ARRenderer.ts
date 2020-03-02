@@ -15,6 +15,7 @@
 
 import {EventDispatcher, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
+import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -160,6 +161,8 @@ export class ARRenderer extends EventDispatcher {
     this[$refSpace] = await currentSession.requestReferenceSpace('local');
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
+
+    element[$onResize](window.screen);
 
     this[$currentSession] = currentSession;
     this[$tick]();
@@ -323,6 +326,7 @@ export class ARRenderer extends EventDispatcher {
 
       this.camera.matrix.getInverse(viewMatrix);
       this.camera.updateMatrixWorld(true);
+      this.camera.position.setFromMatrixPosition(this.camera.matrix);
 
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
