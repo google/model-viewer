@@ -208,6 +208,7 @@ export class ARRenderer extends EventDispatcher {
       scene.remove(this.reticle);
       scene.isDirty = true;
       scene.setCamera(scene.camera);
+      scene.pivot.position.set(0, 0, 0);
       scene.setPivotRotation(this[$turntableRotation]!);
       const {shadow, shadowIntensity} = scene;
       if (shadow != null) {
