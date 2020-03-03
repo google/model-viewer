@@ -159,6 +159,8 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
     this[$evictionPolicy].retain(url);
 
+    // Patch dispose so that we can properly account for instance use
+    // in the caching layer:
     clone.dispose = (() => {
       const originalDispose = clone.dispose;
       let disposed = false;
@@ -177,5 +179,3 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     return clone;
   }
 }
-
-(self as any).CachingGLTFLoader = CachingGLTFLoader;
