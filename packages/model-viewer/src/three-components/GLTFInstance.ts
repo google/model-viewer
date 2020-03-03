@@ -16,6 +16,7 @@
 import {Mesh, Object3D, Scene} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
+import {Constructor} from '../utilities.js';
 
 export const $prepared = Symbol('prepared');
 
@@ -154,4 +155,4 @@ export class GLTFInstance implements GLTF {
 }
 
 export type GLTFInstanceConstructor =
-    Constructor<GLTFInstance>&{prepare: typeof GLTFInstance['prepare']};
+    Constructor<GLTFInstance, {prepare: typeof GLTFInstance['prepare']}>;
