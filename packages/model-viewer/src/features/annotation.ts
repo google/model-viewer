@@ -160,8 +160,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
       const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
       const normal =
-          toVector3D(hit.face.normal.applyMatrix4(hit.object.matrixWorld)
-                         .applyMatrix4(worldToPivot));
+          toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
+                         .transformDirection(worldToPivot));
       return {position: position, normal: normal};
     }
 
