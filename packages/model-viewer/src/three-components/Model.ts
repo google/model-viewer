@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Scene, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
 
-import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {moveChildren, reduceVertices} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
-const $currentScene = Symbol('currentScene');
+const $currentGLTF = Symbol('currentGLTF');
 
 export const DEFAULT_FOV_DEG = 45;
 
@@ -30,8 +31,8 @@ const $loader = Symbol('loader');
  * model.
  */
 export default class Model extends Object3D {
-  private[$currentScene]: CacheRetainedScene|null = null;
-  private[$loader] = new CachingGLTFLoader();
+  private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+  private[$loader] = new CachingGLTFLoader(ModelViewerGLTFInstance);
   private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
@@ -101,20 +102,22 @@ export default class Model extends Object3D {
 
     this.url = url;
 
-    let scene: Scene|null = null;
+    let gltf: ModelViewerGLTFInstance;
 
     try {
-      scene = await new Promise<Scene|null>(async (resolve, reject) => {
-        this[$cancelPendingSourceChange] = () => reject();
-        try {
-          const result = await this.loader.load(url, progressCallback);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
-      });
+      gltf = await new Promise<ModelViewerGLTFInstance>(
+          async (resolve, reject) => {
+            this[$cancelPendingSourceChange] = () => reject();
+            try {
+              const result = await this.loader.load(url, progressCallback);
+              resolve(result);
+            } catch (error) {
+              reject(error);
+            }
+          });
     } catch (error) {
       if (error == null) {
+        // Loading was cancelled, so silently return
         return;
       }
 
@@ -122,20 +125,13 @@ export default class Model extends Object3D {
     }
 
     this.clear();
-    this[$currentScene] = scene as CacheRetainedScene;
+    this[$currentGLTF] = gltf;
 
-    if (scene != null) {
-      moveChildren(scene, this.modelContainer);
+    if (gltf != null) {
+      moveChildren(gltf.scene, this.modelContainer);
     }
 
-    this.modelContainer.traverse(obj => {
-      if (obj && obj.type === 'Mesh') {
-        obj.castShadow = true;
-      }
-    });
-
-
-    const animations = scene ? scene.userData.animations : [];
+    const {animations} = gltf!;
     const animationsByName = new Map();
     const animationNames = [];
 
@@ -231,11 +227,12 @@ export default class Model extends Object3D {
   clear() {
     this.url = null;
     this.userData = {url: null};
+    const gltf = this[$currentGLTF];
     // Remove all current children
-    if (this[$currentScene] != null) {
-      moveChildren(this.modelContainer, this[$currentScene]!);
-      this[$currentScene]![$releaseFromCache]();
-      this[$currentScene] = null;
+    if (gltf != null) {
+      moveChildren(this.modelContainer, gltf.scene);
+      gltf.dispose();
+      this[$currentGLTF] = null;
     }
 
     if (this.currentAnimationAction != null) {

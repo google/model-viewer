@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {$evictionPolicy, $releaseFromCache, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
+
+import {$evictionPolicy, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
+import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
@@ -24,7 +26,7 @@ suite('CachingGLTFLoader', () => {
     let loader: CachingGLTFLoader;
 
     setup(() => {
-      loader = new CachingGLTFLoader();
+      loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
     });
 
     teardown(() => {
@@ -61,7 +63,7 @@ suite('CachingGLTFLoader', () => {
     });
 
     test('yields a promise that resolves a scene', async () => {
-      const scene = await loader.load(ASTRONAUT_GLB_PATH);
+      const {scene} = await loader.load(ASTRONAUT_GLB_PATH);
       expect(scene).to.be.ok;
       expect(scene!.type).to.be.equal('Scene');
     });
@@ -79,10 +81,10 @@ suite('CachingGLTFLoader', () => {
       });
 
       test('deletinates them when they are fully released', async () => {
-        const scene = await loader.load(ASTRONAUT_GLB_PATH);
+        const gltf = await loader.load(ASTRONAUT_GLB_PATH);
 
         expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
-        scene![$releaseFromCache]();
+        gltf.dispose();
         expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.false;
       });
     });
