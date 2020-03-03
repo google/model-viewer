@@ -17,7 +17,7 @@ import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
 import {Hotspot} from '../../features/annotation/hotspot.js';
-import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {ModelScene} from '../../three-components/ModelScene';
 import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
@@ -140,20 +140,21 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
+          element[$needsRender]();
+
+          await waitForEvent(hotspot2, 'hotspot-visibility');
 
           wrapper = hotspotObject2D.element;
         });
 
         test('the hotspot is visible', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
           expect(wrapper.classList.contains('hide')).to.be.false;
         });
 
         test('the hotspot is hidden after turning', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
-
           element[$scene].setPivotRotation(Math.PI);
           element[$scene].updateMatrixWorld();
+          element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 
