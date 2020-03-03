@@ -15,6 +15,7 @@
 
 const resolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-replace');
+const externalGlobals = require('rollup-plugin-external-globals');
 const {basename} = require('path');
 
 const onwarn = (warning, warn) => {
@@ -26,10 +27,13 @@ const onwarn = (warning, warn) => {
 
 const plugins = [
   resolve({preferBuiltins: true}),
-  replace({'Reflect.decorate': 'undefined'})
+  replace({'Reflect.decorate': 'undefined'}),
+  externalGlobals({
+    filament: 'Filament'
+  })
 ];
 
-const buildTarget = (input, outputFormat = 'esm') => ({
+const buildTarget = (input, outputFormat) => ({
   input,
   output: {
     file: `./dist/${basename(input)}`,
