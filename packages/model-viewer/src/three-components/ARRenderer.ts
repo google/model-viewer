@@ -59,7 +59,7 @@ export class ARRenderer extends EventDispatcher {
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
-  public[$presentedScene]: ModelScene|null = null;
+  private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
   constructor(private renderer: Renderer) {
