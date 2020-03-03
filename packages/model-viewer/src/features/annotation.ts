@@ -17,7 +17,7 @@
 import {Matrix4, Raycaster, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
@@ -32,6 +32,9 @@ const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
 const raycaster = new Raycaster();
+const view = new Vector3();
+const target = new Vector3();
+const normalWorld = new Vector3();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -63,6 +66,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           (mutation as MutationRecord).removedNodes.forEach((node) => {
             this[$removeHotspot](node);
           });
+          this[$needsRender]();
         }
       });
     };
@@ -163,8 +167,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
-      this[$updateHotspots]();
-      this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+
+      if (this[$scene].isDirty) {
+        this[$updateHotspots]();
+        this[$annotationRenderer].render(
+            this[$scene], this[$scene].activeCamera);
+      }
     }
 
     [$onResize](e: {width: number, height: number}) {
@@ -177,12 +185,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot) {
-          const view = this[$scene].activeCamera.position.clone();
-          const target =
-              new Vector3().setFromMatrixPosition(hotspot.matrixWorld);
+          view.copy(this[$scene].activeCamera.position);
+          target.setFromMatrixPosition(hotspot.matrixWorld);
           view.sub(target);
-          const normalWorld = hotspot.normal.clone().transformDirection(
-              this[$scene].pivot.matrixWorld);
+          normalWorld.copy(hotspot.normal)
+              .transformDirection(this[$scene].pivot.matrixWorld);
           if (view.dot(normalWorld) < 0) {
             hotspot.hide();
           } else {

@@ -30,7 +30,7 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 // export * from 'three';
 
 export const ModelViewerElement =
-    SceneGraphMixin(MagicLeapMixin(AnnotationMixin(StagingMixin(
+    AnnotationMixin(SceneGraphMixin(MagicLeapMixin(StagingMixin(
         EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
             FocusVisiblePolyfillMixin(ModelViewerElementBase))))))))));
 
