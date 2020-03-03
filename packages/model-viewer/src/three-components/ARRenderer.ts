@@ -24,10 +24,9 @@ import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
-// This is necessary because our default shadowIntensity is very light to look
-// nice on a white background. It is invisible against a camera image unless it
-// is darkened.
-const AR_SHADOW_MULTIPLIER = 5;
+// AR shadow is not user-configurable. This is to pave the way for AR lighting
+// estimation, which will be used once available in WebXR.
+const AR_SHADOW_INTENSITY = 0.5;
 
 const $presentedScene = Symbol('presentedScene');
 
@@ -313,9 +312,9 @@ export class ARRenderer extends EventDispatcher {
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
-    const {shadow, shadowIntensity} = scene;
+    const {shadow} = scene;
     if (shadow != null) {
-      shadow.setIntensity(shadowIntensity * AR_SHADOW_MULTIPLIER);
+      shadow.setIntensity(AR_SHADOW_INTENSITY);
     }
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
