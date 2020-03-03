@@ -14,18 +14,14 @@
  */
 
 import {resolveDpr} from '@google/model-viewer/lib/utilities.js';
-import {Camera, Engine, IndirectLight, Renderer, Scene, SwapChain, View} from 'filament';
-import {Entity, EntityManager, gltfio$FilamentAsset, Skybox} from 'filament';
-import {Camera$Fov, LightManager, LightManager$Type} from 'filament';
-import {Aabb, init} from 'filament';
-import {fetch as filamentFetch} from 'filament';
+import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
 
 const fetchFilamentAssets = async(assets: Array<string>): Promise<void> =>
     new Promise((resolve) => {
-      filamentFetch(assets, () => resolve(), () => {});
+      fetch(assets, () => resolve(), () => {});
     });
 
 const basepath = (urlString: string): string => {
