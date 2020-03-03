@@ -56,9 +56,13 @@ export class GLTFInstance implements GLTF {
       return source;
     }
 
-    const prepared = this[$prepare](source);
+    const prepared = this[$prepare](source) as Partial<PreparedGLTF>;
 
-    return {...prepared, [$prepared]: true};
+    // NOTE: ES5 Symbol polyfill is not compatible with spread operator
+    // so {...prepared, [$prepared]: true} does not work
+    prepared[$prepared] = true;
+
+    return prepared as PreparedGLTF;
   }
 
   /**
