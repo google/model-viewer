@@ -503,7 +503,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         // TODO(elalish) This test is flaky on iOS and Safari.
-        test.skip(
+        test(
             'has initial aria-label set to alt before interaction',
             async () => {
               const input: HTMLDivElement = element[$userInputElement];
@@ -571,7 +571,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               });
 
           // TODO(#584)
-          test.skip('does not prompt if user already interacted', async () => {
+          test('does not prompt if user already interacted', async () => {
             const input: HTMLDivElement = element[$userInputElement];
             const promptElement = (element as any)[$promptElement];
             const originalLabel = input.getAttribute('aria-label');
