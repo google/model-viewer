@@ -161,7 +161,6 @@ export class ThreeDOMExecutionContext extends EventTarget {
     const port = await this[$workerInitializes];
     const {port1, port2} = new MessageChannel();
 
-    console.log(modelGraft?.model.toJSON());
     port.postMessage(
         {
           type: ThreeDOMMessageType.MODEL_CHANGE,

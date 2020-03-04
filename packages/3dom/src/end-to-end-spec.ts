@@ -90,8 +90,9 @@ suite('end-to-end', () => {
     executionContext.eval('self.postMessage(model.materials[0].name)');
 
     const messageEvent = await messageEventArrives;
-    console.log(messageEvent.data);
 
+    expect(messageEvent.data).to.be.ok;
+    expect(messageEvent.data).to.not.be.equal('');
     expect(messageEvent.data).to.be.equal(material.name);
   });
 });
