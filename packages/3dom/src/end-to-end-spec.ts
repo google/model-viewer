@@ -71,4 +71,28 @@ suite('end-to-end', () => {
     expect(material.color.r).to.be.equal(0);
     expect(material.color.b).to.be.equal(1);
   });
+
+  test('expresses the name of a material in the worklet context', async () => {
+    const gltf = await new Promise<GLTF>((resolve) => {
+      new GLTFLoader().load(ASTRONAUT_GLB_URL, (gltf) => resolve(gltf));
+    });
+
+    const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
+        MeshStandardMaterial;
+    const graft = new ModelGraft(ASTRONAUT_GLB_URL, gltf);
+
+    const executionContext =
+        new ThreeDOMExecutionContext(['messaging', 'material-properties']);
+    executionContext.changeModel(graft);
+
+    const messageEventArrives =
+        waitForEvent<MessageEvent>(executionContext.worker, 'message');
+    executionContext.eval('self.postMessage(model.materials[0].name)');
+
+    const messageEvent = await messageEventArrives;
+
+    expect(messageEvent.data).to.be.ok;
+    expect(messageEvent.data).to.not.be.equal('');
+    expect(messageEvent.data).to.be.equal(material.name);
+  });
 });

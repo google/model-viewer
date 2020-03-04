@@ -15,7 +15,7 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineMaterial} from './material.js';
+import {defineMaterial, MaterialConstructor} from './material.js';
 import {defineThreeDOMElement} from './three-dom-element.js';
 
 const ThreeDOMElement = defineThreeDOMElement();
@@ -32,15 +32,34 @@ suite('api/material', () => {
       expect(instance).to.be.ok;
     });
 
-    test('produces elements with the correct owner model', () => {
-      const kernel = new FakeModelKernel();
-      const GeneratedConstructor = defineMaterial(ThreeDOMElement);
-      const instance = new GeneratedConstructor(kernel, {
-        pbrMetallicRoughness: {id: 1, baseColorFactor: [0, 0, 0, 1]},
-        id: 0
+    suite('the generated class', () => {
+      let kernel: FakeModelKernel;
+      let GeneratedConstructor: MaterialConstructor;
+
+
+      setup(() => {
+        kernel = new FakeModelKernel();
+        GeneratedConstructor = defineMaterial(ThreeDOMElement);
       });
 
-      expect(instance.ownerModel).to.be.equal(kernel.model);
+      test('produces elements with the correct owner model', () => {
+        const instance = new GeneratedConstructor(kernel, {
+          pbrMetallicRoughness: {id: 1, baseColorFactor: [0, 0, 0, 1]},
+          id: 0
+        });
+
+        expect(instance.ownerModel).to.be.equal(kernel.model);
+      });
+
+      test('expresses the material name when available', () => {
+        const instance = new GeneratedConstructor(kernel, {
+          pbrMetallicRoughness: {id: 1, baseColorFactor: [0, 0, 0, 1]},
+          id: 0,
+          name: 'foo'
+        });
+
+        expect(instance.name).to.be.equal('foo');
+      });
     });
   });
 });
