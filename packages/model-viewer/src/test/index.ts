@@ -24,6 +24,8 @@ import './model-viewer-base-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
 import './three-components/ARRenderer-spec.js';
+import './three-components/GLTFInstance-spec.js';
+import './three-components/gltf-instance/ModelViewerGLTFInstance-spec.js';
 import './three-components/SmoothControls-spec.js';
 import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';

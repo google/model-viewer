@@ -14,6 +14,7 @@
  */
 
 
+import {Material} from 'three';
 import {Object3D} from 'three/src/core/Object3D.js';
 
 import {createFakeGLTF} from '../../test-helpers.js';
@@ -38,16 +39,16 @@ suite('facade/three-js/three-dom-element', () => {
         object3D.name = 'generated';
 
         const element = new ThreeDOMElement(graft, object3D);
-        expect(element.name).to.be.equal(undefined);
+        expect(element.name).to.be.equal(null);
       });
 
-      test('expresses a name stored in userData', () => {
+      test('expresses a name for a Three.js Material', () => {
         const graft = new ModelGraft('', createFakeGLTF());
-        const object3D = new Object3D();
+        const material = new Material();
 
-        object3D.userData.name = 'original';
+        material.name = 'original';
 
-        const element = new ThreeDOMElement(graft, object3D);
+        const element = new ThreeDOMElement(graft, material);
         expect(element.name).to.be.equal('original');
       });
     });

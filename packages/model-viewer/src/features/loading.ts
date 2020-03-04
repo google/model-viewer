@@ -17,6 +17,7 @@ import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$ariaLabel, $getLoaded, $getModelIsVisible, $input, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
+import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -44,7 +45,7 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loader = new CachingGLTFLoader();
+const loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
 const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');

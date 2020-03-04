@@ -14,7 +14,7 @@ To get started, follow the instructions in [the main README.md file](../../READM
 
 In order to run `npm run update-screenshots`, you must have `imagemagick` installed.
 
-On OSX, you can install `imagemagick` with homebrew: `brew install imagemagick`
+On macOS, you can install `imagemagick` with homebrew: `brew install imagemagick`
 
 On Debian/Ubuntu/Pop!_OS you can install `imagemagick` with `apt`: `sudo apt install imagemagick`
 
@@ -26,3 +26,6 @@ Command                         | Description
 `npm run clean`                 | Deletes all build artifacts
 `npm run test`                  | Run a render fidelity check comparing `<model-viewer>` to other renderers
 `npm run update-screenshots`    | Update the "golden" screenshots for all renderers
+
+After running `npm run test`, you can look at the results by starting a local web server
+(e.g. `npx http-server`) in this folder, then opening `test/results-viewer.html` in a browser.
