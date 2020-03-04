@@ -22,15 +22,15 @@ import {createFakeGLTF} from '../helpers.js';
 const expect = chai.expect;
 
 suite('GLTFInstance', () => {
+  let rawGLTF: GLTF;
+  let preparedGLTF: PreparedGLTF;
+
+  setup(async () => {
+    rawGLTF = createFakeGLTF();
+    preparedGLTF = GLTFInstance.prepare(rawGLTF);
+  });
+
   suite('with a prepared GLTF', () => {
-    let rawGLTF: GLTF;
-    let preparedGLTF: PreparedGLTF;
-
-    setup(async () => {
-      rawGLTF = createFakeGLTF();
-      preparedGLTF = GLTFInstance.prepare(rawGLTF);
-    });
-
     test('exposes the same scene as the GLTF', () => {
       const gltfInstance = new GLTFInstance(preparedGLTF);
       expect(gltfInstance.scene).to.be.equal(preparedGLTF.scene);
@@ -49,9 +49,6 @@ suite('GLTFInstance', () => {
 
   suite('preparing the GLTF', () => {
     test('creates a prepared GLTF', () => {
-      const rawGLTF = createFakeGLTF();
-      const preparedGLTF = GLTFInstance.prepare(rawGLTF);
-
       expect(preparedGLTF).to.not.be.equal(rawGLTF);
       expect(preparedGLTF[$prepared]).to.be.equal(true);
     });
