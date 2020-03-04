@@ -12,76 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FrontSide, Material, Object3D, Scene, Shader, Vector3} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
-
-import {alphaChunk} from './shader-chunk/alphatest_fragment.glsl.js';
-
-/**
- * Fully clones a parsed GLTF, including correct cloning of any SkinnedMesh
- * objects.
- */
-export const cloneGltf = (gltf: GLTF): GLTF => {
-  const clone:
-      GLTF = {...gltf, scene: SkeletonUtils.clone(gltf.scene!) as Scene};
-
-  /**
-   * Creates a clone of the given material, and applies a patch to the
-   * shader program.
-   */
-  const cloneAndPatchMaterial = (material: Material): Material => {
-    const clone = material.clone();
-    // This allows us to patch three's materials, on top of patches already
-    // made, for instance GLTFLoader patches SpecularGlossiness materials.
-    // Unfortunately, three's program cache differentiates SpecGloss materials
-    // via onBeforeCompile.toString(), so these two functions do the same thing
-    // but look different in order to force a proper recompile.
-    const oldOnBeforeCompile = material.onBeforeCompile;
-    clone.onBeforeCompile = (material as any).isGLTFSpecularGlossinessMaterial ?
-        (shader: Shader) => {
-          oldOnBeforeCompile(shader, undefined as any);
-          shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <alphatest_fragment>', alphaChunk);
-        } :
-        (shader: Shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <alphatest_fragment>', alphaChunk);
-          oldOnBeforeCompile(shader, undefined as any);
-        };
-    // This makes shadows better for non-manifold meshes
-    clone.shadowSide = FrontSide;
-    // This improves transparent rendering and can be removed whenever
-    // https://github.com/mrdoob/three.js/pull/18235 finally lands.
-    if (clone.transparent) {
-      clone.depthWrite = false;
-    }
-    // This little hack ignores alpha for opaque materials, in order to comply
-    // with the glTF spec.
-    if (!clone.alphaTest && !clone.transparent) {
-      clone.alphaTest = -0.5;
-    }
-    return clone;
-  };
-
-  clone.scene!.traverse((node: any) => {
-    // Set a high renderOrder while we're here to ensure the model
-    // always renders on top of the skysphere
-    node.renderOrder = 1000;
-
-    // Materials aren't cloned when cloning meshes; geometry
-    // and materials are copied by reference. This is necessary
-    // for the same model to be used twice with different
-    // environment maps.
-    if (Array.isArray(node.material)) {
-      node.material = node.material.map(cloneAndPatchMaterial);
-    } else if (node.material != null) {
-      node.material = cloneAndPatchMaterial(node.material);
-    }
-  });
-
-  return clone;
-};
+import {Object3D, Vector3} from 'three';
 
 /**
  * Moves Three.js objects from one parent to another

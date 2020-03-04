@@ -25,6 +25,8 @@ const onwarn = (warning, warn) => {
 
 const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
+const watchFiles = ['lib/**', '../3dom/lib/**', '../model-viewer/lib/**'];
+
 const outputOptions = [
   {
     input: './lib/components/example-snippet.js',
@@ -54,15 +56,18 @@ const outputOptions = [
       format: 'esm',
       name: 'Tester'
     },
+    watch: {
+      include: watchFiles,
+    },
     plugins,
     onwarn
   },
   {
     input: './lib/tester.js',
-    output: {
-      file: './examples/built/tester-umd.js',
-      format: 'umd',
-      name: 'Tester'
+    output:
+        {file: './examples/built/tester-umd.js', format: 'umd', name: 'Tester'},
+    watch: {
+      include: watchFiles,
     },
     plugins,
     onwarn,
