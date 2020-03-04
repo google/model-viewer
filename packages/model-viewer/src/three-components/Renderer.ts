@@ -239,7 +239,7 @@ export class Renderer extends EventDispatcher {
     }
 
     for (const scene of this.scenes) {
-      const {element, width, height, context} = scene;
+      const {element, width, height} = scene;
       element[$tick](t, delta);
 
       if (!scene.visible || !scene.isDirty || scene.paused) {
@@ -269,13 +269,16 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.render(scene, camera);
 
       if (!this.hasOnlyOneScene) {
+        if (scene.context == null) {
+          scene.createContext();
+        }
         if (USE_OFFSCREEN_CANVAS) {
-          const contextBitmap = context as ImageBitmapRenderingContext;
+          const contextBitmap = scene.context as ImageBitmapRenderingContext;
           const bitmap =
               (this.canvas3D as OffscreenCanvas).transferToImageBitmap();
           contextBitmap.transferFromImageBitmap(bitmap);
         } else {
-          const context2D = context as CanvasRenderingContext2D;
+          const context2D = scene.context as CanvasRenderingContext2D;
           context2D.clearRect(0, 0, width, height);
           context2D.drawImage(
               this.threeRenderer.domElement,

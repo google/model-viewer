@@ -15,7 +15,7 @@
 
 import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$canvas, $input, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor} from '../../utilities.js';
@@ -413,8 +413,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       suite('when user is interacting', () => {
         test('sets an appropriate camera-change event source', async () => {
           await rafPasses();
-          element[$input].focus();
-          interactWith(element[$input]);
+          element[$userInputElement].focus();
+          interactWith(element[$userInputElement]);
 
           const cameraChangeDispatches =
               waitForEvent<CustomEvent<CameraChangeDetails>>(
@@ -506,7 +506,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test.skip(
             'has initial aria-label set to alt before interaction',
             async () => {
-              const input: HTMLDivElement = element[$input];
+              const input: HTMLDivElement = element[$userInputElement];
 
               expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
             });
@@ -517,7 +517,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           });
 
           test('prompts user to interact when focused', async () => {
-            const input: HTMLDivElement = element[$input];
+            const input: HTMLDivElement = element[$userInputElement];
             const promptElement: HTMLElement = (element as any)[$promptElement];
 
             settleControls(controls);
@@ -547,7 +547,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 }
                 element.src = null;
 
-                const input: HTMLDivElement = element[$input];
+                const input: HTMLDivElement = element[$userInputElement];
                 const promptElement: HTMLElement =
                     (element as any)[$promptElement];
 
@@ -572,7 +572,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           // TODO(#584)
           test.skip('does not prompt if user already interacted', async () => {
-            const input: HTMLDivElement = element[$input];
+            const input: HTMLDivElement = element[$userInputElement];
             const promptElement = (element as any)[$promptElement];
             const originalLabel = input.getAttribute('aria-label');
 
@@ -594,7 +594,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting horizontally',
             async () => {
-              const input: HTMLDivElement = element[$input];
+              const input: HTMLDivElement = element[$userInputElement];
 
               await rafPasses();
               input.focus();
@@ -627,7 +627,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting vertically',
             async () => {
-              const input: HTMLDivElement = element[$input];
+              const input: HTMLDivElement = element[$userInputElement];
 
               await rafPasses();
               input.focus();

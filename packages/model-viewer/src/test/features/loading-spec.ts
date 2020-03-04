@@ -14,7 +14,7 @@
  */
 
 import {$defaultPosterElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
-import ModelViewerElementBase, {$input} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -176,7 +176,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   'model-visibility',
                   (event: any) => event.detail.visible);
 
-              const input = element[$input];
+              const input = element[$userInputElement];
               const picked = pickShadowDescendant(element);
 
               expect(picked).to.be.equal(input);
@@ -192,7 +192,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               await waitForEvent(element, 'preload');
               await timePasses(POSTER_TRANSITION_TIME + 100);
 
-              const input = element[$input];
+              const input = element[$userInputElement];
               const picked = pickShadowDescendant(element);
 
               expect(picked).to.not.be.equal(input);
@@ -207,7 +207,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                     const posterElement =
                         (element as any)[$defaultPosterElement];
-                    const inputElement = element[$input];
+                    const inputElement = element[$userInputElement];
 
                     await waitForEvent(element, 'preload');
 
@@ -275,7 +275,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           });
 
           test('allows the input to be interactive', async () => {
-            const input = element[$input];
+            const input = element[$userInputElement];
             const picked = pickShadowDescendant(element);
 
             expect(picked).to.be.equal(input);
@@ -283,7 +283,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           test('when src is reset, poster is dismissable', async () => {
             const posterElement = (element as any)[$defaultPosterElement];
-            const inputElement = element[$input];
+            const inputElement = element[$userInputElement];
 
             element.reveal = 'interaction';
             element.src = null;

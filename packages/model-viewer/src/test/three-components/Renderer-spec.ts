@@ -40,6 +40,7 @@ function createScene(): ModelScene&TestScene {
     height: 100,
   });
   scene.visible = true;
+  scene.createContext();
 
   scene.renderCount = 0;
   const {context} = scene;

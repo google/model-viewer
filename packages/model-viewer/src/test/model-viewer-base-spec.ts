@@ -14,7 +14,7 @@
  */
 
 import {IS_IE11} from '../constants.js';
-import ModelViewerElementBase, {$input, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, resolveDpr} from '../utilities.js';
 
@@ -68,7 +68,7 @@ suite('ModelViewerElementBase', () => {
 
       setup(() => {
         element = new ModelViewerElement();
-        input = element[$input];
+        input = element[$userInputElement];
         document.body.appendChild(element);
       });
 

@@ -47,7 +47,7 @@ template.innerHTML = `
   top: 0;
 }
 
-.input {
+.userInput {
   width: 100%;
   height: 100%;
   display: block;
@@ -288,7 +288,7 @@ canvas.show {
 }
 </style>
 <div class="container">
-  <div class="input" tabindex="1"
+  <div class="userInput" tabindex="1"
       aria-label="A depiction of a 3D model"
       aria-live="polite">
     <canvas></canvas>

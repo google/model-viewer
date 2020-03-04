@@ -53,7 +53,7 @@ export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
-export const $input = Symbol('input');
+export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
 export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
@@ -128,7 +128,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$loadedTime] = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
-  protected[$input]: HTMLDivElement;
+  protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
   protected[$lastDpr]: number = resolveDpr();
@@ -185,9 +185,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
-    this[$input] = shadowRoot.querySelector('.input') as HTMLDivElement;
+    this[$userInputElement] =
+        shadowRoot.querySelector('.userInput') as HTMLDivElement;
     this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
-    this[$defaultAriaLabel] = this[$input].getAttribute('aria-label')!;
+    this[$defaultAriaLabel] =
+        this[$userInputElement].getAttribute('aria-label')!;
 
     // Because of potential race conditions related to invoking the constructor
     // we only use the bounding rect to set the initial size if the element is
@@ -341,7 +343,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     if (changedProperties.has('alt')) {
       const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
-      this[$input].setAttribute('aria-label', ariaLabel);
+      this[$userInputElement].setAttribute('aria-label', ariaLabel);
     }
   }
 
@@ -435,9 +437,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return true;
   }
 
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
   [$selectCanvas]() {
     if (this[$renderer].hasOnlyOneScene) {
-      this[$input].appendChild(this[$renderer].canvasElement);
+      this[$userInputElement].appendChild(this[$renderer].canvasElement);
       this[$canvas].classList.remove('show');
     } else {
       this[$renderer].canvasElement.classList.remove('show');
@@ -446,7 +454,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   get[$displayCanvas]() {
     return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
-                                          this[$canvas];
+                                             this[$canvas];
   }
 
   /**

@@ -63,7 +63,8 @@ export class ModelScene extends Scene {
   public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
-  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext;
+  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
+      null;
   public exposure = 1;
   public model: Model;
   public framedFieldOfView = DEFAULT_FOV_DEG;
@@ -79,12 +80,6 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    if (USE_OFFSCREEN_CANVAS) {
-      this.context = canvas.getContext('bitmaprenderer')!;
-    } else {
-      this.context = canvas.getContext('2d')!;
-    }
-
     this.model = new Model();
 
     // These default camera values are never used, as they are reset once the
@@ -116,6 +111,20 @@ export class ModelScene extends Scene {
 
   resume() {
     this[$paused] = false;
+  }
+
+  /**
+   * Function to create the context lazily, as when there is only one
+   * <model-viewer> element, the renderer's 3D context can be displayed
+   * directly. This extra context is necessary to copy the renderings into when
+   * there are more than one.
+   */
+  createContext() {
+    if (USE_OFFSCREEN_CANVAS) {
+      this.context = this.canvas.getContext('bitmaprenderer')!;
+    } else {
+      this.context = this.canvas.getContext('2d')!;
+    }
   }
 
   /**
