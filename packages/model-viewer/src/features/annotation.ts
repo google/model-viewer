@@ -22,9 +22,9 @@ import {Constructor} from '../utilities.js';
 
 import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
 
+export const $orientHotspots = Symbol('orientHotspots');
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
-export const $orientHotspots = Symbol('orientHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');

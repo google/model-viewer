@@ -30,8 +30,8 @@ const sceneContainsHotspot =
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot &&
-            (hotspot.element.children[0] as HTMLSlotElement).name ===
-                element.slot) {
+            (hotspot.element.children[0].children[0] as HTMLSlotElement)
+                    .name === element.slot) {
           // expect it has been changed from default
           expect(hotspot.position).to.not.eql(new Vector3());
           expect(hotspot.normal).to.not.eql(new Vector3(0, 1, 0));

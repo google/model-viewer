@@ -19,8 +19,8 @@ import {Texture} from 'three';
 import ModelViewerElementBase, {$isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
+export const BASE_OPACITY = 0.1;
 const DEFAULT_SHADOW_INTENSITY = 0.0;
-const BASE_OPACITY = 0.1;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
