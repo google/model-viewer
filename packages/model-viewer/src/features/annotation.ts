@@ -24,6 +24,7 @@ import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
 
 const $annotationRenderer = Symbol('annotationRenderer');
 const $updateHotspots = Symbol('updateHotspots');
+export const $rotateHotspots = Symbol('rotateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
@@ -195,6 +196,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           } else {
             hotspot.show();
           }
+        }
+      }
+    }
+
+    [$rotateHotspots](radians: number) {
+      const {children} = this[$scene].pivot;
+      for (let i = 0, l = children.length; i < l; i++) {
+        const hotspot = children[i];
+        if (hotspot instanceof Hotspot) {
+          hotspot.rotate(radians);
         }
       }
     }

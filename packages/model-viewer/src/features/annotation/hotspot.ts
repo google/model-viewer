@@ -35,6 +35,7 @@ export interface HotspotConfiguration {
 }
 
 const $slot = Symbol('slot');
+const $pivot = Symbol('pivot');
 const $referenceCount = Symbol('referenceCount');
 const $updateVisibility = Symbol('updateVisibility');
 const $visible = Symbol('visible');
@@ -50,6 +51,7 @@ export class Hotspot extends CSS2DObject {
   public normal: Vector3 = new Vector3(0, 1, 0);
   private[$visible] = false;
   private[$referenceCount] = 1;
+  private[$pivot] = document.createElement('div');
   private[$slot]: HTMLSlotElement = document.createElement('slot');
   private[$slotchangeHandler] = () => this[$onSlotchange]();
 
@@ -61,7 +63,8 @@ export class Hotspot extends CSS2DObject {
     this[$slot].name = config.name;
     this[$slot].addEventListener('slotchange', this[$slotchangeHandler]);
 
-    this.element.appendChild(this[$slot]);
+    this.element.appendChild(this[$pivot]);
+    this[$pivot].appendChild(this[$slot]);
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
@@ -140,6 +143,10 @@ export class Hotspot extends CSS2DObject {
       this.normal.setComponent(
           i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
     }
+  }
+
+  rotate(radians: number) {
+    this[$pivot].style.transform = `rotate(${radians}rad)`;
   }
 
   protected[$updateVisibility]({notify}: {notify: boolean}) {
