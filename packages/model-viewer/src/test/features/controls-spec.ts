@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_IE11} from '../../constants.js';
+import {IS_IE11, IS_SAFARI} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -505,12 +505,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await rafPasses();
         });
 
-        // TODO(elalish) This test is flaky on iOS and Safari.
         test('has initial aria-label set to alt before interaction', () => {
           expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
         });
 
         suite('when configured for focus-based interaction prompting', () => {
+          if (IS_SAFARI) {
+            return;
+          }
+
           setup(() => {
             element.interactionPrompt = 'when-focused';
           });
