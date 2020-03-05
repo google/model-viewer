@@ -145,7 +145,7 @@ export class Hotspot extends CSS2DObject {
     }
   }
 
-  rotate(radians: number) {
+  orient(radians: number) {
     this[$pivot].style.transform = `rotate(${radians}rad)`;
   }
 

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
-import {$rotateHotspots} from '../features/annotation.js';
+import {$orientHotspots} from '../features/annotation.js';
 import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -44,7 +44,6 @@ const $resolveCleanup = Symbol('resolveCleanup');
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 
-const matrix4 = new Matrix4();
 const vector3 = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
@@ -217,6 +216,7 @@ export class ARRenderer extends EventDispatcher {
       scene.pivot.position.set(0, 0, 0);
       scene.setPivotRotation(this[$turntableRotation]!);
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
+      (scene.element as any)[$orientHotspots](0);
     }
     this.reticle.reset();
     // The renderer's render method automatically updates
@@ -324,14 +324,17 @@ export class ARRenderer extends EventDispatcher {
       const viewport = session.renderState.baseLayer!.getViewport(view);
       this.threeRenderer.setViewport(
           viewport.x, viewport.y, viewport.width, viewport.height);
-      this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-      const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
 
-      this.camera.matrix.getInverse(viewMatrix);
-      this.camera.updateMatrixWorld(true);
-      this.camera.position.setFromMatrixPosition(this.camera.matrix);
+      const {camera} = this;
+      const {matrix: cameraMatrix} = camera;
+      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      cameraMatrix.fromArray(view.transform.matrix);
+      camera.updateMatrixWorld(true);
+      // position is not updated when matrix is updated.
+      camera.position.setFromMatrixPosition(cameraMatrix);
 
-      (scene.element as any)[$rotateHotspots](0.5);
+      (scene.element as any)[$orientHotspots](
+          Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
 
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
@@ -346,7 +349,7 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
       // this.threeRenderer.clearDepth();
-      this.threeRenderer.render(scene, this.camera);
+      this.threeRenderer.render(scene, camera);
     }
   }
 }
