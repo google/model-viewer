@@ -32,6 +32,7 @@ const $presentedScene = Symbol('presentedScene');
 
 const $lastTick = Symbol('lastTick');
 const $turntableRotation = Symbol('turntableRotation');
+const $oldShadowIntensity = Symbol('oldShadowIntensity');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
@@ -54,6 +55,7 @@ export class ARRenderer extends EventDispatcher {
 
   private[$lastTick]: number|null = null;
   private[$turntableRotation]: number|null = null;
+  private[$oldShadowIntensity]: number|null = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
@@ -143,6 +145,10 @@ export class ARRenderer extends EventDispatcher {
 
     scene.setCamera(this.camera);
     scene.add(this.reticle);
+    scene.pivot.visible = false;
+
+    this[$oldShadowIntensity] = scene.shadowIntensity;
+    scene.setShadowIntensity(AR_SHADOW_INTENSITY);
 
     this[$presentedScene] = scene;
     this[$lastTick] = performance.now();
@@ -209,10 +215,7 @@ export class ARRenderer extends EventDispatcher {
       scene.setCamera(scene.camera);
       scene.pivot.position.set(0, 0, 0);
       scene.setPivotRotation(this[$turntableRotation]!);
-      const {shadow, shadowIntensity} = scene;
-      if (shadow != null) {
-        shadow.setIntensity(shadowIntensity);
-      }
+      scene.setShadowIntensity(this[$oldShadowIntensity]!);
     }
     this.reticle.reset();
     // The renderer's render method automatically updates
@@ -245,14 +248,18 @@ export class ARRenderer extends EventDispatcher {
 
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
-      const scene = this[$presentedScene]!;
-      const hitMatrix = this.reticle.hitMatrix;
+      const {pivot, shadow} = this[$presentedScene]!;
+      const {hitMatrix} = this.reticle;
 
-      scene.pivot.position.setFromMatrixPosition(hitMatrix);
+      pivot.position.setFromMatrixPosition(hitMatrix);
 
       // Orient the dolly/model to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      scene.pivot.lookAt(camPosition.x, scene.pivot.position.y, camPosition.z);
+      pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
+      pivot.updateMatrixWorld();
+      shadow!.setRotation(pivot.rotation.y);
+
+      pivot.visible = true;
 
       this.dispatchEvent({type: 'modelmove'});
     }
@@ -311,11 +318,6 @@ export class ARRenderer extends EventDispatcher {
     const delta = time - this[$lastTick]!;
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
-
-    const {shadow} = scene;
-    if (shadow != null) {
-      shadow.setIntensity(AR_SHADOW_INTENSITY);
-    }
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
