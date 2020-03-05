@@ -47,7 +47,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
 
         setup(async () => {
           element = new ModelViewerElement();
-          document.body.appendChild(element);
+          document.body.insertBefore(element, document.body.firstChild);
           element.magicLeap = true;
 
           // Wait at least a microtask for size calculations
@@ -75,7 +75,7 @@ suite('ModelViewerElementBase with MagicLeapMixin', () => {
           self.mlWorld = {};
 
           element = new ModelViewerElement();
-          document.body.appendChild(element);
+          document.body.insertBefore(element, document.body.firstChild);
           element.magicLeap = true;
 
           // Wait at least a microtask for size calculations

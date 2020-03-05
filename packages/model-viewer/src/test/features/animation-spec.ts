@@ -59,7 +59,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ANIMATED_GLB_PATH;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'load');
     });
@@ -96,7 +96,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     setup(() => {
       element = new ModelViewerElement();
       element.autoplay = true;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
     });
 
     teardown(() => {
