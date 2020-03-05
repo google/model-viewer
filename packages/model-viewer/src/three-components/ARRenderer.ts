@@ -15,7 +15,7 @@
 
 import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
-import {$orientHotspots} from '../features/annotation.js';
+import {$orientHotspots, $setHotspotsVisibility} from '../features/annotation.js';
 import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -146,6 +146,7 @@ export class ARRenderer extends EventDispatcher {
     scene.setCamera(this.camera);
     scene.add(this.reticle);
     scene.pivot.visible = false;
+    (scene.element as any)[$setHotspotsVisibility](false);
 
     this[$oldShadowIntensity] = scene.shadowIntensity;
     scene.setShadowIntensity(AR_SHADOW_INTENSITY);
@@ -210,13 +211,16 @@ export class ARRenderer extends EventDispatcher {
     // necessary and sufficient?
     const scene = this[$presentedScene];
     if (scene != null) {
-      scene.remove(this.reticle);
-      scene.isDirty = true;
       scene.setCamera(scene.camera);
+      scene.remove(this.reticle);
+      scene.pivot.visible = true;
+      (scene.element as any)[$setHotspotsVisibility](true);
+
       scene.pivot.position.set(0, 0, 0);
       scene.setPivotRotation(this[$turntableRotation]!);
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       (scene.element as any)[$orientHotspots](0);
+      scene.isDirty = true;
     }
     this.reticle.reset();
     // The renderer's render method automatically updates
@@ -249,7 +253,7 @@ export class ARRenderer extends EventDispatcher {
 
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
-      const {pivot, shadow} = this[$presentedScene]!;
+      const {pivot, shadow, element} = this[$presentedScene]!;
       const {hitMatrix} = this.reticle;
 
       pivot.position.setFromMatrixPosition(hitMatrix);
@@ -261,6 +265,7 @@ export class ARRenderer extends EventDispatcher {
       shadow!.setRotation(pivot.rotation.y);
 
       pivot.visible = true;
+      (element as any)[$setHotspotsVisibility](true);
 
       this.dispatchEvent({type: 'modelmove'});
     }

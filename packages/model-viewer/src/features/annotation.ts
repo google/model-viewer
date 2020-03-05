@@ -23,7 +23,9 @@ import {Constructor} from '../utilities.js';
 import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
 
 export const $orientHotspots = Symbol('orientHotspots');
+export const $setHotspotsVisibility = Symbol('setHotspotsVisbility');
 const $annotationRenderer = Symbol('annotationRenderer');
+const $forHotspots = Symbol('forHotspots');
 const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
@@ -78,9 +80,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     constructor(...args: Array<any>) {
       super(...args);
 
+      const shadowRoot = this.shadowRoot!;
       const {domElement} = this[$annotationRenderer];
       domElement.classList.add('annotation-container');
-      this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
+      shadowRoot.querySelector('.container')!.appendChild(domElement);
+      domElement.appendChild(shadowRoot.querySelector('.default')!);
     }
 
     connectedCallback() {
@@ -181,33 +185,41 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$annotationRenderer].setSize(e.width, e.height);
     }
 
-    [$updateHotspots]() {
+    [$forHotspots](func: (hotspot: Hotspot) => void) {
       const {children} = this[$scene].pivot;
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot) {
-          view.copy(this[$scene].activeCamera.position);
-          target.setFromMatrixPosition(hotspot.matrixWorld);
-          view.sub(target);
-          normalWorld.copy(hotspot.normal)
-              .transformDirection(this[$scene].pivot.matrixWorld);
-          if (view.dot(normalWorld) < 0) {
-            hotspot.hide();
-          } else {
-            hotspot.show();
-          }
+          func(hotspot);
         }
       }
     }
 
-    [$orientHotspots](radians: number) {
-      const {children} = this[$scene].pivot;
-      for (let i = 0, l = children.length; i < l; i++) {
-        const hotspot = children[i];
-        if (hotspot instanceof Hotspot) {
-          hotspot.orient(radians);
+    [$updateHotspots]() {
+      this[$forHotspots]((hotspot) => {
+        view.copy(this[$scene].activeCamera.position);
+        target.setFromMatrixPosition(hotspot.matrixWorld);
+        view.sub(target);
+        normalWorld.copy(hotspot.normal)
+            .transformDirection(this[$scene].pivot.matrixWorld);
+        if (view.dot(normalWorld) < 0) {
+          hotspot.hide();
+        } else {
+          hotspot.show();
         }
-      }
+      });
+    }
+
+    [$orientHotspots](radians: number) {
+      this[$forHotspots]((hotspot) => {
+        hotspot.orient(radians);
+      });
+    }
+
+    [$setHotspotsVisibility](visible: boolean) {
+      this[$forHotspots]((hotspot) => {
+        hotspot.visible = visible;
+      });
     }
 
     [$addHotspot](node: Node) {
