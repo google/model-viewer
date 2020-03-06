@@ -18,7 +18,7 @@ import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
-import Model, {DEFAULT_FOV_DEG} from './Model.js';
+import Model, {DEFAULT_FOV_DEG, DEFAULT_TAN_FOV} from './Model.js';
 import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -38,8 +38,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
-
-const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 
 const $paused = Symbol('paused');
 

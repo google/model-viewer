@@ -241,7 +241,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('updates with current orbit after interaction', async () => {
-          controls.adjustOrbit(0, 0.5, 0, 0);
+          controls.adjustOrbit(0, 0.5, 0);
           settleControls(controls);
 
           const orbit = element.getCameraOrbit();
@@ -610,13 +610,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage right');
 
-              controls.adjustOrbit(-Math.PI / 2.0, 0, 0, 0);
+              controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage back');
 
-              controls.adjustOrbit(Math.PI, 0, 0, 0);
+              controls.adjustOrbit(Math.PI, 0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
@@ -639,13 +639,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage upper-front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
               settleControls(controls);
 
               expect(canvas.getAttribute('aria-label'))

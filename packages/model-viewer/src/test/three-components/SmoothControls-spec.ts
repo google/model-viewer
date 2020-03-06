@@ -174,13 +174,13 @@ suite('SmoothControls', () => {
         test(
             'adjustOrbit does not move the goal theta more than pi past the current theta',
             () => {
-              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0);
 
               controls.update(performance.now(), ONE_FRAME_DELTA);
               const startingTheta = controls.getCameraSpherical().theta;
               expect(startingTheta).to.be.greaterThan(0);
 
-              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0, 0);
+              controls.adjustOrbit(-Math.PI * 3 / 2, 0, 0);
               settleControls(controls);
               const goalTheta = controls.getCameraSpherical().theta;
               expect(goalTheta).to.be.greaterThan(Math.PI);
@@ -502,7 +502,7 @@ suite('SmoothControls', () => {
           suite('simultaneous user and imperative interaction', () => {
             test('reports source as user interaction', async () => {
               const eventDispatches = waitForEvent(controls, 'change');
-              controls.adjustOrbit(1, 1, 1, 1);
+              controls.adjustOrbit(1, 1, 1);
               dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
               settleControls(controls);
 
