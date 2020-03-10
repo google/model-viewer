@@ -163,8 +163,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
-      this[$updateHotspots]();
-      this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+      if (this.modelIsVisible) {
+        this[$updateHotspots]();
+        this[$annotationRenderer].render(
+            this[$scene], this[$scene].activeCamera);
+      }
     }
 
     [$onResize](e: {width: number, height: number}) {
