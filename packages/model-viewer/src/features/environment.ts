@@ -14,12 +14,11 @@
  */
 
 import {property} from 'lit-element';
-import {Color, Texture} from 'three';
+import {Texture} from 'three';
 
-import ModelViewerElementBase, {$container, $isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
-const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
@@ -32,7 +31,6 @@ const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 export declare interface EnvironmentInterface {
   environmentImage: string|null;
   skyboxImage: string|null;
-  backgroundColor: string;
   shadowIntensity: number;
   shadowSoftness: number;
   exposure: number;
@@ -54,9 +52,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       converter: {fromAttribute: deserializeUrl}
     })
     skyboxImage: string|null = null;
-
-    @property({type: String, attribute: 'background-color'})
-    backgroundColor: string = DEFAULT_BACKGROUND_COLOR;
 
     @property({type: Number, attribute: 'shadow-intensity'})
     shadowIntensity: number = DEFAULT_SHADOW_INTENSITY;
@@ -93,7 +88,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('environmentImage') ||
           changedProperties.has('skyboxImage') ||
-          changedProperties.has('backgroundColor') ||
           changedProperties.has('experimentalPmrem') ||
           changedProperties.has($isInRenderTree)) {
         this[$updateEnvironment]();
@@ -104,7 +98,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$onModelLoad](event);
 
       if (this[$currentEnvironmentMap] != null) {
-        this[$applyEnvironmentMap](this[$currentEnvironmentMap]!);
+        this[$applyEnvironmentMap](this[$currentEnvironmentMap]);
       }
     }
 
@@ -113,13 +107,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const {skyboxImage, backgroundColor, environmentImage} = this;
-      // Set the container node's background color so that it matches
-      // the background color configured for the scene. It's important
-      // to do this because we round the size of the canvas off to the
-      // nearest pixel, so it is possible (indeed likely) that there is
-      // a marginal gap around one or two edges of the canvas.
-      this[$container].style.backgroundColor = backgroundColor;
+      const {skyboxImage, environmentImage} = this;
 
       if (this[$cancelEnvironmentUpdate] != null) {
         this[$cancelEnvironmentUpdate]!();
@@ -144,18 +132,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
             });
 
         if (skybox != null) {
-          const material = this[$scene].skyboxMaterial();
-          // This hack causes ShaderMaterial to populate the correct
-          // envMapTexelToLinear function.
-          (material as any).envMap = skybox.texture;
-          material.uniforms.envMap.value = skybox.texture;
-          material.needsUpdate = true;
-          this[$scene].add(this[$scene].skyboxMesh);
+          this[$scene].background = skybox.texture;
         } else {
-          this[$scene].remove(this[$scene].skyboxMesh);
-
-          const parsedColor = new Color(backgroundColor);
-          this[$scene].background = parsedColor;
+          this[$scene].background = null;
         }
 
         this[$applyEnvironmentMap](environmentMap.texture);
@@ -184,7 +163,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     private[$applyEnvironmentMap](environmentMap: Texture|null) {
       this[$currentEnvironmentMap] = environmentMap;
-      this[$scene].model.applyEnvironmentMap(this[$currentEnvironmentMap]);
+      this[$scene].environment = this[$currentEnvironmentMap];
       this.dispatchEvent(new CustomEvent('environment-change'));
 
       this[$needsRender]();

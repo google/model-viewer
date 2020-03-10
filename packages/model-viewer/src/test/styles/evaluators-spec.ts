@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {CalcEvaluator, EnvEvaluator, PercentageEvaluator, OperatorEvaluator, StyleEvaluator, SphericalIntrinsics} from '../../styles/evaluators.js';
+import {CalcEvaluator, EnvEvaluator, OperatorEvaluator, PercentageEvaluator, SphericalIntrinsics, StyleEvaluator} from '../../styles/evaluators.js';
+import {numberNode} from '../../styles/parsers.js';
 import {expressionNode, functionNode, identNode, operatorNode, spy} from '../helpers.js';
-import { numberNode } from '../../styles/parsers.js';
 
 const expect = chai.expect;
 
@@ -56,7 +56,8 @@ suite('evaluators', () => {
 
   suite('PercentageEvaluator', () => {
     test('multiplies the percentage by the basis', () => {
-      const evaluator = new PercentageEvaluator(numberNode(200, '%'), numberNode(1, 'm'));
+      const evaluator =
+          new PercentageEvaluator(numberNode(200, '%'), numberNode(1, 'm'));
       expect(evaluator.evaluate()).to.be.eql(numberNode(2, 'm'));
     });
   });
@@ -206,10 +207,9 @@ suite('evaluators', () => {
       let intrinsics: SphericalIntrinsics;
       setup(() => {
         intrinsics = {
-          basis: [numberNode(1, 'rad'), numberNode(1, 'rad'), numberNode(1, 'm')],
-          keywords: {
-            auto: [numberNode(2, 'rad'), null, numberNode(200, '%')]
-          }
+          basis:
+              [numberNode(1, 'rad'), numberNode(1, 'rad'), numberNode(1, 'm')],
+          keywords: {auto: [numberNode(2, 'rad'), null, numberNode(200, '%')]}
         };
       });
 
@@ -218,74 +218,79 @@ suite('evaluators', () => {
         expect(evaluator.evaluate()).to.be.eql([2, 1, 2]);
       });
 
-      test('substitutes the keyword auto for the related intrinsic value', () => {
-        const evaluator = new StyleEvaluator([expressionNode([
-          identNode('auto')
-        ])], intrinsics);
+      test(
+          'substitutes the keyword auto for the related intrinsic value',
+          () => {
+            const evaluator = new StyleEvaluator(
+                [expressionNode([identNode('auto')])], intrinsics);
 
-        expect(evaluator.evaluate()).to.be.eql([2, 1, 2]);
-      });
+            expect(evaluator.evaluate()).to.be.eql([2, 1, 2]);
+          });
 
       test('treats missing values as equivalent to auto', () => {
-        const evaluatorOne = new StyleEvaluator([expressionNode([
-        ])], intrinsics);
-        const evaluatorTwo = new StyleEvaluator([expressionNode([
-          identNode('auto'),
-          identNode('auto'),
-          identNode('auto')
-        ])], intrinsics);
+        const evaluatorOne =
+            new StyleEvaluator([expressionNode([])], intrinsics);
+        const evaluatorTwo = new StyleEvaluator(
+            [expressionNode(
+                [identNode('auto'), identNode('auto'), identNode('auto')])],
+            intrinsics);
 
         expect(evaluatorOne.evaluate()).to.be.eql(evaluatorTwo.evaluate());
       });
 
       test('scales the basis by an input percentage', () => {
-        const evaluator = new StyleEvaluator([expressionNode([
-          numberNode(300, '%')
-        ])], intrinsics);
+        const evaluator = new StyleEvaluator(
+            [expressionNode([numberNode(300, '%')])], intrinsics);
 
         expect(evaluator.evaluate()).to.be.eql([3, 1, 2]);
       });
 
       test('evaluates spherical values from basic expressions', () => {
-        const evaluator = new StyleEvaluator([expressionNode([
-          numberNode(1, 'rad'),
-          numberNode(180, 'deg'),
-          numberNode(100, 'cm')
-        ])], intrinsics);
+        const evaluator = new StyleEvaluator(
+            [expressionNode([
+              numberNode(1, 'rad'),
+              numberNode(180, 'deg'),
+              numberNode(100, 'cm')
+            ])],
+            intrinsics);
 
         expect(evaluator.evaluate()).to.be.eql([1, Math.PI, 1]);
       });
 
       test('applies a percentage at any expression depth to the basis', () => {
-        const evaluator = new StyleEvaluator([expressionNode([
-          numberNode(150, '%'),
-          numberNode(180, 'deg'),
-          functionNode('calc', [
-            expressionNode([
-              numberNode(200, '%'),
-              operatorNode('*'),
-              functionNode('calc', [expressionNode([numberNode(3, 'm')])]),
-            ])
-          ])
-        ])], intrinsics);
+        const evaluator = new StyleEvaluator(
+            [expressionNode([
+              numberNode(150, '%'),
+              numberNode(180, 'deg'),
+              functionNode('calc', [expressionNode([
+                             numberNode(200, '%'),
+                             operatorNode('*'),
+                             functionNode('calc', [expressionNode(
+                                                      [numberNode(3, 'm')])]),
+                           ])])
+            ])],
+            intrinsics);
 
         expect(evaluator.evaluate()).to.be.eql([1.5, Math.PI, 6]);
       });
 
       test('evaluates spherical values from complex expressions', () => {
-        const evaluator = new StyleEvaluator([expressionNode([
-          numberNode(1, 'rad'),
-          numberNode(180, 'deg'),
-          functionNode('calc', [
-            expressionNode([
-              numberNode(1, 'm'),
-              operatorNode('+'),
-              functionNode('calc', [expressionNode([numberNode(1, null)])]),
-              operatorNode('+'),
-              functionNode('env', [expressionNode([identNode('window-scroll-y')])])
-            ])
-          ])
-        ])], intrinsics);
+        const evaluator = new StyleEvaluator(
+            [expressionNode([
+              numberNode(1, 'rad'),
+              numberNode(180, 'deg'),
+              functionNode(
+                  'calc', [expressionNode([
+                    numberNode(1, 'm'),
+                    operatorNode('+'),
+                    functionNode(
+                        'calc', [expressionNode([numberNode(1, null)])]),
+                    operatorNode('+'),
+                    functionNode(
+                        'env', [expressionNode([identNode('window-scroll-y')])])
+                  ])])
+            ])],
+            intrinsics);
 
         expect(evaluator.evaluate()).to.be.eql([1, Math.PI, 2]);
       });

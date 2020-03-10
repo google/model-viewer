@@ -154,8 +154,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
 
-    @property({type: String, attribute: 'ar-scale'}) arScale: string =
-      'auto';
+    @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
     @property({type: Boolean, attribute: 'unstable-webxr'})
     unstableWebxr: boolean = false;

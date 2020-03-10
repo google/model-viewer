@@ -1,0 +1,13 @@
+{
+  "name": "@google/model-viewer-shared-assets",
+  "private": true,
+  "version": "0.0.1",
+  "description": "3D models and related assets for <model-viewer> docs and tests",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0",
+    "prepare": "./scripts/fetch-khronos-gltf-samples.sh",
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production"
+  },
+  "author": "DevXR Contributors",
+  "license": "Apache-2.0"
+}

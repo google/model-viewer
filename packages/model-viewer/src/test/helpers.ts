@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventDispatcher, Texture} from 'three';
+import {EventDispatcher, Scene, Texture} from 'three';
+import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
 import {deserializeUrl} from '../utilities.js';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
-      const host = (document === window.document) ?
+      const host: HTMLElement = (document === window.document) ?
           window.document.body :
-          (document as ShadowRoot).host;
+          (document as ShadowRoot).host as HTMLElement;
       const actualDocument =
           (window as any).ShadyCSS ? window.document : document;
       const boundingRect = host.getBoundingClientRect();
@@ -121,7 +122,7 @@ export const dispatchSyntheticEvent =
     };
 
 
-export const ASSETS_DIRECTORY = '../examples/assets/';
+export const ASSETS_DIRECTORY = '../shared-assets/';
 
 /**
  * Returns the full path for an asset by name. This is a convenience helper so
@@ -133,7 +134,6 @@ export const ASSETS_DIRECTORY = '../examples/assets/';
  */
 export const assetPath = (name: string): string =>
     deserializeUrl(`${ASSETS_DIRECTORY}${name}`)!;
-
 
 /**
  * Returns true if the given element is in the tree of the document of the
@@ -208,3 +208,17 @@ export const operatorNode = (value: Operator): OperatorNode =>
 export const functionNode =
     (name: string, args: Array<ExpressionNode>): FunctionNode =>
         ({type: 'function', name: identNode(name), arguments: args});
+
+export const createFakeGLTF = () => {
+  const scene = new Scene();
+
+  return {
+    animations: [],
+    scene,
+    scenes: [scene],
+    cameras: [],
+    asset: {},
+    parser: {} as unknown as GLTFParser,
+    userData: {}
+  };
+};

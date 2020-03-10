@@ -17,13 +17,14 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
-import {ChangeEvent, ChangeSource, SmoothControls} from '../three-components/SmoothControls.js';
+import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -183,10 +184,12 @@ const $updateCameraForRadius = Symbol('updateCameraForRadius');
 const $blurHandler = Symbol('blurHandler');
 const $focusHandler = Symbol('focusHandler');
 const $changeHandler = Symbol('changeHandler');
+const $pointerChangeHandler = Symbol('pointerChangeHandler');
 
 const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
+const $onPointerChange = Symbol('onPointerChange');
 
 const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
@@ -222,9 +225,10 @@ export declare interface ControlsInterface {
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   getCameraOrbit(): SphericalPosition;
-  getCameraTarget(): Vector3;
+  getCameraTarget(): Vector3D;
   getFieldOfView(): number;
   jumpCameraToGoal(): void;
+  resetInteractionPrompt(): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -328,6 +332,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$changeHandler] = (event: Event) =>
         this[$onChange](event as ChangeEvent);
 
+    protected[$pointerChangeHandler] = (event: Event) =>
+        this[$onPointerChange](event as PointerChangeEvent);
+
     protected[$focusHandler] = () => this[$onFocus]();
     protected[$blurHandler] = () => this[$onBlur]();
 
@@ -336,7 +343,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       return {theta, phi, radius};
     }
 
-    getCameraTarget(): Vector3 {
+    getCameraTarget(): Vector3D {
       return this[$controls].getTarget();
     }
 
@@ -349,16 +356,34 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate($jumpCamera, false);
     }
 
+    resetInteractionPrompt() {
+      this[$lastPromptOffset] = 0;
+      this[$promptElementVisibleTime] = Infinity;
+      this[$userPromptedOnce] = false;
+      this[$waitingToPromptUser] =
+          this.interactionPrompt === InteractionPromptStrategy.AUTO &&
+          this.cameraControls;
+      this[$shouldPromptUserToInteract] = true;
+    }
+
     connectedCallback() {
       super.connectedCallback();
 
       this[$controls].addEventListener('change', this[$changeHandler]);
+      this[$controls].addEventListener(
+          'pointer-change-start', this[$pointerChangeHandler]);
+      this[$controls].addEventListener(
+          'pointer-change-end', this[$pointerChangeHandler]);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
 
       this[$controls].removeEventListener('change', this[$changeHandler]);
+      this[$controls].removeEventListener(
+          'pointer-change-start', this[$pointerChangeHandler]);
+      this[$controls].removeEventListener(
+          'pointer-change-end', this[$pointerChangeHandler]);
     }
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
@@ -511,7 +536,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$controls].update(time, delta);
-      const target = this.getCameraTarget();
+      const target = this[$controls].getTarget();
       if (!this[$scene].pivotCenter.equals(target)) {
         this[$scene].pivotCenter.copy(target);
         this[$scene].setPivotRotation(this[$scene].getPivotRotation());
@@ -661,6 +686,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
           'camera-change', {detail: {source}}));
+    }
+
+    [$onPointerChange](event: PointerChangeEvent) {
+      if (event.type === 'pointer-change-start') {
+        this[$container].classList.add('pointer-tumbling');
+      } else {
+        this[$container].classList.remove('pointer-tumbling');
+      }
     }
   }
 

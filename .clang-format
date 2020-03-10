@@ -7,6 +7,7 @@ AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 BinPackArguments: false
+ColumnLimit: 80
 # This breaks async functions sometimes, see
 #     https://github.com/Polymer/polymer-analyzer/pull/393
 # BinPackParameters: false

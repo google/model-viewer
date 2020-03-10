@@ -16,7 +16,8 @@
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$ariaLabel, $canvas, $getLoaded, $getModelIsVisible, $isInRenderTree, $progressTracker, $updateSource} from '../model-viewer-base.js';
-import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
+import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
+import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor, debounce, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -44,7 +45,7 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loader = new CachingGLTFLoader();
+const loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
 const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
@@ -90,6 +91,7 @@ export declare interface LoadingInterface {
 
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
+  mapURLs(callback: (url: string) => string): void;
 }
 
 interface ModelViewerGlobalConfig {
@@ -155,6 +157,16 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get dracoDecoderLocation() {
       return CachingGLTFLoader.getDRACODecoderLocation();
+    }
+
+    /**
+     * If provided, the callback will be passed each resource URL before a
+     * request is sent. The callback may return the original URL, or a new URL
+     * to override loading behavior. This behavior can be used to load assets
+     * from .ZIP files, drag-and-drop APIs, and Data URIs.
+     */
+    static mapURLs(callback: (url: string) => string) {
+      loader[$loader].manager.setURLModifier(callback);
     }
 
     /**
@@ -379,8 +391,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     get[$shouldAttemptPreload](): boolean {
       const {src} = this;
 
-      return !!src && !CachingGLTFLoader.hasFinishedLoading(src) &&
-          (this.preload || this[$shouldRevealModel]) && this[$isInRenderTree];
+      return !!src && (this.preload || this[$shouldRevealModel]) &&
+          this[$isInRenderTree];
     }
 
     async[$updateLoadingAndVisibility]() {

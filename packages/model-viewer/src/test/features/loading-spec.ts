@@ -20,8 +20,8 @@ import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, unt
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ASTRONAUT_GLB_PATH = assetPath('Astronaut.glb');
-const HORSE_GLB_PATH = assetPath('Horse.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with LoadingMixin', () => {
   suite('when registered', () => {
@@ -51,7 +51,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         document.body.appendChild(element);
-        element.poster = assetPath('poster.png');
+        element.poster = assetPath('../screenshot.png');
 
         // Wait at least a microtask for size calculations
         await timePasses();
@@ -65,7 +65,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         }
       });
 
-      test('creates a poster element that captures interactions', () => {
+      test('creates a poster element that captures interactions', async () => {
         const picked = pickShadowDescendant(element);
         expect(picked).to.be.ok;
         // TODO(cdata): Leaky internal details here:
@@ -280,6 +280,28 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             const picked = pickShadowDescendant(element);
 
             expect(picked).to.be.equal(canvas);
+          });
+
+          test('when src is reset, poster is dismissable', async () => {
+            const posterElement = (element as any)[$defaultPosterElement];
+            const canvasElement = element[$canvas];
+
+            element.reveal = 'interaction';
+            element.src = null;
+            element.src = ASTRONAUT_GLB_PATH;
+
+            await timePasses();
+
+            posterElement.focus();
+
+            expect(element.shadowRoot!.activeElement)
+                .to.be.equal(posterElement);
+
+            dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
+
+            await until(() => {
+              return element.shadowRoot!.activeElement === canvasElement;
+            });
           });
         });
       });

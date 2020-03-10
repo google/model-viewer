@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial, Object3D, Scene} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
-import {cloneGltf} from './ModelUtils.js';
-import {RoughnessMipmapper} from './RoughnessMipmapper.js';
+import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
 
 export type ProgressCallback = (progress: number) => void;
 
@@ -39,21 +37,18 @@ export const loadWithLoader =
       });
     };
 
-export const $releaseFromCache = Symbol('releaseFromCache');
-export interface CacheRetainedScene extends Scene {
-  [$releaseFromCache]: () => void;
-}
-
-const cache = new Map<string, Promise<GLTF>>();
+const cache = new Map<string, Promise<GLTFInstance>>();
 const preloaded = new Map<string, boolean>();
-
-export const $evictionPolicy = Symbol('evictionPolicy');
 
 let dracoDecoderLocation: string;
 const dracoLoader = new DRACOLoader();
-const $loader = Symbol('loader');
 
-export class CachingGLTFLoader {
+export const $loader = Symbol('loader');
+export const $evictionPolicy = Symbol('evictionPolicy');
+const $GLTFInstance = Symbol('GLTFInstance');
+
+export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
+                                             GLTFInstanceConstructor> {
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -94,20 +89,8 @@ export class CachingGLTFLoader {
 
     const gltf = await gltfLoads;
     // Dispose of the cached glTF's materials and geometries:
-    gltf!.scenes.forEach(scene => {
-      scene.traverse(object3D => {
-        if (!(object3D as Mesh).isMesh) {
-          return;
-        }
-        const mesh = object3D as Mesh;
-        const materials =
-            Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        materials.forEach(material => {
-          material.dispose();
-        });
-        mesh.geometry.dispose();
-      });
-    });
+
+    gltf!.dispose();
   }
 
   /**
@@ -118,11 +101,13 @@ export class CachingGLTFLoader {
     return !!preloaded.get(url);
   }
 
-  constructor() {
+  constructor(GLTFInstance: T) {
+    this[$GLTFInstance] = GLTFInstance;
     this[$loader].setDRACOLoader(dracoLoader);
   }
 
   protected[$loader]: GLTFLoader = new GLTFLoader();
+  protected[$GLTFInstance]: T;
 
   protected get[$evictionPolicy](): CacheEvictionPolicy {
     return (this.constructor as typeof CachingGLTFLoader)[$evictionPolicy];
@@ -134,9 +119,21 @@ export class CachingGLTFLoader {
    */
   async preload(url: string, progressCallback: ProgressCallback = () => {}) {
     if (!cache.has(url)) {
-      cache.set(url, loadWithLoader(url, this[$loader], (progress: number) => {
-                  progressCallback(progress * 0.9);
-                }));
+      const rawGLTFLoads =
+          loadWithLoader(url, this[$loader], (progress: number) => {
+            progressCallback(progress * 0.8);
+          });
+
+      const gltfInstanceLoads = rawGLTFLoads.then((rawGLTF: GLTF) => {
+        const GLTFInstance = this[$GLTFInstance];
+        const preparedGLTF = GLTFInstance.prepare(rawGLTF);
+
+        progressCallback(0.9);
+
+        return new GLTFInstance(preparedGLTF);
+      });
+
+      cache.set(url, gltfInstanceLoads);
     }
 
     await cache.get(url);
@@ -148,84 +145,37 @@ export class CachingGLTFLoader {
     preloaded.set(url, true);
   }
 
-  protected roughnessMipmapper = new RoughnessMipmapper();
-
   /**
    * Loads a glTF from the specified url and resolves a unique clone of the
    * glTF. If the glTF has already been loaded, makes a clone of the cached
    * copy.
    */
   async load(url: string, progressCallback: ProgressCallback = () => {}):
-      Promise<CacheRetainedScene|null> {
+      Promise<InstanceType<T>> {
     await this.preload(url, progressCallback);
 
     const gltf = await cache.get(url)!;
+    const clone = gltf.clone() as InstanceType<T>;
 
-    if (gltf.scene != null) {
-      gltf.scene.traverse((node: Object3D) => {
-        // Three.js seems to cull some animated models incorrectly. Since we
-        // expect to view our whole scene anyway, we turn off the frustum
-        // culling optimization here.
-        node.frustumCulled = false;
-        // Animations for objects without names target their UUID instead. When
-        // objects are cloned, they get new UUIDs which the animation can't
-        // find. To fix this, we assign their UUID as their name.
-        if (!node.name) {
-          node.name = node.uuid;
-        }
-        if (!(node as Mesh).isMesh) {
+    this[$evictionPolicy].retain(url);
+
+    // Patch dispose so that we can properly account for instance use
+    // in the caching layer:
+    clone.dispose = (() => {
+      const originalDispose = clone.dispose;
+      let disposed = false;
+
+      return () => {
+        if (disposed) {
           return;
         }
-        node.castShadow = true;
-        const mesh = node as Mesh;
-        const materials =
-            Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        materials.forEach(material => {
-          if ((material as any).isMeshStandardMaterial) {
-            this.roughnessMipmapper.generateMipmaps(
-                material as MeshStandardMaterial);
-          }
-        });
-      });
-    }
 
-    const clone = cloneGltf(gltf);
-    const model = clone.scene ? clone.scene : null;
+        disposed = true;
+        originalDispose.apply(clone);
+        this[$evictionPolicy].release(url);
+      };
+    })();
 
-    if (model != null) {
-      model.userData.animations = clone.animations;  // save animations
-
-      this[$evictionPolicy].retain(url);
-
-      (model as CacheRetainedScene)[$releaseFromCache] = (() => {
-        let released = false;
-        return () => {
-          if (released) {
-            return;
-          }
-
-          // We manually dispose cloned materials because Three.js keeps
-          // an internal count of materials using the same program, so it's
-          // safe to dispose of them incrementally. Geometry clones are not
-          // accounted for, so they cannot be disposed of incrementally.
-          model.traverse((object3D) => {
-            if (!(object3D as Mesh).isMesh) {
-              return;
-            }
-            const mesh = object3D as Mesh;
-            const materials =
-                Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-            materials.forEach(material => {
-              material.dispose();
-            });
-          });
-
-          this[$evictionPolicy].release(url);
-          released = true;
-        };
-      })();
-    }
-
-    return model as CacheRetainedScene | null;
+    return clone;
   }
 }

@@ -3,22 +3,47 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
-    "test": "lerna run test --stream",
-    "test:ci": "lerna run test:ci --stream",
-    "bootstrap": "lerna bootstrap --ci",
-    "build": "lerna run build --stream"
+    "test": "./node_modules/.bin/lerna run test --stream",
+    "test:ci": "./node_modules/.bin/lerna run test:ci --stream",
+    "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
+    "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
+    "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
+    "clean": "./node_modules/.bin/lerna run clean --stream",
+    "build": "./node_modules/.bin/lerna run build --stream",
+    "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1",
+    "update:package-lock": "./node_modules/.bin/lerna run update:package-lock --stream"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && ./scripts/pre-commit.sh"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GoogleWebComponents/model-viewer.git"
+    "url": "git+https://github.com/google/model-viewer.git"
   },
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/GoogleWebComponents/model-viewer/issues"
+  "engines": {
+    "node": ">=12.0.0"
   },
-  "homepage": "https://github.com/GoogleWebComponents/model-viewer#readme",
+  "bugs": {
+    "url": "https://github.com/google/model-viewer/issues"
+  },
+  "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
-    "lerna": "^3.20.2"
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
+    "clang-format": "^1.4.0",
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-wc": "^1.2.0",
+    "http-server": "^0.12.1",
+    "husky": "^4.2.1",
+    "lerna": "^3.20.2",
+    "typescript": "^3.7.5"
   }
 }

@@ -1,0 +1,157 @@
+<!--
+/*
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Scene Graph Worklet</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <style>
+#controls {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+}
+
+button {
+  font-size: 2em;
+  margin: 0 0.25em;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sample">
+    <div id="demo-container-1" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph using a special kind of &lt;script&gt; tag</h4>
+        <div class="heading">
+          <h2 class="demo-title">Scene Graph Worklet</h2>
+          <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
+        </div>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <template>
+
+<model-viewer id="astronaut" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <script type="experimental-scene-graph-worklet" allow="messaging; material-properties">
+self.addEventListener('model-change', (event) => {
+  const {model} = event;
+  const [material] = model.materials;
+
+  self.addEventListener('message', (event) => {
+    switch(event.data.action) {
+      case 'change-color':
+        console.log('Changing color to:', event.data.payload);
+        material.pbrMetallicRoughness.setBaseColorFactor(event.data.payload);
+        break;
+    }
+  });
+});
+  </script>
+  <div id="controls">
+    <button data-color="1,0,0,1">Red</button>
+    <button data-color="0,1,0,1">Green</button>
+    <button data-color="0,0,1,1">Blue</button>
+  </div>
+</model-viewer>
+<script>
+document.querySelector('#controls').addEventListener('click', (event) => {
+  const colorString = event.target.dataset.color;
+
+  if (!colorString) {
+    return;
+  }
+
+  const color = colorString.split(',')
+      .map(numberString => parseFloat(numberString));
+
+  // Forward interaction details to the <model-viewer> worklet:
+  astronaut.worklet.postMessage({
+    action: 'change-color',
+    payload: color
+  });
+});
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="footer">
+    <ul>
+      <li class="attribution">
+        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+  </div>
+
+  
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+</html>

@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Camera, Color, Event as ThreeEvent, Mesh, Object3D, PerspectiveCamera, Scene, Shader, ShaderLib, ShaderMaterial, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
-import {cubeUVChunk} from './shader-chunk/cube_uv_reflection_fragment.glsl.js';
 import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -68,7 +67,6 @@ export class ModelScene extends Scene {
   public exposure = 1;
   public model: Model;
   public framedFieldOfView = DEFAULT_FOV_DEG;
-  public skyboxMesh: Mesh;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
@@ -95,13 +93,10 @@ export class ModelScene extends Scene {
     this.pivot.name = 'Pivot';
     this.pivotCenter = new Vector3;
 
-    this.skyboxMesh = this.createSkyboxMesh();
-
     this.add(this.pivot);
     this.pivot.add(this.model);
 
     this.setSize(width, height);
-    this.background = new Color(0xffffff);
 
     this.model.addEventListener(
         'model-load', (event: any) => this.onModelLoad(event));
@@ -240,14 +235,17 @@ export class ModelScene extends Scene {
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
   setShadowIntensity(shadowIntensity: number) {
+    shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
-    if (shadowIntensity > 0 && this.model.hasModel()) {
-      if (this.shadow == null) {
+    if (this.model.hasModel()) {
+      if (this.shadow == null && shadowIntensity > 0) {
         this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
         this.pivot.add(this.shadow);
         // showShadowHelper(this);
       }
-      this.shadow.setIntensity(shadowIntensity);
+      if (this.shadow != null) {
+        this.shadow.setIntensity(shadowIntensity);
+      }
     }
   }
 
@@ -261,54 +259,5 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setSoftness(softness);
     }
-  }
-
-  createSkyboxMesh(): Mesh {
-    const geometry = new BoxBufferGeometry(1, 1, 1);
-    geometry.deleteAttribute('normal');
-    geometry.deleteAttribute('uv');
-    const material = new ShaderMaterial({
-      uniforms: {envMap: {value: null}, opacity: {value: 1.0}},
-      vertexShader: ShaderLib.cube.vertexShader,
-      fragmentShader: ShaderLib.cube.fragmentShader,
-      side: BackSide,
-      // Turn off the depth buffer so that even a small box still ends up
-      // enclosing a scene of any size.
-      depthTest: false,
-      depthWrite: false,
-      fog: false,
-    });
-    material.extensions = {
-      derivatives: true,
-      fragDepth: false,
-      drawBuffers: false,
-      shaderTextureLOD: false
-    };
-    const samplerUV = `
-#define ENVMAP_TYPE_CUBE_UV
-#define PI 3.14159265359
-${cubeUVChunk}
-uniform sampler2D envMap;
-    `;
-    material.onBeforeCompile = (shader: Shader) => {
-      shader.fragmentShader =
-          shader.fragmentShader.replace('uniform samplerCube tCube;', samplerUV)
-              .replace(
-                  'vec4 texColor = textureCube( tCube, vec3( tFlip * vWorldDirection.x, vWorldDirection.yz ) );',
-                  'gl_FragColor = textureCubeUV( envMap, vWorldDirection, 0.0 );')
-              .replace('gl_FragColor = mapTexelToLinear( texColor );', '');
-    };
-    const skyboxMesh = new Mesh(geometry, material);
-    skyboxMesh.frustumCulled = false;
-    // This centers the box on the camera, ensuring the view is not affected by
-    // the camera's motion, which makes it appear inifitely large, as it should.
-    skyboxMesh.onBeforeRender = function(_renderer, _scene, camera) {
-      this.matrixWorld.copyPosition(camera.matrixWorld);
-    };
-    return skyboxMesh;
-  }
-
-  skyboxMaterial(): ShaderMaterial {
-    return this.skyboxMesh.material as ShaderMaterial;
   }
 }

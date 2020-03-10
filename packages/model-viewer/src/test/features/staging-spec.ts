@@ -15,12 +15,12 @@
 
 import {AUTO_ROTATE_DELAY_DEFAULT, StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase, {$onUserModelOrbit} from '../../model-viewer-base.js';
-import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
-const ODD_SHAPE_GLB_PATH = assetPath('odd-shape.glb');
+const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;
@@ -48,6 +48,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       document.body.appendChild(element);
 
       await waitForEvent(element, 'load');
+      await rafPasses();
     });
 
     teardown(() => {
@@ -55,18 +56,16 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     });
 
     suite('auto-rotate', () => {
-      // An arbitrary amount of time, greater than one rAF though
-      const AT_LEAST_ONE_RAF_MS = 50;
-
       setup(() => {
         element.autoRotate = true;
       });
 
       test('causes the model to rotate after a delay', async () => {
         const {turntableRotation} = element;
-        await timePasses(AT_LEAST_ONE_RAF_MS);
+        await rafPasses();
         expect(element.turntableRotation).to.be.equal(turntableRotation);
         await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+        await rafPasses();
         expect(element.turntableRotation).to.be.greaterThan(turntableRotation);
       });
 
@@ -74,7 +73,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           'retains turntable rotation when auto-rotate is toggled',
           async () => {
             element.autoRotateDelay = 0;
-            await timePasses(AT_LEAST_ONE_RAF_MS);
+            await rafPasses();
 
             const {turntableRotation} = element;
 
@@ -82,13 +81,13 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
             element.autoRotate = false;
 
-            await timePasses(AT_LEAST_ONE_RAF_MS);
+            await rafPasses();
 
             expect(element.turntableRotation).to.be.equal(turntableRotation);
 
             element.autoRotate = true;
 
-            await timePasses(AT_LEAST_ONE_RAF_MS);
+            await rafPasses();
 
             expect(element.turntableRotation)
                 .to.be.greaterThan(turntableRotation);
@@ -102,7 +101,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         test('does not cause the model to rotate over time', async () => {
           const {turntableRotation} = element;
 
-          await timePasses(AUTO_ROTATE_DELAY_DEFAULT + AT_LEAST_ONE_RAF_MS);
+          await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+          await rafPasses();
 
           expect(element.turntableRotation).to.be.equal(turntableRotation);
         });
@@ -116,7 +116,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         test('causes the model to rotate ASAP', async () => {
           const {turntableRotation} = element;
-          await timePasses(AT_LEAST_ONE_RAF_MS);
+          await rafPasses();
           expect(element.turntableRotation)
               .to.be.greaterThan(turntableRotation);
         });
@@ -128,11 +128,12 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         element[$onUserModelOrbit]();
 
-        await timePasses(AT_LEAST_ONE_RAF_MS);
+        await rafPasses();
 
         expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
 
         await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+        await rafPasses();
 
         expect(element.turntableRotation)
             .to.be.greaterThan(initialTurntableRotation);

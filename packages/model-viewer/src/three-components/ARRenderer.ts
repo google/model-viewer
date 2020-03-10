@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer,} from 'three';
 
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -28,6 +28,7 @@ const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
+const $viewerRefSpace = Symbol('viewerRefSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $outputContext = Symbol('outputContext');
@@ -51,7 +52,8 @@ export class ARRenderer extends EventDispatcher {
   private[$outputContext]: WebGLRenderingContext|null = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
-  private[$refSpace]: XRCoordinateSystem|null = null;
+  private[$refSpace]: XRReferenceSpace|null = null;
+  private[$viewerRefSpace]: XRReferenceSpace|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
@@ -73,8 +75,8 @@ export class ARRenderer extends EventDispatcher {
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
-    const session: XRSession =
-        await navigator.xr!.requestSession!('immersive-ar');
+    const session: XRSession = await navigator.xr!.requestSession!(
+        'immersive-ar', {requiredFeatures: ['hit-test']});
 
     const gl: WebGLRenderingContext =
         assertContext(this.threeRenderer.getContext());
@@ -121,8 +123,7 @@ export class ARRenderer extends EventDispatcher {
   async supportsPresentation() {
     try {
       assertIsArCandidate();
-      await navigator.xr!.supportsSession!('immersive-ar');
-      return true;
+      return await navigator.xr!.isSessionSupported('immersive-ar');
     } catch (error) {
       return false;
     }
@@ -147,10 +148,10 @@ export class ARRenderer extends EventDispatcher {
       this[$postSessionCleanup]();
     }, {once: true});
 
-    // `requestReferenceSpace` replaced `requestFrameOfReference` in Chrome M73
-    // @TODO #293, handle WebXR API changes
     this[$refSpace] =
-        await (this[$currentSession]!.requestReferenceSpace('local') as any);
+        await this[$currentSession]!.requestReferenceSpace('local');
+    this[$viewerRefSpace] =
+        await this[$currentSession]!.requestReferenceSpace('viewer');
 
     this[$tick]();
   }
@@ -202,6 +203,7 @@ export class ARRenderer extends EventDispatcher {
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
+    this.scene.environment = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -223,33 +225,13 @@ export class ARRenderer extends EventDispatcher {
     if (this[$currentSession] == null) {
       return;
     }
-
-    if (this.raycaster == null) {
-      this.raycaster = new Raycaster();
-    }
-
     // NOTE: Currently rays will be cast from the middle of the screen.
     // Eventually we might use input coordinates for this.
-    this.raycaster.setFromCamera({x: 0, y: 0}, this.camera);
-    const ray = this.raycaster.ray;
-    let xrray: XRRay =
-        new XRRay(ray.origin as DOMPointInit, ray.direction as DOMPointInit);
 
-    let hits;
-    try {
-      hits = await (this[$currentSession] as any)
-                 .requestHitTest(xrray, this[$refSpace]);
-    } catch (e) {
-      // Spec says this should no longer throw on invalid requests:
-      // https://github.com/immersive-web/hit-test/issues/24
-      // But in practice, it will still happen, so just ignore:
-      // https://github.com/immersive-web/hit-test/issues/37
-    }
-
-    if (hits && hits.length) {
+    // Just reuse the hit matrix that the reticle has computed.
+    if (this.reticle && this.reticle.hitMatrix) {
       const presentedScene = this[$presentedScene]!;
-      const hit = hits[0];
-      const hitMatrix = matrix4.fromArray(hit.hitMatrix);
+      const hitMatrix = this.reticle.hitMatrix;
 
       this.dolly.position.setFromMatrixPosition(hitMatrix);
 
@@ -287,8 +269,7 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
-    const pose =
-        (frame as any).getPose(sources[0].targetRaySpace, this[$refSpace])
+    const pose = frame.getPose(sources[0].targetRaySpace, this[$refSpace]!);
     if (pose) {
       this.placeModel();
     }
@@ -302,11 +283,7 @@ export class ARRenderer extends EventDispatcher {
   [$onWebXRFrame](_time: number, frame: XRFrame) {
     const {session} = frame;
 
-    // `getViewerPose` replaced `getDevicePose` in Chrome M73
-    // @TODO #293, handle WebXR API changes
-    const pose = 'getDevicePose' in frame ?
-        (frame as any).getDevicePose(this[$refSpace]) :
-        (frame as any).getViewerPose(this[$refSpace]);
+    const pose = frame.getViewerPose(this[$refSpace]!);
 
     // TODO: Notify external observers of tick
     // TODO: Note that reticle may be "stabilized"
@@ -317,7 +294,11 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
-    for (const view of (frame as any).getViewerPose(this[$refSpace]).views) {
+    if (this.scene.environment !== this[$presentedScene]!.environment) {
+      this.scene.environment = this[$presentedScene]!.environment;
+    }
+
+    for (const view of frame.getViewerPose(this[$refSpace]!).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
       this.threeRenderer.setViewport(
           viewport.x, viewport.y, viewport.width, viewport.height);
@@ -330,7 +311,11 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
       // before render.
-      this.reticle.update(this[$currentSession]!, this[$refSpace] as any);
+      this.reticle.update(
+          this[$currentSession]!,
+          frame,
+          this[$viewerRefSpace]!,
+          this[$refSpace]!);
       this.processXRInput(frame);
 
       // NOTE: Clearing depth caused issues on Samsung devices

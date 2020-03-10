@@ -50,8 +50,30 @@ suite('ModelScene', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource(assetPath('Astronaut.glb'));
+      await scene.setModelSource(assetPath('models/Astronaut.glb'));
       expect(fired).to.be.ok;
+    });
+  });
+
+  suite('with a model', () => {
+    setup(async () => {
+      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+    });
+
+    suite('setShadowIntensity', () => {
+      test('can increase intensity and reset it to zero', () => {
+        scene.setShadowIntensity(1);
+        expect(scene.shadow).to.be.ok;
+        expect(scene.shadow!.getIntensity()).to.be.equal(1);
+        scene.setShadowIntensity(0);
+        expect(scene.shadow!.getIntensity()).to.be.equal(0);
+      });
+
+      test('shadow is only created when intensity is greater than zero', () => {
+        expect(scene.shadow).to.be.not.ok;
+        scene.setShadowIntensity(1);
+        expect(scene.shadow).to.be.ok;
+      });
     });
   });
 
@@ -67,7 +89,7 @@ suite('ModelScene', () => {
     });
 
     test('model is not scaled', () => {
-      dummyMesh.geometry.applyMatrix(new Matrix4().makeScale(1, 3, 10));
+      dummyMesh.geometry.applyMatrix4(new Matrix4().makeScale(1, 3, 10));
       scene.model.setObject(dummyMesh);
 
       scene.setSize(1000, 500);

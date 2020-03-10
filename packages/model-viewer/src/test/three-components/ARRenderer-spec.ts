@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Matrix4, Plane, Ray, Vector3} from 'three';
+import {Camera, Matrix4, Vector3} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
@@ -43,8 +43,11 @@ class MockXRFrame implements XRFrame {
     return {} as XRPose;
   }
 
-  getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
-    return {} as XRViewerPose
+  getViewerPose(_referenceSpace?: XRReferenceSpace):
+  XRViewerPose{return {} as XRViewerPose}
+
+  getHitTestResults(_xrHitTestSource: XRHitTestSource) {
+    return [];
   }
 }
 
@@ -62,14 +65,13 @@ suite('ARRenderer', () => {
   };
 
   const stubWebXrInterface = (arRenderer: ARRenderer) => {
-    const xzPlane = new Plane(new Vector3(0, 1, 0));
-    const mat4 = new Matrix4();
-    const vec3 = new Vector3();
-
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
         public renderState: XRRenderState = {baseLayer: {} as XRLayer} as
             XRRenderState;
+
+        public hitTestSources: Set<XRHitTestSource> =
+            new Set<XRHitTestSource>();
 
         updateRenderState(_object: any) {
         }
@@ -80,38 +82,20 @@ suite('ARRenderer', () => {
 
         async requestReferenceSpace(_type: XRReferenceSpaceType):
             Promise<XRReferenceSpace> {
-          return {
-            originOffset: {
-              position: {} as DOMPointReadOnly,
-              orientation: {} as DOMPointReadOnly,
-              matrix: new Float32Array()
-            }
-          } as XRReferenceSpace;
+          return {} as XRReferenceSpace;
         }
 
         get inputSources(): Array<XRInputSource> {
           return inputSources;
         }
 
-        /**
-         * Returns a hit if ray collides with the XZ plane
-         */
-        async requestHitTest(rayIn: XRRay, _frameOfRef: XRFrameOfReference):
-            Promise<Array<XRHitResult>> {
-          const hits = [];
-          const ray = new Ray(
-              new Vector3(rayIn.origin.x, rayIn.origin.y, rayIn.origin.z),
-              new Vector3(
-                  rayIn.direction.x, rayIn.direction.y, rayIn.direction.z));
-          const success = ray.intersectPlane(xzPlane, vec3);
+        async requestHitTestSource(_options: XRHitTestOptionsInit):
+            Promise<XRHitTestSource> {
+          const result = {cancel: () => {}};
 
-          if (success) {
-            const hitMatrix = new Float32Array(16);
-            (mat4.identity().setPosition(vec3) as any).toArray(hitMatrix);
-            hits.push({hitMatrix});
-          }
+          this.hitTestSources.add(result);
 
-          return hits;
+          return result;
         }
 
         requestAnimationFrame() {
@@ -157,7 +141,7 @@ suite('ARRenderer', () => {
     }
 
     setup(async () => {
-      element.src = assetPath('Astronaut.glb');
+      element.src = assetPath('models/Astronaut.glb');
       await waitForEvent(element, 'load');
       modelScene = element[$scene];
       stubWebXrInterface(arRenderer);

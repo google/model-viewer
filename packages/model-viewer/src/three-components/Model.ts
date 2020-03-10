@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Material, Mesh, MeshStandardMaterial, Object3D, Scene, Texture, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
 
-import {$releaseFromCache, CacheRetainedScene, CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {moveChildren, reduceVertices} from './ModelUtils.js';
 
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
-const $currentScene = Symbol('currentScene');
+const $currentGLTF = Symbol('currentGLTF');
 
 export const DEFAULT_FOV_DEG = 45;
 
@@ -30,9 +31,9 @@ const $loader = Symbol('loader');
  * model.
  */
 export default class Model extends Object3D {
-  private[$currentScene]: CacheRetainedScene|null = null;
-  private[$loader] = new CachingGLTFLoader();
-  private mixer = new AnimationMixer(null);
+  private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+  private[$loader] = new CachingGLTFLoader(ModelViewerGLTFInstance);
+  private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
@@ -61,6 +62,7 @@ export default class Model extends Object3D {
     this.modelContainer.name = 'ModelContainer';
 
     this.add(this.modelContainer);
+    this.mixer = new AnimationMixer(this.modelContainer);
   }
 
   /**
@@ -69,31 +71,6 @@ export default class Model extends Object3D {
    */
   hasModel(): boolean {
     return !!this.modelContainer.children.length;
-  }
-
-  applyEnvironmentMap(map: Texture|null) {
-    // Note that unlit models (using MeshBasicMaterial) should not apply
-    // an environment map, even though `map` is the currently configured
-    // environment map.
-    this.modelContainer.traverse((obj: Object3D) => {
-      // There are some cases where `obj.material` is
-      // an array of materials.
-      const mesh: Mesh = obj as Mesh;
-
-      if (Array.isArray(mesh.material)) {
-        for (let material of (mesh.material as Array<Material>)) {
-          if ((material as any).isMeshBasicMaterial) {
-            continue;
-          }
-          (material as MeshStandardMaterial).envMap = map;
-          material.needsUpdate = true;
-        }
-      } else if (mesh.material && !(mesh.material as any).isMeshBasicMaterial) {
-        (mesh.material as MeshStandardMaterial).envMap = map;
-        (mesh.material as Material).needsUpdate = true;
-      }
-    });
-    this.dispatchEvent({type: 'envmap-change', value: map});
   }
 
   /**
@@ -125,20 +102,22 @@ export default class Model extends Object3D {
 
     this.url = url;
 
-    let scene: Scene|null = null;
+    let gltf: ModelViewerGLTFInstance;
 
     try {
-      scene = await new Promise<Scene|null>(async (resolve, reject) => {
-        this[$cancelPendingSourceChange] = () => reject();
-        try {
-          const result = await this.loader.load(url, progressCallback);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
-      });
+      gltf = await new Promise<ModelViewerGLTFInstance>(
+          async (resolve, reject) => {
+            this[$cancelPendingSourceChange] = () => reject();
+            try {
+              const result = await this.loader.load(url, progressCallback);
+              resolve(result);
+            } catch (error) {
+              reject(error);
+            }
+          });
     } catch (error) {
       if (error == null) {
+        // Loading was cancelled, so silently return
         return;
       }
 
@@ -146,20 +125,13 @@ export default class Model extends Object3D {
     }
 
     this.clear();
-    this[$currentScene] = scene as CacheRetainedScene;
+    this[$currentGLTF] = gltf;
 
-    if (scene != null) {
-      moveChildren(scene, this.modelContainer);
+    if (gltf != null) {
+      moveChildren(gltf.scene, this.modelContainer);
     }
 
-    this.modelContainer.traverse(obj => {
-      if (obj && obj.type === 'Mesh') {
-        obj.castShadow = true;
-      }
-    });
-
-
-    const animations = scene ? scene.userData.animations : [];
+    const {animations} = gltf!;
     const animationsByName = new Map();
     const animationNames = [];
 
@@ -255,11 +227,12 @@ export default class Model extends Object3D {
   clear() {
     this.url = null;
     this.userData = {url: null};
+    const gltf = this[$currentGLTF];
     // Remove all current children
-    if (this[$currentScene] != null) {
-      moveChildren(this.modelContainer, this[$currentScene]!);
-      this[$currentScene]![$releaseFromCache]();
-      this[$currentScene] = null;
+    if (gltf != null) {
+      moveChildren(this.modelContainer, gltf.scene);
+      gltf.dispose();
+      this[$currentGLTF] = null;
     }
 
     if (this.currentAnimationAction != null) {

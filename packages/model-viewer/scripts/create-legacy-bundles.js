@@ -19,7 +19,6 @@ const {jsTransform} = require('polymer-build/lib/js-transform');
 const bundlesToTransform = [
   './dist/model-viewer-umd.js',
   './dist/unit-tests-umd.js',
-  './examples/built/dependencies-umd.js'
 ];
 
 console.log('Generating legacy bundles for IE11 compatibility...');
