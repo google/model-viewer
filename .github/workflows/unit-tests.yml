@@ -1,0 +1,51 @@
+name: Unit tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Get npm cache directory
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+
+    - name: Cache npm packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.npm-cache.outputs.dir }}
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: NPM install
+      run: npm ci
+
+    - name: Lint TypeScript sources
+      run: npm run lint
+
+    - name: Bootstrap packages
+      run: npm run bootstrap
+
+    - name: Build packages
+      run: npm run build
+
+    - name: Unit tests
+      env:
+        BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
+        BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+      run: |
+        # Don't run Sauce from a forked repo, since the code may not be trusted
+        # and therefore secrets like the Sauce password are not available.
+        # GITHUB_HEAD_REF is only defined when building a fork.
+        if [ ! "$GITHUB_HEAD_REF" ]; then
+          export USE_BROWSER_STACK=true
+        fi
+        npm run test:legacy

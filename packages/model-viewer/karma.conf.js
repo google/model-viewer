@@ -195,7 +195,6 @@ module.exports = function(config) {
       browserStack: {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
-        // startTunnel: false
       },
 
       reporters: ['BrowserStack', 'mocha'],

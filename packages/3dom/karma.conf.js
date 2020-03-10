@@ -60,65 +60,117 @@ module.exports = function(config) {
     ],
   });
 
-  if (process.env.USE_SAUCE) {
-    if (!process.env.SAUCE_USERNAME || !process.env.SAUCE_ACCESS_KEY) {
+  if (process.env.USE_BROWSER_STACK) {
+    if (!process.env.BROWSER_STACK_USERNAME ||
+        !process.env.BROWSER_STACK_ACCESS_KEY) {
       throw new Error(
-          'SAUCE_USERNAME and SAUCE_ACCESS_KEY must be set with USE_SAUCE')
+          'BROWSER_STACK_USERNAME and BROWSER_STACK_ACCESS_KEY must be set with USE_BROWSER_STACK');
     }
 
-    const sauceLaunchers = {
-      // 'IE11': {
-      //   base: 'SauceLabs',
-      //   browserName: 'internet explorer',
-      //   version: '11',
-      //   platform: 'Windows 8.1',
-      // },
+    // This terrible hack brought to you by a combination of two things:
+    //  1. BrowserStack drops the server port when redirecting from localhost
+    //     to bs-local.com on iOS
+    //  2. karma-browserstack-launcher drops the test-specific browser ID if
+    //     you configure the browser with a custom URL
+    // A support request to BrowserStack has been filed.
+    // A related bug has been filed againts karma-browserstack-launcher
+    // @see https://github.com/karma-runner/karma-browserstack-launcher/issues/172
+    const assign = Object.assign;
+    const newAssign = function(...args) {
+      // If we know this to be one very specific Object.assign call, then grab
+      // the test-specific browser ID and append it to our URL:
+      // @see https://github.com/karma-runner/karma-browserstack-launcher/blob/76dbfd0db6db46f4f85012cfe3c1f4c3accd2e44/index.js#L143
+      if (args[2] != null && args[2].url === 'http://bs-local.com:9876') {
+        console.warn('PATCHING URL TO ADD ID');
+        const config = args[0];
+        const browser = args[2];
+        const query = config.url.split('?')[1];
+        browser.url = `${browser.url}?${query}`;
+      }
+      return assign.apply(this, args);
+    };
+    // Something in Karma deps actually asserts the sub-keys of Object.assign,
+    // so make sure to copy those over too:
+    assign.call(Object, newAssign, assign);
+    Object.assign = newAssign;
+
+    const browserStackLaunchers = {
       'Edge (latest)': {
-        base: 'SauceLabs',
-        browserName: 'microsoftedge',
-        version: 'latest',
-        platform: 'Windows 10',
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: 'latest',
       },
-      'Safari (latest - 1)': {
-        base: 'SauceLabs',
-        browserName: 'safari',
-        version: 'latest-1',
-        platform: 'macOS 10.13',
-      },
-      'Safari (latest)': {
-        base: 'SauceLabs',
-        browserName: 'safari',
-        version: 'latest',
-        platform: 'macOS 10.13',
+      'Edge 79.0': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: '80.0',
       },
       'Firefox (latest)': {
-        base: 'SauceLabs',
-        browserName: 'firefox',
-        platform: 'Windows 10',
-        version: 'latest'
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Firefox',
+        browser_version: 'latest',
       },
-      'Firefox (latest - 1)': {
-        base: 'SauceLabs',
-        browserName: 'firefox',
-        platform: 'Windows 10',
-        version: 'latest-1'
-      }
+      'Firefox 72.0': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Firefox',
+        browser_version: '72.0',
+      },
+      'Safari (latest)': {
+        base: 'BrowserStack',
+        os: 'OS X',
+        os_version: 'Catalina',
+        browser: 'safari',
+        browser_version: 'latest',
+      },
+      'Safari 12.1': {
+        base: 'BrowserStack',
+        os: 'OS X',
+        os_version: 'Mojave',
+        browser: 'safari',
+        browser_version: '12.1',
+      },
+      'iOS Safari (iOS 13)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '12',
+        device: 'iPhone 8',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        // BrowserStack seems to drop the port when redirecting to this special
+        // domain so we go there directly instead:
+        url: 'http://bs-local.com:9876'
+      },
+      'iOS Safari (iOS 12)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '12',
+        device: 'iPhone 7',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        // BrowserStack seems to drop the port when redirecting to this special
+        // domain so we go there directly instead:
+        url: 'http://bs-local.com:9876'
+      },
     };
 
     config.set({
-      sauceLabs: {
+      browserStack: {
         idleTimeout: 600,
-        testName: '3DOM Unit Tests',
-        build: process.env.SAUCE_BUILD_ID,
-        tunnelIdentifier: process.env.SAUCE_TUNNEL_ID,
+        name: '3DOM Unit Tests',
       },
-      // Attempt to de-flake Sauce Labs tests on TravisCI.
-      transports: ['polling'],
-      browserDisconnectTolerance: 1,
-      reporters: ['saucelabs', 'mocha'],
 
-      customLaunchers: sauceLaunchers,
-      browsers: [...config.browsers, ...Object.keys(sauceLaunchers)],
+      reporters: ['BrowserStack', 'mocha'],
+
+      customLaunchers: browserStackLaunchers,
+      browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
     });
   }
 };
