@@ -66,6 +66,19 @@ if (NODE_ENV !== 'development') {
         plugins,
         onwarn,
       },
+      {
+        input: './lib/test/index.js',
+        output: {
+          file: './dist/unit-tests-umd.js',
+          format: 'umd',
+          name: 'ModelViewerElementUnitTests'
+        },
+        watch: {
+          include: watchFiles,
+        },
+        plugins,
+        onwarn,
+      },
   );
 }
 

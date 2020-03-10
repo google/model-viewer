@@ -46,3 +46,11 @@ import './features/loading/status-announcer-spec.js';
 import './features/magic-leap-spec.js';
 import './features/scene-graph-spec.js';
 import './features/ar-spec.js';
+
+try {
+  // Set an aggressive poll interval if we are using the IntersectionObserver
+  // polyfill. This is currently needed for IE11 and iOS Safari.
+  // @see https://github.com/w3c/IntersectionObserver/tree/master/polyfill#configuring-the-polyfill
+  (IntersectionObserver.prototype as any).POLL_INTERVAL = 50;
+} catch (e) {
+}
