@@ -291,5 +291,3 @@ export class Renderer extends EventDispatcher {
         {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
   }
 }
-
-(self as any).Renderer = Renderer;
