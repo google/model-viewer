@@ -48,4 +48,4 @@ jobs:
         if [ ! "$GITHUB_HEAD_REF" ]; then
           export USE_BROWSER_STACK=true
         fi
-        npm run test:legacy
+        npm run test

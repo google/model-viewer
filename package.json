@@ -4,7 +4,7 @@
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
     "test": "./node_modules/.bin/lerna run test --stream",
-    "test:ci": "./node_modules/.bin/lerna run test:ci --stream",
+    "test:legacy": "./node_modules/.bin/lerna run test:legacy --stream",
     "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
