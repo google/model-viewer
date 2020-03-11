@@ -17,10 +17,6 @@ module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
   config.set({
     basePath: '',
-    // Use special port so that tests can run in parallel
-    // Note that BrowserStack only allows a limited set of ports
-    // @see https://www.browserstack.com/question/664
-    port: 9877,
     plugins: [
       'karma-*',
     ],
