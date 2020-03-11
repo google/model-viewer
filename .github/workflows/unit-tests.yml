@@ -51,6 +51,7 @@ jobs:
         npm run test:ci
 
     - name: Generate legacy bundles
+      if: env.GITHUB_HEAD_REF != null
       run: npm run build:legacy-support
 
     - name: Unit tests (legacy browsers)
