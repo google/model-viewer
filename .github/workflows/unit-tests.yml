@@ -54,6 +54,7 @@ jobs:
       run: npm run build:legacy-support
 
     - name: Unit tests (legacy browsers)
+      if: env.GITHUB_HEAD_REF != null
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
@@ -64,4 +65,5 @@ jobs:
         if [ ! "$GITHUB_HEAD_REF" ]; then
           export USE_BROWSER_STACK=true
         fi
+
         npm run test:ci:legacy
