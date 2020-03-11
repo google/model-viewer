@@ -24,6 +24,7 @@
     "build": "tsc",
     "clean": "rm -rf ./lib",
     "test": "karma start --single-run",
+    "test:ci": "npm run test",
     "watch:test": "karma start",
     "watch:tsc": "tsc -w",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /demo/ -c-1",
