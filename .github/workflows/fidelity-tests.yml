@@ -40,4 +40,6 @@ jobs:
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0
       with:
-        run: lerna run --scope @google/model-viewer-render-fidelity-tools test
+        run: |
+          cd $GITHUB_WORKSPACE
+          lerna run --scope @google/model-viewer-render-fidelity-tools test
