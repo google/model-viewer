@@ -3,7 +3,7 @@ name: Unit tests
 on: [push]
 
 jobs:
-  full test run:
+  full_test_run:
 
     runs-on: ubuntu-latest
 

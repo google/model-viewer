@@ -3,7 +3,7 @@ name: Unit tests (third-party PR)
 on: [pull_request]
 
 jobs:
-  minimal test run:
+  minimal_test_run:
     runs-on: ubuntu-latest
 
     if: env.GITHUB_HEAD_REF != null

@@ -3,7 +3,7 @@ name: Fidelity tests
 on: [pull_request]
 
 jobs:
-  compare renders:
+  compare_renders:
     runs-on: ubuntu-latest
 
     steps:
