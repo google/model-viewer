@@ -107,7 +107,10 @@ export type QuickLookBrowser = 'safari'|'chrome';
 const deserializeQuickLookBrowsers =
     enumerationDeserializer<QuickLookBrowser>(['safari', 'chrome']);
 
-export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
+export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'fallback'|'none';
+
+const deserializeARModes = enumerationDeserializer<ARMode>(
+    ['quick-look', 'scene-viewer', 'webxr', 'fallback', 'none']);
 
 const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look fallback';
 
@@ -124,6 +127,7 @@ const $defaultExitFullscreenButton = Symbol('defaultExitFullscreenButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
+const $arModes = Symbol('arModes');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
@@ -143,8 +147,8 @@ const $onFullscreenchange = Symbol('onFullscreen');
 
 export declare interface ARInterface {
   ar: boolean;
+  arModes: string;
   arScale: string;
-  unstableWebxr: boolean;
   iosSrc: string|null;
   quickLookBrowsers: string;
   readonly canActivateAR: boolean;
@@ -205,6 +209,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$fullscreenchangeHandler]:
         () => void = () => this[$onFullscreenchange]();
 
+    protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
 
     protected[$quickLookBrowsers]: Set<QuickLookBrowser> = new Set();
@@ -220,10 +225,10 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         case ARMode.QUICK_LOOK:
           openIOSARQuickLook(this.iosSrc!);
           break;
-        case ARMode.UNSTABLE_WEBXR:
+        case ARMode.WEBXR:
           await this[$enterARWithWebXR]();
           break;
-        case ARMode.AR_VIEWER:
+        case ARMode.SCENE_VIEWER:
           openSceneViewer(this.src!, this.alt || '', this.arScale);
           break;
         default:
@@ -292,25 +297,30 @@ configuration or device capabilities');
             deserializeQuickLookBrowsers(this.quickLookBrowsers);
       }
 
-      if (!changedProperties.has('unstableWebxr') &&
-          !changedProperties.has('iosSrc') && !changedProperties.has('ar') &&
-          !changedProperties.has('src') && !changedProperties.has('alt')) {
+      if (!changedProperties.has('ar') && !changedProperties.has('ar-modes') &&
+          !changedProperties.has('iosSrc')) {
         return;
       }
 
-      const unstableWebxrCandidate = this.unstableWebxr &&
+      if (changedProperties.has('ar-modes')) {
+        this[$arModes] = deserializeARModes(this.arModes);
+      }
+
+      const webxrCandidate = this.ar && this[$arModes].has('webxr') &&
           IS_WEBXR_AR_CANDIDATE && await this[$renderer].supportsPresentation();
-      const arViewerCandidate = IS_ANDROID && this.ar;
-      const iosQuickLookCandidate = IS_IOS && IS_AR_QUICKLOOK_CANDIDATE &&
-          this[$canLaunchQuickLook] && !!this.iosSrc;
+      const sceneViewerCandidate =
+          this.ar && IS_ANDROID && this[$arModes].has('scene-viewer');
+      const iosQuickLookCandidate = this.ar && !!this.iosSrc &&
+          this[$arModes].has('quick-look') && this[$canLaunchQuickLook] &&
+          IS_AR_QUICKLOOK_CANDIDATE;
 
       const showArButton =
-          unstableWebxrCandidate || arViewerCandidate || iosQuickLookCandidate;
+          webxrCandidate || sceneViewerCandidate || iosQuickLookCandidate;
 
-      if (unstableWebxrCandidate) {
-        this[$arMode] = ARMode.UNSTABLE_WEBXR;
-      } else if (arViewerCandidate) {
-        this[$arMode] = ARMode.AR_VIEWER;
+      if (webxrCandidate) {
+        this[$arMode] = ARMode.WEBXR;
+      } else if (sceneViewerCandidate) {
+        this[$arMode] = ARMode.SCENE_VIEWER;
       } else if (iosQuickLookCandidate) {
         this[$arMode] = ARMode.QUICK_LOOK;
       } else {
@@ -342,7 +352,8 @@ configuration or device capabilities');
     }
 
     [$onARButtonContainerFallbackClick](_event: Event) {
-      if (this[$arMode] === ARMode.AR_VIEWER) {
+      if (this[$arMode] === ARMode.SCENE_VIEWER &&
+          this[$arModes].has('fallback')) {
         this.requestFullscreen();
       }
     }
