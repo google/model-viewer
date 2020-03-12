@@ -107,12 +107,14 @@ export type QuickLookBrowser = 'safari'|'chrome';
 const deserializeQuickLookBrowsers =
     enumerationDeserializer<QuickLookBrowser>(['safari', 'chrome']);
 
-export type ARMode = 'quick-look'|'ar-viewer'|'unstable-webxr'|'none';
+export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
+
+const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look fallback';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
-  AR_VIEWER: 'ar-viewer',
-  UNSTABLE_WEBXR: 'unstable-webxr',
+  SCENE_VIEWER: 'scene-viewer',
+  WEBXR: 'webxr',
   NONE: 'none'
 };
 
@@ -156,8 +158,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
-    @property({type: Boolean, attribute: 'unstable-webxr'})
-    unstableWebxr: boolean = false;
+    @property({type: Boolean, attribute: 'ar-modes'})
+    arModes: string = DEFAULT_AR_MODES;
 
     @property(
         {converter: {fromAttribute: deserializeUrl}, attribute: 'ios-src'})
