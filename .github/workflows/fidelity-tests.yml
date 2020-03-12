@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   tests:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
@@ -38,4 +38,6 @@ jobs:
       run: npm run build
 
     - name: Fidelity tests
-      run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+      uses: GabrielBB/xvfb-action@v1.0
+      with:
+        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
