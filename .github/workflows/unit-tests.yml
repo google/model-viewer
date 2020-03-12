@@ -1,9 +1,10 @@
 name: Unit tests
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  tests:
+  full test run:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -41,30 +42,13 @@ jobs:
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-      run: |
-        # Don't run Sauce from a forked repo, since the code may not be trusted
-        # and therefore secrets like the Sauce password are not available.
-        # GITHUB_HEAD_REF is only defined when building a fork.
-        if [ ! "$GITHUB_HEAD_REF" ]; then
-          export USE_BROWSER_STACK=true
-        fi
-        npm run test:ci
+      run: npm run test:ci
 
     - name: Generate legacy bundles
-      if: env.GITHUB_HEAD_REF == null
       run: npm run build:legacy-support
 
     - name: Unit tests (legacy browsers)
-      if: env.GITHUB_HEAD_REF == null && env.BROWSER_STACK_ACCESS_KEY != null
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-      run: |
-        # Don't run Sauce from a forked repo, since the code may not be trusted
-        # and therefore secrets like the Sauce password are not available.
-        # GITHUB_HEAD_REF is only defined when building a fork.
-        if [ ! "$GITHUB_HEAD_REF" ]; then
-          export USE_BROWSER_STACK=true
-        fi
-
-        npm run test:ci:legacy
+      run: npm run test:ci:legacy

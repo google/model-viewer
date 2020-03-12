@@ -1,10 +1,12 @@
-name: Fidelity tests
+name: Unit tests (third-party PR)
 
 on: [pull_request]
 
 jobs:
-  compare renders:
+  minimal test run:
     runs-on: ubuntu-latest
+
+    if: env.GITHUB_HEAD_REF != null
 
     steps:
     - uses: actions/checkout@v1
@@ -37,7 +39,5 @@ jobs:
     - name: Build packages
       run: npm run build
 
-    - name: Fidelity tests
-      uses: GabrielBB/xvfb-action@v1.0
-      with:
-        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+    - name: Unit tests
+      run: npm run test:ci
