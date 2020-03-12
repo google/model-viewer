@@ -67,4 +67,8 @@ jobs:
           export USE_BROWSER_STACK=true
         fi
 
+        if [ ! "$BROWSER_STACK_ACCESS_KEY" ]; then
+          exit 0
+        fi
+
         npm run test:ci:legacy
