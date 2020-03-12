@@ -38,4 +38,4 @@ jobs:
       run: npm run build
 
     - name: Fidelity tests
-      run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test
+      run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream

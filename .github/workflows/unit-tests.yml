@@ -55,7 +55,7 @@ jobs:
       run: npm run build:legacy-support
 
     - name: Unit tests (legacy browsers)
-      if: env.GITHUB_HEAD_REF == null
+      if: env.GITHUB_HEAD_REF == null && env.BROWSER_STACK_ACCESS_KEY != null
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
@@ -65,10 +65,6 @@ jobs:
         # GITHUB_HEAD_REF is only defined when building a fork.
         if [ ! "$GITHUB_HEAD_REF" ]; then
           export USE_BROWSER_STACK=true
-        fi
-
-        if [ ! "$BROWSER_STACK_ACCESS_KEY" ]; then
-          exit 0
         fi
 
         npm run test:ci:legacy
