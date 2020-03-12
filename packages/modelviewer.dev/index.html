@@ -129,9 +129,18 @@
             </li>
             <li>
               <div>ar</div>
-              <p>Enable the ability to launch
-              <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
-              on supported devices.</p>
+              <p>Enable the ability to launch AR experiences on supported devices.</p>
+            </li>
+            <li>
+              <div>ar-modes</div>
+              <p>A prioritized list of the types of AR experiences to enable, if available; see 
+              <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
+              Augmented Reality</a>.
+              Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
+              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
+              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
+              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
+              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
             </li>
             <li>
               <div>ar-scale</div>
@@ -356,17 +365,6 @@
               <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
               Softness should not be changed every frame as it incurs a 
               performance cost. Softer shadows render faster. Defaults to 1.</p>
-            </li>
-            <li>
-              <div>unstable-webxr</div>
-              <p>Enables the ability to view the model in AR via the
-              experimental <a
-              href="https://github.com/immersive-web/webxr">WebXR Device
-              API</a>, currently <a
-              href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented
-              only in Chrome Canary</a>. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
-              Reality</a>.</p>
             </li>
           </ul>
 
@@ -777,8 +775,8 @@
           </table>
 
           <p class="browser-support-desc">These browser features are
-          <b>optional</b> and are only needed if you wish to use the
-          unstable-webxr feature:</p>
+          <b>optional</b> and are only needed if you wish to use
+          webxr in ar-modes:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -793,8 +791,8 @@
             
             <tr>
               <td>WebXR Device API</td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-flag"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-check"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
@@ -803,8 +801,8 @@
             </tr>
             <tr>
               <td>WebXR HitTest API</td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-flag"></td>
+              <td><img class="icon-check"></td>
+              <td><img class="icon-check"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
