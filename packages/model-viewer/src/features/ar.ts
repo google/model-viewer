@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
@@ -317,14 +317,19 @@ configuration or device capabilities');
       const showArButton =
           webxrCandidate || sceneViewerCandidate || iosQuickLookCandidate;
 
-      if (webxrCandidate) {
-        this[$arMode] = ARMode.WEBXR;
-      } else if (sceneViewerCandidate) {
-        this[$arMode] = ARMode.SCENE_VIEWER;
-      } else if (iosQuickLookCandidate) {
-        this[$arMode] = ARMode.QUICK_LOOK;
-      } else {
-        this[$arMode] = ARMode.NONE;
+      this[$arMode] = ARMode.NONE;
+      let it = this[$arModes].values();
+      for (let val = it.next().value; val = it.next().value;) {
+        if (webxrCandidate && val === 'webxr') {
+          this[$arMode] = ARMode.WEBXR;
+          break;
+        } else if (sceneViewerCandidate && val === 'scene-viewer') {
+          this[$arMode] = ARMode.SCENE_VIEWER;
+          break;
+        } else if (iosQuickLookCandidate && val === 'quick-look') {
+          this[$arMode] = ARMode.QUICK_LOOK;
+          break;
+        }
       }
 
       if (showArButton) {
