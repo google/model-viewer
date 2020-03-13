@@ -306,34 +306,30 @@ configuration or device capabilities');
         this[$arModes] = deserializeARModes(this.arModes);
       }
 
-      const webxrCandidate = this.ar && this[$arModes].has('webxr') &&
-          IS_WEBXR_AR_CANDIDATE && await this[$renderer].supportsPresentation();
-      const sceneViewerCandidate =
-          this.ar && IS_ANDROID && this[$arModes].has('scene-viewer');
-      const iosQuickLookCandidate = this.ar && !!this.iosSrc &&
-          this[$arModes].has('quick-look') && this[$canLaunchQuickLook] &&
-          IS_AR_QUICKLOOK_CANDIDATE;
-
-      const showArButton =
-          webxrCandidate || sceneViewerCandidate || iosQuickLookCandidate;
-
       this[$arMode] = ARMode.NONE;
-      const it = this[$arModes].values();
-      let item = it.next();
-      while (!item.done) {
-        const {value} = item;
-        if (webxrCandidate && value === 'webxr') {
-          this[$arMode] = ARMode.WEBXR;
-          break;
-        } else if (sceneViewerCandidate && value === 'scene-viewer') {
-          this[$arMode] = ARMode.SCENE_VIEWER;
-          break;
-        } else if (iosQuickLookCandidate && value === 'quick-look') {
-          this[$arMode] = ARMode.QUICK_LOOK;
-          break;
+      if (this.ar) {
+        const it = this[$arModes].values();
+        let item = it.next();
+        while (!item.done) {
+          const {value} = item;
+          if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
+              await this[$renderer].supportsPresentation()) {
+            this[$arMode] = ARMode.WEBXR;
+            break;
+          } else if (value === 'scene-viewer' && IS_ANDROID) {
+            this[$arMode] = ARMode.SCENE_VIEWER;
+            break;
+          } else if (
+              value === 'quick-look' && !!this.iosSrc &&
+              this[$canLaunchQuickLook] && IS_AR_QUICKLOOK_CANDIDATE) {
+            this[$arMode] = ARMode.QUICK_LOOK;
+            break;
+          }
+          item = it.next();
         }
-        item = it.next();
       }
+
+      const showArButton = this[$arMode] !== ARMode.NONE;
 
       if (showArButton) {
         this[$arButtonContainer].classList.add('enabled');
