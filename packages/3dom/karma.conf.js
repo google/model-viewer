@@ -165,6 +165,8 @@ module.exports = function(config) {
       browserStack: {
         idleTimeout: 600,
         name: '3DOM Unit Tests',
+        project: '3DOM',
+        build: process.env.BROWSER_STACK_BUILD_NAME || `${Date.now()}`,
       },
 
       reporters: ['BrowserStack', 'mocha'],

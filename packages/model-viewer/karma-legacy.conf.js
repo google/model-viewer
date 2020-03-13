@@ -93,6 +93,8 @@ module.exports = function(config) {
       browserStack: {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
+        project: '<model-viewer>',
+        build: process.env.BROWSER_STACK_BUILD_NAME || `${Date.now()}`,
       },
 
       reporters: ['BrowserStack', 'mocha'],
