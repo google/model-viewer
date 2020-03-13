@@ -69,19 +69,6 @@ if (NODE_ENV !== 'development') {
       {
         input: './lib/test/index.js',
         output: {
-          file: './dist/unit-tests.js',
-          format: 'esm',
-          name: 'ModelViewerElementUnitTests'
-        },
-        watch: {
-          include: watchFiles,
-        },
-        plugins,
-        onwarn,
-      },
-      {
-        input: './lib/test/index.js',
-        output: {
           file: './dist/unit-tests-umd.js',
           format: 'umd',
           name: 'ModelViewerElementUnitTests'

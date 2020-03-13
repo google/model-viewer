@@ -36,7 +36,7 @@ suite('Hotspot', () => {
       assigned = document.createElement('div');
       host.appendChild(assigned);
 
-      document.body.appendChild(host);
+      document.body.insertBefore(host, document.body.firstChild);
     });
 
     teardown(() => {
