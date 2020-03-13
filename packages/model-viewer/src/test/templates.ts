@@ -70,7 +70,7 @@ export const BasicSpecTemplate =
               async () => {
                 const ModelViewerElement = ModelViewerElementAccessor();
                 const element = new ModelViewerElement();
-                document.body.appendChild(element);
+                document.body.insertBefore(element, document.body.firstChild);
                 await timePasses();
                 document.body.removeChild(element);
               });

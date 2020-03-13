@@ -46,7 +46,7 @@ suite('ModelViewerElementBase with FocusVisiblePolyfillMixin', () => {
       element = new ModelViewerElement();
       element.tabIndex = 0;
       element.src = assetPath('models/cube.gltf');
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
     });
 

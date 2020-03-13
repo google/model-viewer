@@ -23,9 +23,37 @@ module.exports = function(config) {
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
+      {
+        pattern:
+            'node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js',
+        watched: false
+      },
+      {
+        pattern: 'node_modules/@webcomponents/webcomponentsjs/bundles/*.js',
+        watched: false,
+        included: false
+      },
+      {
+        pattern: 'node_modules/resize-observer-polyfill/dist/ResizeObserver.js',
+        watched: false
+      },
+      {
+        pattern: 'node_modules/intersection-observer/intersection-observer.js',
+        watched: false
+      },
+      {
+        pattern: 'node_modules/focus-visible/dist/focus-visible.js',
+        watched: false
+      },
       {pattern: 'node_modules/@ungap/event-target/min.js', watched: false},
-      {pattern: 'shared-assets/models/Astronaut.glb', included: false},
-      {pattern: 'lib/**/*-spec.js', watched: true, type: 'module'},
+      {pattern: 'shared-assets/**/*', included: false},
+      {
+        pattern: 'lib/test/**/*-spec.js',
+        included: false,
+        watched: true,
+        type: 'module'
+      },
+      {pattern: 'lib/test/index.js', watched: true, type: 'module'}
     ],
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
@@ -46,7 +74,7 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html',
         ui: 'tdd',
-        timeout: 10000,
+        timeout: 30000,
       },
     },
 
@@ -59,6 +87,7 @@ module.exports = function(config) {
       'ChromeHeadless',
     ],
   });
+
 
   if (process.env.USE_BROWSER_STACK) {
     if (!process.env.BROWSER_STACK_USERNAME ||
@@ -159,12 +188,13 @@ module.exports = function(config) {
         // domain so we go there directly instead:
         url: 'http://bs-local.com:9876'
       },
+
     };
 
     config.set({
       browserStack: {
         idleTimeout: 600,
-        name: '3DOM Unit Tests',
+        name: '<model-viewer> Unit Tests',
       },
 
       reporters: ['BrowserStack', 'mocha'],

@@ -45,7 +45,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ODD_SHAPE_GLB_PATH;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'load');
       await rafPasses();

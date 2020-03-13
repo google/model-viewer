@@ -69,7 +69,7 @@ suite('ModelViewerElementBase', () => {
       setup(() => {
         element = new ModelViewerElement();
         input = element[$userInputElement];
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
       });
 
       teardown(() => {
@@ -105,7 +105,7 @@ suite('ModelViewerElementBase', () => {
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
       });
 
       teardown(() => {
@@ -148,7 +148,7 @@ suite('ModelViewerElementBase', () => {
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
       });
 
       teardown(() => {
@@ -171,7 +171,7 @@ suite('ModelViewerElementBase', () => {
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
       });
 
       teardown(() => {
@@ -208,7 +208,7 @@ suite('ModelViewerElementBase', () => {
         element.style.width = '32px';
         element.style.height = '64px';
 
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
         const modelLoads = waitForEvent(element, 'load');
         element.src = assetPath('models/cube.gltf');
@@ -326,7 +326,7 @@ suite('ModelViewerElementBase', () => {
           element.style.position = 'relative';
           element.style.marginBottom = '100vh';
           element.src = assetPath('models/cube.gltf');
-          document.body.appendChild(element);
+          document.body.insertBefore(element, document.body.firstChild);
         }
 
         await Promise.all(loaded);
@@ -340,10 +340,10 @@ suite('ModelViewerElementBase', () => {
 
       test('sets a model within viewport to be visible', async () => {
         await until(() => {
-          return elements[0][$scene].visible;
+          return elements[2][$scene].visible;
         });
 
-        expect(elements[0][$scene].visible).to.be.true;
+        expect(elements[2][$scene].visible).to.be.true;
       });
 
       test.skip('only models visible in the viewport', async () => {
