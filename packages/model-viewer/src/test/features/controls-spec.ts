@@ -80,7 +80,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls];
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         element.src = assetPath('models/cube.gltf');
 
         await waitForEvent(element, 'load');
@@ -333,7 +333,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           });
 
           test('respects user-configured maxFieldOfView', async () => {
-            document.body.appendChild(initiallyUnloadedElement);
+            document.body.insertBefore(
+                initiallyUnloadedElement, document.body.firstChild);
 
             initiallyUnloadedElement.maxFieldOfView = '100deg';
             initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
@@ -359,7 +360,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls]
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         element.src = assetPath('models/cube.gltf');
         element.cameraControls = true;
 

@@ -50,7 +50,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         element.poster = assetPath('../screenshot.png');
 
         // Wait at least a microtask for size calculations

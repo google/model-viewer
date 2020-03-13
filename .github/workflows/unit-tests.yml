@@ -1,0 +1,57 @@
+name: Unit tests
+
+on: [push]
+
+jobs:
+  full_test_run:
+
+    env:
+      USE_BROWSER_STACK: true
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Get npm cache directory
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+
+    - name: Cache npm packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.npm-cache.outputs.dir }}
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: NPM install
+      run: npm ci
+
+    - name: Lint TypeScript sources
+      run: npm run lint
+
+    - name: Bootstrap packages
+      run: npm run bootstrap
+
+    - name: Build packages
+      run: npm run build
+
+    - name: Unit tests
+      env:
+        BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
+        BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+      run: npm run test:ci
+
+    - name: Generate legacy bundles
+      run: npm run build:legacy-support
+
+    - name: Unit tests (legacy browsers)
+      env:
+        BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
+        BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+      run: npm run test:ci:legacy

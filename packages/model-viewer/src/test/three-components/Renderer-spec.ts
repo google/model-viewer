@@ -55,9 +55,10 @@ function createScene(): ModelScene&TestScene {
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
-  const renderer = Renderer.singleton;
+  let renderer: Renderer;
 
   setup(() => {
+    renderer = Renderer.singleton;
     scene = createScene();
   });
 
