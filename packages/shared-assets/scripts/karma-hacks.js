@@ -1,4 +1,6 @@
-module.exports.applyKarmaHacks = (buildIdentiifer) => {
+module.exports.applyKarmaHacks = () => {
+  const uniqueTunnelID = `${Date.now()}-${Math.random().toString().slice(2)}`;
+
   // This terrible hack needed in order to specify a custom BrowserStack
   // tunnel identifier. Failures to do so results in overlapping tunnels when
   // builds run in parallel.
@@ -28,8 +30,8 @@ module.exports.applyKarmaHacks = (buildIdentiifer) => {
           if (config && config.localIdentifier == null) {
             console.warn(
                 'Patching BrowserStack tunnel configuration to specify unique ID:',
-                buildIdentifier);
-            config.localIdentifier = buildIdentifier;
+                uniqueTunnelID);
+            config.localIdentifier = uniqueTunnelID;
           }
           return start.apply(this, args);
         };
@@ -67,4 +69,6 @@ module.exports.applyKarmaHacks = (buildIdentiifer) => {
   // so make sure to copy those over too:
   assign.call(Object, newAssign, assign);
   Object.assign = newAssign;
-}
+
+  return uniqueTunnelID;
+};

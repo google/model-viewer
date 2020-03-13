@@ -15,9 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const buildIdentifier = process.env.BROWSER_STACK_BUILD_NAME || `${Date.now()}`;
-
-applyKarmaHacks(buildIdentifier);
+const browserStackTunnelID = applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
@@ -148,7 +146,7 @@ module.exports = function(config) {
       'iOS Safari (iOS 13)': {
         base: 'BrowserStack',
         os: 'iOS',
-        os_version: '12',
+        os_version: '13',
         device: 'iPhone 8',
         browser: 'iPhone',
         real_mobile: 'true',
@@ -175,8 +173,8 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
-        build: buildIdentifier,
-        tunnelIdentifier: buildIdentifier
+        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
+        tunnelIdentifier: browserStackTunnelID
       },
 
       reporters: ['BrowserStack', 'mocha'],

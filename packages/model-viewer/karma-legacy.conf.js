@@ -100,8 +100,8 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
-        build: buildIdentifier,
-        tunnelIdentifier: buildIdentifier
+        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
+        tunnelIdentifier: browserStackTunnelID
       },
 
       reporters: ['BrowserStack', 'mocha'],

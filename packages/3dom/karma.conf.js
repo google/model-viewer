@@ -15,51 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const buildIdentifier = process.env.BROWSER_STACK_BUILD_NAME || `${Date.now()}`;
-
-applyKarmaHacks(buildIdentifier);
-
-// This terrible hack needed in order to specify a custom BrowserStack
-// tunnel identifier. Failures to do so results in overlapping tunnels when
-// builds run in parallel:
-{
-  // Patch global require so that we can intercept a resolved module by name. It
-  // isn't sufficient to require the module ourselves because it is a transitive
-  // dependency and we might not resolve the correct version:
-  const Module = module.constructor;
-  const require = Module.prototype.require;
-  Module.prototype.require = function(...args) {
-    const resolvedModule = require.apply(this, args);
-    if (args[0] === 'browserstack-local') {
-      const {Local} = resolvedModule;
-      // Annoyingly, browserstack-local populates methods using assignment on
-      // the instance rather than decorating the prototype, so we have to wrap
-      // the constructor in order to patch anything:
-      // @see https://github.com/browserstack/browserstack-local-nodejs/blob/d238484416e7ea6dfb51aede7d84d09339a8032a/lib/Local.js#L28
-      const WrappedLocal = function(...args) {
-        // Create an instance of the canonical class and patch its method post
-        // hoc before it is handed off to the invoking user:
-        const local = new Local(...args);
-        const start = local.start;
-        local.start = function(...args) {
-          const config = args[0];
-          // If the config is lacking a specified identifier for the tunnel,
-          // make sure to populate it with the one we want:
-          if (config && config.localIdentifier == null) {
-            console.warn(
-                'Patching BrowserStack tunnel configuration to specify unique ID:',
-                buildIdentifier);
-            config.localIdentifier = buildIdentifier;
-          }
-          return start.apply(this, args);
-        };
-        return local;
-      };
-      resolvedModule.Local = WrappedLocal;
-    }
-    return resolvedModule;
-  };
-}
+const browserStackTunnelID = applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
@@ -161,7 +117,7 @@ module.exports = function(config) {
       'iOS Safari (iOS 13)': {
         base: 'BrowserStack',
         os: 'iOS',
-        os_version: '12',
+        os_version: '13',
         device: 'iPhone 8',
         browser: 'iPhone',
         real_mobile: 'true',
@@ -182,14 +138,13 @@ module.exports = function(config) {
       },
     };
 
-
     config.set({
       browserStack: {
         idleTimeout: 600,
         name: '3DOM Unit Tests',
         project: '3DOM',
-        build: buildIdentifier,
-        tunnelIdentifier: buildIdentifier
+        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
+        tunnelIdentifier: browserStackTunnelID
       },
 
       reporters: ['BrowserStack', 'mocha'],
