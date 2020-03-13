@@ -297,12 +297,12 @@ configuration or device capabilities');
             deserializeQuickLookBrowsers(this.quickLookBrowsers);
       }
 
-      if (!changedProperties.has('ar') && !changedProperties.has('ar-modes') &&
+      if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
           !changedProperties.has('iosSrc')) {
         return;
       }
 
-      if (changedProperties.has('ar-modes')) {
+      if (changedProperties.has('arModes')) {
         this[$arModes] = deserializeARModes(this.arModes);
       }
 
@@ -318,18 +318,21 @@ configuration or device capabilities');
           webxrCandidate || sceneViewerCandidate || iosQuickLookCandidate;
 
       this[$arMode] = ARMode.NONE;
-      let it = this[$arModes].values();
-      for (let val = it.next().value; val = it.next().value;) {
-        if (webxrCandidate && val === 'webxr') {
+      const it = this[$arModes].values();
+      let item = it.next();
+      while (!item.done) {
+        const {value} = item;
+        if (webxrCandidate && value === 'webxr') {
           this[$arMode] = ARMode.WEBXR;
           break;
-        } else if (sceneViewerCandidate && val === 'scene-viewer') {
+        } else if (sceneViewerCandidate && value === 'scene-viewer') {
           this[$arMode] = ARMode.SCENE_VIEWER;
           break;
-        } else if (iosQuickLookCandidate && val === 'quick-look') {
+        } else if (iosQuickLookCandidate && value === 'quick-look') {
           this[$arMode] = ARMode.QUICK_LOOK;
           break;
         }
+        item = it.next();
       }
 
       if (showArButton) {
