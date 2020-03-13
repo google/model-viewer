@@ -5,6 +5,9 @@ on: [push]
 jobs:
   full_test_run:
 
+    env:
+      USE_BROWSER_STACK: true
+
     runs-on: ubuntu-latest
 
     steps:
