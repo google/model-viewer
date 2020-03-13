@@ -15,8 +15,8 @@
 
 import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
 
+import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
-import {resolveDpr} from '../utilities.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Shadow} from './Shadow.js';
@@ -63,7 +63,8 @@ export class ModelScene extends Scene {
   public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
-  public context: CanvasRenderingContext2D;
+  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
+      null;
   public exposure = 1;
   public model: Model;
   public framedFieldOfView = DEFAULT_FOV_DEG;
@@ -79,8 +80,6 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    this.context = canvas.getContext('2d')!;
-
     this.model = new Model();
 
     // These default camera values are never used, as they are reset once the
@@ -115,6 +114,20 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Function to create the context lazily, as when there is only one
+   * <model-viewer> element, the renderer's 3D context can be displayed
+   * directly. This extra context is necessary to copy the renderings into when
+   * there are more than one.
+   */
+  createContext() {
+    if (USE_OFFSCREEN_CANVAS) {
+      this.context = this.canvas.getContext('bitmaprenderer')!;
+    } else {
+      this.context = this.canvas.getContext('2d')!;
+    }
+  }
+
+  /**
    * Sets the model via URL.
    */
   async setModelSource(
@@ -135,15 +148,14 @@ export class ModelScene extends Scene {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
-      // In practice, invocations of setSize are throttled at the element level,
-      // so no need to throttle here:
-      const dpr = resolveDpr();
-      this.canvas.width = this.width * dpr;
-      this.canvas.height = this.height * dpr;
-      this.canvas.style.width = `${this.width}px`;
-      this.canvas.style.height = `${this.height}px`;
+
       this.aspect = this.width / this.height;
       this.frameModel();
+
+      const renderer = this.element[$renderer];
+      renderer.expandTo(this.width, this.height);
+      this.canvas.width = renderer.width;
+      this.canvas.height = renderer.height;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -156,7 +168,7 @@ export class ModelScene extends Scene {
       // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
       // additional considerations.
       Promise.resolve().then(() => {
-        this.element[$renderer].render(performance.now());
+        renderer.render(performance.now());
       });
     }
   }

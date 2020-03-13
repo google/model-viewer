@@ -81,11 +81,7 @@ suite('ModelScene', () => {
     test('updates visual and buffer size', () => {
       scene.setSize(500, 200);
       expect(scene.width).to.be.equal(500);
-      expect(scene.canvas.width).to.be.equal(500 * devicePixelRatio);
-      expect(scene.canvas.style.width).to.be.equal('500px');
       expect(scene.height).to.be.equal(200);
-      expect(scene.canvas.height).to.be.equal(200 * devicePixelRatio);
-      expect(scene.canvas.style.height).to.be.equal('200px');
     });
 
     test('model is not scaled', () => {
