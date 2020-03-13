@@ -45,7 +45,7 @@ jobs:
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-        BROWSER_STACK_BUILD_NAME: ${{ github.ref + '/' + github.run_id }}
+        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
       run: npm run test:ci
 
     - name: Generate legacy bundles
@@ -55,5 +55,5 @@ jobs:
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-        BROWSER_STACK_BUILD_NAME: ${{ github.ref + '/' + github.run_id }}
+        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
       run: npm run test:ci:legacy
