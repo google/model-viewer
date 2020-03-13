@@ -55,7 +55,11 @@ module.exports.applyKarmaHacks = () => {
     // If we know this to be one very specific Object.assign call, then grab
     // the test-specific browser ID and append it to our URL:
     // @see https://github.com/karma-runner/karma-browserstack-launcher/blob/76dbfd0db6db46f4f85012cfe3c1f4c3accd2e44/index.js#L143
-    if (args[2] != null && args[2].url === 'http://bs-local.com:9876') {
+    const url = args[2] && args[2].url;
+
+    if (url != null &&
+        (url === 'http://bs-local.com:9876' ||
+         url === 'http://127.0.0.1:9876')) {
       const config = args[0];
       const browser = args[2];
       const query = config.url.split('?')[1];

@@ -135,6 +135,9 @@ module.exports = function(config) {
         os_version: 'Catalina',
         browser: 'safari',
         browser_version: 'latest',
+        // BrowserStack occassionally fails to tunnel localhost for Safari
+        // instances, causing them to time out:
+        url: 'http://127.0.0.1:9876'
       },
       'Safari 12.1': {
         base: 'BrowserStack',
@@ -142,6 +145,9 @@ module.exports = function(config) {
         os_version: 'Mojave',
         browser: 'safari',
         browser_version: '12.1',
+        // BrowserStack occassionally fails to tunnel localhost for Safari
+        // instances, causing them to time out:
+        url: 'http://127.0.0.1:9876'
       },
       'iOS Safari (iOS 13)': {
         base: 'BrowserStack',
