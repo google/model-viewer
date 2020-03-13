@@ -6,7 +6,7 @@ jobs:
   minimal_test_run:
     runs-on: ubuntu-latest
 
-    if: env.GITHUB_HEAD_REF != null
+    if: github.event.pull_request.base.repo.id != github.event.pull_request.head.repo.id
 
     steps:
     - uses: actions/checkout@v1
