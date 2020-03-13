@@ -84,7 +84,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     const environmentChangeHandler = () => environmentChangeCount++;
     element.addEventListener('environment-change', environmentChangeHandler);
     element.style.display = 'none';
-    document.body.appendChild(element);
+    document.body.insertBefore(element, document.body.firstChild);
     await rafPasses();
     expect(environmentChangeCount).to.be.equal(0);
     element.style.display = 'block';
@@ -99,7 +99,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       setup(async () => {
         let onLoad = waitForLoadAndEnvMap(element);
         element.src = MODEL_URL;
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
         environmentChanges = 0;
         scene.model.addEventListener('envmap-update', () => {
@@ -128,7 +128,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         let onLoad = waitForLoadAndEnvMap(element);
         element.src = MODEL_URL;
         element.skyboxImage = BG_IMAGE_URL;
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         await onLoad;
       });
 
@@ -162,7 +162,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('exposure', () => {
     setup(async () => {
       element.src = MODEL_URL;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
       scene.visible = true;
     });
@@ -189,7 +189,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   suite('shadow-intensity', () => {
     setup(async () => {
       element.src = MODEL_URL;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
     });
 
@@ -210,7 +210,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       let onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
       await onLoad;
     });
 
@@ -240,7 +240,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       let onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('skybox-image', HDR_BG_IMAGE_URL);
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
       await onLoad;
     });
 

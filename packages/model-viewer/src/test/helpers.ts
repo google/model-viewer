@@ -122,7 +122,7 @@ export const dispatchSyntheticEvent =
     };
 
 
-export const ASSETS_DIRECTORY = '../shared-assets/';
+export const ASSETS_DIRECTORY = '../base/shared-assets/';
 
 /**
  * Returns the full path for an asset by name. This is a convenience helper so

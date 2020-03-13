@@ -50,7 +50,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     customElements.define(tagName, ModelViewerElement);
 
     element = new ModelViewerElement();
-    document.body.appendChild(element);
+    document.body.insertBefore(element, document.body.firstChild);
   });
 
   teardown(() => {
