@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
+
+const browserStackTunnelID = applyKarmaHacks();
+
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
   config.set({
@@ -93,6 +97,9 @@ module.exports = function(config) {
       browserStack: {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
+        project: '<model-viewer>',
+        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
+        tunnelIdentifier: browserStackTunnelID
       },
 
       reporters: ['BrowserStack', 'mocha'],
