@@ -15,9 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const buildIdentifier = process.env.BROWSER_STACK_BUILD_NAME || `${Date.now()}`;
-
-applyKarmaHacks(buildIdentifier);
+const browserStackTunnelID = applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
