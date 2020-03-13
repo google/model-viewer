@@ -50,7 +50,7 @@ suite('decorators', () => {
       customElements.define(tagName, class extends StyleableElement {});
 
       element = document.createElement(tagName) as StyleableElement;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
 
       await timePasses();
     });

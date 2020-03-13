@@ -92,7 +92,7 @@ suite('SmoothControls', () => {
     element.style.height = '100px';
     element.tabIndex = 0;
 
-    document.body.appendChild(element);
+    document.body.insertBefore(element, document.body.firstChild);
 
     controls.enableInteraction();
   });
