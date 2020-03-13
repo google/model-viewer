@@ -4,6 +4,7 @@ module.exports.applyKarmaHacks = () => {
   // This terrible hack needed in order to specify a custom BrowserStack
   // tunnel identifier. Failures to do so results in overlapping tunnels when
   // builds run in parallel.
+  // @see https://github.com/karma-runner/karma-browserstack-launcher/issues/155
 
   // Patch global require so that we can intercept a resolved module by name. It
   // isn't sufficient to require the module ourselves because it is a transitive
