@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, $userInputElement, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -323,7 +323,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$shouldPromptUserToInteract] = true;
 
     protected[$controls] = new SmoothControls(
-        this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
+        this[$scene].getCamera() as PerspectiveCamera, this[$userInputElement]);
 
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
@@ -390,7 +390,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       const controls = this[$controls];
-      const scene = this[$scene];
+      const input = this[$userInputElement];
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
@@ -399,11 +399,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             this[$waitingToPromptUser] = true;
           }
 
-          scene.canvas.addEventListener('focus', this[$focusHandler]);
-          scene.canvas.addEventListener('blur', this[$blurHandler]);
+          input.addEventListener('focus', this[$focusHandler]);
+          input.addEventListener('blur', this[$blurHandler]);
         } else {
-          scene.canvas.removeEventListener('focus', this[$focusHandler]);
-          scene.canvas.removeEventListener('blur', this[$blurHandler]);
+          input.removeEventListener('focus', this[$focusHandler]);
+          input.removeEventListener('blur', this[$blurHandler]);
 
           controls.disableInteraction();
           this[$deferInteractionPrompt]();
@@ -497,7 +497,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (this.loaded &&
             time > thresholdTime + this.interactionPromptThreshold) {
-          this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
+          this[$userInputElement].setAttribute(
+              'aria-label', INTERACTION_PROMPT);
 
           // NOTE(cdata): After notifying users that the controls are
           // available, we flag that the user has been prompted at least
@@ -595,7 +596,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
             polarTrient !== lastPolarTrient) {
-          const {canvas} = this[$scene];
           const azimuthalQuadrantLabel =
               AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
           const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
@@ -603,7 +603,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           const ariaLabel =
               `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
 
-          canvas.setAttribute('aria-label', ariaLabel);
+          this[$userInputElement].setAttribute('aria-label', ariaLabel);
         }
       }
     }
@@ -641,7 +641,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onFocus]() {
-      const {canvas} = this[$scene];
+      const input = this[$userInputElement];
 
       if (!isFinite(this[$focusedTime])) {
         this[$focusedTime] = performance.now();
@@ -654,8 +654,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // has been crossed.
       const ariaLabel = this[$ariaLabel];
 
-      if (canvas.getAttribute('aria-label') !== ariaLabel) {
-        canvas.setAttribute('aria-label', ariaLabel);
+      if (input.getAttribute('aria-label') !== ariaLabel) {
+        input.setAttribute('aria-label', ariaLabel);
       }
 
       // NOTE(cdata): When focused, if the user has yet to interact with the

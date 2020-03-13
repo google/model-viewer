@@ -41,7 +41,7 @@ suite('LoadingStatusAnnouncer', () => {
     let element: any;
     setup(() => {
       element = new ModelViewerElement();
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
     });
 
     teardown(() => {
@@ -86,7 +86,7 @@ suite('LoadingStatusAnnouncer', () => {
 
         setup(() => {
           otherElement = new ModelViewerElement();
-          document.body.appendChild(otherElement);
+          document.body.insertBefore(otherElement, document.body.firstChild);
         });
 
         teardown(() => {
@@ -170,8 +170,8 @@ suite('LoadingStatusAnnouncer', () => {
       element = new ModelViewerElementBase();
       otherElement = new ModelViewerElementBase();
 
-      document.body.appendChild(element);
-      document.body.appendChild(otherElement);
+      document.body.insertBefore(element, document.body.firstChild);
+      document.body.insertBefore(otherElement, document.body.firstChild);
     });
 
     teardown(() => {

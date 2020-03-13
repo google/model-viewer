@@ -77,7 +77,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
         element.ar = true;
         element.arModes = 'webxr';
@@ -104,7 +104,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
         element.src = assetPath('models/Astronaut.glb');
 

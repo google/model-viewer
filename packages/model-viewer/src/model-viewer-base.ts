@@ -31,6 +31,10 @@ const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
+const blobCanvas = document.createElement('canvas');
+let blobContext: CanvasRenderingContext2D|null = null;
+
+const $selectCanvas = Symbol('selectCanvas');
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
@@ -49,7 +53,9 @@ export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
+export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
+export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
@@ -122,6 +128,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$loadedTime] = 0;
   protected[$scene]: ModelScene;
   protected[$container]: HTMLDivElement;
+  protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
   protected[$lastDpr]: number = resolveDpr();
@@ -178,8 +185,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     shadowRoot.appendChild(template.content.cloneNode(true));
 
     this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
+    this[$userInputElement] =
+        shadowRoot.querySelector('.userInput') as HTMLDivElement;
     this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
-    this[$defaultAriaLabel] = this[$canvas].getAttribute('aria-label')!;
+    this[$defaultAriaLabel] =
+        this[$userInputElement].getAttribute('aria-label')!;
 
     // Because of potential race conditions related to invoking the constructor
     // we only use the bounding rect to set the initial size if the element is
@@ -281,6 +291,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     this[$renderer].registerScene(this[$scene]);
+    this[$selectCanvas]();
     this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
@@ -309,6 +320,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     this[$renderer].unregisterScene(this[$scene]);
+    this[$selectCanvas]();
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
@@ -331,13 +343,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     if (changedProperties.has('alt')) {
       const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
-      this[$canvas].setAttribute('aria-label', ariaLabel);
+      this[$userInputElement].setAttribute('aria-label', ariaLabel);
     }
   }
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$canvas].toDataURL(type, encoderOptions);
+    return this[$displayCanvas].toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -345,34 +357,56 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const mimeType = options ? options.mimeType : undefined;
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
+
     const {width, height, model, aspect} = this[$scene];
+    const dpr = resolveDpr();
+    let outputWidth = width * dpr;
+    let outputHeight = height * dpr;
+    let offsetX = 0;
+    let offsetY = 0;
     if (idealAspect === true) {
-      const idealWidth = model.fieldOfViewAspect > aspect ?
-          width :
-          Math.round(height * model.fieldOfViewAspect);
-      const idealHeight = model.fieldOfViewAspect > aspect ?
-          Math.round(width / model.fieldOfViewAspect) :
-          height;
-      this[$updateSize]({width: idealWidth, height: idealHeight});
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      if (model.fieldOfViewAspect > aspect) {
+        const oldHeight = outputHeight;
+        outputHeight = Math.round(outputWidth / model.fieldOfViewAspect);
+        offsetY = (oldHeight - outputHeight) / 2;
+      } else {
+        const oldWidth = outputWidth;
+        outputWidth = Math.round(outputHeight * model.fieldOfViewAspect);
+        offsetX = (oldWidth - outputWidth) / 2;
+      }
     }
+    blobCanvas.width = outputWidth;
+    blobCanvas.height = outputHeight;
     try {
       return new Promise<Blob>(async (resolve, reject) => {
-        if ((this[$canvas] as any).msToBlob) {
+        if (blobContext == null) {
+          blobContext = blobCanvas.getContext('2d');
+        }
+        blobContext!.drawImage(
+            this[$displayCanvas],
+            offsetX,
+            offsetY,
+            outputWidth,
+            outputHeight,
+            0,
+            0,
+            outputWidth,
+            outputHeight);
+        if ((blobCanvas as any).msToBlob) {
           // NOTE: msToBlob only returns image/png
           // so ensure mimeType is not specified (defaults to image/png)
           // or is image/png, otherwise fallback to using toDataURL on IE.
           if (!mimeType || mimeType === 'image/png') {
-            return resolve((this[$canvas] as any).msToBlob());
+            return resolve((blobCanvas as any).msToBlob());
           }
         }
 
-        if (!this[$canvas].toBlob) {
+        if (!blobCanvas.toBlob) {
           return resolve(await dataUrlToBlob(
-              this[$canvas].toDataURL(mimeType, qualityArgument)));
+              blobCanvas.toDataURL(mimeType, qualityArgument)));
         }
 
-        this[$canvas].toBlob((blob) => {
+        blobCanvas.toBlob((blob) => {
           if (!blob) {
             return reject(new Error('Unable to retrieve canvas blob'));
           }
@@ -401,6 +435,26 @@ export default class ModelViewerElementBase extends UpdatingElement {
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
     return true;
+  }
+
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
+  [$selectCanvas]() {
+    if (this[$renderer].hasOnlyOneScene) {
+      this[$userInputElement].appendChild(this[$renderer].canvasElement);
+      this[$canvas].classList.remove('show');
+    } else {
+      this[$renderer].canvasElement.classList.remove('show');
+    }
+  }
+
+  get[$displayCanvas]() {
+    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
+                                             this[$canvas];
   }
 
   /**
@@ -474,12 +528,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
 
+    const canvas = this[$displayCanvas];
     try {
-      this[$canvas].classList.add('show');
+      canvas.classList.add('show');
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
-      this[$canvas].classList.remove('show');
+      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
       updateSourceProgress(1.0);

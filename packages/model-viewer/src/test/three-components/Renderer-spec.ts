@@ -40,13 +40,26 @@ function createScene(): ModelScene&TestScene {
     height: 100,
   });
   scene.visible = true;
+  scene.createContext();
 
   scene.renderCount = 0;
-  const drawImage = scene.context.drawImage;
-  scene.context.drawImage = (...args: any[]) => {
-    scene.renderCount!++;
-    (drawImage as any).call(scene.context, ...args);
-  };
+  const {context} = scene;
+  if (context instanceof CanvasRenderingContext2D) {
+    const drawImage = context.drawImage;
+    context.drawImage = (...args: any[]) => {
+      scene.renderCount!++;
+      (drawImage as any).call(context, ...args);
+    };
+  } else if (context instanceof ImageBitmapRenderingContext) {
+    const transferFromImageBitmap = context.transferFromImageBitmap;
+    context.transferFromImageBitmap = (...args: any[]) => {
+      scene.renderCount!++;
+      (transferFromImageBitmap as any).call(context, ...args);
+    }
+  } else {
+    throw new Error(
+        'context is neither a CanvasRenderingContext2D nor an ImageBitmapRenderingContext.');
+  }
 
   element[$renderer].registerScene(scene);
 
@@ -55,9 +68,10 @@ function createScene(): ModelScene&TestScene {
 
 suite('Renderer', () => {
   let scene: ModelScene&TestScene;
-  const renderer = Renderer.singleton;
+  let renderer: Renderer;
 
   setup(() => {
+    renderer = Renderer.singleton;
     scene = createScene();
   });
 

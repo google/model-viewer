@@ -66,7 +66,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     };
     customElements.define(tagName, ModelViewerElement);
     element = new ModelViewerElement();
-    document.body.appendChild(element);
+    document.body.insertBefore(element, document.body.firstChild);
     scene = element[$scene];
   });
 
@@ -195,19 +195,23 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     });
 
     test('gets expected hit result', () => {
-      const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2)!;
-      closeToVector3(position!, new Vector3(0, 0, 0.5));
-      closeToVector3(normal!, new Vector3(0, 0, 1));
+      const hitResult =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      expect(hitResult).to.be.ok;
+      const {position, normal} = hitResult!;
+      closeToVector3(position, new Vector3(0, 0, 0.5));
+      closeToVector3(normal, new Vector3(0, 0, 1));
     });
 
     test('gets expected hit result when turned', () => {
       element[$scene].setPivotRotation(-Math.PI / 2);
       element[$scene].updateMatrixWorld();
-      const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2)!;
-      closeToVector3(position!, new Vector3(0.5, 0, 0));
-      closeToVector3(normal!, new Vector3(1, 0, 0));
+      const hitResult =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      expect(hitResult).to.be.ok;
+      const {position, normal} = hitResult!;
+      closeToVector3(position, new Vector3(0.5, 0, 0));
+      closeToVector3(normal, new Vector3(1, 0, 0));
     });
   });
 });
