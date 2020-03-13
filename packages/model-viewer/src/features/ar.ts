@@ -162,7 +162,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
-    @property({type: Boolean, attribute: 'ar-modes'})
+    @property({type: String, attribute: 'ar-modes'})
     arModes: string = DEFAULT_AR_MODES;
 
     @property(
