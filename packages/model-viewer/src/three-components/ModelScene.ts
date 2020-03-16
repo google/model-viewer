@@ -16,9 +16,9 @@
 import {Camera, Event as ThreeEvent, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {Hotspot} from '../features/annotation/hotspot.js';
 import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
+import {Hotspot} from './Hotspot.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Shadow} from './Shadow.js';
 

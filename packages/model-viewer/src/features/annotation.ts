@@ -17,9 +17,8 @@
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
-
-import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
 
 const $annotationRenderer = Symbol('annotationRenderer');
 const $hotspotMap = Symbol('hotspotMap');

@@ -16,8 +16,8 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import {Hotspot} from '../../features/annotation/hotspot.js';
 import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';

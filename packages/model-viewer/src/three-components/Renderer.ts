@@ -207,6 +207,10 @@ export class Renderer extends EventDispatcher {
     return this[$arRenderer] != null && this[$arRenderer].isPresenting;
   }
 
+  /**
+   * This method takes care of updating the element and renderer state based on
+   * the time that has passed since the last rendered frame.
+   */
   preRender(scene: ModelScene, t: number, delta: number) {
     const {element, exposure, shadow} = scene;
 

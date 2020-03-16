@@ -53,6 +53,10 @@ export default class Reticle extends Object3D {
     return this._hitMatrix;
   }
 
+  /**
+   * Resets the Reticle's hit test state so that it gets properly updated, for
+   * instance if the reference space changes.
+   */
   reset() {
     this.hitTestSourceRequest = null;
     this.hitTestSource = null;
