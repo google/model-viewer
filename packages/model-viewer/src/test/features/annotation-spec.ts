@@ -132,10 +132,10 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         let wrapper: HTMLElement;
 
         setup(async () => {
+          await rafPasses();
+
           const hotspotObject2D = scene.pivot.children[numSlots - 1] as Hotspot;
           hotspotObject2D.hide();
-
-          await rafPasses();
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
