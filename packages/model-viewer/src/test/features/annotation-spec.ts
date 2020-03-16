@@ -132,10 +132,15 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         let wrapper: HTMLElement;
 
         setup(async () => {
+          // This is to wait for the hotspots to be added to their slots, as
+          // this triggers their visibility to "show". Otherwise, sometimes the
+          // following hide() call will happen first, then when the camera
+          // moves, we never get a hotspot-visibility event because they were
+          // already visible.
+          await rafPasses();
+
           const hotspotObject2D = scene.pivot.children[numSlots - 1] as Hotspot;
           hotspotObject2D.hide();
-
-          await rafPasses();
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;

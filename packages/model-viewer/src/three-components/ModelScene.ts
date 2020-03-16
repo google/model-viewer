@@ -60,7 +60,6 @@ export class ModelScene extends Scene {
   public pivotCenter: Vector3;
   public width = 1;
   public height = 1;
-  public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =

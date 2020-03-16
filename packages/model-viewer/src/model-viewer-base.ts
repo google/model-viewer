@@ -28,6 +28,7 @@ import {ProgressTracker} from './utilities/progress-tracker.js';
 
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
+const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
@@ -47,7 +48,8 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
-export const $isInRenderTree = Symbol('isInRenderTree');
+export const $isElementInViewport = Symbol('isElementInViewport');
+export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');
 export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
@@ -123,7 +125,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   @property({converter: {fromAttribute: deserializeUrl}})
   src: string|null = null;
 
-  protected[$isInRenderTree] = false;
+  protected[$isElementInViewport] = false;
   protected[$loaded] = false;
   protected[$loadedTime] = 0;
   protected[$scene]: ModelScene;
@@ -138,6 +140,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const boundingRect = this.getBoundingClientRect();
     this[$updateSize](boundingRect);
   }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
+
+  protected[$announceModelVisibility] = debounce((oldVisibility: boolean) => {
+    const newVisibility = this.modelIsVisible;
+    if (newVisibility !== oldVisibility) {
+      this.dispatchEvent(new CustomEvent(
+          'model-visibility', {detail: {visible: newVisibility}}));
+    }
+  }, ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD);
 
   protected[$resizeObserver]: ResizeObserver|null = null;
   protected[$intersectionObserver]: IntersectionObserver|null = null;
@@ -247,11 +257,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
-            const oldValue = this[$isInRenderTree];
-            this[$isInRenderTree] = this[$scene].visible = entry.isIntersecting;
-            this.requestUpdate($isInRenderTree, oldValue);
+            const oldVisibility = this.modelIsVisible;
+            const oldValue = this[$isElementInViewport];
+            this[$isElementInViewport] = this[$scene].visible =
+                entry.isIntersecting;
+            this.requestUpdate($isElementInViewport, oldValue);
+            this[$announceModelVisibility](oldVisibility);
 
-            if (this[$isInRenderTree]) {
+            if (this[$isElementInViewport]) {
               // Wait a microtask to give other properties a chance to respond
               // to the state change, then resolve progress on entering the
               // render tree:
@@ -269,8 +282,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this[$isInRenderTree] = this[$scene].visible = true;
-      this.requestUpdate($isInRenderTree, false);
+      this[$isElementInViewport] = this[$scene].visible = true;
+      this.requestUpdate($isElementInViewport, false);
     }
   }
 
@@ -434,7 +447,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
-    return true;
+    return this[$isElementInViewport];
   }
 
   /**
