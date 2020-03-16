@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
-import {HAS_OFFSCREEN_CANVAS, IS_WEBXR_AR_CANDIDATE, OFFSCREEN_CANVAS_SUPPORT_BITMAP} from '../constants.js';
+import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -65,6 +65,7 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public context3D!: WebGLRenderingContext|null;
+  public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public width: number = 0;
@@ -92,16 +93,17 @@ export class Renderer extends EventDispatcher {
       Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
     }
 
-    if (HAS_OFFSCREEN_CANVAS && OFFSCREEN_CANVAS_SUPPORT_BITMAP) {
-      this.canvas3D = new OffscreenCanvas(0, 0);
-    } else {
-      this.canvas3D = document.createElement('canvas');
-    }
+    this.canvasElement = document.createElement('canvas');
+
+    this.canvas3D = USE_OFFSCREEN_CANVAS ?
+        this.canvasElement.transferControlToOffscreen() :
+        this.canvasElement;
 
     this.canvas3D.addEventListener(
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
-    // Need to support both 'webgl' and 'experimental-webgl' (IE11).
+
     try {
+      // Need to support both 'webgl' and 'experimental-webgl' (IE11).
       this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
 
       // Patch the gl context's extension functions before passing
@@ -172,6 +174,10 @@ export class Renderer extends EventDispatcher {
     }
   }
 
+  get hasOnlyOneScene(): boolean {
+    return this.scenes.size === 1;
+  }
+
   async supportsPresentation() {
     return this.canRender && this[$arRenderer].supportsPresentation();
   }
@@ -218,6 +224,20 @@ export class Renderer extends EventDispatcher {
     }
   }
 
+  /**
+   * Expands the size of the renderer to the max of its current size and the
+   * incoming size.
+   */
+  expandTo(width: number, height: number) {
+    if (width > this.width || height > this.height) {
+      const maxWidth = Math.max(width, this.width);
+      const maxHeight = Math.max(height, this.height);
+      this.setRendererSize(maxWidth, maxHeight);
+      this.canvasElement.style.width = `${maxWidth}px`;
+      this.canvasElement.style.height = `${maxHeight}px`;
+    }
+  }
+
   render(t: number) {
     if (!this.canRender || this.isPresenting) {
       return;
@@ -228,9 +248,14 @@ export class Renderer extends EventDispatcher {
 
     if (dpr !== this.threeRenderer.getPixelRatio()) {
       this.threeRenderer.setPixelRatio(dpr);
+      this.canvasElement.style.width = `${this.width}px`;
+      this.canvasElement.style.height = `${this.height}px`;
+      for (const scene of this.scenes) {
+        scene.isDirty = true;
+      }
     }
 
-    for (let scene of this.scenes) {
+    for (const scene of this.scenes) {
       if (!scene.visible || scene.paused) {
         continue;
       }
@@ -241,7 +266,7 @@ export class Renderer extends EventDispatcher {
         continue;
       }
 
-      const {width, height, context} = scene;
+      const {width, height} = scene;
 
       if (width > this.width || height > this.height) {
         const maxWidth = Math.max(width, this.width);
@@ -256,19 +281,30 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(0, 0, width, height);
       this.threeRenderer.render(scene, scene.getCamera());
 
-      const widthDPR = width * dpr;
-      const heightDPR = height * dpr;
-      context.clearRect(0, 0, widthDPR, heightDPR);
-      context.drawImage(
-          this.threeRenderer.domElement,
-          0,
-          this.canvas3D.height - heightDPR,
-          widthDPR,
-          heightDPR,
-          0,
-          0,
-          widthDPR,
-          heightDPR);
+      if (!this.hasOnlyOneScene) {
+        if (scene.context == null) {
+          scene.createContext();
+        }
+        if (USE_OFFSCREEN_CANVAS) {
+          const contextBitmap = scene.context as ImageBitmapRenderingContext;
+          const bitmap =
+              (this.canvas3D as OffscreenCanvas).transferToImageBitmap();
+          contextBitmap.transferFromImageBitmap(bitmap);
+        } else {
+          const context2D = scene.context as CanvasRenderingContext2D;
+          context2D.clearRect(0, 0, width, height);
+          context2D.drawImage(
+              this.threeRenderer.domElement,
+              0,
+              0,
+              width * dpr,
+              height * dpr,
+              0,
+              0,
+              width,
+              height);
+        }
+      }
 
       scene.isDirty = false;
     }

@@ -42,9 +42,7 @@ export const IS_MOBILE = (() => {
   return check;
 })();
 
-export const HAS_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas);
-export const OFFSCREEN_CANVAS_SUPPORT_BITMAP =
-    Boolean((self as any).OffscreenCanvas) &&
+export const USE_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas) &&
     Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap);
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
@@ -73,7 +71,8 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
 })();
 
 // @see https://developer.chrome.com/multidevice/user-agent
+export const IS_SAFARI = /Safari\//.test(navigator.userAgent);
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
-export const IS_IOS_SAFARI = IS_IOS && /Safari\//.test(navigator.userAgent);
+export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
 export const IS_IE11 =
     !((window as any).ActiveXObject) && 'ActiveXObject' in window;
