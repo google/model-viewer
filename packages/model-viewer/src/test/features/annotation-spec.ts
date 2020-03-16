@@ -142,6 +142,8 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 
+          await timePasses();
+
           wrapper = hotspotObject2D.element;
         });
 
