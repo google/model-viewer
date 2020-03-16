@@ -19,7 +19,7 @@ import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
 import {Hotspot} from '../../features/annotation/hotspot.js';
 import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {ModelScene} from '../../three-components/ModelScene';
-import {assetPath, timePasses, waitForEvent} from '../helpers';
+import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
@@ -135,14 +135,14 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const hotspotObject2D = scene.pivot.children[numSlots - 1] as Hotspot;
           hotspotObject2D.hide();
 
+          await rafPasses();
+
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
-
-          await timePasses();
 
           wrapper = hotspotObject2D.element;
         });
