@@ -112,7 +112,7 @@ export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'fallback'|'none';
 const deserializeARModes = enumerationDeserializer<ARMode>(
     ['quick-look', 'scene-viewer', 'webxr', 'fallback', 'none']);
 
-const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look fallback';
+const DEFAULT_AR_MODES = 'scene-viewer quick-look fallback';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
