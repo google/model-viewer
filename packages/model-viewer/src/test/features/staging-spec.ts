@@ -111,7 +111,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       suite('with zero auto-rotate-delay', () => {
         setup(async () => {
           element.autoRotateDelay = 0;
-          await timePasses();
+          await rafPasses();
         });
 
         test('causes the model to rotate ASAP', async () => {
