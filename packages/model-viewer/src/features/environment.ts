@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 import {Texture} from 'three';
 
-import ModelViewerElementBase, {$isInRenderTree, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$isElementInViewport, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 const DEFAULT_SHADOW_INTENSITY = 0.0;
@@ -88,8 +88,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('environmentImage') ||
           changedProperties.has('skyboxImage') ||
-          changedProperties.has('experimentalPmrem') ||
-          changedProperties.has($isInRenderTree)) {
+          changedProperties.has($isElementInViewport)) {
         this[$updateEnvironment]();
       }
     }
@@ -103,7 +102,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateEnvironment]() {
-      if (!this[$isInRenderTree]) {
+      if (!this[$isElementInViewport]) {
         return;
       }
 

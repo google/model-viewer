@@ -440,6 +440,17 @@
               set it to 0, it will reset an animation to the beginning.</p>
             </li>
             <li>
+              <div>loaded</div>
+              <p>This property is read-only. It returns true if the load event
+              below has fired since the last src change.</p>
+            </li>
+            <li>
+              <div>modelIsVisible</div>
+              <p>This property is read-only. It returns true if the element is 
+              visible on the page (assuming there is an IntersectionObserver) and the
+              poster has been dismissed.</p>
+            </li>
+            <li>
               <div>paused</div>
               <p>This property is read-only. It returns true if animations are
               paused. It returns false if animations are playing. Animations
@@ -638,12 +649,9 @@
             <li>
               <div>model-visibility</div>
               <p>This event is fired when the visibility of the model changes. When the
-              model is loaded, able to be rendered and fully visible (e.g., the poster is no longer
-              visible), this event will fire and <span class="attribute">event.detail.visible</span>
-              will be "true". Note that this event will fire regardless of whether the model is 
-              present in the viewport. This means that the model may not be rendered yet (as we
-              do not render models that are outside of the viewport) even though the event says
-              that the model is visible.</p>
+              model is loaded, the element is in the viewport (assuming there is an 
+              IntersectionObserver), and the poster has been dismissed, this event will fire 
+              and <span class="attribute">event.detail.visible</span> will be "true".</p>
             </li>
             <li>
               <div>poster-visibility</div>
