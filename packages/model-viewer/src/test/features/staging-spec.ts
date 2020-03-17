@@ -14,8 +14,9 @@
  */
 
 import {AUTO_ROTATE_DELAY_DEFAULT, StagingMixin} from '../../features/staging.js';
-import ModelViewerElementBase, {$onUserModelOrbit} from '../../model-viewer-base.js';
-import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers.js';
+import ModelViewerElementBase from '../../model-viewer-base.js';
+import {KeyCode} from '../../three-components/SmoothControls.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -56,8 +57,9 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     });
 
     suite('auto-rotate', () => {
-      setup(() => {
+      setup(async () => {
         element.autoRotate = true;
+        await timePasses();
       });
 
       test('causes the model to rotate after a delay', async () => {
@@ -73,6 +75,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           'retains turntable rotation when auto-rotate is toggled',
           async () => {
             element.autoRotateDelay = 0;
+            await timePasses();
             await rafPasses();
 
             const {turntableRotation} = element;
@@ -111,6 +114,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       suite('with zero auto-rotate-delay', () => {
         setup(async () => {
           element.autoRotateDelay = 0;
+          await timePasses();
           await rafPasses();
         });
 
@@ -122,11 +126,10 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         });
       })
 
-      // TODO(#582)
-      test.skip('pauses rotate after user interaction', async () => {
+      test('pauses rotate after user interaction', async () => {
         const {turntableRotation: initialTurntableRotation} = element;
 
-        element[$onUserModelOrbit]();
+        dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
 
         await rafPasses();
 
