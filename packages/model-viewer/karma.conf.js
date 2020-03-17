@@ -160,18 +160,6 @@ module.exports = function(config) {
         // domain so we go there directly instead:
         url: 'http://bs-local.com:9876'
       },
-      'iOS Safari (iOS 12)': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '12',
-        device: 'iPhone 7',
-        browser: 'iPhone',
-        real_mobile: 'true',
-        // BrowserStack seems to drop the port when redirecting to this special
-        // domain so we go there directly instead:
-        url: 'http://bs-local.com:9876'
-      },
-
     };
 
     config.set({
