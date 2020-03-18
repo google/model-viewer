@@ -50,7 +50,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'load');
-      Object.defineProperty(element, 'modelIsVisible', {value: true});
+      Object.defineProperty(
+          element, 'modelIsVisible', {value: true, writable: true});
       await rafPasses();
     });
 
