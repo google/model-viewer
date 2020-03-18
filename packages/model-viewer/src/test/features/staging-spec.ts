@@ -59,6 +59,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     suite.only('auto-rotate', () => {
       setup(async () => {
         element.autoRotate = true;
+        element.autoRotateDelay = 50;
         await timePasses();
         console.log('after setup');
       });

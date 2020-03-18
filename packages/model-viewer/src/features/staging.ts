@@ -79,6 +79,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (!this.autoRotate || !this.modelIsVisible ||
           this[$renderer].isPresenting) {
+        console.log(this.autoRotate, this.modelIsVisible);
         return;
       }
 
