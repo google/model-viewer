@@ -88,13 +88,13 @@ suite('ModelViewerElementBase with StagingMixin', () => {
             expect(turntableRotation).to.be.greaterThan(0);
 
             element.autoRotate = false;
-
+            await timePasses();
             await rafPasses();
 
             expect(element.turntableRotation).to.be.equal(turntableRotation);
 
             element.autoRotate = true;
-
+            await timePasses();
             await rafPasses();
 
             expect(element.turntableRotation)
