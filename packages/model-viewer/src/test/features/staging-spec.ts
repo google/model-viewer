@@ -60,6 +60,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       setup(async () => {
         element.autoRotate = true;
         await timePasses();
+        console.log('after setup');
       });
 
       test('causes the model to rotate after a delay', async () => {
@@ -75,8 +76,11 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           'retains turntable rotation when auto-rotate is toggled',
           async () => {
             element.autoRotateDelay = 0;
+            console.log('after delay = 0');
             await timePasses();
+            console.log('after macrotask');
             await rafPasses();
+            console.log('after raf');
 
             const {turntableRotation} = element;
 
@@ -95,6 +99,22 @@ suite('ModelViewerElementBase with StagingMixin', () => {
             expect(element.turntableRotation)
                 .to.be.greaterThan(turntableRotation);
           });
+
+      test('pauses rotate after user interaction', async () => {
+        const {turntableRotation: initialTurntableRotation} = element;
+
+        dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+
+        await rafPasses();
+
+        expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
+
+        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+        await rafPasses();
+
+        expect(element.turntableRotation)
+            .to.be.greaterThan(initialTurntableRotation);
+      });
 
       suite('when the model is not visible', () => {
         setup(() => {
@@ -124,22 +144,6 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           expect(element.turntableRotation)
               .to.be.greaterThan(turntableRotation);
         });
-      })
-
-      test('pauses rotate after user interaction', async () => {
-        const {turntableRotation: initialTurntableRotation} = element;
-
-        dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-
-        await rafPasses();
-
-        expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
-
-        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
-        await rafPasses();
-
-        expect(element.turntableRotation)
-            .to.be.greaterThan(initialTurntableRotation);
       });
     });
   });

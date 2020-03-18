@@ -75,6 +75,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
+      console.log('time = ', time);
 
       if (!this.autoRotate || !this.modelIsVisible ||
           this[$renderer].isPresenting) {

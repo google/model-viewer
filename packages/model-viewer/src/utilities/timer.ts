@@ -73,9 +73,11 @@ export class Timer {
    */
   tick(deltaTime: number) {
     this[$time] += deltaTime;
+    console.log('tick, delta = ', deltaTime);
 
     if (this.time >= this.duration) {
       this[$time] = this.duration;
+      console.log('timer stopped');
     }
   }
 }
