@@ -14,7 +14,6 @@
  */
 
 const $time = Symbol('time');
-const $duration = Symbol('duration');
 
 /**
  * The Timer class can be used power delays and animations
@@ -31,33 +30,24 @@ export class Timer {
    * a calculation of `time / duration` which can be used for animations
    */
   get timeScale(): number {
-    return this[$time] / this[$duration];
-  }
-
-  /**
-   * duration of the timer
-   */
-  get duration(): number {
-    return this[$duration];
+    return this[$time] / this.duration;
   }
 
   /**
    * whether the timer has run fully or stop has been called
    */
   get hasStopped(): boolean {
-    return this[$time] >= this[$duration];
+    return this[$time] >= this.duration;
   }
 
   private[$time]: number;
-  private[$duration]: number;
 
   /**
    * Creates a new timer
    *
    * @param duration the total duration for the timer
    */
-  constructor(duration: number) {
-    this[$duration] = duration;
+  constructor(public duration: number) {
     this[$time] = 0;
   }
 
@@ -73,7 +63,7 @@ export class Timer {
    * return true
    */
   stop(): void {
-    this[$time] = this[$duration];
+    this[$time] = this.duration;
   }
 
   /**
@@ -84,8 +74,8 @@ export class Timer {
   tick(deltaTime: number) {
     this[$time] += deltaTime;
 
-    if (this.time >= this[$duration]) {
-      this[$time] = this[$duration];
+    if (this.time >= this.duration) {
+      this[$time] = this.duration;
     }
   }
 }

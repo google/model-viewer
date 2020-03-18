@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {IS_IE11} from '../../constants.js';
 import {AUTO_ROTATE_DELAY_DEFAULT, StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {KeyCode} from '../../three-components/SmoothControls.js';
@@ -44,11 +43,6 @@ suite('ModelViewerElementBase with StagingMixin', () => {
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   suite('with a loaded model', () => {
-    if (IS_IE11) {
-      console.warn('Skipping these tests for IE11 only');
-      return;
-    }
-
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ODD_SHAPE_GLB_PATH;

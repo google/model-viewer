@@ -55,30 +55,21 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
       this.addEventListener(
           'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
+      this[$autoRotateTimer].reset();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
       this.removeEventListener(
           'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
+      this[$autoRotateTimer].reset();
     }
 
     updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
-      if (changedProperties.has('autoRotate')) {
-        this[$needsRender]();
-      }
-
       if (changedProperties.has('autoRotateDelay')) {
-        const timer = new Timer(this.autoRotateDelay);
-        timer.tick(this[$autoRotateTimer].time);
-        if (timer.hasStopped) {
-          timer.reset();
-        }
-        this[$autoRotateTimer] = timer;
+        this[$autoRotateTimer].duration = this.autoRotateDelay;
       }
     }
 
