@@ -43,13 +43,14 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('with a loaded model', () => {
+  suite('with a visible loaded model', () => {
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ODD_SHAPE_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'load');
+      Object.defineProperty(element, 'modelIsVisible', {value: true});
       await rafPasses();
     });
 
