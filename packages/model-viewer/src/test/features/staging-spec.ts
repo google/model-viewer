@@ -60,7 +60,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       document.body.removeChild(element);
     });
 
-    suite.only('auto-rotate', () => {
+    suite('auto-rotate', () => {
       setup(async () => {
         element.autoRotate = true;
         element.autoRotateDelay = AUTO_ROTATE_DELAY;
