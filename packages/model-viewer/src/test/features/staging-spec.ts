@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+import {CameraChangeDetails} from '../../features/controls.js';
 import {StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {KeyCode} from '../../three-components/SmoothControls.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, waitForEvent} from '../helpers.js';
+import {ChangeSource} from '../../three-components/SmoothControls.js';
+import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -64,7 +65,6 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         element.autoRotate = true;
         element.autoRotateDelay = AUTO_ROTATE_DELAY;
         await timePasses();
-        console.log('after setup');
       });
 
       test('causes the model to rotate after a delay', async () => {
@@ -80,11 +80,8 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           'retains turntable rotation when auto-rotate is toggled',
           async () => {
             element.autoRotateDelay = 0;
-            console.log('after delay = 0');
             await timePasses();
-            console.log('after macrotask');
             await rafPasses();
-            console.log('after raf');
 
             const {turntableRotation} = element;
 
@@ -105,9 +102,17 @@ suite('ModelViewerElementBase with StagingMixin', () => {
           });
 
       test('pauses rotate after user interaction', async () => {
-        const {turntableRotation: initialTurntableRotation} = element;
+        const {turntableRotation} = element;
+        await timePasses(AUTO_ROTATE_DELAY);
+        await rafPasses();
 
-        dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+        const {turntableRotation: initialTurntableRotation} = element;
+        expect(initialTurntableRotation).to.be.greaterThan(turntableRotation);
+
+        element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+            'camera-change',
+            {detail: {source: ChangeSource.USER_INTERACTION}}));
+        await timePasses();
 
         await rafPasses();
 

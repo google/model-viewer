@@ -88,7 +88,7 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
-      // 'ChromeHeadless',
+      'ChromeHeadless',
     ],
   });
 
@@ -101,66 +101,65 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      // 'Edge (latest)': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Edge',
-      //   browser_version: 'latest',
-      // },
-      // 'Edge 79.0': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Edge',
-      //   browser_version: '80.0',
-      // },
-      // 'Firefox (latest)': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Firefox',
-      //   browser_version: 'latest',
-      // },
-      // 'Firefox 72.0': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Firefox',
-      //   browser_version: '72.0',
-      // },
-      // 'Safari (latest)': {
-      //   base: 'BrowserStack',
-      //   os: 'OS X',
-      //   os_version: 'Catalina',
-      //   browser: 'safari',
-      //   browser_version: 'latest',
-      //   // BrowserStack occassionally fails to tunnel localhost for Safari
-      //   // instances, causing them to time out:
-      //   url: 'http://127.0.0.1:9876'
-      // },
-      // 'Safari 12.1': {
-      //   base: 'BrowserStack',
-      //   os: 'OS X',
-      //   os_version: 'Mojave',
-      //   browser: 'safari',
-      //   browser_version: '12.1',
-      //   // BrowserStack occassionally fails to tunnel localhost for Safari
-      //   // instances, causing them to time out:
-      //   url: 'http://127.0.0.1:9876'
-      // },
-      // 'iOS Safari (iOS 13)': {
-      //   base: 'BrowserStack',
-      //   os: 'iOS',
-      //   os_version: '13',
-      //   device: 'iPhone 8',
-      //   browser: 'iPhone',
-      //   real_mobile: 'true',
-      //   // BrowserStack seems to drop the port when redirecting to this
-      //   special
-      //   // domain so we go there directly instead:
-      //   url: 'http://bs-local.com:9876'
-      // },
+      'Edge (latest)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: 'latest',
+      },
+      'Edge 79.0': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: '80.0',
+      },
+      'Firefox (latest)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Firefox',
+        browser_version: 'latest',
+      },
+      'Firefox 72.0': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Firefox',
+        browser_version: '72.0',
+      },
+      'Safari (latest)': {
+        base: 'BrowserStack',
+        os: 'OS X',
+        os_version: 'Catalina',
+        browser: 'safari',
+        browser_version: 'latest',
+        // BrowserStack occassionally fails to tunnel localhost for Safari
+        // instances, causing them to time out:
+        url: 'http://127.0.0.1:9876'
+      },
+      'Safari 12.1': {
+        base: 'BrowserStack',
+        os: 'OS X',
+        os_version: 'Mojave',
+        browser: 'safari',
+        browser_version: '12.1',
+        // BrowserStack occassionally fails to tunnel localhost for Safari
+        // instances, causing them to time out:
+        url: 'http://127.0.0.1:9876'
+      },
+      'iOS Safari (iOS 13)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '13',
+        device: 'iPhone 8',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        // BrowserStack seems to drop the port when redirecting to this special
+        // domain so we go there directly instead:
+        url: 'http://bs-local.com:9876'
+      },
       'iOS Safari (iOS 12)': {
         base: 'BrowserStack',
         os: 'iOS',

@@ -35,7 +35,6 @@ import './utilities/animation-spec.js';
 import './utilities/cache-eviction-policy-spec.js';
 import './utilities/focus-visible-spec.js';
 import './utilities/progress-tracker-spec.js';
-import './utilities/timer-spec.js';
 import './features/animation-spec.js';
 import './features/annotation-spec.js';
 import './features/staging-spec.js';
