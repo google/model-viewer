@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AUTO_ROTATE_DELAY_DEFAULT, StagingMixin} from '../../features/staging.js';
+import {StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {KeyCode} from '../../three-components/SmoothControls.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, waitForEvent} from '../helpers.js';
@@ -22,6 +22,7 @@ import {BasicSpecTemplate} from '../templates.js';
 const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
+const AUTO_ROTATE_DELAY = 50;
 
 suite('ModelViewerElementBase with StagingMixin', () => {
   let nextId = 0;
@@ -59,7 +60,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
     suite.only('auto-rotate', () => {
       setup(async () => {
         element.autoRotate = true;
-        element.autoRotateDelay = 50;
+        element.autoRotateDelay = AUTO_ROTATE_DELAY;
         await timePasses();
         console.log('after setup');
       });
@@ -68,7 +69,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         const {turntableRotation} = element;
         await rafPasses();
         expect(element.turntableRotation).to.be.equal(turntableRotation);
-        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+        await timePasses(AUTO_ROTATE_DELAY);
         await rafPasses();
         expect(element.turntableRotation).to.be.greaterThan(turntableRotation);
       });
@@ -110,7 +111,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
         expect(element.turntableRotation).to.be.equal(initialTurntableRotation);
 
-        await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+        await timePasses(AUTO_ROTATE_DELAY);
         await rafPasses();
 
         expect(element.turntableRotation)
@@ -125,7 +126,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         test('does not cause the model to rotate over time', async () => {
           const {turntableRotation} = element;
 
-          await timePasses(AUTO_ROTATE_DELAY_DEFAULT);
+          await timePasses(AUTO_ROTATE_DELAY);
           await rafPasses();
 
           expect(element.turntableRotation).to.be.equal(turntableRotation);
