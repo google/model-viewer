@@ -33,6 +33,7 @@ const $presentedScene = Symbol('presentedScene');
 const $lastTick = Symbol('lastTick');
 const $turntableRotation = Symbol('turntableRotation');
 const $oldShadowIntensity = Symbol('oldShadowIntensity');
+const $oldBackground = Symbol('oldBackground');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
@@ -55,6 +56,7 @@ export class ARRenderer extends EventDispatcher {
   private[$lastTick]: number|null = null;
   private[$turntableRotation]: number|null = null;
   private[$oldShadowIntensity]: number|null = null;
+  private[$oldBackground]: any = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
@@ -147,6 +149,9 @@ export class ARRenderer extends EventDispatcher {
     scene.pivot.visible = false;
     scene.setHotspotsVisibility(false);
 
+    this[$oldBackground] = scene.background;
+    scene.background = null;
+
     this[$oldShadowIntensity] = scene.shadowIntensity;
     scene.setShadowIntensity(AR_SHADOW_INTENSITY);
 
@@ -201,13 +206,6 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$postSessionCleanup]() {
-    // The offscreen WebXR framebuffer is now invalid, switch
-    // back to the default framebuffer for canvas output.
-    // TODO: this method should be added to three.js's exported interface.
-    (this.threeRenderer as any).setFramebuffer(null);
-
-    // Trigger a parent renderer update. TODO(klausw): are these all
-    // necessary and sufficient?
     const scene = this[$presentedScene];
     if (scene != null) {
       scene.setCamera(scene.camera);
@@ -218,6 +216,7 @@ export class ARRenderer extends EventDispatcher {
       scene.pivot.position.set(0, 0, 0);
       scene.setPivotRotation(this[$turntableRotation]!);
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
+      scene.background = this[$oldBackground];
       scene.orientHotspots(0);
       scene.isDirty = true;
     }
