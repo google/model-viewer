@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
+import {Hotspot} from './Hotspot.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Shadow} from './Shadow.js';
 
@@ -40,6 +41,12 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 };
 
 const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
+
+const view = new Vector3();
+const target = new Vector3();
+const normalWorld = new Vector3();
+const pixelPosition = new Vector2();
+const raycaster = new Raycaster();
 
 const $paused = Symbol('paused');
 
@@ -270,5 +277,104 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setSoftness(softness);
     }
+  }
+
+  /**
+   * This method returns the world position and normal of the point on the
+   * mesh corresponding to the input pixel coordinates given relative to the
+   * model-viewer element. The position and normal are returned as strings in
+   * the format suitable for putting in a hotspot's data-position and
+   * data-normal attributes. If the mesh is not hit, position returns the
+   * empty string.
+   */
+  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+      {position: Vector3D, normal: Vector3D}|null {
+    pixelPosition.set(pixelX / this.width, pixelY / this.height)
+        .multiplyScalar(2)
+        .subScalar(1);
+    pixelPosition.y *= -1;
+    raycaster.setFromCamera(pixelPosition, this.getCamera());
+    const hits = raycaster.intersectObject(this, true);
+
+    if (hits.length === 0) {
+      return null;
+    }
+
+    const hit = hits[0];
+    if (hit.face == null) {
+      return null;
+    }
+
+    const worldToPivot = new Matrix4().getInverse(this.pivot.matrixWorld);
+    const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
+    const normal =
+        toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
+                       .transformDirection(worldToPivot));
+    return {position: position, normal: normal};
+  }
+
+  /**
+   * The following methods are for operating on the set of Hotspot objects
+   * attached to the scene. These come from DOM elements, provided to slots by
+   * the Annotation Mixin.
+   */
+  addHotspot(hotspot: Hotspot) {
+    this.pivot.add(hotspot);
+  }
+
+  removeHotspot(hotspot: Hotspot) {
+    this.pivot.remove(hotspot);
+  }
+
+  /**
+   * Helper method to apply a function to all hotspots.
+   */
+  forHotspots(func: (hotspot: Hotspot) => void) {
+    const {children} = this.pivot;
+    for (let i = 0, l = children.length; i < l; i++) {
+      const hotspot = children[i];
+      if (hotspot instanceof Hotspot) {
+        func(hotspot);
+      }
+    }
+  }
+
+  /**
+   * Update the CSS visibility of the hotspots based on whether their normals
+   * point toward the camera.
+   */
+  updateHotspots() {
+    this.forHotspots((hotspot) => {
+      view.copy(this.activeCamera.position);
+      target.setFromMatrixPosition(hotspot.matrixWorld);
+      view.sub(target);
+      normalWorld.copy(hotspot.normal)
+          .transformDirection(this.pivot.matrixWorld);
+      if (view.dot(normalWorld) < 0) {
+        hotspot.hide();
+      } else {
+        hotspot.show();
+      }
+    });
+  }
+
+  /**
+   * Rotate all hotspots to an absolute orientation given by the input number of
+   * radians. Zero returns them to upright.
+   */
+  orientHotspots(radians: number) {
+    this.forHotspots((hotspot) => {
+      hotspot.orient(radians);
+    });
+  }
+
+  /**
+   * Set the rendering visibility of all hotspots. This is used to hide them
+   * during transitions and such.
+   */
+  setHotspotsVisibility(visible: boolean) {
+    this.forHotspots((hotspot) => {
+      hotspot.visible = visible;
+    });
   }
 }

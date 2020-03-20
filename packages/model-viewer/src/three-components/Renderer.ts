@@ -208,6 +208,27 @@ export class Renderer extends EventDispatcher {
   }
 
   /**
+   * This method takes care of updating the element and renderer state based on
+   * the time that has passed since the last rendered frame.
+   */
+  preRender(scene: ModelScene, t: number, delta: number) {
+    const {element, exposure, shadow} = scene;
+
+    element[$tick](t, delta);
+
+    const exposureIsNumber =
+        typeof exposure === 'number' && !(self as any).isNaN(exposure);
+    this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+
+    const shadowNeedsUpdate = this.threeRenderer.shadowMap.needsUpdate;
+    if (shadow != null) {
+      this.threeRenderer.shadowMap.needsUpdate =
+          shadowNeedsUpdate || shadow.needsUpdate;
+      shadow.needsUpdate = false;
+    }
+  }
+
+  /**
    * Expands the size of the renderer to the max of its current size and the
    * incoming size.
    */
@@ -239,26 +260,22 @@ export class Renderer extends EventDispatcher {
     }
 
     for (const scene of this.scenes) {
-      const {element, width, height} = scene;
-      element[$tick](t, delta);
-
-      if (!scene.visible || !scene.isDirty || scene.paused) {
+      if (!scene.visible || scene.paused) {
         continue;
       }
 
-      const camera = scene.getCamera();
+      this.preRender(scene, t, delta);
 
-      const {exposure, shadow} = scene;
-      const exposureIsNumber =
-          typeof exposure === 'number' && !(self as any).isNaN(exposure);
-      this.threeRenderer.toneMappingExposure =
-          exposureIsNumber ? exposure : 1.0;
+      if (!scene.isDirty) {
+        continue;
+      }
 
-      const shadowNeedsUpdate = this.threeRenderer.shadowMap.needsUpdate;
-      if (shadow != null) {
-        this.threeRenderer.shadowMap.needsUpdate =
-            shadowNeedsUpdate || shadow.needsUpdate;
-        shadow.needsUpdate = false;
+      const {width, height} = scene;
+
+      if (width > this.width || height > this.height) {
+        const maxWidth = Math.max(width, this.width);
+        const maxHeight = Math.max(height, this.height);
+        this.setRendererSize(maxWidth, maxHeight);
       }
 
       // Need to set the render target in order to prevent
@@ -266,7 +283,7 @@ export class Renderer extends EventDispatcher {
       // from something in
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(0, this.height - height, width, height);
-      this.threeRenderer.render(scene, camera);
+      this.threeRenderer.render(scene, scene.getCamera());
 
       if (!this.hasOnlyOneScene) {
         if (scene.context == null) {

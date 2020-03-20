@@ -20,7 +20,6 @@ import Model from './Model';
 // Nothing within Offset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
 const OFFSET = 0.001;
-const BASE_OPACITY = 0.1;
 // The softness [0, 1] of the shadow is mapped to a resolution between
 // 2^LOG_MAX_RESOLUTION and 2^LOG_MIN_RESOLUTION.
 const LOG_MAX_RESOLUTION = 9;
@@ -148,7 +147,7 @@ export class Shadow extends DirectionalLight {
   }
 
   setIntensity(intensity: number) {
-    this.shadowMaterial.opacity = intensity * BASE_OPACITY;
+    this.shadowMaterial.opacity = intensity;
     if (intensity > 0) {
       this.visible = true;
       this.floor.visible = true;
@@ -159,7 +158,7 @@ export class Shadow extends DirectionalLight {
   }
 
   getIntensity(): number {
-    return this.shadowMaterial.opacity / BASE_OPACITY;
+    return this.shadowMaterial.opacity;
   }
 
   setRotation(radiansY: number) {
