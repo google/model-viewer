@@ -26,8 +26,6 @@ import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
 
-
-
 // NOTE(cdata): The following "animation" timing functions are deliberately
 // being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
 // would cause the interaction prompt to glitch unexpectedly
@@ -53,6 +51,19 @@ const fade = timeline(0, [
   {frames: 1, value: 0},
   {frames: 4, value: 0}
 ]);
+
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
+const DEFAULT_CAMERA_TARGET = 'auto auto auto';
+const DEFAULT_FIELD_OF_VIEW = 'auto';
+
+const MINIMUM_RADIUS_RATIO = 1.1 * SAFE_RADIUS_RATIO;
+
+const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
+const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
+
+export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
+export const INTERACTION_PROMPT =
+    'Use mouse, touch or arrow keys to control the camera!';
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -85,10 +96,6 @@ export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   ALWAYS_ALLOW: 'always-allow',
   WHEN_FOCUSED: 'allow-when-focused'
 };
-
-export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
-const DEFAULT_CAMERA_TARGET = 'auto auto auto';
-const DEFAULT_FIELD_OF_VIEW = 'auto';
 
 export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   return {
@@ -176,15 +183,6 @@ const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
 const TAU = 2.0 * Math.PI;
-
-const MINIMUM_RADIUS_RATIO = 1.1 * SAFE_RADIUS_RATIO;
-
-const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
-const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
-
-export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
-export const INTERACTION_PROMPT =
-    'Use mouse, touch or arrow keys to control the camera!';
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
