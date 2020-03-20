@@ -258,6 +258,9 @@ configuration or device capabilities');
     }
 
     [$onFullscreenchange]() {
+      if (this[$arMode] !== ARMode.AR_VIEWER) {
+        return;
+      }
       const scene = this[$scene];
       const isFullscreen = document.fullscreenElement === this;
 
@@ -267,8 +270,7 @@ configuration or device capabilities');
         this[$container].classList.remove('fullscreen');
       }
 
-      if (document.fullscreenElement !== this &&
-          this[$renderer].presentedScene === scene) {
+      if (!isFullscreen && this[$renderer].presentedScene === scene) {
         try {
           this[$renderer].stopPresenting();
         } catch (error) {

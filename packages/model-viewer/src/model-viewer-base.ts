@@ -63,7 +63,6 @@ export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
-export const $onUserModelOrbit = Symbol('onUserModelOrbit');
 export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');

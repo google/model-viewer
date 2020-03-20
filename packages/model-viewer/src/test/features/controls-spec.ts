@@ -110,8 +110,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
       });
 
-      // TODO(#583)
-      test.skip('can independently adjust azimuth', async () => {
+      test('can independently adjust azimuth', async () => {
         const orbit = element.getCameraOrbit();
         const nextTheta = orbit.theta + 1.0;
 
@@ -232,8 +231,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(controls);
         });
 
-        // NOTE(cdata): Flakey test is flakey
-        test.skip('starts at the initially configured orbit', () => {
+        test('starts at the initially configured orbit', () => {
           const orbit = element.getCameraOrbit();
 
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)

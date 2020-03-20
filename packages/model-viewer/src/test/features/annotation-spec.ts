@@ -16,8 +16,8 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import {Hotspot} from '../../features/annotation/hotspot.js';
-import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
@@ -30,8 +30,8 @@ const sceneContainsHotspot =
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot &&
-            (hotspot.element.children[0] as HTMLSlotElement).name ===
-                element.slot) {
+            (hotspot.element.children[0].children[0] as HTMLSlotElement)
+                    .name === element.slot) {
           // expect it has been changed from default
           expect(hotspot.position).to.not.eql(new Vector3());
           expect(hotspot.normal).to.not.eql(new Vector3(0, 1, 0));
@@ -145,20 +145,21 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
+          element[$needsRender]();
+
+          await waitForEvent(hotspot2, 'hotspot-visibility');
 
           wrapper = hotspotObject2D.element;
         });
 
         test('the hotspot is visible', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
           expect(wrapper.classList.contains('hide')).to.be.false;
         });
 
         test('the hotspot is hidden after turning', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
-
           element[$scene].setPivotRotation(Math.PI);
           element[$scene].updateMatrixWorld();
+          element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 

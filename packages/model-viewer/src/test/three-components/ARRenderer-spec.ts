@@ -187,25 +187,26 @@ suite('ARRenderer', () => {
 
         await arRenderer.present(modelScene);
         await arRenderer.placeModel();
+        const {position, rotation} = modelScene.pivot;
 
-        expect(arRenderer.dolly.position.x).to.be.equal(10);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        expect(position.x).to.be.equal(10);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(2);
         // Quaternion rotation results in the rotation towards the viewer
         // with -X and -Z, and the offset applied to Y to invert pivotRotation,
         // but it's inverted again here due to the -X/-Z rotation encoding
-        expect(arRenderer.dolly.rotation.x).to.be.equal(-Math.PI);
-        expect(arRenderer.dolly.rotation.y)
-            .to.be.closeTo(pivotRotation, epsilon);
-        expect(arRenderer.dolly.rotation.z).to.be.equal(-Math.PI);
+        expect(rotation.x).to.be.equal(-Math.PI);
+        expect(rotation.y).to.be.closeTo(pivotRotation, epsilon);
+        expect(rotation.z).to.be.equal(-Math.PI);
       });
 
       test('when a screen-type XRInputSource exists', async () => {
         await arRenderer.present(modelScene);
+        const {position} = modelScene.pivot;
 
-        expect(arRenderer.dolly.position.x).to.be.equal(0);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(0);
+        expect(position.x).to.be.equal(0);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(0);
 
         // Set camera to (10, 2, 0), rotated 180 degrees on Y,
         // and angled 45 degrees towards the ground, like a phone.
@@ -222,9 +223,9 @@ suite('ARRenderer', () => {
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await waitForEvent(arRenderer, 'modelmove');
 
-        expect(arRenderer.dolly.position.x).to.be.equal(10);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        expect(position.x).to.be.equal(10);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(2);
 
 
         // Move the camera, ensure model hasn't changed
@@ -234,15 +235,16 @@ suite('ARRenderer', () => {
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await timePasses();
 
-        expect(arRenderer.dolly.position.x).to.be.equal(10);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        expect(position.x).to.be.equal(10);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(2);
       });
 
       test('ignores non-screen-type XRInputSources', async () => {
         applyPhoneRotation(arRenderer.camera);
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
+        const {position} = modelScene.pivot;
 
         setInputSources([{
           targetRayMode: 'gaze' as XRTargetRayMode,
@@ -253,9 +255,9 @@ suite('ARRenderer', () => {
         arRenderer.processXRInput(new MockXRFrame(xrSession));
         await timePasses();
 
-        expect(arRenderer.dolly.position.x).to.be.equal(0);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(0);
+        expect(position.x).to.be.equal(0);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(0);
       });
 
       test('ignores when ray fails', async () => {
@@ -264,10 +266,11 @@ suite('ARRenderer', () => {
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
         await arRenderer.placeModel();
+        const {position} = modelScene.pivot;
 
-        expect(arRenderer.dolly.position.x).to.be.equal(10);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        expect(position.x).to.be.equal(10);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(2);
 
         // Now point phone upwards
         arRenderer.camera.matrix.identity().makeRotationAxis(
@@ -276,9 +279,9 @@ suite('ARRenderer', () => {
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.placeModel();
 
-        expect(arRenderer.dolly.position.x).to.be.equal(10);
-        expect(arRenderer.dolly.position.y).to.be.equal(0);
-        expect(arRenderer.dolly.position.z).to.be.equal(2);
+        expect(position.x).to.be.equal(10);
+        expect(position.y).to.be.equal(0);
+        expect(position.z).to.be.equal(2);
       });
     });
   });

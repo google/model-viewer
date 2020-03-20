@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-import {Matrix4, Raycaster, Vector2} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
 
-import {Hotspot, HotspotConfiguration} from './annotation/hotspot.js';
-
 const $annotationRenderer = Symbol('annotationRenderer');
-const $updateHotspots = Symbol('updateHotspots');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
-const $pixelPosition = Symbol('pixelPosition')
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
-
-const raycaster = new Raycaster();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -63,19 +57,20 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           (mutation as MutationRecord).removedNodes.forEach((node) => {
             this[$removeHotspot](node);
           });
+          this[$needsRender]();
         }
       });
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
 
-    private[$pixelPosition] = new Vector2();
-
     constructor(...args: Array<any>) {
       super(...args);
 
+      const shadowRoot = this.shadowRoot!;
       const {domElement} = this[$annotationRenderer];
       domElement.classList.add('annotation-container');
-      this.shadowRoot!.querySelector('.container')!.appendChild(domElement);
+      shadowRoot.querySelector('.container')!.appendChild(domElement);
+      domElement.appendChild(shadowRoot.querySelector('.default')!);
     }
 
     connectedCallback() {
@@ -134,37 +129,17 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
-      const {width, height} = this[$scene];
-      this[$pixelPosition]
-          .set(pixelX / width, pixelY / height)
-          .multiplyScalar(2)
-          .subScalar(1);
-      this[$pixelPosition].y *= -1;
-      raycaster.setFromCamera(this[$pixelPosition], this[$scene].getCamera());
-      const hits = raycaster.intersectObject(this[$scene], true);
-
-      if (hits.length === 0) {
-        return null;
-      }
-
-      const hit = hits[0];
-      if (hit.face == null) {
-        return null;
-      }
-
-      const worldToPivot =
-          new Matrix4().getInverse(this[$scene].pivot.matrixWorld);
-      const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
-      const normal =
-          toVector3D(hit.face.normal.applyMatrix4(hit.object.matrixWorld)
-                         .applyMatrix4(worldToPivot));
-      return {position: position, normal: normal};
+      return this[$scene].positionAndNormalFromPoint(pixelX, pixelY);
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
-      this[$updateHotspots]();
-      this[$annotationRenderer].render(this[$scene], this[$scene].activeCamera);
+      const scene = this[$scene];
+
+      if (scene.isDirty) {
+        scene.updateHotspots();
+        this[$annotationRenderer].render(scene, scene.activeCamera);
+      }
     }
 
     [$onResize](e: {width: number, height: number}) {
@@ -172,25 +147,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$annotationRenderer].setSize(e.width, e.height);
     }
 
-    [$updateHotspots]() {
-      const {children} = this[$scene].pivot;
-      for (let i = 0, l = children.length; i < l; i++) {
-        const hotspot = children[i];
-        if (hotspot instanceof Hotspot) {
-          const view = this[$scene].activeCamera.position.clone();
-          view.sub(hotspot.position);
-          const normalWorld = hotspot.normal.clone().transformDirection(
-              this[$scene].pivot.matrixWorld);
-          if (view.dot(normalWorld) < 0) {
-            hotspot.hide();
-          } else {
-            hotspot.show();
-          }
-        }
-      }
-    }
-
-    [$addHotspot](node: Node) {
+    private[$addHotspot](node: Node) {
       if (!(node instanceof HTMLElement &&
             node.slot.indexOf('hotspot') === 0)) {
         return;
@@ -207,11 +164,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           normal: node.dataset.normal,
         });
         this[$hotspotMap].set(node.slot, hotspot);
-        this[$scene].pivot.add(hotspot);
+        this[$scene].addHotspot(hotspot);
       }
     }
 
-    [$removeHotspot](node: Node) {
+    private[$removeHotspot](node: Node) {
       if (!(node instanceof HTMLElement)) {
         return;
       }
@@ -223,7 +180,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (hotspot.decrement()) {
-        this[$scene].pivot.remove(hotspot);
+        this[$scene].removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
         hotspot.dispose();
       }
