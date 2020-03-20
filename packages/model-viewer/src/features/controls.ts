@@ -19,13 +19,12 @@ import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, $userInputElement, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
-import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
+import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
+import {SAFE_RADIUS_RATIO} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
-
-
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
 // being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
@@ -52,6 +51,19 @@ const fade = timeline(0, [
   {frames: 1, value: 0},
   {frames: 4, value: 0}
 ]);
+
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
+const DEFAULT_CAMERA_TARGET = 'auto auto auto';
+const DEFAULT_FIELD_OF_VIEW = 'auto';
+
+const MINIMUM_RADIUS_RATIO = 1.1 * SAFE_RADIUS_RATIO;
+
+const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
+const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
+
+export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
+export const INTERACTION_PROMPT =
+    'Use mouse, touch or arrow keys to control the camera!';
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -85,10 +97,6 @@ export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   WHEN_FOCUSED: 'allow-when-focused'
 };
 
-export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
-const DEFAULT_CAMERA_TARGET = 'auto auto auto';
-const DEFAULT_FIELD_OF_VIEW = 'auto';
-
 export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   return {
     basis: [numberNode(
@@ -98,7 +106,7 @@ export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
 };
 
 const minFieldOfViewIntrinsics = {
-  basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
+  basis: [degreesToRadians(numberNode(25, 'deg')) as NumberNode<'rad'>],
   keywords: {auto: [null]}
 };
 
@@ -129,22 +137,33 @@ export const cameraOrbitIntrinsics = (() => {
   };
 })();
 
-const minCameraOrbitIntrinsics = {
-  basis: [
-    numberNode(-Infinity, 'rad'),
-    numberNode(Math.PI / 8, 'rad'),
-    numberNode(0, 'm')
-  ],
-  keywords: {auto: [null, null, null]}
+const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
+  const radius =
+      MINIMUM_RADIUS_RATIO * element[$scene].model.idealCameraDistance;
+
+  return {
+    basis: [
+      numberNode(-Infinity, 'rad'),
+      numberNode(Math.PI / 8, 'rad'),
+      numberNode(radius, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
 };
 
-const maxCameraOrbitIntrinsics = {
-  basis: [
-    numberNode(Infinity, 'rad'),
-    numberNode(Math.PI - Math.PI / 8, 'rad'),
-    numberNode(Infinity, 'm')
-  ],
-  keywords: {auto: [null, null, null]}
+const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
+  const orbitIntrinsics = cameraOrbitIntrinsics(element);
+  const evaluator = new StyleEvaluator([], orbitIntrinsics);
+  const defaultRadius = evaluator.evaluate()[2];
+
+  return {
+    basis: [
+      numberNode(Infinity, 'rad'),
+      numberNode(Math.PI - Math.PI / 8, 'rad'),
+      numberNode(defaultRadius, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
 };
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
@@ -163,14 +182,7 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
-const PHI = 2.0 * Math.PI;
-
-const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
-const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
-
-export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
-export const INTERACTION_PROMPT =
-    'Use mouse, touch or arrow keys to control the camera!';
+const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
@@ -530,7 +542,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             `translateX(${xOffset}px)`;
         this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
-        this[$controls].adjustOrbit(deltaTheta, 0, 0, 0);
+        this[$controls].adjustOrbit(deltaTheta, 0, 0);
 
         this[$lastPromptOffset] = offset;
         this[$needsRender]();
@@ -587,9 +599,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Only change the aria-label if <model-viewer> is currently focused:
       if (rootNode != null && rootNode.activeElement === this) {
         const lastAzimuthalQuadrant =
-            (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+            (4 + Math.floor(((lastTheta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
         const azimuthalQuadrant =
-            (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+            (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
 
         const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
         const polarTrient = Math.floor(phi / THIRD_PI);
@@ -636,6 +648,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
+      this.requestUpdate('minCameraOrbit', this.minCameraOrbit);
+      this.requestUpdate('maxCameraOrbit', this.maxCameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }

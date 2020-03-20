@@ -117,7 +117,7 @@ const $handleKey = Symbol('handleKey');
 // Constants
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
-const ZOOM_SENSITIVITY = 0.1;
+const ZOOM_SENSITIVITY = 0.04;
 const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
 const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
@@ -469,22 +469,38 @@ export class SmoothControls extends EventDispatcher {
    * Adjust the orbital position of the camera relative to its current orbital
    * position. Does not let the theta goal get more than pi ahead of the current
    * theta, which ensures interpolation continues in the direction of the delta.
+   * The deltaZoom parameter adjusts both the field of view and the orbit radius
+   * such that they progress across their allowed ranges in sync.
    */
-  adjustOrbit(
-      deltaTheta: number, deltaPhi: number, deltaRadius: number,
-      deltaFov: number): boolean {
+  adjustOrbit(deltaTheta: number, deltaPhi: number, deltaZoom: number):
+      boolean {
     const {theta, phi, radius} = this[$goalSpherical];
+    const {
+      minimumRadius,
+      maximumRadius,
+      minimumFieldOfView,
+      maximumFieldOfView
+    } = this[$options];
 
     const dTheta = this[$spherical].theta - theta;
     const dThetaLimit = Math.PI - 0.001;
     const goalTheta =
         theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
     const goalPhi = phi - deltaPhi;
-    const goalRadius = radius + deltaRadius;
+
+    const deltaRatio = deltaZoom === 0 ?
+        0 :
+        deltaZoom > 0 ? (maximumRadius! - radius) /
+                (Math.log(maximumFieldOfView!) - this[$goalLogFov]) :
+                        (radius - minimumRadius!) /
+                (this[$goalLogFov] - Math.log(minimumFieldOfView!));
+
+    const goalRadius =
+        radius + (isFinite(deltaRatio) ? deltaZoom * deltaRatio : 0);
     let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
 
-    if (deltaFov !== 0) {
-      const goalLogFov = this[$goalLogFov] + deltaFov;
+    if (deltaZoom !== 0) {
+      const goalLogFov = this[$goalLogFov] + deltaZoom;
       this.setFieldOfView(Math.exp(goalLogFov));
       handled = true;
     }
@@ -586,10 +602,8 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private[$userAdjustOrbit](
-      deltaTheta: number, deltaPhi: number, deltaRadius: number,
-      deltaFov: number): boolean {
-    const handled =
-        this.adjustOrbit(deltaTheta, deltaPhi, deltaRadius, deltaFov);
+      deltaTheta: number, deltaPhi: number, deltaZoom: number): boolean {
+    const handled = this.adjustOrbit(deltaTheta, deltaPhi, deltaZoom);
 
     this[$isUserChange] = true;
     // Always make sure that an initial event is triggered in case there is
@@ -640,10 +654,10 @@ export class SmoothControls extends EventDispatcher {
                 this[$lastTouches][0], this[$lastTouches][1]);
             const touchDistance =
                 this[$twoTouchDistance](touches[0], touches[1]);
-            const deltaFov = -1 * ZOOM_SENSITIVITY *
-                (touchDistance - lastTouchDistance) / 10.0;
+            const deltaZoom =
+                ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
 
-            handled = this[$userAdjustOrbit](0, 0, 0, deltaFov);
+            handled = this[$userAdjustOrbit](0, 0, deltaZoom);
           }
 
           break;
@@ -678,7 +692,7 @@ export class SmoothControls extends EventDispatcher {
       this.dispatchEvent({type: 'pointer-change-start', pointer: {...pointer}});
     }
 
-    return this[$userAdjustOrbit](deltaTheta, deltaPhi, 0, 0);
+    return this[$userAdjustOrbit](deltaTheta, deltaPhi, 0);
   }
 
   private[$handlePointerDown](event: MouseEvent|TouchEvent) {
@@ -728,9 +742,9 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
-    const deltaFov = (event as WheelEvent).deltaY * ZOOM_SENSITIVITY / 30;
+    const deltaZoom = (event as WheelEvent).deltaY * ZOOM_SENSITIVITY / 30;
 
-    if ((this[$userAdjustOrbit](0, 0, 0, deltaFov) ||
+    if ((this[$userAdjustOrbit](0, 0, deltaZoom) ||
          this[$options].eventHandlingBehavior === 'prevent-all') &&
         event.cancelable) {
       event.preventDefault();
@@ -747,27 +761,27 @@ export class SmoothControls extends EventDispatcher {
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](0, 0, 0, ZOOM_SENSITIVITY);
+        handled = this[$userAdjustOrbit](0, 0, ZOOM_SENSITIVITY);
         break;
       case KeyCode.PAGE_DOWN:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](0, 0, 0, -1 * ZOOM_SENSITIVITY);
+        handled = this[$userAdjustOrbit](0, 0, -1 * ZOOM_SENSITIVITY);
         break;
       case KeyCode.UP:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](0, -KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        handled = this[$userAdjustOrbit](0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.DOWN:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](0, KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        handled = this[$userAdjustOrbit](0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.LEFT:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](-KEYBOARD_ORBIT_INCREMENT, 0, 0, 0);
+        handled = this[$userAdjustOrbit](-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       case KeyCode.RIGHT:
         relevantKey = true;
-        handled = this[$userAdjustOrbit](KEYBOARD_ORBIT_INCREMENT, 0, 0, 0);
+        handled = this[$userAdjustOrbit](KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
     }
 
