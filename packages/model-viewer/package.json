@@ -52,7 +52,8 @@
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "karma start"
+    "watch:test": "karma start",
+    "watch:test:legacy": "karma start ./karma-legacy.conf.js"
   },
   "keywords": [
     "ar",

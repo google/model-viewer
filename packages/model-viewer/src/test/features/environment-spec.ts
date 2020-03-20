@@ -15,7 +15,7 @@
 
 import {Texture} from 'three';
 
-import {EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
+import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
@@ -201,7 +201,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       element.shadowIntensity = 1.0;
       await timePasses();
       const newIntensity = scene.shadow!.getIntensity();
-      expect(newIntensity).to.be.eq(1.0);
+      expect(newIntensity).to.be.eq(BASE_OPACITY);
     });
   });
 

@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector3, WebGLRenderer,} from 'three';
+import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
+import {$onResize} from '../model-viewer-base.js';
+import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {ModelScene} from './ModelScene.js';
@@ -22,8 +24,16 @@ import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
+// AR shadow is not user-configurable. This is to pave the way for AR lighting
+// estimation, which will be used once available in WebXR.
+const AR_SHADOW_INTENSITY = 0.5;
+
 const $presentedScene = Symbol('presentedScene');
 
+const $lastTick = Symbol('lastTick');
+const $turntableRotation = Symbol('turntableRotation');
+const $oldShadowIntensity = Symbol('oldShadowIntensity');
+const $oldBackground = Symbol('oldBackground');
 const $rafId = Symbol('rafId');
 const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
@@ -31,25 +41,22 @@ const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $resolveCleanup = Symbol('resolveCleanup');
 
-const $outputContext = Symbol('outputContext');
-
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 
-const matrix4 = new Matrix4();
 const vector3 = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
-  public inputContext: WebGLRenderingContext;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public scene: Scene = new Scene();
-  public dolly: Object3D = new Object3D();
   public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
-  private[$outputContext]: WebGLRenderingContext|null = null;
+  private[$lastTick]: number|null = null;
+  private[$turntableRotation]: number|null = null;
+  private[$oldShadowIntensity]: number|null = null;
+  private[$oldBackground]: any = null;
   private[$rafId]: number|null = null;
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
@@ -60,12 +67,8 @@ export class ARRenderer extends EventDispatcher {
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-    this.inputContext = renderer.context3D!;
 
     this.camera.matrixAutoUpdate = false;
-
-    this.scene.add(this.reticle);
-    this.scene.add(this.dolly);
   }
 
   initializeRenderer() {
@@ -75,17 +78,21 @@ export class ARRenderer extends EventDispatcher {
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
-    const session: XRSession = await navigator.xr!.requestSession!(
-        'immersive-ar', {requiredFeatures: ['hit-test']});
+    const session: XRSession =
+        await navigator.xr!.requestSession!('immersive-ar', {
+          requiredFeatures: ['hit-test'],
+          optionalFeatures: ['dom-overlay'],
+          domOverlay: {
+            root: document.querySelector('model-viewer')!.shadowRoot!
+                      .querySelector('div.annotation-container')
+          }
+        });
 
-    const gl: WebGLRenderingContext =
-        assertContext(this.threeRenderer.getContext());
-
+    const gl = assertContext(this.renderer.context3D);
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
     // loss according to the spec, though current implementations don't do so.
     await gl.makeXRCompatible();
-    this[$outputContext] = gl;
 
     session.updateRenderState(
         {baseLayer: new XRWebGLLayer(session, gl, {alpha: true})});
@@ -137,22 +144,37 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.model.scale.set(1, 1, 1);
+    scene.setHotspotsVisibility(false);
 
-    this[$presentedScene] = scene;
-
-    this.initializeRenderer();
-
-    this[$currentSession] = await this.resolveARSession();
-    this[$currentSession]!.addEventListener('end', () => {
+    const currentSession = await this.resolveARSession();
+    currentSession.addEventListener('end', () => {
       this[$postSessionCleanup]();
     }, {once: true});
 
-    this[$refSpace] =
-        await this[$currentSession]!.requestReferenceSpace('local');
+    this[$refSpace] = await currentSession.requestReferenceSpace('local');
     this[$viewerRefSpace] =
-        await this[$currentSession]!.requestReferenceSpace('viewer');
+        await currentSession.requestReferenceSpace('viewer');
 
+    scene.setCamera(this.camera);
+    scene.add(this.reticle);
+    scene.pivot.visible = false;
+
+    this[$oldBackground] = scene.background;
+    scene.background = null;
+
+    this[$oldShadowIntensity] = scene.shadowIntensity;
+    scene.setShadowIntensity(AR_SHADOW_INTENSITY);
+
+    this[$presentedScene] = scene;
+    this[$lastTick] = performance.now();
+    const element = scene.element as ModelViewerElement;
+    this[$turntableRotation] = element.turntableRotation;
+    element.resetTurntableRotation();
+
+    this.initializeRenderer();
+    element[$onResize](window.screen);
+
+    this[$currentSession] = currentSession;
     this[$tick]();
   }
 
@@ -189,21 +211,26 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(null);
 
-    // Trigger a parent renderer update. TODO(klausw): are these all
-    // necessary and sufficient?
-    if (this[$presentedScene] != null) {
-      this.dolly.remove(this[$presentedScene]!);
-      this[$presentedScene]!.isDirty = true;
+    const scene = this[$presentedScene];
+    if (scene != null) {
+      scene.setCamera(scene.camera);
+      scene.remove(this.reticle);
+      scene.pivot.visible = true;
+      scene.setHotspotsVisibility(true);
+
+      scene.pivot.position.set(0, 0, 0);
+      scene.setPivotRotation(this[$turntableRotation]!);
+      scene.setShadowIntensity(this[$oldShadowIntensity]!);
+      scene.background = this[$oldBackground];
+      scene.orientHotspots(0);
+      scene.isDirty = true;
+
+      this.renderer.expandTo(scene.width, scene.height);
     }
-    // The renderer's render method automatically updates
-    // the device pixel ratio, but only updates the three.js renderer
-    // size if there's a size mismatch. Reset the size to force that
-    // to refresh.
-    this.renderer.setRendererSize(1, 1);
+    this.reticle.reset();
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
-    this.scene.environment = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
@@ -217,10 +244,6 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  get outputContext() {
-    return this[$outputContext];
-  }
-
   async placeModel() {
     if (this[$currentSession] == null) {
       return;
@@ -230,17 +253,20 @@ export class ARRenderer extends EventDispatcher {
 
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
-      const presentedScene = this[$presentedScene]!;
-      const hitMatrix = this.reticle.hitMatrix;
+      const scene = this[$presentedScene]!;
+      const {pivot, shadow} = scene;
+      const {hitMatrix} = this.reticle;
 
-      this.dolly.position.setFromMatrixPosition(hitMatrix);
+      pivot.position.setFromMatrixPosition(hitMatrix);
 
       // Orient the dolly/model to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      this.dolly.lookAt(camPosition.x, this.dolly.position.y, camPosition.z);
-      this.dolly.rotateY(-presentedScene.pivot.rotation.y);
+      pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
+      pivot.updateMatrixWorld();
+      shadow!.setRotation(pivot.rotation.y);
 
-      this.dolly.add(presentedScene);
+      pivot.visible = true;
+      scene.setHotspotsVisibility(true);
 
       this.dispatchEvent({type: 'modelmove'});
     }
@@ -261,7 +287,8 @@ export class ARRenderer extends EventDispatcher {
     // Get current input sources. For now, only 'screen' input is supported,
     // which is only added to the session's active input sources immediately
     // before `selectstart` and removed immediately after `selectend` event.
-    // If we have a 'screen' source here, it means the output canvas was tapped.
+    // If we have a 'screen' source here, it means the output canvas was
+    // tapped.
     const sources = Array.from(session.inputSources)
                         .filter(input => input.targetRayMode === 'screen');
 
@@ -280,7 +307,7 @@ export class ARRenderer extends EventDispatcher {
         (time, frame) => this[$onWebXRFrame](time, frame));
   }
 
-  [$onWebXRFrame](_time: number, frame: XRFrame) {
+  [$onWebXRFrame](time: number, frame: XRFrame) {
     const {session} = frame;
 
     const pose = frame.getViewerPose(this[$refSpace]!);
@@ -290,23 +317,30 @@ export class ARRenderer extends EventDispatcher {
 
     this[$tick]();
 
-    if (pose == null) {
+    const scene = this[$presentedScene];
+    if (pose == null || scene == null) {
       return;
     }
 
-    if (this.scene.environment !== this[$presentedScene]!.environment) {
-      this.scene.environment = this[$presentedScene]!.environment;
-    }
+    const delta = time - this[$lastTick]!;
+    this.renderer.preRender(scene, time, delta);
+    this[$lastTick] = time;
 
     for (const view of frame.getViewerPose(this[$refSpace]!).views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
       this.threeRenderer.setViewport(
           viewport.x, viewport.y, viewport.width, viewport.height);
-      this.camera.projectionMatrix.fromArray(view.projectionMatrix);
-      const viewMatrix = matrix4.fromArray(view.transform.inverse.matrix);
 
-      this.camera.matrix.getInverse(viewMatrix);
-      this.camera.updateMatrixWorld(true);
+      const {camera} = this;
+      const {matrix: cameraMatrix} = camera;
+      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      cameraMatrix.fromArray(view.transform.matrix);
+      camera.updateMatrixWorld(true);
+      // position is not updated when matrix is updated.
+      camera.position.setFromMatrixPosition(cameraMatrix);
+
+      scene.orientHotspots(
+          Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
 
       // NOTE: Updating input or the reticle is dependent on the camera's
       // pose, hence updating these elements after camera update but
@@ -321,7 +355,7 @@ export class ARRenderer extends EventDispatcher {
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
       // this.threeRenderer.clearDepth();
-      this.threeRenderer.render(this.scene, this.camera);
+      this.threeRenderer.render(scene, camera);
     }
   }
 }

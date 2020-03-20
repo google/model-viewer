@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Scene, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
-import {resolveDpr} from '../utilities.js';
+import {USE_OFFSCREEN_CANVAS} from '../constants.js';
+import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
-import Model, {DEFAULT_FOV_DEG, DEFAULT_TAN_FOV} from './Model.js';
+import {Hotspot} from './Hotspot.js';
+import Model, {DEFAULT_FOV_DEG} from './Model.js';
 import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -39,6 +40,14 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
+const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
+
+const view = new Vector3();
+const target = new Vector3();
+const normalWorld = new Vector3();
+const pixelPosition = new Vector2();
+const raycaster = new Raycaster();
+
 const $paused = Symbol('paused');
 
 /**
@@ -58,10 +67,10 @@ export class ModelScene extends Scene {
   public pivotCenter: Vector3;
   public width = 1;
   public height = 1;
-  public isVisible: boolean = false;
   public isDirty: boolean = false;
   public element: ModelViewerElementBase;
-  public context: CanvasRenderingContext2D;
+  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
+      null;
   public exposure = 1;
   public model: Model;
   public framedFieldOfView = DEFAULT_FOV_DEG;
@@ -77,8 +86,6 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    this.context = canvas.getContext('2d')!;
-
     this.model = new Model();
 
     // These default camera values are never used, as they are reset once the
@@ -113,6 +120,20 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Function to create the context lazily, as when there is only one
+   * <model-viewer> element, the renderer's 3D context can be displayed
+   * directly. This extra context is necessary to copy the renderings into when
+   * there are more than one.
+   */
+  createContext() {
+    if (USE_OFFSCREEN_CANVAS) {
+      this.context = this.canvas.getContext('bitmaprenderer')!;
+    } else {
+      this.context = this.canvas.getContext('2d')!;
+    }
+  }
+
+  /**
    * Sets the model via URL.
    */
   async setModelSource(
@@ -133,15 +154,14 @@ export class ModelScene extends Scene {
     if (width !== this.width || height !== this.height) {
       this.width = Math.max(width, 1);
       this.height = Math.max(height, 1);
-      // In practice, invocations of setSize are throttled at the element level,
-      // so no need to throttle here:
-      const dpr = resolveDpr();
-      this.canvas.width = this.width * dpr;
-      this.canvas.height = this.height * dpr;
-      this.canvas.style.width = `${this.width}px`;
-      this.canvas.style.height = `${this.height}px`;
+
       this.aspect = this.width / this.height;
       this.frameModel();
+
+      const renderer = this.element[$renderer];
+      renderer.expandTo(this.width, this.height);
+      this.canvas.width = renderer.width;
+      this.canvas.height = renderer.height;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -154,7 +174,7 @@ export class ModelScene extends Scene {
       // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
       // additional considerations.
       Promise.resolve().then(() => {
-        this.element[$renderer].render(performance.now());
+        renderer.render(performance.now());
       });
     }
   }
@@ -257,5 +277,104 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setSoftness(softness);
     }
+  }
+
+  /**
+   * This method returns the world position and normal of the point on the
+   * mesh corresponding to the input pixel coordinates given relative to the
+   * model-viewer element. The position and normal are returned as strings in
+   * the format suitable for putting in a hotspot's data-position and
+   * data-normal attributes. If the mesh is not hit, position returns the
+   * empty string.
+   */
+  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+      {position: Vector3D, normal: Vector3D}|null {
+    pixelPosition.set(pixelX / this.width, pixelY / this.height)
+        .multiplyScalar(2)
+        .subScalar(1);
+    pixelPosition.y *= -1;
+    raycaster.setFromCamera(pixelPosition, this.getCamera());
+    const hits = raycaster.intersectObject(this, true);
+
+    if (hits.length === 0) {
+      return null;
+    }
+
+    const hit = hits[0];
+    if (hit.face == null) {
+      return null;
+    }
+
+    const worldToPivot = new Matrix4().getInverse(this.pivot.matrixWorld);
+    const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
+    const normal =
+        toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
+                       .transformDirection(worldToPivot));
+    return {position: position, normal: normal};
+  }
+
+  /**
+   * The following methods are for operating on the set of Hotspot objects
+   * attached to the scene. These come from DOM elements, provided to slots by
+   * the Annotation Mixin.
+   */
+  addHotspot(hotspot: Hotspot) {
+    this.pivot.add(hotspot);
+  }
+
+  removeHotspot(hotspot: Hotspot) {
+    this.pivot.remove(hotspot);
+  }
+
+  /**
+   * Helper method to apply a function to all hotspots.
+   */
+  forHotspots(func: (hotspot: Hotspot) => void) {
+    const {children} = this.pivot;
+    for (let i = 0, l = children.length; i < l; i++) {
+      const hotspot = children[i];
+      if (hotspot instanceof Hotspot) {
+        func(hotspot);
+      }
+    }
+  }
+
+  /**
+   * Update the CSS visibility of the hotspots based on whether their normals
+   * point toward the camera.
+   */
+  updateHotspots() {
+    this.forHotspots((hotspot) => {
+      view.copy(this.activeCamera.position);
+      target.setFromMatrixPosition(hotspot.matrixWorld);
+      view.sub(target);
+      normalWorld.copy(hotspot.normal)
+          .transformDirection(this.pivot.matrixWorld);
+      if (view.dot(normalWorld) < 0) {
+        hotspot.hide();
+      } else {
+        hotspot.show();
+      }
+    });
+  }
+
+  /**
+   * Rotate all hotspots to an absolute orientation given by the input number of
+   * radians. Zero returns them to upright.
+   */
+  orientHotspots(radians: number) {
+    this.forHotspots((hotspot) => {
+      hotspot.orient(radians);
+    });
+  }
+
+  /**
+   * Set the rendering visibility of all hotspots. This is used to hide them
+   * during transitions and such.
+   */
+  setHotspotsVisibility(visible: boolean) {
+    this.forHotspots((hotspot) => {
+      hotspot.visible = visible;
+    });
   }
 }

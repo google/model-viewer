@@ -16,8 +16,8 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import {Hotspot} from '../../features/annotation/hotspot.js';
-import ModelViewerElementBase, {$scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
@@ -30,8 +30,8 @@ const sceneContainsHotspot =
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot &&
-            (hotspot.element.children[0] as HTMLSlotElement).name ===
-                element.slot) {
+            (hotspot.element.children[0].children[0] as HTMLSlotElement)
+                    .name === element.slot) {
           // expect it has been changed from default
           expect(hotspot.position).to.not.eql(new Vector3());
           expect(hotspot.normal).to.not.eql(new Vector3(0, 1, 0));
@@ -132,28 +132,34 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         let wrapper: HTMLElement;
 
         setup(async () => {
+          // This is to wait for the hotspots to be added to their slots, as
+          // this triggers their visibility to "show". Otherwise, sometimes the
+          // following hide() call will happen first, then when the camera
+          // moves, we never get a hotspot-visibility event because they were
+          // already visible.
+          await rafPasses();
+
           const hotspotObject2D = scene.pivot.children[numSlots - 1] as Hotspot;
           hotspotObject2D.hide();
-
-          await rafPasses();
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
+          element[$needsRender]();
+
+          await waitForEvent(hotspot2, 'hotspot-visibility');
 
           wrapper = hotspotObject2D.element;
         });
 
         test('the hotspot is visible', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
           expect(wrapper.classList.contains('hide')).to.be.false;
         });
 
         test('the hotspot is hidden after turning', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
-
           element[$scene].setPivotRotation(Math.PI);
           element[$scene].updateMatrixWorld();
+          element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 
@@ -195,19 +201,23 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     });
 
     test('gets expected hit result', () => {
-      const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2)!;
-      closeToVector3(position!, new Vector3(0, 0, 0.5));
-      closeToVector3(normal!, new Vector3(0, 0, 1));
+      const hitResult =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      expect(hitResult).to.be.ok;
+      const {position, normal} = hitResult!;
+      closeToVector3(position, new Vector3(0, 0, 0.5));
+      closeToVector3(normal, new Vector3(0, 0, 1));
     });
 
     test('gets expected hit result when turned', () => {
       element[$scene].setPivotRotation(-Math.PI / 2);
       element[$scene].updateMatrixWorld();
-      const {position, normal} =
-          element.positionAndNormalFromPoint(width / 2, height / 2)!;
-      closeToVector3(position!, new Vector3(0.5, 0, 0));
-      closeToVector3(normal!, new Vector3(1, 0, 0));
+      const hitResult =
+          element.positionAndNormalFromPoint(width / 2, height / 2);
+      expect(hitResult).to.be.ok;
+      const {position, normal} = hitResult!;
+      closeToVector3(position, new Vector3(0.5, 0, 0));
+      closeToVector3(normal, new Vector3(1, 0, 0));
     });
   });
 });
