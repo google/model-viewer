@@ -282,7 +282,7 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer -- possibly
       // from something in
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.setViewport(0, 0, width, height);
+      this.threeRenderer.setViewport(0, this.height - height, width, height);
       this.threeRenderer.render(scene, scene.getCamera());
 
       if (!this.hasOnlyOneScene) {
