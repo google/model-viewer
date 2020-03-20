@@ -144,10 +144,20 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
+    scene.setHotspotsVisibility(false);
+
+    const currentSession = await this.resolveARSession();
+    currentSession.addEventListener('end', () => {
+      this[$postSessionCleanup]();
+    }, {once: true});
+
+    this[$refSpace] = await currentSession.requestReferenceSpace('local');
+    this[$viewerRefSpace] =
+        await currentSession.requestReferenceSpace('viewer');
+
     scene.setCamera(this.camera);
     scene.add(this.reticle);
     scene.pivot.visible = false;
-    scene.setHotspotsVisibility(false);
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -162,16 +172,6 @@ export class ARRenderer extends EventDispatcher {
     element.resetTurntableRotation();
 
     this.initializeRenderer();
-
-    const currentSession = await this.resolveARSession();
-    currentSession.addEventListener('end', () => {
-      this[$postSessionCleanup]();
-    }, {once: true});
-
-    this[$refSpace] = await currentSession.requestReferenceSpace('local');
-    this[$viewerRefSpace] =
-        await currentSession.requestReferenceSpace('viewer');
-
     element[$onResize](window.screen);
 
     this[$currentSession] = currentSession;
