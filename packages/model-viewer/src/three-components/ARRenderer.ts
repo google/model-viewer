@@ -206,6 +206,11 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$postSessionCleanup]() {
+    // The offscreen WebXR framebuffer is now invalid, switch
+    // back to the default framebuffer for canvas output.
+    // TODO: this method should be added to three.js's exported interface.
+    (this.threeRenderer as any).setFramebuffer(null);
+
     const scene = this[$presentedScene];
     if (scene != null) {
       scene.setCamera(scene.camera);
@@ -219,13 +224,10 @@ export class ARRenderer extends EventDispatcher {
       scene.background = this[$oldBackground];
       scene.orientHotspots(0);
       scene.isDirty = true;
+
+      this.renderer.expandTo(scene.width, scene.height);
     }
     this.reticle.reset();
-    // The renderer's render method automatically updates
-    // the device pixel ratio, but only updates the three.js renderer
-    // size if there's a size mismatch. Reset the size to force that
-    // to refresh.
-    this.renderer.setRendererSize(1, 1);
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
