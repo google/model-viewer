@@ -106,6 +106,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         element = new ModelViewerElement();
         document.body.insertBefore(element, document.body.firstChild);
 
+        element.ar = true;
         element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');

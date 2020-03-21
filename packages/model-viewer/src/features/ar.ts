@@ -331,9 +331,7 @@ configuration or device capabilities');
         }
       }
 
-      const showArButton = this[$arMode] !== ARMode.NONE;
-
-      if (showArButton) {
+      if (this.canActivateAR) {
         this[$arButtonContainer].classList.add('enabled');
         // NOTE(cdata): The order of the two click handlers on the "ar
         // button container" is important, vital to the workaround described
