@@ -523,12 +523,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal(true);
           });
 
-          test.only(
+          test(
               'does not prompt users to interact before a model is loaded',
               async () => {
                 element.src = null;
 
-                console.log('focus!');
                 input.focus();
 
                 await timePasses(element.interactionPromptThreshold + 100);
@@ -537,17 +536,16 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
-                console.log('blur!');
                 input.blur();
+                // IE11 does not fire the blur handler without this wait.
+                await timePasses();
 
                 element.src = ASTRONAUT_GLB_PATH;
                 await waitForEvent(element, 'load');
 
-                console.log('focus!');
                 input.focus();
 
                 await timePasses(element.interactionPromptThreshold + 100);
-                console.log('raf!');
                 await rafPasses();
 
                 expect(promptElement.classList.contains('visible'))

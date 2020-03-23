@@ -523,7 +523,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$promptElementVisibleTime] = now;
 
           this[$promptElement].classList.add('visible');
-          console.log('prompt visible!');
         }
       }
 
@@ -682,7 +681,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$shouldPromptUserToInteract]) {
         this[$waitingToPromptUser] = true;
       }
-      console.log('on focus, waiting to prompt: ' + this[$waitingToPromptUser]);
     }
 
     [$onBlur]() {
