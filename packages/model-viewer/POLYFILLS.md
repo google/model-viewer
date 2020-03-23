@@ -35,8 +35,8 @@ the `webxr` feature:
 
 Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
-WebXR Device API           |     ✅ |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
-WebXR HitTest API          |     ✅ |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
+WebXR Device API           |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
+WebXR HitTest API          |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
 
 
 [1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer
