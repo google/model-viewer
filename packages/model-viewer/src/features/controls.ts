@@ -500,6 +500,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
+      const now = performance.now();
       if (this[$waitingToPromptUser] &&
           this.interactionPrompt !== InteractionPromptStrategy.NONE) {
         const thresholdTime =
@@ -508,7 +509,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             this[$focusedTime];
 
         if (this.loaded &&
-            time > thresholdTime + this.interactionPromptThreshold) {
+            now > thresholdTime + this.interactionPromptThreshold) {
           this[$userInputElement].setAttribute(
               'aria-label', INTERACTION_PROMPT);
 
@@ -519,9 +520,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           // again for this particular <model-element> instance:
           this[$userPromptedOnce] = true;
           this[$waitingToPromptUser] = false;
-          this[$promptElementVisibleTime] = time;
+          this[$promptElementVisibleTime] = now;
 
           this[$promptElement].classList.add('visible');
+          console.log('prompt visible!');
         }
       }
 
@@ -530,7 +532,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
         const scene = this[$scene];
         const animationTime =
-            ((time - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
+            ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
@@ -680,6 +682,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$shouldPromptUserToInteract]) {
         this[$waitingToPromptUser] = true;
       }
+      console.log('on focus, waiting to prompt: ' + this[$waitingToPromptUser]);
     }
 
     [$onBlur]() {

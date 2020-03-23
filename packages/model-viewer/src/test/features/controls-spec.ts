@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {IS_IE11, IS_SAFARI} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -495,40 +494,26 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('a11y', () => {
         let input: HTMLDivElement;
+        let promptElement: HTMLElement;
 
         setup(async () => {
           input = element[$userInputElement];
+          promptElement = (element as any)[$promptElement];
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';
-          await timePasses();
-          await rafPasses();
-        });
-
-        test('has initial aria-label set to alt before interaction', () => {
-          expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
         });
 
         suite('when configured for focus-based interaction prompting', () => {
-          if (IS_SAFARI) {
-            return;
-          }
-
-          setup(() => {
+          setup(async () => {
             element.interactionPrompt = 'when-focused';
+            await timePasses();
+          });
+
+          test('has initial aria-label set to alt before interaction', () => {
+            expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
           });
 
           test('prompts user to interact when focused', async () => {
-            const promptElement: HTMLElement = (element as any)[$promptElement];
-
-            settleControls(controls);
-
-            // NOTE(cdata): This wait time was added in order to deflake tests
-            // on iOS Simulator and Android Emulator on Sauce Labs. These same
-            // test targets were tested manually locally and manually on Sauce,
-            // and do not fail. Only automated Sauce tests seem to fail
-            // consistently without this additional wait time:
-            await rafPasses();
-
             input.focus();
 
             await until(
@@ -538,44 +523,38 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal(true);
           });
 
-          test(
+          test.only(
               'does not prompt users to interact before a model is loaded',
               async () => {
-                if (IS_IE11) {
-                  console.warn('Skipping this test for IE11 only');
-                  return;
-                }
                 element.src = null;
 
-                const promptElement: HTMLElement =
-                    (element as any)[$promptElement];
-
-                await rafPasses();
-
+                console.log('focus!');
                 input.focus();
 
                 await timePasses(element.interactionPromptThreshold + 100);
+                await rafPasses();
 
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
+                console.log('blur!');
                 input.blur();
 
                 element.src = ASTRONAUT_GLB_PATH;
                 await waitForEvent(element, 'load');
 
+                console.log('focus!');
                 input.focus();
 
-                await until(() => promptElement.classList.contains('visible'));
+                await timePasses(element.interactionPromptThreshold + 100);
+                console.log('raf!');
+                await rafPasses();
+
+                expect(promptElement.classList.contains('visible'))
+                    .to.be.equal(true);
               });
 
-          // TODO(#584)
           test('does not prompt if user already interacted', async () => {
-            const promptElement = (element as any)[$promptElement];
-            const originalLabel = input.getAttribute('aria-label');
-
-            expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
-
             input.focus();
 
             interactWith(input);
