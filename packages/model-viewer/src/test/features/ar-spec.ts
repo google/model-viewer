@@ -72,14 +72,15 @@ suite('ModelViewerElementBase with ARMixin', () => {
       test('hides the AR button for non-allowed browsers');
     });
 
-    suite('with unstable-webxr', () => {
+    suite('with webxr', () => {
       let element: ModelViewerElementBase&ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
         document.body.insertBefore(element, document.body.firstChild);
 
-        element.unstableWebxr = true;
+        element.ar = true;
+        element.arModes = 'webxr';
         element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');
@@ -105,6 +106,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         element = new ModelViewerElement();
         document.body.insertBefore(element, document.body.firstChild);
 
+        element.ar = true;
         element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');
