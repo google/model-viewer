@@ -320,8 +320,10 @@ export class ARRenderer extends EventDispatcher {
 
   [$onWebXRFrame](time: number, frame: XRFrame) {
     const {session} = frame;
+    const refSpace = this[$refSpace]!;
+    const viewerRefSpace = this[$viewerRefSpace]!;
 
-    const pose = frame.getViewerPose(this[$refSpace]!);
+    const pose = frame.getViewerPose(refSpace);
 
     // TODO: Notify external observers of tick
 
@@ -337,18 +339,21 @@ export class ARRenderer extends EventDispatcher {
     this[$lastTick] = time;
 
     const hitSource = this[$hitTestSource];
-    const refSapce = this[$refSpace];
-    if (hitSource != null && refSapce != null) {
+
+    if (hitSource != null) {
       const hitTestResults = frame.getHitTestResults(hitSource);
       if (hitTestResults.length > 0) {
         const hit = hitTestResults[0];
         const hitMatrix =
-            matrix4.fromArray(hit.getPose(refSapce)!.transform.matrix);
+            matrix4.fromArray(hit.getPose(refSpace)!.transform.matrix);
         this.placeModel(hitMatrix);
         hitSource.cancel();
         this[$hitTestSource] = null;
       }
     }
+
+    this.reticle.update(session, frame, viewerRefSpace, refSpace);
+    this.processXRInput(frame);
 
     for (const view of pose.views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
@@ -365,16 +370,6 @@ export class ARRenderer extends EventDispatcher {
 
       scene.orientHotspots(
           Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
-
-      // NOTE: Updating input or the reticle is dependent on the camera's
-      // pose, hence updating these elements after camera update but
-      // before render.
-      this.reticle.update(
-          this[$currentSession]!,
-          frame,
-          this[$viewerRefSpace]!,
-          this[$refSpace]!);
-      this.processXRInput(frame);
 
       // NOTE: Clearing depth caused issues on Samsung devices
       // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
