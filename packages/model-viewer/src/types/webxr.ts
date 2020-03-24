@@ -31,8 +31,17 @@ declare interface XRHitTestSource {
   cancel(): void;
 }
 
+declare interface XRTransientInputHitTestSource {
+  cancel(): void;
+}
+
 declare interface XRHitTestResult {
   getPose(baseSpace: XRSpace): XRPose|null;
+}
+
+declare interface XRTransientInputHitTestResult {
+  readonly inputSource: XRInputSource;
+  readonly results: Array<XRHitTestResult>;
 }
 
 declare interface XR extends EventTarget {
@@ -91,11 +100,19 @@ declare interface XRInputSource {
   readonly profiles: Array<String>;
 }
 
+declare interface XRInputSourceEvent extends Event {
+  readonly frame: XRFrame;
+  readonly inputSource: XRInputSource;
+}
+
 declare interface XRFrame {
   readonly session: XRSession;
   getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose;
   getPose(space: XRSpace, referenceSpace: XRReferenceSpace): XRPose;
   getHitTestResults(hitTestSource: XRHitTestSource): Array<XRHitTestResult>;
+  getHitTestResultsForTransientInput(hitTestSource:
+                                         XRTransientInputHitTestSource):
+      Array<XRTransientInputHitTestResult>;
 }
 
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
@@ -116,7 +133,12 @@ declare interface XRRenderStateInit {
 
 declare interface XRHitTestOptionsInit {
   space: XRSpace;
-  ray?: XRRay;
+  offsetRay?: XRRay;
+}
+
+declare interface XRTransientInputHitTestOptionsInit {
+  profile: string;
+  offsetRay?: XRRay;
 }
 
 declare interface XRSession extends EventTarget {
@@ -124,6 +146,9 @@ declare interface XRSession extends EventTarget {
   updateRenderState(state?: XRRenderStateInit): any;
   requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
   requestHitTestSource(options: XRHitTestOptionsInit): Promise<XRHitTestSource>;
+  requestHitTestSourceForTransientInput(options:
+                                            XRTransientInputHitTestOptionsInit):
+      Promise<XRTransientInputHitTestSource>;
   inputSources: Array<XRInputSource>;
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;

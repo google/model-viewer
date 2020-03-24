@@ -22,7 +22,6 @@ import {assertIsArCandidate} from '../utilities.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
-import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
@@ -41,10 +40,16 @@ const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $hitTestSource = Symbol('hitTestSource');
+const $transientHitTestSource = Symbol('transiertHitTestSource');
+const $inputSource = Symbol('inputSource');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
+const $selectStartHandler = Symbol('selectStartHandler');
+const $onSelectStart = Symbol('onSelectStart');
+const $selectHandler = Symbol('selectHandler');
+const $onSelect = Symbol('onSelect');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -53,7 +58,6 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
   private[$placementBox]: PlacementBox|null = null;
@@ -66,8 +70,15 @@ export class ARRenderer extends EventDispatcher {
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
   private[$hitTestSource]: XRHitTestSource|null = null;
+  private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
+  private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
+
+  private[$selectStartHandler] = (event: Event) =>
+      this[$onSelectStart](event as XRInputSourceEvent);
+  private[$selectHandler] = (event: Event) =>
+      this[$onSelect](event as XRInputSourceEvent);
 
   constructor(private renderer: Renderer) {
     super();
@@ -161,7 +172,6 @@ export class ARRenderer extends EventDispatcher {
         await currentSession.requestReferenceSpace('viewer');
 
     scene.setCamera(this.camera);
-    scene.add(this.reticle);
 
     const {size} = scene.model;
     this[$placementBox] = new PlacementBox(size.x, size.z);
@@ -228,7 +238,6 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene];
     if (scene != null) {
       scene.setCamera(scene.camera);
-      scene.remove(this.reticle);
       scene.pivot.remove(this[$placementBox]!);
       scene.pivot.visible = true;
       scene.setHotspotsVisibility(true);
@@ -242,7 +251,6 @@ export class ARRenderer extends EventDispatcher {
 
       this.renderer.expandTo(scene.width, scene.height);
     }
-    this.reticle.reset();
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
@@ -283,34 +291,27 @@ export class ARRenderer extends EventDispatcher {
     this.dispatchEvent({type: 'modelmove'});
   }
 
-  /**
-   * It appears that XRSession's `inputsourceschange` event is not implemented
-   * in Chrome Canary as of m72 for 'screen' inputs, which would be preferable
-   * since we only need an "select" event, rather than track a pose on every
-   * frame (like a 6DOF controller). Due to this bug, on every frame, check to
-   * see if an input exists.
-   * @see https://bugs.chromium.org/p/chromium/issues/detail?id=913703
-   * @see https://immersive-web.github.io/webxr/#xrinputsource-interface
-   */
-  processXRInput(frame: XRFrame) {
-    const {session} = frame;
+  [$onSelectStart](event: XRInputSourceEvent) {
+    this[$inputSource] = event.inputSource;
+  }
 
-    // Get current input sources. For now, only 'screen' input is supported,
-    // which is only added to the session's active input sources immediately
-    // before `selectstart` and removed immediately after `selectend` event.
-    // If we have a 'screen' source here, it means the output canvas was
-    // tapped.
-    const sources = Array.from(session.inputSources)
-                        .filter(input => input.targetRayMode === 'screen');
-
-    if (sources.length === 0) {
+  [$onSelect](event: XRInputSourceEvent) {
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource == null) {
       return;
     }
+    const fingers = event.frame.getHitTestResultsForTransientInput(hitSource);
 
-    const pose = frame.getPose(sources[0].targetRaySpace, this[$refSpace]!);
-    if (pose && this.reticle && this.reticle.hitMatrix) {
-      this.placeModel(this.reticle.hitMatrix);
-    }
+    fingers.forEach(finger => {
+      if (finger.inputSource !== this[$inputSource] ||
+          finger.results.length < 1) {
+        return;
+      }
+
+      const hitMatrix = matrix4.fromArray(
+          finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
+      this.placeModel(hitMatrix);
+    });
   }
 
   [$tick]() {
@@ -321,7 +322,6 @@ export class ARRenderer extends EventDispatcher {
   [$onWebXRFrame](time: number, frame: XRFrame) {
     const {session} = frame;
     const refSpace = this[$refSpace]!;
-    const viewerRefSpace = this[$viewerRefSpace]!;
 
     const pose = frame.getViewerPose(refSpace);
 
@@ -347,13 +347,20 @@ export class ARRenderer extends EventDispatcher {
         const hitMatrix =
             matrix4.fromArray(hit.getPose(refSpace)!.transform.matrix);
         this.placeModel(hitMatrix);
+
         hitSource.cancel();
         this[$hitTestSource] = null;
+
+        session.addEventListener('selectstart', this[$selectStartHandler]);
+        session.addEventListener('select', this[$selectHandler]);
+        session
+            .requestHitTestSourceForTransientInput(
+                {profile: 'generic-touchscreen'})
+            .then(hitTestSource => {
+              this[$transientHitTestSource] = hitTestSource;
+            });
       }
     }
-
-    this.reticle.update(session, frame, viewerRefSpace, refSpace);
-    this.processXRInput(frame);
 
     for (const view of pose.views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
