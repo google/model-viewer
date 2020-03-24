@@ -20,6 +20,7 @@ import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {ModelScene} from './ModelScene.js';
+import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
 import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
@@ -29,7 +30,7 @@ import {assertContext} from './WebGLUtils.js';
 const AR_SHADOW_INTENSITY = 0.5;
 
 const $presentedScene = Symbol('presentedScene');
-
+const $placementBox = Symbol('placementBox');
 const $lastTick = Symbol('lastTick');
 const $turntableRotation = Symbol('turntableRotation');
 const $oldShadowIntensity = Symbol('oldShadowIntensity');
@@ -53,6 +54,7 @@ export class ARRenderer extends EventDispatcher {
   public reticle: Reticle = new Reticle(this.camera);
   public raycaster: Raycaster|null = null;
 
+  private[$placementBox]: PlacementBox|null = null;
   private[$lastTick]: number|null = null;
   private[$turntableRotation]: number|null = null;
   private[$oldShadowIntensity]: number|null = null;
@@ -157,6 +159,10 @@ export class ARRenderer extends EventDispatcher {
 
     scene.setCamera(this.camera);
     scene.add(this.reticle);
+
+    const {size} = scene.model;
+    this[$placementBox] = new PlacementBox(size.x, size.z);
+    scene.pivot.add(this[$placementBox]!);
     scene.pivot.visible = false;
 
     this[$oldBackground] = scene.background;
@@ -215,6 +221,7 @@ export class ARRenderer extends EventDispatcher {
     if (scene != null) {
       scene.setCamera(scene.camera);
       scene.remove(this.reticle);
+      scene.pivot.remove(this[$placementBox]!);
       scene.pivot.visible = true;
       scene.setHotspotsVisibility(true);
 
