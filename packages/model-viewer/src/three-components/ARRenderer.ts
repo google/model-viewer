@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -40,12 +40,14 @@ const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
+const $hitTestSource = Symbol('hitTestSource');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 
 const vector3 = new Vector3();
+const matrix4 = new Matrix4();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
@@ -63,6 +65,7 @@ export class ARRenderer extends EventDispatcher {
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
+  private[$hitTestSource]: XRHitTestSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
@@ -180,6 +183,11 @@ export class ARRenderer extends EventDispatcher {
     this.initializeRenderer();
     element[$onResize](window.screen);
 
+    currentSession.requestHitTestSource({space: this[$viewerRefSpace]!})
+        .then(hitTestSource => {
+          this[$hitTestSource] = hitTestSource;
+        });
+
     this[$currentSession] = currentSession;
     this[$tick]();
   }
@@ -251,32 +259,28 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  async placeModel() {
+  async placeModel(hitMatrix: Matrix4) {
     if (this[$currentSession] == null) {
       return;
     }
     // NOTE: Currently rays will be cast from the middle of the screen.
     // Eventually we might use input coordinates for this.
 
-    // Just reuse the hit matrix that the reticle has computed.
-    if (this.reticle && this.reticle.hitMatrix) {
-      const scene = this[$presentedScene]!;
-      const {pivot, shadow} = scene;
-      const {hitMatrix} = this.reticle;
+    const scene = this[$presentedScene]!;
+    const {pivot, shadow} = scene;
 
-      pivot.position.setFromMatrixPosition(hitMatrix);
+    pivot.position.setFromMatrixPosition(hitMatrix);
 
-      // Orient the dolly/model to face the camera
-      const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
-      pivot.updateMatrixWorld();
-      shadow!.setRotation(pivot.rotation.y);
+    // Orient the dolly/model to face the camera
+    const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
+    pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
+    pivot.updateMatrixWorld();
+    shadow!.setRotation(pivot.rotation.y);
 
-      pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+    pivot.visible = true;
+    scene.setHotspotsVisibility(true);
 
-      this.dispatchEvent({type: 'modelmove'});
-    }
+    this.dispatchEvent({type: 'modelmove'});
   }
 
   /**
@@ -304,8 +308,8 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const pose = frame.getPose(sources[0].targetRaySpace, this[$refSpace]!);
-    if (pose) {
-      this.placeModel();
+    if (pose && this.reticle && this.reticle.hitMatrix) {
+      this.placeModel(this.reticle.hitMatrix);
     }
   }
 
@@ -320,7 +324,6 @@ export class ARRenderer extends EventDispatcher {
     const pose = frame.getViewerPose(this[$refSpace]!);
 
     // TODO: Notify external observers of tick
-    // TODO: Note that reticle may be "stabilized"
 
     this[$tick]();
 
@@ -333,7 +336,21 @@ export class ARRenderer extends EventDispatcher {
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
-    for (const view of frame.getViewerPose(this[$refSpace]!).views) {
+    const hitSource = this[$hitTestSource];
+    const refSapce = this[$refSpace];
+    if (hitSource != null && refSapce != null) {
+      const hitTestResults = frame.getHitTestResults(hitSource);
+      if (hitTestResults.length > 0) {
+        const hit = hitTestResults[0];
+        const hitMatrix =
+            matrix4.fromArray(hit.getPose(refSapce)!.transform.matrix);
+        this.placeModel(hitMatrix);
+        hitSource.cancel();
+        this[$hitTestSource] = null;
+      }
+    }
+
+    for (const view of pose.views) {
       const viewport = session.renderState.baseLayer!.getViewport(view);
       this.threeRenderer.setViewport(
           viewport.x, viewport.y, viewport.width, viewport.height);
