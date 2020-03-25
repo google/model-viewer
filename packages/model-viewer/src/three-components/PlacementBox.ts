@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry} from 'three';
+import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2} from 'three';
+import {ModelScene} from './ModelScene';
 
 const RADIUS = 0.1;
 const LINE_WIDTH = 0.02;
 const SEGMENTS = 12;
 const DELTA_PHI = Math.PI / (2 * SEGMENTS);
+
+const vector2 = new Vector2();
 
 const addCorner =
     (vertices: Array<number>, cornerX: number, cornerY: number) => {
@@ -37,7 +40,7 @@ const addCorner =
     };
 
 export class PlacementBox extends Mesh {
-  public plane: Mesh;
+  private hitPlane: Mesh;
 
   constructor(xSize: number, zSize: number) {
     const geometry = new BufferGeometry();
@@ -64,11 +67,19 @@ export class PlacementBox extends Mesh {
     super(geometry);
     (this.material as MeshBasicMaterial).side = DoubleSide;
 
-    this.plane = new Mesh(
+    this.hitPlane = new Mesh(
         new PlaneBufferGeometry(xSize + 2 * RADIUS, zSize + 2 * RADIUS));
-    this.plane.visible = false;
-    this.add(this.plane);
+    this.hitPlane.visible = false;
+    this.add(this.hitPlane);
 
     this.rotateX(-Math.PI / 2);
+  }
+
+  isHit(scene: ModelScene, screenX: number, screenY: number): boolean {
+    vector2.set(screenX, -screenY);
+    this.hitPlane.visible = true;
+    const hitResult = scene.positionAndNormalFromPoint(vector2, this.hitPlane);
+    this.hitPlane.visible = false;
+    return hitResult != null;
   }
 }

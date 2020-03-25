@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Vector2, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -39,7 +39,7 @@ const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
-const $hitTestSource = Symbol('hitTestSource');
+const $initialHitSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
 const $isTranslating = Symbol('isTranslating');
@@ -49,13 +49,13 @@ const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
+const $placeInitially = Symbol('placeInitially');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
-const $translateModel = Symbol('translateModel');
+const $processTransientInput = Symbol('processTransientInput');
 
-const vector2 = new Vector2();
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 
@@ -73,7 +73,7 @@ export class ARRenderer extends EventDispatcher {
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
-  private[$hitTestSource]: XRHitTestSource|null = null;
+  private[$initialHitSource]: XRHitTestSource|null = null;
   private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
   private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
@@ -203,7 +203,7 @@ export class ARRenderer extends EventDispatcher {
 
     currentSession.requestHitTestSource({space: this[$viewerRefSpace]!})
         .then(hitTestSource => {
-          this[$hitTestSource] = hitTestSource;
+          this[$initialHitSource] = hitTestSource;
         });
 
     this[$currentSession] = currentSession;
@@ -275,10 +275,35 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  placeModel(hitMatrix: Matrix4) {
-    if (this[$currentSession] == null) {
+  [$placeInitially](frame: XRFrame) {
+    const hitSource = this[$initialHitSource];
+    if (hitSource == null) {
       return;
     }
+
+    const hitTestResults = frame.getHitTestResults(hitSource);
+    if (hitTestResults.length > 0) {
+      const hit = hitTestResults[0];
+      const hitMatrix =
+          matrix4.fromArray(hit.getPose(this[$refSpace]!)!.transform.matrix);
+      this.placeModel(hitMatrix);
+
+      hitSource.cancel();
+      this[$initialHitSource] = null;
+
+      const {session} = frame;
+      session.addEventListener('selectstart', this[$selectStartHandler]);
+      session.addEventListener('selectend', this[$selectEndHandler]);
+      session
+          .requestHitTestSourceForTransientInput(
+              {profile: 'generic-touchscreen'})
+          .then(hitTestSource => {
+            this[$transientHitTestSource] = hitTestSource;
+          });
+    }
+  }
+
+  placeModel(hitMatrix: Matrix4) {
     // NOTE: Currently rays will be cast from the middle of the screen.
     // Eventually we might use input coordinates for this.
 
@@ -301,35 +326,13 @@ export class ARRenderer extends EventDispatcher {
 
   [$onSelectStart](event: XRInputSourceEvent) {
     this[$inputSource] = event.inputSource;
-
     const {axes} = event.inputSource.gamepad;
-    vector2.set(axes[0], -axes[1]);
-    this[$placementBox]!.plane.visible = true;
-    const hitResult = this[$presentedScene]!.positionAndNormalFromPoint(
-        vector2, this[$placementBox]!.plane);
-    this[$placementBox]!.plane.visible = false;
 
-    if (hitResult == null) {
-      this[$isRotating] = true;
-    } else {
+    if (this[$placementBox]!.isHit(this[$presentedScene]!, axes[0], axes[1])) {
       this[$isTranslating] = true;
-
-      const hitSource = this[$transientHitTestSource];
-      if (hitSource == null) {
-        return;
-      }
-      const fingers = event.frame.getHitTestResultsForTransientInput(hitSource);
-
-      fingers.forEach(finger => {
-        if (finger.inputSource !== this[$inputSource] ||
-            finger.results.length < 1) {
-          return;
-        }
-
-        const hitMatrix = matrix4.fromArray(
-            finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
-        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
-      });
+      this[$processTransientInput](event.frame, false);
+    } else {
+      this[$isRotating] = true;
     }
   }
 
@@ -339,7 +342,7 @@ export class ARRenderer extends EventDispatcher {
     this[$inputSource] = null;
   }
 
-  [$translateModel](frame: XRFrame) {
+  [$processTransientInput](frame: XRFrame, translateModel: boolean) {
     const hitSource = this[$transientHitTestSource];
     if (hitSource == null) {
       return;
@@ -354,12 +357,16 @@ export class ARRenderer extends EventDispatcher {
 
       const hitMatrix = matrix4.fromArray(
           finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
-      const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
 
-      const {pivot} = this[$presentedScene]!;
-      pivot.position.add(thisDragPosition).sub(this[$lastDragPosition]);
-      pivot.updateMatrixWorld();
-      this[$lastDragPosition].copy(thisDragPosition);
+      if (translateModel === true) {
+        const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
+        const {pivot} = this[$presentedScene]!;
+        pivot.position.add(thisDragPosition).sub(this[$lastDragPosition]);
+        pivot.updateMatrixWorld();
+        this[$lastDragPosition].copy(thisDragPosition);
+      } else {
+        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+      }
     });
   }
 
@@ -387,32 +394,10 @@ export class ARRenderer extends EventDispatcher {
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
-    const hitSource = this[$hitTestSource];
-
-    if (hitSource != null) {
-      const hitTestResults = frame.getHitTestResults(hitSource);
-      if (hitTestResults.length > 0) {
-        const hit = hitTestResults[0];
-        const hitMatrix =
-            matrix4.fromArray(hit.getPose(refSpace)!.transform.matrix);
-        this.placeModel(hitMatrix);
-
-        hitSource.cancel();
-        this[$hitTestSource] = null;
-
-        session.addEventListener('selectstart', this[$selectStartHandler]);
-        session.addEventListener('selectend', this[$selectEndHandler]);
-        session
-            .requestHitTestSourceForTransientInput(
-                {profile: 'generic-touchscreen'})
-            .then(hitTestSource => {
-              this[$transientHitTestSource] = hitTestSource;
-            });
-      }
-    }
+    this[$placeInitially](frame);
 
     if (this[$isTranslating] === true) {
-      this[$translateModel](frame);
+      this[$processTransientInput](frame, true);
     }
 
     if (this[$isRotating] === true) {
