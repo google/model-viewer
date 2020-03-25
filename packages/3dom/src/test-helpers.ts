@@ -14,7 +14,7 @@
  */
 
 import {EventDispatcher, Group} from 'three';
-import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Material, Model, PBRMetallicRoughness, RGBA, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
 import {ModelKernel} from './api/model-kernel.js';
@@ -101,7 +101,16 @@ export class FakeModelKernel implements ModelKernel {
   }
 }
 
-export const createFakeGLTF = () => {
+export const assetPath = (asset: string) => `./base/shared-assets/${asset}`;
+
+export const loadThreeGLTF = (url: string): Promise<ThreeGLTF> => {
+  const loader = new GLTFLoader();
+  return new Promise<ThreeGLTF>((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
+  });
+};
+
+export const createFakeThreeGLTF = () => {
   const scene = new Group();
 
   return {
@@ -110,7 +119,10 @@ export const createFakeGLTF = () => {
     scenes: [scene],
     cameras: [],
     asset: {},
-    parser: {} as unknown as GLTFParser,
+    parser: {
+      cache: new Map(),
+      json: {scene: 0, scenes: [{}], materials: [], nodes: []}
+    } as unknown as GLTFParser,
     userData: {}
   };
 };

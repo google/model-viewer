@@ -1,11 +1,16 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"git.ignoreLimitWarning": true,
-		"typescript.tsdk": "node_modules/typescript/lib"
-	}
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "git.ignoreLimitWarning": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+		"editor.formatOnSave": true,
+    "[typescript]": {
+			"editor.defaultFormatter": "xaver.clang-format"
+    },
+    "prettier.requireConfig": true,
+  }
 }

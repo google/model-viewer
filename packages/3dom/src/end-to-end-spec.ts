@@ -13,31 +13,30 @@
  * limitations under the License.
  */
 
-import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {BufferGeometry} from 'three/src/core/BufferGeometry.js';
+import {Object3D} from 'three/src/core/Object3D.js';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
-import {Color} from 'three/src/math/Color.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
 import {ThreeDOMExecutionContext} from './context.js';
+import {correlateSceneGraphs} from './facade/three-js/correlated-scene-graph.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
-import {createFakeGLTF, waitForEvent} from './test-helpers.js';
+import {assetPath, loadThreeGLTF, waitForEvent} from './test-helpers.js';
 
-const ASTRONAUT_GLB_URL = './base/shared-assets/models/Astronaut.glb';
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('end-to-end', () => {
   test('can operate on a scene graph via a custom script in a worker', async () => {
-    const gltf = createFakeGLTF();
+    const gltf = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
 
-    const material = new MeshStandardMaterial();
-    material.color = new Color('rgba(255, 0, 0)');
-    const mesh = new Mesh(new BufferGeometry(), material);
-
-    gltf.scene.add(mesh);
+    // Note that this lookup is specific to the Astronaut model and will need
+    // to be adapted in case the model changes:
+    const material =
+        ((gltf.scene.children[0] as Object3D).children[0] as Mesh).material as
+        MeshStandardMaterial;
 
     const executionContext =
         new ThreeDOMExecutionContext(['material-properties']);
-    const graft = new ModelGraft('', gltf);
+    const graft = new ModelGraft('', await correlateSceneGraphs(gltf));
 
     executionContext.changeModel(graft);
 
@@ -51,13 +50,12 @@ suite('end-to-end', () => {
   });
 
   test('can operate on the artifact of a Three.js GLTFLoader', async () => {
-    const gltf = await new Promise<GLTF>((resolve) => {
-      new GLTFLoader().load(ASTRONAUT_GLB_URL, (gltf) => resolve(gltf));
-    });
+    const gltf = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
 
     const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
         MeshStandardMaterial;
-    const graft = new ModelGraft(ASTRONAUT_GLB_URL, gltf);
+    const graft =
+        new ModelGraft(ASTRONAUT_GLB_PATH, await correlateSceneGraphs(gltf));
 
     const executionContext =
         new ThreeDOMExecutionContext(['material-properties']);
@@ -73,13 +71,12 @@ suite('end-to-end', () => {
   });
 
   test('expresses the name of a material in the worklet context', async () => {
-    const gltf = await new Promise<GLTF>((resolve) => {
-      new GLTFLoader().load(ASTRONAUT_GLB_URL, (gltf) => resolve(gltf));
-    });
+    const gltf = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
 
     const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
         MeshStandardMaterial;
-    const graft = new ModelGraft(ASTRONAUT_GLB_URL, gltf);
+    const graft =
+        new ModelGraft(ASTRONAUT_GLB_PATH, await correlateSceneGraphs(gltf));
 
     const executionContext =
         new ThreeDOMExecutionContext(['messaging', 'material-properties']);

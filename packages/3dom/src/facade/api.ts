@@ -14,12 +14,14 @@
  */
 
 import {RGBA} from '../api.js';
+import {GLTF, GLTFElement} from '../gltf-2.0.js';
 import {SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedThreeDOMElement} from '../protocol.js';
 
 export interface ThreeDOMElement {
   readonly ownerModel: Model;
   readonly internalID: number;
   readonly name: string|null;
+  readonly sourceObject: GLTF|GLTFElement;
   toJSON(): SerializedThreeDOMElement;
 }
 

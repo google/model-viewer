@@ -13,35 +13,40 @@
  * limitations under the License.
  */
 
-import {BufferGeometry} from 'three/src/core/BufferGeometry.js';
-import {Object3D} from 'three/src/core/Object3D.js';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {createFakeGLTF} from '../../test-helpers.js';
+import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
 
+import {correlateSceneGraphs} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
+
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('facade/three-js/model', () => {
   suite('Model', () => {
-    test('exposes a list of materials in the scene', () => {
-      const materials =
-          [new MeshStandardMaterial(), new MeshStandardMaterial()];
-      const gltf = createFakeGLTF();
-      const root = new Object3D();
-      const childOne = new Object3D();
-      const childTwo = new Mesh(new BufferGeometry(), materials[1]);
-      const grandChild = new Mesh(new BufferGeometry(), materials[0]);
+    test('exposes a list of materials in the scene 2', async () => {
+      const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
+      const materials: MeshStandardMaterial[] = [];
 
-      gltf.scene.add(root);
-      root.add(childOne, childTwo);
-      childOne.add(grandChild);
+      threeGLTF.scene.traverse((object) => {
+        if ((object as Mesh).isMesh) {
+          const material = (object as Mesh).material;
+          if (Array.isArray(material)) {
+            materials.push(...(material as MeshStandardMaterial[]));
+          } else {
+            materials.push(material as MeshStandardMaterial);
+          }
+        }
+      });
 
-      const graft = new ModelGraft('', gltf);
+      const graft = new ModelGraft(
+          ASTRONAUT_GLB_PATH, await correlateSceneGraphs(threeGLTF));
+
       const model = graft.model;
 
       const collectedMaterials = model.materials.map((material) => {
-        return material.relatedObject;
+        return material.correlatedObject;
       });
 
       expect(collectedMaterials).to.be.deep.equal(materials);

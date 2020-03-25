@@ -1,4 +1,5 @@
 BasedOnStyle: Google
+Language: JavaScript
 AlignAfterOpenBracket: AlwaysBreak
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: false

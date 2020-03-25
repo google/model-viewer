@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial} from 'three';
+import {MeshStandardMaterial} from 'three';
 
+import {Material as GLTFMaterial} from '../../gltf-2.0.js';
 import {SerializedMaterial} from '../../protocol.js';
 import {Material as MaterialInterface} from '../api.js';
 
@@ -31,10 +32,13 @@ const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$pbrMetallicRoughness]: PBRMetallicRoughness;
 
-  constructor(graft: ModelGraft, material: ThreeMaterial) {
-    super(graft, material);
+  constructor(
+      graft: ModelGraft, material: GLTFMaterial,
+      correlatedMaterial: MeshStandardMaterial) {
+    super(graft, material, correlatedMaterial);
 
-    this[$pbrMetallicRoughness] = new PBRMetallicRoughness(graft, material);
+    this[$pbrMetallicRoughness] =
+        new PBRMetallicRoughness(graft, material, correlatedMaterial);
   }
 
   get pbrMetallicRoughness() {

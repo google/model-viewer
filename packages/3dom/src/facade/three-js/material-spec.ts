@@ -16,8 +16,10 @@
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Color} from 'three/src/math/Color.js';
 
-import {createFakeGLTF} from '../../test-helpers.js';
+import {Material as GLTFMaterial} from '../../gltf-2.0.js';
+import {createFakeThreeGLTF} from '../../test-helpers.js';
 
+import {correlateSceneGraphs} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
 
@@ -25,13 +27,17 @@ suite('facade/three-js/material', () => {
   suite('Material', () => {
     test(
         'expresses Three.js material color as PBRMetallicRoughness base color factor',
-        () => {
-          const graft = new ModelGraft('', createFakeGLTF());
-          const threeMaterial = new MeshStandardMaterial();
+        async () => {
+          const graft = new ModelGraft(
+              '', await correlateSceneGraphs(createFakeThreeGLTF()));
+          const gltfMaterial: GLTFMaterial = {
+            pbrMetallicRoughness: {baseColorFactor: [1, 0.5, 0, 1]}
+          };
 
+          const threeMaterial = new MeshStandardMaterial();
           threeMaterial.color = new Color('rgb(255, 127, 0)');
 
-          const material = new Material(graft, threeMaterial);
+          const material = new Material(graft, gltfMaterial, threeMaterial);
 
           expect(material.pbrMetallicRoughness.baseColorFactor)
               .to.be.deep.equal([1, 127 / 255, 0, 1]);

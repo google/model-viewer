@@ -14,16 +14,18 @@
  */
 
 import {Material, Object3D} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import {GLTF, GLTFElement} from '../../gltf-2.0.js';
 import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';
 import {ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
 
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 
-export const $relatedObject = Symbol('relatedObject');
+export const $correlatedObject = Symbol('correlatedObject');
 export const $type = Symbol('type');
+export const $sourceObject = Symbol('sourceObject');
 
 const $graft = Symbol('graft');
 const $id = Symbol('id');
@@ -36,13 +38,17 @@ const $id = Symbol('id');
  */
 export class ThreeDOMElement implements ThreeDOMElementInterface {
   private[$graft]: ModelGraft;
-  private[$relatedObject]: Object3D|Material|GLTF;
+  private[$sourceObject]: GLTFElement|GLTF;
+  private[$correlatedObject]: Object3D|Material|CorrelatedSceneGraph;
 
   private[$id]: number = getLocallyUniqueId();
 
-  constructor(graft: ModelGraft, relatedObject: Object3D|Material|GLTF) {
-    this[$relatedObject] = relatedObject;
+  constructor(
+      graft: ModelGraft, element: GLTFElement|GLTF,
+      correlatedObject: Object3D|Material|CorrelatedSceneGraph) {
     this[$graft] = graft;
+    this[$sourceObject] = element;
+    this[$correlatedObject] = correlatedObject;
 
     graft.adopt(this);
   }
@@ -70,7 +76,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * generated names are ignored.
    */
   get name() {
-    const relatedObject = this[$relatedObject];
+    const relatedObject = this[$correlatedObject];
 
     // NOTE: Some Three.js object names are modified from the names found in the
     // glTF. Special casing is handled here, but might be better moved to
@@ -88,8 +94,15 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
   /**
    * The backing Three.js scene graph construct for this element.
    */
-  get relatedObject() {
-    return this[$relatedObject];
+  get correlatedObject() {
+    return this[$correlatedObject];
+  }
+
+  /**
+   * The canonical GLTF or GLTFElement represented by this facade.
+   */
+  get sourceObject() {
+    return this[$sourceObject];
   }
 
   toJSON(): SerializedThreeDOMElement {
