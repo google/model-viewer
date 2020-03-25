@@ -27,6 +27,7 @@ import {assertContext} from './WebGLUtils.js';
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.5;
+const ROTATION_RATE = 1.0;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -45,6 +46,7 @@ const $inputSource = Symbol('inputSource');
 const $isTranslating = Symbol('isTranslating');
 const $isRotating = Symbol('isRotating');
 const $lastDragPosition = Symbol('lastDragPosition');
+const $lastDragX = Symbol('lastDragX');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
@@ -55,6 +57,7 @@ const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
 const $processTransientInput = Symbol('processTransientInput');
+const $rotateModel = Symbol('rotateModel');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -82,6 +85,7 @@ export class ARRenderer extends EventDispatcher {
   private[$isTranslating] = false;
   private[$isRotating] = false;
   private[$lastDragPosition] = new Vector3();
+  private[$lastDragX] = 0;
 
   private[$selectStartHandler] = (event: Event) =>
       this[$onSelectStart](event as XRInputSourceEvent);
@@ -333,6 +337,7 @@ export class ARRenderer extends EventDispatcher {
       this[$processTransientInput](event.frame, false);
     } else {
       this[$isRotating] = true;
+      this[$lastDragX] = axes[0];
     }
   }
 
@@ -360,14 +365,25 @@ export class ARRenderer extends EventDispatcher {
 
       if (translateModel === true) {
         const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
-        const {pivot} = this[$presentedScene]!;
+        const {pivot, shadow} = this[$presentedScene]!;
         pivot.position.add(thisDragPosition).sub(this[$lastDragPosition]);
         pivot.updateMatrixWorld();
+        shadow!.setRotation(pivot.rotation.y);
         this[$lastDragPosition].copy(thisDragPosition);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
       }
     });
+  }
+
+  [$rotateModel]() {
+    const {pivot, shadow} = this[$presentedScene]!;
+    const thisDragX = this[$inputSource]!.gamepad.axes[0];
+    const deltaRadians = (thisDragX - this[$lastDragX]) * ROTATION_RATE;
+    pivot.rotateY(deltaRadians);
+    pivot.updateMatrixWorld();
+    shadow!.setRotation(pivot.rotation.y);
+    this[$lastDragX] = thisDragX;
   }
 
   [$tick]() {
@@ -401,6 +417,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     if (this[$isRotating] === true) {
+      this[$rotateModel]();
     }
 
     for (const view of pose.views) {
