@@ -98,6 +98,7 @@ declare interface XRInputSource {
   readonly targetRaySpace: XRSpace;
   readonly gripSpace?: XRSpace;
   readonly profiles: Array<String>;
+  readonly gamepad: Gamepad;
 }
 
 declare interface XRInputSourceEvent extends Event {

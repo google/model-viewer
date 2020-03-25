@@ -37,6 +37,8 @@ const addCorner =
     };
 
 export class PlacementBox extends Mesh {
+  public plane: Mesh;
+
   constructor(xSize: number, zSize: number) {
     const geometry = new BufferGeometry();
     const triangles: Array<number> = [];
@@ -62,10 +64,10 @@ export class PlacementBox extends Mesh {
     super(geometry);
     (this.material as MeshBasicMaterial).side = DoubleSide;
 
-    const plane = new Mesh(
+    this.plane = new Mesh(
         new PlaneBufferGeometry(xSize + 2 * RADIUS, zSize + 2 * RADIUS));
-    plane.visible = false;
-    this.add(plane);
+    this.plane.visible = false;
+    this.add(this.plane);
 
     this.rotateX(-Math.PI / 2);
   }

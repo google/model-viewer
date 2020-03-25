@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Vector2} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
@@ -26,6 +27,8 @@ const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
+
+const pixelPosition = new Vector2();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -129,7 +132,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
-      return this[$scene].positionAndNormalFromPoint(pixelX, pixelY);
+      const {width, height} = this[$scene];
+      pixelPosition.set(pixelX / width, pixelY / height)
+          .multiplyScalar(2)
+          .subScalar(1);
+      pixelPosition.y *= -1;
+      return this[$scene].positionAndNormalFromPoint(pixelPosition);
     }
 
     [$tick](time: number, delta: number) {

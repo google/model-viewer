@@ -45,7 +45,6 @@ const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 const view = new Vector3();
 const target = new Vector3();
 const normalWorld = new Vector3();
-const pixelPosition = new Vector2();
 const raycaster = new Raycaster();
 
 const $paused = Symbol('paused');
@@ -287,14 +286,10 @@ export class ModelScene extends Scene {
    * data-normal attributes. If the mesh is not hit, position returns the
    * empty string.
    */
-  positionAndNormalFromPoint(pixelX: number, pixelY: number):
+  positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
       {position: Vector3D, normal: Vector3D}|null {
-    pixelPosition.set(pixelX / this.width, pixelY / this.height)
-        .multiplyScalar(2)
-        .subScalar(1);
-    pixelPosition.y *= -1;
     raycaster.setFromCamera(pixelPosition, this.getCamera());
-    const hits = raycaster.intersectObject(this, true);
+    const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
       return null;

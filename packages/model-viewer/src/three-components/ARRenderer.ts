@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Vector2, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -44,6 +44,7 @@ const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
 const $isTranslating = Symbol('isTranslating');
 const $isRotating = Symbol('isRotating');
+const $lastDragPosition = Symbol('lastDragPosition');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
@@ -54,6 +55,7 @@ const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
 const $translateModel = Symbol('translateModel');
 
+const vector2 = new Vector2();
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 
@@ -61,7 +63,6 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public raycaster: Raycaster|null = null;
 
   private[$placementBox]: PlacementBox|null = null;
   private[$lastTick]: number|null = null;
@@ -80,6 +81,7 @@ export class ARRenderer extends EventDispatcher {
 
   private[$isTranslating] = false;
   private[$isRotating] = false;
+  private[$lastDragPosition] = new Vector3();
 
   private[$selectStartHandler] = (event: Event) =>
       this[$onSelectStart](event as XRInputSourceEvent);
@@ -273,7 +275,7 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  async placeModel(hitMatrix: Matrix4) {
+  placeModel(hitMatrix: Matrix4) {
     if (this[$currentSession] == null) {
       return;
     }
@@ -299,7 +301,36 @@ export class ARRenderer extends EventDispatcher {
 
   [$onSelectStart](event: XRInputSourceEvent) {
     this[$inputSource] = event.inputSource;
-    this[$isTranslating] = true;
+
+    const {axes} = event.inputSource.gamepad;
+    vector2.set(axes[0], -axes[1]);
+    this[$placementBox]!.plane.visible = true;
+    const hitResult = this[$presentedScene]!.positionAndNormalFromPoint(
+        vector2, this[$placementBox]!.plane);
+    this[$placementBox]!.plane.visible = false;
+
+    if (hitResult == null) {
+      this[$isRotating] = true;
+    } else {
+      this[$isTranslating] = true;
+
+      const hitSource = this[$transientHitTestSource];
+      if (hitSource == null) {
+        return;
+      }
+      const fingers = event.frame.getHitTestResultsForTransientInput(hitSource);
+
+      fingers.forEach(finger => {
+        if (finger.inputSource !== this[$inputSource] ||
+            finger.results.length < 1) {
+          return;
+        }
+
+        const hitMatrix = matrix4.fromArray(
+            finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
+        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+      });
+    }
   }
 
   [$onSelectEnd](_event: XRInputSourceEvent) {
@@ -323,7 +354,12 @@ export class ARRenderer extends EventDispatcher {
 
       const hitMatrix = matrix4.fromArray(
           finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
-      this.placeModel(hitMatrix);
+      const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
+
+      const {pivot} = this[$presentedScene]!;
+      pivot.position.add(thisDragPosition).sub(this[$lastDragPosition]);
+      pivot.updateMatrixWorld();
+      this[$lastDragPosition].copy(thisDragPosition);
     });
   }
 
