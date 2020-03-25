@@ -406,6 +406,22 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
+    const view = pose.views[0];
+    const viewport = session.renderState.baseLayer!.getViewport(view);
+    this.threeRenderer.setViewport(
+        viewport.x, viewport.y, viewport.width, viewport.height);
+
+    const {camera} = this;
+    const {matrix: cameraMatrix} = camera;
+    camera.projectionMatrix.fromArray(view.projectionMatrix);
+    cameraMatrix.fromArray(view.transform.matrix);
+    camera.updateMatrixWorld(true);
+    // position is not updated when matrix is updated.
+    camera.position.setFromMatrixPosition(cameraMatrix);
+
+    scene.orientHotspots(
+        Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
+
     const delta = time - this[$lastTick]!;
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
@@ -420,26 +436,9 @@ export class ARRenderer extends EventDispatcher {
       this[$rotateModel]();
     }
 
-    for (const view of pose.views) {
-      const viewport = session.renderState.baseLayer!.getViewport(view);
-      this.threeRenderer.setViewport(
-          viewport.x, viewport.y, viewport.width, viewport.height);
-
-      const {camera} = this;
-      const {matrix: cameraMatrix} = camera;
-      camera.projectionMatrix.fromArray(view.projectionMatrix);
-      cameraMatrix.fromArray(view.transform.matrix);
-      camera.updateMatrixWorld(true);
-      // position is not updated when matrix is updated.
-      camera.position.setFromMatrixPosition(cameraMatrix);
-
-      scene.orientHotspots(
-          Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
-
-      // NOTE: Clearing depth caused issues on Samsung devices
-      // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-      // this.threeRenderer.clearDepth();
-      this.threeRenderer.render(scene, camera);
-    }
+    // NOTE: Clearing depth caused issues on Samsung devices
+    // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
+    // this.threeRenderer.clearDepth();
+    this.threeRenderer.render(scene, camera);
   }
 }
