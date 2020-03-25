@@ -95,7 +95,7 @@ export class ARRenderer extends EventDispatcher {
     await gl.makeXRCompatible();
 
     session.updateRenderState(
-        {baseLayer: new XRWebGLLayer(session, gl, {alpha: true})});
+        {baseLayer: new XRWebGLLayer(session, gl, {alpha: true, framebufferScaleFactor: 0.5})});
 
     // The render state update takes effect on the next animation frame. Wait
     // for it so that we get a framebuffer.
