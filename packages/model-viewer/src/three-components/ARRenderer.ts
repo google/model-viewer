@@ -42,14 +42,17 @@ const $viewerRefSpace = Symbol('viewerRefSpace');
 const $hitTestSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
+const $isTranslating = Symbol('isTranslating');
+const $isRotating = Symbol('isRotating');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
-const $selectHandler = Symbol('selectHandler');
-const $onSelect = Symbol('onSelect');
+const $selectEndHandler = Symbol('selectHandler');
+const $onSelectEnd = Symbol('onSelect');
+const $translateModel = Symbol('translateModel');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -75,10 +78,13 @@ export class ARRenderer extends EventDispatcher {
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
+  private[$isTranslating] = false;
+  private[$isRotating] = false;
+
   private[$selectStartHandler] = (event: Event) =>
       this[$onSelectStart](event as XRInputSourceEvent);
-  private[$selectHandler] = (event: Event) =>
-      this[$onSelect](event as XRInputSourceEvent);
+  private[$selectEndHandler] = (event: Event) =>
+      this[$onSelectEnd](event as XRInputSourceEvent);
 
   constructor(private renderer: Renderer) {
     super();
@@ -293,14 +299,21 @@ export class ARRenderer extends EventDispatcher {
 
   [$onSelectStart](event: XRInputSourceEvent) {
     this[$inputSource] = event.inputSource;
+    this[$isTranslating] = true;
   }
 
-  [$onSelect](event: XRInputSourceEvent) {
+  [$onSelectEnd](_event: XRInputSourceEvent) {
+    this[$isTranslating] = false;
+    this[$isRotating] = false;
+    this[$inputSource] = null;
+  }
+
+  [$translateModel](frame: XRFrame) {
     const hitSource = this[$transientHitTestSource];
     if (hitSource == null) {
       return;
     }
-    const fingers = event.frame.getHitTestResultsForTransientInput(hitSource);
+    const fingers = frame.getHitTestResultsForTransientInput(hitSource);
 
     fingers.forEach(finger => {
       if (finger.inputSource !== this[$inputSource] ||
@@ -352,7 +365,7 @@ export class ARRenderer extends EventDispatcher {
         this[$hitTestSource] = null;
 
         session.addEventListener('selectstart', this[$selectStartHandler]);
-        session.addEventListener('select', this[$selectHandler]);
+        session.addEventListener('selectend', this[$selectEndHandler]);
         session
             .requestHitTestSourceForTransientInput(
                 {profile: 'generic-touchscreen'})
@@ -360,6 +373,13 @@ export class ARRenderer extends EventDispatcher {
               this[$transientHitTestSource] = hitTestSource;
             });
       }
+    }
+
+    if (this[$isTranslating] === true) {
+      this[$translateModel](frame);
+    }
+
+    if (this[$isRotating] === true) {
     }
 
     for (const view of pose.views) {
