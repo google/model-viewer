@@ -144,7 +144,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.setHotspotsVisibility(false);
+    scene.pivot.setHotspotsVisibility(false);
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -213,16 +213,17 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this[$presentedScene];
     if (scene != null) {
+      const {pivot} = scene;
       scene.setCamera(scene.camera);
       scene.remove(this.reticle);
-      scene.pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+      pivot.visible = true;
+      pivot.setHotspotsVisibility(true);
 
-      scene.pivot.position.set(0, 0, 0);
-      scene.setPivotRotation(this[$turntableRotation]!);
+      pivot.position.set(0, 0, 0);
+      pivot.setRotation(this[$turntableRotation]!);
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
-      scene.orientHotspots(0);
+      pivot.orientHotspots(0);
       scene.isDirty = true;
 
       this.renderer.expandTo(scene.width, scene.height);
@@ -254,19 +255,18 @@ export class ARRenderer extends EventDispatcher {
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
       const scene = this[$presentedScene]!;
-      const {pivot, shadow} = scene;
+      const {pivot} = scene;
       const {hitMatrix} = this.reticle;
 
       pivot.position.setFromMatrixPosition(hitMatrix);
 
       // Orient the dolly/model to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
+      pivot.pointToward(camPosition.x, camPosition.z);
       pivot.updateMatrixWorld();
-      shadow!.setRotation(pivot.rotation.y);
 
       pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+      pivot.setHotspotsVisibility(true);
 
       this.dispatchEvent({type: 'modelmove'});
     }
@@ -339,7 +339,7 @@ export class ARRenderer extends EventDispatcher {
       // position is not updated when matrix is updated.
       camera.position.setFromMatrixPosition(cameraMatrix);
 
-      scene.orientHotspots(
+      scene.pivot.orientHotspots(
           Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
 
       // NOTE: Updating input or the reticle is dependent on the camera's

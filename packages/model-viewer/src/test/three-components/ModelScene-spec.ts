@@ -18,6 +18,7 @@ import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {$shadow} from '../../three-components/Pivot.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -63,16 +64,17 @@ suite('ModelScene', () => {
     suite('setShadowIntensity', () => {
       test('can increase intensity and reset it to zero', () => {
         scene.setShadowIntensity(1);
-        expect(scene.shadow).to.be.ok;
-        expect(scene.shadow!.getIntensity()).to.be.equal(1);
+        const shadow = scene.pivot[$shadow]!;
+        expect(shadow).to.be.ok;
+        expect(shadow.getIntensity()).to.be.equal(1);
         scene.setShadowIntensity(0);
-        expect(scene.shadow!.getIntensity()).to.be.equal(0);
+        expect(shadow.getIntensity()).to.be.equal(0);
       });
 
       test('shadow is only created when intensity is greater than zero', () => {
-        expect(scene.shadow).to.be.not.ok;
+        expect(scene.pivot[$shadow]).to.be.not.ok;
         scene.setShadowIntensity(1);
-        expect(scene.shadow).to.be.ok;
+        expect(scene.pivot[$shadow]).to.be.ok;
       });
     });
   });

@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Matrix4, PerspectiveCamera, Raycaster, Scene, Vector2} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
-import {Hotspot} from './Hotspot.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
-import {Shadow} from './Shadow.js';
+import {Pivot} from './Pivot.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -42,9 +41,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 
 const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 
-const view = new Vector3();
-const target = new Vector3();
-const normalWorld = new Vector3();
 const pixelPosition = new Vector2();
 const raycaster = new Raycaster();
 
@@ -60,11 +56,9 @@ export class ModelScene extends Scene {
 
   public aspect = 1;
   public canvas: HTMLCanvasElement;
-  public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
-  public pivot: Object3D;
-  public pivotCenter: Vector3;
+  public pivot: Pivot;
   public width = 1;
   public height = 1;
   public isDirty: boolean = false;
@@ -94,12 +88,9 @@ export class ModelScene extends Scene {
     this.camera.name = 'MainCamera';
 
     this.activeCamera = this.camera;
-    this.pivot = new Object3D();
-    this.pivot.name = 'Pivot';
-    this.pivotCenter = new Vector3;
+    this.pivot = new Pivot(this.model);
 
     this.add(this.pivot);
-    this.pivot.add(this.model);
 
     this.setSize(width, height);
 
@@ -211,42 +202,22 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Sets the rotation of the model's pivot, around its pivotCenter point.
-   */
-  setPivotRotation(radiansY: number) {
-    this.pivot.rotation.y = radiansY;
-    this.pivot.position.x = -this.pivotCenter.x;
-    this.pivot.position.z = -this.pivotCenter.z;
-    this.pivot.position.applyAxisAngle(this.pivot.up, radiansY);
-    this.pivot.position.x += this.pivotCenter.x;
-    this.pivot.position.z += this.pivotCenter.z;
-    if (this.shadow != null) {
-      this.shadow.setRotation(radiansY);
-    }
-  }
-
-  /**
-   * Gets the current rotation value of the pivot
-   */
-  getPivotRotation(): number {
-    return this.pivot.rotation.y;
-  }
-
-  /**
    * Called when the model's contents have loaded, or changed.
    */
   onModelLoad(event: {url: string}) {
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
-    if (this.shadow != null) {
-      this.shadow.setModel(this.model, this.shadowSoftness);
-    }
-    // Uncomment if using showShadowHelper below
-    // if (this.children.length > 1) {
-    //   (this.children[1] as CameraHelper).update();
-    // }
     this.element[$needsRender]();
     this.dispatchEvent({type: 'model-load', url: event.url});
+  }
+
+  /**
+   * Sets the point the model should pivot around. The height of the floor is
+   * recorded in pivotCenter.y.
+   */
+  setRotationCenter(x: number, z: number) {
+    const floorHeight = this.model.boundingBox.min.y;
+    this.pivot.setCenter(x, floorHeight, z);
   }
 
   /**
@@ -256,14 +227,8 @@ export class ModelScene extends Scene {
     shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
     if (this.model.hasModel()) {
-      if (this.shadow == null && shadowIntensity > 0) {
-        this.shadow = new Shadow(this.model, this.pivot, this.shadowSoftness);
-        this.pivot.add(this.shadow);
-        // showShadowHelper(this);
-      }
-      if (this.shadow != null) {
-        this.shadow.setIntensity(shadowIntensity);
-      }
+      this.pivot.setShadowIntensity(
+          shadowIntensity, this.model, this.shadowSoftness);
     }
   }
 
@@ -274,9 +239,7 @@ export class ModelScene extends Scene {
    */
   setShadowSoftness(softness: number) {
     this.shadowSoftness = softness;
-    if (this.shadow != null) {
-      this.shadow.setSoftness(softness);
-    }
+    this.pivot.setShadowSoftness(softness);
   }
 
   /**
@@ -311,70 +274,5 @@ export class ModelScene extends Scene {
         toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
                        .transformDirection(worldToPivot));
     return {position: position, normal: normal};
-  }
-
-  /**
-   * The following methods are for operating on the set of Hotspot objects
-   * attached to the scene. These come from DOM elements, provided to slots by
-   * the Annotation Mixin.
-   */
-  addHotspot(hotspot: Hotspot) {
-    this.pivot.add(hotspot);
-  }
-
-  removeHotspot(hotspot: Hotspot) {
-    this.pivot.remove(hotspot);
-  }
-
-  /**
-   * Helper method to apply a function to all hotspots.
-   */
-  forHotspots(func: (hotspot: Hotspot) => void) {
-    const {children} = this.pivot;
-    for (let i = 0, l = children.length; i < l; i++) {
-      const hotspot = children[i];
-      if (hotspot instanceof Hotspot) {
-        func(hotspot);
-      }
-    }
-  }
-
-  /**
-   * Update the CSS visibility of the hotspots based on whether their normals
-   * point toward the camera.
-   */
-  updateHotspots() {
-    this.forHotspots((hotspot) => {
-      view.copy(this.activeCamera.position);
-      target.setFromMatrixPosition(hotspot.matrixWorld);
-      view.sub(target);
-      normalWorld.copy(hotspot.normal)
-          .transformDirection(this.pivot.matrixWorld);
-      if (view.dot(normalWorld) < 0) {
-        hotspot.hide();
-      } else {
-        hotspot.show();
-      }
-    });
-  }
-
-  /**
-   * Rotate all hotspots to an absolute orientation given by the input number of
-   * radians. Zero returns them to upright.
-   */
-  orientHotspots(radians: number) {
-    this.forHotspots((hotspot) => {
-      hotspot.orient(radians);
-    });
-  }
-
-  /**
-   * Set the rendering visibility of all hotspots. This is used to hide them
-   * during transitions and such.
-   */
-  setHotspotsVisibility(visible: boolean) {
-    this.forHotspots((hotspot) => {
-      hotspot.visible = visible;
-    });
   }
 }

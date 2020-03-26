@@ -491,10 +491,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const [x, y, z] = style;
       const scene = this[$scene];
       this[$controls].setTarget(x, y, z);
-      // TODO(#837): Mutating scene.pivotCenter should automatically adjust
-      // pivot rotation
-      scene.pivotCenter.set(x, y, z);
-      scene.setPivotRotation(scene.getPivotRotation());
+      scene.setRotationCenter(x, z);
     }
 
     [$tick](time: number, delta: number) {
@@ -550,11 +547,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$controls].update(time, delta);
-      const target = this[$controls].getTarget();
-      if (!this[$scene].pivotCenter.equals(target)) {
-        this[$scene].pivotCenter.copy(target);
-        this[$scene].setPivotRotation(this[$scene].getPivotRotation());
-      }
     }
 
     [$deferInteractionPrompt]() {
