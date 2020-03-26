@@ -92,8 +92,8 @@ export class Shadow extends DirectionalLight {
     const shadowOffset = size.y * OFFSET;
     this.position.y = boundingBox.max.y + shadowOffset;
     boundingBox.getCenter(this.floor.position);
-    // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
-    // to stay inside the shadow camera.
+    // Floor plane is up slightly from the bottom of the bounding box to avoid
+    // Z-fighting with baked-in shadows and to stay inside the shadow camera.
     this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
 
     camera.near = 0;

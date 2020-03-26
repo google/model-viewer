@@ -187,10 +187,17 @@ export class ARRenderer extends EventDispatcher {
 
     scene.setCamera(this.camera);
 
+    const element = scene.element as ModelViewerElement;
+    const {pivot} = scene;
+    this[$turntableRotation] = element.turntableRotation;
+    element.resetTurntableRotation();
+    pivot.updateMatrixWorld();
+
     const {size} = scene.model;
-    this[$placementBox] = new PlacementBox(size.x, size.z);
-    scene.pivot.add(this[$placementBox]!);
-    scene.pivot.visible = false;
+    const placementBox = new PlacementBox(size.x, size.z);
+    // placementBox.position.set();
+    pivot.add(placementBox);
+    pivot.visible = false;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -198,20 +205,18 @@ export class ARRenderer extends EventDispatcher {
     this[$oldShadowIntensity] = scene.shadowIntensity;
     scene.setShadowIntensity(AR_SHADOW_INTENSITY);
 
-    this[$presentedScene] = scene;
-    this[$lastTick] = performance.now();
-    const element = scene.element as ModelViewerElement;
-    this[$turntableRotation] = element.turntableRotation;
-    element.resetTurntableRotation();
-
-    element[$onResize](window.screen);
-
     currentSession.requestHitTestSource({space: this[$viewerRefSpace]!})
         .then(hitTestSource => {
           this[$initialHitSource] = hitTestSource;
         });
 
+    element[$onResize](window.screen);
     this[$currentSession] = currentSession;
+    this[$presentedScene] = scene;
+    this[$placementBox] = placementBox;
+    this[$lastTick] = performance.now();
+
+    // Start the event loop.
     this[$tick]();
   }
 
@@ -329,6 +334,7 @@ export class ARRenderer extends EventDispatcher {
     const {pivot, shadow} = scene;
 
     pivot.position.setFromMatrixPosition(hitMatrix);
+    // .sub(this[$placementBox]!.position);
 
     // Orient the dolly/model to face the camera
     const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
