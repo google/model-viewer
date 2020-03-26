@@ -51,6 +51,7 @@ const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
+const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
@@ -173,6 +174,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     scene.setHotspotsVisibility(false);
+    this.initializeRenderer();
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -202,7 +204,6 @@ export class ARRenderer extends EventDispatcher {
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
 
-    this.initializeRenderer();
     element[$onResize](window.screen);
 
     currentSession.requestHitTestSource({space: this[$viewerRefSpace]!})
@@ -277,6 +278,19 @@ export class ARRenderer extends EventDispatcher {
    */
   get isPresenting(): boolean {
     return this[$presentedScene] != null;
+  }
+
+  [$updateCamera](view: XRView) {
+    const {camera} = this;
+    const {matrix: cameraMatrix} = camera;
+    camera.projectionMatrix.fromArray(view.projectionMatrix);
+    cameraMatrix.fromArray(view.transform.matrix);
+    camera.updateMatrixWorld(true);
+    // position is not updated when matrix is updated.
+    camera.position.setFromMatrixPosition(cameraMatrix);
+
+    this[$presentedScene]!.orientHotspots(
+        Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
 
   [$placeInitially](frame: XRFrame) {
@@ -392,13 +406,9 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$onWebXRFrame](time: number, frame: XRFrame) {
-    const {session} = frame;
-    const refSpace = this[$refSpace]!;
-
-    const pose = frame.getViewerPose(refSpace);
+    const pose = frame.getViewerPose(this[$refSpace]!);
 
     // TODO: Notify external observers of tick
-
     this[$tick]();
 
     const scene = this[$presentedScene];
@@ -406,21 +416,7 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
-    const view = pose.views[0];
-    const viewport = session.renderState.baseLayer!.getViewport(view);
-    this.threeRenderer.setViewport(
-        viewport.x, viewport.y, viewport.width, viewport.height);
-
-    const {camera} = this;
-    const {matrix: cameraMatrix} = camera;
-    camera.projectionMatrix.fromArray(view.projectionMatrix);
-    cameraMatrix.fromArray(view.transform.matrix);
-    camera.updateMatrixWorld(true);
-    // position is not updated when matrix is updated.
-    camera.position.setFromMatrixPosition(cameraMatrix);
-
-    scene.orientHotspots(
-        Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
+    this[$updateCamera](pose.views[0]);
 
     const delta = time - this[$lastTick]!;
     this.renderer.preRender(scene, time, delta);
@@ -439,6 +435,6 @@ export class ARRenderer extends EventDispatcher {
     // NOTE: Clearing depth caused issues on Samsung devices
     // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
     // this.threeRenderer.clearDepth();
-    this.threeRenderer.render(scene, camera);
+    this.threeRenderer.render(scene, this.camera);
   }
 }
