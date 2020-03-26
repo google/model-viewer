@@ -258,11 +258,10 @@ export class ARRenderer extends EventDispatcher {
       const {pivot} = scene;
       const {hitMatrix} = this.reticle;
 
-      pivot.position.setFromMatrixPosition(hitMatrix);
-
       // Orient the dolly/model to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
       pivot.pointToward(camPosition.x, camPosition.z);
+      pivot.position.setFromMatrixPosition(hitMatrix);
       pivot.updateMatrixWorld();
 
       pivot.visible = true;

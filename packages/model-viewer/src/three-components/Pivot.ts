@@ -46,8 +46,9 @@ export class Pivot extends Object3D {
   }
 
   pointToward(worldX: number, worldZ: number) {
-    const {x, z} = this[$rotationCenter];
-    const angle = Math.atan2(worldZ - z, worldX - x);
+    const centerWorld = this.localToWorld(this[$rotationCenter].clone());
+    const {x, z} = centerWorld;
+    const angle = Math.atan2(worldX - x, worldZ - z);
     this.setRotation(angle);
   }
 
