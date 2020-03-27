@@ -15,7 +15,7 @@
 
 import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
-import {$onResize} from '../model-viewer-base.js';
+import {$needsRender, $onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -226,8 +226,8 @@ export class ARRenderer extends EventDispatcher {
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
       model.orientHotspots(0);
-      scene.isDirty = true;
       element.requestUpdate('cameraTarget');
+      element[$needsRender]();
 
       this.renderer.expandTo(scene.width, scene.height);
     }

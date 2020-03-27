@@ -16,7 +16,7 @@
 import {Camera, Event as ThreeEvent, Matrix4, PerspectiveCamera, Raycaster, Scene, Vector2} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
@@ -204,7 +204,7 @@ export class ModelScene extends Scene {
   onModelLoad(event: {url: string}) {
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
-    this.element[$needsRender]();
+    this.isDirty = true;
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
@@ -213,6 +213,7 @@ export class ModelScene extends Scene {
    */
   setTarget(modelX: number, modelY: number, modelZ: number) {
     this.model.position.set(-modelX, -modelY, -modelZ);
+    this.isDirty = true;
   }
 
   /**
@@ -238,7 +239,8 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
-    this.model.setShadowRotation(radiansY)
+    this.model.setShadowRotation(radiansY);
+    this.isDirty = true;
   }
 
   get yaw(): number {

@@ -16,7 +16,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 import {CameraChangeDetails} from './controls.js';
@@ -86,7 +86,6 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (rotationDelta > 0) {
         this[$scene].yaw =
             this.turntableRotation + ROTATION_SPEED * rotationDelta * 0.001;
-        this[$needsRender]();
       }
     }
 
@@ -106,7 +105,6 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     resetTurntableRotation() {
       this[$scene].yaw = 0;
-      this[$needsRender]();
     }
   }
 
