@@ -155,6 +155,8 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
+    scene.setARTarget();
+
     scene.setCamera(this.camera);
     scene.add(this.reticle);
     scene.model.visible = false;
@@ -213,18 +215,19 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this[$presentedScene];
     if (scene != null) {
-      const {model} = scene;
+      const {model, element} = scene;
       scene.setCamera(scene.camera);
       scene.remove(this.reticle);
       model.visible = true;
       model.setHotspotsVisibility(true);
 
       scene.position.set(0, 0, 0);
-      scene.setRotation(this[$turntableRotation]!);
+      scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
       model.orientHotspots(0);
       scene.isDirty = true;
+      element.requestUpdate('cameraTarget');
 
       this.renderer.expandTo(scene.width, scene.height);
     }

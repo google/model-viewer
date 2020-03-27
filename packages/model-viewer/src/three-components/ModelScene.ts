@@ -209,25 +209,39 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Sets the point in model coordinates the model should model around. The
-   * height of the floor is recorded in pivotCenter.y.
+   * Sets the point in model coordinates the model should orbit/pivot around.
    */
-  setRotationCenter(x: number, z: number) {
-    const floorHeight = this.model.boundingBox.min.y;
-    this.model.position.set(-x, -floorHeight, -z);
+  setTarget(modelX: number, modelY: number, modelZ: number) {
+    this.model.position.set(-modelX, -modelY, -modelZ);
   }
 
+  /**
+   * The AR scene is anchored at the center of the lower, forward edge of the
+   * bounding box.
+   */
+  setARTarget() {
+    const {min, max} = this.model.boundingBox;
+    this.model.position.set(-(min.x + max.x) / 2, -min.y, -max.z);
+  }
+
+  /**
+   * Yaw the +z (front) of the model toward the indicated world coordinates.
+   */
   pointTowards(worldX: number, worldZ: number) {
     const {x, z} = this.position;
-    this.setRotation(Math.atan2(worldX - x, worldZ - z));
+    this.yaw = Math.atan2(worldX - x, worldZ - z);
   }
 
-  setRotation(radiansY: number) {
+  /**
+   * Yaw is the scene's orientation about the y-axis, around the rotation
+   * center.
+   */
+  set yaw(radiansY: number) {
     this.rotation.y = radiansY;
     this.model.setShadowRotation(radiansY)
   }
 
-  getRotation(): number {
+  get yaw(): number {
     return this.rotation.y;
   }
 

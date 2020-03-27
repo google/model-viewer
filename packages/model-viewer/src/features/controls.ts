@@ -490,8 +490,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
       const scene = this[$scene];
-      this[$controls].setTarget(x, y, z);
-      scene.setRotationCenter(x, z);
+      scene.setTarget(x, y, z);
     }
 
     [$tick](time: number, delta: number) {

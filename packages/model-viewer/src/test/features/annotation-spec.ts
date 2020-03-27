@@ -157,7 +157,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         });
 
         test('the hotspot is hidden after turning', async () => {
-          element[$scene].setRotation(Math.PI);
+          element[$scene].yaw = Math.PI;
           element[$scene].updateMatrixWorld();
           element[$needsRender]();
 
@@ -210,7 +210,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
     });
 
     test('gets expected hit result when turned', () => {
-      element[$scene].setRotation(-Math.PI / 2);
+      element[$scene].yaw = -Math.PI / 2;
       element[$scene].updateMatrixWorld();
       const hitResult =
           element.positionAndNormalFromPoint(width / 2, height / 2);

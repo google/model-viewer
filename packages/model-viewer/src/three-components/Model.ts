@@ -294,8 +294,7 @@ export default class Model extends Object3D {
   /**
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
-  setShadowIntensity(shadowIntensity: number, shadowSoftness: number): Shadow
-      |null {
+  setShadowIntensity(shadowIntensity: number, shadowSoftness: number) {
     let shadow = this[$shadow];
     if (shadow != null) {
       shadow.setIntensity(shadowIntensity);
@@ -305,7 +304,6 @@ export default class Model extends Object3D {
       shadow.setIntensity(shadowIntensity);
       this[$shadow] = shadow;
     }
-    return shadow;
   }
 
   /**
