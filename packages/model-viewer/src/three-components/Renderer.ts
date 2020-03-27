@@ -212,7 +212,7 @@ export class Renderer extends EventDispatcher {
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure, pivot} = scene;
+    const {element, exposure, model} = scene;
 
     element[$tick](t, delta);
 
@@ -220,7 +220,7 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    if (pivot.updateShadow()) {
+    if (model.updateShadow()) {
       this.threeRenderer.shadowMap.needsUpdate = true;
     }
   }

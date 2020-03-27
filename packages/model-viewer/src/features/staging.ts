@@ -84,9 +84,8 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
           delta, time - this[$autoRotateStartTime] - this.autoRotateDelay);
 
       if (rotationDelta > 0) {
-        const {pivot} = this[$scene];
-        pivot.setRotation(
-            pivot.getRotation() + ROTATION_SPEED * rotationDelta * 0.001);
+        this[$scene].setRotation(
+            this.turntableRotation + ROTATION_SPEED * rotationDelta * 0.001);
         this[$needsRender]();
       }
     }
@@ -102,11 +101,11 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get turntableRotation(): number {
-      return this[$scene].pivot.getRotation();
+      return this[$scene].getRotation();
     }
 
     resetTurntableRotation() {
-      this[$scene].pivot.setRotation(0);
+      this[$scene].setRotation(0);
       this[$needsRender]();
     }
   }

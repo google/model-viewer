@@ -34,9 +34,9 @@ const ANIMATION_SCALING = 2;
  * The Shadow class creates a shadow that fits a given model and follows a
  * target. This shadow will follow the model without any updates needed so long
  * as the shadow and model are both parented to the same object (call it the
- * pivot) and this pivot is passed as the target parameter to the shadow's
- * constructor. We also must constrain the pivot to motion within the horizontal
- * plane and call the setRotation() method whenever the pivot's Y-axis rotation
+ * scene) and this scene is passed as the target parameter to the shadow's
+ * constructor. We also must constrain the scene to motion within the horizontal
+ * plane and call the setRotation() method whenever the model's Y-axis rotation
  * changes. For motion outside of the horizontal plane, this.needsUpdate must be
  * set to true.
  *
@@ -90,11 +90,11 @@ export class Shadow extends DirectionalLight {
     }
 
     const shadowOffset = size.y * OFFSET;
-    this.position.y = boundingBox.max.y + shadowOffset;
-    boundingBox.getCenter(this.floor.position);
+    this.position.y = size.y + shadowOffset;
+    // boundingBox.getCenter(this.floor.position);
     // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
     // to stay inside the shadow camera.
-    this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
+    this.floor.position.y = shadowOffset - size.y;
 
     camera.near = 0;
     camera.far = size.y;
@@ -112,7 +112,7 @@ export class Shadow extends DirectionalLight {
 
   setMapSize(maxMapSize: number) {
     const {camera, mapSize, map} = this.shadow;
-    const {boundingBox, size} = this;
+    const {size} = this;
 
     if (map != null) {
       (map as any).dispose();
@@ -133,10 +133,10 @@ export class Shadow extends DirectionalLight {
     const widthPad = 2.5 * size.x / width;
     const heightPad = 2.5 * size.z / height;
 
-    camera.left = -boundingBox.max.x - widthPad;
-    camera.right = -boundingBox.min.x + widthPad;
-    camera.bottom = boundingBox.min.z - heightPad;
-    camera.top = boundingBox.max.z + heightPad;
+    camera.left = -size.x / 2 - widthPad;
+    camera.right = size.x / 2 + widthPad;
+    camera.bottom = -size.z / 2 - heightPad;
+    camera.top = size.z / 2 + heightPad;
 
     this.updateMatrixWorld();
     camera.updateProjectionMatrix();

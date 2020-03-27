@@ -176,7 +176,7 @@ suite('ARRenderer', () => {
       test('places the model oriented to the camera', async () => {
         const epsilon = 0.0001;
         const pivotRotation = 0.123;
-        modelScene.pivot.rotation.y = pivotRotation;
+        modelScene.model.rotation.y = pivotRotation;
 
         // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
         // our dolly will need to rotate to face camera) and angled 45
@@ -187,7 +187,7 @@ suite('ARRenderer', () => {
 
         await arRenderer.present(modelScene);
         await arRenderer.placeModel();
-        const {position, rotation} = modelScene.pivot;
+        const {position, rotation} = modelScene.model;
 
         expect(position.x).to.be.equal(10);
         expect(position.y).to.be.equal(0);
@@ -202,7 +202,7 @@ suite('ARRenderer', () => {
 
       test('when a screen-type XRInputSource exists', async () => {
         await arRenderer.present(modelScene);
-        const {position} = modelScene.pivot;
+        const {position} = modelScene.model;
 
         expect(position.x).to.be.equal(0);
         expect(position.y).to.be.equal(0);
@@ -244,7 +244,7 @@ suite('ARRenderer', () => {
         applyPhoneRotation(arRenderer.camera);
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
-        const {position} = modelScene.pivot;
+        const {position} = modelScene.model;
 
         setInputSources([{
           targetRayMode: 'gaze' as XRTargetRayMode,
@@ -266,7 +266,7 @@ suite('ARRenderer', () => {
         arRenderer.camera.updateMatrixWorld(true);
         await arRenderer.present(modelScene);
         await arRenderer.placeModel();
-        const {position} = modelScene.pivot;
+        const {position} = modelScene.model;
 
         expect(position.x).to.be.equal(10);
         expect(position.y).to.be.equal(0);

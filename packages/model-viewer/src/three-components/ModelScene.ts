@@ -19,7 +19,6 @@ import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
-import {Pivot} from './Pivot.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -58,7 +57,6 @@ export class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
-  public pivot: Pivot;
   public width = 1;
   public height = 1;
   public isDirty: boolean = false;
@@ -88,9 +86,8 @@ export class ModelScene extends Scene {
     this.camera.name = 'MainCamera';
 
     this.activeCamera = this.camera;
-    this.pivot = new Pivot(this.model);
 
-    this.add(this.pivot);
+    this.add(this.model);
 
     this.setSize(width, height);
 
@@ -212,12 +209,26 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Sets the point the model should pivot around. The height of the floor is
-   * recorded in pivotCenter.y.
+   * Sets the point in model coordinates the model should model around. The
+   * height of the floor is recorded in pivotCenter.y.
    */
   setRotationCenter(x: number, z: number) {
     const floorHeight = this.model.boundingBox.min.y;
-    this.pivot.setCenter(x, floorHeight, z);
+    this.model.position.set(-x, -floorHeight, -z);
+  }
+
+  pointTowards(worldX: number, worldZ: number) {
+    const {x, z} = this.position;
+    this.setRotation(Math.atan2(worldX - x, worldZ - z));
+  }
+
+  setRotation(radiansY: number) {
+    this.rotation.y = radiansY;
+    this.model.setShadowRotation(radiansY)
+  }
+
+  getRotation(): number {
+    return this.rotation.y;
   }
 
   /**
@@ -227,8 +238,11 @@ export class ModelScene extends Scene {
     shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
     if (this.model.hasModel()) {
-      this.pivot.setShadowIntensity(
-          shadowIntensity, this.model, this.shadowSoftness);
+      const shadow = this.model.setShadowIntensity(
+          shadowIntensity, this, this.shadowSoftness);
+      if (shadow != null) {
+        this.add(shadow);
+      }
     }
   }
 
@@ -239,7 +253,7 @@ export class ModelScene extends Scene {
    */
   setShadowSoftness(softness: number) {
     this.shadowSoftness = softness;
-    this.pivot.setShadowSoftness(softness);
+    this.model.setShadowSoftness(softness);
   }
 
   /**
@@ -268,7 +282,7 @@ export class ModelScene extends Scene {
       return null;
     }
 
-    const worldToPivot = new Matrix4().getInverse(this.pivot.matrixWorld);
+    const worldToPivot = new Matrix4().getInverse(this.model.matrixWorld);
     const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
     const normal =
         toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
