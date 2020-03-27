@@ -238,11 +238,7 @@ export class ModelScene extends Scene {
     shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
     if (this.model.hasModel()) {
-      const shadow = this.model.setShadowIntensity(
-          shadowIntensity, this, this.shadowSoftness);
-      if (shadow != null) {
-        this.add(shadow);
-      }
+      this.model.setShadowIntensity(shadowIntensity, this.shadowSoftness);
     }
   }
 

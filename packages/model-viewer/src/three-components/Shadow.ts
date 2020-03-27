@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, DirectionalLight, Mesh, Object3D, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
+import {Box3, DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
 
 import Model from './Model';
 
@@ -48,9 +48,10 @@ export class Shadow extends DirectionalLight {
   private floor: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
+  private isAnimated = false;
   public needsUpdate = false;
 
-  constructor(private model: Model, target: Object3D, softness: number) {
+  constructor(model: Model, softness: number) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -67,20 +68,21 @@ export class Shadow extends DirectionalLight {
 
     this.shadow.camera.up.set(0, 0, 1);
 
-    this.target = target;
+    model.add(this);
+    this.target = model;
 
     this.setModel(model, softness);
   }
 
   setModel(model: Model, softness: number) {
-    this.model = model;
     const {camera} = this.shadow;
 
+    this.isAnimated = model.animationNames.length > 0;
     this.boundingBox.copy(model.boundingBox);
     this.size.copy(model.size);
     const {boundingBox, size} = this;
 
-    if (this.model.animationNames.length > 0) {
+    if (this.isAnimated) {
       const maxDimension = Math.max(size.x, size.y, size.z) * ANIMATION_SCALING;
       size.y = maxDimension;
       boundingBox.expandByVector(
@@ -90,11 +92,11 @@ export class Shadow extends DirectionalLight {
     }
 
     const shadowOffset = size.y * OFFSET;
-    this.position.y = size.y + shadowOffset;
-    // boundingBox.getCenter(this.floor.position);
+    this.position.y = boundingBox.max.y + shadowOffset;
+    boundingBox.getCenter(this.floor.position);
     // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
     // to stay inside the shadow camera.
-    this.floor.position.y = shadowOffset - size.y;
+    this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
 
     camera.near = 0;
     camera.far = size.y;
@@ -112,14 +114,14 @@ export class Shadow extends DirectionalLight {
 
   setMapSize(maxMapSize: number) {
     const {camera, mapSize, map} = this.shadow;
-    const {size} = this;
+    const {size, boundingBox} = this;
 
     if (map != null) {
       (map as any).dispose();
       (this.shadow.map as any) = null;
     }
 
-    if (this.model.animationNames.length > 0) {
+    if (this.isAnimated) {
       maxMapSize *= ANIMATION_SCALING;
     }
 
@@ -133,10 +135,10 @@ export class Shadow extends DirectionalLight {
     const widthPad = 2.5 * size.x / width;
     const heightPad = 2.5 * size.z / height;
 
-    camera.left = -size.x / 2 - widthPad;
-    camera.right = size.x / 2 + widthPad;
-    camera.bottom = -size.z / 2 - heightPad;
-    camera.top = size.z / 2 + heightPad;
+    camera.left = -boundingBox.max.x - widthPad;
+    camera.right = -boundingBox.min.x + widthPad;
+    camera.bottom = boundingBox.min.z - heightPad;
+    camera.top = boundingBox.max.z + heightPad;
 
     this.updateMatrixWorld();
     camera.updateProjectionMatrix();

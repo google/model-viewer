@@ -15,20 +15,7 @@
 
 import {WebGLRenderTarget} from 'three';
 
-import {ModelScene} from '../three-components/ModelScene';
 import {Renderer} from '../three-components/Renderer';
-
-/**
- * Renders a box representing the shadow camera, which is helpful in
- * debugging.
- */
-export const showShadowHelper = (_scene: ModelScene) => {
-  // if (scene.shadow != null) {
-  //   const helper = new CameraHelper(scene.shadow.shadow.camera);
-  //   helper.frustumCulled = false;
-  //   scene.add(helper);
-  // }
-};
 
 /**
  * Debug method to save an offscreen render target to an image; filename should

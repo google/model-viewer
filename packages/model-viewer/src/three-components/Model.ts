@@ -294,24 +294,18 @@ export default class Model extends Object3D {
   /**
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
-  setShadowIntensity(
-      shadowIntensity: number, scene: Object3D, shadowSoftness: number): Shadow
+  setShadowIntensity(shadowIntensity: number, shadowSoftness: number): Shadow
       |null {
     let shadow = this[$shadow];
     if (shadow != null) {
       shadow.setIntensity(shadowIntensity);
       shadow.setModel(this, shadowSoftness);
     } else if (shadowIntensity > 0) {
-      shadow = new Shadow(this, scene, shadowSoftness);
+      shadow = new Shadow(this, shadowSoftness);
       shadow.setIntensity(shadowIntensity);
       this[$shadow] = shadow;
-      // showShadowHelper(this);
     }
     return shadow;
-    // Uncomment if using showShadowHelper below
-    // if (this.children.length > 1) {
-    //   (this.children[1] as CameraHelper).update();
-    // }
   }
 
   /**
