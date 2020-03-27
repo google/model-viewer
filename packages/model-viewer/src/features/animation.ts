@@ -66,6 +66,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     set currentTime(value: number) {
       this[$scene].model.animationTime = value;
+      this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
     }
 
     pause() {
@@ -104,11 +105,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$tick](_time, delta);
 
       if (this[$paused]) { 
-        // TODO we should return here if currentTime has not actually changed
-        // should we defer setting this[$scene].model.animationTime until here
-        // (store it in a temporary variable when currentTime setter is called?)
-        // return; 
-        this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
+        return;
       }
 
       const {model} = this[$scene];
