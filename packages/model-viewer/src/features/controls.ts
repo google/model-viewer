@@ -483,6 +483,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         minimumPolarAngle: style[1],
         minimumRadius: style[2]
       });
+      this.jumpCameraToGoal();
     }
 
     [$syncMaxCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -491,16 +492,19 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         maximumPolarAngle: style[1],
         maximumRadius: style[2]
       });
+      this.jumpCameraToGoal();
     }
 
     [$syncMinFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
           {minimumFieldOfView: style[0] * 180 / Math.PI});
+      this.jumpCameraToGoal();
     }
 
     [$syncMaxFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
           {maximumFieldOfView: style[0] * 180 / Math.PI});
+      this.jumpCameraToGoal();
     }
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
