@@ -103,8 +103,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](_time: number, delta: number) {
       super[$tick](_time, delta);
 
-      if (this[$paused]) {
-        return;
+      if (this[$paused]) { 
+        // TODO we should return here if currentTime has not actually changed
+        // should we defer setting this[$scene].model.animationTime until here
+        // (store it in a temporary variable when currentTime setter is called?)
+        // return; 
+        this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
       }
 
       const {model} = this[$scene];
