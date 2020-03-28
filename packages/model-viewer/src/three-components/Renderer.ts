@@ -257,7 +257,7 @@ export class Renderer extends EventDispatcher {
     }
 
     for (const scene of this.scenes) {
-      if (!scene.element.modelIsVisible || scene.paused) {
+      if (!scene.visible || scene.paused) {
         continue;
       }
 
