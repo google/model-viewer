@@ -298,6 +298,10 @@ export class SmoothControls extends EventDispatcher {
    */
   applyOptions(options: SmoothControlsOptions) {
     Object.assign(this[$options], options);
+    // Re-evaluates clamping based on potentially new values for min/max
+    // polar, azimuth and radius:
+    this.setOrbit();
+    this.setFieldOfView(Math.exp(this[$goalLogFov]));
   }
 
   /**

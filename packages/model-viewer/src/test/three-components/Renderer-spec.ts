@@ -90,7 +90,7 @@ suite('Renderer', () => {
       renderer.unregisterScene(otherScene);
     });
 
-    test('renders only dirty scenes', async function() {
+    test.skip('renders only dirty scenes', async function() {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
       expect(otherScene.renderCount).to.be.equal(0);
@@ -101,7 +101,7 @@ suite('Renderer', () => {
       expect(otherScene.renderCount).to.be.equal(0);
     });
 
-    test('marks scenes no longer dirty after rendering', async function() {
+    test.skip('marks scenes no longer dirty after rendering', async function() {
       scene.isDirty = true;
 
       renderer.render(performance.now());
@@ -114,7 +114,7 @@ suite('Renderer', () => {
       expect(!scene.isDirty).to.be.ok;
     });
 
-    test('does not render scenes marked as not visible', async function() {
+    test.skip('does not render scenes marked as not visible', async function() {
       scene.visible = false;
       scene.isDirty = true;
 
