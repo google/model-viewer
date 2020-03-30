@@ -96,7 +96,8 @@ export class ARRenderer extends EventDispatcher {
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-
+    // Turn this off, as the matrix is set directly from webXR rather than using
+    // postion, rotation, scale.
     this.camera.matrixAutoUpdate = false;
   }
 
@@ -334,16 +335,17 @@ export class ARRenderer extends EventDispatcher {
     const {model, position} = scene;
 
     position.setFromMatrixPosition(hitMatrix);
+    // Position hit at the center of the lower forward edge of the model's
+    // bounding box.
     const {min, max} = model.boundingBox;
     position.sub(model.position);
     position.x -= (min.x + max.x) / 2;
     position.y -= min.y;
     position.z -= max.z;
 
-    // Orient the dolly/model to face the camera
+    // Orient the scene to face the camera
     const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
     scene.pointTowards(camPosition.x, camPosition.z);
-    scene.updateMatrixWorld();
 
     scene.visible = true;
     scene.model.setHotspotsVisibility(true);
