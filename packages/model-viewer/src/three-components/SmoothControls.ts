@@ -12,9 +12,10 @@
  * limitations under the License.
  */
 
-import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical, Vector3} from 'three';
+import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
 
 import {clamp} from '../utilities.js';
+import {Damper} from './Damper.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
@@ -60,8 +61,6 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   interactionPolicy: 'always-allow'
 });
 
-const $velocity = Symbol('velocity');
-
 // Internal orbital position state
 const $spherical = Symbol('spherical');
 const $goalSpherical = Symbol('goalSpherical');
@@ -71,11 +70,6 @@ const $radiusDamper = Symbol('radiusDamper');
 const $logFov = Symbol('fov');
 const $goalLogFov = Symbol('goalLogFov');
 const $fovDamper = Symbol('fovDamper');
-const $target = Symbol('target');
-const $goalTarget = Symbol('goalTarget');
-const $targetDamperX = Symbol('targetDamperX');
-const $targetDamperY = Symbol('targetDamperY');
-const $targetDamperZ = Symbol('targetDamperZ');
 
 const $options = Symbol('options');
 const $touchMode = Symbol('touchMode');
@@ -118,9 +112,6 @@ const $handleKey = Symbol('handleKey');
 const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
-const DECAY_MILLISECONDS = 50;
-const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
-const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -156,54 +147,6 @@ export interface PointerChangeEvent extends ThreeEvent {
 }
 
 /**
- * The Damper class is a generic second-order critically damped system that does
- * one linear step of the desired length of time. The only parameter is
- * DECAY_MILLISECONDS, which should be adjustable: TODO(#580). This common
- * parameter makes all states converge at the same rate regardless of scale.
- * xNormalization is a number to provide the rough scale of x, such that
- * NIL_SPEED clamping also happens at roughly the same convergence for all
- * states.
- */
-export class Damper {
-  private[$velocity]: number = 0;
-
-  update(
-      x: number, xGoal: number, timeStepMilliseconds: number,
-      xNormalization: number): number {
-    if (x == null) {
-      return xGoal;
-    }
-    if (x === xGoal && this[$velocity] === 0) {
-      return xGoal;
-    }
-    if (timeStepMilliseconds < 0) {
-      return x;
-    }
-    // Exact solution to a critically damped second-order system, where:
-    // acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
-    // 2 * NATURAL_FREQUENCY * this[$velocity];
-    const deltaX = (x - xGoal);
-    const intermediateVelocity = this[$velocity] + NATURAL_FREQUENCY * deltaX;
-    const intermediateX = deltaX + timeStepMilliseconds * intermediateVelocity;
-    const decay = Math.exp(-NATURAL_FREQUENCY * timeStepMilliseconds);
-    const newVelocity =
-        (intermediateVelocity - NATURAL_FREQUENCY * intermediateX) * decay;
-    const acceleration =
-        -NATURAL_FREQUENCY * (newVelocity + intermediateVelocity * decay);
-    if (Math.abs(newVelocity) < NIL_SPEED * xNormalization &&
-        acceleration * deltaX >= 0) {
-      // This ensures the controls settle and stop calling this function instead
-      // of asymptotically approaching their goal.
-      this[$velocity] = 0;
-      return xGoal;
-    } else {
-      this[$velocity] = newVelocity;
-      return xGoal + intermediateX * decay;
-    }
-  }
-}
-
-/**
  * SmoothControls is a Three.js helper for adding delightful pointer and
  * keyboard-based input to a staged Three.js scene. Its API is very similar to
  * OrbitControls, but it offers more opinionated (subjectively more delightful)
@@ -236,11 +179,6 @@ export class SmoothControls extends EventDispatcher {
   private[$logFov]: number;
   private[$goalLogFov]: number;
   private[$fovDamper] = new Damper();
-  private[$target] = new Vector3();
-  private[$goalTarget] = new Vector3();
-  private[$targetDamperX] = new Damper();
-  private[$targetDamperY] = new Damper();
-  private[$targetDamperZ] = new Damper();
 
   private[$pointerIsDown] = false;
   private[$lastPointerPosition]: Pointer = {
@@ -364,9 +302,6 @@ export class SmoothControls extends EventDispatcher {
     // polar, azimuth and radius:
     this.setOrbit();
     this.setFieldOfView(Math.exp(this[$goalLogFov]));
-    // Prevent interpolation in the case that any target spherical values
-    // changed (preserving OrbitalControls behavior):
-    this.jumpToGoal();
   }
 
   /**
@@ -452,20 +387,6 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
-   * Sets the target the camera is pointing toward
-   */
-  setTarget(x: number, y: number, z: number) {
-    this[$goalTarget].set(x, y, z);
-  }
-
-  /**
-   * Returns a copy of the target position the camera is pointed toward
-   */
-  getTarget(): Vector3 {
-    return this[$target].clone();
-  }
-
-  /**
    * Adjust the orbital position of the camera relative to its current orbital
    * position. Does not let the theta goal get more than pi ahead of the current
    * theta, which ensures interpolation continues in the direction of the delta.
@@ -513,7 +434,7 @@ export class SmoothControls extends EventDispatcher {
    * parameters.
    */
   jumpToGoal() {
-    this.update(0, 100 * DECAY_MILLISECONDS);
+    this.update(0, 10000);
   }
 
   /**
@@ -555,13 +476,6 @@ export class SmoothControls extends EventDispatcher {
     this[$logFov] = this[$fovDamper].update(
         this[$logFov], this[$goalLogFov], delta, maximumFieldOfView!);
 
-    this[$target].x = this[$targetDamperX].update(
-        this[$target].x, this[$goalTarget].x, delta, maximumRadius!);
-    this[$target].y = this[$targetDamperY].update(
-        this[$target].y, this[$goalTarget].y, delta, maximumRadius!);
-    this[$target].z = this[$targetDamperZ].update(
-        this[$target].z, this[$goalTarget].z, delta, maximumRadius!);
-
     this[$moveCamera]();
   }
 
@@ -569,15 +483,13 @@ export class SmoothControls extends EventDispatcher {
     return this[$goalSpherical].theta === this[$spherical].theta &&
         this[$goalSpherical].phi === this[$spherical].phi &&
         this[$goalSpherical].radius === this[$spherical].radius &&
-        this[$goalLogFov] === this[$logFov] &&
-        this[$goalTarget].equals(this[$target]);
+        this[$goalLogFov] === this[$logFov];
   }
 
   private[$moveCamera]() {
     // Derive the new camera position from the updated spherical:
     this[$spherical].makeSafe();
     this.camera.position.setFromSpherical(this[$spherical]);
-    this.camera.position.add(this[$target]);
     this.camera.setRotationFromEuler(new Euler(
         this[$spherical].phi - Math.PI / 2, this[$spherical].theta, 0, 'YXZ'));
 

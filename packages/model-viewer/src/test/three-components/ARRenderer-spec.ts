@@ -1,17 +1,17 @@
-// /* @license
-//  * Copyright 2019 Google LLC. All Rights Reserved.
-//  * Licensed under the Apache License, Version 2.0 (the 'License');
-//  * you may not use this file except in compliance with the License.
-//  * You may obtain a copy of the License at
-//  *
-//  *     http://www.apache.org/licenses/LICENSE-2.0
-//  *
-//  * Unless required by applicable law or agreed to in writing, software
-//  * distributed under the License is distributed on an 'AS IS' BASIS,
-//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  * See the License for the specific language governing permissions and
-//  * limitations under the License.
-//  */
+/* @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // import {Camera, Matrix4, Vector3} from 'three';
 
@@ -177,7 +177,7 @@
 //       test('places the model oriented to the camera', async () => {
 //         const epsilon = 0.0001;
 //         const pivotRotation = 0.123;
-//         modelScene.pivot.rotation.y = pivotRotation;
+//         modelScene.model.rotation.y = pivotRotation;
 
 //         // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
 //         // our dolly will need to rotate to face camera) and angled 45
@@ -187,8 +187,8 @@
 //         arRenderer.camera.updateMatrixWorld(true);
 
 //         await arRenderer.present(modelScene);
-//         // await arRenderer.placeModel();
-//         const {position, rotation} = modelScene.pivot;
+//         await arRenderer.placeModel();
+//         const {position, rotation} = modelScene.model;
 
 //         expect(position.x).to.be.equal(10);
 //         expect(position.y).to.be.equal(0);
@@ -204,7 +204,7 @@
 
 //       test('when a screen-type XRInputSource exists', async () => {
 //         await arRenderer.present(modelScene);
-//         const {position} = modelScene.pivot;
+//         const {position} = modelScene.model;
 
 //         expect(position.x).to.be.equal(0);
 //         expect(position.y).to.be.equal(0);
@@ -246,7 +246,7 @@
 //         applyPhoneRotation(arRenderer.camera);
 //         arRenderer.camera.updateMatrixWorld(true);
 //         await arRenderer.present(modelScene);
-//         const {position} = modelScene.pivot;
+//         const {position} = modelScene.model;
 
 //         setInputSources([{
 //           targetRayMode: 'gaze' as XRTargetRayMode,
@@ -267,8 +267,8 @@
 //         arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
 //         arRenderer.camera.updateMatrixWorld(true);
 //         await arRenderer.present(modelScene);
-//         // await arRenderer.placeModel();
-//         const {position} = modelScene.pivot;
+//         await arRenderer.placeModel();
+//         const {position} = modelScene.model;
 
 //         expect(position.x).to.be.equal(10);
 //         expect(position.y).to.be.equal(0);
@@ -279,7 +279,7 @@
 //             new Vector3(1, 0, 0), Math.PI / 2);
 //         arRenderer.camera.matrix.setPosition(new Vector3(0, 2, 0));
 //         arRenderer.camera.updateMatrixWorld(true);
-//         // await arRenderer.placeModel();
+//         await arRenderer.placeModel();
 
 //         expect(position.x).to.be.equal(10);
 //         expect(position.y).to.be.equal(0);

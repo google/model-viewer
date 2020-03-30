@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, DirectionalLight, Mesh, Object3D, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
+import {Box3, DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
 
 import Model from './Model';
 
@@ -34,9 +34,9 @@ const ANIMATION_SCALING = 2;
  * The Shadow class creates a shadow that fits a given model and follows a
  * target. This shadow will follow the model without any updates needed so long
  * as the shadow and model are both parented to the same object (call it the
- * pivot) and this pivot is passed as the target parameter to the shadow's
- * constructor. We also must constrain the pivot to motion within the horizontal
- * plane and call the setRotation() method whenever the pivot's Y-axis rotation
+ * scene) and this scene is passed as the target parameter to the shadow's
+ * constructor. We also must constrain the scene to motion within the horizontal
+ * plane and call the setRotation() method whenever the model's Y-axis rotation
  * changes. For motion outside of the horizontal plane, this.needsUpdate must be
  * set to true.
  *
@@ -48,9 +48,10 @@ export class Shadow extends DirectionalLight {
   private floor: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
+  private isAnimated = false;
   public needsUpdate = false;
 
-  constructor(private model: Model, target: Object3D, softness: number) {
+  constructor(model: Model, softness: number) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -67,20 +68,21 @@ export class Shadow extends DirectionalLight {
 
     this.shadow.camera.up.set(0, 0, 1);
 
-    this.target = target;
+    model.add(this);
+    this.target = model;
 
     this.setModel(model, softness);
   }
 
   setModel(model: Model, softness: number) {
-    this.model = model;
     const {camera} = this.shadow;
 
+    this.isAnimated = model.animationNames.length > 0;
     this.boundingBox.copy(model.boundingBox);
     this.size.copy(model.size);
     const {boundingBox, size} = this;
 
-    if (this.model.animationNames.length > 0) {
+    if (this.isAnimated) {
       const maxDimension = Math.max(size.x, size.y, size.z) * ANIMATION_SCALING;
       size.y = maxDimension;
       boundingBox.expandByVector(
@@ -112,14 +114,14 @@ export class Shadow extends DirectionalLight {
 
   setMapSize(maxMapSize: number) {
     const {camera, mapSize, map} = this.shadow;
-    const {boundingBox, size} = this;
+    const {size, boundingBox} = this;
 
     if (map != null) {
       (map as any).dispose();
       (this.shadow.map as any) = null;
     }
 
-    if (this.model.animationNames.length > 0) {
+    if (this.isAnimated) {
       maxMapSize *= ANIMATION_SCALING;
     }
 

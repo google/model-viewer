@@ -15,7 +15,7 @@
 
 import {EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 
-import {$onResize} from '../model-viewer-base.js';
+import {$needsRender, $onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -173,7 +173,8 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.setHotspotsVisibility(false);
+    scene.model.setHotspotsVisibility(false);
+    scene.visible = false;
     this.initializeRenderer();
 
     const currentSession = await this.resolveARSession();
@@ -185,19 +186,20 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
+    scene.setARTarget();
+
     scene.setCamera(this.camera);
 
     const element = scene.element as ModelViewerElement;
-    const {pivot} = scene;
+    const {model} = scene;
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
-    pivot.updateMatrixWorld();
+    scene.setARTarget();
 
-    const {size} = scene.model;
+    const {size} = model;
     const placementBox = new PlacementBox(size.x, size.z);
     // placementBox.position.set();
-    pivot.add(placementBox);
-    pivot.visible = false;
+    model.add(placementBox);
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -255,17 +257,19 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this[$presentedScene];
     if (scene != null) {
+      const {model, element} = scene;
+      scene.visible = true;
       scene.setCamera(scene.camera);
-      scene.pivot.remove(this[$placementBox]!);
-      scene.pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+      model.remove(this[$placementBox]!);
+      model.setHotspotsVisibility(true);
 
-      scene.pivot.position.set(0, 0, 0);
-      scene.setPivotRotation(this[$turntableRotation]!);
+      scene.position.set(0, 0, 0);
+      scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
-      scene.orientHotspots(0);
-      scene.isDirty = true;
+      model.orientHotspots(0);
+      element.requestUpdate('cameraTarget');
+      element[$needsRender]();
 
       this.renderer.expandTo(scene.width, scene.height);
     }
@@ -294,7 +298,7 @@ export class ARRenderer extends EventDispatcher {
     // position is not updated when matrix is updated.
     camera.position.setFromMatrixPosition(cameraMatrix);
 
-    this[$presentedScene]!.orientHotspots(
+    this[$presentedScene]!.model.orientHotspots(
         Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
 
@@ -331,19 +335,17 @@ export class ARRenderer extends EventDispatcher {
     // Eventually we might use input coordinates for this.
 
     const scene = this[$presentedScene]!;
-    const {pivot, shadow} = scene;
 
-    pivot.position.setFromMatrixPosition(hitMatrix);
+    scene.position.setFromMatrixPosition(hitMatrix);
     // .sub(this[$placementBox]!.position);
 
     // Orient the dolly/model to face the camera
     const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-    pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
-    pivot.updateMatrixWorld();
-    shadow!.setRotation(pivot.rotation.y);
+    scene.pointTowards(camPosition.x, camPosition.z);
+    scene.updateMatrixWorld();
 
-    pivot.visible = true;
-    scene.setHotspotsVisibility(true);
+    scene.visible = true;
+    scene.model.setHotspotsVisibility(true);
 
     this.dispatchEvent({type: 'modelmove'});
   }
@@ -385,10 +387,9 @@ export class ARRenderer extends EventDispatcher {
 
       if (translateModel === true) {
         const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
-        const {pivot, shadow} = this[$presentedScene]!;
-        pivot.position.add(thisDragPosition).sub(this[$lastDragPosition]);
-        pivot.updateMatrixWorld();
-        shadow!.setRotation(pivot.rotation.y);
+        const scene = this[$presentedScene]!;
+        scene.position.add(thisDragPosition).sub(this[$lastDragPosition]);
+        // scene.updateMatrixWorld();
         this[$lastDragPosition].copy(thisDragPosition);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
@@ -397,12 +398,10 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$rotateModel]() {
-    const {pivot, shadow} = this[$presentedScene]!;
+    const scene = this[$presentedScene]!;
     const thisDragX = this[$inputSource]!.gamepad.axes[0];
     const deltaRadians = (thisDragX - this[$lastDragX]) * ROTATION_RATE;
-    pivot.rotateY(deltaRadians);
-    pivot.updateMatrixWorld();
-    shadow!.setRotation(pivot.rotation.y);
+    scene.yaw = scene.yaw + deltaRadians;
     this[$lastDragX] = thisDragX;
   }
 
