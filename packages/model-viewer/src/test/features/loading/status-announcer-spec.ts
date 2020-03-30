@@ -167,6 +167,7 @@ suite('LoadingStatusAnnouncer', () => {
       // NOTE(cdata): We use ModelViewerElementBase here because we are
       // testing behavior that is affected by connected/disconnected
       // side-effects in LoadingMixin.
+      customElements.define('model-viewer-element', ModelViewerElementBase);
       element = new ModelViewerElementBase();
       otherElement = new ModelViewerElementBase();
 
