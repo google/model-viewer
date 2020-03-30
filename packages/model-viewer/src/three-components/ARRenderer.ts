@@ -392,8 +392,12 @@ export class ARRenderer extends EventDispatcher {
         const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
         const scene = this[$presentedScene]!;
         scene.position.add(thisDragPosition).sub(this[$lastDragPosition]);
-        // This forces the shadow position to update.
+
+        // This updates the model's position, which the shadow is based on, then
+        // updates the shadow's position accordingly.
+        scene.updateMatrixWorld(true);
         scene.yaw = scene.yaw;
+
         this[$lastDragPosition].copy(thisDragPosition);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
@@ -427,10 +431,6 @@ export class ARRenderer extends EventDispatcher {
 
     this[$updateCamera](pose.views[0]);
 
-    const delta = time - this[$lastTick]!;
-    this.renderer.preRender(scene, time, delta);
-    this[$lastTick] = time;
-
     this[$placeInitially](frame);
 
     if (this[$isTranslating] === true) {
@@ -440,6 +440,10 @@ export class ARRenderer extends EventDispatcher {
     if (this[$isRotating] === true) {
       this[$rotateModel]();
     }
+
+    const delta = time - this[$lastTick]!;
+    this.renderer.preRender(scene, time, delta);
+    this[$lastTick] = time;
 
     // NOTE: Clearing depth caused issues on Samsung devices
     // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
