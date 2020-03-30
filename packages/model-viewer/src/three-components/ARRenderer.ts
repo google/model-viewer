@@ -19,6 +19,7 @@ import {$needsRender, $onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
+import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
@@ -28,6 +29,7 @@ import {assertContext} from './WebGLUtils.js';
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.5;
 const ROTATION_RATE = 1.0;
+const DROP_HEIGHT = 0.1;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -47,6 +49,12 @@ const $isTranslating = Symbol('isTranslating');
 const $isRotating = Symbol('isRotating');
 const $lastDragPosition = Symbol('lastDragPosition');
 const $lastDragX = Symbol('lastDragX');
+const $goalPosition = Symbol('goalPosition');
+const $goalYaw = Symbol('goalYaw');
+const $xDamper = Symbol('xDamper');
+const $yDamper = Symbol('yDamper');
+const $zDamper = Symbol('zDamper');
+const $yawDamper = Symbol('yawDamper');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
@@ -58,7 +66,8 @@ const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
 const $processTransientInput = Symbol('processTransientInput');
-const $rotateModel = Symbol('rotateModel');
+const $processRotation = Symbol('processRotation');
+const $moveScene = Symbol('moveScene');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -87,6 +96,12 @@ export class ARRenderer extends EventDispatcher {
   private[$isRotating] = false;
   private[$lastDragPosition] = new Vector3();
   private[$lastDragX] = 0;
+  private[$goalPosition] = new Vector3();
+  private[$goalYaw] = 0;
+  private[$xDamper] = new Damper();
+  private[$yDamper] = new Damper();
+  private[$zDamper] = new Damper();
+  private[$yawDamper] = new Damper();
 
   private[$selectStartHandler] = (event: Event) =>
       this[$onSelectStart](event as XRInputSourceEvent);
@@ -265,7 +280,6 @@ export class ARRenderer extends EventDispatcher {
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
       model.orientHotspots(0);
-      element.requestUpdate('cameraTarget');
       element[$needsRender]();
 
       this.renderer.expandTo(scene.width, scene.height);
@@ -332,16 +346,20 @@ export class ARRenderer extends EventDispatcher {
     // Eventually we might use input coordinates for this.
 
     const scene = this[$presentedScene]!;
-    const {model, position} = scene;
+    const {model} = scene;
+    const goal = this[$goalPosition];
 
-    position.setFromMatrixPosition(hitMatrix);
+    goal.setFromMatrixPosition(hitMatrix);
     // Position hit at the center of the lower forward edge of the model's
     // bounding box.
     const {min, max} = model.boundingBox;
-    position.sub(model.position);
-    position.x -= (min.x + max.x) / 2;
-    position.y -= min.y;
-    position.z -= max.z;
+    goal.sub(model.position);
+    goal.x -= (min.x + max.x) / 2;
+    goal.y -= min.y;
+    goal.z -= max.z;
+
+    scene.position.copy(goal);
+    scene.position.y += DROP_HEIGHT;
 
     // Orient the scene to face the camera
     const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
@@ -390,14 +408,7 @@ export class ARRenderer extends EventDispatcher {
 
       if (translateModel === true) {
         const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
-        const scene = this[$presentedScene]!;
-        scene.position.add(thisDragPosition).sub(this[$lastDragPosition]);
-
-        // This updates the model's position, which the shadow is based on, then
-        // updates the shadow's position accordingly.
-        scene.updateMatrixWorld(true);
-        scene.yaw = scene.yaw;
-
+        this[$goalPosition].add(thisDragPosition).sub(this[$lastDragPosition]);
         this[$lastDragPosition].copy(thisDragPosition);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
@@ -405,12 +416,26 @@ export class ARRenderer extends EventDispatcher {
     });
   }
 
-  [$rotateModel]() {
-    const scene = this[$presentedScene]!;
+  [$processRotation]() {
     const thisDragX = this[$inputSource]!.gamepad.axes[0];
-    const deltaRadians = (thisDragX - this[$lastDragX]) * ROTATION_RATE;
-    scene.yaw = scene.yaw + deltaRadians;
+    this[$goalYaw] += (thisDragX - this[$lastDragX]) * ROTATION_RATE;
     this[$lastDragX] = thisDragX;
+  }
+
+  [$moveScene](delta: number) {
+    const scene = this[$presentedScene]!;
+    const {model, position, yaw} = scene;
+    const radius = model.idealCameraDistance;
+    const goal = this[$goalPosition];
+    let {x, y, z} = position;
+    x = this[$xDamper].update(x, goal.x, delta, radius);
+    y = this[$yDamper].update(y, goal.y, delta, radius);
+    z = this[$zDamper].update(z, goal.z, delta, radius);
+    position.set(x, y, z);
+    // This updates the model's position, which the shadow is based on.
+    scene.updateMatrixWorld(true);
+    // yaw must be updated last, since this also updates the shadow position.
+    scene.yaw = this[$yawDamper].update(yaw, this[$goalYaw], delta, Math.PI);
   }
 
   [$tick]() {
@@ -438,10 +463,11 @@ export class ARRenderer extends EventDispatcher {
     }
 
     if (this[$isRotating] === true) {
-      this[$rotateModel]();
+      this[$processRotation]();
     }
 
     const delta = time - this[$lastTick]!;
+    this[$moveScene](delta);
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
