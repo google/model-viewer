@@ -186,20 +186,17 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
-    scene.setARTarget();
-
-    scene.setCamera(this.camera);
-
     const element = scene.element as ModelViewerElement;
-    const {model} = scene;
+    element[$onResize](window.screen);
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
-    scene.setARTarget();
 
+    const {model} = scene;
     const {size} = model;
     const placementBox = new PlacementBox(size.x, size.z);
-    // placementBox.position.set();
     model.add(placementBox);
+
+    scene.setCamera(this.camera);
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -212,7 +209,6 @@ export class ARRenderer extends EventDispatcher {
           this[$initialHitSource] = hitTestSource;
         });
 
-    element[$onResize](window.screen);
     this[$currentSession] = currentSession;
     this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
@@ -335,9 +331,14 @@ export class ARRenderer extends EventDispatcher {
     // Eventually we might use input coordinates for this.
 
     const scene = this[$presentedScene]!;
+    const {model, position} = scene;
 
-    scene.position.setFromMatrixPosition(hitMatrix);
-    // .sub(this[$placementBox]!.position);
+    position.setFromMatrixPosition(hitMatrix);
+    const {min, max} = model.boundingBox;
+    position.sub(model.position);
+    position.x -= (min.x + max.x) / 2;
+    position.y -= min.y;
+    position.z -= max.z;
 
     // Orient the dolly/model to face the camera
     const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
@@ -389,7 +390,8 @@ export class ARRenderer extends EventDispatcher {
         const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
         const scene = this[$presentedScene]!;
         scene.position.add(thisDragPosition).sub(this[$lastDragPosition]);
-        // scene.updateMatrixWorld();
+        // This forces the shadow position to update.
+        scene.yaw = scene.yaw;
         this[$lastDragPosition].copy(thisDragPosition);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);

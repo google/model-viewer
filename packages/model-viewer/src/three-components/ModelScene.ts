@@ -216,15 +216,6 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * The AR scene is anchored at the center of the lower, forward edge of the
-   * bounding box.
-   */
-  setARTarget() {
-    const {min, max} = this.model.boundingBox;
-    this.model.position.set(-(min.x + max.x) / 2, -min.y, -max.z);
-  }
-
-  /**
    * Yaw the +z (front) of the model toward the indicated world coordinates.
    */
   pointTowards(worldX: number, worldZ: number) {
