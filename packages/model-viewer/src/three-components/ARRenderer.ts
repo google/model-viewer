@@ -28,8 +28,8 @@ import {assertContext} from './WebGLUtils.js';
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.5;
-const ROTATION_RATE = 1.0;
-const DROP_HEIGHT = 0.1;
+const ROTATION_RATE = 1.5;
+const DROP_HEIGHT = 1;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -61,6 +61,7 @@ const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
+const $getHitMatrix = Symbol('getHitMatrix');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
@@ -320,25 +321,37 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const hitTestResults = frame.getHitTestResults(hitSource);
-    if (hitTestResults.length > 0) {
-      const hit = hitTestResults[0];
-      const hitMatrix =
-          matrix4.fromArray(hit.getPose(this[$refSpace]!)!.transform.matrix);
-      this.placeModel(hitMatrix);
-
-      hitSource.cancel();
-      this[$initialHitSource] = null;
-
-      const {session} = frame;
-      session.addEventListener('selectstart', this[$selectStartHandler]);
-      session.addEventListener('selectend', this[$selectEndHandler]);
-      session
-          .requestHitTestSourceForTransientInput(
-              {profile: 'generic-touchscreen'})
-          .then(hitTestSource => {
-            this[$transientHitTestSource] = hitTestSource;
-          });
+    if (hitTestResults.length == 0) {
+      return;
     }
+
+    const hit = hitTestResults[0];
+    const hitMatrix = this[$getHitMatrix](hit);
+    if (hitMatrix == null) {
+      return;
+    }
+
+    this.placeModel(hitMatrix);
+
+    hitSource.cancel();
+    this[$initialHitSource] = null;
+
+    const {session} = frame;
+    session.addEventListener('selectstart', this[$selectStartHandler]);
+    session.addEventListener('selectend', this[$selectEndHandler]);
+    session
+        .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
+        .then(hitTestSource => {
+          this[$transientHitTestSource] = hitTestSource;
+        });
+  }
+
+  [$getHitMatrix](hit: XRHitTestResult): Matrix4|null {
+    const hitMatrix =
+        matrix4.fromArray(hit.getPose(this[$refSpace]!)!.transform.matrix);
+    // Check that the y-coordinate of the normal is large enough that the normal
+    // is pointing up.
+    return hitMatrix.elements[10] > 0.75 ? hitMatrix : null;
   }
 
   placeModel(hitMatrix: Matrix4) {
@@ -403,13 +416,17 @@ export class ARRenderer extends EventDispatcher {
         return;
       }
 
-      const hitMatrix = matrix4.fromArray(
-          finger.results[0].getPose(this[$refSpace]!)!.transform.matrix);
+      const hitMatrix = this[$getHitMatrix](finger.results[0]);
+      if (hitMatrix == null) {
+        // This needs to change; probably use hit on placementBox.
+        this[$lastDragPosition].set(0, 0, 0);
+        return;
+      }
 
       if (translateModel === true) {
-        const thisDragPosition = vector3.setFromMatrixPosition(hitMatrix);
-        this[$goalPosition].add(thisDragPosition).sub(this[$lastDragPosition]);
-        this[$lastDragPosition].copy(thisDragPosition);
+        this[$goalPosition].sub(this[$lastDragPosition]);
+        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+        this[$goalPosition].add(this[$lastDragPosition]);
       } else {
         this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
       }
