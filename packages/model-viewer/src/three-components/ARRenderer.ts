@@ -117,8 +117,12 @@ export class ARRenderer extends EventDispatcher {
     this.camera.matrixAutoUpdate = false;
   }
 
-  initializeRenderer() {
-    this.threeRenderer.setPixelRatio(1);
+  initializeRenderer(session: XRSession) {
+    const {threeRenderer} = this;
+    const {framebufferWidth, framebufferHeight} =
+        session.renderState.baseLayer!;
+    threeRenderer.setPixelRatio(1);
+    threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -192,7 +196,6 @@ export class ARRenderer extends EventDispatcher {
 
     scene.model.setHotspotsVisibility(false);
     scene.visible = false;
-    this.initializeRenderer();
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -230,6 +233,8 @@ export class ARRenderer extends EventDispatcher {
     this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
     this[$lastTick] = performance.now();
+
+    this.initializeRenderer(currentSession);
 
     // Start the event loop.
     this[$tick]();
