@@ -343,7 +343,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$shouldPromptUserToInteract] = true;
 
     protected[$controls] = new SmoothControls(
-        this[$scene].getCamera() as PerspectiveCamera, this[$userInputElement]);
+        this[$scene].camera as PerspectiveCamera, this[$userInputElement]);
 
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
