@@ -380,9 +380,11 @@ export class ARRenderer extends EventDispatcher {
     this[$inputSource] = event.inputSource;
     const {axes} = event.inputSource.gamepad;
 
-    if (this[$placementBox]!.isHit(this[$presentedScene]!, axes[0], axes[1])) {
+    const hitPosition =
+        this[$placementBox]!.getHit(this[$presentedScene]!, axes[0], axes[1]);
+    if (hitPosition != null) {
       this[$isTranslating] = true;
-      this[$processTransientInput](event.frame, false);
+      this[$lastDragPosition].copy(hitPosition);
     } else {
       this[$isRotating] = true;
       this[$lastDragX] = axes[0];
@@ -395,7 +397,7 @@ export class ARRenderer extends EventDispatcher {
     this[$inputSource] = null;
   }
 
-  [$processTransientInput](frame: XRFrame, translateModel: boolean) {
+  [$processTransientInput](frame: XRFrame) {
     const hitSource = this[$transientHitTestSource];
     if (hitSource == null) {
       return;
@@ -415,13 +417,9 @@ export class ARRenderer extends EventDispatcher {
         return;
       }
 
-      if (translateModel === true) {
-        this[$goalPosition].sub(this[$lastDragPosition]);
-        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
-        this[$goalPosition].add(this[$lastDragPosition]);
-      } else {
-        this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
-      }
+      this[$goalPosition].sub(this[$lastDragPosition]);
+      this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+      this[$goalPosition].add(this[$lastDragPosition]);
     });
   }
 
@@ -468,7 +466,7 @@ export class ARRenderer extends EventDispatcher {
     this[$placeInitially](frame);
 
     if (this[$isTranslating] === true) {
-      this[$processTransientInput](frame, true);
+      this[$processTransientInput](frame);
     }
 
     if (this[$isRotating] === true) {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2} from 'three';
+import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
 import {ModelScene} from './ModelScene';
 
 const RADIUS = 0.1;
@@ -75,11 +75,11 @@ export class PlacementBox extends Mesh {
     this.rotateX(-Math.PI / 2);
   }
 
-  isHit(scene: ModelScene, screenX: number, screenY: number): boolean {
+  getHit(scene: ModelScene, screenX: number, screenY: number): Vector3|null {
     vector2.set(screenX, -screenY);
     this.hitPlane.visible = true;
     const hitResult = scene.positionAndNormalFromPoint(vector2, this.hitPlane);
     this.hitPlane.visible = false;
-    return hitResult != null;
+    return hitResult == null ? null : hitResult.position;
   }
 }

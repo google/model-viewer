@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2} from 'three';
+import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
@@ -259,15 +259,12 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns the world position and normal of the point on the
-   * mesh corresponding to the input pixel coordinates given relative to the
-   * model-viewer element. The position and normal are returned as strings in
-   * the format suitable for putting in a hotspot's data-position and
-   * data-normal attributes. If the mesh is not hit, position returns the
-   * empty string.
+   * This method returns the world position and model-space normal of the point
+   * on the mesh corresponding to the input pixel coordinates given relative to
+   * the model-viewer element. If the mesh is not hit, the result is null.
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
-      {position: Vector3D, normal: Vector3D}|null {
+      {position: Vector3, normal: Vector3}|null {
     raycaster.setFromCamera(pixelPosition, this.getCamera());
     const hits = raycaster.intersectObject(object, true);
 
@@ -280,11 +277,6 @@ export class ModelScene extends Scene {
       return null;
     }
 
-    const worldToPivot = new Matrix4().getInverse(this.model.matrixWorld);
-    const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
-    const normal =
-        toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
-                       .transformDirection(worldToPivot));
-    return {position: position, normal: normal};
+    return {position: hit.point, normal: hit.face.normal};
   }
 }
