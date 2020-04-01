@@ -647,16 +647,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onResize](event: any) {
-      if (this[$renderer].isPresenting) {
-        return;
-      }
-
       const controls = this[$controls];
       const oldFramedFieldOfView = this[$scene].framedFieldOfView;
 
       // The super of $onResize will update the scene's framedFieldOfView, so we
       // compare the before and after to calculate the proper zoom.
       super[$onResize](event);
+      if (this[$renderer].isPresenting) {
+        return;
+      }
 
       const newFramedFieldOfView = this[$scene].framedFieldOfView;
       const zoom = controls.getFieldOfView() / oldFramedFieldOfView;

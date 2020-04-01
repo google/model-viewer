@@ -230,13 +230,11 @@ export class Renderer extends EventDispatcher {
    * incoming size.
    */
   expandTo(width: number, height: number) {
-    if (width > this.width || height > this.height) {
-      const maxWidth = Math.max(width, this.width);
-      const maxHeight = Math.max(height, this.height);
-      this.setRendererSize(maxWidth, maxHeight);
-      this.canvasElement.style.width = `${maxWidth}px`;
-      this.canvasElement.style.height = `${maxHeight}px`;
-    }
+    const maxWidth = Math.max(width, this.width);
+    const maxHeight = Math.max(height, this.height);
+    this.setRendererSize(maxWidth, maxHeight);
+    this.canvasElement.style.width = `${maxWidth}px`;
+    this.canvasElement.style.height = `${maxHeight}px`;
   }
 
   render(t: number) {

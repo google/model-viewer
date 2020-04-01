@@ -117,14 +117,6 @@ export class ARRenderer extends EventDispatcher {
     this.camera.matrixAutoUpdate = false;
   }
 
-  initializeRenderer(session: XRSession) {
-    const {threeRenderer} = this;
-    const {framebufferWidth, framebufferHeight} =
-        session.renderState.baseLayer!;
-    threeRenderer.setPixelRatio(1);
-    threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
-  }
-
   async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
 
@@ -158,10 +150,8 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    this.threeRenderer.setSize(
-        session.renderState.baseLayer!.framebufferWidth,
-        session.renderState.baseLayer!.framebufferHeight,
-        false);
+    (this[$presentedScene]!.element as
+     ModelViewerElement)[$onResize](window.screen);
 
     return session;
   }
@@ -194,6 +184,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
+    this[$presentedScene] = scene;
     scene.model.setHotspotsVisibility(false);
     scene.visible = false;
 
@@ -207,7 +198,6 @@ export class ARRenderer extends EventDispatcher {
         await currentSession.requestReferenceSpace('viewer');
 
     const element = scene.element as ModelViewerElement;
-    element[$onResize](window.screen);
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
 
@@ -230,11 +220,8 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this[$currentSession] = currentSession;
-    this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
     this[$lastTick] = performance.now();
-
-    this.initializeRenderer(currentSession);
 
     // Start the event loop.
     this[$tick]();
