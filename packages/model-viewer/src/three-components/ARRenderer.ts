@@ -185,7 +185,8 @@ export class ARRenderer extends EventDispatcher {
     }
 
     this[$presentedScene] = scene;
-    scene.model.setHotspotsVisibility(false);
+    const {model} = scene;
+    model.setHotspotsVisibility(false);
     scene.visible = false;
 
     const currentSession = await this.resolveARSession();
@@ -201,10 +202,7 @@ export class ARRenderer extends EventDispatcher {
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
 
-    const {model} = scene;
-    const {size} = model;
-    const placementBox = new PlacementBox(size.x, size.z);
-    model.add(placementBox);
+    const placementBox = new PlacementBox(model);
 
     scene.setCamera(this.camera);
 
@@ -382,6 +380,7 @@ export class ARRenderer extends EventDispatcher {
 
     const hitPosition =
         this[$placementBox]!.getHit(this[$presentedScene]!, axes[0], axes[1]);
+
     if (hitPosition != null) {
       this[$isTranslating] = true;
       this[$lastDragPosition].copy(hitPosition);
@@ -395,6 +394,7 @@ export class ARRenderer extends EventDispatcher {
     this[$isTranslating] = false;
     this[$isRotating] = false;
     this[$inputSource] = null;
+    this[$goalPosition].y += this[$placementBox]!.offsetHeight;
   }
 
   [$processTransientInput](frame: XRFrame) {
@@ -412,14 +412,27 @@ export class ARRenderer extends EventDispatcher {
 
       const hitMatrix = this[$getHitMatrix](finger.results[0]);
       if (hitMatrix == null) {
-        // This needs to change; probably use hit on placementBox.
-        this[$lastDragPosition].set(0, 0, 0);
         return;
       }
 
       this[$goalPosition].sub(this[$lastDragPosition]);
-      this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
-      this[$goalPosition].add(this[$lastDragPosition]);
+
+      const initialHeight = this[$lastDragPosition].y;
+      const hitPosition =
+          this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+
+      const offset = hitPosition.y - initialHeight;
+      // When a lower floor is found, keep the model at the same height, but
+      // drop the placement box to the floor. The model drops on select end.
+      if (offset < 0) {
+        const cameraPosition = vector3.copy(this.camera.position);
+        const alpha = -offset / (cameraPosition.y - hitPosition.y);
+        cameraPosition.multiplyScalar(alpha);
+        hitPosition.multiplyScalar(1 - alpha).add(cameraPosition);
+        this[$placementBox]!.offsetHeight = offset;
+      }
+
+      this[$goalPosition].add(hitPosition);
     });
   }
 
@@ -439,6 +452,10 @@ export class ARRenderer extends EventDispatcher {
     y = this[$yDamper].update(y, goal.y, delta, radius);
     z = this[$zDamper].update(z, goal.z, delta, radius);
     position.set(x, y, z);
+
+    if (!this[$isTranslating]) {
+      this[$placementBox]!.offsetHeight = goal.y - y;
+    }
     // This updates the model's position, which the shadow is based on.
     scene.updateMatrixWorld(true);
     // yaw must be updated last, since this also updates the shadow position.

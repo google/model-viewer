@@ -14,6 +14,8 @@
  */
 
 import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
+
+import Model from './Model';
 import {ModelScene} from './ModelScene';
 
 const RADIUS = 0.1;
@@ -41,14 +43,16 @@ const addCorner =
 
 export class PlacementBox extends Mesh {
   private hitPlane: Mesh;
+  private shadowHeight: number;
 
-  constructor(xSize: number, zSize: number) {
+  constructor(model: Model) {
     const geometry = new BufferGeometry();
     const triangles: Array<number> = [];
     const vertices: Array<number> = [];
+    const {size, boundingBox} = model;
 
-    const x = xSize / 2;
-    const y = zSize / 2;
+    const x = size.x / 2;
+    const y = size.z / 2;
     addCorner(vertices, x, y);
     addCorner(vertices, -x, y);
     addCorner(vertices, -x, -y);
@@ -68,11 +72,16 @@ export class PlacementBox extends Mesh {
     (this.material as MeshBasicMaterial).side = DoubleSide;
 
     this.hitPlane = new Mesh(
-        new PlaneBufferGeometry(xSize + 2 * RADIUS, zSize + 2 * RADIUS));
+        new PlaneBufferGeometry(size.x + 2 * RADIUS, size.z + 2 * RADIUS));
     this.hitPlane.visible = false;
     this.add(this.hitPlane);
 
     this.rotateX(-Math.PI / 2);
+    boundingBox.getCenter(this.position);
+    this.shadowHeight = boundingBox.min.y;
+    this.position.y = this.shadowHeight;
+
+    model.add(this);
   }
 
   getHit(scene: ModelScene, screenX: number, screenY: number): Vector3|null {
@@ -81,5 +90,13 @@ export class PlacementBox extends Mesh {
     const hitResult = scene.positionAndNormalFromPoint(vector2, this.hitPlane);
     this.hitPlane.visible = false;
     return hitResult == null ? null : hitResult.position;
+  }
+
+  set offsetHeight(offset: number) {
+    this.position.y = this.shadowHeight + offset;
+  }
+
+  get offsetHeight(): number {
+    return this.position.y - this.shadowHeight;
   }
 }
