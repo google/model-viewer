@@ -147,8 +147,6 @@ export class ModelScene extends Scene {
 
       const renderer = this.element[$renderer];
       renderer.expandTo(this.width, this.height);
-      this.canvas.width = renderer.width;
-      this.canvas.height = renderer.height;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the

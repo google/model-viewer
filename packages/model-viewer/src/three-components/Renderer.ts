@@ -235,6 +235,10 @@ export class Renderer extends EventDispatcher {
     this.setRendererSize(maxWidth, maxHeight);
     this.canvasElement.style.width = `${maxWidth}px`;
     this.canvasElement.style.height = `${maxHeight}px`;
+    for (const scene of this.scenes) {
+      scene.canvas.width = maxWidth;
+      scene.canvas.height = maxHeight;
+    }
   }
 
   render(t: number) {
