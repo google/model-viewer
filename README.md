@@ -1,7 +1,8 @@
 # The `<model-viewer>` project
 
 This is the main Github repository for the `<model-viewer>` web component and
-all of its related projects.
+all of its related projects. Getting started? Check out the
+[`<model-viewer>`](packages/model-viewer) project!
 
 The repository is organized into sub-directories containing the various projects.
 Check out the README.md files for specific projects to get more details:
@@ -42,7 +43,7 @@ Node.js and npm.
 Then, perform the following steps to get set up for development:
 
 ```sh
-git clone git@github.com:GoogleWebComponents/model-viewer.git
+git clone git@github.com:google/model-viewer.git
 cd model-viewer
 npm install
 npm run bootstrap
