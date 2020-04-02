@@ -35,7 +35,7 @@ const DROP_HEIGHT = 1;
 // assuming the phone is in portrait mode. This seems to be a reasonable
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
-const HIT_ANGLE_DEG = 25;
+const HIT_ANGLE_DEG = 15;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -272,10 +272,8 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene];
     if (scene != null) {
       const {model, element} = scene;
-      scene.visible = true;
       scene.setCamera(scene.camera);
       model.remove(this[$placementBox]!);
-      model.setHotspotsVisibility(true);
 
       scene.position.set(0, 0, 0);
       scene.yaw = this[$turntableRotation]!;
@@ -305,17 +303,22 @@ export class ARRenderer extends EventDispatcher {
   [$updateCamera](view: XRView) {
     const {camera} = this;
     const {matrix: cameraMatrix} = camera;
+
+    cameraMatrix.fromArray(view.transform.matrix);
+    camera.updateMatrixWorld(true);
+    // position is not updated when matrix is updated.
+    camera.position.setFromMatrixPosition(cameraMatrix);
+
     if (!this[$initialized]) {
       camera.projectionMatrix.fromArray(view.projectionMatrix);
       // Have to set the inverse manually when setting matrix directly. This is
       // needed for raycasting.
       camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+      // Orient model toward camera on first frame.
+      const {x, z} = camera.position;
+      this[$presentedScene]!.pointTowards(x, z);
       this[$initialized] = true;
     }
-    cameraMatrix.fromArray(view.transform.matrix);
-    camera.updateMatrixWorld(true);
-    // position is not updated when matrix is updated.
-    camera.position.setFromMatrixPosition(cameraMatrix);
 
     this[$presentedScene]!.model.orientHotspots(
         Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
@@ -372,21 +375,11 @@ export class ARRenderer extends EventDispatcher {
     goal.setFromMatrixPosition(hitMatrix);
     // Position hit at the center of the lower forward edge of the model's
     // bounding box.
-    const {min, max} = model.boundingBox;
-    goal.sub(model.position);
-    goal.x -= (min.x + max.x) / 2;
-    goal.y -= min.y;
-    goal.z -= max.z;
+    const {min} = model.boundingBox;
+    goal.y -= min.y + model.position.y;
 
     scene.position.copy(goal);
     scene.position.y += DROP_HEIGHT;
-
-    // Orient the scene to face the camera
-    const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-    scene.pointTowards(camPosition.x, camPosition.z);
-
-    scene.visible = true;
-    scene.model.setHotspotsVisibility(true);
 
     this.dispatchEvent({type: 'modelmove'});
   }
