@@ -63,9 +63,9 @@ const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
 const $getHitMatrix = Symbol('getHitMatrix');
-const $selectStartHandler = Symbol('selectStartHandler');
+// const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
-const $selectEndHandler = Symbol('selectHandler');
+// const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
 const $processTransientInput = Symbol('processTransientInput');
 const $processRotation = Symbol('processRotation');
@@ -106,10 +106,10 @@ export class ARRenderer extends EventDispatcher {
   private[$zDamper] = new Damper();
   private[$yawDamper] = new Damper();
 
-  private[$selectStartHandler] = (event: Event) =>
-      this[$onSelectStart](event as XRInputSourceEvent);
-  private[$selectEndHandler] = (event: Event) =>
-      this[$onSelectEnd](event as XRInputSourceEvent);
+  // private[$selectStartHandler] = (event: Event) =>
+  //     this[$onSelectStart](event as XRInputSourceEvent);
+  // private[$selectEndHandler] = (event: Event) =>
+  //     this[$onSelectEnd](event as XRInputSourceEvent);
 
   constructor(private renderer: Renderer) {
     super();
@@ -335,14 +335,14 @@ export class ARRenderer extends EventDispatcher {
     hitSource.cancel();
     this[$initialHitSource] = null;
 
-    const {session} = frame;
-    session.addEventListener('selectstart', this[$selectStartHandler]);
-    session.addEventListener('selectend', this[$selectEndHandler]);
-    session
-        .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
-        .then(hitTestSource => {
-          this[$transientHitTestSource] = hitTestSource;
-        });
+    // const {session} = frame;
+    // session.addEventListener('selectstart', this[$selectStartHandler]);
+    // session.addEventListener('selectend', this[$selectEndHandler]);
+    // session
+    //     .requestHitTestSourceForTransientInput({profile:
+    //     'generic-touchscreen'}) .then(hitTestSource => {
+    //       this[$transientHitTestSource] = hitTestSource;
+    //     });
   }
 
   [$getHitMatrix](hit: XRHitTestResult): Matrix4|null {
@@ -492,15 +492,15 @@ export class ARRenderer extends EventDispatcher {
     this[$placeInitially](frame);
 
     if (this[$isTranslating] === true) {
-      this[$processTransientInput](frame);
+      // this[$processTransientInput](frame);
     }
 
     if (this[$isRotating] === true) {
-      this[$processRotation]();
+      // this[$processRotation]();
     }
 
     const delta = time - this[$lastTick]!;
-    this[$moveScene](delta);
+    // this[$moveScene](delta);
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
