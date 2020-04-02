@@ -50,6 +50,7 @@ const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $initialized = Symbol('initialized');
+const $placementComplete = Symbol('placementComplete');
 const $initialHitSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
@@ -103,6 +104,7 @@ export class ARRenderer extends EventDispatcher {
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
   private[$initialized] = false;
+  private[$placementComplete] = false;
   private[$isTranslating] = false;
   private[$isRotating] = false;
   private[$lastDragPosition] = new Vector3();
@@ -211,7 +213,7 @@ export class ARRenderer extends EventDispatcher {
     element.resetTurntableRotation();
 
     const placementBox = new PlacementBox(scene.model);
-    placementBox.show = false;
+    this[$placementComplete] = false;
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
@@ -379,6 +381,7 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene]!;
     const {model} = scene;
     const goal = this[$goalPosition];
+    this[$placementBox]!.show = true;
 
     goal.setFromMatrixPosition(hitMatrix);
     // Position hit at the center of the lower forward edge of the model's
@@ -447,6 +450,7 @@ export class ARRenderer extends EventDispatcher {
         cameraPosition.multiplyScalar(alpha);
         hitPosition.multiplyScalar(1 - alpha).add(cameraPosition);
         this[$placementBox]!.offsetHeight = offset;
+        this[$presentedScene]!.model.setShadowOffset(offset);
       }
 
       this[$goalPosition].add(hitPosition);
@@ -483,8 +487,12 @@ export class ARRenderer extends EventDispatcher {
       box.updateOpacity(delta);
       if (!this[$isTranslating]) {
         const offset = goal.y - y;
-        box.offsetHeight = offset;
-        if (offset === 0) {
+        if (this[$placementComplete]) {
+          box.offsetHeight = offset;
+          model.setShadowOffset(offset);
+        } else if (offset === 0) {
+          this[$placementComplete] = true;
+          box.show = false;
           this[$damperRate] = 1;
         }
       }

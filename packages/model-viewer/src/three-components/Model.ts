@@ -318,6 +318,10 @@ export default class Model extends Object3D {
     }
   }
 
+  /**
+   * The shadow must be rotated manually to match any global rotation applied to
+   * this model. The input is the global orientation about the Y axis.
+   */
   setShadowRotation(radiansY: number) {
     const shadow = this[$shadow];
     if (shadow != null) {
@@ -337,6 +341,17 @@ export default class Model extends Object3D {
       const {needsUpdate} = shadow;
       shadow.needsUpdate = false;
       return needsUpdate;
+    }
+  }
+
+  /**
+   * Shift the floor vertically from the bottom of the model's bounding box by
+   * offset (should generally be negative).
+   */
+  setShadowOffset(offset: number) {
+    const shadow = this[$shadow];
+    if (shadow != null) {
+      shadow.setOffset(offset);
     }
   }
 
