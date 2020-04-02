@@ -29,7 +29,7 @@ import {assertContext} from './WebGLUtils.js';
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.5;
 const ROTATION_RATE = 1.5;
-const DROP_HEIGHT = 1;
+const DROP_HEIGHT = 0;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
