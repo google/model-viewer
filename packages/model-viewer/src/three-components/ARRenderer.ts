@@ -42,6 +42,7 @@ const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
+const $initialized = Symbol('initialized');
 const $initialHitSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
@@ -93,6 +94,7 @@ export class ARRenderer extends EventDispatcher {
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
+  private[$initialized] = false;
   private[$isTranslating] = false;
   private[$isRotating] = false;
   private[$lastDragPosition] = new Vector3();
@@ -205,6 +207,7 @@ export class ARRenderer extends EventDispatcher {
     const placementBox = new PlacementBox(model);
 
     scene.setCamera(this.camera);
+    this[$initialized] = false;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -294,10 +297,13 @@ export class ARRenderer extends EventDispatcher {
   [$updateCamera](view: XRView) {
     const {camera} = this;
     const {matrix: cameraMatrix} = camera;
-    camera.projectionMatrix.fromArray(view.projectionMatrix);
-    // Have to set the inverse manually when setting matrix directly. This is
-    // needed for raycasting.
-    camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+    if (!this[$initialized]) {
+      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      // Have to set the inverse manually when setting matrix directly. This is
+      // needed for raycasting.
+      camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+      this[$initialized] = true;
+    }
     cameraMatrix.fromArray(view.transform.matrix);
     camera.updateMatrixWorld(true);
     // position is not updated when matrix is updated.
