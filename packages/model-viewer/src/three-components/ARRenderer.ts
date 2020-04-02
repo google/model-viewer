@@ -30,6 +30,12 @@ import {assertContext} from './WebGLUtils.js';
 const AR_SHADOW_INTENSITY = 0.5;
 const ROTATION_RATE = 1.5;
 const DROP_HEIGHT = 1;
+// Angle down (towards bottom of screen) from camera center ray to use for hit
+// testing against the floor. This makes placement faster and more intuitive
+// assuming the phone is in portrait mode. This seems to be a reasonable
+// assumption for the start of the session and UI will lack landscape mode to
+// encourage upright use.
+const HIT_ANGLE_DEG = 25;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -212,7 +218,12 @@ export class ARRenderer extends EventDispatcher {
     this[$oldShadowIntensity] = scene.shadowIntensity;
     scene.setShadowIntensity(AR_SHADOW_INTENSITY);
 
-    currentSession.requestHitTestSource({space: this[$viewerRefSpace]!})
+    const radians = HIT_ANGLE_DEG * Math.PI / 180;
+    const ray = new XRRay(
+        new DOMPoint(0, 0, 0),
+        new DOMPoint(0, -Math.sin(radians), -Math.cos(radians)));
+    currentSession
+        .requestHitTestSource({space: this[$viewerRefSpace]!, offsetRay: ray})
         .then(hitTestSource => {
           this[$initialHitSource] = hitTestSource;
         });
