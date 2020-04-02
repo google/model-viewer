@@ -187,9 +187,6 @@ export class ARRenderer extends EventDispatcher {
     }
 
     this[$presentedScene] = scene;
-    const {model} = scene;
-    model.setHotspotsVisibility(false);
-    scene.visible = false;
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -204,7 +201,7 @@ export class ARRenderer extends EventDispatcher {
     this[$turntableRotation] = element.turntableRotation;
     element.resetTurntableRotation();
 
-    const placementBox = new PlacementBox(model);
+    const placementBox = new PlacementBox(scene.model);
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
@@ -455,15 +452,24 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene]!;
     const {model, position, yaw} = scene;
     const radius = model.idealCameraDistance;
-    const goal = this[$goalPosition];
-    let {x, y, z} = position;
-    x = this[$xDamper].update(x, goal.x, delta, radius);
-    y = this[$yDamper].update(y, goal.y, delta, radius);
-    z = this[$zDamper].update(z, goal.z, delta, radius);
-    position.set(x, y, z);
 
-    if (!this[$isTranslating]) {
-      this[$placementBox]!.offsetHeight = goal.y - y;
+    if (this[$initialHitSource] != null) {
+      // Locked to screen center
+      const {camera} = this;
+      camera.getWorldDirection(position);
+      position.multiplyScalar(radius);
+      position.add(camera.position);
+    } else {
+      const goal = this[$goalPosition];
+      let {x, y, z} = position;
+      x = this[$xDamper].update(x, goal.x, delta, radius);
+      y = this[$yDamper].update(y, goal.y, delta, radius);
+      z = this[$zDamper].update(z, goal.z, delta, radius);
+      position.set(x, y, z);
+
+      if (!this[$isTranslating]) {
+        this[$placementBox]!.offsetHeight = goal.y - y;
+      }
     }
     // This updates the model's position, which the shadow is based on.
     scene.updateMatrixWorld(true);
