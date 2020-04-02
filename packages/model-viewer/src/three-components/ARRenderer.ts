@@ -290,6 +290,9 @@ export class ARRenderer extends EventDispatcher {
       this.renderer.expandTo(scene.width, scene.height);
     }
 
+    this[$placementBox]!.dispose();
+    this[$placementBox] = null;
+
     this[$refSpace] = null;
     this[$presentedScene] = null;
 
