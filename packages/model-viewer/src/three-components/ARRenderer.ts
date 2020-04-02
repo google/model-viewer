@@ -27,7 +27,7 @@ import {assertContext} from './WebGLUtils.js';
 
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
-const AR_SHADOW_INTENSITY = 0.5;
+const AR_SHADOW_INTENSITY = 0.3;
 const ROTATION_RATE = 1.5;
 // Angle down (towards bottom of screen) from camera center ray to use for hit
 // testing against the floor. This makes placement faster and more intuitive
@@ -211,7 +211,7 @@ export class ARRenderer extends EventDispatcher {
     element.resetTurntableRotation();
 
     const placementBox = new PlacementBox(scene.model);
-    placementBox.visible = false;
+    placementBox.show = false;
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
@@ -392,7 +392,7 @@ export class ARRenderer extends EventDispatcher {
     const box = this[$placementBox]!;
 
     const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
-    box.visible = true;
+    box.show = true;
 
     if (hitPosition != null) {
       this[$isTranslating] = true;
@@ -408,7 +408,7 @@ export class ARRenderer extends EventDispatcher {
     this[$isRotating] = false;
     this[$inputSource] = null;
     this[$goalPosition].y += this[$placementBox]!.offsetHeight;
-    this[$placementBox]!.visible = false
+    this[$placementBox]!.show = false
   }
 
   [$processTransientInput](frame: XRFrame) {
@@ -477,6 +477,7 @@ export class ARRenderer extends EventDispatcher {
       position.set(x, y, z);
 
       const box = this[$placementBox]!;
+      box.updateOpacity(delta);
       if (!this[$isTranslating]) {
         const offset = goal.y - y;
         box.offsetHeight = offset;

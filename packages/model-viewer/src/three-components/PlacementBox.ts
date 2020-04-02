@@ -15,11 +15,13 @@
 
 import {BufferGeometry, DoubleSide, Float32BufferAttribute, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
 
+import {Damper} from './Damper';
 import Model from './Model';
 import {ModelScene} from './ModelScene';
 
-const RADIUS = 0.1;
-const LINE_WIDTH = 0.02;
+const RADIUS = 0.2;
+const LINE_WIDTH = 0.03;
+const MAX_OPACITY = 0.75;
 const SEGMENTS = 12;
 const DELTA_PHI = Math.PI / (2 * SEGMENTS);
 
@@ -44,6 +46,8 @@ const addCorner =
 export class PlacementBox extends Mesh {
   private hitPlane: Mesh;
   private shadowHeight: number;
+  private goalOpacity: number;
+  private opacityDamper: Damper;
 
   constructor(model: Model) {
     const geometry = new BufferGeometry();
@@ -69,7 +73,13 @@ export class PlacementBox extends Mesh {
     geometry.setIndex(triangles);
 
     super(geometry);
-    (this.material as MeshBasicMaterial).side = DoubleSide;
+
+    const material = this.material as MeshBasicMaterial;
+    material.side = DoubleSide;
+    material.transparent = true;
+    material.opacity = 0;
+    this.goalOpacity = 0;
+    this.opacityDamper = new Damper();
 
     this.hitPlane = new Mesh(
         new PlaneBufferGeometry(size.x + 2 * RADIUS, size.z + 2 * RADIUS));
@@ -98,5 +108,16 @@ export class PlacementBox extends Mesh {
 
   get offsetHeight(): number {
     return this.position.y - this.shadowHeight;
+  }
+
+  set show(visible: boolean) {
+    this.goalOpacity = visible ? MAX_OPACITY : 0;
+  }
+
+  updateOpacity(delta: number) {
+    const material = this.material as MeshBasicMaterial;
+    material.opacity =
+        this.opacityDamper.update(material.opacity, this.goalOpacity, delta, 1);
+    this.visible = material.opacity > 0;
   }
 }
