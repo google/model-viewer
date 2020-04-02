@@ -29,13 +29,14 @@ import {assertContext} from './WebGLUtils.js';
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.5;
 const ROTATION_RATE = 1.5;
-const DROP_HEIGHT = 1;
 // Angle down (towards bottom of screen) from camera center ray to use for hit
 // testing against the floor. This makes placement faster and more intuitive
 // assuming the phone is in portrait mode. This seems to be a reasonable
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
 const HIT_ANGLE_DEG = 15;
+// Slow down the dampers for initial placement.
+const INTRO_RATE = 0.4;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -62,6 +63,7 @@ const $xDamper = Symbol('xDamper');
 const $yDamper = Symbol('yDamper');
 const $zDamper = Symbol('zDamper');
 const $yawDamper = Symbol('yawDamper');
+const $damperRate = Symbol('damperRate');
 const $resolveCleanup = Symbol('resolveCleanup');
 
 const $onWebXRFrame = Symbol('onWebXRFrame');
@@ -111,6 +113,7 @@ export class ARRenderer extends EventDispatcher {
   private[$yDamper] = new Damper();
   private[$zDamper] = new Damper();
   private[$yawDamper] = new Damper();
+  private[$damperRate] = 1;
 
   private[$selectStartHandler] = (event: Event) =>
       this[$onSelectStart](event as XRInputSourceEvent);
@@ -208,9 +211,11 @@ export class ARRenderer extends EventDispatcher {
     element.resetTurntableRotation();
 
     const placementBox = new PlacementBox(scene.model);
+    placementBox.visible = false;
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
+    this[$damperRate] = INTRO_RATE;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -378,18 +383,16 @@ export class ARRenderer extends EventDispatcher {
     const {min} = model.boundingBox;
     goal.y -= min.y + model.position.y;
 
-    scene.position.copy(goal);
-    scene.position.y += DROP_HEIGHT;
-
     this.dispatchEvent({type: 'modelmove'});
   }
 
   [$onSelectStart](event: XRInputSourceEvent) {
     this[$inputSource] = event.inputSource;
     const {axes} = event.inputSource.gamepad;
+    const box = this[$placementBox]!;
 
-    const hitPosition =
-        this[$placementBox]!.getHit(this[$presentedScene]!, axes[0], axes[1]);
+    const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
+    box.visible = true;
 
     if (hitPosition != null) {
       this[$isTranslating] = true;
@@ -405,6 +408,7 @@ export class ARRenderer extends EventDispatcher {
     this[$isRotating] = false;
     this[$inputSource] = null;
     this[$goalPosition].y += this[$placementBox]!.offsetHeight;
+    this[$placementBox]!.visible = false
   }
 
   [$processTransientInput](frame: XRFrame) {
@@ -466,13 +470,19 @@ export class ARRenderer extends EventDispatcher {
     } else {
       const goal = this[$goalPosition];
       let {x, y, z} = position;
+      delta *= this[$damperRate];
       x = this[$xDamper].update(x, goal.x, delta, radius);
       y = this[$yDamper].update(y, goal.y, delta, radius);
       z = this[$zDamper].update(z, goal.z, delta, radius);
       position.set(x, y, z);
 
+      const box = this[$placementBox]!;
       if (!this[$isTranslating]) {
-        this[$placementBox]!.offsetHeight = goal.y - y;
+        const offset = goal.y - y;
+        box.offsetHeight = offset;
+        if (offset === 0) {
+          this[$damperRate] = 1;
+        }
       }
     }
     // This updates the model's position, which the shadow is based on.
