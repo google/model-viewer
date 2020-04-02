@@ -295,6 +295,9 @@ export class ARRenderer extends EventDispatcher {
     const {camera} = this;
     const {matrix: cameraMatrix} = camera;
     camera.projectionMatrix.fromArray(view.projectionMatrix);
+    // Have to set the inverse manually when setting matrix directly. This is
+    // needed for raycasting.
+    camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
     cameraMatrix.fromArray(view.transform.matrix);
     camera.updateMatrixWorld(true);
     // position is not updated when matrix is updated.
