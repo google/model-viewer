@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$needsRender, $onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -34,7 +34,7 @@ const ROTATION_RATE = 1.5;
 // assuming the phone is in portrait mode. This seems to be a reasonable
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
-const HIT_ANGLE_DEG = 15;
+const HIT_ANGLE_DEG = 0;
 // Slow down the dampers for initial placement.
 const INTRO_RATE = 0.4;
 
@@ -50,6 +50,7 @@ const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $initialized = Symbol('initialized');
+const $initialModel2World = Symbol('initialModel2World');
 const $placementComplete = Symbol('placementComplete');
 const $initialHitSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
@@ -71,7 +72,7 @@ const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
-const $getHitMatrix = Symbol('getHitMatrix');
+const $getHitPoint = Symbol('getHitMatrix');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
@@ -82,6 +83,7 @@ const $moveScene = Symbol('moveScene');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
+const hitPosition = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
@@ -104,6 +106,7 @@ export class ARRenderer extends EventDispatcher {
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
   private[$initialized] = false;
+  private[$initialModel2World] = new Matrix4();
   private[$placementComplete] = false;
   private[$isTranslating] = false;
   private[$isRotating] = false;
@@ -319,6 +322,15 @@ export class ARRenderer extends EventDispatcher {
     // position is not updated when matrix is updated.
     camera.position.setFromMatrixPosition(cameraMatrix);
 
+    if (this[$initialHitSource] != null) {
+      // Target locked to screen center
+      const {position, model} = this[$presentedScene]!;
+      const radius = model.idealCameraDistance;
+      camera.getWorldDirection(position);
+      position.multiplyScalar(radius);
+      position.add(camera.position);
+    }
+
     if (!this[$initialized]) {
       camera.projectionMatrix.fromArray(view.projectionMatrix);
       // Have to set the inverse manually when setting matrix directly. This is
@@ -326,7 +338,10 @@ export class ARRenderer extends EventDispatcher {
       camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
       // Orient model toward camera on first frame.
       const {x, z} = camera.position;
-      this[$presentedScene]!.pointTowards(x, z);
+      const scene = this[$presentedScene]!;
+      scene.pointTowards(x, z);
+      scene.model.updateMatrixWorld(true);
+      this[$initialModel2World].copy(scene.model.matrixWorld);
       this[$initialized] = true;
     }
 
@@ -346,7 +361,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const hit = hitTestResults[0];
-    const hitMatrix = this[$getHitMatrix](hit);
+    const hitMatrix = this[$getHitPoint](hit);
     if (hitMatrix == null) {
       return;
     }
@@ -366,28 +381,63 @@ export class ARRenderer extends EventDispatcher {
         });
   }
 
-  [$getHitMatrix](hit: XRHitTestResult): Matrix4|null {
-    const hitMatrix =
-        matrix4.fromArray(hit.getPose(this[$refSpace]!)!.transform.matrix);
+  [$getHitPoint](hitResult: XRHitTestResult): Vector3|null {
+    const hitMatrix = matrix4.fromArray(
+        hitResult.getPose(this[$refSpace]!)!.transform.matrix);
     // Check that the y-coordinate of the normal is large enough that the normal
     // is pointing up.
-    return hitMatrix.elements[10] > 0.75 ? hitMatrix : null;
+    return hitMatrix.elements[10] > 0.75 ?
+        hitPosition.setFromMatrixPosition(hitMatrix) :
+        null;
   }
 
-  placeModel(hitMatrix: Matrix4) {
-    // NOTE: Currently rays will be cast from the middle of the screen.
-    // Eventually we might use input coordinates for this.
-
+  /**
+   * This sets the initial model placement based on the input hit point. The
+   * bottom of the model will be placed on the floor (the shadow will rest on
+   * the input's y-coordinate). The XZ placement is found by first putting the
+   * scene's target at the hit point, drawing a ray from the camera to the
+   * target, and finding the XZ-intersection of this ray with the model's
+   * bounding box. The scene is then translated on the XZ plane to position this
+   * intersection point at the input hit point. If the ray does not intersect,
+   * the target is left at the hit point.
+   *
+   * This ensures the model is placed according to the chosen target, is not
+   * reoriented, and does not intersect the camera even when the model
+   * is large (unless the target is chosen outside of the model's bounding box).
+   */
+  placeModel(hit: Vector3) {
     const scene = this[$presentedScene]!;
     const {model} = scene;
-    const goal = this[$goalPosition];
+    const {min, max} = model.boundingBox;
     this[$placementBox]!.show = true;
 
-    goal.setFromMatrixPosition(hitMatrix);
-    // Position hit at the center of the lower forward edge of the model's
-    // bounding box.
-    const {min} = model.boundingBox;
-    goal.y -= min.y + model.position.y;
+    const goal = this[$goalPosition];
+    goal.copy(hit);
+    const floor = hit.y;
+
+    const origin = this.camera.position.clone();
+    const direction = hit.clone().sub(origin).normalize();
+    const ray = new Ray(origin, direction);
+
+    const model2World = this[$initialModel2World];
+    const modelPosition =
+        new Vector3().setFromMatrixPosition(model2World).add(hit);
+    model2World.setPosition(modelPosition);
+    const world2Model = new Matrix4().getInverse(model2World);
+    ray.applyMatrix4(world2Model);
+
+    // Make the box tall so that we don't intersect the top face.
+    max.y += 10;
+    ray.intersectBox(model.boundingBox, modelPosition);
+    max.y -= 10;
+
+    if (modelPosition != null) {
+      modelPosition.applyMatrix4(model2World);
+      goal.add(hit).sub(modelPosition);
+    }
+
+    // Ignore the y-coordinate and set on the floor instead.
+    goal.y = floor - min.y - model.position.y;
 
     this.dispatchEvent({type: 'modelmove'});
   }
@@ -430,30 +480,29 @@ export class ARRenderer extends EventDispatcher {
         return;
       }
 
-      const hitMatrix = this[$getHitMatrix](finger.results[0]);
-      if (hitMatrix == null) {
+      const hit = this[$getHitPoint](finger.results[0]);
+      if (hit == null) {
         return;
       }
 
       this[$goalPosition].sub(this[$lastDragPosition]);
 
       const initialHeight = this[$lastDragPosition].y;
-      const hitPosition =
-          this[$lastDragPosition].setFromMatrixPosition(hitMatrix);
+      this[$lastDragPosition].copy(hit);
 
-      const offset = hitPosition.y - initialHeight;
+      const offset = hit.y - initialHeight;
       // When a lower floor is found, keep the model at the same height, but
       // drop the placement box to the floor. The model drops on select end.
       if (offset < 0) {
         const cameraPosition = vector3.copy(this.camera.position);
-        const alpha = -offset / (cameraPosition.y - hitPosition.y);
+        const alpha = -offset / (cameraPosition.y - hit.y);
         cameraPosition.multiplyScalar(alpha);
-        hitPosition.multiplyScalar(1 - alpha).add(cameraPosition);
+        hit.multiplyScalar(1 - alpha).add(cameraPosition);
         this[$placementBox]!.offsetHeight = offset;
         this[$presentedScene]!.model.setShadowOffset(offset);
       }
 
-      this[$goalPosition].add(hitPosition);
+      this[$goalPosition].add(hit);
     });
   }
 
@@ -468,13 +517,7 @@ export class ARRenderer extends EventDispatcher {
     const {model, position, yaw} = scene;
     const radius = model.idealCameraDistance;
 
-    if (this[$initialHitSource] != null) {
-      // Locked to screen center
-      const {camera} = this;
-      camera.getWorldDirection(position);
-      position.multiplyScalar(radius);
-      position.add(camera.position);
-    } else {
+    if (this[$initialHitSource] == null) {
       const goal = this[$goalPosition];
       let {x, y, z} = position;
       delta *= this[$damperRate];
