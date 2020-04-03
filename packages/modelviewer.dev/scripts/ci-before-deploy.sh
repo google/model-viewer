@@ -18,7 +18,7 @@
 set -x
 
 DEPLOY_ROOT=$(dirname $0)/../
-GITIGNORE="${DEPLOY_ROOT}/.gitignore"
+GITIGNORE="${DEPLOY_ROOT}.gitignore"
 
 pushd $DEPLOY_ROOT
 
