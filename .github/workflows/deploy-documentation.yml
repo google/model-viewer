@@ -40,6 +40,9 @@ jobs:
     - name: Build packages
       run: npm run build
 
+    - name: Prepare documentation artifacts
+      run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
+
     - name: Deploy to Github Pages
       uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
