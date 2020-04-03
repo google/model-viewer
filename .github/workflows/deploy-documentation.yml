@@ -41,7 +41,7 @@ jobs:
       run: npm run build
 
     - name: Deploy to Github Pages
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+      uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages-test
