@@ -34,7 +34,7 @@ const ROTATION_RATE = 1.5;
 // assuming the phone is in portrait mode. This seems to be a reasonable
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
-const HIT_ANGLE_DEG = 15;
+const HIT_ANGLE_DEG = 20;
 // Slow down the dampers for initial placement.
 const INTRO_RATE = 0.4;
 
@@ -386,7 +386,7 @@ export class ARRenderer extends EventDispatcher {
         hitResult.getPose(this[$refSpace]!)!.transform.matrix);
     // Check that the y-coordinate of the normal is large enough that the normal
     // is pointing up.
-    return hitMatrix.elements[10] > 0.75 ?
+    return hitMatrix.elements[5] > 0.75 ?
         hitPosition.setFromMatrixPosition(hitMatrix) :
         null;
   }
