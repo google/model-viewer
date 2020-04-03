@@ -40,7 +40,12 @@ jobs:
     - name: Build packages
       run: npm run build
 
-    - name: Prepare documentation artifacts
+    - name: Generate fidelity artifacts 
+      uses: GabrielBB/xvfb-action@v1.0
+      with:
+        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+
+    - name: Stage documentation artifacts
       run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 
     - name: Deploy to Github Pages
@@ -49,3 +54,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages-test
         FOLDER: packages/modelviewer.dev
+        SINGLE_COMMIT: true
