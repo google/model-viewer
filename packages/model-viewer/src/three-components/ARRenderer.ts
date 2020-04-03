@@ -417,7 +417,9 @@ export class ARRenderer extends EventDispatcher {
 
     const origin = this.camera.position.clone();
     const direction = hit.clone().sub(origin).normalize();
-    const ray = new Ray(origin, direction);
+    // Pull camera back enough to be outside of large models.
+    origin.sub(direction.multiplyScalar(model.idealCameraDistance));
+    const ray = new Ray(origin, direction.normalize());
 
     const model2World = this[$initialModel2World];
     const modelPosition =
