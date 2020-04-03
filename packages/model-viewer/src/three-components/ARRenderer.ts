@@ -34,7 +34,7 @@ const ROTATION_RATE = 1.5;
 // assuming the phone is in portrait mode. This seems to be a reasonable
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
-const HIT_ANGLE_DEG = 0;
+const HIT_ANGLE_DEG = 15;
 // Slow down the dampers for initial placement.
 const INTRO_RATE = 0.4;
 
@@ -487,22 +487,21 @@ export class ARRenderer extends EventDispatcher {
 
       this[$goalPosition].sub(this[$lastDragPosition]);
 
-      const initialHeight = this[$lastDragPosition].y;
-      this[$lastDragPosition].copy(hit);
-
-      const offset = hit.y - initialHeight;
+      const offset = hit.y - this[$lastDragPosition].y;
       // When a lower floor is found, keep the model at the same height, but
-      // drop the placement box to the floor. The model drops on select end.
+      // drop the placement box to the floor. The model falls on select end.
       if (offset < 0) {
+        this[$placementBox]!.offsetHeight = offset;
+        this[$presentedScene]!.model.setShadowOffset(offset);
+        // Interpolate hit ray up to drag plane
         const cameraPosition = vector3.copy(this.camera.position);
         const alpha = -offset / (cameraPosition.y - hit.y);
         cameraPosition.multiplyScalar(alpha);
         hit.multiplyScalar(1 - alpha).add(cameraPosition);
-        this[$placementBox]!.offsetHeight = offset;
-        this[$presentedScene]!.model.setShadowOffset(offset);
       }
 
       this[$goalPosition].add(hit);
+      this[$lastDragPosition].copy(hit);
     });
   }
 
