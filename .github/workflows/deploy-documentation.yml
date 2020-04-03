@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  compare_renders:
+  deploy_github_pages:
     runs-on: ubuntu-latest
 
     steps:
