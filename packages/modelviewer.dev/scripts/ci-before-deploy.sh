@@ -18,12 +18,12 @@
 set -x
 
 DEPLOY_ROOT=$(dirname $0)/../
-GITIGNORE="${DEPLOY_ROOT}.gitignore"
 
 pushd $DEPLOY_ROOT
 
 touch .nojekyll
 
+GITIGNORE="./.gitignore"
 
 rm $GITIGNORE
 echo 'node_modules/*' > $GITIGNORE
