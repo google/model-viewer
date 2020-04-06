@@ -17,6 +17,7 @@ import {Texture} from 'three';
 
 import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$shadow} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
@@ -200,7 +201,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     test('changes the opacity of the static shadow', async () => {
       element.shadowIntensity = 1.0;
       await timePasses();
-      const newIntensity = scene.shadow!.getIntensity();
+      const newIntensity = scene.model[$shadow]!.getIntensity();
       expect(newIntensity).to.be.eq(BASE_OPACITY);
     });
   });

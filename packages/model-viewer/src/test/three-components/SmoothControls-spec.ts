@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {Camera, PerspectiveCamera, Vector3} from 'three';
+import {PerspectiveCamera, Vector3} from 'three';
 
-import {ChangeSource, Damper, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
-import {step} from '../../utilities.js';
+import {Damper} from '../../three-components/Damper.js';
+import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {dispatchSyntheticEvent, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
@@ -30,28 +30,6 @@ const THREE_QUARTERS_PI = HALF_PI + QUARTER_PI;
 
 const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
 const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
-
-// NOTE(cdata): Precision is a bit off when comparing e.g., expected camera
-// direction in practice:
-const FLOAT_EQUALITY_THRESHOLD = 1e-6;
-
-/**
- * Returns true if the camera is looking at a given position, within +/-
- * FLOAT_EQUALITY_THRESHOLD on each axis.
- */
-const cameraIsLookingAt = (camera: Camera, position: Vector3) => {
-  const cameraDirection = camera.getWorldDirection(new Vector3());
-  const expectedDirection = position.clone().sub(camera.position).normalize();
-
-  const deltaX = Math.abs(cameraDirection.x - expectedDirection.x);
-  const deltaY = Math.abs(cameraDirection.y - expectedDirection.y);
-  const deltaZ = Math.abs(cameraDirection.z - expectedDirection.z);
-
-  return step(FLOAT_EQUALITY_THRESHOLD, deltaX) === 0 &&
-      step(FLOAT_EQUALITY_THRESHOLD, deltaY) === 0 &&
-      step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
-};
-
 
 /**
  * Settle controls by performing 50 frames worth of updates
@@ -112,21 +90,6 @@ suite('SmoothControls', () => {
       expect(radius).to.be.within(
           DEFAULT_OPTIONS.minimumRadius as number,
           DEFAULT_OPTIONS.maximumRadius as number);
-    });
-
-    test('causes the camera to look at the target', () => {
-      settleControls(controls);
-      expect(cameraIsLookingAt(camera, controls.getTarget())).to.be.equal(true);
-    });
-
-    suite('when target is modified', () => {
-      test('camera looks at the configured target', () => {
-        controls.setTarget(3, 2, 1);
-        settleControls(controls);
-
-        expect(cameraIsLookingAt(camera, controls.getTarget()))
-            .to.be.equal(true);
-      });
     });
 
     suite('when orbit is changed', () => {
