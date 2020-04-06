@@ -23,15 +23,18 @@ pushd $DEPLOY_ROOT
 
 touch .nojekyll
 
-echo 'node_modules/*' > .gitignore
-echo '!node_modules/@webcomponents' >> .gitignore
-echo '!node_modules/focus-visible' >> .gitignore
-echo '!node_modules/intersection-observer' >> .gitignore
-echo '!node_modules/@magicleap' >> .gitignore
-echo '!node_modules/fullscreen-polyfill' >> .gitignore
-echo '!node_modules/resize-observer-polyfill' >> .gitignore
-echo '!node_modules/filament' >> .gitignore
-echo '!node_modules/@google' >> .gitignore
+GITIGNORE="./.gitignore"
+
+rm $GITIGNORE
+echo 'node_modules/*' > $GITIGNORE
+echo '!node_modules/@webcomponents' >> $GITIGNORE
+echo '!node_modules/focus-visible' >> $GITIGNORE
+echo '!node_modules/intersection-observer' >> $GITIGNORE
+echo '!node_modules/@magicleap' >> $GITIGNORE
+echo '!node_modules/fullscreen-polyfill' >> $GITIGNORE
+echo '!node_modules/resize-observer-polyfill' >> $GITIGNORE
+echo '!node_modules/filament' >> $GITIGNORE
+echo '!node_modules/@google' >> $GITIGNORE
 
 ln -s ./node_modules/\@google/model-viewer/dist ./dist
 
