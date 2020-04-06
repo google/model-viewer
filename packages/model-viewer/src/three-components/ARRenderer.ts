@@ -49,6 +49,7 @@ const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
+const $frame = Symbol('frame');
 const $initialized = Symbol('initialized');
 const $initialModel2World = Symbol('initialModel2World');
 const $placementComplete = Symbol('placementComplete');
@@ -57,14 +58,17 @@ const $transientHitTestSource = Symbol('transiertHitTestSource');
 const $inputSource = Symbol('inputSource');
 const $isTranslating = Symbol('isTranslating');
 const $isRotating = Symbol('isRotating');
+const $isScaling = Symbol('isScaling');
 const $lastDragPosition = Symbol('lastDragPosition');
-const $lastDragX = Symbol('lastDragX');
+const $lastScalar = Symbol('lastScalar');
 const $goalPosition = Symbol('goalPosition');
 const $goalYaw = Symbol('goalYaw');
+const $goalScale = Symbol('goalScale');
 const $xDamper = Symbol('xDamper');
 const $yDamper = Symbol('yDamper');
 const $zDamper = Symbol('zDamper');
 const $yawDamper = Symbol('yawDamper');
+const $scaleDamper = Symbol('scaleDamper');
 const $damperRate = Symbol('damperRate');
 const $resolveCleanup = Symbol('resolveCleanup');
 
@@ -77,8 +81,8 @@ const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
-const $processTransientInput = Symbol('processTransientInput');
-const $processRotation = Symbol('processRotation');
+const $fingerSeparation = Symbol('fingerSeparation');
+const $processInput = Symbol('processInput');
 const $moveScene = Symbol('moveScene');
 
 const vector3 = new Vector3();
@@ -89,6 +93,7 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
+  public canScale = true;
 
   private[$placementBox]: PlacementBox|null = null;
   private[$lastTick]: number|null = null;
@@ -99,6 +104,7 @@ export class ARRenderer extends EventDispatcher {
   private[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
+  private[$frame]: XRFrame|null = null;
   private[$initialHitSource]: XRHitTestSource|null = null;
   private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
   private[$inputSource]: XRInputSource|null = null;
@@ -110,14 +116,17 @@ export class ARRenderer extends EventDispatcher {
   private[$placementComplete] = false;
   private[$isTranslating] = false;
   private[$isRotating] = false;
+  private[$isScaling] = false;
   private[$lastDragPosition] = new Vector3();
-  private[$lastDragX] = 0;
+  private[$lastScalar] = 0;
   private[$goalPosition] = new Vector3();
   private[$goalYaw] = 0;
+  private[$goalScale] = 1;
   private[$xDamper] = new Damper();
   private[$yDamper] = new Damper();
   private[$zDamper] = new Damper();
   private[$yawDamper] = new Damper();
+  private[$scaleDamper] = new Damper();
   private[$damperRate] = 1;
 
   private[$selectStartHandler] = (event: Event) =>
@@ -226,7 +235,7 @@ export class ARRenderer extends EventDispatcher {
     scene.background = null;
 
     this[$oldShadowIntensity] = scene.shadowIntensity;
-    scene.setShadowIntensity(AR_SHADOW_INTENSITY);
+    scene.setShadowIntensity(0);
 
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = new XRRay(
@@ -286,6 +295,7 @@ export class ARRenderer extends EventDispatcher {
       model.remove(this[$placementBox]!);
 
       scene.position.set(0, 0, 0);
+      scene.scale.set(1, 1, 1);
       scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
@@ -445,72 +455,114 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$onSelectStart](event: XRInputSourceEvent) {
-    this[$inputSource] = event.inputSource;
-    const {axes} = event.inputSource.gamepad;
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource == null) {
+      return;
+    }
+    const fingers = this[$frame]!.getHitTestResultsForTransientInput(hitSource);
     const box = this[$placementBox]!;
 
-    const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
-    box.show = true;
+    if (fingers.length === 1) {
+      this[$inputSource] = event.inputSource;
+      const {axes} = event.inputSource.gamepad;
 
-    if (hitPosition != null) {
-      this[$isTranslating] = true;
-      this[$lastDragPosition].copy(hitPosition);
-    } else {
-      this[$isRotating] = true;
-      this[$lastDragX] = axes[0];
+      const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
+      box.show = true;
+
+      if (hitPosition != null) {
+        this[$isTranslating] = true;
+        this[$lastDragPosition].copy(hitPosition);
+      } else {
+        this[$isRotating] = true;
+        this[$lastScalar] = axes[0];
+      }
+    } else if (fingers.length === 2 && this.canScale) {
+      box.show = true;
+      this[$isScaling] = true;
+      this[$lastScalar] =
+          this[$fingerSeparation](fingers) / this[$presentedScene]!.scale.x;
     }
   }
 
   [$onSelectEnd](_event: XRInputSourceEvent) {
     this[$isTranslating] = false;
     this[$isRotating] = false;
+    this[$isScaling] = false;
     this[$inputSource] = null;
     this[$goalPosition].y += this[$placementBox]!.offsetHeight;
     this[$placementBox]!.show = false
   }
 
-  [$processTransientInput](frame: XRFrame) {
+  [$fingerSeparation](fingers: XRTransientInputHitTestResult[]): number {
+    const finger0 = fingers[0].inputSource.gamepad.axes;
+    const finger1 = fingers[1].inputSource.gamepad.axes;
+    const deltaX = finger1[0] - finger0[0];
+    const deltaY = finger1[1] - finger0[1];
+    return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  }
+
+  [$processInput](frame: XRFrame) {
     const hitSource = this[$transientHitTestSource];
     if (hitSource == null) {
       return;
     }
+    if (!this[$isTranslating] && !this[$isScaling] && !this[$isRotating]) {
+      return;
+    }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
 
-    fingers.forEach(finger => {
-      if (finger.inputSource !== this[$inputSource] ||
-          finger.results.length < 1) {
-        return;
+    if (this[$isScaling]) {
+      if (fingers.length < 2) {
+        this[$isScaling] = false;
+      } else {
+        const separation = this[$fingerSeparation](fingers);
+        this[$goalScale] = separation / this[$lastScalar];
       }
+      return;
+    } else if (fingers.length === 2 && this.canScale) {
+      this[$isTranslating] = false;
+      this[$isRotating] = false;
+      this[$isScaling] = true;
+      this[$lastScalar] =
+          this[$fingerSeparation](fingers) / this[$presentedScene]!.scale.x;
+      return;
+    }
 
-      const hit = this[$getHitPoint](finger.results[0]);
-      if (hit == null) {
-        return;
-      }
+    if (this[$isRotating]) {
+      const thisDragX = this[$inputSource]!.gamepad.axes[0];
+      this[$goalYaw] += (thisDragX - this[$lastScalar]) * ROTATION_RATE;
+      this[$lastScalar] = thisDragX;
+    } else if (this[$isTranslating]) {
+      fingers.forEach(finger => {
+        if (finger.inputSource !== this[$inputSource] ||
+            finger.results.length < 1) {
+          return;
+        }
 
-      this[$goalPosition].sub(this[$lastDragPosition]);
+        const hit = this[$getHitPoint](finger.results[0]);
+        if (hit == null) {
+          return;
+        }
 
-      const offset = hit.y - this[$lastDragPosition].y;
-      // When a lower floor is found, keep the model at the same height, but
-      // drop the placement box to the floor. The model falls on select end.
-      if (offset < 0) {
-        this[$placementBox]!.offsetHeight = offset;
-        this[$presentedScene]!.model.setShadowOffset(offset);
-        // Interpolate hit ray up to drag plane
-        const cameraPosition = vector3.copy(this.camera.position);
-        const alpha = -offset / (cameraPosition.y - hit.y);
-        cameraPosition.multiplyScalar(alpha);
-        hit.multiplyScalar(1 - alpha).add(cameraPosition);
-      }
+        this[$goalPosition].sub(this[$lastDragPosition]);
 
-      this[$goalPosition].add(hit);
-      this[$lastDragPosition].copy(hit);
-    });
-  }
+        const offset = hit.y - this[$lastDragPosition].y;
+        // When a lower floor is found, keep the model at the same height, but
+        // drop the placement box to the floor. The model falls on select end.
+        if (offset < 0) {
+          this[$placementBox]!.offsetHeight = offset;
+          this[$presentedScene]!.model.setShadowOffset(offset);
+          // Interpolate hit ray up to drag plane
+          const cameraPosition = vector3.copy(this.camera.position);
+          const alpha = -offset / (cameraPosition.y - hit.y);
+          cameraPosition.multiplyScalar(alpha);
+          hit.multiplyScalar(1 - alpha).add(cameraPosition);
+        }
 
-  [$processRotation]() {
-    const thisDragX = this[$inputSource]!.gamepad.axes[0];
-    this[$goalYaw] += (thisDragX - this[$lastDragX]) * ROTATION_RATE;
-    this[$lastDragX] = thisDragX;
+        this[$goalPosition].add(hit);
+        this[$lastDragPosition].copy(hit);
+      });
+    }
   }
 
   [$moveScene](delta: number) {
@@ -527,6 +579,11 @@ export class ARRenderer extends EventDispatcher {
       z = this[$zDamper].update(z, goal.z, delta, radius);
       position.set(x, y, z);
 
+      const oldScale = scene.scale.x;
+      const newScale =
+          this[$scaleDamper].update(oldScale, this[$goalScale], delta, 1);
+      scene.scale.set(newScale, newScale, newScale);
+
       const box = this[$placementBox]!;
       box.updateOpacity(delta);
       if (!this[$isTranslating]) {
@@ -537,6 +594,7 @@ export class ARRenderer extends EventDispatcher {
         } else if (offset === 0) {
           this[$placementComplete] = true;
           box.show = false;
+          scene.setShadowIntensity(AR_SHADOW_INTENSITY);
           this[$damperRate] = 1;
         }
       }
@@ -553,6 +611,7 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$onWebXRFrame](time: number, frame: XRFrame) {
+    this[$frame] = frame;
     const pose = frame.getViewerPose(this[$refSpace]!);
 
     // TODO: Notify external observers of tick
@@ -567,13 +626,7 @@ export class ARRenderer extends EventDispatcher {
 
     this[$placeInitially](frame);
 
-    if (this[$isTranslating] === true) {
-      this[$processTransientInput](frame);
-    }
-
-    if (this[$isRotating] === true) {
-      this[$processRotation]();
-    }
+    this[$processInput](frame);
 
     const delta = time - this[$lastTick]!;
     this[$moveScene](delta);
