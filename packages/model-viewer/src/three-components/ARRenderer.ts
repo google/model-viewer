@@ -37,7 +37,7 @@ const ROTATION_RATE = 1.5;
 const HIT_ANGLE_DEG = 20;
 // Slow down the dampers for initial placement.
 const INTRO_RATE = 0.4;
-const SCALE_SNAP = 1.1;
+const SCALE_SNAP = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP;
 
 const $presentedScene = Symbol('presentedScene');
@@ -232,6 +232,8 @@ export class ARRenderer extends EventDispatcher {
     scene.setCamera(this.camera);
     this[$initialized] = false;
     this[$damperRate] = INTRO_RATE;
+    this[$goalYaw] = 0;
+    this[$goalScale] = 1;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -423,6 +425,7 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene]!;
     const {model} = scene;
     const {min, max} = model.boundingBox;
+
     this[$placementBox]!.show = true;
 
     const goal = this[$goalPosition];
@@ -453,7 +456,8 @@ export class ARRenderer extends EventDispatcher {
     }
 
     // Move the scene's target to the model's floor height.
-    model.position.y = -min.y;
+    const target = scene.getTarget();
+    scene.setTarget(target.x, min.y, target.z);
     // Ignore the y-coordinate and set on the floor instead.
     goal.y = floor;
 
@@ -608,6 +612,7 @@ export class ARRenderer extends EventDispatcher {
         }
       }
     }
+    scene.updateTarget(delta);
     // This updates the model's position, which the shadow is based on.
     scene.updateMatrixWorld(true);
     // yaw must be updated last, since this also updates the shadow position.
