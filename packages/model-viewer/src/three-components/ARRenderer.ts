@@ -582,9 +582,12 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene]!;
     const {model, position, yaw} = scene;
     const radius = model.idealCameraDistance;
+    const goal = this[$goalPosition];
+    const oldScale = scene.scale.x;
+    const box = this[$placementBox]!;
 
-    if (this[$initialHitSource] == null) {
-      const goal = this[$goalPosition];
+    if (this[$initialHitSource] == null &&
+        (!goal.equals(position) || this[$goalScale] !== oldScale)) {
       let {x, y, z} = position;
       delta *= this[$damperRate];
       x = this[$xDamper].update(x, goal.x, delta, radius);
@@ -592,13 +595,10 @@ export class ARRenderer extends EventDispatcher {
       z = this[$zDamper].update(z, goal.z, delta, radius);
       position.set(x, y, z);
 
-      const oldScale = scene.scale.x;
       const newScale =
           this[$scaleDamper].update(oldScale, this[$goalScale], delta, 1);
       scene.scale.set(newScale, newScale, newScale);
 
-      const box = this[$placementBox]!;
-      box.updateOpacity(delta);
       if (!this[$isTranslating]) {
         const offset = goal.y - y;
         if (this[$placementComplete]) {
@@ -612,6 +612,7 @@ export class ARRenderer extends EventDispatcher {
         }
       }
     }
+    box.updateOpacity(delta);
     scene.updateTarget(delta);
     // This updates the model's position, which the shadow is based on.
     scene.updateMatrixWorld(true);

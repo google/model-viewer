@@ -171,7 +171,6 @@ export class Shadow extends DirectionalLight {
     camera.near = 0;
     camera.far = sizeY * scale - offset;
 
-    this.updateMatrixWorld();
     camera.projectionMatrix.makeOrthographic(
         camera.left * scale,
         camera.right * scale,
