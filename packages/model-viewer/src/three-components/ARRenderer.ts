@@ -300,6 +300,7 @@ export class ARRenderer extends EventDispatcher {
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
       model.orientHotspots(0);
+      element.requestUpdate('cameraTarget');
       element[$needsRender]();
 
       this.renderer.expandTo(scene.width, scene.height);
@@ -448,8 +449,10 @@ export class ARRenderer extends EventDispatcher {
       goal.add(hit).sub(modelPosition);
     }
 
+    // Move the scene's target to the model's floor height.
+    model.position.y = -min.y;
     // Ignore the y-coordinate and set on the floor instead.
-    goal.y = floor - min.y - model.position.y;
+    goal.y = floor;
 
     this.dispatchEvent({type: 'modelmove'});
   }
@@ -489,7 +492,8 @@ export class ARRenderer extends EventDispatcher {
     this[$isRotating] = false;
     this[$isScaling] = false;
     this[$inputSource] = null;
-    this[$goalPosition].y += this[$placementBox]!.offsetHeight;
+    this[$goalPosition].y +=
+        this[$placementBox]!.offsetHeight * this[$presentedScene]!.scale.x;
     this[$placementBox]!.show = false
   }
 
@@ -510,6 +514,7 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
+    const scale = this[$presentedScene]!.scale.x;
 
     if (this[$isScaling]) {
       if (fingers.length < 2) {
@@ -523,8 +528,7 @@ export class ARRenderer extends EventDispatcher {
       this[$isTranslating] = false;
       this[$isRotating] = false;
       this[$isScaling] = true;
-      this[$lastScalar] =
-          this[$fingerSeparation](fingers) / this[$presentedScene]!.scale.x;
+      this[$lastScalar] = this[$fingerSeparation](fingers) / scale;
       return;
     }
 
@@ -550,8 +554,9 @@ export class ARRenderer extends EventDispatcher {
         // When a lower floor is found, keep the model at the same height, but
         // drop the placement box to the floor. The model falls on select end.
         if (offset < 0) {
-          this[$placementBox]!.offsetHeight = offset;
-          this[$presentedScene]!.model.setShadowOffset(offset);
+          const modelOffset = offset / scale;
+          this[$placementBox]!.offsetHeight = modelOffset;
+          this[$presentedScene]!.model.setShadowOffset(modelOffset);
           // Interpolate hit ray up to drag plane
           const cameraPosition = vector3.copy(this.camera.position);
           const alpha = -offset / (cameraPosition.y - hit.y);
@@ -587,7 +592,7 @@ export class ARRenderer extends EventDispatcher {
       const box = this[$placementBox]!;
       box.updateOpacity(delta);
       if (!this[$isTranslating]) {
-        const offset = goal.y - y;
+        const offset = (goal.y - y) / newScale;
         if (this[$placementComplete]) {
           box.offsetHeight = offset;
           model.setShadowOffset(offset);
