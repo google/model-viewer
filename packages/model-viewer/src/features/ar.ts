@@ -18,7 +18,6 @@ import {property} from 'lit-element';
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$container, $renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {$arRenderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
@@ -310,8 +309,7 @@ configuration or device capabilities');
       }
 
       if (changedProperties.has('arScale')) {
-        this[$renderer][$arRenderer].canScale =
-            this.arScale === 'fixed' ? false : true;
+        this[$scene].canScale = this.arScale !== 'fixed';
       }
 
       this[$arMode] = ARMode.NONE;

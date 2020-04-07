@@ -66,6 +66,7 @@ export class ModelScene extends Scene {
       null;
   public exposure = 1;
   public model: Model;
+  public canScale = true;
   public framedFieldOfView = DEFAULT_FOV_DEG;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the

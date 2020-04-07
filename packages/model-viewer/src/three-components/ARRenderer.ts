@@ -95,7 +95,6 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public canScale = true;
 
   private[$placementBox]: PlacementBox|null = null;
   private[$lastTick]: number|null = null;
@@ -470,6 +469,7 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
     const fingers = this[$frame]!.getHitTestResultsForTransientInput(hitSource);
+    const scene = this[$presentedScene]!;
     const box = this[$placementBox]!;
 
     if (fingers.length === 1) {
@@ -486,11 +486,10 @@ export class ARRenderer extends EventDispatcher {
         this[$isRotating] = true;
         this[$lastScalar] = axes[0];
       }
-    } else if (fingers.length === 2 && this.canScale) {
+    } else if (fingers.length === 2 && scene.canScale) {
       box.show = true;
       this[$isScaling] = true;
-      this[$lastScalar] =
-          this[$fingerSeparation](fingers) / this[$presentedScene]!.scale.x;
+      this[$lastScalar] = this[$fingerSeparation](fingers) / scene.scale.x;
     }
   }
 
@@ -521,7 +520,8 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
-    const scale = this[$presentedScene]!.scale.x;
+    const scene = this[$presentedScene]!;
+    const scale = scene.scale.x;
 
     if (this[$isScaling]) {
       if (fingers.length < 2) {
@@ -533,7 +533,7 @@ export class ARRenderer extends EventDispatcher {
             (scale < SCALE_SNAP && scale > SCALE_SNAP_LOW) ? 1 : scale;
       }
       return;
-    } else if (fingers.length === 2 && this.canScale) {
+    } else if (fingers.length === 2 && scene.canScale) {
       this[$isTranslating] = false;
       this[$isRotating] = false;
       this[$isScaling] = true;
