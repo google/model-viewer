@@ -37,6 +37,8 @@ const ROTATION_RATE = 1.5;
 const HIT_ANGLE_DEG = 20;
 // Slow down the dampers for initial placement.
 const INTRO_RATE = 0.4;
+const SCALE_SNAP = 1.1;
+const SCALE_SNAP_LOW = 1 / SCALE_SNAP;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -522,7 +524,9 @@ export class ARRenderer extends EventDispatcher {
         this[$isScaling] = false;
       } else {
         const separation = this[$fingerSeparation](fingers);
-        this[$goalScale] = separation / this[$lastScalar];
+        const scale = separation / this[$lastScalar];
+        this[$goalScale] =
+            (scale < SCALE_SNAP && scale > SCALE_SNAP_LOW) ? 1 : scale;
       }
       return;
     } else if (fingers.length === 2 && this.canScale) {
