@@ -296,6 +296,7 @@ export class ARRenderer extends EventDispatcher {
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
+      model.setShadowScaleAndOffset(1, 0);
       scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
@@ -554,9 +555,8 @@ export class ARRenderer extends EventDispatcher {
         // When a lower floor is found, keep the model at the same height, but
         // drop the placement box to the floor. The model falls on select end.
         if (offset < 0) {
-          const modelOffset = offset / scale;
-          this[$placementBox]!.offsetHeight = modelOffset;
-          this[$presentedScene]!.model.setShadowOffset(modelOffset);
+          this[$placementBox]!.offsetHeight = offset / scale;
+          this[$presentedScene]!.model.setShadowScaleAndOffset(scale, offset);
           // Interpolate hit ray up to drag plane
           const cameraPosition = vector3.copy(this.camera.position);
           const alpha = -offset / (cameraPosition.y - hit.y);
@@ -592,10 +592,10 @@ export class ARRenderer extends EventDispatcher {
       const box = this[$placementBox]!;
       box.updateOpacity(delta);
       if (!this[$isTranslating]) {
-        const offset = (goal.y - y) / newScale;
+        const offset = goal.y - y;
         if (this[$placementComplete]) {
-          box.offsetHeight = offset;
-          model.setShadowOffset(offset);
+          box.offsetHeight = offset / newScale;
+          model.setShadowScaleAndOffset(newScale, offset);
         } else if (offset === 0) {
           this[$placementComplete] = true;
           box.show = false;
