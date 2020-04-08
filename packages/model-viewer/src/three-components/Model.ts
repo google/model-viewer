@@ -348,10 +348,10 @@ export default class Model extends Object3D {
    * Shift the floor vertically from the bottom of the model's bounding box by
    * offset (should generally be negative).
    */
-  setShadowOffset(offset: number) {
+  setShadowScaleAndOffset(scale: number, offset: number) {
     const shadow = this[$shadow];
     if (shadow != null) {
-      shadow.setOffset(offset);
+      shadow.setScaleAndOffset(scale, offset);
     }
   }
 

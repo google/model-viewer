@@ -18,6 +18,7 @@ import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Sce
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
+import {Damper} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -41,6 +42,7 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 
 const raycaster = new Raycaster();
+const vector3 = new Vector3();
 
 const $paused = Symbol('paused');
 
@@ -64,11 +66,17 @@ export class ModelScene extends Scene {
       null;
   public exposure = 1;
   public model: Model;
+  public canScale = true;
   public framedFieldOfView = DEFAULT_FOV_DEG;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
+
+  private goalTarget = new Vector3();
+  private targetDamperX = new Damper();
+  private targetDamperY = new Damper();
+  private targetDamperZ = new Damper();
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
@@ -147,6 +155,8 @@ export class ModelScene extends Scene {
 
       const renderer = this.element[$renderer];
       renderer.expandTo(this.width, this.height);
+      this.canvas.width = renderer.width;
+      this.canvas.height = renderer.height;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
@@ -209,8 +219,29 @@ export class ModelScene extends Scene {
    * Sets the point in model coordinates the model should orbit/pivot around.
    */
   setTarget(modelX: number, modelY: number, modelZ: number) {
-    this.model.position.set(-modelX, -modelY, -modelZ);
-    this.isDirty = true;
+    this.goalTarget.set(-modelX, -modelY, -modelZ);
+  }
+
+  getTarget(): Vector3 {
+    return vector3.copy(this.goalTarget).multiplyScalar(-1);
+  }
+
+  jumpToGoal() {
+    this.updateTarget(10000);
+  }
+
+  updateTarget(delta: number) {
+    const goal = this.goalTarget;
+    const target = this.model.position;
+    if (!goal.equals(target)) {
+      const radius = this.model.idealCameraDistance;
+      let {x, y, z} = target;
+      x = this.targetDamperX.update(x, goal.x, delta, radius);
+      y = this.targetDamperY.update(y, goal.y, delta, radius);
+      z = this.targetDamperZ.update(z, goal.z, delta, radius);
+      this.model.position.set(x, y, z);
+      this.isDirty = true;
+    }
   }
 
   /**

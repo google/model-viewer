@@ -132,7 +132,7 @@ export class Shadow extends DirectionalLight {
     camera.bottom = boundingBox.min.z - heightPad;
     camera.top = boundingBox.max.z + heightPad;
 
-    this.setOffset(0);
+    this.setScaleAndOffset(camera.zoom, 0);
     this.shadow.updateMatrices(this);
 
     this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
@@ -159,16 +159,25 @@ export class Shadow extends DirectionalLight {
     this.shadow.updateMatrices(this);
   }
 
-  setOffset(offset: number) {
+  setScaleAndOffset(scale: number, offset: number) {
     const sizeY = this.size.y;
+    const inverseScale = 1 / scale;
     // Floor plane is up slightly from the bottom of the bounding box to avoid
     // Z-fighting with baked-in shadows and to stay inside the shadow camera.
     const shadowOffset = sizeY * OFFSET;
-    this.floor.position.y = 2 * shadowOffset - sizeY + offset;
+    this.floor.position.y = 2 * shadowOffset - sizeY + offset * inverseScale;
     const {camera} = this.shadow;
+    camera.zoom = scale;
     camera.near = 0;
-    camera.far = sizeY - offset;
-    this.updateMatrixWorld();
-    camera.updateProjectionMatrix();
+    camera.far = sizeY * scale - offset;
+
+    camera.projectionMatrix.makeOrthographic(
+        camera.left * scale,
+        camera.right * scale,
+        camera.top * scale,
+        camera.bottom * scale,
+        camera.near,
+        camera.far);
+    camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
   }
 }
