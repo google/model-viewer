@@ -16,7 +16,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 import {CameraChangeDetails} from './controls.js';
@@ -84,10 +84,8 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
           delta, time - this[$autoRotateStartTime] - this.autoRotateDelay);
 
       if (rotationDelta > 0) {
-        this[$scene].setPivotRotation(
-            this[$scene].getPivotRotation() +
-            ROTATION_SPEED * rotationDelta * 0.001);
-        this[$needsRender]();
+        this[$scene].yaw =
+            this.turntableRotation + ROTATION_SPEED * rotationDelta * 0.001;
       }
     }
 
@@ -102,12 +100,11 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get turntableRotation(): number {
-      return this[$scene].getPivotRotation();
+      return this[$scene].yaw;
     }
 
     resetTurntableRotation() {
-      this[$scene].setPivotRotation(0);
-      this[$needsRender]();
+      this[$scene].yaw = 0;
     }
   }
 

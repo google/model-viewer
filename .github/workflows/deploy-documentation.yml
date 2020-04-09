@@ -1,0 +1,57 @@
+name: Deploy documentation 
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy_github_pages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Get npm cache directory
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+
+    - name: Cache npm packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.npm-cache.outputs.dir }}
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: NPM install
+      run: npm ci
+
+    - name: Lint TypeScript sources
+      run: npm run lint
+
+    - name: Bootstrap packages
+      run: npm run bootstrap
+
+    - name: Build packages
+      run: npm run build
+
+    - name: Generate fidelity artifacts 
+      uses: GabrielBB/xvfb-action@v1.0
+      with:
+        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+
+    - name: Stage documentation artifacts
+      run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
+
+    - name: Deploy to Github Pages
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages-test
+        FOLDER: packages/modelviewer.dev
+        SINGLE_COMMIT: true

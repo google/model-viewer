@@ -212,7 +212,7 @@ export class Renderer extends EventDispatcher {
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure, shadow} = scene;
+    const {element, exposure, model} = scene;
 
     element[$tick](t, delta);
 
@@ -220,11 +220,8 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    const shadowNeedsUpdate = this.threeRenderer.shadowMap.needsUpdate;
-    if (shadow != null) {
-      this.threeRenderer.shadowMap.needsUpdate =
-          shadowNeedsUpdate || shadow.needsUpdate;
-      shadow.needsUpdate = false;
+    if (model.updateShadow()) {
+      this.threeRenderer.shadowMap.needsUpdate = true;
     }
   }
 

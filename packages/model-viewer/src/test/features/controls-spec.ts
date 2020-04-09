@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+import {Camera, Vector3} from 'three';
+
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$canvas, $scene, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
-import {Constructor} from '../../utilities.js';
+import {Constructor, step} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
@@ -50,6 +52,30 @@ const expectSphericalsToBeEqual =
               sphericalTwo.radius.toFixed(precision),
               'Spherical radius does not match');
     };
+
+// NOTE(cdata): Precision is a bit off when comparing e.g., expected camera
+// direction in practice:
+const FLOAT_EQUALITY_THRESHOLD = 1e-6;
+
+/**
+ * Returns true if the camera is looking at a given position, within +/-
+ * FLOAT_EQUALITY_THRESHOLD on each axis.
+ */
+const cameraIsLookingAt = (camera: Camera, position: Vector3D) => {
+  const cameraDirection = camera.getWorldDirection(new Vector3());
+  const expectedDirection = new Vector3(position.x, position.y, position.z)
+                                .sub(camera.position)
+                                .normalize();
+
+  const deltaX = Math.abs(cameraDirection.x - expectedDirection.x);
+  const deltaY = Math.abs(cameraDirection.y - expectedDirection.y);
+  const deltaZ = Math.abs(cameraDirection.z - expectedDirection.z);
+
+  return step(FLOAT_EQUALITY_THRESHOLD, deltaX) === 0 &&
+      step(FLOAT_EQUALITY_THRESHOLD, deltaY) === 0 &&
+      step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
+};
+
 
 suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
@@ -173,6 +199,23 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         settleControls(controls);
 
         expect(element.getCameraTarget()).to.be.eql(target);
+      });
+
+      test('causes the camera to look at the target', () => {
+        expect(cameraIsLookingAt(
+                   element[$scene].camera, element.getCameraTarget()))
+            .to.be.equal(true);
+      });
+
+      suite('when target is modified', () => {
+        test('camera looks at the configured target', () => {
+          element.cameraTarget = '3m 2m 1m';
+          element.jumpCameraToGoal();
+
+          expect(cameraIsLookingAt(
+                     element[$scene].camera, element.getCameraTarget()))
+              .to.be.equal(true);
+        });
       });
 
       test('defaults FOV correctly', async () => {
