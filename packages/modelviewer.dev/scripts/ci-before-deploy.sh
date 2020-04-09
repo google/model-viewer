@@ -74,6 +74,9 @@ popd
 
 git log -n 1 > VERSION
 
+git add *
+git commit -m "Stage documentation for deploy"
+
 popd
 
 set +x
