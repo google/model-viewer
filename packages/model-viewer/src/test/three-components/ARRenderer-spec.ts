@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-import {Camera, Matrix4, Vector3} from 'three';
+import {Vector3} from 'three';
 
-import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {assetPath, waitForEvent} from '../helpers.js';
+import {assetPath} from '../helpers.js';
 
 
 const expect = chai.expect;
 
+/**
 const applyPhoneRotation = (camera: Camera) => {
   // Rotate 180 degrees on Y (so it's not the default)
   // and angle 45 degrees towards the ground, like a phone.
@@ -32,7 +33,6 @@ const applyPhoneRotation = (camera: Camera) => {
           new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4));
 };
 
-/**
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
   }
@@ -56,14 +56,16 @@ class MockXRFrame implements XRFrame {
 }
 */
 
-customElements.define('model-viewer-element', ModelViewerElementBase);
-
 suite('ARRenderer', () => {
   let element: ModelViewerElementBase;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
   let inputSources: Array<XRInputSource> = [];
+
+  let ModelViewerElement = class extends ModelViewerElementBase {};
+
+  customElements.define('model-viewer-arrenderer', ModelViewerElement);
 
   const setInputSources = (sources: Array<XRInputSource>) => {
     inputSources = sources;
@@ -130,7 +132,7 @@ suite('ARRenderer', () => {
   };
 
   setup(() => {
-    element = new ModelViewerElementBase();
+    element = new ModelViewerElement();
     arRenderer = new ARRenderer(element[$renderer]);
   });
 
@@ -149,13 +151,32 @@ suite('ARRenderer', () => {
 
   suite('when presenting a scene', () => {
     let modelScene: ModelScene;
+    let oldXRRay: any;
 
     setup(async () => {
-      element.src = assetPath('models/Astronaut.glb');
-      await waitForEvent(element, 'load');
-      modelScene = element[$scene];
+      modelScene = new ModelScene({
+        element: element,
+        canvas: element[$canvas],
+        width: 200,
+        height: 100,
+      });
+      await modelScene.setModelSource(assetPath('models/Astronaut.glb'));
       stubWebXrInterface(arRenderer);
       setInputSources([]);
+
+      oldXRRay = (window as any).XRRay;
+      (window as any).XRRay = class MockXRRay implements XRRay {
+        readonly origin = new DOMPointReadOnly;
+        readonly direction = new DOMPointReadOnly;
+        matrix = new Float32Array;
+
+        constructor(_origin: DOMPointInit, _direction: DOMPointInit) {
+        }
+      }
+    });
+
+    teardown(() => {
+      (window as any).XRRay = oldXRRay;
     });
 
     test('presents the model at its natural scale', async () => {
@@ -163,52 +184,57 @@ suite('ARRenderer', () => {
 
       await arRenderer.present(modelScene);
 
-      expect(model.scale.x).to.be.equal(1);
-      expect(model.scale.y).to.be.equal(1);
-      expect(model.scale.z).to.be.equal(1);
+      const scale = model.getWorldScale(new Vector3());
+
+      expect(scale.x).to.be.equal(1);
+      expect(scale.y).to.be.equal(1);
+      expect(scale.z).to.be.equal(1);
     });
 
     suite('presentation ends', () => {
-      test('restores the original model scale', async () => {
+      test('restores the model to its natural scale', async () => {
         const model = modelScene.model;
-        const originalModelScale = model.scale.clone();
 
         await arRenderer.present(modelScene);
         await arRenderer.stopPresenting();
 
-        expect(originalModelScale.x).to.be.equal(model.scale.x);
-        expect(originalModelScale.y).to.be.equal(model.scale.y);
-        expect(originalModelScale.z).to.be.equal(model.scale.z);
+        const scale = model.getWorldScale(new Vector3());
+
+        expect(scale.x).to.be.equal(1);
+        expect(scale.y).to.be.equal(1);
+        expect(scale.z).to.be.equal(1);
       });
     });
 
+    // We're going to need to mock out XRFrame more so it can set the camera
+    // in order to properly test this.
+    /**
     suite('placing a model', () => {
       test('places the model oriented to the camera', async () => {
         const epsilon = 0.0001;
-        const pivotRotation = 0.123;
-        modelScene.model.rotation.y = pivotRotation;
+        const model = modelScene.model;
 
-        // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
-        // our dolly will need to rotate to face camera) and angled 45
-        // degrees towards the ground, like someone holding a phone.
         applyPhoneRotation(arRenderer.camera);
-        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
+        const cameraPosition = new Vector3(10, 2, 3)
+        const hitPosition = new Vector3(5, -1, 1);
+
+        arRenderer.camera.matrix.setPosition(cameraPosition);
         arRenderer.camera.updateMatrixWorld(true);
 
         await arRenderer.present(modelScene);
-        await arRenderer.placeModel(new Vector3(0, 0, 0));
-        const {position, rotation} = modelScene.model;
+        await arRenderer.placeModel(hitPosition);
+        arRenderer[$onWebXRFrame](
+            0, new MockXRFrame(arRenderer[$currentSession]!));
 
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
-        // Quaternion rotation results in the rotation towards the viewer
-        // with -X and -Z, and the offset applied to Y to invert pivotRotation,
-        // but it's inverted again here due to the -X/-Z rotation encoding
-        expect(rotation.x).to.be.equal(-Math.PI);
-        expect(rotation.y).to.be.closeTo(pivotRotation, epsilon);
-        expect(rotation.z).to.be.equal(-Math.PI);
+        const cameraToHit = new Vector2(
+            hitPosition.x - cameraPosition.x, hitPosition.z - cameraPosition.z);
+        const forward = model.getWorldDirection(new Vector3());
+        const forwardProjection = new Vector2(forward.x, forward.z);
+
+        expect(cameraToHit.cross(forwardProjection)).to.be.closeTo(0, epsilon);
+        expect(cameraToHit.dot(forwardProjection)).to.be.lessThan(0);
       });
     });
+    */
   });
 });

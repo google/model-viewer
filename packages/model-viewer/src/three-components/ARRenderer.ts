@@ -221,16 +221,15 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
-    const element = scene.element as ModelViewerElement;
-    this[$turntableRotation] = element.turntableRotation;
-    element.resetTurntableRotation();
-
     const placementBox = new PlacementBox(scene.model);
     this[$placementComplete] = false;
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
     this[$damperRate] = INTRO_RATE;
+
+    this[$turntableRotation] = scene.yaw;
+    scene.yaw = 0;
     this[$goalYaw] = 0;
     this[$goalScale] = 1;
 
