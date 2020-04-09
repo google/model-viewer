@@ -416,8 +416,11 @@ export class SmoothControls extends EventDispatcher {
                         (radius - minimumRadius!) /
                 (this[$goalLogFov] - Math.log(minimumFieldOfView!));
 
-    const goalRadius =
-        radius + (isFinite(deltaRatio) ? deltaZoom * deltaRatio : 0);
+    const goalRadius = radius +
+        deltaZoom *
+            Math.min(
+                isFinite(deltaRatio) ? deltaRatio : Infinity,
+                maximumRadius! - minimumRadius!);
     let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
 
     if (deltaZoom !== 0) {
