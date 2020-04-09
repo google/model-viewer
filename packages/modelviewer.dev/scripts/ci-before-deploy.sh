@@ -25,6 +25,7 @@ touch .nojekyll
 
 GITIGNORE="./.gitignore"
 
+rm ../../.gitignore
 rm $GITIGNORE
 echo 'node_modules/*' > $GITIGNORE
 echo '!node_modules/@webcomponents' >> $GITIGNORE
@@ -73,6 +74,9 @@ popd
 popd
 
 git log -n 1 > VERSION
+
+git config --global user.email "cibot@example.com"
+git config --global user.name "Github Actions"
 
 git add *
 git commit -m "Stage documentation for deploy"
