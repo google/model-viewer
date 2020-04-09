@@ -120,17 +120,18 @@ module.exports = function(config) {
         // instances, causing them to time out:
         url: 'http://127.0.0.1:9876'
       },
-      'iOS Safari (iOS 13)': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '13',
-        device: 'iPhone 8',
-        browser: 'iPhone',
-        real_mobile: 'true',
-        // BrowserStack seems to drop the port when redirecting to this special
-        // domain so we go there directly instead:
-        url: 'http://bs-local.com:9876'
-      },
+      // 'iOS Safari (iOS 13)': {
+      //   base: 'BrowserStack',
+      //   os: 'iOS',
+      //   os_version: '13',
+      //   device: 'iPhone 8',
+      //   browser: 'iPhone',
+      //   real_mobile: 'true',
+      //   // BrowserStack seems to drop the port when redirecting to this
+      //   special
+      //   // domain so we go there directly instead:
+      //   url: 'http://bs-local.com:9876'
+      // },
       'iOS Safari (iOS 12)': {
         base: 'BrowserStack',
         os: 'iOS',
