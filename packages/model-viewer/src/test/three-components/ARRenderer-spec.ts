@@ -173,18 +173,16 @@ suite('ARRenderer', () => {
         constructor(_origin: DOMPointInit, _direction: DOMPointInit) {
         }
       }
+
+      await arRenderer.present(modelScene);
     });
 
     teardown(() => {
       (window as any).XRRay = oldXRRay;
     });
 
-    test('presents the model at its natural scale', async () => {
-      const model = modelScene.model;
-
-      await arRenderer.present(modelScene);
-
-      const scale = model.getWorldScale(new Vector3());
+    test('presents the model at its natural scale', () => {
+      const scale = modelScene.model.getWorldScale(new Vector3());
 
       expect(scale.x).to.be.equal(1);
       expect(scale.y).to.be.equal(1);
@@ -192,17 +190,25 @@ suite('ARRenderer', () => {
     });
 
     suite('presentation ends', () => {
-      test('restores the model to its natural scale', async () => {
-        const model = modelScene.model;
-
-        await arRenderer.present(modelScene);
+      setup(async () => {
         await arRenderer.stopPresenting();
+      });
 
-        const scale = model.getWorldScale(new Vector3());
+      test('restores the model to its natural scale', () => {
+        const scale = modelScene.model.getWorldScale(new Vector3());
 
         expect(scale.x).to.be.equal(1);
         expect(scale.y).to.be.equal(1);
         expect(scale.z).to.be.equal(1);
+      });
+
+      test('restores original camera', () => {
+        expect(modelScene.getCamera()).to.be.equal(modelScene.camera);
+      });
+
+      test('restores scene size', () => {
+        expect(modelScene.width).to.be.equal(200);
+        expect(modelScene.height).to.be.equal(100);
       });
     });
 
