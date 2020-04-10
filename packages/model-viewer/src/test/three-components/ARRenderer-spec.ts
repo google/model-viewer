@@ -13,25 +13,15 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
+import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
-import {ARRenderer} from '../../three-components/ARRenderer.js';
+import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
 
 const expect = chai.expect;
-
-/**
-const applyPhoneRotation = (camera: Camera) => {
-  // Rotate 180 degrees on Y (so it's not the default)
-  // and angle 45 degrees towards the ground, like a phone.
-  camera.matrix.identity()
-      .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
-      .multiply(
-          new Matrix4().makeRotationAxis(new Vector3(1, 0, 0), -Math.PI / 4));
-};
 
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
@@ -42,8 +32,33 @@ class MockXRFrame implements XRFrame {
     return {} as XRPose;
   }
 
-  getViewerPose(_referenceSpace?: XRReferenceSpace):
-  XRViewerPose{return {} as XRViewerPose}
+  getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
+    // Rotate 180 degrees on Y (so it's not the default)
+    // and angle 45 degrees towards the ground, like a phone.
+    const matrix = new Matrix4()
+                       .identity()
+                       .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
+                       .multiply(new Matrix4().makeRotationAxis(
+                           new Vector3(1, 0, 0), -Math.PI / 4));
+    matrix.setPosition(10, 2, 3);
+    const transform: XRRigidTransform = {
+      matrix: matrix.elements as unknown as Float32Array,
+      position: {} as DOMPointReadOnly,
+      orientation: {} as DOMPointReadOnly,
+      inverse: {} as XRRigidTransform
+    };
+    const camera = new PerspectiveCamera();
+    const view: XRView = {
+      eye: {} as XREye,
+      projectionMatrix: camera.projectionMatrix.elements as unknown as
+          Float32Array,
+      viewMatrix: {} as Float32Array,
+      transform: transform
+    };
+    const viewerPos: XRViewerPose = {transform: transform, views: [view]};
+
+    return viewerPos;
+  }
 
   getHitTestResults(_xrHitTestSource: XRHitTestSource) {
     return [];
@@ -54,7 +69,6 @@ class MockXRFrame implements XRFrame {
     return [];
   }
 }
-*/
 
 suite('ARRenderer', () => {
   let element: ModelViewerElementBase;
@@ -214,33 +228,47 @@ suite('ARRenderer', () => {
 
     // We're going to need to mock out XRFrame more so it can set the camera
     // in order to properly test this.
-    /**
-    suite('placing a model', () => {
-      test('places the model oriented to the camera', async () => {
-        const epsilon = 0.0001;
-        const model = modelScene.model;
 
-        applyPhoneRotation(arRenderer.camera);
-        const cameraPosition = new Vector3(10, 2, 3)
-        const hitPosition = new Vector3(5, -1, 1);
+    suite('after initial placement', () => {
+      let yaw: number;
 
-        arRenderer.camera.matrix.setPosition(cameraPosition);
-        arRenderer.camera.updateMatrixWorld(true);
-
+      setup(async () => {
         await arRenderer.present(modelScene);
-        await arRenderer.placeModel(hitPosition);
         arRenderer[$onWebXRFrame](
             0, new MockXRFrame(arRenderer[$currentSession]!));
+        yaw = modelScene.yaw;
+      });
 
+      test('places the model oriented to the camera', () => {
+        const epsilon = 0.0001;
+        const {model, position} = modelScene;
+
+        const cameraPosition = arRenderer.camera.position;
         const cameraToHit = new Vector2(
-            hitPosition.x - cameraPosition.x, hitPosition.z - cameraPosition.z);
+            position.x - cameraPosition.x, position.z - cameraPosition.z);
         const forward = model.getWorldDirection(new Vector3());
         const forwardProjection = new Vector2(forward.x, forward.z);
 
+        expect(forward.y).to.be.equal(0);
         expect(cameraToHit.cross(forwardProjection)).to.be.closeTo(0, epsilon);
         expect(cameraToHit.dot(forwardProjection)).to.be.lessThan(0);
       });
+
+      suite('after hit placement', () => {
+        let hitPosition: Vector3;
+
+        setup(async () => {
+          hitPosition = new Vector3(5, -1, 1);
+          await arRenderer.placeModel(hitPosition);
+          // Long enough time to settle at new position.
+          arRenderer[$onWebXRFrame](
+              10000, new MockXRFrame(arRenderer[$currentSession]!));
+        });
+
+        test('scene has the same orientation', () => {
+          expect(modelScene.yaw).to.be.equal(yaw);
+        });
+      });
     });
-    */
   });
 });

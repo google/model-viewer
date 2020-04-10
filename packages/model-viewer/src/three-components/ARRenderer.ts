@@ -47,7 +47,7 @@ const $turntableRotation = Symbol('turntableRotation');
 const $oldShadowIntensity = Symbol('oldShadowIntensity');
 const $oldBackground = Symbol('oldBackground');
 const $rafId = Symbol('rafId');
-const $currentSession = Symbol('currentSession');
+export const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
@@ -74,7 +74,7 @@ const $scaleDamper = Symbol('scaleDamper');
 const $damperRate = Symbol('damperRate');
 const $resolveCleanup = Symbol('resolveCleanup');
 
-const $onWebXRFrame = Symbol('onWebXRFrame');
+export const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
@@ -102,7 +102,7 @@ export class ARRenderer extends EventDispatcher {
   private[$oldShadowIntensity]: number|null = null;
   private[$oldBackground]: any = null;
   private[$rafId]: number|null = null;
-  private[$currentSession]: XRSession|null = null;
+  protected[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
   private[$frame]: XRFrame|null = null;
@@ -355,6 +355,7 @@ export class ARRenderer extends EventDispatcher {
       const scene = this[$presentedScene]!;
       scene.pointTowards(x, z);
       scene.model.updateMatrixWorld(true);
+      this[$goalYaw] = scene.yaw;
       this[$initialModel2World].copy(scene.model.matrixWorld);
       this[$initialized] = true;
     }
