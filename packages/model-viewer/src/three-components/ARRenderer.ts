@@ -16,7 +16,6 @@
 import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$needsRender, $onResize} from '../model-viewer-base.js';
-import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -36,9 +35,9 @@ const ROTATION_RATE = 1.5;
 // encourage upright use.
 const HIT_ANGLE_DEG = 20;
 // Slow down the dampers for initial placement.
-const INTRO_RATE = 0.4;
-const SCALE_SNAP = 1.2;
-const SCALE_SNAP_LOW = 1 / SCALE_SNAP;
+const INTRO_DAMPER_RATE = 0.4;
+const SCALE_SNAP_HIGH = 1.2;
+const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -53,7 +52,7 @@ const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
 const $frame = Symbol('frame');
 const $initialized = Symbol('initialized');
-const $initialModel2World = Symbol('initialModel2World');
+const $initialModelToWorld = Symbol('initialModelToWorld');
 const $placementComplete = Symbol('placementComplete');
 const $initialHitSource = Symbol('hitTestSource');
 const $transientHitTestSource = Symbol('transiertHitTestSource');
@@ -78,7 +77,7 @@ export const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
-const $getHitPoint = Symbol('getHitMatrix');
+const $getHitPoint = Symbol('getHitPoint');
 const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
 const $selectEndHandler = Symbol('selectHandler');
@@ -113,7 +112,7 @@ export class ARRenderer extends EventDispatcher {
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
 
   private[$initialized] = false;
-  private[$initialModel2World] = new Matrix4();
+  private[$initialModelToWorld] = new Matrix4();
   private[$placementComplete] = false;
   private[$isTranslating] = false;
   private[$isRotating] = false;
@@ -176,8 +175,7 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    (this[$presentedScene]!.element as
-     ModelViewerElement)[$onResize](window.screen);
+    (this[$presentedScene]!.element)[$onResize](window.screen);
 
     return session;
   }
@@ -226,7 +224,7 @@ export class ARRenderer extends EventDispatcher {
 
     scene.setCamera(this.camera);
     this[$initialized] = false;
-    this[$damperRate] = INTRO_RATE;
+    this[$damperRate] = INTRO_DAMPER_RATE;
 
     this[$turntableRotation] = scene.yaw;
     scene.yaw = 0;
@@ -356,7 +354,7 @@ export class ARRenderer extends EventDispatcher {
       scene.pointTowards(x, z);
       scene.model.updateMatrixWorld(true);
       this[$goalYaw] = scene.yaw;
-      this[$initialModel2World].copy(scene.model.matrixWorld);
+      this[$initialModelToWorld].copy(scene.model.matrixWorld);
       this[$initialized] = true;
     }
 
@@ -397,8 +395,12 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$getHitPoint](hitResult: XRHitTestResult): Vector3|null {
-    const hitMatrix = matrix4.fromArray(
-        hitResult.getPose(this[$refSpace]!)!.transform.matrix);
+    const pose = hitResult.getPose(this[$refSpace]!);
+    if (pose == null) {
+      return null;
+    }
+
+    const hitMatrix = matrix4.fromArray(pose.transform.matrix);
     // Check that the y-coordinate of the normal is large enough that the normal
     // is pointing up.
     return hitMatrix.elements[5] > 0.75 ?
@@ -437,11 +439,11 @@ export class ARRenderer extends EventDispatcher {
     origin.sub(direction.multiplyScalar(model.idealCameraDistance));
     const ray = new Ray(origin, direction.normalize());
 
-    const model2World = this[$initialModel2World];
+    const modelToWorld = this[$initialModelToWorld];
     const modelPosition =
-        new Vector3().setFromMatrixPosition(model2World).add(hit);
-    model2World.setPosition(modelPosition);
-    const world2Model = new Matrix4().getInverse(model2World);
+        new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
+    modelToWorld.setPosition(modelPosition);
+    const world2Model = new Matrix4().getInverse(modelToWorld);
     ray.applyMatrix4(world2Model);
 
     // Make the box tall so that we don't intersect the top face.
@@ -450,7 +452,7 @@ export class ARRenderer extends EventDispatcher {
     max.y -= 10;
 
     if (modelPosition != null) {
-      modelPosition.applyMatrix4(model2World);
+      modelPosition.applyMatrix4(modelToWorld);
       goal.add(hit).sub(modelPosition);
     }
 
@@ -504,10 +506,10 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$fingerSeparation](fingers: XRTransientInputHitTestResult[]): number {
-    const finger0 = fingers[0].inputSource.gamepad.axes;
-    const finger1 = fingers[1].inputSource.gamepad.axes;
-    const deltaX = finger1[0] - finger0[0];
-    const deltaY = finger1[1] - finger0[1];
+    const fingerOne = fingers[0].inputSource.gamepad.axes;
+    const fingerTwo = fingers[1].inputSource.gamepad.axes;
+    const deltaX = fingerTwo[0] - fingerOne[0];
+    const deltaY = fingerTwo[1] - fingerOne[1];
     return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   }
 
@@ -523,17 +525,23 @@ export class ARRenderer extends EventDispatcher {
     const scene = this[$presentedScene]!;
     const scale = scene.scale.x;
 
+    // Rotating, translating and scaling are mutually exclusive operations; only
+    // one can happen at a time, but we can switch during a gesture.
     if (this[$isScaling]) {
       if (fingers.length < 2) {
+        // If we lose the second finger, stop scaling (in fact, stop processing
+        // input altogether until a new gesture starts).
         this[$isScaling] = false;
       } else {
         const separation = this[$fingerSeparation](fingers);
         const scale = separation / this[$lastScalar];
         this[$goalScale] =
-            (scale < SCALE_SNAP && scale > SCALE_SNAP_LOW) ? 1 : scale;
+            (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
       }
       return;
     } else if (fingers.length === 2 && scene.canScale) {
+      // If we were rotating or translating and we get a second finger, switch
+      // to scaling instead.
       this[$isTranslating] = false;
       this[$isRotating] = false;
       this[$isScaling] = true;

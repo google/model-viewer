@@ -15,7 +15,7 @@
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
 
 import {clamp} from '../utilities.js';
-import {Damper} from './Damper.js';
+import {Damper, SETTLING_TIME} from './Damper.js';
 
 export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
@@ -437,7 +437,7 @@ export class SmoothControls extends EventDispatcher {
    * parameters.
    */
   jumpToGoal() {
-    this.update(0, 10000);
+    this.update(0, SETTLING_TIME);
   }
 
   /**

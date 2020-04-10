@@ -163,11 +163,12 @@ suite('LoadingStatusAnnouncer', () => {
     let element: ModelViewerElementBase;
     let otherElement: ModelViewerElementBase;
 
+    customElements.define('model-viewer-element', ModelViewerElementBase);
+
     setup(() => {
       // NOTE(cdata): We use ModelViewerElementBase here because we are
       // testing behavior that is affected by connected/disconnected
       // side-effects in LoadingMixin.
-      customElements.define('model-viewer-element', ModelViewerElementBase);
       element = new ModelViewerElementBase();
       otherElement = new ModelViewerElementBase();
 

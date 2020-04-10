@@ -28,6 +28,7 @@ const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
+// Used internally by positionAndNormalFromPoint()
 const pixelPosition = new Vector2();
 const worldToModel = new Matrix4();
 

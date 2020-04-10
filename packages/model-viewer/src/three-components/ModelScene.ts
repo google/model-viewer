@@ -18,7 +18,7 @@ import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Sce
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
-import {Damper} from './Damper.js';
+import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -222,14 +222,24 @@ export class ModelScene extends Scene {
     this.goalTarget.set(-modelX, -modelY, -modelZ);
   }
 
+  /**
+   * Gets the point in model coordinates the model should orbit/pivot around.
+   */
   getTarget(): Vector3 {
     return vector3.copy(this.goalTarget).multiplyScalar(-1);
   }
 
+  /**
+   * Shifts the model to the target point immediately instead of easing in.
+   */
   jumpToGoal() {
-    this.updateTarget(10000);
+    this.updateTarget(SETTLING_TIME);
   }
 
+  /**
+   * This should be called every frame with the frame delta to cause the target
+   * to transition to its set point.
+   */
   updateTarget(delta: number) {
     const goal = this.goalTarget;
     const target = this.model.position;

@@ -15,9 +15,9 @@
 
 import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
 
-import {Damper} from './Damper';
-import Model from './Model';
-import {ModelScene} from './ModelScene';
+import {Damper} from './Damper.js';
+import Model from './Model.js';
+import {ModelScene} from './ModelScene.js';
 
 const RADIUS = 0.2;
 const LINE_WIDTH = 0.03;
@@ -27,6 +27,10 @@ const DELTA_PHI = Math.PI / (2 * SEGMENTS);
 
 const vector2 = new Vector2();
 
+/**
+ * Adds a quarter-annulus of vertices to the array, centered on cornerX,
+ * cornerY.
+ */
 const addCorner =
     (vertices: Array<number>, cornerX: number, cornerY: number) => {
       let phi = cornerX > 0 ? (cornerY > 0 ? 0 : -Math.PI / 2) :
@@ -43,6 +47,18 @@ const addCorner =
       }
     };
 
+/**
+ * This class is a set of two coincident planes. The first is just a cute box
+ * outline with rounded corners and damped opacity to indicate the floor extents
+ * of a model. It is purposely larger than the model's bounding box by RADIUS on
+ * all sides so that small models are still visible / selectable. Its center is
+ * actually carved out by vertices to ensure its fragment shader doesn't add
+ * much time.
+ *
+ * The child plane is a simple plane with the same extents for use in hit
+ * testing (translation is triggered when the touch hits the plane, rotation
+ * otherwise).
+ */
 export class PlacementBox extends Mesh {
   private hitPlane: Mesh;
   private shadowHeight: number;
@@ -94,6 +110,10 @@ export class PlacementBox extends Mesh {
     model.add(this);
   }
 
+  /**
+   * Get the world hit position if the touch coordinates hit the box, and null
+   * otherwise. Pass the scene in to get access to its raycaster.
+   */
   getHit(scene: ModelScene, screenX: number, screenY: number): Vector3|null {
     vector2.set(screenX, -screenY);
     this.hitPlane.visible = true;
@@ -102,6 +122,10 @@ export class PlacementBox extends Mesh {
     return hitResult == null ? null : hitResult.position;
   }
 
+  /**
+   * Offset the height of the box relative to the bottom of the model. Positive
+   * is up, so generally only negative values are used.
+   */
   set offsetHeight(offset: number) {
     this.position.y = this.shadowHeight + offset;
   }
@@ -110,10 +134,16 @@ export class PlacementBox extends Mesh {
     return this.position.y - this.shadowHeight;
   }
 
+  /**
+   * Set the box's visibility; it will fade in and out.
+   */
   set show(visible: boolean) {
     this.goalOpacity = visible ? MAX_OPACITY : 0;
   }
 
+  /**
+   * Call on each frame with the frame delta to fade the box.
+   */
   updateOpacity(delta: number) {
     const material = this.material as MeshBasicMaterial;
     material.opacity =
@@ -121,6 +151,9 @@ export class PlacementBox extends Mesh {
     this.visible = material.opacity > 0;
   }
 
+  /**
+   * Call this to clean up Three's cache when you remove the box.
+   */
   dispose() {
     const {geometry, material} = this.hitPlane;
     geometry.dispose();

@@ -18,6 +18,7 @@ import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 import {IS_IE11} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
+import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
@@ -268,7 +269,7 @@ suite('ARRenderer', () => {
           await arRenderer.placeModel(hitPosition);
           // Long enough time to settle at new position.
           arRenderer[$onWebXRFrame](
-              10000, new MockXRFrame(arRenderer[$currentSession]!));
+              SETTLING_TIME, new MockXRFrame(arRenderer[$currentSession]!));
         });
 
         test('scene has the same orientation', () => {
