@@ -78,15 +78,15 @@ suite('ARRenderer', () => {
     return;
   }
 
+  let nextId = 0;
+  let tagName: string;
+  let ModelViewerElement: Constructor<ModelViewerElementBase>;
+
   let element: ModelViewerElementBase;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
   let inputSources: Array<XRInputSource> = [];
-
-  let ModelViewerElement = class extends ModelViewerElementBase {};
-
-  customElements.define('model-viewer-arrenderer', ModelViewerElement);
 
   const setInputSources = (sources: Array<XRInputSource>) => {
     inputSources = sources;
@@ -153,6 +153,14 @@ suite('ARRenderer', () => {
   };
 
   setup(() => {
+    tagName = `model-viewer-arrenderer-${nextId++}`;
+    ModelViewerElement = class extends ModelViewerElementBase {
+      static get is() {
+        return tagName;
+      }
+    };
+    customElements.define(tagName, ModelViewerElement);
+
     element = new ModelViewerElement();
     arRenderer = new ARRenderer(element[$renderer]);
   });

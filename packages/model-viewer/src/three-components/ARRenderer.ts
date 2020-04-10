@@ -269,6 +269,9 @@ export class ARRenderer extends EventDispatcher {
 
     try {
       const session = this[$currentSession]!;
+      session.removeEventListener('selectstart', this[$selectStartHandler]);
+      session.removeEventListener('selectend', this[$selectEndHandler]);
+
       this[$currentSession] = null;
       session.cancelAnimationFrame(this[$rafId]!);
 
