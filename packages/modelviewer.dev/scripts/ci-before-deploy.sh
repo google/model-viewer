@@ -74,6 +74,8 @@ popd
 
 git log -n 1 > VERSION
 
+git status --ignored
+
 popd
 
 set +x
