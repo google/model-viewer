@@ -46,7 +46,10 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/environments \
 )
 
-PACKAGE_ROOT=$(dirname $0)/..
+# Switch to the package root
+pushd $(dirname $0)/..
+
+PACKAGE_ROOT=`pwd`
 DEPLOY_ROOT=$PACKAGE_ROOT/dist
 
 function copyToDeployRoot {
@@ -73,11 +76,7 @@ function copyToDeployRoot {
       exit 1
     fi
   fi
-
-  # popd
 }
-
-pushd $PACKAGE_ROOT
 
 mkdir -p $DEPLOY_ROOT
 touch $DEPLOY_ROOT/.nojekyll
