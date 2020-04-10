@@ -15,6 +15,7 @@
 
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
+import {IS_IE11} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
@@ -71,6 +72,11 @@ class MockXRFrame implements XRFrame {
 }
 
 suite('ARRenderer', () => {
+  // IE11 doesn't support DOMPoint, and will never support AR, so skip.
+  if (IS_IE11) {
+    return;
+  }
+
   let element: ModelViewerElementBase;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
