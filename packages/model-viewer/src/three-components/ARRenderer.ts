@@ -15,7 +15,7 @@
 
 import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 
-import {$onResize} from '../model-viewer-base.js';
+import {$needsRender, $onResize} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -144,7 +144,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.setHotspotsVisibility(false);
+    scene.model.setHotspotsVisibility(false);
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -155,9 +155,11 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
+    scene.setARTarget();
+
     scene.setCamera(this.camera);
     scene.add(this.reticle);
-    scene.pivot.visible = false;
+    scene.model.visible = false;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
@@ -213,17 +215,19 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this[$presentedScene];
     if (scene != null) {
+      const {model, element} = scene;
       scene.setCamera(scene.camera);
       scene.remove(this.reticle);
-      scene.pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+      model.visible = true;
+      model.setHotspotsVisibility(true);
 
-      scene.pivot.position.set(0, 0, 0);
-      scene.setPivotRotation(this[$turntableRotation]!);
+      scene.position.set(0, 0, 0);
+      scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
-      scene.orientHotspots(0);
-      scene.isDirty = true;
+      model.orientHotspots(0);
+      element.requestUpdate('cameraTarget');
+      element[$needsRender]();
 
       this.renderer.expandTo(scene.width, scene.height);
     }
@@ -254,19 +258,18 @@ export class ARRenderer extends EventDispatcher {
     // Just reuse the hit matrix that the reticle has computed.
     if (this.reticle && this.reticle.hitMatrix) {
       const scene = this[$presentedScene]!;
-      const {pivot, shadow} = scene;
+      const {model} = scene;
       const {hitMatrix} = this.reticle;
 
-      pivot.position.setFromMatrixPosition(hitMatrix);
+      scene.position.setFromMatrixPosition(hitMatrix);
 
-      // Orient the dolly/model to face the camera
+      // Orient the scene to face the camera
       const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      pivot.lookAt(camPosition.x, pivot.position.y, camPosition.z);
-      pivot.updateMatrixWorld();
-      shadow!.setRotation(pivot.rotation.y);
+      scene.pointTowards(camPosition.x, camPosition.z);
+      scene.updateMatrixWorld();
 
-      pivot.visible = true;
-      scene.setHotspotsVisibility(true);
+      model.visible = true;
+      model.setHotspotsVisibility(true);
 
       this.dispatchEvent({type: 'modelmove'});
     }
@@ -339,7 +342,7 @@ export class ARRenderer extends EventDispatcher {
       // position is not updated when matrix is updated.
       camera.position.setFromMatrixPosition(cameraMatrix);
 
-      scene.orientHotspots(
+      scene.model.orientHotspots(
           Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
 
       // NOTE: Updating input or the reticle is dependent on the camera's

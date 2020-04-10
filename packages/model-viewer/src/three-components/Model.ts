@@ -17,23 +17,30 @@ import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3}
 
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
+import {Hotspot} from './Hotspot.js';
 import {moveChildren, reduceVertices} from './ModelUtils.js';
-
-const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
-const $currentGLTF = Symbol('currentGLTF');
+import {Shadow} from './Shadow.js';
 
 export const DEFAULT_FOV_DEG = 45;
 const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
 export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 
+export const $shadow = Symbol('shadow');
+const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
+const $currentGLTF = Symbol('currentGLTF');
 const $loader = Symbol('loader');
 
+const view = new Vector3();
+const target = new Vector3();
+const normalWorld = new Vector3();
+
 /**
- * An Object3D that can swap out its underlying
- * model.
+ * An Object3D that can swap out its underlying model.
  */
 export default class Model extends Object3D {
+  protected[$shadow]: Shadow|null = null;
+
   private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
   private[$loader] = new CachingGLTFLoader(ModelViewerGLTFInstance);
   private mixer: AnimationMixer;
@@ -283,5 +290,118 @@ export default class Model extends Object3D {
         reduceVertices(this.modelContainer, horizontalFov) / DEFAULT_TAN_FOV;
 
     this.add(this.modelContainer);
+  }
+
+  /**
+   * Sets the shadow's intensity, lazily creating the shadow as necessary.
+   */
+  setShadowIntensity(shadowIntensity: number, shadowSoftness: number) {
+    let shadow = this[$shadow];
+    if (shadow != null) {
+      shadow.setIntensity(shadowIntensity);
+      shadow.setModel(this, shadowSoftness);
+    } else if (shadowIntensity > 0) {
+      shadow = new Shadow(this, shadowSoftness);
+      shadow.setIntensity(shadowIntensity);
+      this[$shadow] = shadow;
+    }
+  }
+
+  /**
+   * Sets the shadow's softness by mapping a [0, 1] softness parameter to the
+   * shadow's resolution. This involves reallocation, so it should not be
+   * changed frequently. Softer shadows are cheaper to render.
+   */
+  setShadowSoftness(softness: number) {
+    const shadow = this[$shadow];
+    if (shadow != null) {
+      shadow.setSoftness(softness);
+    }
+  }
+
+  setShadowRotation(radiansY: number) {
+    const shadow = this[$shadow];
+    if (shadow != null) {
+      shadow.setRotation(radiansY);
+    }
+  }
+
+  /**
+   * Call when updating the shadow; returns true if an update is needed and
+   * resets the state.
+   */
+  updateShadow(): boolean {
+    const shadow = this[$shadow];
+    if (shadow == null) {
+      return false;
+    } else {
+      const {needsUpdate} = shadow;
+      shadow.needsUpdate = false;
+      return needsUpdate;
+    }
+  }
+
+  /**
+   * The following methods are for operating on the set of Hotspot objects
+   * attached to the scene. These come from DOM elements, provided to slots by
+   * the Annotation Mixin.
+   */
+  addHotspot(hotspot: Hotspot) {
+    this.add(hotspot);
+  }
+
+  removeHotspot(hotspot: Hotspot) {
+    this.remove(hotspot);
+  }
+
+  /**
+   * Helper method to apply a function to all hotspots.
+   */
+  forHotspots(func: (hotspot: Hotspot) => void) {
+    const {children} = this;
+    for (let i = 0, l = children.length; i < l; i++) {
+      const hotspot = children[i];
+      if (hotspot instanceof Hotspot) {
+        func(hotspot);
+      }
+    }
+  }
+
+  /**
+   * Update the CSS visibility of the hotspots based on whether their normals
+   * point toward the camera.
+   */
+  updateHotspots(viewerPosition: Vector3) {
+    this.forHotspots((hotspot) => {
+      view.copy(viewerPosition);
+      target.setFromMatrixPosition(hotspot.matrixWorld);
+      view.sub(target);
+      normalWorld.copy(hotspot.normal).transformDirection(this.matrixWorld);
+      if (view.dot(normalWorld) < 0) {
+        hotspot.hide();
+      } else {
+        hotspot.show();
+      }
+    });
+  }
+
+  /**
+   * Rotate all hotspots to an absolute orientation given by the input number of
+   * radians. Zero returns them to upright.
+   */
+  orientHotspots(radians: number) {
+    this.forHotspots((hotspot) => {
+      hotspot.orient(radians);
+    });
+  }
+
+  /**
+   * Set the rendering visibility of all hotspots. This is used to hide them
+   * during transitions and such.
+   */
+  setHotspotsVisibility(visible: boolean) {
+    this.forHotspots((hotspot) => {
+      hotspot.visible = visible;
+    });
   }
 }
