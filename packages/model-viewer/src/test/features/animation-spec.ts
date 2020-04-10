@@ -83,11 +83,21 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
-      test('animations can be paused', async () => {
-        const animationsPause = waitForEvent(element, 'pause');
-        element.pause();
-        await animationsPause;
-        expect(animationIsPlaying(element)).to.be.false;
+      suite('when pause is invoked', () => {
+        setup(async () => {
+          const animationsPause = waitForEvent(element, 'pause');
+          element.pause();
+          await animationsPause;
+        });
+
+        test('animations pause', () => {
+          expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('changing currentTime triggers render', () => {
+          element.currentTime = 5;
+          expect(element[$scene].isDirty).to.be.true;
+        });
       });
     });
   });
