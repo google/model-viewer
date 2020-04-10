@@ -165,6 +165,15 @@ declare interface XRViewport {
 
 declare interface XRLayer {}
 
+declare interface XRWebGLLayerInit {
+  antialias?: boolean;
+  depth?: boolean;
+  stencil?: boolean;
+  alpha?: boolean;
+  ignoreDepthValues?: boolean;
+  framebufferScaleFactor?: number;
+}
+
 declare class XRWebGLLayer implements XRLayer {
   public framebuffer: WebGLFramebuffer;
   public framebufferWidth: number;
@@ -172,7 +181,7 @@ declare class XRWebGLLayer implements XRLayer {
 
   constructor(
       session: XRSession, gl: WebGLRenderingContext,
-      options: WebGLContextAttributes)
+      options: XRWebGLLayerInit)
 
   getViewport(view: XRView): XRViewport
 }

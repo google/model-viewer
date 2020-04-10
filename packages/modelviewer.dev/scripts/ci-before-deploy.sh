@@ -15,72 +15,95 @@
 # limitations under the License.
 ##
 
+set -e
+
+DEPLOYABLE_STATIC_FILES=( \
+  index.html \
+  assets \
+  examples \
+  lib \
+  styles \
+  ATTRIBUTIONS.md \
+  CNAME \
+  LICENSE \
+  README.md \
+  node_modules/@webcomponents \
+  node_modules/@google/model-viewer/dist \
+  node_modules/focus-visible \
+  node_modules/intersection-observer \
+  node_modules/@magicleap \
+  node_modules/fullscreen-polyfill \
+  node_modules/resize-observer-polyfill \
+  shared-assets/models/*.glb \
+  shared-assets/models/*.gltf \
+  shared-assets/models/*.usdz \
+  shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
+  shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
+  shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
+  shared-assets/models/glTF-Sample-Models/2.0/Duck \
+  shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
+  shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
+  shared-assets/environments \
+)
+
+PACKAGE_ROOT=$(dirname $0)/..
+DEPLOY_ROOT=$PACKAGE_ROOT/dist
+
+function copyToDeployRoot {
+  path=$1
+
+  echo "Copying $path"
+
+  if [ -d "$path" ]; then
+    directory="$path"
+  else
+    directory="`dirname $path`"
+  fi
+
+  echo "Creating $DEPLOY_ROOT/$directory"
+  mkdir -p "$DEPLOY_ROOT/$directory"
+
+  if [ -d "${path}" ]; then
+    cp -r $path/* "$DEPLOY_ROOT/$path"
+  else
+    if [ -f "${path}" ]; then
+      cp $path "$DEPLOY_ROOT/$path"
+    else
+      echo "Path not found: $path"
+      exit 1
+    fi
+  fi
+
+  # popd
+}
+
+pushd $PACKAGE_ROOT
+
+mkdir -p $DEPLOY_ROOT
+touch $DEPLOY_ROOT/.nojekyll
+
+# Copy over deployable static files and directories, maintaining relative paths
+for static in "${DEPLOYABLE_STATIC_FILES[@]}"; do
+  echo $static
+  copyToDeployRoot $static
+done
+
 set -x
 
-DEPLOY_ROOT=$(dirname $0)/../
+# Copy the latest fidelity testing results:
+mkdir -p $DEPLOY_ROOT/fidelity
+mkdir -p $DEPLOY_ROOT/dist
 
-pushd $DEPLOY_ROOT
+mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
+cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
+cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 
-touch .nojekyll
+# Add a "VERSION" file containing the last git commit message
+git log -n 1 > $DEPLOY_ROOT/VERSION
 
-GITIGNORE="./.gitignore"
-
-rm ../../.gitignore
-rm $GITIGNORE
-echo 'node_modules/*' > $GITIGNORE
-echo '!node_modules/@webcomponents' >> $GITIGNORE
-echo '!node_modules/focus-visible' >> $GITIGNORE
-echo '!node_modules/intersection-observer' >> $GITIGNORE
-echo '!node_modules/@magicleap' >> $GITIGNORE
-echo '!node_modules/fullscreen-polyfill' >> $GITIGNORE
-echo '!node_modules/resize-observer-polyfill' >> $GITIGNORE
-echo '!node_modules/filament' >> $GITIGNORE
-echo '!node_modules/@google' >> $GITIGNORE
-
-ln -s ./node_modules/\@google/model-viewer/dist ./dist
-
-mkdir -p ./fidelity
-mv ../render-fidelity-tools/test/results ./fidelity/results
-cp ../render-fidelity-tools/test/results-viewer.html ./fidelity/index.html
-cp ../render-fidelity-tools/dist/* ./dist/
-
-pushd ./node_modules/\@google
-
-MODEL_VIEWER_DIR=$(readlink ./model-viewer)
-SHARED_ASSETS_DIR=$(readlink ./model-viewer-shared-assets)
-
-rm ./model-viewer ./model-viewer-shared-assets
-
-mv $MODEL_VIEWER_DIR ./model-viewer
-
-pushd ./model-viewer
-echo 'node_modules/*' > .gitignore
-echo 'shared-assets' >> .gitignore
-popd
-
-mv $SHARED_ASSETS_DIR ./model-viewer-shared-assets
-
-pushd ./model-viewer-shared-assets
-echo 'node_modules/*' > .gitignore
-echo 'models/glTF-Sample-Models/*' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/BoomBox' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/FlightHelmet' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/DamagedHelmet' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/Duck' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/MetalRoughSpheres' >> .gitignore
-echo '!models/glTF-Sample-Models/2.0/AntiqueCamera' >> .gitignore
-popd
-popd
-
-git log -n 1 > VERSION
-
-git config --global user.email "cibot@example.com"
-git config --global user.name "Github Actions"
-
-git add *
-git commit -m "Stage documentation for deploy"
+git status --ignored
 
 popd
 
+set +e
 set +x
