@@ -41,12 +41,19 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/*.glb \
   shared-assets/models/*.gltf \
   shared-assets/models/*.usdz \
+  shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
+  shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
+  shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
   shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
-  shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
+  shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
+  shared-assets/models/glTF-Sample-Models/2.0/Corset \
   shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Duck \
+  shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
+  shared-assets/models/glTF-Sample-Models/2.0/Lantern \
   shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
-  shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
+  shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
+  shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
   shared-assets/environments \
 )
 
