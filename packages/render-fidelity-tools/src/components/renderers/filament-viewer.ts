@@ -122,6 +122,7 @@ export class FilamentViewer extends LitElement {
     this[$view] = view;
     view.setCamera(this[$camera]);
     view.setScene(this[$scene]);
+    view.setBloomOptions({enabled: false});
 
     this[$updateSize]();
   }
