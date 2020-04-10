@@ -16,6 +16,10 @@
 ##
 
 set -e
+set -x
+
+# Switch to the package root
+pushd $(dirname $0)/..
 
 DEPLOYABLE_STATIC_FILES=( \
   index.html \
@@ -45,9 +49,6 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
   shared-assets/environments \
 )
-
-# Switch to the package root
-pushd $(dirname $0)/..
 
 PACKAGE_ROOT=`pwd`
 DEPLOY_ROOT=$PACKAGE_ROOT/dist
