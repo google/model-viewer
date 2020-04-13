@@ -45,7 +45,7 @@ export const openSceneViewer = (() => {
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
-  return (gltfSrc: string, _title: string, arScale: string) => {
+  return (gltfSrc: string, arScale: string) => {
     // If the fallback has ever been invoked this session, bounce early:
     if (fallbackInvoked) {
       return;
@@ -54,7 +54,6 @@ export const openSceneViewer = (() => {
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
-    // const link = encodeURIComponent(location);
     const scheme = modelUrl.protocol.replace(':', '');
 
     if (modelUrl.search && modelUrl.search.match(linkOrTitle)) {
@@ -67,19 +66,12 @@ export const openSceneViewer = (() => {
 
     locationUrl.hash = noArViewerSigil;
 
-    // title = encodeURIComponent(title);
-
-    // // It's possible for a model URL to have meaningful query parameters
-    // // already. Sure hope they aren't called 'link' or 'title' though 😅
-    // modelUrl.search +=
-    //     (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
-
     if (arScale === 'fixed') {
       modelUrl.search += `&resizable=false`;
     }
 
     const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${
-        modelUrl.toString()}?mode=ar_only#Intent;scheme=${
+        modelUrl.toString()}&mode=ar_only#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 
@@ -229,7 +221,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
-          openSceneViewer(this.src!, this.alt || '', this.arScale);
+          openSceneViewer(this.src!, this.arScale);
           break;
         default:
           console.warn(
@@ -344,15 +336,15 @@ configuration or device capabilities');
         // @see https://github.com/GoogleWebComponents/model-viewer/issues/693
         this[$arButtonContainer].addEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        // this[$arButtonContainer].addEventListener(
-        //     'click', this[$arButtonContainerFallbackClickHandler]);
+        this[$arButtonContainer].addEventListener(
+            'click', this[$arButtonContainerFallbackClickHandler]);
         this[$exitFullscreenButtonContainer].addEventListener(
             'click', this[$exitFullscreenButtonContainerClickHandler]);
       } else {
         this[$arButtonContainer].removeEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        // this[$arButtonContainer].removeEventListener(
-        //     'click', this[$arButtonContainerFallbackClickHandler]);
+        this[$arButtonContainer].removeEventListener(
+            'click', this[$arButtonContainerFallbackClickHandler]);
         this[$exitFullscreenButtonContainer].removeEventListener(
             'click', this[$exitFullscreenButtonContainerClickHandler]);
         this[$arButtonContainer].classList.remove('enabled');

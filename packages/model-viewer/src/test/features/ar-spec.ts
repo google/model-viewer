@@ -50,10 +50,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
           }
         });
 
-        openSceneViewer(
-            'https://example.com/model.gltf?token=foo',
-            'Example model',
-            'auto');
+        openSceneViewer('https://example.com/model.gltf?token=foo', 'auto');
 
         expect(intentUrls.length).to.be.equal(1);
 
