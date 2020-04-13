@@ -36,6 +36,17 @@ suite('parsers', () => {
       ]);
     });
 
+    test('parses exponential numbers', () => {
+      expect(parseExpressions('123e10mm 123E10 123e-3 4e+3')).to.be.eql([
+        expressionNode([
+          numberNode(123e10, 'mm'),
+          numberNode(123e10, null),
+          numberNode(123e-3, null),
+          numberNode(4e3, null)
+        ])
+      ]);
+    });
+
     test('parses hex colors', () => {
       expect(parseExpressions('#fff')).to.be.eql([expressionNode(
           [hexNode('fff')])]);
