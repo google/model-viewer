@@ -162,9 +162,7 @@ export default class Model extends Object3D {
   }
 
   set animationTime(value: number) {
-    if (this.currentAnimationAction != null) {
-      this.currentAnimationAction.time = value;
-    }
+    this.mixer.setTime(value);
   }
 
   get animationTime(): number {
