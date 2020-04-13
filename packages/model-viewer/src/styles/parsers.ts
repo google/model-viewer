@@ -223,18 +223,16 @@ const parseIdent = (() => {
  * require one for our purposes).
  */
 const parseNumber = (() => {
-  const NOT_VALUE_RE = /[^0-9\.\-]|$/;
+  // @see https://www.w3.org/TR/css-syntax/#number-token-diagram
+  const VALUE_RE = /[\+\-]?(\d+[\.]\d+|\d+|[\.]\d+)([eE][\+\-]?\d+)?/;
   const UNIT_RE = /^[a-z%]+/i;
   const ALLOWED_UNITS = /^(m|mm|cm|rad|deg|[%])$/;
 
   return (inputString: string): ParseResult<NumberNode> => {
-    const notValueMatch = inputString.match(NOT_VALUE_RE);
-    const value = notValueMatch == null ?
-        inputString :
-        inputString.substr(0, notValueMatch.index);
-    inputString = notValueMatch == null ?
-        inputString :
-        inputString.slice(notValueMatch.index);
+    const valueMatch = inputString.match(VALUE_RE);
+    const value = valueMatch == null ? '0' : valueMatch[0];
+    inputString = value == null ? inputString : inputString.slice(value.length);
+
     const unitMatch = inputString.match(UNIT_RE);
     let unit = unitMatch != null && unitMatch[0] !== '' ? unitMatch[0] : null;
     const remainingInput =
