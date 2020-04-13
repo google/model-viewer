@@ -13,26 +13,17 @@
  * limitations under the License.
  */
 
-import {Camera, Matrix4, Vector3} from 'three';
+import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE} from '../../constants.js';
-import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
-import {ARRenderer} from '../../three-components/ARRenderer.js';
+import {IS_IE11} from '../../constants.js';
+import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
+import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
+import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
-import {assetPath, timePasses, waitForEvent} from '../helpers.js';
+import {assetPath} from '../helpers.js';
 
 
 const expect = chai.expect;
-
-const applyPhoneRotation =
-    (camera: Camera) => {
-      // Rotate 180 degrees on Y (so it's not the default)
-      // and angle 45 degrees towards the ground, like a phone.
-      camera.matrix.identity()
-          .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
-          .multiply(new Matrix4().makeRotationAxis(
-              new Vector3(1, 0, 0), -Math.PI / 4));
-    }
 
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
@@ -43,17 +34,54 @@ class MockXRFrame implements XRFrame {
     return {} as XRPose;
   }
 
-  getViewerPose(_referenceSpace?: XRReferenceSpace):
-  XRViewerPose{return {} as XRViewerPose}
+  getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
+    // Rotate 180 degrees on Y (so it's not the default)
+    // and angle 45 degrees towards the ground, like a phone.
+    const matrix = new Matrix4()
+                       .identity()
+                       .makeRotationAxis(new Vector3(0, 1, 0), Math.PI)
+                       .multiply(new Matrix4().makeRotationAxis(
+                           new Vector3(1, 0, 0), -Math.PI / 4));
+    matrix.setPosition(10, 2, 3);
+    const transform: XRRigidTransform = {
+      matrix: matrix.elements as unknown as Float32Array,
+      position: {} as DOMPointReadOnly,
+      orientation: {} as DOMPointReadOnly,
+      inverse: {} as XRRigidTransform
+    };
+    const camera = new PerspectiveCamera();
+    const view: XRView = {
+      eye: {} as XREye,
+      projectionMatrix: camera.projectionMatrix.elements as unknown as
+          Float32Array,
+      viewMatrix: {} as Float32Array,
+      transform: transform
+    };
+    const viewerPos: XRViewerPose = {transform: transform, views: [view]};
+
+    return viewerPos;
+  }
 
   getHitTestResults(_xrHitTestSource: XRHitTestSource) {
     return [];
   }
+
+  getHitTestResultsForTransientInput(_hitTestSource:
+                                         XRTransientInputHitTestSource) {
+    return [];
+  }
 }
 
-customElements.define('model-viewer-element', ModelViewerElementBase);
-
 suite('ARRenderer', () => {
+  // IE11 doesn't support DOMPoint, and will never support AR, so skip.
+  if (IS_IE11) {
+    return;
+  }
+
+  let nextId = 0;
+  let tagName: string;
+  let ModelViewerElement: Constructor<ModelViewerElementBase>;
+
   let element: ModelViewerElementBase;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
@@ -98,6 +126,15 @@ suite('ARRenderer', () => {
           return result;
         }
 
+        async requestHitTestSourceForTransientInput(
+            _options: XRTransientInputHitTestOptionsInit) {
+          const result = {cancel: () => {}};
+
+          this.hitTestSources.add(result);
+
+          return result;
+        }
+
         requestAnimationFrame() {
           return 1;
         }
@@ -116,7 +153,15 @@ suite('ARRenderer', () => {
   };
 
   setup(() => {
-    element = new ModelViewerElementBase();
+    tagName = `model-viewer-arrenderer-${nextId++}`;
+    ModelViewerElement = class extends ModelViewerElementBase {
+      static get is() {
+        return tagName;
+      }
+    };
+    customElements.define(tagName, ModelViewerElement);
+
+    element = new ModelViewerElement();
     arRenderer = new ARRenderer(element[$renderer]);
   });
 
@@ -135,153 +180,109 @@ suite('ARRenderer', () => {
 
   suite('when presenting a scene', () => {
     let modelScene: ModelScene;
-
-    if (!IS_WEBXR_AR_CANDIDATE) {
-      return;
-    }
+    let oldXRRay: any;
 
     setup(async () => {
-      element.src = assetPath('models/Astronaut.glb');
-      await waitForEvent(element, 'load');
-      modelScene = element[$scene];
+      modelScene = new ModelScene({
+        element: element,
+        canvas: element[$canvas],
+        width: 200,
+        height: 100,
+      });
+      await modelScene.setModelSource(assetPath('models/Astronaut.glb'));
       stubWebXrInterface(arRenderer);
       setInputSources([]);
-    });
 
-    test('presents the model at its natural scale', async () => {
-      const model = modelScene.model;
+      oldXRRay = (window as any).XRRay;
+      (window as any).XRRay = class MockXRRay implements XRRay {
+        readonly origin = new DOMPointReadOnly;
+        readonly direction = new DOMPointReadOnly;
+        matrix = new Float32Array;
+
+        constructor(_origin: DOMPointInit, _direction: DOMPointInit) {
+        }
+      }
 
       await arRenderer.present(modelScene);
+    });
 
-      expect(model.scale.x).to.be.equal(1);
-      expect(model.scale.y).to.be.equal(1);
-      expect(model.scale.z).to.be.equal(1);
+    teardown(() => {
+      (window as any).XRRay = oldXRRay;
+    });
+
+    test('presents the model at its natural scale', () => {
+      const scale = modelScene.model.getWorldScale(new Vector3());
+
+      expect(scale.x).to.be.equal(1);
+      expect(scale.y).to.be.equal(1);
+      expect(scale.z).to.be.equal(1);
     });
 
     suite('presentation ends', () => {
-      test('restores the original model scale', async () => {
-        const model = modelScene.model;
-        const originalModelScale = model.scale.clone();
-
-        await arRenderer.present(modelScene);
+      setup(async () => {
         await arRenderer.stopPresenting();
+      });
 
-        expect(originalModelScale.x).to.be.equal(model.scale.x);
-        expect(originalModelScale.y).to.be.equal(model.scale.y);
-        expect(originalModelScale.z).to.be.equal(model.scale.z);
+      test('restores the model to its natural scale', () => {
+        const scale = modelScene.model.getWorldScale(new Vector3());
+
+        expect(scale.x).to.be.equal(1);
+        expect(scale.y).to.be.equal(1);
+        expect(scale.z).to.be.equal(1);
+      });
+
+      test('restores original camera', () => {
+        expect(modelScene.getCamera()).to.be.equal(modelScene.camera);
+      });
+
+      test('restores scene size', () => {
+        expect(modelScene.width).to.be.equal(200);
+        expect(modelScene.height).to.be.equal(100);
       });
     });
 
-    suite('placing a model', () => {
-      test('places the model oriented to the camera', async () => {
+    // We're going to need to mock out XRFrame more so it can set the camera
+    // in order to properly test this.
+
+    suite('after initial placement', () => {
+      let yaw: number;
+
+      setup(async () => {
+        await arRenderer.present(modelScene);
+        arRenderer[$onWebXRFrame](
+            0, new MockXRFrame(arRenderer[$currentSession]!));
+        yaw = modelScene.yaw;
+      });
+
+      test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
-        const pivotRotation = 0.123;
-        modelScene.model.rotation.y = pivotRotation;
+        const {model, position} = modelScene;
 
-        // Set camera to (10, 2, 0), rotated 180 degrees on Y (so
-        // our dolly will need to rotate to face camera) and angled 45
-        // degrees towards the ground, like someone holding a phone.
-        applyPhoneRotation(arRenderer.camera);
-        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
-        arRenderer.camera.updateMatrixWorld(true);
+        const cameraPosition = arRenderer.camera.position;
+        const cameraToHit = new Vector2(
+            position.x - cameraPosition.x, position.z - cameraPosition.z);
+        const forward = model.getWorldDirection(new Vector3());
+        const forwardProjection = new Vector2(forward.x, forward.z);
 
-        await arRenderer.present(modelScene);
-        await arRenderer.placeModel();
-        const {position, rotation} = modelScene.model;
-
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
-        // Quaternion rotation results in the rotation towards the viewer
-        // with -X and -Z, and the offset applied to Y to invert pivotRotation,
-        // but it's inverted again here due to the -X/-Z rotation encoding
-        expect(rotation.x).to.be.equal(-Math.PI);
-        expect(rotation.y).to.be.closeTo(pivotRotation, epsilon);
-        expect(rotation.z).to.be.equal(-Math.PI);
+        expect(forward.y).to.be.equal(0);
+        expect(cameraToHit.cross(forwardProjection)).to.be.closeTo(0, epsilon);
+        expect(cameraToHit.dot(forwardProjection)).to.be.lessThan(0);
       });
 
-      test('when a screen-type XRInputSource exists', async () => {
-        await arRenderer.present(modelScene);
-        const {position} = modelScene.model;
+      suite('after hit placement', () => {
+        let hitPosition: Vector3;
 
-        expect(position.x).to.be.equal(0);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(0);
+        setup(async () => {
+          hitPosition = new Vector3(5, -1, 1);
+          await arRenderer.placeModel(hitPosition);
+          // Long enough time to settle at new position.
+          arRenderer[$onWebXRFrame](
+              SETTLING_TIME, new MockXRFrame(arRenderer[$currentSession]!));
+        });
 
-        // Set camera to (10, 2, 0), rotated 180 degrees on Y,
-        // and angled 45 degrees towards the ground, like a phone.
-        applyPhoneRotation(arRenderer.camera);
-        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
-        arRenderer.camera.updateMatrixWorld(true);
-
-        setInputSources([{
-          targetRayMode: 'screen' as XRTargetRayMode,
-          handedness: '' as XRHandedness,
-          targetRaySpace: {} as XRSpace,
-          profiles: []
-        }]);
-        arRenderer.processXRInput(new MockXRFrame(xrSession));
-        await waitForEvent(arRenderer, 'modelmove');
-
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
-
-
-        // Move the camera, ensure model hasn't changed
-        arRenderer.camera.matrix.setPosition(new Vector3(0, 1, 0));
-        arRenderer.camera.updateMatrixWorld(true);
-        setInputSources([]);
-        arRenderer.processXRInput(new MockXRFrame(xrSession));
-        await timePasses();
-
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
-      });
-
-      test('ignores non-screen-type XRInputSources', async () => {
-        applyPhoneRotation(arRenderer.camera);
-        arRenderer.camera.updateMatrixWorld(true);
-        await arRenderer.present(modelScene);
-        const {position} = modelScene.model;
-
-        setInputSources([{
-          targetRayMode: 'gaze' as XRTargetRayMode,
-          handedness: '' as XRHandedness,
-          targetRaySpace: {} as XRSpace,
-          profiles: []
-        }]);
-        arRenderer.processXRInput(new MockXRFrame(xrSession));
-        await timePasses();
-
-        expect(position.x).to.be.equal(0);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(0);
-      });
-
-      test('ignores when ray fails', async () => {
-        applyPhoneRotation(arRenderer.camera);
-        arRenderer.camera.matrix.setPosition(new Vector3(10, 2, 0));
-        arRenderer.camera.updateMatrixWorld(true);
-        await arRenderer.present(modelScene);
-        await arRenderer.placeModel();
-        const {position} = modelScene.model;
-
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
-
-        // Now point phone upwards
-        arRenderer.camera.matrix.identity().makeRotationAxis(
-            new Vector3(1, 0, 0), Math.PI / 2);
-        arRenderer.camera.matrix.setPosition(new Vector3(0, 2, 0));
-        arRenderer.camera.updateMatrixWorld(true);
-        await arRenderer.placeModel();
-
-        expect(position.x).to.be.equal(10);
-        expect(position.y).to.be.equal(0);
-        expect(position.z).to.be.equal(2);
+        test('scene has the same orientation', () => {
+          expect(modelScene.yaw).to.be.equal(yaw);
+        });
       });
     });
   });

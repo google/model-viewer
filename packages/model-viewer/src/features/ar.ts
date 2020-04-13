@@ -308,6 +308,10 @@ configuration or device capabilities');
         this[$arModes] = deserializeARModes(this.arModes);
       }
 
+      if (changedProperties.has('arScale')) {
+        this[$scene].canScale = this.arScale !== 'fixed';
+      }
+
       this[$arMode] = ARMode.NONE;
       if (this.ar) {
         const it = this[$arModes].values();

@@ -74,9 +74,11 @@ export class Shadow extends DirectionalLight {
     this.setModel(model, softness);
   }
 
+  /**
+   * Update the shadow's size and position for a new model. Softness is also
+   * needed, as this controls the shadow's resolution.
+   */
   setModel(model: Model, softness: number) {
-    const {camera} = this.shadow;
-
     this.isAnimated = model.animationNames.length > 0;
     this.boundingBox.copy(model.boundingBox);
     this.size.copy(model.size);
@@ -94,16 +96,14 @@ export class Shadow extends DirectionalLight {
     const shadowOffset = size.y * OFFSET;
     this.position.y = boundingBox.max.y + shadowOffset;
     boundingBox.getCenter(this.floor.position);
-    // Floor plane is up slightly to avoid Z-fighting with baked-in shadows and
-    // to stay inside the shadow camera.
-    this.floor.position.y -= size.y / 2 + this.position.y - 2 * shadowOffset;
-
-    camera.near = 0;
-    camera.far = size.y;
 
     this.setSoftness(softness);
   }
 
+  /**
+   * Update the shadow's resolution based on softness (between 0 and 1). Should
+   * not be called frequently, as this results in reallocation.
+   */
   setSoftness(softness: number) {
     const resolution = Math.pow(
         2,
@@ -112,6 +112,9 @@ export class Shadow extends DirectionalLight {
     this.setMapSize(resolution);
   }
 
+  /**
+   * Lower-level version of the above function.
+   */
   setMapSize(maxMapSize: number) {
     const {camera, mapSize, map} = this.shadow;
     const {size, boundingBox} = this;
@@ -140,14 +143,17 @@ export class Shadow extends DirectionalLight {
     camera.bottom = boundingBox.min.z - heightPad;
     camera.top = boundingBox.max.z + heightPad;
 
-    this.updateMatrixWorld();
-    camera.updateProjectionMatrix();
+    this.setScaleAndOffset(camera.zoom, 0);
     this.shadow.updateMatrices(this);
 
     this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
   }
 
+  /**
+   * Set the shadow's intensity (0 to 1), which is just its opacity. Turns off
+   * shadow rendering if zero.
+   */
   setIntensity(intensity: number) {
     this.shadowMaterial.opacity = intensity;
     if (intensity > 0) {
@@ -163,8 +169,41 @@ export class Shadow extends DirectionalLight {
     return this.shadowMaterial.opacity;
   }
 
+  /**
+   * The shadow does not rotate with its parent transforms, so the rotation must
+   * be manually updated here if it rotates in world space. The input is its
+   * absolute orientation about the Y-axis (other rotations are not supported).
+   */
   setRotation(radiansY: number) {
     this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
     this.shadow.updateMatrices(this);
+  }
+
+  /**
+   * The scale is also not inherited from parents, so it must be set here in
+   * accordance with any transforms. An offset can also be specified to move the
+   * shadow vertically relative to the bottom of the model. Positive is up, so
+   * values are generally negative.
+   */
+  setScaleAndOffset(scale: number, offset: number) {
+    const sizeY = this.size.y;
+    const inverseScale = 1 / scale;
+    // Floor plane is up slightly from the bottom of the bounding box to avoid
+    // Z-fighting with baked-in shadows and to stay inside the shadow camera.
+    const shadowOffset = sizeY * OFFSET;
+    this.floor.position.y = 2 * shadowOffset - sizeY + offset * inverseScale;
+    const {camera} = this.shadow;
+    camera.zoom = scale;
+    camera.near = 0;
+    camera.far = sizeY * scale - offset;
+
+    camera.projectionMatrix.makeOrthographic(
+        camera.left * scale,
+        camera.right * scale,
+        camera.top * scale,
+        camera.bottom * scale,
+        camera.near,
+        camera.far);
+    camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
   }
 }

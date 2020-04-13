@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+export const SETTLING_TIME = 10000;  // plenty long enough
 const DECAY_MILLISECONDS = 50;
 const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
 const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;

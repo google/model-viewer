@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Matrix4, PerspectiveCamera, Raycaster, Scene, Vector2} from 'three';
+import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$renderer, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
+import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
@@ -40,8 +41,8 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 
 const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 
-const pixelPosition = new Vector2();
 const raycaster = new Raycaster();
+const vector3 = new Vector3();
 
 const $paused = Symbol('paused');
 
@@ -65,11 +66,17 @@ export class ModelScene extends Scene {
       null;
   public exposure = 1;
   public model: Model;
+  public canScale = true;
   public framedFieldOfView = DEFAULT_FOV_DEG;
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
+
+  private goalTarget = new Vector3();
+  private targetDamperX = new Damper();
+  private targetDamperY = new Damper();
+  private targetDamperZ = new Damper();
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
@@ -212,17 +219,39 @@ export class ModelScene extends Scene {
    * Sets the point in model coordinates the model should orbit/pivot around.
    */
   setTarget(modelX: number, modelY: number, modelZ: number) {
-    this.model.position.set(-modelX, -modelY, -modelZ);
-    this.isDirty = true;
+    this.goalTarget.set(-modelX, -modelY, -modelZ);
   }
 
   /**
-   * The AR scene is anchored at the center of the lower, forward edge of the
-   * bounding box.
+   * Gets the point in model coordinates the model should orbit/pivot around.
    */
-  setARTarget() {
-    const {min, max} = this.model.boundingBox;
-    this.model.position.set(-(min.x + max.x) / 2, -min.y, -max.z);
+  getTarget(): Vector3 {
+    return vector3.copy(this.goalTarget).multiplyScalar(-1);
+  }
+
+  /**
+   * Shifts the model to the target point immediately instead of easing in.
+   */
+  jumpToGoal() {
+    this.updateTarget(SETTLING_TIME);
+  }
+
+  /**
+   * This should be called every frame with the frame delta to cause the target
+   * to transition to its set point.
+   */
+  updateTarget(delta: number) {
+    const goal = this.goalTarget;
+    const target = this.model.position;
+    if (!goal.equals(target)) {
+      const radius = this.model.idealCameraDistance;
+      let {x, y, z} = target;
+      x = this.targetDamperX.update(x, goal.x, delta, radius);
+      y = this.targetDamperY.update(y, goal.y, delta, radius);
+      z = this.targetDamperZ.update(z, goal.z, delta, radius);
+      this.model.position.set(x, y, z);
+      this.isDirty = true;
+    }
   }
 
   /**
@@ -269,21 +298,14 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns the world position and normal of the point on the
-   * mesh corresponding to the input pixel coordinates given relative to the
-   * model-viewer element. The position and normal are returned as strings in
-   * the format suitable for putting in a hotspot's data-position and
-   * data-normal attributes. If the mesh is not hit, position returns the
-   * empty string.
+   * This method returns the world position and model-space normal of the point
+   * on the mesh corresponding to the input pixel coordinates given relative to
+   * the model-viewer element. If the mesh is not hit, the result is null.
    */
-  positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D}|null {
-    pixelPosition.set(pixelX / this.width, pixelY / this.height)
-        .multiplyScalar(2)
-        .subScalar(1);
-    pixelPosition.y *= -1;
+  positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
+      {position: Vector3, normal: Vector3}|null {
     raycaster.setFromCamera(pixelPosition, this.getCamera());
-    const hits = raycaster.intersectObject(this, true);
+    const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
       return null;
@@ -294,11 +316,6 @@ export class ModelScene extends Scene {
       return null;
     }
 
-    const worldToPivot = new Matrix4().getInverse(this.model.matrixWorld);
-    const position = toVector3D(hit.point.applyMatrix4(worldToPivot));
-    const normal =
-        toVector3D(hit.face.normal.transformDirection(hit.object.matrixWorld)
-                       .transformDirection(worldToPivot));
-    return {position: position, normal: normal};
+    return {position: hit.point, normal: hit.face.normal};
   }
 }

@@ -13,66 +13,133 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
+import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$needsRender, $onResize} from '../model-viewer-base.js';
-import {ModelViewerElement} from '../model-viewer.js';
 import {assertIsArCandidate} from '../utilities.js';
 
+import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
+import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
-import Reticle from './Reticle.js';
 import {assertContext} from './WebGLUtils.js';
 
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
-const AR_SHADOW_INTENSITY = 0.5;
+const AR_SHADOW_INTENSITY = 0.3;
+const ROTATION_RATE = 1.5;
+// Angle down (towards bottom of screen) from camera center ray to use for hit
+// testing against the floor. This makes placement faster and more intuitive
+// assuming the phone is in portrait mode. This seems to be a reasonable
+// assumption for the start of the session and UI will lack landscape mode to
+// encourage upright use.
+const HIT_ANGLE_DEG = 20;
+// Slow down the dampers for initial placement.
+const INTRO_DAMPER_RATE = 0.4;
+const SCALE_SNAP_HIGH = 1.2;
+const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
 const $presentedScene = Symbol('presentedScene');
-
+const $placementBox = Symbol('placementBox');
 const $lastTick = Symbol('lastTick');
 const $turntableRotation = Symbol('turntableRotation');
 const $oldShadowIntensity = Symbol('oldShadowIntensity');
 const $oldBackground = Symbol('oldBackground');
 const $rafId = Symbol('rafId');
-const $currentSession = Symbol('currentSession');
+export const $currentSession = Symbol('currentSession');
 const $tick = Symbol('tick');
 const $refSpace = Symbol('refSpace');
 const $viewerRefSpace = Symbol('viewerRefSpace');
+const $frame = Symbol('frame');
+const $initialized = Symbol('initialized');
+const $initialModelToWorld = Symbol('initialModelToWorld');
+const $placementComplete = Symbol('placementComplete');
+const $initialHitSource = Symbol('hitTestSource');
+const $transientHitTestSource = Symbol('transiertHitTestSource');
+const $inputSource = Symbol('inputSource');
+const $isTranslating = Symbol('isTranslating');
+const $isRotating = Symbol('isRotating');
+const $isScaling = Symbol('isScaling');
+const $lastDragPosition = Symbol('lastDragPosition');
+const $lastScalar = Symbol('lastScalar');
+const $goalPosition = Symbol('goalPosition');
+const $goalYaw = Symbol('goalYaw');
+const $goalScale = Symbol('goalScale');
+const $xDamper = Symbol('xDamper');
+const $yDamper = Symbol('yDamper');
+const $zDamper = Symbol('zDamper');
+const $yawDamper = Symbol('yawDamper');
+const $scaleDamper = Symbol('scaleDamper');
+const $damperRate = Symbol('damperRate');
 const $resolveCleanup = Symbol('resolveCleanup');
 
-const $onWebXRFrame = Symbol('onWebXRFrame');
+export const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
+const $updateCamera = Symbol('updateCamera');
+const $placeInitially = Symbol('placeInitially');
+const $getHitPoint = Symbol('getHitPoint');
+const $selectStartHandler = Symbol('selectStartHandler');
+const $onSelectStart = Symbol('onSelectStart');
+const $selectEndHandler = Symbol('selectHandler');
+const $onSelectEnd = Symbol('onSelect');
+const $fingerSeparation = Symbol('fingerSeparation');
+const $processInput = Symbol('processInput');
+const $moveScene = Symbol('moveScene');
 
 const vector3 = new Vector3();
+const matrix4 = new Matrix4();
+const hitPosition = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
 
   public camera: PerspectiveCamera = new PerspectiveCamera();
-  public reticle: Reticle = new Reticle(this.camera);
-  public raycaster: Raycaster|null = null;
 
+  private[$placementBox]: PlacementBox|null = null;
   private[$lastTick]: number|null = null;
   private[$turntableRotation]: number|null = null;
   private[$oldShadowIntensity]: number|null = null;
   private[$oldBackground]: any = null;
   private[$rafId]: number|null = null;
-  private[$currentSession]: XRSession|null = null;
+  protected[$currentSession]: XRSession|null = null;
   private[$refSpace]: XRReferenceSpace|null = null;
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
+  private[$frame]: XRFrame|null = null;
+  private[$initialHitSource]: XRHitTestSource|null = null;
+  private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
+  private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
+
+  private[$initialized] = false;
+  private[$initialModelToWorld] = new Matrix4();
+  private[$placementComplete] = false;
+  private[$isTranslating] = false;
+  private[$isRotating] = false;
+  private[$isScaling] = false;
+  private[$lastDragPosition] = new Vector3();
+  private[$lastScalar] = 0;
+  private[$goalPosition] = new Vector3();
+  private[$goalYaw] = 0;
+  private[$goalScale] = 1;
+  private[$xDamper] = new Damper();
+  private[$yDamper] = new Damper();
+  private[$zDamper] = new Damper();
+  private[$yawDamper] = new Damper();
+  private[$scaleDamper] = new Damper();
+  private[$damperRate] = 1;
+
+  private[$selectStartHandler] = (event: Event) =>
+      this[$onSelectStart](event as XRInputSourceEvent);
+  private[$selectEndHandler] = (event: Event) =>
+      this[$onSelectEnd](event as XRInputSourceEvent);
 
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-
+    // Turn this off, as the matrix is set directly from webXR rather than using
+    // postion, rotation, scale.
     this.camera.matrixAutoUpdate = false;
-  }
-
-  initializeRenderer() {
-    this.threeRenderer.setPixelRatio(1);
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -108,10 +175,7 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    this.threeRenderer.setSize(
-        session.renderState.baseLayer!.framebufferWidth,
-        session.renderState.baseLayer!.framebufferHeight,
-        false);
+    (this[$presentedScene]!.element)[$onResize](window.screen);
 
     return session;
   }
@@ -144,7 +208,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.model.setHotspotsVisibility(false);
+    this[$presentedScene] = scene;
 
     const currentSession = await this.resolveARSession();
     currentSession.addEventListener('end', () => {
@@ -155,28 +219,39 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
-    scene.setARTarget();
+    const placementBox = new PlacementBox(scene.model);
+    this[$placementComplete] = false;
 
     scene.setCamera(this.camera);
-    scene.add(this.reticle);
-    scene.model.visible = false;
+    this[$initialized] = false;
+    this[$damperRate] = INTRO_DAMPER_RATE;
+
+    this[$turntableRotation] = scene.yaw;
+    scene.yaw = 0;
+    this[$goalYaw] = 0;
+    this[$goalScale] = 1;
 
     this[$oldBackground] = scene.background;
     scene.background = null;
 
     this[$oldShadowIntensity] = scene.shadowIntensity;
-    scene.setShadowIntensity(AR_SHADOW_INTENSITY);
+    scene.setShadowIntensity(0);
 
-    this[$presentedScene] = scene;
-    this[$lastTick] = performance.now();
-    const element = scene.element as ModelViewerElement;
-    this[$turntableRotation] = element.turntableRotation;
-    element.resetTurntableRotation();
-
-    this.initializeRenderer();
-    element[$onResize](window.screen);
+    const radians = HIT_ANGLE_DEG * Math.PI / 180;
+    const ray = new XRRay(
+        new DOMPoint(0, 0, 0),
+        new DOMPoint(0, -Math.sin(radians), -Math.cos(radians)));
+    currentSession
+        .requestHitTestSource({space: this[$viewerRefSpace]!, offsetRay: ray})
+        .then(hitTestSource => {
+          this[$initialHitSource] = hitTestSource;
+        });
 
     this[$currentSession] = currentSession;
+    this[$placementBox] = placementBox;
+    this[$lastTick] = performance.now();
+
+    // Start the event loop.
     this[$tick]();
   }
 
@@ -194,6 +269,9 @@ export class ARRenderer extends EventDispatcher {
 
     try {
       const session = this[$currentSession]!;
+      session.removeEventListener('selectstart', this[$selectStartHandler]);
+      session.removeEventListener('selectend', this[$selectEndHandler]);
+
       this[$currentSession] = null;
       session.cancelAnimationFrame(this[$rafId]!);
 
@@ -217,11 +295,11 @@ export class ARRenderer extends EventDispatcher {
     if (scene != null) {
       const {model, element} = scene;
       scene.setCamera(scene.camera);
-      scene.remove(this.reticle);
-      model.visible = true;
-      model.setHotspotsVisibility(true);
+      model.remove(this[$placementBox]!);
 
       scene.position.set(0, 0, 0);
+      scene.scale.set(1, 1, 1);
+      model.setShadowScaleAndOffset(1, 0);
       scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
@@ -231,7 +309,9 @@ export class ARRenderer extends EventDispatcher {
 
       this.renderer.expandTo(scene.width, scene.height);
     }
-    this.reticle.reset();
+
+    this[$placementBox]!.dispose();
+    this[$placementBox] = null;
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
@@ -248,61 +328,307 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  async placeModel() {
-    if (this[$currentSession] == null) {
+  [$updateCamera](view: XRView) {
+    const {camera} = this;
+    const {matrix: cameraMatrix} = camera;
+
+    cameraMatrix.fromArray(view.transform.matrix);
+    camera.updateMatrixWorld(true);
+    // position is not updated when matrix is updated.
+    camera.position.setFromMatrixPosition(cameraMatrix);
+
+    if (this[$initialHitSource] != null) {
+      // Target locked to screen center
+      const {position, model} = this[$presentedScene]!;
+      const radius = model.idealCameraDistance;
+      camera.getWorldDirection(position);
+      position.multiplyScalar(radius);
+      position.add(camera.position);
+    }
+
+    if (!this[$initialized]) {
+      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      // Have to set the inverse manually when setting matrix directly. This is
+      // needed for raycasting.
+      camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+      // Orient model toward camera on first frame.
+      const {x, z} = camera.position;
+      const scene = this[$presentedScene]!;
+      scene.pointTowards(x, z);
+      scene.model.updateMatrixWorld(true);
+      this[$goalYaw] = scene.yaw;
+      this[$initialModelToWorld].copy(scene.model.matrixWorld);
+      this[$initialized] = true;
+    }
+
+    this[$presentedScene]!.model.orientHotspots(
+        Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
+  }
+
+  [$placeInitially](frame: XRFrame) {
+    const hitSource = this[$initialHitSource];
+    if (hitSource == null) {
       return;
     }
-    // NOTE: Currently rays will be cast from the middle of the screen.
-    // Eventually we might use input coordinates for this.
 
-    // Just reuse the hit matrix that the reticle has computed.
-    if (this.reticle && this.reticle.hitMatrix) {
-      const scene = this[$presentedScene]!;
-      const {model} = scene;
-      const {hitMatrix} = this.reticle;
-
-      scene.position.setFromMatrixPosition(hitMatrix);
-
-      // Orient the scene to face the camera
-      const camPosition = vector3.setFromMatrixPosition(this.camera.matrix);
-      scene.pointTowards(camPosition.x, camPosition.z);
-      scene.updateMatrixWorld();
-
-      model.visible = true;
-      model.setHotspotsVisibility(true);
-
-      this.dispatchEvent({type: 'modelmove'});
+    const hitTestResults = frame.getHitTestResults(hitSource);
+    if (hitTestResults.length == 0) {
+      return;
     }
+
+    const hit = hitTestResults[0];
+    const hitMatrix = this[$getHitPoint](hit);
+    if (hitMatrix == null) {
+      return;
+    }
+
+    this.placeModel(hitMatrix);
+
+    hitSource.cancel();
+    this[$initialHitSource] = null;
+
+    const {session} = frame;
+    session.addEventListener('selectstart', this[$selectStartHandler]);
+    session.addEventListener('selectend', this[$selectEndHandler]);
+    session
+        .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
+        .then(hitTestSource => {
+          this[$transientHitTestSource] = hitTestSource;
+        });
+  }
+
+  [$getHitPoint](hitResult: XRHitTestResult): Vector3|null {
+    const pose = hitResult.getPose(this[$refSpace]!);
+    if (pose == null) {
+      return null;
+    }
+
+    const hitMatrix = matrix4.fromArray(pose.transform.matrix);
+    // Check that the y-coordinate of the normal is large enough that the normal
+    // is pointing up.
+    return hitMatrix.elements[5] > 0.75 ?
+        hitPosition.setFromMatrixPosition(hitMatrix) :
+        null;
   }
 
   /**
-   * It appears that XRSession's `inputsourceschange` event is not implemented
-   * in Chrome Canary as of m72 for 'screen' inputs, which would be preferable
-   * since we only need an "select" event, rather than track a pose on every
-   * frame (like a 6DOF controller). Due to this bug, on every frame, check to
-   * see if an input exists.
-   * @see https://bugs.chromium.org/p/chromium/issues/detail?id=913703
-   * @see https://immersive-web.github.io/webxr/#xrinputsource-interface
+   * This sets the initial model placement based on the input hit point. The
+   * bottom of the model will be placed on the floor (the shadow will rest on
+   * the input's y-coordinate). The XZ placement is found by first putting the
+   * scene's target at the hit point, drawing a ray from the camera to the
+   * target, and finding the XZ-intersection of this ray with the model's
+   * bounding box. The scene is then translated on the XZ plane to position this
+   * intersection point at the input hit point. If the ray does not intersect,
+   * the target is left at the hit point.
+   *
+   * This ensures the model is placed according to the chosen target, is not
+   * reoriented, and does not intersect the camera even when the model
+   * is large (unless the target is chosen outside of the model's bounding box).
    */
-  processXRInput(frame: XRFrame) {
-    const {session} = frame;
+  placeModel(hit: Vector3) {
+    const scene = this[$presentedScene]!;
+    const {model} = scene;
+    const {min, max} = model.boundingBox;
 
-    // Get current input sources. For now, only 'screen' input is supported,
-    // which is only added to the session's active input sources immediately
-    // before `selectstart` and removed immediately after `selectend` event.
-    // If we have a 'screen' source here, it means the output canvas was
-    // tapped.
-    const sources = Array.from(session.inputSources)
-                        .filter(input => input.targetRayMode === 'screen');
+    this[$placementBox]!.show = true;
 
-    if (sources.length === 0) {
+    const goal = this[$goalPosition];
+    goal.copy(hit);
+    const floor = hit.y;
+
+    const origin = this.camera.position.clone();
+    const direction = hit.clone().sub(origin).normalize();
+    // Pull camera back enough to be outside of large models.
+    origin.sub(direction.multiplyScalar(model.idealCameraDistance));
+    const ray = new Ray(origin, direction.normalize());
+
+    const modelToWorld = this[$initialModelToWorld];
+    const modelPosition =
+        new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
+    modelToWorld.setPosition(modelPosition);
+    const world2Model = new Matrix4().getInverse(modelToWorld);
+    ray.applyMatrix4(world2Model);
+
+    // Make the box tall so that we don't intersect the top face.
+    max.y += 10;
+    ray.intersectBox(model.boundingBox, modelPosition);
+    max.y -= 10;
+
+    if (modelPosition != null) {
+      modelPosition.applyMatrix4(modelToWorld);
+      goal.add(hit).sub(modelPosition);
+    }
+
+    // Move the scene's target to the model's floor height.
+    const target = scene.getTarget();
+    scene.setTarget(target.x, min.y, target.z);
+    // Ignore the y-coordinate and set on the floor instead.
+    goal.y = floor;
+
+    this.dispatchEvent({type: 'modelmove'});
+  }
+
+  [$onSelectStart](event: XRInputSourceEvent) {
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource == null) {
+      return;
+    }
+    const fingers = this[$frame]!.getHitTestResultsForTransientInput(hitSource);
+    const scene = this[$presentedScene]!;
+    const box = this[$placementBox]!;
+
+    if (fingers.length === 1) {
+      this[$inputSource] = event.inputSource;
+      const {axes} = event.inputSource.gamepad;
+
+      const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
+      box.show = true;
+
+      if (hitPosition != null) {
+        this[$isTranslating] = true;
+        this[$lastDragPosition].copy(hitPosition);
+      } else {
+        this[$isRotating] = true;
+        this[$lastScalar] = axes[0];
+      }
+    } else if (fingers.length === 2 && scene.canScale) {
+      box.show = true;
+      this[$isScaling] = true;
+      this[$lastScalar] = this[$fingerSeparation](fingers) / scene.scale.x;
+    }
+  }
+
+  [$onSelectEnd](_event: XRInputSourceEvent) {
+    this[$isTranslating] = false;
+    this[$isRotating] = false;
+    this[$isScaling] = false;
+    this[$inputSource] = null;
+    this[$goalPosition].y +=
+        this[$placementBox]!.offsetHeight * this[$presentedScene]!.scale.x;
+    this[$placementBox]!.show = false
+  }
+
+  [$fingerSeparation](fingers: XRTransientInputHitTestResult[]): number {
+    const fingerOne = fingers[0].inputSource.gamepad.axes;
+    const fingerTwo = fingers[1].inputSource.gamepad.axes;
+    const deltaX = fingerTwo[0] - fingerOne[0];
+    const deltaY = fingerTwo[1] - fingerOne[1];
+    return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  }
+
+  [$processInput](frame: XRFrame) {
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource == null) {
+      return;
+    }
+    if (!this[$isTranslating] && !this[$isScaling] && !this[$isRotating]) {
+      return;
+    }
+    const fingers = frame.getHitTestResultsForTransientInput(hitSource);
+    const scene = this[$presentedScene]!;
+    const scale = scene.scale.x;
+
+    // Rotating, translating and scaling are mutually exclusive operations; only
+    // one can happen at a time, but we can switch during a gesture.
+    if (this[$isScaling]) {
+      if (fingers.length < 2) {
+        // If we lose the second finger, stop scaling (in fact, stop processing
+        // input altogether until a new gesture starts).
+        this[$isScaling] = false;
+      } else {
+        const separation = this[$fingerSeparation](fingers);
+        const scale = separation / this[$lastScalar];
+        this[$goalScale] =
+            (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+      }
+      return;
+    } else if (fingers.length === 2 && scene.canScale) {
+      // If we were rotating or translating and we get a second finger, switch
+      // to scaling instead.
+      this[$isTranslating] = false;
+      this[$isRotating] = false;
+      this[$isScaling] = true;
+      this[$lastScalar] = this[$fingerSeparation](fingers) / scale;
       return;
     }
 
-    const pose = frame.getPose(sources[0].targetRaySpace, this[$refSpace]!);
-    if (pose) {
-      this.placeModel();
+    if (this[$isRotating]) {
+      const thisDragX = this[$inputSource]!.gamepad.axes[0];
+      this[$goalYaw] += (thisDragX - this[$lastScalar]) * ROTATION_RATE;
+      this[$lastScalar] = thisDragX;
+    } else if (this[$isTranslating]) {
+      fingers.forEach(finger => {
+        if (finger.inputSource !== this[$inputSource] ||
+            finger.results.length < 1) {
+          return;
+        }
+
+        const hit = this[$getHitPoint](finger.results[0]);
+        if (hit == null) {
+          return;
+        }
+
+        this[$goalPosition].sub(this[$lastDragPosition]);
+
+        const offset = hit.y - this[$lastDragPosition].y;
+        // When a lower floor is found, keep the model at the same height, but
+        // drop the placement box to the floor. The model falls on select end.
+        if (offset < 0) {
+          this[$placementBox]!.offsetHeight = offset / scale;
+          this[$presentedScene]!.model.setShadowScaleAndOffset(scale, offset);
+          // Interpolate hit ray up to drag plane
+          const cameraPosition = vector3.copy(this.camera.position);
+          const alpha = -offset / (cameraPosition.y - hit.y);
+          cameraPosition.multiplyScalar(alpha);
+          hit.multiplyScalar(1 - alpha).add(cameraPosition);
+        }
+
+        this[$goalPosition].add(hit);
+        this[$lastDragPosition].copy(hit);
+      });
     }
+  }
+
+  [$moveScene](delta: number) {
+    const scene = this[$presentedScene]!;
+    const {model, position, yaw} = scene;
+    const radius = model.idealCameraDistance;
+    const goal = this[$goalPosition];
+    const oldScale = scene.scale.x;
+    const box = this[$placementBox]!;
+
+    if (this[$initialHitSource] == null &&
+        (!goal.equals(position) || this[$goalScale] !== oldScale)) {
+      let {x, y, z} = position;
+      delta *= this[$damperRate];
+      x = this[$xDamper].update(x, goal.x, delta, radius);
+      y = this[$yDamper].update(y, goal.y, delta, radius);
+      z = this[$zDamper].update(z, goal.z, delta, radius);
+      position.set(x, y, z);
+
+      const newScale =
+          this[$scaleDamper].update(oldScale, this[$goalScale], delta, 1);
+      scene.scale.set(newScale, newScale, newScale);
+
+      if (!this[$isTranslating]) {
+        const offset = goal.y - y;
+        if (this[$placementComplete]) {
+          box.offsetHeight = offset / newScale;
+          model.setShadowScaleAndOffset(newScale, offset);
+        } else if (offset === 0) {
+          this[$placementComplete] = true;
+          box.show = false;
+          scene.setShadowIntensity(AR_SHADOW_INTENSITY);
+          this[$damperRate] = 1;
+        }
+      }
+    }
+    box.updateOpacity(delta);
+    scene.updateTarget(delta);
+    // This updates the model's position, which the shadow is based on.
+    scene.updateMatrixWorld(true);
+    // yaw must be updated last, since this also updates the shadow position.
+    scene.yaw = this[$yawDamper].update(yaw, this[$goalYaw], delta, Math.PI);
   }
 
   [$tick]() {
@@ -311,13 +637,10 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$onWebXRFrame](time: number, frame: XRFrame) {
-    const {session} = frame;
-
+    this[$frame] = frame;
     const pose = frame.getViewerPose(this[$refSpace]!);
 
     // TODO: Notify external observers of tick
-    // TODO: Note that reticle may be "stabilized"
-
     this[$tick]();
 
     const scene = this[$presentedScene];
@@ -325,40 +648,20 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
+    this[$updateCamera](pose.views[0]);
+
+    this[$placeInitially](frame);
+
+    this[$processInput](frame);
+
     const delta = time - this[$lastTick]!;
+    this[$moveScene](delta);
     this.renderer.preRender(scene, time, delta);
     this[$lastTick] = time;
 
-    for (const view of frame.getViewerPose(this[$refSpace]!).views) {
-      const viewport = session.renderState.baseLayer!.getViewport(view);
-      this.threeRenderer.setViewport(
-          viewport.x, viewport.y, viewport.width, viewport.height);
-
-      const {camera} = this;
-      const {matrix: cameraMatrix} = camera;
-      camera.projectionMatrix.fromArray(view.projectionMatrix);
-      cameraMatrix.fromArray(view.transform.matrix);
-      camera.updateMatrixWorld(true);
-      // position is not updated when matrix is updated.
-      camera.position.setFromMatrixPosition(cameraMatrix);
-
-      scene.model.orientHotspots(
-          Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
-
-      // NOTE: Updating input or the reticle is dependent on the camera's
-      // pose, hence updating these elements after camera update but
-      // before render.
-      this.reticle.update(
-          this[$currentSession]!,
-          frame,
-          this[$viewerRefSpace]!,
-          this[$refSpace]!);
-      this.processXRInput(frame);
-
-      // NOTE: Clearing depth caused issues on Samsung devices
-      // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-      // this.threeRenderer.clearDepth();
-      this.threeRenderer.render(scene, camera);
-    }
+    // NOTE: Clearing depth caused issues on Samsung devices
+    // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
+    // this.threeRenderer.clearDepth();
+    this.threeRenderer.render(scene, this.camera);
   }
 }

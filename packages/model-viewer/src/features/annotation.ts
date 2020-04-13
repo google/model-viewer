@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {Matrix4, Vector2} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
 
@@ -26,6 +27,10 @@ const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
+
+// Used internally by positionAndNormalFromPoint()
+const pixelPosition = new Vector2();
+const worldToModel = new Matrix4();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -120,26 +125,40 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     * This method returns the world position and normal of the point on the
+     * This method returns the model position and normal of the point on the
      * mesh corresponding to the input pixel coordinates given relative to the
      * model-viewer element. The position and normal are returned as strings in
      * the format suitable for putting in a hotspot's data-position and
-     * data-normal attributes. If the mesh is not hit, position returns the
-     * empty string.
+     * data-normal attributes. If the mesh is not hit, the result is null.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
-      return this[$scene].positionAndNormalFromPoint(pixelX, pixelY);
+      const scene = this[$scene];
+      const {width, height, model} = scene;
+      pixelPosition.set(pixelX / width, pixelY / height)
+          .multiplyScalar(2)
+          .subScalar(1);
+      pixelPosition.y *= -1;
+
+      const hit = scene.positionAndNormalFromPoint(pixelPosition);
+      if (hit == null) {
+        return null;
+      }
+
+      worldToModel.getInverse(model.matrixWorld);
+      const position = toVector3D(hit.position.applyMatrix4(worldToModel));
+      const normal = toVector3D(hit.normal);
+      return {position: position, normal: normal};
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
       const scene = this[$scene];
-      const {activeCamera} = scene;
+      const camera = scene.getCamera();
 
       if (scene.isDirty) {
-        scene.model.updateHotspots(activeCamera.position);
-        this[$annotationRenderer].render(scene, activeCamera);
+        scene.model.updateHotspots(camera.position);
+        this[$annotationRenderer].render(scene, camera);
       }
     }
 

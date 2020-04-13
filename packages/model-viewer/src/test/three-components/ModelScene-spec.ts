@@ -24,15 +24,23 @@ import {assetPath} from '../helpers.js';
 const expect = chai.expect;
 
 suite('ModelScene', () => {
+  let nextId = 0;
+  let tagName: string;
+  let ModelViewerElement: Constructor<ModelViewerElementBase>;
+
   let element: ModelViewerElementBase;
   let scene: ModelScene;
   let dummyRadius: number;
   let dummyMesh: Mesh;
-  let ModelViewerElement = class extends ModelViewerElementBase {};
-
-  customElements.define('model-viewer-modelscene', ModelViewerElement);
 
   setup(() => {
+    tagName = `model-viewer-modelscene-${nextId++}`;
+    ModelViewerElement = class extends ModelViewerElementBase {
+      static get is() {
+        return tagName;
+      }
+    };
+    customElements.define(tagName, ModelViewerElement);
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyRadius = 0.5;
