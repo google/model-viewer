@@ -45,7 +45,7 @@ export const openSceneViewer = (() => {
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
-  return (gltfSrc: string, arScale: string) => {
+  return (gltfSrc: string, title: string, arScale: string) => {
     // If the fallback has ever been invoked this session, bounce early:
     if (fallbackInvoked) {
       return;
@@ -54,6 +54,7 @@ export const openSceneViewer = (() => {
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
+    const link = encodeURIComponent(location);
     const scheme = modelUrl.protocol.replace(':', '');
 
     if (modelUrl.search && modelUrl.search.match(linkOrTitle)) {
@@ -65,6 +66,13 @@ export const openSceneViewer = (() => {
     }
 
     locationUrl.hash = noArViewerSigil;
+
+    title = encodeURIComponent(title);
+
+    // It's possible for a model URL to have meaningful query parameters
+    // already. Sure hope they aren't called 'link' or 'title' though 😅
+    modelUrl.search +=
+        (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
 
     if (arScale === 'fixed') {
       modelUrl.search += `&resizable=false`;
@@ -221,7 +229,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
-          openSceneViewer(this.src!, this.arScale);
+          openSceneViewer(this.src!, this.alt || '', this.arScale);
           break;
         default:
           console.warn(
