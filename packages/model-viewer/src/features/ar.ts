@@ -54,7 +54,6 @@ export const openSceneViewer = (() => {
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
-    const link = encodeURIComponent(location);
     const scheme = modelUrl.protocol.replace(':', '');
 
     if (modelUrl.search && modelUrl.search.match(linkOrTitle)) {
@@ -69,17 +68,15 @@ export const openSceneViewer = (() => {
 
     title = encodeURIComponent(title);
 
-    // It's possible for a model URL to have meaningful query parameters
-    // already. Sure hope they aren't called 'link' or 'title' though 😅
-    modelUrl.search +=
-        (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
+    let intentParams = `?file=${modelUrl.toString()}&mode=ar_only&link=${
+        location}&title=${title}`;
 
     if (arScale === 'fixed') {
-      modelUrl.search += `&resizable=false`;
+      intentParams += `&resizable=false`;
     }
 
-    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${
-        modelUrl.toString()}&mode=ar_only#Intent;scheme=${
+    const intent = `intent://arvr.google.com/scene-viewer/1.0${
+        intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 
