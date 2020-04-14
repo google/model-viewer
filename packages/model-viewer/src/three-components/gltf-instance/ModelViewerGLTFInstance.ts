@@ -20,7 +20,6 @@ import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper.js
 import {$clone, $prepare, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
 import {Renderer} from '../Renderer.js';
 import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
-import {normalmapChunk} from '../shader-chunk/normalmap_pars_fragment.glsl.js';
 
 
 const $roughnessMipmapper = Symbol('roughnessMipmapper');
@@ -159,19 +158,15 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // via onBeforeCompile.toString(), so these two functions do the same
     // thing but look different in order to force a proper recompile.
     const oldOnBeforeCompile = material.onBeforeCompile;
-    const patchFragment = (shader: Shader) => {
-      shader.fragmentShader =
-          shader.fragmentShader
-              .replace('#include <alphatest_fragment>', alphaChunk)
-              .replace('#include <normalmap_pars_fragment>', normalmapChunk);
-    };
     clone.onBeforeCompile = (material as any).isGLTFSpecularGlossinessMaterial ?
         (shader: Shader) => {
           oldOnBeforeCompile(shader, undefined as any);
-          patchFragment(shader);
+          shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <alphatest_fragment>', alphaChunk);
         } :
         (shader: Shader) => {
-          patchFragment(shader);
+          shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <alphatest_fragment>', alphaChunk);
           oldOnBeforeCompile(shader, undefined as any);
         };
     // This makes shadows better for non-manifold meshes
