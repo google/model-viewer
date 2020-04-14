@@ -41,7 +41,6 @@ export const openIOSARQuickLook = (() => {
  */
 export const openSceneViewer = (() => {
   const anchor = document.createElement('a');
-  const linkOrTitle = /(link|title)(=|&)|(\?|&)(link|title)$/;
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
@@ -55,14 +54,6 @@ export const openSceneViewer = (() => {
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
     const scheme = modelUrl.protocol.replace(':', '');
-
-    if (modelUrl.search && modelUrl.search.match(linkOrTitle)) {
-      console.warn(`The model URL (${
-          modelUrl
-              .toString()}) contains a "link" and/or "title" query parameter.
- These parameters are used to configure Scene Viewer and will be duplicated in the URL.
- You should choose different query parameter names if possible!`);
-    }
 
     locationUrl.hash = noArViewerSigil;
 
