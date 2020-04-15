@@ -265,6 +265,8 @@ canvas.show {
   position: absolute;
   bottom: 16px;
   right: 16px;
+  transform: scale(var(--ar-button-scale, 1));
+  transform-origin: bottom right;
 }
 
 :not(.fullscreen) .slot.exit-fullscreen-button {
