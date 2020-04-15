@@ -41,7 +41,6 @@ export const openIOSARQuickLook = (() => {
  */
 export const openSceneViewer = (() => {
   const anchor = document.createElement('a');
-  const linkOrTitle = /(link|title)(=|&)|(\?|&)(link|title)$/;
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
@@ -54,32 +53,20 @@ export const openSceneViewer = (() => {
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc);
-    const link = encodeURIComponent(location);
     const scheme = modelUrl.protocol.replace(':', '');
-
-    if (modelUrl.search && modelUrl.search.match(linkOrTitle)) {
-      console.warn(`The model URL (${
-          modelUrl
-              .toString()}) contains a "link" and/or "title" query parameter.
- These parameters are used to configure Scene Viewer and will be duplicated in the URL.
- You should choose different query parameter names if possible!`);
-    }
 
     locationUrl.hash = noArViewerSigil;
 
-    title = encodeURIComponent(title);
-    modelUrl.protocol = 'intent://';
-
-    // It's possible for a model URL to have meaningful query parameters
-    // already. Sure hope they aren't called 'link' or 'title' though 😅
-    modelUrl.search +=
-        (modelUrl.search ? '&' : '') + `link=${link}&title=${title}`;
+    let intentParams =
+        `?file=${encodeURIComponent(modelUrl.toString())}&mode=ar_only&link=${
+            location}&title=${encodeURIComponent(title)}`;
 
     if (arScale === 'fixed') {
-      modelUrl.search += `&resizable=false`;
+      intentParams += `&resizable=false`;
     }
 
-    const intent = `${modelUrl.toString()}#Intent;scheme=${
+    const intent = `intent://arvr.google.com/scene-viewer/1.0${
+        intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 

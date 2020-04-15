@@ -59,7 +59,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
         const url = new URL(intentUrls[0]);
 
-        expect(url.search).to.match(/[\?&]token=foo(&|$)/);
+        expect(url.search).to.match(/(%3F|%26)token%3Dfoo(%26|&|$)/);
 
         restoreAnchorClick();
       });
