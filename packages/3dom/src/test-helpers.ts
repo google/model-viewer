@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Scene} from 'three';
+import {EventDispatcher, Group} from 'three';
 import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Material, Model, PBRMetallicRoughness, RGBA, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
@@ -102,7 +102,7 @@ export class FakeModelKernel implements ModelKernel {
 }
 
 export const createFakeGLTF = () => {
-  const scene = new Scene();
+  const scene = new Group();
 
   return {
     animations: [],
