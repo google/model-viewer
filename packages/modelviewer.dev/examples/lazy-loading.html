@@ -81,6 +81,11 @@
           <h4></h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <style>
+            model-viewer#reveal {
+              --poster-color: transparent;
+            }
+          </style>
           <template>
 <model-viewer id="reveal" preload camera-controls auto-rotate poster="../assets/poster-shishkebab.png" src="../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
           </template>
