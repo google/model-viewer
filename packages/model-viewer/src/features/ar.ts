@@ -57,10 +57,9 @@ export const openSceneViewer = (() => {
 
     locationUrl.hash = noArViewerSigil;
 
-    title = encodeURIComponent(title);
-
-    let intentParams = `?file=${modelUrl.toString()}&mode=ar_only&link=${
-        location}&title=${title}`;
+    let intentParams =
+        `?file=${encodeURIComponent(modelUrl.toString())}&mode=ar_only&link=${
+            location}&title=${encodeURIComponent(title)}`;
 
     if (arScale === 'fixed') {
       intentParams += `&resizable=false`;
