@@ -142,7 +142,7 @@ export class ARRenderer extends EventDispatcher {
     this.camera.matrixAutoUpdate = false;
   }
 
-  async resolveARSession(): Promise<XRSession> {
+  async resolveARSession(scene: ModelScene): Promise<XRSession> {
     assertIsArCandidate();
 
     const session: XRSession =
@@ -175,7 +175,7 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    (this[$presentedScene]!.element)[$onResize](window.screen);
+    (scene.element)[$onResize](window.screen);
 
     return session;
   }
@@ -208,9 +208,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    this[$presentedScene] = scene;
-
-    const currentSession = await this.resolveARSession();
+    const currentSession = await this.resolveARSession(scene);
     currentSession.addEventListener('end', () => {
       this[$postSessionCleanup]();
     }, {once: true});
@@ -248,6 +246,7 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this[$currentSession] = currentSession;
+    this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
     this[$lastTick] = performance.now();
 
@@ -310,8 +309,10 @@ export class ARRenderer extends EventDispatcher {
       this.renderer.expandTo(scene.width, scene.height);
     }
 
-    this[$placementBox]!.dispose();
-    this[$placementBox] = null;
+    if (this[$placementBox] != null) {
+      this[$placementBox]!.dispose();
+      this[$placementBox] = null;
+    }
 
     this[$refSpace] = null;
     this[$presentedScene] = null;
