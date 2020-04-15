@@ -327,16 +327,18 @@
             </li>
             <li>
               <div>poster</div>
-              <p>Displays an image instead of the model. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
-              Loading</a> for more information.</p>
+              <p>Displays an image instead of the model, useful for showing the
+                user something before a model is loaded and ready to render. If
+                you use a poster with transparency, you may also want to set
+                --poster-color to transparent so that the background shows
+                through. See <a href="./examples/lazy-loading.html">our section
+                on lazy loading</a> for examples.</p>
             </li>
             <li>
               <div>preload</div>
               <p>When poster is also enabled, the model will be downloaded
-              before user action. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
-              Loading</a> for more information.</p>
+              before user action. See <a href="./examples/lazy-loading.html">our
+              section on lazy loading</a> for examples.</p>
             </li>
             <li>
               <div>quick-look-browsers</div>
@@ -401,8 +403,10 @@
             </li>
             <li>
               <div>--poster-color</div>
-              <p>Sets the background-color of the poster. Falls back to
-              --background-color if set. Defaults to #fff.</p>
+              <p>Sets the background-color of the poster. You may wish to set
+                this to transparent if you are using a seamless poster with
+                transparency (so that the background color of
+                &lt;model-viewer&gt; shows through). Defaults to #fff.</p>
             </li>
             <li>
               <div>--poster-image</div>
