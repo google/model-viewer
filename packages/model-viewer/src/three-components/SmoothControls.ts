@@ -451,8 +451,7 @@ export class SmoothControls extends EventDispatcher {
     if (this[$isStationary]()) {
       return;
     }
-    const {maximumPolarAngle, maximumRadius, maximumFieldOfView} =
-        this[$options];
+    const {maximumPolarAngle, maximumRadius} = this[$options];
 
     const dTheta = this[$spherical].theta - this[$goalSpherical].theta;
     if (Math.abs(dTheta) > Math.PI &&
@@ -476,8 +475,8 @@ export class SmoothControls extends EventDispatcher {
         delta,
         maximumRadius!);
 
-    this[$logFov] = this[$fovDamper].update(
-        this[$logFov], this[$goalLogFov], delta, maximumFieldOfView!);
+    this[$logFov] =
+        this[$fovDamper].update(this[$logFov], this[$goalLogFov], delta, 1);
 
     this[$moveCamera]();
   }
