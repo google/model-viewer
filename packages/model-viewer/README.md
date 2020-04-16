@@ -56,12 +56,13 @@ If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll 
 upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
 
 If you’re using [unpkg.com](https://unpkg.com), you can pin to a specific
-version by specifying it in the URL (the sample below pins to version 0.10.0):
+version by specifying it in the URL. Replace the `<version>` tag in the sample
+below with the full version number (like `0.10.0`) to be pinned to.
 
 ```html
 <!-- Loads <model-viewer> for modern browsers: -->
 <script type="module"
-    src="https://unpkg.com/@google/model-viewer@0.10.0/dist/model-viewer.js">
+    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.js">
 </script>
 ```
 
