@@ -19,7 +19,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@google/model-viewer": "^0.9.0",
+    "@google/model-viewer": "^0.10.0",
     "@magicleap/prismatic": "^2.0.2",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
