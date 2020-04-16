@@ -42,7 +42,7 @@ For more detailed usage documentation and live examples, please visit our docs
 at [modelviewer.dev](https://modelviewer.dev)!
 
 ### Important note about versions
-It’s very important that model-viewer be stable for you to depend on as we continue to deliver new features. We’ll always try to minimize breaking changes, and to keep the component backwards compatible. See our (guide to contributing)[../../CONTRIBUTING.md#Stability] for more information on backwards compatibility.
+It’s very important that model-viewer be stable for you to depend on as we continue to deliver new features. We’ll always try to minimize breaking changes, and to keep the component backwards compatible. See our [guide to contributing](../../CONTRIBUTING.md#Stability) for more information on backwards compatibility.
 
 However, for your production site you may want the extra stability that comes by pinning to a specific version, and upgrading on your own schedule (after testing).
 
