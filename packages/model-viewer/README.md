@@ -42,6 +42,32 @@ It can also be used directly from various free CDNs such as [unpkg.com](https://
 For more detailed usage documentation and live examples, please visit our docs
 at [modelviewer.dev](https://modelviewer.dev)!
 
+### Important note about versions
+Our goal for `<model-viewer>` is to be a consistent, stable part of your web
+platform while continuing to deliver cutting-edge features. We’ll always try
+to minimize breaking changes, and to keep the component backwards compatible.
+See our [guide to contributing](../../CONTRIBUTING.md#Stability) for more
+information on backwards compatibility.
+
+For your production site you may want the extra stability that comes by
+pinning to a specific version, and upgrading on your own schedule (after
+testing).
+
+If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
+upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
+
+If you’re using [unpkg.com](https://unpkg.com), you can pin to a specific
+version by specifying it in the URL. Replace the `<version>` tag in the sample
+below with the full version number (like `0.10.0`) to be pinned to.
+
+```html
+<!-- Loads <model-viewer> for modern browsers: -->
+<script type="module"
+    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.js">
+</script>
+```
+
+
 ## Browser Support
 
 `<model-viewer>` is supported on the last 2 major versions of all evergreen
@@ -56,7 +82,7 @@ desktop and mobile browsers. `<model-viewer>` is also supported on IE11.
 capabilities and compatibility of the library get better as the web evolves.
 
 However, not all browsers support all of these features today. **Check out
-[POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md) to
+[POLYFILLS.md](https://github.com/google/model-viewer/blob/master/packages/model-viewer/POLYFILLS.md) to
 learn how to polyfill for maximum browser compatibility!**
 
 ## Development
