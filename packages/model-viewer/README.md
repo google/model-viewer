@@ -10,6 +10,7 @@
  [![Build Status](https://github.com/google/model-viewer/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/google/model-viewer/actions?query=branch%3Amaster)
  [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
  [![Bundlephobia](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
+ [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/<mycommunity>)
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
 models - optionally in AR - easy to do, on as many browsers and devices as possible.
