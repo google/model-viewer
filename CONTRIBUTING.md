@@ -40,7 +40,7 @@ approach.
 
 Please include tests in your pull request.
 
-We recommend making your pull request from a fork. See [Creating a pull
+We recommend making your pull request from a fork. See [creating a pull
 request from a
 fork](https://help.github.com/articles/creating-a-pull-request-from-a-fork/)
 for more information.
@@ -52,16 +52,16 @@ about changes in model-viewer causing regressions in their use of the
 component. However, it’s also important that we continue to improve
 model-viewer, making changes to improve ergonomics and rendering quality.
 
-In general, <model-viewer> follows semver. Major versions (X.y.z) are used for
+In general, <model-viewer> follows semver. Major versions (`X.y.z`) are used for
 the largest features and backwards-incompatible changes (more below on that),
-minor versions (x.Y.z) are used for new features, and patch versions (x.y.Z)
+minor versions (`x.Y.z`) are used for new features, and patch versions (`x.y.Z`)
 are used for bug fixes.
 
 When possible please keep your changes backwards-compatible - including
 keeping both existing APIs and rendering consistent. When that’s not possible,
 we’ll follow a three-step process across several [semver](semver.org) major
-versions (in the `0.x.y` versions leading up to 1.0, we’ll use the minor
-version - `x` - for the same purpose): 
+versions (in the `0.y.z` versions leading up to 1.0, we’ll use the minor
+version - `y` - for the same purpose): 
 
 1) Add a new optional API to enable the new behavior; in the release notes,
 document the new behavior, as well that it will become the default in the
