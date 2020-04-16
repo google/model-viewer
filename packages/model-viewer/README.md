@@ -42,13 +42,21 @@ For more detailed usage documentation and live examples, please visit our docs
 at [modelviewer.dev](https://modelviewer.dev)!
 
 ### Important note about versions
-It’s very important that model-viewer be stable for you to depend on as we continue to deliver new features. We’ll always try to minimize breaking changes, and to keep the component backwards compatible. See our [guide to contributing](../../CONTRIBUTING.md#Stability) for more information on backwards compatibility.
+Our goal for `<model-viewer>` is to be a consistent, stable part of your web
+platform while continuing to deliver cutting-edge features. We’ll always try
+to minimize breaking changes, and to keep the component backwards compatible.
+See our [guide to contributing](../../CONTRIBUTING.md#Stability) for more
+information on backwards compatibility.
 
-However, for your production site you may want the extra stability that comes by pinning to a specific version, and upgrading on your own schedule (after testing).
+For your production site you may want the extra stability that comes by
+pinning to a specific version, and upgrading on your own schedule (after
+testing).
 
-If you’ve installed via npm, you’re all set - you’ll only upgrade when you run [npm update](https://docs.npmjs.com/cli/update.html).
+If you’ve installed via npm, you’re all set - you’ll only upgrade when you run
+[npm update](https://docs.npmjs.com/cli/update.html).
 
-If you’re using unpkg.com, you can pin to a specific version by specifying it in the unpkg URL (the sample below pins to version 0.10.0):
+If you’re using unpkg.com, you can pin to a specific version by specifying it
+in the unpkg URL (the sample below pins to version 0.10.0):
 
 ```html
 <!-- Loads <model-viewer> for modern browsers: -->

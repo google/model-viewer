@@ -65,11 +65,11 @@ version - `y` - for the same purpose):
 
 1) Add a new optional API to enable the new behavior; in the release notes,
 document the new behavior, as well that it will become the default in the
-next version (2.0.0)
+next version (in for instance the `2.0.0` release)
 1) Make the new API default enabled (allow it to be explicitly disabled for
 the old behavior); in the release notes, document this change, and that the
-API will be removed in the next version (3.0.0)
-1) Remove the API (4.0.0)
+API will be removed in the next version (the `3.0.0` release)
+1) Remove the API (the `4.0.0` release)
 
 Breaking changes mostly center around anything that the developer would have
 to take action on. This includes changes in APIs, or changes to the model
