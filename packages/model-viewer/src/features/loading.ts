@@ -23,6 +23,7 @@ import {Constructor, deserializeUrl, throttle} from '../utilities.js';
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
 export type RevealAttributeValue = 'auto'|'interaction';
+export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 type DismissalSource = 'interaction';
 
 export const POSTER_TRANSITION_TIME = 300;
@@ -38,6 +39,12 @@ const ENTER_KEY = 13;
 const RevealStrategy: {[index: string]: RevealAttributeValue} = {
   AUTO: 'auto',
   INTERACTION: 'interaction'
+};
+
+const LoadingStrategy: {[index: string]: LoadingAttributeValue} = {
+  AUTO: 'auto',
+  LAZY: 'lazy',
+  EAGER: 'eager'
 };
 
 const PosterDismissalSource: {[index: string]: DismissalSource} = {
@@ -81,7 +88,7 @@ const $onProgress = Symbol('onProgress');
 export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
-  preload: boolean;
+  loading: LoadingAttributeValue;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
@@ -185,10 +192,16 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     reveal: RevealAttributeValue = RevealStrategy.AUTO;
 
     /**
-     * If true, a configured model file will be aggressively loaded, even if
-     * the <model-viewer> is only configured to reveal upon interaction.
+     * An enumerable attribute describing under what conditions the
+     * <model-viewer> should preload a model.
+     *
+     * The default value is "auto". The only supported alternative values are
+     * "lazy" and "eager". Auto is equivalent to lazy, which loads the model
+     * when it is near the viewport for reveal = "auto", and when interacted
+     * with for reveal = "interaction". Eager loads the model immediately.
      */
-    @property({type: Boolean}) preload: boolean = false;
+    @property({type: String})
+    loading: LoadingAttributeValue = LoadingStrategy.AUTO;
 
     /**
      * Dismisses the poster, causing the model to load and render if
@@ -384,7 +397,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     get[$shouldAttemptPreload](): boolean {
       const {src} = this;
 
-      return !!src && (this.preload || this[$shouldRevealModel]) &&
+      return !!src &&
+          (this.loading === LoadingStrategy.EAGER ||
+           this[$shouldRevealModel]) &&
           this[$isElementInViewport];
     }
 

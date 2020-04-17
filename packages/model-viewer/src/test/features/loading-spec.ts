@@ -137,11 +137,11 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         });
       });
 
-      suite('preload', () => {
+      suite('loading', () => {
         suite('src changes quickly', () => {
           test(
               'eventually notifies that current src is preloaded', async () => {
-                element.preload = true;
+                element.loading = 'eager';
                 element.src = ASTRONAUT_GLB_PATH;
 
                 await timePasses();
@@ -168,7 +168,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         suite('reveal', () => {
           suite('auto', () => {
             test('hides poster when element loads', async () => {
-              element.preload = true;
+              element.loading = 'eager';
               element.src = ASTRONAUT_GLB_PATH;
 
               await waitForEvent(
@@ -185,7 +185,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           suite('interaction', () => {
             test('retains poster after preloading', async () => {
-              element.preload = true;
+              element.loading = 'eager';
               element.reveal = 'interaction';
               element.src = ASTRONAUT_GLB_PATH;
 
@@ -201,7 +201,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             suite('when focused', () => {
               test(
                   'can hide the poster with keyboard interaction', async () => {
-                    element.preload = true;
+                    element.loading = 'eager';
                     element.reveal = 'interaction';
                     element.src = ASTRONAUT_GLB_PATH;
 
