@@ -353,13 +353,13 @@
             </li>
             <li>
               <div>reveal</div>
-              <p>This attribute controls whether or not the model should be
-              automatically revealed when loaded. It currently supports two
-              values: "auto" and "interaction". If reveal is set to
+              <p>This attribute controls when the model should be revealed. It currently supports three
+              values: "auto", "interaction", and "manual". If reveal is set to
               "interaction", &lt;model-viewer&gt; will wait until the user
               interacts with the poster before loading and revealing the model.
-              Otherwise, the model will be revealed as soon as it is done
-              loading and rendering. Defaults to "auto".</p>
+              If set to "auto", the model will be revealed as soon as it is done
+              loading and rendering. If set to "manual", the model will remain hidden 
+              until dismissPoster() is called. Defaults to "auto".</p>
             </li>
             <li>
               <div>shadow-intensity</div>
