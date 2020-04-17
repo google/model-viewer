@@ -22,7 +22,7 @@ import {Constructor, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
-export type RevealAttributeValue = 'auto'|'interaction';
+export type RevealAttributeValue = 'auto'|'interaction'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 type DismissalSource = 'interaction';
 
@@ -38,7 +38,8 @@ const ENTER_KEY = 13;
 
 const RevealStrategy: {[index: string]: RevealAttributeValue} = {
   AUTO: 'auto',
-  INTERACTION: 'interaction'
+  INTERACTION: 'interaction',
+  MANUAL: 'manual'
 };
 
 const LoadingStrategy: {[index: string]: LoadingAttributeValue} = {
@@ -345,11 +346,19 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onClick]() {
+      if (this[$posterDismissalSource] != null ||
+          this.reveal === RevealStrategy.MANUAL) {
+        return;
+      }
       this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
       this.requestUpdate();
     }
 
     [$onKeydown](event: KeyboardEvent) {
+      if (this[$posterDismissalSource] != null ||
+          this.reveal === RevealStrategy.MANUAL) {
+        return;
+      }
       switch (event.keyCode) {
         // NOTE(cdata): Links and buttons can typically be activated with
         // both spacebar and enter to produce a synthetic click action

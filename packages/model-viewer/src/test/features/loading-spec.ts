@@ -228,6 +228,30 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   });
             });
           });
+
+          suite('manual', () => {
+            test('does not hide poster until dismissed', async () => {
+              element.loading = 'eager';
+              element.reveal = 'manual';
+              element.src = ASTRONAUT_GLB_PATH;
+
+              const posterElement = (element as any)[$defaultPosterElement];
+              const input = element[$userInputElement];
+
+              await waitForEvent(element, 'preload');
+
+              posterElement.focus();
+
+              expect(element.shadowRoot!.activeElement)
+                  .to.be.equal(posterElement);
+
+              element.dismissPoster();
+
+              await until(() => {
+                return element.shadowRoot!.activeElement === input;
+              });
+            });
+          });
         });
       });
 
