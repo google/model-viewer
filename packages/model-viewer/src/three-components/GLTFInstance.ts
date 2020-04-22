@@ -16,7 +16,6 @@
 import {Group, Mesh, Object3D} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
-
 import {Constructor} from '../utilities.js';
 
 export const $prepared = Symbol('prepared');
@@ -48,7 +47,7 @@ export class GLTFInstance implements GLTF {
    * prepared can safely have this method invoked on it multiple times; it will
    * only be prepared once, including after being cloned.
    */
-  static prepare(source: GLTF): PreparedGLTF {
+  static async prepare(source: GLTF): Promise<PreparedGLTF> {
     if (source.scene == null) {
       throw new Error('Model does not have a scene');
     }

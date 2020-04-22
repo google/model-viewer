@@ -124,14 +124,15 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
             progressCallback(progress * 0.8);
           });
 
-      const gltfInstanceLoads = rawGLTFLoads.then((rawGLTF: GLTF) => {
-        const GLTFInstance = this[$GLTFInstance];
-        const preparedGLTF = GLTFInstance.prepare(rawGLTF);
-
-        progressCallback(0.9);
-
-        return new GLTFInstance(preparedGLTF);
-      });
+      const gltfInstanceLoads = rawGLTFLoads
+                                    .then((rawGLTF) => {
+                                      const GLTFInstance = this[$GLTFInstance];
+                                      return GLTFInstance.prepare(rawGLTF);
+                                    })
+                                    .then((preparedGLTF) => {
+                                      progressCallback(0.9);
+                                      return new GLTFInstance(preparedGLTF);
+                                    });
 
       cache.set(url, gltfInstanceLoads);
     }
