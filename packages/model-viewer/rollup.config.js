@@ -16,6 +16,8 @@
 const resolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-replace');
 const cleanup = require('rollup-plugin-cleanup');
+const {terser} = require('rollup-plugin-terser');
+
 const {NODE_ENV} = process.env;
 
 const onwarn = (warning, warn) => {
@@ -25,7 +27,7 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+let plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 const watchFiles = ['lib/**', '../3dom/lib/**'];
 
 const outputOptions = [{
@@ -44,14 +46,28 @@ const outputOptions = [{
 }];
 
 if (NODE_ENV !== 'development') {
-  plugins.unshift(cleanup({
+  plugins = [...plugins, cleanup({
     // Ideally we'd also clean third_party/three, which saves
     // ~45kb in filesize alone... but takes 2 minutes to build
     include: ['lib/**'],
     comments: 'none',
-  }));
+  }), terser()];
 
   outputOptions.push(
+      {
+        input: './lib/model-viewer.js',
+        output: {
+          file: './dist/model-viewer.min.js',
+          sourcemap: true,
+          format: 'esm',
+          name: 'ModelViewerElement'
+        },
+        watch: {
+          include: watchFiles,
+        },
+        plugins,
+        onwarn,
+      },
       {
         input: './lib/model-viewer.js',
         output: {
