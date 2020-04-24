@@ -101,13 +101,13 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      'Edge (latest)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Edge',
-        browser_version: 'latest',
-      },
+      // 'Edge (latest)': {
+      //   base: 'BrowserStack',
+      //   os: 'Windows',
+      //   os_version: '10',
+      //   browser: 'Edge',
+      //   browser_version: 'latest',
+      // },
       // 'Edge 80.0': {
       //   base: 'BrowserStack',
       //   os: 'Windows',
