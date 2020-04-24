@@ -86,11 +86,15 @@ export class Renderer extends EventDispatcher {
   constructor(options?: RendererOptions) {
     super();
 
-    const webGlOptions = {alpha: true, antialias: true};
+    const webGlOptions = {
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance' as WebGLPowerPreference
+    };
 
     // Only enable certain options when Web XR capabilities are detected:
     if (IS_WEBXR_AR_CANDIDATE) {
-      Object.assign(webGlOptions, {alpha: true, preserveDrawingBuffer: true});
+      Object.assign(webGlOptions, {preserveDrawingBuffer: true});
     }
 
     this.canvasElement = document.createElement('canvas');
