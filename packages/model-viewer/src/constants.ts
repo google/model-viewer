@@ -26,6 +26,8 @@ export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
 export const HAS_INTERSECTION_OBSERVER = self.IntersectionObserver != null;
 
+export const IS_WEBXR_AR_CANDIDATE = HAS_WEBXR_HIT_TEST_API;
+
 export const IS_MOBILE = (() => {
   const userAgent =
       navigator.userAgent || navigator.vendor || (self as any).opera;
@@ -67,8 +69,6 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
       tempAnchor.relList && tempAnchor.relList.supports &&
       tempAnchor.relList.supports('ar'));
 })();
-
-export const IS_WEBXR_AR_CANDIDATE = IS_ANDROID && HAS_WEBXR_HIT_TEST_API;
 
 // @see https://developer.chrome.com/multidevice/user-agent
 export const IS_SAFARI = /Safari\//.test(navigator.userAgent);

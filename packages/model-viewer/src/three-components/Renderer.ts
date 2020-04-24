@@ -15,7 +15,7 @@
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
-import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
+import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$tick} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -91,11 +91,6 @@ export class Renderer extends EventDispatcher {
       antialias: true,
       powerPreference: 'high-performance' as WebGLPowerPreference
     };
-
-    // Only enable certain options when Web XR capabilities are detected:
-    if (IS_WEBXR_AR_CANDIDATE) {
-      Object.assign(webGlOptions, {preserveDrawingBuffer: true});
-    }
 
     this.canvasElement = document.createElement('canvas');
 
