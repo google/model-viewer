@@ -117,8 +117,7 @@ export class GLTFInstance implements GLTF {
    */
   async clone<T extends GLTFInstance>(): Promise<T> {
     const GLTFInstanceConstructor = this.constructor as Constructor<T>;
-
-    const clonedGLTF = this[$clone]();
+    const clonedGLTF = await this[$clone]();
 
     return new GLTFInstanceConstructor(clonedGLTF);
   }

@@ -151,6 +151,9 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       }
     });
 
+    // Cross-correlate the scene graph by relying on information in the
+    // current scene graph; without this step, relationships between the
+    // Three.js object graph and the glTF scene graph will be lost.
     clone[$correlatedSceneGraph] =
         this.correlatedSceneGraph.correlateClone(clone);
 

@@ -42,7 +42,7 @@ suite('ModelViewerGLTFInstance', () => {
 
     rawGLTF.scene.add(meshOne, meshTwo, meshThree);
 
-    preparedGLTF = ModelViewerGLTFInstance.prepare(rawGLTF);
+    preparedGLTF = await ModelViewerGLTFInstance.prepare(rawGLTF);
   });
 
   suite('with a prepared GLTF', () => {
@@ -50,9 +50,9 @@ suite('ModelViewerGLTFInstance', () => {
       let cloneInstance: ModelViewerGLTFInstance;
       let gltfInstance: ModelViewerGLTFInstance;
 
-      setup(() => {
+      setup(async () => {
         gltfInstance = new ModelViewerGLTFInstance(preparedGLTF);
-        cloneInstance = gltfInstance.clone();
+        cloneInstance = await gltfInstance.clone();
       });
 
       teardown(() => {

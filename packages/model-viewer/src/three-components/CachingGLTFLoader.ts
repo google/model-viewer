@@ -124,9 +124,9 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
             progressCallback(progress * 0.8);
           });
 
+      const GLTFInstance = this[$GLTFInstance];
       const gltfInstanceLoads = rawGLTFLoads
                                     .then((rawGLTF) => {
-                                      const GLTFInstance = this[$GLTFInstance];
                                       return GLTFInstance.prepare(rawGLTF);
                                     })
                                     .then((preparedGLTF) => {
