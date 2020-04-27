@@ -39,13 +39,13 @@ const $id = Symbol('id');
 export class ThreeDOMElement implements ThreeDOMElementInterface {
   private[$graft]: ModelGraft;
   private[$sourceObject]: GLTFElement|GLTF;
-  private[$correlatedObject]: Object3D|Material|CorrelatedSceneGraph;
+  private[$correlatedObject]: Object3D[]|Material[]|CorrelatedSceneGraph;
 
   private[$id]: number = getLocallyUniqueId();
 
   constructor(
       graft: ModelGraft, element: GLTFElement|GLTF,
-      correlatedObject: Object3D|Material|CorrelatedSceneGraph) {
+      correlatedObject: Object3D[]|Material[]|CorrelatedSceneGraph) {
     this[$graft] = graft;
     this[$sourceObject] = element;
     this[$correlatedObject] = correlatedObject;
@@ -76,19 +76,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * generated names are ignored.
    */
   get name() {
-    const relatedObject = this[$correlatedObject];
-
-    // NOTE: Some Three.js object names are modified from the names found in the
-    // glTF. Special casing is handled here, but might be better moved to
-    // subclasses down the road:
-    if ((relatedObject as Material).isMaterial) {
-      // Material names can be safely referenced directly from the Three.js
-      // object.
-      // @see: https://github.com/mrdoob/three.js/blob/790811db742ea9d7c54fe28f83865d7576f14134/examples/js/loaders/GLTFLoader.js#L2162
-      return (relatedObject as Material).name;
-    }
-
-    return null;
+    return (this[$sourceObject] as unknown as {name?: string}).name || null;
   }
 
   /**

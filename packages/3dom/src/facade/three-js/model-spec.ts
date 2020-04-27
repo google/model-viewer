@@ -18,14 +18,14 @@ import {Mesh} from 'three/src/objects/Mesh.js';
 
 import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
 
-import {correlateSceneGraphs} from './correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('facade/three-js/model', () => {
   suite('Model', () => {
-    test('exposes a list of materials in the scene 2', async () => {
+    test('exposes a list of materials in the scene', async () => {
       const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
       const materials: MeshStandardMaterial[] = [];
 
@@ -41,13 +41,17 @@ suite('facade/three-js/model', () => {
       });
 
       const graft = new ModelGraft(
-          ASTRONAUT_GLB_PATH, await correlateSceneGraphs(threeGLTF));
+          ASTRONAUT_GLB_PATH, await CorrelatedSceneGraph.from(threeGLTF));
 
       const model = graft.model;
 
-      const collectedMaterials = model.materials.map((material) => {
-        return material.correlatedObject;
-      });
+      const collectedMaterials = model.materials.reduce<MeshStandardMaterial[]>(
+          (materials, material) => {
+            materials.push(
+                ...(material.correlatedObject as MeshStandardMaterial[]));
+            return materials;
+          },
+          []);
 
       expect(collectedMaterials).to.be.deep.equal(materials);
     });

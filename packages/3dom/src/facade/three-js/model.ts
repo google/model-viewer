@@ -50,7 +50,7 @@ export class Model extends ThreeDOMElement implements ModelInterface {
             graft,
             material,
             correlatedSceneGraph.gltfElementMap.get(material) as
-                MeshStandardMaterial));
+                MeshStandardMaterial[]));
       }
     });
 

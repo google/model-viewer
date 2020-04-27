@@ -23,25 +23,25 @@ import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from '../api.js';
 import {ModelGraft} from './model-graft.js';
 import {$correlatedObject, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
-const $threeMaterial = Symbol('threeMaterial');
+const $threeMaterials = Symbol('threeMaterials');
 
 /**
  * PBR material properties facade implementation for Three.js materials
  */
 export class PBRMetallicRoughness extends ThreeDOMElement implements
     PBRMetallicRoughnessInterface {
-  private get[$threeMaterial](): MeshStandardMaterial {
-    return this[$correlatedObject] as MeshStandardMaterial;
+  private get[$threeMaterials](): MeshStandardMaterial[] {
+    return this[$correlatedObject] as MeshStandardMaterial[];
   }
 
   constructor(
       graft: ModelGraft, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
-      correlatedMaterial: MeshStandardMaterial) {
-    super(graft, pbrMetallicRoughness, correlatedMaterial);
+      correlatedMaterials: MeshStandardMaterial[]) {
+    super(graft, pbrMetallicRoughness, correlatedMaterials);
   }
 
   get baseColorFactor(): RGBA {
-    const material = this[$threeMaterial];
+    const material = this[$threeMaterials][0];
     if (material.color) {
       return [...material.color.toArray(), material.opacity] as RGBA;
     } else {
@@ -50,16 +50,19 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   }
 
   set baseColorFactor(value: RGBA) {
-    this[$threeMaterial].color.fromArray(value);
-    this[$threeMaterial].opacity = value[3];
+    for (const material of this[$threeMaterials]) {
+      material.color.fromArray(value);
+      material.opacity = value[3];
 
-    const pbrMetallicRoughness =
-        this[$sourceObject] as GLTFPBRMetallicRoughness;
+      const pbrMetallicRoughness =
+          this[$sourceObject] as GLTFPBRMetallicRoughness;
 
-    if (value[0] === 1 && value[1] === 1 && value[2] === 1 && value[3] === 1) {
-      delete pbrMetallicRoughness.baseColorFactor;
-    } else {
-      pbrMetallicRoughness.baseColorFactor = value;
+      if (value[0] === 1 && value[1] === 1 && value[2] === 1 &&
+          value[3] === 1) {
+        delete pbrMetallicRoughness.baseColorFactor;
+      } else {
+        pbrMetallicRoughness.baseColorFactor = value;
+      }
     }
   }
 

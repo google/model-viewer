@@ -156,7 +156,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     await this.preload(url, progressCallback);
 
     const gltf = await cache.get(url)!;
-    const clone = gltf.clone() as InstanceType<T>;
+    const clone = await gltf.clone() as InstanceType<T>;
 
     this[$evictionPolicy].retain(url);
 

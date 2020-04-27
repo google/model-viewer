@@ -17,7 +17,7 @@ import {Object3D} from 'three/src/core/Object3D.js';
 
 import {createFakeThreeGLTF} from '../../test-helpers.js';
 
-import {correlateSceneGraphs} from './correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -26,9 +26,9 @@ suite('facade/three-js/model-graft', () => {
     suite('when an element is configured with it', () => {
       test('can query that element by internal ID', async () => {
         const graft = new ModelGraft(
-            '', await correlateSceneGraphs(createFakeThreeGLTF()));
+            '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
         const object3D = new Object3D();
-        const element = new ThreeDOMElement(graft, {}, object3D);
+        const element = new ThreeDOMElement(graft, {}, [object3D]);
 
         expect(graft.getElementByInternalId(element.internalID))
             .to.be.equal(element);

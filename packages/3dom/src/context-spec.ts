@@ -14,7 +14,7 @@
  */
 
 import {ThreeDOMExecutionContext} from './context.js';
-import {correlateSceneGraphs} from './facade/three-js/correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from './facade/three-js/correlated-scene-graph.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
 import {assetPath, loadThreeGLTF, waitForEvent} from './test-helpers.js';
 
@@ -75,7 +75,7 @@ suite('context', () => {
       test('dispatches an event in the worker', async () => {
         const modelGraft = new ModelGraft(
             '',
-            await correlateSceneGraphs(
+            await CorrelatedSceneGraph.from(
                 await loadThreeGLTF(ASTRONAUT_GLB_PATH)));
         const context = new ThreeDOMExecutionContext(['messaging']);
         const workerConfirmsEvent = waitForEvent(context.worker, 'message');

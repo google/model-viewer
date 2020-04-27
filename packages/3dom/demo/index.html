@@ -76,7 +76,7 @@ self.addEventListener('model-change', () => {
 
   <script type="module">
 import { ModelGraft } from '../lib/facade/three-js/model-graft.js';
-import { correlateSceneGraphs } from '../lib/facade/three-js/correlated-scene-graph.js';
+import { CorrelatedSceneGraph } from '../lib/facade/three-js/correlated-scene-graph.js';
 import { ThreeDOMExecutionContext } from '../lib/context.js';
 
 import { Scene, sRGBEncoding, ACESFilmicToneMapping, UnsignedByteType, PMREMGenerator, PerspectiveCamera, WebGLRenderer } from '../node_modules/three/build/three.module.js';
@@ -167,7 +167,7 @@ class ThreeDOMDemo {
 
     const context = new ThreeDOMExecutionContext();
     const graft = new ModelGraft('../shared-assets/models/Astronaut.glb',
-        await correlateSceneGraphs(gltf));
+        await CorrelatedSceneGraph.from(gltf));
 
     context.eval(scriptText);
     context.changeModel(graft);

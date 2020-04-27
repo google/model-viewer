@@ -34,11 +34,11 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   constructor(
       graft: ModelGraft, material: GLTFMaterial,
-      correlatedMaterial: MeshStandardMaterial) {
-    super(graft, material, correlatedMaterial);
+      correlatedMaterials: MeshStandardMaterial[]) {
+    super(graft, material, correlatedMaterials);
 
     this[$pbrMetallicRoughness] =
-        new PBRMetallicRoughness(graft, material, correlatedMaterial);
+        new PBRMetallicRoughness(graft, material, correlatedMaterials);
   }
 
   get pbrMetallicRoughness() {

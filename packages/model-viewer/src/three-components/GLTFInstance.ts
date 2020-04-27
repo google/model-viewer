@@ -56,7 +56,7 @@ export class GLTFInstance implements GLTF {
       return source;
     }
 
-    const prepared = this[$prepare](source) as Partial<PreparedGLTF>;
+    const prepared = await this[$prepare](source) as Partial<PreparedGLTF>;
 
     // NOTE: ES5 Symbol polyfill is not compatible with spread operator
     // so {...prepared, [$prepared]: true} does not work
@@ -69,7 +69,7 @@ export class GLTFInstance implements GLTF {
    * Override in an inheriting class to apply specialty one-time preparations
    * for a given input GLTF.
    */
-  protected static[$prepare](source: GLTF): GLTF {
+  protected static async[$prepare](source: GLTF): Promise<GLTF> {
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother preparing extra scenes for now:
     const {scene} = source;
@@ -115,7 +115,7 @@ export class GLTFInstance implements GLTF {
   /**
    * Creates and returns a copy of this instance.
    */
-  clone<T extends GLTFInstance>(): T {
+  async clone<T extends GLTFInstance>(): Promise<T> {
     const GLTFInstanceConstructor = this.constructor as Constructor<T>;
 
     const clonedGLTF = this[$clone]();
@@ -147,7 +147,7 @@ export class GLTFInstance implements GLTF {
   /**
    * Override in an inheriting class to implement specialized cloning strategies
    */
-  protected[$clone](): PreparedGLTF {
+  protected async[$clone](): Promise<PreparedGLTF> {
     const source = this[$preparedGLTF];
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother cloning extra scenes for now:
