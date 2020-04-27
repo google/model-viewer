@@ -212,6 +212,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
       width = UNSIZED_MEDIA_WIDTH;
       height = UNSIZED_MEDIA_HEIGHT;
     }
+    width *= this[$lastDpr];
+    height *= this[$lastDpr];
 
     // Create the underlying ModelScene.
     this[$scene] =
@@ -475,6 +477,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
   [$updateSize](
       {width, height}: {width: any, height: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
+
+    const prevIntWidth = Math.round(prevWidth / this[$lastDpr]);
+    const prevIntHeight = Math.round(prevHeight / this[$lastDpr]);
     // Round off the pixel size
     const intWidth = parseInt(width, 10);
     const intHeight = parseInt(height, 10);
@@ -482,7 +487,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
+    if (forceApply ||
+        (prevIntWidth !== intWidth || prevIntHeight !== intHeight)) {
       this[$onResize]({width: intWidth, height: intHeight});
     }
   }
@@ -521,7 +527,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$onResize](e: {width: number, height: number}) {
-    this[$scene].setSize(e.width, e.height);
+    const dpr = resolveDpr();
+    this[$scene].setSize(e.width * dpr, e.height * dpr);
     this[$needsRender]();
   }
 

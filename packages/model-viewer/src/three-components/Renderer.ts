@@ -118,7 +118,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
-      this.threeRenderer.setPixelRatio(resolveDpr());
+      this.threeRenderer.setPixelRatio(1);
       this.threeRenderer.shadowMap.enabled = true;
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
@@ -154,6 +154,8 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
+    scene.canvas.width = this.width;
+    scene.canvas.height = this.height;
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
     }
@@ -233,8 +235,9 @@ export class Renderer extends EventDispatcher {
     const maxWidth = Math.max(width, this.width);
     const maxHeight = Math.max(height, this.height);
     this.setRendererSize(maxWidth, maxHeight);
-    this.canvasElement.style.width = `${maxWidth}px`;
-    this.canvasElement.style.height = `${maxHeight}px`;
+    const dpr = resolveDpr();
+    this.canvasElement.style.width = `${maxWidth / dpr}px`;
+    this.canvasElement.style.height = `${maxHeight / dpr}px`;
     for (const scene of this.scenes) {
       scene.canvas.width = maxWidth;
       scene.canvas.height = maxHeight;
@@ -249,14 +252,14 @@ export class Renderer extends EventDispatcher {
     const delta = t - this.lastTick;
     const dpr = resolveDpr();
 
-    if (dpr !== this.threeRenderer.getPixelRatio()) {
-      this.threeRenderer.setPixelRatio(dpr);
-      this.canvasElement.style.width = `${this.width}px`;
-      this.canvasElement.style.height = `${this.height}px`;
-      for (const scene of this.scenes) {
-        scene.isDirty = true;
-      }
-    }
+    // if (dpr !== this.threeRenderer.getPixelRatio()) {
+    //   this.threeRenderer.setPixelRatio(dpr);
+    //   this.canvasElement.style.width = `${this.width}px`;
+    //   this.canvasElement.style.height = `${this.height}px`;
+    //   for (const scene of this.scenes) {
+    //     scene.isDirty = true;
+    //   }
+    // }
 
     for (const scene of this.scenes) {
       if (!scene.visible || scene.paused) {
@@ -271,11 +274,11 @@ export class Renderer extends EventDispatcher {
 
       const {width, height} = scene;
 
-      if (width > this.width || height > this.height) {
-        const maxWidth = Math.max(width, this.width);
-        const maxHeight = Math.max(height, this.height);
-        this.setRendererSize(maxWidth, maxHeight);
-      }
+      // if (width > this.width || height > this.height) {
+      //   const maxWidth = Math.max(width, this.width);
+      //   const maxHeight = Math.max(height, this.height);
+      //   this.setRendererSize(maxWidth, maxHeight);
+      // }
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly

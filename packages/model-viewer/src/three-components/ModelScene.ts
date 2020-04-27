@@ -17,6 +17,7 @@ import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Sce
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+import {resolveDpr} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
@@ -155,8 +156,10 @@ export class ModelScene extends Scene {
 
       const renderer = this.element[$renderer];
       renderer.expandTo(this.width, this.height);
-      this.canvas.width = renderer.width;
-      this.canvas.height = renderer.height;
+
+      const dpr = resolveDpr();
+      this.canvas.style.width = `${renderer.width / dpr}px`;
+      this.canvas.style.height = `${renderer.height / dpr}px`;
 
       // Immediately queue a render to happen at microtask timing. This is
       // necessary because setting the width and height of the canvas has the
