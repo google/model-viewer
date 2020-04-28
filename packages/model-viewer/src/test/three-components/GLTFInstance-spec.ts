@@ -16,7 +16,7 @@
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$prepared, GLTFInstance, PreparedGLTF} from '../../three-components/GLTFInstance.js';
-import {createFakeGLTF} from '../helpers.js';
+import {createFakeThreeGLTF} from '../helpers.js';
 
 
 const expect = chai.expect;
@@ -26,7 +26,7 @@ suite('GLTFInstance', () => {
   let preparedGLTF: PreparedGLTF;
 
   setup(async () => {
-    rawGLTF = createFakeGLTF();
+    rawGLTF = createFakeThreeGLTF();
     preparedGLTF = await GLTFInstance.prepare(rawGLTF);
   });
 

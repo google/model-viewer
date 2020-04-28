@@ -146,9 +146,11 @@ self.addEventListener('model-change', function() {
 
         await waitForEvent(element.worklet!, 'message');
 
-        expect(((scene.model.modelContainer.children[0].children[0] as Mesh)
-                    .material as MeshStandardMaterial)
-                   .color)
+        expect(
+            ((scene.model.modelContainer.children[0].children[0].children[0] as
+              Mesh)
+                 .material as MeshStandardMaterial)
+                .color)
             .to.include({r: 1, g: 0, b: 0});
       });
     });
