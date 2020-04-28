@@ -31,12 +31,12 @@ Fullscreen API[³](3)       |     ✅ |     ✅ |        ✋ |         ✅ |   �
 `:focus-visible`[⁴](4)     |     ✋ |     ✋ |        ✋ |         ✋ |   ✋ |   ✋ |               ✋
 
 These browser features are **optional** and are only needed if you wish to use
-the `unstable-webxr` feature:
+the `webxr` feature:
 
 Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
-WebXR Device API           |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
-WebXR HitTest API          |     🚫 |     🚧 |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
+WebXR Device API           |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
+WebXR HitTest API          |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
 
 
 [1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer

@@ -17,7 +17,7 @@ import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
 import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {property} from 'lit-element';
-import {Scene} from 'three';
+import {Group} from 'three';
 import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
@@ -258,8 +258,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const modelGraft: ModelGraft|null = this.loaded ?
           // TODO: Use a proper GLTF artifact as cached by the loader for this:
           new ModelGraft(scene.model.url || '', {
-            scene: scene as Scene,
-            scenes: [scene as Scene],
+            scene: scene as unknown as Group,
+            scenes: [scene as unknown as Group],
             animations: [],
             cameras: [],
             parser: {} as unknown as GLTFParser,

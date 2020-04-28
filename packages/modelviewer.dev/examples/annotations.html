@@ -111,12 +111,13 @@
     display: none;
   }
 </style>
-<model-viewer id="hotspot-demo" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut.">
+<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut.">
   <button slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
-  <button slot="hotspot-hand" data-position="-0.55 0.95 0.1" data-normal="-1 0 1">
+  <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
     <div id="annotation">This hotspot disappears completely</div>
   </button>
-  <button slot="hotspot-foot" data-position="0.16 0.11 0.15" data-normal="0 1 0.75" data-visibility-attribute="visible"></button>
+  <button slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
+  <div id="annotation">This annotation is fixed in screen-space</div>
 </model-viewer>
           </template>
         </example-snippet>

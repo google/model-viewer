@@ -47,10 +47,17 @@ template.innerHTML = `
   top: 0;
 }
 
-canvas {
+.userInput {
   width: 100%;
   height: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+canvas {
+  position: absolute;
   display: none;
+  pointer-events: none;
   /* NOTE(cdata): Chrome 76 and below apparently have a bug
    * that causes our canvas not to display pixels unless it is
    * on its own render layer
@@ -139,7 +146,7 @@ canvas.show {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--poster-color, inherit);
+  background-color: var(--poster-color, #fff);
   background-image: var(--poster-image, none);
 }
 
@@ -258,6 +265,8 @@ canvas.show {
   position: absolute;
   bottom: 16px;
   right: 16px;
+  transform: scale(var(--ar-button-scale, 1));
+  transform-origin: bottom right;
 }
 
 :not(.fullscreen) .slot.exit-fullscreen-button {
@@ -281,10 +290,11 @@ canvas.show {
 }
 </style>
 <div class="container">
-  <canvas tabindex="1"
-    aria-label="A depiction of a 3D model"
-    aria-live="polite">
-  </canvas>
+  <div class="userInput" tabindex="0" role="img"
+      aria-label="A depiction of a 3D model"
+      aria-live="polite">
+    <canvas></canvas>
+  </div>
 
   <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
         will have their <slot> elements removed by ShadyCSS -->

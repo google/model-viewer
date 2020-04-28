@@ -129,9 +129,18 @@
             </li>
             <li>
               <div>ar</div>
-              <p>Enable the ability to launch
-              <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
-              on supported devices.</p>
+              <p>Enable the ability to launch AR experiences on supported devices.</p>
+            </li>
+            <li>
+              <div>ar-modes</div>
+              <p>A prioritized list of the types of AR experiences to enable, if available; see 
+              <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
+              Augmented Reality</a>.
+              Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
+              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
+              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
+              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
+              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
             </li>
             <li>
               <div>ar-scale</div>
@@ -318,16 +327,18 @@
             </li>
             <li>
               <div>poster</div>
-              <p>Displays an image instead of the model. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
-              Loading</a> for more information.</p>
+              <p>Displays an image instead of the model, useful for showing the
+                user something before a model is loaded and ready to render. If
+                you use a poster with transparency, you may also want to set
+                --poster-color to transparent so that the background shows
+                through. See <a href="./examples/lazy-loading.html">our section
+                on lazy loading</a> for examples.</p>
             </li>
             <li>
               <div>preload</div>
               <p>When poster is also enabled, the model will be downloaded
-              before user action. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#on-loading">On
-              Loading</a> for more information.</p>
+              before user action. See <a href="./examples/lazy-loading.html">our
+              section on lazy loading</a> for examples.</p>
             </li>
             <li>
               <div>quick-look-browsers</div>
@@ -356,17 +367,6 @@
               <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
               Softness should not be changed every frame as it incurs a 
               performance cost. Softer shadows render faster. Defaults to 1.</p>
-            </li>
-            <li>
-              <div>unstable-webxr</div>
-              <p>Enables the ability to view the model in AR via the
-              experimental <a
-              href="https://github.com/immersive-web/webxr">WebXR Device
-              API</a>, currently <a
-              href="https://developers.google.com/web/updates/2018/06/ar-for-the-web">implemented
-              only in Chrome Canary</a>. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
-              Reality</a>.</p>
             </li>
           </ul>
 
@@ -403,8 +403,10 @@
             </li>
             <li>
               <div>--poster-color</div>
-              <p>Sets the background-color of the poster. Falls back to
-              --background-color if set. Defaults to #fff.</p>
+              <p>Sets the background-color of the poster. You may wish to set
+                this to transparent if you are using a seamless poster with
+                transparency (so that the background color of
+                &lt;model-viewer&gt; shows through). Defaults to #fff.</p>
             </li>
             <li>
               <div>--poster-image</div>
@@ -440,6 +442,17 @@
               always 0. This property can be set in order to seek along the
               timeline of the currently playing animation. For example, if you
               set it to 0, it will reset an animation to the beginning.</p>
+            </li>
+            <li>
+              <div>loaded</div>
+              <p>This property is read-only. It returns true if the load event
+              below has fired since the last src change.</p>
+            </li>
+            <li>
+              <div>modelIsVisible</div>
+              <p>This property is read-only. It returns true if the element is 
+              visible on the page (assuming there is an IntersectionObserver) and the
+              poster has been dismissed.</p>
             </li>
             <li>
               <div>paused</div>
@@ -640,12 +653,9 @@
             <li>
               <div>model-visibility</div>
               <p>This event is fired when the visibility of the model changes. When the
-              model is loaded, able to be rendered and fully visible (e.g., the poster is no longer
-              visible), this event will fire and <span class="attribute">event.detail.visible</span>
-              will be "true". Note that this event will fire regardless of whether the model is 
-              present in the viewport. This means that the model may not be rendered yet (as we
-              do not render models that are outside of the viewport) even though the event says
-              that the model is visible.</p>
+              model is loaded, the element is in the viewport (assuming there is an 
+              IntersectionObserver), and the poster has been dismissed, this event will fire 
+              and <span class="attribute">event.detail.visible</span> will be "true".</p>
             </li>
             <li>
               <div>poster-visibility</div>
@@ -777,8 +787,8 @@
           </table>
 
           <p class="browser-support-desc">These browser features are
-          <b>optional</b> and are only needed if you wish to use the
-          unstable-webxr feature:</p>
+          <b>optional</b> and are only needed if you wish to use
+          webxr in ar-modes:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -793,8 +803,8 @@
             
             <tr>
               <td>WebXR Device API</td>
-              <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-check"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
@@ -803,8 +813,8 @@
             </tr>
             <tr>
               <td>WebXR HitTest API</td>
-              <td><img class="icon-na"></td>
               <td><img class="icon-flag"></td>
+              <td><img class="icon-check"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>
               <td><img class="icon-na"></td>

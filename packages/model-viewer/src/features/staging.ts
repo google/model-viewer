@@ -16,9 +16,8 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
-import {Timer} from '../utilities/timer.js';
 
 import {CameraChangeDetails} from './controls.js';
 
@@ -27,7 +26,7 @@ import {CameraChangeDetails} from './controls.js';
 const ROTATION_SPEED = Math.PI / 32;
 export const AUTO_ROTATE_DELAY_DEFAULT = 3000;
 
-const $autoRotateTimer = Symbol('autoRotateTimer');
+const $autoRotateStartTime = Symbol('autoRotateStartTime');
 const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
 
@@ -47,7 +46,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'auto-rotate-delay'})
     autoRotateDelay: number = AUTO_ROTATE_DELAY_DEFAULT;
 
-    private[$autoRotateTimer]: Timer = new Timer(this.autoRotateDelay);
+    private[$autoRotateStartTime] = performance.now();
     private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
         this[$onCameraChange](event);
 
@@ -55,46 +54,38 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
       this.addEventListener(
           'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
+      this[$autoRotateStartTime] = performance.now();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
       this.removeEventListener(
           'camera-change', this[$cameraChangeHandler] as EventListener);
-      this[$autoRotateTimer].stop();
+      this[$autoRotateStartTime] = performance.now();
     }
 
     updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('autoRotate')) {
-        this[$needsRender]();
-      }
-
-      if (changedProperties.has('autoRotateDelay')) {
-        const timer = new Timer(this.autoRotateDelay);
-        timer.tick(this[$autoRotateTimer].time);
-        if (timer.hasStopped) {
-          timer.reset();
-        }
-        this[$autoRotateTimer] = timer;
+        this[$autoRotateStartTime] = performance.now();
       }
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (!this.autoRotate || !this.modelIsVisible) {
+      if (!this.autoRotate || !this.modelIsVisible ||
+          this[$renderer].isPresenting) {
         return;
       }
 
-      this[$autoRotateTimer].tick(delta);
+      const rotationDelta = Math.min(
+          delta, time - this[$autoRotateStartTime] - this.autoRotateDelay);
 
-      if (this[$autoRotateTimer].hasStopped) {
-        this[$scene].setPivotRotation(
-            this[$scene].getPivotRotation() + ROTATION_SPEED * delta * 0.001);
-        this[$needsRender]();
+      if (rotationDelta > 0) {
+        this[$scene].yaw =
+            this.turntableRotation + ROTATION_SPEED * rotationDelta * 0.001;
       }
     }
 
@@ -104,17 +95,16 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (event.detail.source === 'user-interaction') {
-        this[$autoRotateTimer].reset();
+        this[$autoRotateStartTime] = performance.now();
       }
     }
 
     get turntableRotation(): number {
-      return this[$scene].getPivotRotation();
+      return this[$scene].yaw;
     }
 
     resetTurntableRotation() {
-      this[$scene].setPivotRotation(0);
-      this[$needsRender]();
+      this[$scene].yaw = 0;
     }
   }
 

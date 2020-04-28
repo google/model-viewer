@@ -5,7 +5,7 @@
   "description": "<model-viewer> web site and live documentation",
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
-    "clean": "rm -rf ./examples/built ./lib",
+    "clean": "rm -rf ./examples/built ./lib ./dist",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
@@ -17,7 +17,7 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "@google/model-viewer": "^0.9.0",
+    "@google/model-viewer": "^0.10.0",
     "@magicleap/prismatic": "^2.0.2",
     "@types/prismjs": "^1.9.0",
     "@types/resize-observer-browser": "^0.1.2",

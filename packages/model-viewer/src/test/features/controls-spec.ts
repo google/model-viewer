@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+import {Camera, Vector3} from 'three';
+
 import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$canvas, $scene} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
-import {Constructor} from '../../utilities.js';
+import {Constructor, step} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
@@ -52,6 +54,30 @@ const expectSphericalsToBeEqual =
               'Spherical radius does not match');
     };
 
+// NOTE(cdata): Precision is a bit off when comparing e.g., expected camera
+// direction in practice:
+const FLOAT_EQUALITY_THRESHOLD = 1e-6;
+
+/**
+ * Returns true if the camera is looking at a given position, within +/-
+ * FLOAT_EQUALITY_THRESHOLD on each axis.
+ */
+const cameraIsLookingAt = (camera: Camera, position: Vector3D) => {
+  const cameraDirection = camera.getWorldDirection(new Vector3());
+  const expectedDirection = new Vector3(position.x, position.y, position.z)
+                                .sub(camera.position)
+                                .normalize();
+
+  const deltaX = Math.abs(cameraDirection.x - expectedDirection.x);
+  const deltaY = Math.abs(cameraDirection.y - expectedDirection.y);
+  const deltaZ = Math.abs(cameraDirection.z - expectedDirection.z);
+
+  return step(FLOAT_EQUALITY_THRESHOLD, deltaX) === 0 &&
+      step(FLOAT_EQUALITY_THRESHOLD, deltaY) === 0 &&
+      step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
+};
+
+
 suite('ModelViewerElementBase with ControlsMixin', () => {
   suite('when registered', () => {
     let nextId = 0;
@@ -80,7 +106,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls];
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         element.src = assetPath('models/cube.gltf');
 
         await waitForEvent(element, 'load');
@@ -110,8 +136,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
       });
 
-      // TODO(#583)
-      test.skip('can independently adjust azimuth', async () => {
+      test('can independently adjust azimuth', async () => {
         const orbit = element.getCameraOrbit();
         const nextTheta = orbit.theta + 1.0;
 
@@ -177,6 +202,23 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getCameraTarget()).to.be.eql(target);
       });
 
+      test('causes the camera to look at the target', () => {
+        expect(cameraIsLookingAt(
+                   element[$scene].camera, element.getCameraTarget()))
+            .to.be.equal(true);
+      });
+
+      suite('when target is modified', () => {
+        test('camera looks at the configured target', () => {
+          element.cameraTarget = '3m 2m 1m';
+          element.jumpCameraToGoal();
+
+          expect(cameraIsLookingAt(
+                     element[$scene].camera, element.getCameraTarget()))
+              .to.be.equal(true);
+        });
+      });
+
       test('defaults FOV correctly', async () => {
         expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
       });
@@ -232,8 +274,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(controls);
         });
 
-        // NOTE(cdata): Flakey test is flakey
-        test.skip('starts at the initially configured orbit', () => {
+        test('starts at the initially configured orbit', () => {
           const orbit = element.getCameraOrbit();
 
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -241,7 +282,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('updates with current orbit after interaction', async () => {
-          controls.adjustOrbit(0, 0.5, 0, 0);
+          controls.adjustOrbit(0, 0.5, 0);
           settleControls(controls);
 
           const orbit = element.getCameraOrbit();
@@ -333,7 +374,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           });
 
           test('respects user-configured maxFieldOfView', async () => {
-            document.body.appendChild(initiallyUnloadedElement);
+            document.body.insertBefore(
+                initiallyUnloadedElement, document.body.firstChild);
 
             initiallyUnloadedElement.maxFieldOfView = '100deg';
             initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
@@ -359,7 +401,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       setup(async () => {
         element = new ModelViewerElement();
         controls = (element as any)[$controls]
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
         element.src = assetPath('models/cube.gltf');
         element.cameraControls = true;
 
@@ -413,8 +455,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       suite('when user is interacting', () => {
         test('sets an appropriate camera-change event source', async () => {
           await rafPasses();
-          element[$canvas].focus();
-          interactWith(element[$canvas]);
+          element[$userInputElement].focus();
+          interactWith(element[$userInputElement]);
 
           const cameraChangeDispatches =
               waitForEvent<CustomEvent<CameraChangeDetails>>(
@@ -495,95 +537,74 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       suite('a11y', () => {
+        let input: HTMLDivElement;
+        let promptElement: HTMLElement;
+
         setup(async () => {
+          input = element[$userInputElement];
+          promptElement = (element as any)[$promptElement];
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';
-          await rafPasses();
         });
 
-        test(
-            'has initial aria-label set to alt before interaction',
-            async () => {
-              const canvas: HTMLCanvasElement = element[$scene].canvas;
-
-              expect(canvas.getAttribute('aria-label'))
-                  .to.be.equal(element.alt);
-            });
-
         suite('when configured for focus-based interaction prompting', () => {
-          setup(() => {
+          setup(async () => {
             element.interactionPrompt = 'when-focused';
+            await timePasses();
+          });
+
+          test('has initial aria-label set to alt before interaction', () => {
+            expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
           });
 
           test('prompts user to interact when focused', async () => {
-            const canvas: HTMLCanvasElement = element[$scene].canvas;
-            const promptElement: HTMLElement = (element as any)[$promptElement];
-
-            settleControls(controls);
-
-            // NOTE(cdata): This wait time was added in order to deflake tests
-            // on iOS Simulator and Android Emulator on Sauce Labs. These same
-            // test targets were tested manually locally and manually on Sauce,
-            // and do not fail. Only automated Sauce tests seem to fail
-            // consistently without this additional wait time:
-            await rafPasses();
-
-            canvas.focus();
+            input.focus();
 
             await until(
-                () => canvas.getAttribute('aria-label') === INTERACTION_PROMPT);
+                () => input.getAttribute('aria-label') === INTERACTION_PROMPT);
 
             expect(promptElement.classList.contains('visible'))
                 .to.be.equal(true);
           });
 
-          test(
+          // TODO(#1141)
+          (IS_IE11 ? test.skip : test)(
               'does not prompt users to interact before a model is loaded',
               async () => {
-                if (IS_IE11) {
-                  console.warn('Skipping this test for IE11 only');
-                  return;
-                }
                 element.src = null;
 
-                const canvas: HTMLCanvasElement = element[$scene].canvas;
-                const promptElement: HTMLElement =
-                    (element as any)[$promptElement];
-
-                await rafPasses();
-
-                canvas.focus();
+                input.focus();
 
                 await timePasses(element.interactionPromptThreshold + 100);
+                await rafPasses();
 
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(false);
 
-                canvas.blur();
+                input.blur();
+                // IE11 does not fire the blur handler without this wait.
+                await timePasses();
 
                 element.src = ASTRONAUT_GLB_PATH;
                 await waitForEvent(element, 'load');
 
-                canvas.focus();
+                input.focus();
 
-                await until(() => promptElement.classList.contains('visible'));
+                await timePasses(element.interactionPromptThreshold + 100);
+                await rafPasses();
+
+                expect(promptElement.classList.contains('visible'))
+                    .to.be.equal(true);
               });
 
-          // TODO(#584)
-          test.skip('does not prompt if user already interacted', async () => {
-            const canvas: HTMLCanvasElement = element[$scene].canvas;
-            const promptElement = (element as any)[$promptElement];
-            const originalLabel = canvas.getAttribute('aria-label');
+          test('does not prompt if user already interacted', async () => {
+            input.focus();
 
-            expect(originalLabel).to.not.be.equal(INTERACTION_PROMPT);
-
-            canvas.focus();
-
-            interactWith(canvas);
+            interactWith(input);
 
             await timePasses(element.interactionPromptThreshold + 100);
 
-            expect(canvas.getAttribute('aria-label'))
+            expect(input.getAttribute('aria-label'))
                 .to.not.be.equal(INTERACTION_PROMPT);
             expect(promptElement.classList.contains('visible'))
                 .to.be.equal(false);
@@ -593,62 +614,58 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         test(
             'announces camera orientation when orbiting horizontally',
             async () => {
-              const canvas: HTMLCanvasElement = element[$scene].canvas;
-
               await rafPasses();
-              canvas.focus();
+              input.focus();
 
               controls.setOrbit(-Math.PI / 2.0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage left');
 
               controls.setOrbit(Math.PI / 2.0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage right');
 
-              controls.adjustOrbit(-Math.PI / 2.0, 0, 0, 0);
+              controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage back');
 
-              controls.adjustOrbit(Math.PI, 0, 0, 0);
+              controls.adjustOrbit(Math.PI, 0, 0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
             });
 
         test(
             'announces camera orientation when orbiting vertically',
             async () => {
-              const canvas: HTMLCanvasElement = element[$scene].canvas;
-
               await rafPasses();
-              canvas.focus();
+              input.focus();
 
               settleControls(controls);
 
               controls.setOrbit(0, 0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage upper-front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage front');
 
-              controls.adjustOrbit(0, -Math.PI / 2.0, 0, 0);
+              controls.adjustOrbit(0, -Math.PI / 2.0, 0);
               settleControls(controls);
 
-              expect(canvas.getAttribute('aria-label'))
+              expect(input.getAttribute('aria-label'))
                   .to.be.equal('View from stage lower-front');
             });
       });

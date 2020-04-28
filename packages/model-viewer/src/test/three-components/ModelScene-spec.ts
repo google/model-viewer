@@ -16,7 +16,7 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
+import {$shadow, DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
@@ -24,15 +24,23 @@ import {assetPath} from '../helpers.js';
 const expect = chai.expect;
 
 suite('ModelScene', () => {
+  let nextId = 0;
+  let tagName: string;
+  let ModelViewerElement: Constructor<ModelViewerElementBase>;
+
   let element: ModelViewerElementBase;
   let scene: ModelScene;
   let dummyRadius: number;
   let dummyMesh: Mesh;
-  let ModelViewerElement = class extends ModelViewerElementBase {};
-
-  customElements.define('model-viewer-modelscene', ModelViewerElement);
 
   setup(() => {
+    tagName = `model-viewer-modelscene-${nextId++}`;
+    ModelViewerElement = class extends ModelViewerElementBase {
+      static get is() {
+        return tagName;
+      }
+    };
+    customElements.define(tagName, ModelViewerElement);
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyRadius = 0.5;
@@ -63,16 +71,17 @@ suite('ModelScene', () => {
     suite('setShadowIntensity', () => {
       test('can increase intensity and reset it to zero', () => {
         scene.setShadowIntensity(1);
-        expect(scene.shadow).to.be.ok;
-        expect(scene.shadow!.getIntensity()).to.be.equal(1);
+        const shadow = scene.model[$shadow]!;
+        expect(shadow).to.be.ok;
+        expect(shadow.getIntensity()).to.be.equal(1);
         scene.setShadowIntensity(0);
-        expect(scene.shadow!.getIntensity()).to.be.equal(0);
+        expect(shadow.getIntensity()).to.be.equal(0);
       });
 
       test('shadow is only created when intensity is greater than zero', () => {
-        expect(scene.shadow).to.be.not.ok;
+        expect(scene.model[$shadow]).to.be.not.ok;
         scene.setShadowIntensity(1);
-        expect(scene.shadow).to.be.ok;
+        expect(scene.model[$shadow]).to.be.ok;
       });
     });
   });
@@ -81,11 +90,7 @@ suite('ModelScene', () => {
     test('updates visual and buffer size', () => {
       scene.setSize(500, 200);
       expect(scene.width).to.be.equal(500);
-      expect(scene.canvas.width).to.be.equal(500 * devicePixelRatio);
-      expect(scene.canvas.style.width).to.be.equal('500px');
       expect(scene.height).to.be.equal(200);
-      expect(scene.canvas.height).to.be.equal(200 * devicePixelRatio);
-      expect(scene.canvas.style.height).to.be.equal('200px');
     });
 
     test('model is not scaled', () => {

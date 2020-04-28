@@ -7,9 +7,10 @@
 
 # `<model-viewer>`
 
- [![Build Status](https://api.travis-ci.org/GoogleWebComponents/model-viewer.svg?branch=master)](https://travis-ci.org/GoogleWebComponents/model-viewer)
+ [![Build Status](https://github.com/google/model-viewer/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/google/model-viewer/actions?query=branch%3Amaster)
  [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
  [![Bundlephobia](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
+ [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/model-viewer)
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
 models - optionally in AR - easy to do, on as many browsers and devices as possible.
@@ -20,7 +21,7 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-[Demo](https://model-viewer.glitch.me) • [Documentation](https://googlewebcomponents.github.io/model-viewer/index.html) • [Kanban](https://github.com/GoogleWebComponents/model-viewer/projects/1) • [Quality Tests](https://googlewebcomponents.github.io/model-viewer/test/fidelity/results-viewer.html)
+[Demo](https://model-viewer.glitch.me) • [Documentation](https://modelviewer.dev/) • [Kanban](https://github.com/google/model-viewer/projects/1) • [Quality Tests](https://modelviewer.dev/fidelity/)
 
 
 ## Installing
@@ -41,6 +42,32 @@ It can also be used directly from various free CDNs such as [unpkg.com](https://
 For more detailed usage documentation and live examples, please visit our docs
 at [modelviewer.dev](https://modelviewer.dev)!
 
+### Important note about versions
+Our goal for `<model-viewer>` is to be a consistent, stable part of your web
+platform while continuing to deliver cutting-edge features. We’ll always try
+to minimize breaking changes, and to keep the component backwards compatible.
+See our [guide to contributing](../../CONTRIBUTING.md#Stability) for more
+information on backwards compatibility.
+
+For your production site you may want the extra stability that comes by
+pinning to a specific version, and upgrading on your own schedule (after
+testing).
+
+If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
+upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
+
+If you’re using [unpkg.com](https://unpkg.com), you can pin to a specific
+version by specifying it in the URL. Replace the `<version>` tag in the sample
+below with the full version number (like `0.10.0`) to be pinned to.
+
+```html
+<!-- Loads <model-viewer> for modern browsers: -->
+<script type="module"
+    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.js">
+</script>
+```
+
+
 ## Browser Support
 
 `<model-viewer>` is supported on the last 2 major versions of all evergreen
@@ -55,7 +82,7 @@ desktop and mobile browsers. `<model-viewer>` is also supported on IE11.
 capabilities and compatibility of the library get better as the web evolves.
 
 However, not all browsers support all of these features today. **Check out
-[POLYFILLS.md](https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md) to
+[POLYFILLS.md](https://github.com/google/model-viewer/blob/master/packages/model-viewer/POLYFILLS.md) to
 learn how to polyfill for maximum browser compatibility!**
 
 ## Development

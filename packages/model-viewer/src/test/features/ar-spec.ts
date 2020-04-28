@@ -59,7 +59,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
         const url = new URL(intentUrls[0]);
 
-        expect(url.search).to.match(/[\?&]token=foo(&|$)/);
+        expect(url.search).to.match(/(%3F|%26)token%3Dfoo(%26|&|$)/);
 
         restoreAnchorClick();
       });
@@ -72,14 +72,15 @@ suite('ModelViewerElementBase with ARMixin', () => {
       test('hides the AR button for non-allowed browsers');
     });
 
-    suite('with unstable-webxr', () => {
+    suite('with webxr', () => {
       let element: ModelViewerElementBase&ARInterface;
 
       setup(async () => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
-        element.unstableWebxr = true;
+        element.ar = true;
+        element.arModes = 'webxr';
         element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');
@@ -103,8 +104,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
-        document.body.appendChild(element);
+        document.body.insertBefore(element, document.body.firstChild);
 
+        element.ar = true;
         element.src = assetPath('models/Astronaut.glb');
 
         await waitForEvent(element, 'load');

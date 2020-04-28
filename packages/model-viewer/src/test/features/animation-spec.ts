@@ -59,7 +59,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ANIMATED_GLB_PATH;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'load');
     });
@@ -83,11 +83,21 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
-      test('animations can be paused', async () => {
-        const animationsPause = waitForEvent(element, 'pause');
-        element.pause();
-        await animationsPause;
-        expect(animationIsPlaying(element)).to.be.false;
+      suite('when pause is invoked', () => {
+        setup(async () => {
+          const animationsPause = waitForEvent(element, 'pause');
+          element.pause();
+          await animationsPause;
+        });
+
+        test('animations pause', () => {
+          expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('changing currentTime triggers render', () => {
+          element.currentTime = 5;
+          expect(element[$scene].isDirty).to.be.true;
+        });
       });
     });
   });
@@ -96,7 +106,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     setup(() => {
       element = new ModelViewerElement();
       element.autoplay = true;
-      document.body.appendChild(element);
+      document.body.insertBefore(element, document.body.firstChild);
     });
 
     teardown(() => {

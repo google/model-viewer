@@ -62,10 +62,10 @@ suite('CachingGLTFLoader', () => {
       }
     });
 
-    test('yields a promise that resolves a scene', async () => {
+    test('yields a promise that resolves a group', async () => {
       const {scene} = await loader.load(ASTRONAUT_GLB_PATH);
       expect(scene).to.be.ok;
-      expect(scene!.type).to.be.equal('Scene');
+      expect(scene!.type).to.be.equal('Group');
     });
 
     suite('with items outside of the eviction threshold', () => {

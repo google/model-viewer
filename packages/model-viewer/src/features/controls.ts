@@ -17,10 +17,11 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $scene, $tick, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
-import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, Vector3Intrinsics} from '../styles/evaluators.js';
+import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
+import {SAFE_RADIUS_RATIO} from '../three-components/Model.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -52,6 +53,19 @@ const fade = timeline(0, [
   {frames: 1, value: 0},
   {frames: 4, value: 0}
 ]);
+
+export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
+const DEFAULT_CAMERA_TARGET = 'auto auto auto';
+const DEFAULT_FIELD_OF_VIEW = 'auto';
+
+const MINIMUM_RADIUS_RATIO = 1.1 * SAFE_RADIUS_RATIO;
+
+const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
+const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
+
+export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
+export const INTERACTION_PROMPT =
+    'Use mouse, touch or arrow keys to control the camera!';
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -85,10 +99,6 @@ export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   WHEN_FOCUSED: 'allow-when-focused'
 };
 
-export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
-const DEFAULT_CAMERA_TARGET = 'auto auto auto';
-const DEFAULT_FIELD_OF_VIEW = 'auto';
-
 export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
   return {
     basis: [numberNode(
@@ -98,7 +108,7 @@ export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
 };
 
 const minFieldOfViewIntrinsics = {
-  basis: [degreesToRadians(numberNode(10, 'deg')) as NumberNode<'rad'>],
+  basis: [degreesToRadians(numberNode(25, 'deg')) as NumberNode<'rad'>],
   keywords: {auto: [null]}
 };
 
@@ -129,22 +139,33 @@ export const cameraOrbitIntrinsics = (() => {
   };
 })();
 
-const minCameraOrbitIntrinsics = {
-  basis: [
-    numberNode(-Infinity, 'rad'),
-    numberNode(Math.PI / 8, 'rad'),
-    numberNode(0, 'm')
-  ],
-  keywords: {auto: [null, null, null]}
+const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
+  const radius =
+      MINIMUM_RADIUS_RATIO * element[$scene].model.idealCameraDistance;
+
+  return {
+    basis: [
+      numberNode(-Infinity, 'rad'),
+      numberNode(Math.PI / 8, 'rad'),
+      numberNode(radius, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
 };
 
-const maxCameraOrbitIntrinsics = {
-  basis: [
-    numberNode(Infinity, 'rad'),
-    numberNode(Math.PI - Math.PI / 8, 'rad'),
-    numberNode(Infinity, 'm')
-  ],
-  keywords: {auto: [null, null, null]}
+const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
+  const orbitIntrinsics = cameraOrbitIntrinsics(element);
+  const evaluator = new StyleEvaluator([], orbitIntrinsics);
+  const defaultRadius = evaluator.evaluate()[2];
+
+  return {
+    basis: [
+      numberNode(Infinity, 'rad'),
+      numberNode(Math.PI - Math.PI / 8, 'rad'),
+      numberNode(defaultRadius, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
 };
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
@@ -163,14 +184,7 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
-const PHI = 2.0 * Math.PI;
-
-const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
-const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
-
-export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
-export const INTERACTION_PROMPT =
-    'Use mouse, touch or arrow keys to control the camera!';
+const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
@@ -191,9 +205,8 @@ const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
 
-const $shouldPromptUserToInteract = Symbol('shouldPromptUserToInteract');
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
-const $userPromptedOnce = Symbol('userPromptedOnce');
+const $userHasInteracted = Symbol('userHasInteracted');
 const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
@@ -318,12 +331,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$focusedTime] = Infinity;
     protected[$lastPromptOffset] = 0;
     protected[$promptElementVisibleTime] = Infinity;
-    protected[$userPromptedOnce] = false;
+    protected[$userHasInteracted] = false;
     protected[$waitingToPromptUser] = false;
-    protected[$shouldPromptUserToInteract] = true;
 
     protected[$controls] = new SmoothControls(
-        this[$scene].getCamera() as PerspectiveCamera, this[$scene].canvas);
+        this[$scene].camera as PerspectiveCamera, this[$userInputElement]);
 
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
@@ -344,7 +356,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     getCameraTarget(): Vector3D {
-      return this[$controls].getTarget();
+      return this[$scene].getTarget();
     }
 
     getFieldOfView(): number {
@@ -359,11 +371,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     resetInteractionPrompt() {
       this[$lastPromptOffset] = 0;
       this[$promptElementVisibleTime] = Infinity;
-      this[$userPromptedOnce] = false;
+      this[$userHasInteracted] = false;
       this[$waitingToPromptUser] =
           this.interactionPrompt === InteractionPromptStrategy.AUTO &&
           this.cameraControls;
-      this[$shouldPromptUserToInteract] = true;
     }
 
     connectedCallback() {
@@ -390,7 +401,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       const controls = this[$controls];
-      const scene = this[$scene];
+      const input = this[$userInputElement];
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
@@ -399,11 +410,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             this[$waitingToPromptUser] = true;
           }
 
-          scene.canvas.addEventListener('focus', this[$focusHandler]);
-          scene.canvas.addEventListener('blur', this[$blurHandler]);
+          input.addEventListener('focus', this[$focusHandler]);
+          input.addEventListener('blur', this[$blurHandler]);
         } else {
-          scene.canvas.removeEventListener('focus', this[$focusHandler]);
-          scene.canvas.removeEventListener('blur', this[$blurHandler]);
+          input.removeEventListener('focus', this[$focusHandler]);
+          input.removeEventListener('blur', this[$blurHandler]);
 
           controls.disableInteraction();
           this[$deferInteractionPrompt]();
@@ -435,6 +446,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$jumpCamera] === true) {
         Promise.resolve().then(() => {
           this[$controls].jumpToGoal();
+          this[$scene].jumpToGoal();
           this[$jumpCamera] = false;
         });
       }
@@ -455,6 +467,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         minimumPolarAngle: style[1],
         minimumRadius: style[2]
       });
+      this.jumpCameraToGoal();
     }
 
     [$syncMaxCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -463,50 +476,47 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         maximumPolarAngle: style[1],
         maximumRadius: style[2]
       });
+      this.jumpCameraToGoal();
     }
 
     [$syncMinFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
           {minimumFieldOfView: style[0] * 180 / Math.PI});
+      this.jumpCameraToGoal();
     }
 
     [$syncMaxFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       this[$controls].applyOptions(
           {maximumFieldOfView: style[0] * 180 / Math.PI});
+      this.jumpCameraToGoal();
     }
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
-      const scene = this[$scene];
-      this[$controls].setTarget(x, y, z);
-      // TODO(#837): Mutating scene.pivotCenter should automatically adjust
-      // pivot rotation
-      scene.pivotCenter.set(x, y, z);
-      scene.setPivotRotation(scene.getPivotRotation());
+      this[$scene].setTarget(x, y, z);
     }
 
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (this[$waitingToPromptUser] &&
-          this.interactionPrompt !== InteractionPromptStrategy.NONE) {
+      if (this[$renderer].isPresenting) {
+        return;
+      }
+
+      const now = performance.now();
+      if (this[$waitingToPromptUser]) {
         const thresholdTime =
             this.interactionPrompt === InteractionPromptStrategy.AUTO ?
             this[$loadedTime] :
             this[$focusedTime];
 
         if (this.loaded &&
-            time > thresholdTime + this.interactionPromptThreshold) {
-          this[$scene].canvas.setAttribute('aria-label', INTERACTION_PROMPT);
+            now > thresholdTime + this.interactionPromptThreshold) {
+          this[$userInputElement].setAttribute(
+              'aria-label', INTERACTION_PROMPT);
 
-          // NOTE(cdata): After notifying users that the controls are
-          // available, we flag that the user has been prompted at least
-          // once, and then effectively stop the idle timer. If the camera
-          // orbit changes after this point, the user will never be prompted
-          // again for this particular <model-element> instance:
-          this[$userPromptedOnce] = true;
           this[$waitingToPromptUser] = false;
-          this[$promptElementVisibleTime] = time;
+          this[$promptElementVisibleTime] = now;
 
           this[$promptElement].classList.add('visible');
         }
@@ -517,7 +527,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
         const scene = this[$scene];
         const animationTime =
-            ((time - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
+            ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
@@ -529,18 +539,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             `translateX(${xOffset}px)`;
         this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
-        this[$controls].adjustOrbit(deltaTheta, 0, 0, 0);
+        this[$controls].adjustOrbit(deltaTheta, 0, 0);
 
         this[$lastPromptOffset] = offset;
         this[$needsRender]();
       }
 
       this[$controls].update(time, delta);
-      const target = this[$controls].getTarget();
-      if (!this[$scene].pivotCenter.equals(target)) {
-        this[$scene].pivotCenter.copy(target);
-        this[$scene].setPivotRotation(this[$scene].getPivotRotation());
-      }
+      this[$scene].updateTarget(delta);
     }
 
     [$deferInteractionPrompt]() {
@@ -548,14 +554,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
-
-      // Implicitly there was some reason to defer the prompt. If the user
-      // has been prompted at least once already, we no longer need to
-      // prompt the user, although if they have never been prompted we
-      // should probably prompt them at least once just in case.
-      if (this[$userPromptedOnce]) {
-        this[$shouldPromptUserToInteract] = false;
-      }
     }
 
     /**
@@ -586,16 +584,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Only change the aria-label if <model-viewer> is currently focused:
       if (rootNode != null && rootNode.activeElement === this) {
         const lastAzimuthalQuadrant =
-            (4 + Math.floor(((lastTheta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+            (4 + Math.floor(((lastTheta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
         const azimuthalQuadrant =
-            (4 + Math.floor(((theta % PHI) + QUARTER_PI) / HALF_PI)) % 4;
+            (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
 
         const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
         const polarTrient = Math.floor(phi / THIRD_PI);
 
         if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
             polarTrient !== lastPolarTrient) {
-          const {canvas} = this[$scene];
           const azimuthalQuadrantLabel =
               AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
           const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
@@ -603,7 +600,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           const ariaLabel =
               `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
 
-          canvas.setAttribute('aria-label', ariaLabel);
+          this[$userInputElement].setAttribute('aria-label', ariaLabel);
         }
       }
     }
@@ -636,12 +633,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
       this.requestUpdate('cameraOrbit', this.cameraOrbit);
+      this.requestUpdate('minCameraOrbit', this.minCameraOrbit);
+      this.requestUpdate('maxCameraOrbit', this.maxCameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
 
     [$onFocus]() {
-      const {canvas} = this[$scene];
+      const input = this[$userInputElement];
 
       if (!isFinite(this[$focusedTime])) {
         this[$focusedTime] = performance.now();
@@ -654,16 +653,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // has been crossed.
       const ariaLabel = this[$ariaLabel];
 
-      if (canvas.getAttribute('aria-label') !== ariaLabel) {
-        canvas.setAttribute('aria-label', ariaLabel);
+      if (input.getAttribute('aria-label') !== ariaLabel) {
+        input.setAttribute('aria-label', ariaLabel);
       }
 
-      // NOTE(cdata): When focused, if the user has yet to interact with the
-      // camera controls (that is, we "should" prompt the user), we begin
-      // the idle timer and indicate that we are waiting for it to cross the
-      // prompt threshold:
-      if (!isFinite(this[$promptElementVisibleTime]) &&
-          this[$shouldPromptUserToInteract]) {
+      if (this.interactionPrompt === InteractionPromptStrategy.WHEN_FOCUSED &&
+          !this[$userHasInteracted]) {
         this[$waitingToPromptUser] = true;
       }
     }
@@ -681,6 +676,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$needsRender]();
 
       if (source === ChangeSource.USER_INTERACTION) {
+        this[$userHasInteracted] = true;
         this[$deferInteractionPrompt]();
       }
 
