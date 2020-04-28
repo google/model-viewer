@@ -120,7 +120,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
-      this.threeRenderer.setPixelRatio(1);
+      this.threeRenderer.setPixelRatio(1);  // not allowed to change
       this.threeRenderer.shadowMap.enabled = true;
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
@@ -145,6 +145,13 @@ export class Renderer extends EventDispatcher {
     this.lastTick = performance.now();
   }
 
+  /**
+   * Sets the renderer's size in physical pixels. The width and height
+   * properties are saved as unrounded floats to avoid accruing rounding error.
+   * Every scene canvas is kept in sync with the size of the renderer's canvas;
+   * the portion that is drawn to is controlled by scene.width and .height. The
+   * device pixel ratio of the threeRenderer is not used (always kept at one).
+   */
   setRendererSize(width: number, height: number) {
     const oldPixelWidth = Math.round(this.width);
     const oldPixelHeight = Math.round(this.height);
@@ -257,7 +264,7 @@ export class Renderer extends EventDispatcher {
 
   /**
    * Expands the size of the renderer to the max of its current size and the
-   * incoming size.
+   * incoming size, in physical pixels.
    */
   expandTo(width: number, height: number) {
     const maxWidth = Math.max(Math.round(width), this.width);
@@ -267,6 +274,11 @@ export class Renderer extends EventDispatcher {
     }
   }
 
+  /**
+   * Checks if the Device Pixel Ratio has changed due to page zoom. If so, it
+   * rescales the renderer's dimensions in physical pixels to match the
+   * unchanged CSS size.
+   */
   updateDpr() {
     const dpr = resolveDpr();
     if (dpr !== this.dpr) {
@@ -299,8 +311,7 @@ export class Renderer extends EventDispatcher {
       const height = scene.height * this.dpr;
 
       // Need to set the render target in order to prevent
-      // clearing the depth from a different buffer -- possibly
-      // from something in
+      // clearing the depth from a different buffer
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(0, this.height - height, width, height);
       this.threeRenderer.render(scene, scene.getCamera());
@@ -318,15 +329,7 @@ export class Renderer extends EventDispatcher {
           const context2D = scene.context as CanvasRenderingContext2D;
           context2D.clearRect(0, 0, width, height);
           context2D.drawImage(
-              this.threeRenderer.domElement,
-              0,
-              0,
-              width,
-              height,
-              0,
-              0,
-              width,
-              height);
+              this.canvas3D, 0, 0, width, height, 0, 0, width, height);
         }
       }
 

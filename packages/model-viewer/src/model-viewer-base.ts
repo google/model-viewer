@@ -229,7 +229,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
     Promise.resolve().then(() => {
-      this[$updateSize](this.getBoundingClientRect(), true);
+      this[$updateSize](this.getBoundingClientRect());
     });
 
     if (HAS_RESIZE_OBSERVER) {
@@ -473,24 +473,15 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize](
-      {width, height}: {width: any, height: any}, forceApply = false) {
-    const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
-
-    const {dpr} = this[$renderer];
-    const prevIntWidth = Math.round(prevWidth / dpr);
-    const prevIntHeight = Math.round(prevHeight / dpr);
+  [$updateSize]({width, height}: {width: any, height: any}) {
     // Round off the pixel size
-    const intWidth = parseInt(width, 10);
-    const intHeight = parseInt(height, 10);
+    const intWidth = Math.max(parseInt(width, 10), 1);
+    const intHeight = Math.max(parseInt(height, 10), 1);
 
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    if (forceApply ||
-        (prevIntWidth !== intWidth || prevIntHeight !== intHeight)) {
-      this[$onResize]({width: intWidth, height: intHeight});
-    }
+    this[$onResize]({width: intWidth, height: intHeight});
   }
 
   [$tick](_time: number, _delta: number) {

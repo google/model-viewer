@@ -142,14 +142,13 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Receives the size of the 2D canvas element to make according
-   * adjustments in the scene.
+   * Updates the ModelScene for a new container size in CSS pixels.
    */
   setSize(width: number, height: number) {
-    this.width = width;
-    this.height = height;
+    this.width = Math.max(width, 1);
+    this.height = Math.max(height, 1);
 
-    this.aspect = width / height;
+    this.aspect = this.width / this.height;
     this.frameModel();
 
     this.isDirty = true;

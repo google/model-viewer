@@ -92,13 +92,13 @@ suite('Renderer', () => {
 
     test('renders only dirty scenes', async function() {
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(1);
+      expect(otherScene.renderCount).to.be.equal(1);
 
       scene.isDirty = true;
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(2);
+      expect(otherScene.renderCount).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function() {
@@ -142,7 +142,7 @@ suite('Renderer', () => {
 
       test('updates effective DPR', async () => {
         const {element} = scene;
-        const initialDpr = renderer.threeRenderer.getPixelRatio();
+        const initialDpr = renderer.dpr;
         const {width, height} = scene.getSize();
 
         element[$onResize]({width, height});
@@ -152,7 +152,7 @@ suite('Renderer', () => {
 
         await new Promise(resolve => requestAnimationFrame(resolve));
 
-        const newDpr = renderer.threeRenderer.getPixelRatio();
+        const newDpr = renderer.dpr;
 
         expect(newDpr).to.be.equal(initialDpr + 1);
       });
