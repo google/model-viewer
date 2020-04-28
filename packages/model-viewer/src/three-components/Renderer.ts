@@ -35,6 +35,7 @@ export interface ContextLostEvent extends Event {
 }
 
 export const $arRenderer = Symbol('arRenderer');
+const $dpr = Symbol('dpr');
 
 const $onWebGLContextLost = Symbol('onWebGLContextLost');
 const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
@@ -73,6 +74,7 @@ export class Renderer extends EventDispatcher {
 
   protected debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
+  private[$dpr]: number = resolveDpr();
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
 
@@ -144,12 +146,34 @@ export class Renderer extends EventDispatcher {
   }
 
   setRendererSize(width: number, height: number) {
+    const oldPixelWidth = Math.round(this.width);
+    const oldPixelHeight = Math.round(this.height);
+    this.width = width;
+    this.height = height;
+
+    width = Math.round(width);
+    height = Math.round(height);
+
+    if (oldPixelWidth === width && oldPixelHeight === height) {
+      return;
+    }
+
     if (this.canRender) {
       this.threeRenderer.setSize(width, height, false);
     }
+    const widthCSS = width / this.dpr;
+    const heightCSS = height / this.dpr;
+    this.canvasElement.style.width = `${widthCSS}px`;
+    this.canvasElement.style.height = `${heightCSS}px`;
 
-    this.width = width;
-    this.height = height;
+    for (const scene of this.scenes) {
+      const {canvas} = scene;
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = `${widthCSS}px`;
+      canvas.style.height = `${heightCSS}px`;
+      scene.isDirty = true;
+    }
   }
 
   registerScene(scene: ModelScene) {
@@ -178,6 +202,10 @@ export class Renderer extends EventDispatcher {
 
   get hasOnlyOneScene(): boolean {
     return this.scenes.size === 1;
+  }
+
+  get dpr(): number {
+    return this[$dpr];
   }
 
   async supportsPresentation() {
@@ -232,15 +260,19 @@ export class Renderer extends EventDispatcher {
    * incoming size.
    */
   expandTo(width: number, height: number) {
-    const maxWidth = Math.max(width, this.width);
-    const maxHeight = Math.max(height, this.height);
-    this.setRendererSize(maxWidth, maxHeight);
+    const maxWidth = Math.max(Math.round(width), this.width);
+    const maxHeight = Math.max(Math.round(height), this.height);
+    if (maxWidth !== this.width || maxHeight !== this.height) {
+      this.setRendererSize(maxWidth, maxHeight);
+    }
+  }
+
+  updateDpr() {
     const dpr = resolveDpr();
-    this.canvasElement.style.width = `${maxWidth / dpr}px`;
-    this.canvasElement.style.height = `${maxHeight / dpr}px`;
-    for (const scene of this.scenes) {
-      scene.canvas.width = maxWidth;
-      scene.canvas.height = maxHeight;
+    if (dpr !== this.dpr) {
+      const scale = dpr / this.dpr;
+      this[$dpr] = dpr;
+      this.setRendererSize(this.width * scale, this.height * scale);
     }
   }
 
@@ -250,16 +282,7 @@ export class Renderer extends EventDispatcher {
     }
 
     const delta = t - this.lastTick;
-    const dpr = resolveDpr();
-
-    // if (dpr !== this.threeRenderer.getPixelRatio()) {
-    //   this.threeRenderer.setPixelRatio(dpr);
-    //   this.canvasElement.style.width = `${this.width}px`;
-    //   this.canvasElement.style.height = `${this.height}px`;
-    //   for (const scene of this.scenes) {
-    //     scene.isDirty = true;
-    //   }
-    // }
+    this.updateDpr();
 
     for (const scene of this.scenes) {
       if (!scene.visible || scene.paused) {
@@ -272,13 +295,8 @@ export class Renderer extends EventDispatcher {
         continue;
       }
 
-      const {width, height} = scene;
-
-      // if (width > this.width || height > this.height) {
-      //   const maxWidth = Math.max(width, this.width);
-      //   const maxHeight = Math.max(height, this.height);
-      //   this.setRendererSize(maxWidth, maxHeight);
-      // }
+      const width = scene.width * this.dpr;
+      const height = scene.height * this.dpr;
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer -- possibly
@@ -303,8 +321,8 @@ export class Renderer extends EventDispatcher {
               this.threeRenderer.domElement,
               0,
               0,
-              width * dpr,
-              height * dpr,
+              width,
+              height,
               0,
               0,
               width,

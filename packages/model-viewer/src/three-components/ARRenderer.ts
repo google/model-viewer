@@ -16,7 +16,7 @@
 import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$needsRender, $onResize} from '../model-viewer-base.js';
-import {assertIsArCandidate} from '../utilities.js';
+import {assertIsArCandidate, resolveDpr} from '../utilities.js';
 
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
@@ -306,7 +306,8 @@ export class ARRenderer extends EventDispatcher {
       element.requestUpdate('cameraTarget');
       element[$needsRender]();
 
-      this.renderer.expandTo(scene.width, scene.height);
+      const dpr = resolveDpr();
+      this.renderer.expandTo(scene.width / dpr, scene.height / dpr);
     }
 
     if (this[$placementBox] != null) {

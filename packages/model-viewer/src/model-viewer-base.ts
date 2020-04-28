@@ -43,7 +43,6 @@ const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
-const $lastDpr = Symbol('lastDpr');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
@@ -132,7 +131,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
-  protected[$lastDpr]: number = resolveDpr();
   protected[$clearModelTimeout]: number|null = null;
 
   protected[$fallbackResizeHandler] = debounce(() => {
@@ -212,8 +210,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
       width = UNSIZED_MEDIA_WIDTH;
       height = UNSIZED_MEDIA_HEIGHT;
     }
-    width *= this[$lastDpr];
-    height *= this[$lastDpr];
+    const {dpr} = this[$renderer];
+    width *= dpr;
+    height *= dpr;
 
     // Create the underlying ModelScene.
     this[$scene] =
@@ -478,8 +477,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
       {width, height}: {width: any, height: any}, forceApply = false) {
     const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
 
-    const prevIntWidth = Math.round(prevWidth / this[$lastDpr]);
-    const prevIntHeight = Math.round(prevHeight / this[$lastDpr]);
+    const {dpr} = this[$renderer];
+    const prevIntWidth = Math.round(prevWidth / dpr);
+    const prevIntHeight = Math.round(prevHeight / dpr);
     // Round off the pixel size
     const intWidth = parseInt(width, 10);
     const intHeight = parseInt(height, 10);
@@ -494,17 +494,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$tick](_time: number, _delta: number) {
-    const dpr = resolveDpr();
-    // There is no standard way to detect when DPR changes on account of zoom.
-    // Here we keep a local copy of DPR updated, and when it changes we invoke
-    // the fallback resize handler. It might be better to invoke the resize
-    // handler directly in this case, but the fallback is debounced which will
-    // save us from doing too much work when DPR and window size changes at the
-    // same time.
-    if (dpr !== this[$lastDpr]) {
-      this[$lastDpr] = dpr;
-      this[$fallbackResizeHandler]();
-    }
   }
 
   [$markLoaded]() {
@@ -527,9 +516,31 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$onResize](e: {width: number, height: number}) {
-    const dpr = resolveDpr();
-    this[$scene].setSize(e.width * dpr, e.height * dpr);
-    this[$needsRender]();
+    const {width, height} = this[$scene];
+    if (e.width === width && e.height === height) {
+      return;
+    }
+    this[$scene].setSize(e.width, e.height);
+
+    const renderer = this[$renderer];
+    renderer.updateDpr();
+    const {dpr} = renderer;
+    const widthPixels = e.width * dpr;
+    const heightPixels = e.height * dpr;
+    renderer.expandTo(widthPixels, heightPixels);
+    // Immediately queue a render to happen at microtask timing. This is
+    // necessary because setting the width and height of the canvas has the
+    // side-effect of clearing it, and also if we wait for the next rAF to
+    // render again we might get hit with yet-another-resize, or worse we
+    // may not actually be marked as dirty and so render will just not
+    // happen. Queuing a render to happen here means we will render twice on
+    // a resize frame, but it avoids most of the visual artifacts associated
+    // with other potential mitigations for this problem. See discussion in
+    // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
+    // additional considerations.
+    Promise.resolve().then(() => {
+      renderer.render(performance.now());
+    });
   }
 
   [$onContextLost](event: ContextLostEvent) {
