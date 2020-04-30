@@ -35,7 +35,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 const blobCanvas = document.createElement('canvas');
 let blobContext: CanvasRenderingContext2D|null = null;
 
-const $selectCanvas = Symbol('selectCanvas');
 const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
@@ -298,12 +297,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
-    this[$renderer].addEventListener(
+    const renderer = this[$renderer];
+    renderer.addEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].registerScene(this[$scene]);
-    this[$selectCanvas]();
+    renderer.registerScene(this[$scene]);
+    renderer.selectCanvas();
     this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
@@ -327,12 +327,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
-    this[$renderer].removeEventListener(
+    const renderer = this[$renderer];
+    renderer.removeEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].unregisterScene(this[$scene]);
-    this[$selectCanvas]();
+    renderer.unregisterScene(this[$scene]);
+    renderer.selectCanvas();
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
@@ -447,21 +448,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
     return this[$isElementInViewport];
-  }
-
-  /**
-   * The function enables an optimization, where when there is only a single
-   * <model-viewer> element, we can use the renderer's 3D canvas directly for
-   * display. Otherwise we need to use the element's 2D canvas and copy the
-   * renderer's result into it.
-   */
-  [$selectCanvas]() {
-    if (this[$renderer].hasOnlyOneScene) {
-      this[$userInputElement].appendChild(this[$renderer].canvasElement);
-      this[$canvas].classList.remove('show');
-    } else {
-      this[$renderer].canvasElement.classList.remove('show');
-    }
   }
 
   get[$displayCanvas]() {

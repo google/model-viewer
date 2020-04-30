@@ -16,7 +16,7 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$tick} from '../model-viewer-base.js';
+import {$canvas, $tick, $userInputElement} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -176,6 +176,29 @@ export class Renderer extends EventDispatcher {
 
   get hasOnlyOneScene(): boolean {
     return this.scenes.size === 1;
+  }
+
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
+  selectCanvas() {
+    for (const scene of this.scenes) {
+      const userInputElement = scene.element[$userInputElement];
+      const canvas = scene.element[$canvas];
+      if (this.hasOnlyOneScene) {
+        userInputElement.appendChild(this.canvasElement);
+        canvas.classList.remove('show');
+      } else {
+        if (this.canvasElement.parentElement === userInputElement) {
+          userInputElement.removeChild(this.canvasElement);
+        }
+        canvas.classList.add('show');
+        scene.isDirty = true;
+      }
+    }
   }
 
   async supportsPresentation() {
