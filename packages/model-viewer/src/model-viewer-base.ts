@@ -303,8 +303,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     renderer.registerScene(this[$scene]);
-    renderer.selectCanvas();
-    this[$scene].isDirty = true;
 
     if (this[$clearModelTimeout] != null) {
       self.clearTimeout(this[$clearModelTimeout]!);
@@ -333,7 +331,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     renderer.unregisterScene(this[$scene]);
-    renderer.selectCanvas();
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();

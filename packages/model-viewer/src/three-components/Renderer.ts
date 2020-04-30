@@ -154,6 +154,9 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
+    this.selectCanvas();
+    scene.isDirty = true;
+
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
     }
@@ -164,7 +167,14 @@ export class Renderer extends EventDispatcher {
   }
 
   unregisterScene(scene: ModelScene) {
+    const userInputElement = scene.element[$userInputElement];
+    if (this.canvasElement.parentElement === userInputElement) {
+      userInputElement.removeChild(this.canvasElement);
+    }
+
     this.scenes.delete(scene);
+    this.selectCanvas();
+
     if (this.canRender && this.scenes.size === 0) {
       (this.threeRenderer.setAnimationLoop as any)(null);
     }
@@ -194,9 +204,9 @@ export class Renderer extends EventDispatcher {
       } else {
         if (this.canvasElement.parentElement === userInputElement) {
           userInputElement.removeChild(this.canvasElement);
+          scene.isDirty = true;
         }
         canvas.classList.add('show');
-        scene.isDirty = true;
       }
     }
   }
