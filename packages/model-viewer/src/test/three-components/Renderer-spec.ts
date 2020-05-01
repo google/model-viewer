@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize, $renderer, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
@@ -92,13 +92,13 @@ suite('Renderer', () => {
 
     test('renders only dirty scenes', async function() {
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(1);
+      expect(otherScene.renderCount).to.be.equal(1);
 
       scene.isDirty = true;
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(2);
+      expect(otherScene.renderCount).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function() {
@@ -127,6 +127,24 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
+    });
+
+    test('uses the proper canvas when unregsitering scenes', function() {
+      expect(renderer.canvasElement.parentElement).to.be.not.ok;
+      expect(scene.element[$canvas].classList.contains('show')).to.be.eq(true);
+      expect(otherScene.element[$canvas].classList.contains('show'))
+          .to.be.eq(true);
+
+      renderer.unregisterScene(scene);
+
+      expect(renderer.canvasElement.parentElement)
+          .to.be.eq(otherScene.element[$userInputElement]);
+      expect(otherScene.element[$canvas].classList.contains('show'))
+          .to.be.eq(false);
+
+      renderer.unregisterScene(otherScene);
+
+      expect(renderer.canvasElement.parentElement).to.be.not.ok;
     });
 
     suite('when resizing', () => {
