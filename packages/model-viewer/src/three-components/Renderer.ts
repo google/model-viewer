@@ -16,7 +16,7 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$tick} from '../model-viewer-base.js';
+import {$canvas, $tick, $userInputElement} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -185,8 +185,16 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
-    scene.canvas.width = this.width;
-    scene.canvas.height = this.height;
+
+    const {canvas} = scene;
+    canvas.width = this.width;
+    canvas.height = this.height;
+    canvas.style.width = `${this.width / this.dpr}px`;
+    canvas.style.height = `${this.height / this.dpr}px`;
+
+    this.selectCanvas();
+    scene.isDirty = true;
+
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
     }
@@ -197,7 +205,14 @@ export class Renderer extends EventDispatcher {
   }
 
   unregisterScene(scene: ModelScene) {
+    const userInputElement = scene.element[$userInputElement];
+    if (this.canvasElement.parentElement === userInputElement) {
+      userInputElement.removeChild(this.canvasElement);
+    }
+
     this.scenes.delete(scene);
+    this.selectCanvas();
+
     if (this.canRender && this.scenes.size === 0) {
       (this.threeRenderer.setAnimationLoop as any)(null);
     }
@@ -213,6 +228,29 @@ export class Renderer extends EventDispatcher {
 
   get dpr(): number {
     return this[$dpr];
+  }
+
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
+  selectCanvas() {
+    for (const scene of this.scenes) {
+      const userInputElement = scene.element[$userInputElement];
+      const canvas = scene.element[$canvas];
+      if (this.hasOnlyOneScene) {
+        userInputElement.appendChild(this.canvasElement);
+        canvas.classList.remove('show');
+      } else {
+        if (this.canvasElement.parentElement === userInputElement) {
+          userInputElement.removeChild(this.canvasElement);
+          scene.isDirty = true;
+        }
+        canvas.classList.add('show');
+      }
+    }
   }
 
   async supportsPresentation() {
