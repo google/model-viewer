@@ -51,7 +51,7 @@ const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   return Promise.all([load, envMap]);
 };
 
-suite('ModelViewerElementBase with EnvironmentMixin', () => {
+suite.skip('ModelViewerElementBase with EnvironmentMixin', () => {
   suiteTeardown(() => {
     Renderer.resetSingleton();
   });
