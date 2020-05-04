@@ -87,9 +87,9 @@ module.exports = function(config) {
     mochaReporter: {output: 'autowatch'},
 
     // Note setting --browsers on the command-line always overrides this list.
-    browsers: [
-      'ChromeHeadless',
-    ],
+    // browsers: [
+    //   'ChromeHeadless',
+    // ],
   });
 
 
@@ -101,6 +101,13 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
+      'Chrome 81.0': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Chrome',
+        browser_version: '81.0',
+      },
       'Edge (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
@@ -186,7 +193,7 @@ module.exports = function(config) {
       reporters: ['BrowserStack', 'mocha'],
 
       customLaunchers: browserStackLaunchers,
-      browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
+      browsers: [...Object.keys(browserStackLaunchers)],
     });
   }
 };
