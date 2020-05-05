@@ -25,6 +25,7 @@ import {BasicSpecTemplate} from '../templates.js';
 const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
   if (IS_IE11) {
@@ -152,6 +153,42 @@ self.addEventListener('model-change', function() {
                  .material as MeshStandardMaterial)
                 .color)
             .to.include({r: 1, g: 0, b: 0});
+      });
+
+      suite('when the model changes', () => {
+        test('updates when the model changes', async () => {
+          const script = document.createElement('script');
+
+          script.type = 'experimental-scene-graph-worklet';
+          script.setAttribute('allow', 'material-properties; messaging');
+          script.textContent = `
+self.addEventListener('model-change', function() {
+  self.postMessage(JSON.stringify(model.materials[0].pbrMetallicRoughness.baseColorFactor));
+});
+`;
+
+          element.appendChild(script);
+
+          await waitForEvent(element, 'worklet-created');
+
+          const message =
+              await waitForEvent<MessageEvent>(element.worklet!, 'message');
+
+          expect(JSON.parse(message.data)).to.be.eql([0.5, 0.5, 0.5, 1]);
+
+          const nextMessageArrives =
+              waitForEvent<MessageEvent>(element.worklet!, 'message');
+
+          element.src = HORSE_GLB_PATH;
+
+          await waitForEvent(element, 'load');
+          await rafPasses();
+
+          const nextMessage = await nextMessageArrives;
+
+          debugger;
+          expect(JSON.parse(nextMessage.data)).to.be.eql([1, 1, 1, 1]);
+        });
       });
     });
   });

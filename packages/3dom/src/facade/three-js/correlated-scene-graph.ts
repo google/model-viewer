@@ -83,14 +83,43 @@ export class CorrelatedSceneGraph {
     return [threeObjectMap, gltfElementMap];
   }
 
+  // private static async collectClonedMaterials(
+  //     originalMaterial: MeshStandardMaterial, cache: ThreeGLTFParserCache) {
+  //   const keyParts = [
+  //     `ClonedMaterial:${originalMaterial.uuid}:`,
+  //     'skinning:',
+  //     'vertex-tangents:',
+  //     'vertex-colors:',
+  //     'flat-shading:',
+  //     'morph-targets:',
+  //     'morph-normals:'
+  //   ];
+  //   const materials: Material[] = [];
+  //   const keyCombinations = [''];
+  //   let currentKey = '';
+
+  //   for (let i = 0; i < keyParts.length; ++i) {
+  //     currentKey += keyParts[i];
+  //     for (let j = i + 1; j < keyParts.length; ++j) {
+  //       const material = await cache.get(`${currentKey}${keyParts[j]}`);
+  //       if (material != null && (material as Material).isMaterial) {
+  //         materials.push(material as Material);
+  //       }
+  //     }
+  //   }
+
+  //   return materials;
+  // }
+
   /**
    * Produce a CorrelatedSceneGraph from a naturally generated Three.js GLTF.
    * Such GLTFs are produced by Three.js' GLTFLoader, and contain cached
    * details that expedite the correlation step.
    */
   static async from(threeGLTF: ThreeGLTF): Promise<CorrelatedSceneGraph> {
-    const gltf: GLTF =
-        JSON.parse(JSON.stringify(threeGLTF.parser.json)) as GLTF;
+    // const gltf: GLTF =
+    //     JSON.parse(JSON.stringify(threeGLTF.parser.json)) as GLTF;
+    const gltf = threeGLTF.parser.json as GLTF;
     const [threeObjectMap, gltfElementMap] =
         await this[$correlateSceneGraphs](threeGLTF, gltf);
     return new CorrelatedSceneGraph(
