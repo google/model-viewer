@@ -51,13 +51,7 @@ module.exports = function(config) {
       },
       {pattern: 'node_modules/@ungap/event-target/min.js', watched: false},
       {pattern: 'shared-assets/**/*', included: false},
-      {
-        pattern: 'lib/test/**/*-spec.js',
-        included: false,
-        watched: true,
-        type: 'module'
-      },
-      {pattern: 'lib/test/index.js', watched: true, type: 'module'}
+      {pattern: 'dist/unit-tests-umd.js', watched: true, type: 'module'}
     ],
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
