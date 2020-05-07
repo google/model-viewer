@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {resolveDpr} from '@google/model-viewer/lib/utilities.js';
 import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
@@ -258,7 +257,7 @@ export class FilamentViewer extends LitElement {
     const canvas = this[$canvas]!;
     const {dimensions, target, orbit, verticalFoV} = this.scenario;
 
-    const dpr = resolveDpr();
+    const dpr = window.devicePixelRatio;
     const width = dimensions.width * dpr;
     const height = dimensions.height * dpr;
 

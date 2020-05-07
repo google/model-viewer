@@ -22,7 +22,7 @@ import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {debounce, deserializeUrl} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -370,7 +370,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const idealAspect = options ? options.idealAspect : undefined;
 
     const {width, height, model, aspect} = this[$scene];
-    const dpr = resolveDpr();
+    const dpr = window.devicePixelRatio;
     let outputWidth = width * dpr;
     let outputHeight = height * dpr;
     let offsetX = 0;

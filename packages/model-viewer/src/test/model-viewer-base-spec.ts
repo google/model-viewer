@@ -16,7 +16,7 @@
 import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
-import {Constructor, resolveDpr} from '../utilities.js';
+import {Constructor} from '../utilities.js';
 
 import {assetPath, spy, timePasses, until, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
@@ -35,7 +35,7 @@ const expectBlobDimensions =
     img.src = url;
   });
 
-  const dpr = resolveDpr();
+  const dpr = window.devicePixelRatio;
   expect(img.width).to.be.equal(width * dpr);
   expect(img.height).to.be.equal(height * dpr);
 };
