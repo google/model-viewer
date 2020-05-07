@@ -76,12 +76,19 @@ declare interface XRViewerPose {
   readonly views: Array<XRView>
 }
 
+declare interface XRRayDirectionInit {
+  x?: number;
+  y?: number;
+  z?: number;
+  w?: number;
+}
+
 declare class XRRay {
   readonly origin: DOMPointReadOnly;
-  readonly direction: DOMPointReadOnly;
+  readonly direction: XRRayDirectionInit;
   matrix: Float32Array;
 
-  constructor(origin: DOMPointInit, direction: DOMPointInit)
+  constructor(origin: DOMPointInit, direction: XRRayDirectionInit)
 }
 
 declare interface XRPose {
@@ -180,8 +187,7 @@ declare class XRWebGLLayer implements XRLayer {
   public framebufferHeight: number;
 
   constructor(
-      session: XRSession, gl: WebGLRenderingContext,
-      options: XRWebGLLayerInit)
+      session: XRSession, gl: WebGLRenderingContext, options: XRWebGLLayerInit)
 
   getViewport(view: XRView): XRViewport
 }

@@ -238,7 +238,7 @@ export class ARRenderer extends EventDispatcher {
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = new XRRay(
         new DOMPoint(0, 0, 0),
-        new DOMPoint(0, -Math.sin(radians), -Math.cos(radians)));
+        {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
         .requestHitTestSource({space: this[$viewerRefSpace]!, offsetRay: ray})
         .then(hitTestSource => {
