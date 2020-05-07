@@ -75,40 +75,6 @@ window.oscillate = function(min, max, period, time) {
   </div>
 
   <div class="sample">
-    <div id="demo-container-2" class="demo"></div>
-    <div class="content">
-      <div class="wrapper">
-        <div class="heading">
-          <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
-          <h4></h4>
-        </div>
-        <example-snippet stamp-to="demo-container-2" highlight-as="html">
-          <template>
-<model-viewer camera-controls skybox-image="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
-          </template>
-        </example-snippet>
-      </div>
-    </div>
-  </div>
-
-  <div class="sample">
-      <div id="demo-container-2.5" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">An equirectangular LDR <span class="attribute">skybox-image</span></h2>
-            <h4></h4>
-          </div>
-          <example-snippet stamp-to="demo-container-2.5" highlight-as="html">
-            <template>
-  <model-viewer camera-controls skybox-image="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-  <div class="sample">
     <div id="demo-container-3" class="demo"></div>
     <div class="content">
       <div class="wrapper">
@@ -235,6 +201,43 @@ window.oscillate = function(min, max, period, time) {
       </div>
     </div>
   </div>
+
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<model-viewer camera-controls skybox-image="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+      <div id="demo-container-2.5" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular LDR <span class="attribute">environment-image</span></h2>
+            <h4>Note we are still specifying an HDR skybox-image. This is not in general necessary, but if you have multiple &lt;model-viewer&gt; elements
+              on a page (as here) there is a performance problem with having different format skyboxes. To avoid it, simply use only HDR or only LDR for your skyboxes.
+            </h4>
+          </div>
+          <example-snippet stamp-to="demo-container-2.5" highlight-as="html">
+            <template>
+  <model-viewer camera-controls environment-image="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" skybox-image="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
 
   <div class="footer">
     <ul>
