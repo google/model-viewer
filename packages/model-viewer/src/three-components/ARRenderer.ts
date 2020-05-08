@@ -171,11 +171,11 @@ export class ARRenderer extends EventDispatcher {
     });
     await waitForAnimationFrame;
 
+    scene.element[$onResize](window.screen);
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    scene.element[$onResize](window.screen);
 
     return session;
   }
@@ -207,6 +207,9 @@ export class ARRenderer extends EventDispatcher {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
+
+    // This sets isPresenting to true
+    this[$presentedScene] = scene;
 
     const currentSession = await this.resolveARSession(scene);
     currentSession.addEventListener('end', () => {
@@ -246,7 +249,6 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this[$currentSession] = currentSession;
-    this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
     this[$lastTick] = performance.now();
 
