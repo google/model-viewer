@@ -35,7 +35,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 const blobCanvas = document.createElement('canvas');
 let blobContext: CanvasRenderingContext2D|null = null;
 
-const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
@@ -46,6 +45,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
+export const $updateSize = Symbol('updateSize');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');
@@ -457,14 +457,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * Called on initialization and when the resize observer fires.
    */
   [$updateSize]({width, height}: {width: any, height: any}) {
-    // Round off the pixel size
-    const intWidth = Math.max(parseInt(width, 10), 1);
-    const intHeight = Math.max(parseInt(height, 10), 1);
-
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    this[$onResize]({width: intWidth, height: intHeight});
+    this[$onResize]({width: parseFloat(width), height: parseFloat(height)});
   }
 
   [$tick](_time: number, _delta: number) {
@@ -490,31 +486,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$onResize](e: {width: number, height: number}) {
-    const {width, height} = this[$scene];
-    if (e.width === width && e.height === height) {
-      return;
-    }
     this[$scene].setSize(e.width, e.height);
-
-    const renderer = this[$renderer];
-    renderer.updateDpr();
-    const {dpr} = renderer;
-    const widthPixels = e.width * dpr;
-    const heightPixels = e.height * dpr;
-    renderer.expandTo(widthPixels, heightPixels);
-    // Immediately queue a render to happen at microtask timing. This is
-    // necessary because setting the width and height of the canvas has the
-    // side-effect of clearing it, and also if we wait for the next rAF to
-    // render again we might get hit with yet-another-resize, or worse we
-    // may not actually be marked as dirty and so render will just not
-    // happen. Queuing a render to happen here means we will render twice on
-    // a resize frame, but it avoids most of the visual artifacts associated
-    // with other potential mitigations for this problem. See discussion in
-    // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
-    // additional considerations.
-    Promise.resolve().then(() => {
-      renderer.render(performance.now());
-    });
   }
 
   [$onContextLost](event: ContextLostEvent) {

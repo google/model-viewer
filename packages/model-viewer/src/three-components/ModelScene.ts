@@ -145,6 +145,9 @@ export class ModelScene extends Scene {
    * Updates the ModelScene for a new container size in CSS pixels.
    */
   setSize(width: number, height: number) {
+    if (this.width === width && this.height === height) {
+      return;
+    }
     this.width = Math.max(width, 1);
     this.height = Math.max(height, 1);
 

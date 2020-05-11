@@ -16,7 +16,7 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 
 import {IS_WEBXR_AR_CANDIDATE, USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $tick, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -141,58 +141,82 @@ export class Renderer extends EventDispatcher {
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
 
-    this.setRendererSize(1, 1);
+    this.width = 1;
+    this.height = 1;
+    this.updateRendererSize();
     this.lastTick = performance.now();
   }
 
   /**
-   * Sets the renderer's size in physical pixels. The width and height
-   * properties are saved as unrounded floats to avoid accruing rounding error.
-   * Every scene canvas is kept in sync with the size of the renderer's canvas;
-   * the portion that is drawn to is controlled by scene.width and .height. The
-   * device pixel ratio of the threeRenderer is not used (always kept at one).
+   * Updates the renderer's size based on the largest scene and any changes to
+   * device pixel ratio.
    */
-  setRendererSize(width: number, height: number) {
-    const oldPixelWidth = Math.round(this.width);
-    const oldPixelHeight = Math.round(this.height);
-    this.width = width;
-    this.height = height;
+  updateRendererSize() {
+    const dpr = resolveDpr();
+    if (dpr !== this[$dpr]) {
+      // If the device pixel ratio has changed due to page zoom, elements
+      // specified by % width do not fire a resize event even though their CSS
+      // pixel dimensions change, so we force them to update their size here.
+      for (const scene of this.scenes) {
+        const {element} = scene;
+        element[$updateSize](element.getBoundingClientRect());
+      }
+    }
 
-    width = Math.round(width);
-    height = Math.round(height);
+    // Make the renderer the size of the largest scene
+    let maxWidth = 0;
+    let maxHeight = 0;
+    for (const scene of this.scenes) {
+      maxWidth = Math.max(maxWidth, scene.width);
+      maxHeight = Math.max(maxHeight, scene.height);
+    }
 
-    if (oldPixelWidth === width && oldPixelHeight === height) {
+    if (maxWidth === this.width && maxHeight === this.height &&
+        dpr === this[$dpr]) {
       return;
     }
 
-    if (this.canRender) {
-      this.threeRenderer.setSize(width, height, false);
-    }
-    const widthCSS = width / this.dpr;
-    const heightCSS = height / this.dpr;
-    this.canvasElement.style.width = `${widthCSS}px`;
-    this.canvasElement.style.height = `${heightCSS}px`;
+    // The width and height properties are saved as unrounded floats in CSS
+    // pixels to avoid accruing rounding error.
+    this.width = maxWidth;
+    this.height = maxHeight;
+    this[$dpr] = dpr;
+    const {width, height} = this;
+    this.canvasElement.style.width = `${width}px`;
+    this.canvasElement.style.height = `${height}px`;
 
+    // We are not using three's pixel ratio (it is always 1.0), but instead
+    // calculating sizes ourselves. Therefore all viewport dimenions are in
+    // physical pixels, not CSS.
+    const widthPixels = Math.round(width * dpr);
+    const heightPixels = Math.round(height * dpr);
+    if (this.canRender) {
+      this.threeRenderer.setSize(widthPixels, heightPixels, false);
+    }
+
+    // Each scene's canvas must match the renderer size. In general they can be
+    // larger than the element that contains them, but the overflow is hidden
+    // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = width;
-      canvas.height = height;
-      canvas.style.width = `${widthCSS}px`;
-      canvas.style.height = `${heightCSS}px`;
+      canvas.width = widthPixels;
+      canvas.height = heightPixels;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
       scene.isDirty = true;
     }
   }
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
+    this.selectCanvas();
 
     const {canvas} = scene;
-    canvas.width = this.width;
-    canvas.height = this.height;
-    canvas.style.width = `${this.width / this.dpr}px`;
-    canvas.style.height = `${this.height / this.dpr}px`;
-
-    this.selectCanvas();
+    const {width, height, dpr} = this;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
     scene.isDirty = true;
 
     if (this.canRender && this.scenes.size > 0) {
@@ -300,39 +324,14 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  /**
-   * Expands the size of the renderer to the max of its current size and the
-   * incoming size, in physical pixels.
-   */
-  expandTo(width: number, height: number) {
-    const maxWidth = Math.max(Math.round(width), this.width);
-    const maxHeight = Math.max(Math.round(height), this.height);
-    if (maxWidth !== this.width || maxHeight !== this.height) {
-      this.setRendererSize(maxWidth, maxHeight);
-    }
-  }
-
-  /**
-   * Checks if the Device Pixel Ratio has changed due to page zoom. If so, it
-   * rescales the renderer's dimensions in physical pixels to match the
-   * unchanged CSS size.
-   */
-  updateDpr() {
-    const dpr = resolveDpr();
-    if (dpr !== this.dpr) {
-      const scale = dpr / this.dpr;
-      this[$dpr] = dpr;
-      this.setRendererSize(this.width * scale, this.height * scale);
-    }
-  }
-
   render(t: number) {
     if (!this.canRender || this.isPresenting) {
       return;
     }
 
     const delta = t - this.lastTick;
-    this.updateDpr();
+    this.updateRendererSize();
+    const {dpr} = this;
 
     for (const scene of this.scenes) {
       if (!scene.visible || scene.paused) {
@@ -345,13 +344,14 @@ export class Renderer extends EventDispatcher {
         continue;
       }
 
-      const width = scene.width * this.dpr;
-      const height = scene.height * this.dpr;
+      const widthPixels = scene.width * dpr;
+      const heightPixels = scene.height * dpr;
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
       this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.setViewport(0, this.height - height, width, height);
+      this.threeRenderer.setViewport(
+          0, this.height * dpr - heightPixels, widthPixels, heightPixels);
       this.threeRenderer.render(scene, scene.getCamera());
 
       if (!this.hasOnlyOneScene) {
@@ -365,9 +365,17 @@ export class Renderer extends EventDispatcher {
           contextBitmap.transferFromImageBitmap(bitmap);
         } else {
           const context2D = scene.context as CanvasRenderingContext2D;
-          context2D.clearRect(0, 0, width, height);
+          context2D.clearRect(0, 0, widthPixels, heightPixels);
           context2D.drawImage(
-              this.canvas3D, 0, 0, width, height, 0, 0, width, height);
+              this.canvas3D,
+              0,
+              0,
+              widthPixels,
+              heightPixels,
+              0,
+              0,
+              widthPixels,
+              heightPixels);
         }
       }
 
