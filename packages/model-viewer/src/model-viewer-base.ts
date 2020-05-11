@@ -209,9 +209,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
       width = UNSIZED_MEDIA_WIDTH;
       height = UNSIZED_MEDIA_HEIGHT;
     }
-    const {dpr} = this[$renderer];
-    width *= dpr;
-    height *= dpr;
 
     // Create the underlying ModelScene.
     this[$scene] =
@@ -370,7 +367,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const idealAspect = options ? options.idealAspect : undefined;
 
     const {width, height, model, aspect} = this[$scene];
-    const dpr = window.devicePixelRatio;
+    const {dpr} = this[$renderer];
     let outputWidth = width * dpr;
     let outputHeight = height * dpr;
     let offsetX = 0;
