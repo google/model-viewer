@@ -172,10 +172,13 @@ export class ARRenderer extends EventDispatcher {
     await waitForAnimationFrame;
 
     scene.element[$onResize](window.screen);
+
+    const {framebuffer, framebufferWidth, framebufferHeight} =
+        session.renderState.baseLayer!;
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
-    (this.threeRenderer as any)
-        .setFramebuffer(session.renderState.baseLayer!.framebuffer);
+    (this.threeRenderer as any).setFramebuffer(framebuffer);
+    this.threeRenderer.setViewport(0, 0, framebufferWidth, framebufferHeight);
 
     return session;
   }
