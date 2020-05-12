@@ -88,6 +88,7 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
+      // TODO(#1207)
       // 'ChromeHeadless',
     ],
   });
@@ -101,6 +102,7 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
+      // TODO(#1207)
       // 'Edge (latest)': {
       //   base: 'BrowserStack',
       //   os: 'Windows',

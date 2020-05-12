@@ -76,6 +76,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         expect(element.turntableRotation).to.be.greaterThan(turntableRotation);
       });
 
+      // TODO(#1205)
       test.skip(
           'retains turntable rotation when auto-rotate is toggled',
           async () => {
@@ -101,6 +102,7 @@ suite('ModelViewerElementBase with StagingMixin', () => {
                 .to.be.greaterThan(turntableRotation);
           });
 
+      // TODO(#1206)
       test.skip('pauses rotate after user interaction', async () => {
         const {turntableRotation} = element;
         await timePasses(AUTO_ROTATE_DELAY);
