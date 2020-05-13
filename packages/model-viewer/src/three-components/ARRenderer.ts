@@ -15,7 +15,7 @@
 
 import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
-import {$needsRender, $onResize} from '../model-viewer-base.js';
+import {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -150,8 +150,8 @@ export class ARRenderer extends EventDispatcher {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
           domOverlay: {
-            root: document.querySelector('model-viewer')!.shadowRoot!
-                      .querySelector('div.annotation-container')
+            root: scene.element.shadowRoot!.querySelector(
+                'div.annotation-container')
           }
         });
 
@@ -175,7 +175,7 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any)
         .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    (scene.element)[$onResize](window.screen);
+    scene.element[$onResize](window.screen);
 
     return session;
   }
@@ -238,7 +238,7 @@ export class ARRenderer extends EventDispatcher {
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = new XRRay(
         new DOMPoint(0, 0, 0),
-        new DOMPoint(0, -Math.sin(radians), -Math.cos(radians)));
+        {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
         .requestHitTestSource({space: this[$viewerRefSpace]!, offsetRay: ray})
         .then(hitTestSource => {
@@ -304,7 +304,7 @@ export class ARRenderer extends EventDispatcher {
       scene.background = this[$oldBackground];
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
-      element[$needsRender]();
+      element[$onResize](element.getBoundingClientRect());
 
       this.renderer.expandTo(scene.width, scene.height);
     }
