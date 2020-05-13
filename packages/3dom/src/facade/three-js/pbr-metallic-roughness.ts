@@ -21,7 +21,7 @@ import {SerializedPBRMetallicRoughness} from '../../protocol.js';
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from '../api.js';
 
 import {ModelGraft} from './model-graft.js';
-import {$correlatedObject, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $threeMaterials = Symbol('threeMaterials');
 
@@ -30,23 +30,19 @@ const $threeMaterials = Symbol('threeMaterials');
  */
 export class PBRMetallicRoughness extends ThreeDOMElement implements
     PBRMetallicRoughnessInterface {
-  private get[$threeMaterials](): MeshStandardMaterial[] {
-    return this[$correlatedObject] as MeshStandardMaterial[];
+  private get[$threeMaterials](): Set<MeshStandardMaterial> {
+    return this[$correlatedObjects] as Set<MeshStandardMaterial>;
   }
 
   constructor(
       graft: ModelGraft, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
-      correlatedMaterials: MeshStandardMaterial[]) {
+      correlatedMaterials: Set<MeshStandardMaterial>) {
     super(graft, pbrMetallicRoughness, correlatedMaterials);
   }
 
   get baseColorFactor(): RGBA {
-    const material = this[$threeMaterials][0];
-    if (material.color) {
-      return [...material.color.toArray(), material.opacity] as RGBA;
-    } else {
-      return [1, 1, 1, 1];
-    }
+    return (this.sourceObject as PBRMetallicRoughness).baseColorFactor ||
+        [1, 1, 1, 1];
   }
 
   set baseColorFactor(value: RGBA) {

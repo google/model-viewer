@@ -40,7 +40,7 @@ export class Model extends ThreeDOMElement implements ModelInterface {
   constructor(
       graft: ModelGraft, modelUri: string,
       correlatedSceneGraph: CorrelatedSceneGraph) {
-    super(graft, correlatedSceneGraph.gltf, correlatedSceneGraph);
+    super(graft, correlatedSceneGraph.gltf);
 
     this[$modelUri] = modelUri;
 
@@ -50,7 +50,7 @@ export class Model extends ThreeDOMElement implements ModelInterface {
             graft,
             material,
             correlatedSceneGraph.gltfElementMap.get(material) as
-                MeshStandardMaterial[]));
+                Set<MeshStandardMaterial>));
       }
     });
 

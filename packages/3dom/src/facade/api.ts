@@ -42,7 +42,7 @@ export interface PBRMetallicRoughness extends ThreeDOMElement {
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#material
  */
 export interface Material extends ThreeDOMElement {
-  readonly pbrMetallicRoughness: PBRMetallicRoughness;
+  readonly pbrMetallicRoughness: PBRMetallicRoughness|null;
   toJSON(): SerializedMaterial;
 }
 

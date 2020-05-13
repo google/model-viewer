@@ -28,7 +28,7 @@ suite('facade/three-js/model-graft', () => {
         const graft = new ModelGraft(
             '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
         const object3D = new Object3D();
-        const element = new ThreeDOMElement(graft, {}, [object3D]);
+        const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
 
         expect(graft.getElementByInternalId(element.internalID))
             .to.be.equal(element);

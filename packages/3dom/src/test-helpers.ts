@@ -121,6 +121,7 @@ export const createFakeThreeGLTF = () => {
     asset: {},
     parser: {
       cache: new Map(),
+      associations: new Map(),
       json: {scene: 0, scenes: [{}], materials: [], nodes: []}
     } as unknown as GLTFParser,
     userData: {}

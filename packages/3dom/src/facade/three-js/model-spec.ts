@@ -27,15 +27,16 @@ suite('facade/three-js/model', () => {
   suite('Model', () => {
     test('exposes a list of materials in the scene', async () => {
       const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
-      const materials: MeshStandardMaterial[] = [];
+      const materials: Set<MeshStandardMaterial> = new Set();
 
       threeGLTF.scene.traverse((object) => {
         if ((object as Mesh).isMesh) {
           const material = (object as Mesh).material;
           if (Array.isArray(material)) {
-            materials.push(...(material as MeshStandardMaterial[]));
+            material.forEach(
+                (material) => materials.add(material as MeshStandardMaterial));
           } else {
-            materials.push(material as MeshStandardMaterial);
+            materials.add(material as MeshStandardMaterial);
           }
         }
       });
@@ -44,16 +45,17 @@ suite('facade/three-js/model', () => {
           ASTRONAUT_GLB_PATH, await CorrelatedSceneGraph.from(threeGLTF));
 
       const model = graft.model;
+      const collectedMaterials = new Set<MeshStandardMaterial>();
 
-      const collectedMaterials = model.materials.reduce<MeshStandardMaterial[]>(
-          (materials, material) => {
-            materials.push(
-                ...(material.correlatedObject as MeshStandardMaterial[]));
-            return materials;
-          },
-          []);
+      model.materials.forEach((material) => {
+        for (const threeMaterial of material.correlatedObjects as
+             Set<MeshStandardMaterial>) {
+          collectedMaterials.add(threeMaterial);
+          expect(materials.has(threeMaterial)).to.be.true;
+        }
+      });
 
-      expect(collectedMaterials).to.be.deep.equal(materials);
+      expect(collectedMaterials.size).to.be.equal(materials.size);
     });
   });
 });

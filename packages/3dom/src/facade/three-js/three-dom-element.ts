@@ -20,15 +20,16 @@ import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';
 import {ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
 
-import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 
-export const $correlatedObject = Symbol('correlatedObject');
+export const $correlatedObjects = Symbol('correlatedObjects');
 export const $type = Symbol('type');
 export const $sourceObject = Symbol('sourceObject');
 
 const $graft = Symbol('graft');
 const $id = Symbol('id');
+
+export type CorrelatedObjects = Set<Object3D>|Set<Material>;
 
 /**
  * A SerializableThreeDOMElement is the common primitive of all scene graph
@@ -39,16 +40,16 @@ const $id = Symbol('id');
 export class ThreeDOMElement implements ThreeDOMElementInterface {
   private[$graft]: ModelGraft;
   private[$sourceObject]: GLTFElement|GLTF;
-  private[$correlatedObject]: Object3D[]|Material[]|CorrelatedSceneGraph;
+  private[$correlatedObjects]: CorrelatedObjects|null;
 
   private[$id]: number = getLocallyUniqueId();
 
   constructor(
       graft: ModelGraft, element: GLTFElement|GLTF,
-      correlatedObject: Object3D[]|Material[]|CorrelatedSceneGraph) {
+      correlatedObjects: CorrelatedObjects|null = null) {
     this[$graft] = graft;
     this[$sourceObject] = element;
-    this[$correlatedObject] = correlatedObject;
+    this[$correlatedObjects] = correlatedObjects;
 
     graft.adopt(this);
   }
@@ -82,8 +83,8 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
   /**
    * The backing Three.js scene graph construct for this element.
    */
-  get correlatedObject() {
-    return this[$correlatedObject];
+  get correlatedObjects() {
+    return this[$correlatedObjects];
   }
 
   /**

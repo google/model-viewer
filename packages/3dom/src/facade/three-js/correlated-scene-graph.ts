@@ -1,21 +1,9 @@
-import {Group, Material, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Scene} from 'three';
-import {GLTF as ThreeGLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Group, Material, Mesh, Object3D, Texture} from 'three';
+import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {GLTF, GLTFElement} from '../../gltf-2.0.js';
-import {GLTFTreeVisitor} from '../../utilities.js';
 
-/**
- * ThreeGLTFParserCache gives us a valid type for an as-yet untyped part of the
- * Three.js GLTFParser API. It is basically a Map-like object that maps string
- * keys in the form of "$ELEMENT_TYPE:$INDEX" to promises for corresponding
- * Three.js constructs.
- */
-interface ThreeGLTFParserCache {
-  get(key: string):
-      Promise<MeshStandardMaterial|MeshPhysicalMaterial|Mesh|Object3D|Scene>;
-}
-
-export type ThreeSceneObject = Object3D|Material;
+export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>
     void;
 
@@ -24,11 +12,11 @@ export interface GLTFElementHandle {
   element: GLTFElement;
 }
 
-export type ThreeObjectList = ThreeSceneObject[];
+export type ThreeObjectSet = Set<ThreeSceneObject>;
 
-export type GLTFElementToThreeObjectMap = Map<GLTFElement, ThreeObjectList>;
+export type GLTFElementToThreeObjectMap = Map<GLTFElement, ThreeObjectSet>;
 export type ThreeObjectToGLTFElementHandleMap =
-    Map<Object3D|Material, GLTFElementHandle>;
+    Map<Object3D|Material|Texture, GLTFReference>;
 
 const $threeGLTF = Symbol('threeGLTF');
 const $gltf = Symbol('gltf');
@@ -53,63 +41,29 @@ export class CorrelatedSceneGraph {
    * promises. In practice, the asynchrony should last no longer than a
    * microtask.
    */
-  private static async[$correlateSceneGraphs](threeGLTF: ThreeGLTF, gltf: GLTF):
-      Promise<
-          [ThreeObjectToGLTFElementHandleMap, GLTFElementToThreeObjectMap]> {
-    const {cache} =
-        (threeGLTF.parser as unknown as {cache: ThreeGLTFParserCache});
+  private static[$correlateSceneGraphs](threeGLTF: ThreeGLTF):
+      [ThreeObjectToGLTFElementHandleMap, GLTFElementToThreeObjectMap] {
+    const gltf = threeGLTF.parser.json;
+
+    const {associations} = threeGLTF.parser;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
-    const threeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
 
-    const pendingObjectLookups: Promise<unknown>[] = [];
+    for (const [threeObject, gltfElementReference] of associations.entries()) {
+      const {type, index} = gltfElementReference;
+      const gltfElement = gltf[type][index] as GLTFElement;
 
-    const visitor = new GLTFTreeVisitor({
-      material: (material, index) => {
-        pendingObjectLookups.push(
-            (cache.get(`material:${index}`) as Promise<MeshStandardMaterial>)
-                .then((threeMaterial: MeshStandardMaterial) => {
-                  const threeObjects = [threeMaterial];
-                  gltfElementMap.set(material, threeObjects);
-                  threeObjectMap.set(
-                      threeMaterial, {key: 'materials', element: material});
-                }));
+      let threeObjects = gltfElementMap.get(gltfElement);
+
+      if (threeObjects == null) {
+        threeObjects = new Set();
+        gltfElementMap.set(gltfElement, threeObjects);
       }
-    });
 
-    visitor.visit(gltf);
+      threeObjects.add(threeObject);
+    }
 
-    await Promise.all(pendingObjectLookups);
-
-    return [threeObjectMap, gltfElementMap];
+    return [associations, gltfElementMap];
   }
-
-  // private static async collectClonedMaterials(
-  //     originalMaterial: MeshStandardMaterial, cache: ThreeGLTFParserCache) {
-  //   const keyParts = [
-  //     `ClonedMaterial:${originalMaterial.uuid}:`,
-  //     'skinning:',
-  //     'vertex-tangents:',
-  //     'vertex-colors:',
-  //     'flat-shading:',
-  //     'morph-targets:',
-  //     'morph-normals:'
-  //   ];
-  //   const materials: Material[] = [];
-  //   const keyCombinations = [''];
-  //   let currentKey = '';
-
-  //   for (let i = 0; i < keyParts.length; ++i) {
-  //     currentKey += keyParts[i];
-  //     for (let j = i + 1; j < keyParts.length; ++j) {
-  //       const material = await cache.get(`${currentKey}${keyParts[j]}`);
-  //       if (material != null && (material as Material).isMaterial) {
-  //         materials.push(material as Material);
-  //       }
-  //     }
-  //   }
-
-  //   return materials;
-  // }
 
   /**
    * Produce a CorrelatedSceneGraph from a naturally generated Three.js GLTF.
@@ -121,7 +75,7 @@ export class CorrelatedSceneGraph {
     //     JSON.parse(JSON.stringify(threeGLTF.parser.json)) as GLTF;
     const gltf = threeGLTF.parser.json as GLTF;
     const [threeObjectMap, gltfElementMap] =
-        await this[$correlateSceneGraphs](threeGLTF, gltf);
+        await this[$correlateSceneGraphs](threeGLTF);
     return new CorrelatedSceneGraph(
         threeGLTF, gltf, threeObjectMap, gltfElementMap);
   }
@@ -190,21 +144,17 @@ export class CorrelatedSceneGraph {
           originalThreeGLTF.scenes[i],
           cloneThreeGLTF.scenes[i],
           (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
-            const elementHandle = this.threeObjectMap.get(object);
+            const elementReference = this.threeObjectMap.get(object);
 
-            if (elementHandle != null) {
-              const {key, element} = elementHandle;
-              const elementList = originalGLTF[key] as (typeof element)[];
-              const elementIndex = elementList.indexOf(element);
+            if (elementReference != null) {
+              const {type, index} = elementReference;
+              const cloneElement = cloneGLTF[type][index];
 
-              const cloneElementList = cloneGLTF[key] as (typeof element)[];
-              const cloneElement = cloneElementList[elementIndex];
+              cloneThreeObjectMap.set(cloneObject, {type, index});
 
-              cloneThreeObjectMap.set(
-                  cloneObject, {key, element: cloneElement});
-              const cloneObjects: (typeof cloneObject)[] =
-                  cloneGLTFELementMap.get(cloneElement) || [];
-              cloneObjects.push(cloneObject);
+              const cloneObjects: Set<typeof cloneObject> =
+                  cloneGLTFELementMap.get(cloneElement) || new Set();
+              cloneObjects.add(cloneObject);
 
               cloneGLTFELementMap.set(cloneElement, cloneObjects);
             }

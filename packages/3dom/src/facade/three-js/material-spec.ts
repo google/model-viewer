@@ -22,6 +22,7 @@ import {createFakeThreeGLTF} from '../../test-helpers.js';
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
+import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 
 suite('facade/three-js/material', () => {
   suite('Material', () => {
@@ -37,10 +38,14 @@ suite('facade/three-js/material', () => {
           const threeMaterial = new MeshStandardMaterial();
           threeMaterial.color = new Color('rgb(255, 127, 0)');
 
-          const material = new Material(graft, gltfMaterial, [threeMaterial]);
+          const material =
+              new Material(graft, gltfMaterial, new Set([threeMaterial]));
+          const {pbrMetallicRoughness} = material;
 
-          expect(material.pbrMetallicRoughness.baseColorFactor)
-              .to.be.deep.equal([1, 127 / 255, 0, 1]);
+
+          expect(pbrMetallicRoughness).to.be.ok;
+          expect((pbrMetallicRoughness as PBRMetallicRoughness).baseColorFactor)
+              .to.be.deep.equal([1, 0.5, 0, 1]);
         });
   });
 });

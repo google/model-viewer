@@ -30,15 +30,19 @@ const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
  * Material facade implementation for Three.js materials
  */
 export class Material extends ThreeDOMElement implements MaterialInterface {
-  private[$pbrMetallicRoughness]: PBRMetallicRoughness;
+  private[$pbrMetallicRoughness]: PBRMetallicRoughness|null = null;
 
   constructor(
       graft: ModelGraft, material: GLTFMaterial,
-      correlatedMaterials: MeshStandardMaterial[]) {
+      correlatedMaterials: Set<MeshStandardMaterial>) {
     super(graft, material, correlatedMaterials);
 
-    this[$pbrMetallicRoughness] =
-        new PBRMetallicRoughness(graft, material, correlatedMaterials);
+    const {pbrMetallicRoughness} = material;
+
+    if (pbrMetallicRoughness != null) {
+      this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
+          graft, pbrMetallicRoughness, correlatedMaterials);
+    }
   }
 
   get pbrMetallicRoughness() {
@@ -47,7 +51,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   toJSON(): SerializedMaterial {
     const serialized: Partial<SerializedMaterial> = super.toJSON();
-    serialized.pbrMetallicRoughness = this.pbrMetallicRoughness.toJSON();
+    const {pbrMetallicRoughness} = this;
+    if (pbrMetallicRoughness != null) {
+      serialized.pbrMetallicRoughness = pbrMetallicRoughness.toJSON();
+    }
     return serialized as SerializedMaterial;
   }
 }

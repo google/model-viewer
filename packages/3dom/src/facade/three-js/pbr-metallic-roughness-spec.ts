@@ -29,13 +29,13 @@ suite('facade/three-js/pbr-metallic-roughness', () => {
           '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
       const threeMaterial = new MeshStandardMaterial();
 
-      threeMaterial.color = new Color('rgb(255, 127, 0)');
+      threeMaterial.color = new Color('rgb(255, 127.5, 0)');
 
       const pbrMetallicRoughness = new PBRMetallicRoughness(
-          graft, {baseColorFactor: [1, 0.5, 0, 1]}, [threeMaterial]);
+          graft, {baseColorFactor: [1, 0.5, 0, 1]}, new Set([threeMaterial]));
 
       expect(pbrMetallicRoughness.baseColorFactor)
-          .to.be.deep.equal([1, 127 / 255, 0, 1]);
+          .to.be.deep.equal([1, 0.5, 0, 1]);
     });
   });
 });

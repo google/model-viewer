@@ -29,7 +29,7 @@ suite('facade/three-js/three-dom-element', () => {
       const graft = new ModelGraft(
           '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
       const object3D = new Object3D();
-      const element = new ThreeDOMElement(graft, {}, [object3D]);
+      const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
       expect(element.ownerModel).to.be.equal(graft.model);
     });
 
@@ -41,7 +41,7 @@ suite('facade/three-js/three-dom-element', () => {
 
         object3D.name = 'generated';
 
-        const element = new ThreeDOMElement(graft, {}, [object3D]);
+        const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
         expect(element.name).to.be.equal(null);
       });
 
@@ -53,7 +53,7 @@ suite('facade/three-js/three-dom-element', () => {
 
         material.name = name;
 
-        const element = new ThreeDOMElement(graft, {name}, [material]);
+        const element = new ThreeDOMElement(graft, {name}, new Set([material]));
         expect(element.name).to.be.equal(name);
       });
     });
