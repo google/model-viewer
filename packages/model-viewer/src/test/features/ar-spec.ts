@@ -14,7 +14,7 @@
  */
 
 import {IS_IOS} from '../../constants.js';
-import {ARInterface, ARMixin, openSceneViewer} from '../../features/ar.js';
+import {ARInterface, ARMixin, openIOSARQuickLook, openSceneViewer} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
 import {assetPath, spy, timePasses, waitForEvent} from '../helpers.js';
@@ -60,6 +60,27 @@ suite('ModelViewerElementBase with ARMixin', () => {
         const url = new URL(intentUrls[0]);
 
         expect(url.search).to.match(/(%3F|%26)token%3Dfoo(%26|&|$)/);
+
+        restoreAnchorClick();
+      });
+    });
+
+    suite('openQuickLook', () => {
+      test('sets hash for fixed scale', () => {
+        const intentUrls: Array<string> = [];
+        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
+          value: function() {
+            intentUrls.push((this as HTMLAnchorElement).href);
+          }
+        });
+
+        openIOSARQuickLook('https://example.com/model.gltf', 'fixed');
+
+        expect(intentUrls.length).to.be.equal(1);
+
+        const url = new URL(intentUrls[0]);
+
+        expect(url.hash).to.equal('#allowsContentScaling=0');
 
         restoreAnchorClick();
       });
