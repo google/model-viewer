@@ -153,8 +153,6 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
-    // Reselect the rendering path for all scenes to use in case we have
-    // switched between a single and multiple instances.
     this.selectCanvas();
     scene.isDirty = true;
 
@@ -202,7 +200,6 @@ export class Renderer extends EventDispatcher {
       if (this.hasOnlyOneScene) {
         userInputElement.appendChild(this.canvasElement);
         canvas.classList.remove('show');
-        scene.isDirty = true;
       } else {
         if (this.canvasElement.parentElement === userInputElement) {
           userInputElement.removeChild(this.canvasElement);
