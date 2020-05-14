@@ -27,6 +27,7 @@ import './three-components/ARRenderer-spec.js';
 import './three-components/GLTFInstance-spec.js';
 import './three-components/gltf-instance/ModelViewerGLTFInstance-spec.js';
 import './three-components/SmoothControls-spec.js';
+import './three-components/Damper-spec.js';
 import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';
 import './three-components/ModelUtils-spec.js';
