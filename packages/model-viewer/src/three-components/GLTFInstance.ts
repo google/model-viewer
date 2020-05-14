@@ -47,7 +47,7 @@ export class GLTFInstance implements GLTF {
    * prepared can safely have this method invoked on it multiple times; it will
    * only be prepared once, including after being cloned.
    */
-  static async prepare(source: GLTF): Promise<PreparedGLTF> {
+  static prepare(source: GLTF): PreparedGLTF {
     if (source.scene == null) {
       throw new Error('Model does not have a scene');
     }
@@ -56,7 +56,7 @@ export class GLTFInstance implements GLTF {
       return source;
     }
 
-    const prepared = await this[$prepare](source) as Partial<PreparedGLTF>;
+    const prepared = this[$prepare](source) as Partial<PreparedGLTF>;
 
     // NOTE: ES5 Symbol polyfill is not compatible with spread operator
     // so {...prepared, [$prepared]: true} does not work
@@ -69,7 +69,7 @@ export class GLTFInstance implements GLTF {
    * Override in an inheriting class to apply specialty one-time preparations
    * for a given input GLTF.
    */
-  protected static async[$prepare](source: GLTF): Promise<GLTF> {
+  protected static[$prepare](source: GLTF): GLTF {
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother preparing extra scenes for now:
     const {scene} = source;
@@ -115,9 +115,9 @@ export class GLTFInstance implements GLTF {
   /**
    * Creates and returns a copy of this instance.
    */
-  async clone<T extends GLTFInstance>(): Promise<T> {
+  clone<T extends GLTFInstance>(): T {
     const GLTFInstanceConstructor = this.constructor as Constructor<T>;
-    const clonedGLTF = await this[$clone]();
+    const clonedGLTF = this[$clone]();
 
     return new GLTFInstanceConstructor(clonedGLTF);
   }
@@ -146,7 +146,7 @@ export class GLTFInstance implements GLTF {
   /**
    * Override in an inheriting class to implement specialized cloning strategies
    */
-  protected async[$clone](): Promise<PreparedGLTF> {
+  protected[$clone](): PreparedGLTF {
     const source = this[$preparedGLTF];
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother cloning extra scenes for now:

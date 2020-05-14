@@ -52,7 +52,7 @@ suite('ModelViewerGLTFInstance', () => {
 
       setup(async () => {
         gltfInstance = new ModelViewerGLTFInstance(preparedGLTF);
-        cloneInstance = await gltfInstance.clone();
+        cloneInstance = await gltfInstance.clone<ModelViewerGLTFInstance>();
       });
 
       teardown(() => {

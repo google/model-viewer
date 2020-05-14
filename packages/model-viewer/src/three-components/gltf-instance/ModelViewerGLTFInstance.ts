@@ -43,12 +43,11 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
   /**
    * @override
    */
-  protected static async[$prepare](source: GLTF) {
-    const prepared = await super[$prepare](source) as PreparedModelViewerGLTF;
+  protected static[$prepare](source: GLTF) {
+    const prepared = super[$prepare](source) as PreparedModelViewerGLTF;
 
     if (prepared[$correlatedSceneGraph] == null) {
-      prepared[$correlatedSceneGraph] =
-          await CorrelatedSceneGraph.from(prepared);
+      prepared[$correlatedSceneGraph] = CorrelatedSceneGraph.from(prepared);
     }
 
     const {scene} = prepared;
@@ -129,8 +128,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
   /**
    * @override
    */
-  async[$clone](): Promise<PreparedGLTF> {
-    const clone: PreparedModelViewerGLTF = await super[$clone]();
+  [$clone](): PreparedGLTF {
+    const clone: PreparedModelViewerGLTF = super[$clone]();
     const sourceUUIDToClonedMaterial = new Map<string, Material>();
 
     clone.scene.traverse((node: any) => {
