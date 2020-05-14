@@ -66,7 +66,9 @@ export class CorrelatedSceneGraph {
     const {associations} = threeGLTF.parser;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
 
-    for (const [threeObject, gltfElementReference] of associations.entries()) {
+    for (const threeObject of associations.keys()) {
+      const gltfElementReference =
+          associations.get(threeObject) as GLTFReference;
       const {type, index} = gltfElementReference;
       const gltfElement = gltf[type][index] as GLTFElement;
 
