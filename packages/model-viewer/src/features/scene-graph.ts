@@ -19,6 +19,7 @@ import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
 const SCENE_GRAPH_SCRIPT_TYPE = 'experimental-scene-graph-worklet';
@@ -32,6 +33,7 @@ const $createExecutionContext = Symbol('createExecutionContext');
 const $onScriptElementAdded = Symbol('onScriptElementAdded');
 const $executionContext = Symbol('executionContext');
 const $updateExecutionContextModel = Symbol('updateExecutionContextModel');
+const $currentGLTF = Symbol('currentGLTF');
 const $modelGraft = Symbol('modelGraft');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
 const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
@@ -108,6 +110,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         new MutationObserver(this[$childListMutationHandler]);
 
     protected[$executionContext]: ThreeDOMExecutionContext|null = null;
+
+    protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
 
     /**
      * A reference to the active worklet if one exists, or else `null`. A
@@ -262,9 +266,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const currentModelGraft = this[$modelGraft];
 
         if (correlatedSceneGraph != null) {
-          if (currentModelGraft != null &&
-              currentModelGraft.model.correlatedObject ===
-                  correlatedSceneGraph) {
+          if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
             return;
           }
 
@@ -273,7 +275,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       executionContext.changeModel(modelGraft);
+
       this[$modelGraft] = modelGraft;
+      this[$currentGLTF] = currentGLTF;
     }
 
     [$onModelGraftMutation](_event: Event) {

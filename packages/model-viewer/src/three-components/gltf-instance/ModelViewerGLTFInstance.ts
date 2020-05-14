@@ -155,7 +155,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // current scene graph; without this step, relationships between the
     // Three.js object graph and the glTF scene graph will be lost.
     clone[$correlatedSceneGraph] =
-        this.correlatedSceneGraph.correlateClone(clone);
+        CorrelatedSceneGraph.from(clone, this.correlatedSceneGraph);
+    // this.correlatedSceneGraph.correlateClone(clone);
 
     return clone;
   }

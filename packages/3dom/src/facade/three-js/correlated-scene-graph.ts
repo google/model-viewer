@@ -42,7 +42,6 @@ export class CorrelatedSceneGraph {
    * Such GLTFs are produced by Three.js' GLTFLoader, and contain cached
    * details that expedite the correlation step.
    */
-  static from(threeGLTF: ThreeGLTF): CorrelatedSceneGraph;
 
   /**
    * Re-correlates a cloned Three.js GLTF with a clone of the glTF hierarchy

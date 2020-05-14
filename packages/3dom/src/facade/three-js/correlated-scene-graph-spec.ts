@@ -14,14 +14,15 @@
  */
 
 import {Mesh, MeshStandardMaterial} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {Material} from '../../gltf-2.0.js';
+import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../gltf-2.0.js';
 import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
+const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 
 suite('facade/three-js/correlated-scene-graph', () => {
   suite('CorrelatedSceneGraph', () => {
@@ -45,6 +46,34 @@ suite('facade/three-js/correlated-scene-graph', () => {
       expect(referencedGltfMaterial).to.be.equal(gltfMaterial);
     });
 
-    // test('maps Three.js textures to glTF elements')
+    test('maps Three.js textures to glTF elements', async () => {
+      const threeGLTF = await loadThreeGLTF(ORDER_TEST_GLB_PATH);
+      const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
+
+      const threeMaterial =
+          ((threeGLTF.scene.children[0] as Mesh).material as
+           MeshStandardMaterial);
+
+      const threeTexture = threeMaterial.map!;
+
+      const gltfMaterial = threeGLTF.parser.json.materials[2]! as Material;
+      const textureIndex =
+          ((gltfMaterial.pbrMetallicRoughness as PBRMetallicRoughness)
+               .baseColorTexture as TextureInfo)
+              .index;
+
+      const gltfTexture =
+          threeGLTF.parser.json.textures[textureIndex] as Texture;
+      const gltfReference =
+          correlatedSceneGraph.threeObjectMap.get(threeTexture);
+
+      expect(gltfReference).to.be.ok;
+
+      const {type, index} = gltfReference as GLTFReference;
+
+      const referencedGltfTexture = threeGLTF.parser.json[type][index];
+
+      expect(referencedGltfTexture).to.be.equal(gltfTexture);
+    });
   });
 });

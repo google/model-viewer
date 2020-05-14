@@ -54,7 +54,7 @@ export class Model extends ThreeDOMElement implements ModelInterface {
       }
     });
 
-    visitor.visit(correlatedSceneGraph.gltf);
+    visitor.visit(correlatedSceneGraph.gltf, {sparse: true});
   }
 
   /**
