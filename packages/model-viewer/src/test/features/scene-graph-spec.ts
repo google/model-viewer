@@ -186,7 +186,6 @@ self.addEventListener('model-change', function() {
 
           const nextMessage = await nextMessageArrives;
 
-          debugger;
           expect(JSON.parse(nextMessage.data)).to.be.eql([1, 1, 1, 1]);
         });
       });
