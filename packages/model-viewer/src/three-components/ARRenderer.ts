@@ -178,7 +178,8 @@ export class ARRenderer extends EventDispatcher {
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(framebuffer);
-    this.threeRenderer.setViewport(0, 0, framebufferWidth, framebufferHeight);
+    this.threeRenderer.setPixelRatio(1);
+    this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
 
     return session;
   }
