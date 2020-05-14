@@ -166,10 +166,10 @@ export class ARRenderer extends EventDispatcher {
 
     // The render state update takes effect on the next animation frame. Wait
     // for it so that we get a framebuffer.
-    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+    let waitForXRAnimationFrame = new Promise((resolve, _reject) => {
       session.requestAnimationFrame(() => resolve());
     });
-    await waitForAnimationFrame;
+    await waitForXRAnimationFrame;
 
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
@@ -207,6 +207,18 @@ export class ARRenderer extends EventDispatcher {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
+
+    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+      requestAnimationFrame(() => resolve());
+    });
+
+    scene.model.setHotspotsVisibility(false);
+    scene.isDirty = true;
+    // Render a frame to turn off the hotspots
+    await waitForAnimationFrame;
+
+    // This sets isPresenting to true
+    this[$presentedScene] = scene;
 
     const currentSession = await this.resolveARSession(scene);
     currentSession.addEventListener('end', () => {
@@ -359,6 +371,7 @@ export class ARRenderer extends EventDispatcher {
       scene.model.updateMatrixWorld(true);
       this[$goalYaw] = scene.yaw;
       this[$initialModelToWorld].copy(scene.model.matrixWorld);
+      scene.model.setHotspotsVisibility(true);
       this[$initialized] = true;
     }
 
