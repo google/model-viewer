@@ -22,8 +22,10 @@ const $threeGLTF = Symbol('threeGLTF');
 const $gltf = Symbol('gltf');
 const $gltfElementMap = Symbol('gltfElementMap');
 const $threeObjectMap = Symbol('threeObjectMap');
-const $correlateSceneGraphs = Symbol('correlatedSceneGraphs');
 const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
+
+const $correlateOriginalThreeGLTF = Symbol('correlateOriginalThreeGLTF');
+const $correlateCloneThreeGLTF = Symbol('correlateCloneThreeGLTF');
 
 /**
  * The Three.js GLTFLoader provides us with an in-memory representation
@@ -36,14 +38,32 @@ const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
  */
 export class CorrelatedSceneGraph {
   /**
-   * Maps the elements of a glTF to corresponding Three.js constructs. This
-   * helper is async because the related Three.js constructs are cached behind
-   * promises. In practice, the asynchrony should last no longer than a
-   * microtask.
+   * Produce a CorrelatedSceneGraph from a naturally generated Three.js GLTF.
+   * Such GLTFs are produced by Three.js' GLTFLoader, and contain cached
+   * details that expedite the correlation step.
    */
-  private static[$correlateSceneGraphs](threeGLTF: ThreeGLTF):
-      [ThreeObjectToGLTFElementHandleMap, GLTFElementToThreeObjectMap] {
-    const gltf = threeGLTF.parser.json;
+  static from(threeGLTF: ThreeGLTF): CorrelatedSceneGraph;
+
+  /**
+   * Re-correlates a cloned Three.js GLTF with a clone of the glTF hierarchy
+   * used to produce the upstream Three.js GLTF that the clone was created from.
+   * The result CorrelatedSceneGraph is representative of the cloned hierarchy.
+   */
+  static from(
+      threeGLTF: ThreeGLTF,
+      upstreamCorrelatedSceneGraph?: CorrelatedSceneGraph):
+      CorrelatedSceneGraph {
+    if (upstreamCorrelatedSceneGraph != null) {
+      return this[$correlateCloneThreeGLTF](
+          threeGLTF, upstreamCorrelatedSceneGraph);
+    } else {
+      return this[$correlateOriginalThreeGLTF](threeGLTF);
+    }
+  }
+
+  private static[$correlateOriginalThreeGLTF](threeGLTF: ThreeGLTF):
+      CorrelatedSceneGraph {
+    const gltf = threeGLTF.parser.json as GLTF;
 
     const {associations} = threeGLTF.parser;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
@@ -62,22 +82,85 @@ export class CorrelatedSceneGraph {
       threeObjects.add(threeObject);
     }
 
-    return [associations, gltfElementMap];
+    return new CorrelatedSceneGraph(
+        threeGLTF, gltf, associations, gltfElementMap);
   }
 
   /**
-   * Produce a CorrelatedSceneGraph from a naturally generated Three.js GLTF.
-   * Such GLTFs are produced by Three.js' GLTFLoader, and contain cached
-   * details that expedite the correlation step.
+   * Transfers the association between a raw glTF and a Three.js scene graph
+   * to a clone of the Three.js scene graph, resolved as a new
+   * CorrelatedsceneGraph instance.
    */
-  static async from(threeGLTF: ThreeGLTF): Promise<CorrelatedSceneGraph> {
-    // const gltf: GLTF =
-    //     JSON.parse(JSON.stringify(threeGLTF.parser.json)) as GLTF;
-    const gltf = threeGLTF.parser.json as GLTF;
-    const [threeObjectMap, gltfElementMap] =
-        await this[$correlateSceneGraphs](threeGLTF);
+  private static[$correlateCloneThreeGLTF](
+      cloneThreeGLTF: ThreeGLTF,
+      upstreamCorrelatedSceneGraph: CorrelatedSceneGraph):
+      CorrelatedSceneGraph {
+    const originalThreeGLTF = upstreamCorrelatedSceneGraph.threeGLTF;
+    const originalGLTF = upstreamCorrelatedSceneGraph.gltf;
+    const cloneGLTF: GLTF = JSON.parse(JSON.stringify(originalGLTF));
+    const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
+    const cloneGLTFELementMap: GLTFElementToThreeObjectMap = new Map();
+
+    for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
+      this[$parallelTraverseThreeScene](
+          originalThreeGLTF.scenes[i],
+          cloneThreeGLTF.scenes[i],
+          (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
+            const elementReference =
+                upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
+
+            if (elementReference != null) {
+              const {type, index} = elementReference;
+              const cloneElement = cloneGLTF[type][index];
+
+              cloneThreeObjectMap.set(cloneObject, {type, index});
+
+              const cloneObjects: Set<typeof cloneObject> =
+                  cloneGLTFELementMap.get(cloneElement) || new Set();
+              cloneObjects.add(cloneObject);
+
+              cloneGLTFELementMap.set(cloneElement, cloneObjects);
+            }
+          });
+    }
+
     return new CorrelatedSceneGraph(
-        threeGLTF, gltf, threeObjectMap, gltfElementMap);
+        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFELementMap);
+  }
+
+  /**
+   * Traverses two presumably identical Three.js scenes, and invokes a callback
+   * for each Object3D or Material encountered, including the initial scene.
+   * Adapted from
+   * https://github.com/mrdoob/three.js/blob/7c1424c5819ab622a346dd630ee4e6431388021e/examples/jsm/utils/SkeletonUtils.js#L586-L596
+   */
+  private static[$parallelTraverseThreeScene](
+      sceneOne: Group, sceneTwo: Group, callback: ThreeSceneObjectCallback) {
+    const isMesh = (object: unknown): object is Mesh => {
+      return (object as Mesh).isMesh;
+    };
+    const traverse = (a: ThreeSceneObject, b: ThreeSceneObject) => {
+      callback(a, b);
+
+      if ((a as Object3D).isObject3D) {
+        if (isMesh(a)) {
+          if (Array.isArray(a.material)) {
+            for (let i = 0; i < a.material.length; ++i) {
+              traverse(
+                  a.material[i], ((b as typeof a).material as Material[])[i]);
+            }
+          } else {
+            traverse(a.material, (b as typeof a).material as Material);
+          }
+        }
+
+        for (let i = 0; i < (a as Object3D).children.length; ++i) {
+          traverse((a as Object3D).children[i], (b as Object3D).children[i]);
+        }
+      }
+    };
+
+    traverse(sceneOne, sceneTwo);
   }
 
   private[$threeGLTF]: ThreeGLTF;
@@ -125,78 +208,5 @@ export class CorrelatedSceneGraph {
     this[$gltf] = gltf;
     this[$gltfElementMap] = gltfElementMap;
     this[$threeObjectMap] = threeObjectMap;
-  }
-
-  /**
-   * Transfers the association between a raw glTF and a Three.js scene graph
-   * to a clone of the Three.js scene graph, resolved as a new
-   * CorrelatedsceneGraph instance.
-   */
-  correlateClone(cloneThreeGLTF: ThreeGLTF): CorrelatedSceneGraph {
-    const originalThreeGLTF = this[$threeGLTF];
-    const originalGLTF = this.gltf;
-    const cloneGLTF: GLTF = JSON.parse(JSON.stringify(originalGLTF));
-    const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
-    const cloneGLTFELementMap: GLTFElementToThreeObjectMap = new Map();
-
-    for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
-      this[$parallelTraverseThreeScene](
-          originalThreeGLTF.scenes[i],
-          cloneThreeGLTF.scenes[i],
-          (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
-            const elementReference = this.threeObjectMap.get(object);
-
-            if (elementReference != null) {
-              const {type, index} = elementReference;
-              const cloneElement = cloneGLTF[type][index];
-
-              cloneThreeObjectMap.set(cloneObject, {type, index});
-
-              const cloneObjects: Set<typeof cloneObject> =
-                  cloneGLTFELementMap.get(cloneElement) || new Set();
-              cloneObjects.add(cloneObject);
-
-              cloneGLTFELementMap.set(cloneElement, cloneObjects);
-            }
-          });
-    }
-
-    return new CorrelatedSceneGraph(
-        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFELementMap);
-  }
-
-  /**
-   * Traverses two presumably identical Three.js scenes, and invokes a callback
-   * for each Object3D or Material encountered, including the initial scene.
-   * Adapted from
-   * https://github.com/mrdoob/three.js/blob/7c1424c5819ab622a346dd630ee4e6431388021e/examples/jsm/utils/SkeletonUtils.js#L586-L596
-   */
-  private[$parallelTraverseThreeScene](
-      sceneOne: Group, sceneTwo: Group, callback: ThreeSceneObjectCallback) {
-    const isMesh = (object: unknown): object is Mesh => {
-      return (object as Mesh).isMesh;
-    };
-    const traverse = (a: ThreeSceneObject, b: ThreeSceneObject) => {
-      callback(a, b);
-
-      if ((a as Object3D).isObject3D) {
-        if (isMesh(a)) {
-          if (Array.isArray(a.material)) {
-            for (let i = 0; i < a.material.length; ++i) {
-              traverse(
-                  a.material[i], ((b as typeof a).material as Material[])[i]);
-            }
-          } else {
-            traverse(a.material, (b as typeof a).material as Material);
-          }
-        }
-
-        for (let i = 0; i < (a as Object3D).children.length; ++i) {
-          traverse((a as Object3D).children[i], (b as Object3D).children[i]);
-        }
-      }
-    };
-
-    traverse(sceneOne, sceneTwo);
   }
 }

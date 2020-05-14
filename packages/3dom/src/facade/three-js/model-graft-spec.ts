@@ -24,9 +24,9 @@ import {ThreeDOMElement} from './three-dom-element.js';
 suite('facade/three-js/model-graft', () => {
   suite('ModelGraft', () => {
     suite('when an element is configured with it', () => {
-      test('can query that element by internal ID', async () => {
+      test('can query that element by internal ID', () => {
         const graft = new ModelGraft(
-            '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+            '', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
         const object3D = new Object3D();
         const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
 

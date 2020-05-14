@@ -36,7 +36,7 @@ suite('end-to-end', () => {
 
     const executionContext =
         new ThreeDOMExecutionContext(['material-properties']);
-    const graft = new ModelGraft('', await CorrelatedSceneGraph.from(gltf));
+    const graft = new ModelGraft('', CorrelatedSceneGraph.from(gltf));
 
     executionContext.changeModel(graft);
 
@@ -54,8 +54,8 @@ suite('end-to-end', () => {
 
     const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
         MeshStandardMaterial;
-    const graft = new ModelGraft(
-        ASTRONAUT_GLB_PATH, await CorrelatedSceneGraph.from(gltf));
+    const graft =
+        new ModelGraft(ASTRONAUT_GLB_PATH, CorrelatedSceneGraph.from(gltf));
 
     const executionContext =
         new ThreeDOMExecutionContext(['material-properties']);
@@ -75,8 +75,8 @@ suite('end-to-end', () => {
 
     const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
         MeshStandardMaterial;
-    const graft = new ModelGraft(
-        ASTRONAUT_GLB_PATH, await CorrelatedSceneGraph.from(gltf));
+    const graft =
+        new ModelGraft(ASTRONAUT_GLB_PATH, CorrelatedSceneGraph.from(gltf));
 
     const executionContext =
         new ThreeDOMExecutionContext(['messaging', 'material-properties']);

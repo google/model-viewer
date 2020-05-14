@@ -42,7 +42,7 @@ suite('facade/three-js/model', () => {
       });
 
       const graft = new ModelGraft(
-          ASTRONAUT_GLB_PATH, await CorrelatedSceneGraph.from(threeGLTF));
+          ASTRONAUT_GLB_PATH, CorrelatedSceneGraph.from(threeGLTF));
 
       const model = graft.model;
       const collectedMaterials = new Set<MeshStandardMaterial>();

@@ -30,7 +30,7 @@ suite('facade/three-js/material', () => {
         'expresses Three.js material color as PBRMetallicRoughness base color factor',
         async () => {
           const graft = new ModelGraft(
-              '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+              '', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
           const gltfMaterial: GLTFMaterial = {
             pbrMetallicRoughness: {baseColorFactor: [1, 0.5, 0, 1]}
           };

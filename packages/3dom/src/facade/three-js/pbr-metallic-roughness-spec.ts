@@ -24,12 +24,12 @@ import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 
 suite('facade/three-js/pbr-metallic-roughness', () => {
   suite('PBRMetallicRoughness', () => {
-    test('expresses Three.js material color as base color factor', async () => {
-      const graft = new ModelGraft(
-          '', await CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+    test('expresses Three.js material color as base color factor', () => {
+      const graft =
+          new ModelGraft('', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
       const threeMaterial = new MeshStandardMaterial();
 
-      threeMaterial.color = new Color('rgb(255, 127.5, 0)');
+      threeMaterial.color = new Color('rgb(255, 127, 0)');
 
       const pbrMetallicRoughness = new PBRMetallicRoughness(
           graft, {baseColorFactor: [1, 0.5, 0, 1]}, new Set([threeMaterial]));
