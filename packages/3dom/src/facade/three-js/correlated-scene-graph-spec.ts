@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial} from 'three';
+import {Mesh, MeshStandardMaterial, Object3D} from 'three';
 import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../gltf-2.0.js';
@@ -23,6 +23,19 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
+
+const getObject3DByName =
+    <T extends Object3D>(root: Object3D, name: string): T|null => {
+      const objects = [root];
+      while (objects.length) {
+        const next = objects.shift()!;
+        if (next.name === name) {
+          return next as T;
+        }
+        objects.push(...next.children);
+      }
+      return null;
+    };
 
 suite('facade/three-js/correlated-scene-graph', () => {
   suite('CorrelatedSceneGraph', () => {
@@ -51,9 +64,8 @@ suite('facade/three-js/correlated-scene-graph', () => {
       const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
       const threeMaterial =
-          ((threeGLTF.scene.children[0] as Mesh).material as
-           MeshStandardMaterial);
-
+          getObject3DByName<Mesh>(threeGLTF.scene, 'Node0')!.material as
+          MeshStandardMaterial;
       const threeTexture = threeMaterial.map!;
 
       const gltfMaterial = threeGLTF.parser.json.materials[2]! as Material;

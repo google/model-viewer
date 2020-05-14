@@ -156,7 +156,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // Three.js object graph and the glTF scene graph will be lost.
     clone[$correlatedSceneGraph] =
         CorrelatedSceneGraph.from(clone, this.correlatedSceneGraph);
-    // this.correlatedSceneGraph.correlateClone(clone);
 
     return clone;
   }
