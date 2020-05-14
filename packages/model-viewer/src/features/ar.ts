@@ -29,8 +29,12 @@ export const openIOSARQuickLook = (() => {
   anchor.setAttribute('rel', 'ar');
   anchor.appendChild(document.createElement('img'));
 
-  return (usdzSrc: string) => {
-    anchor.setAttribute('href', usdzSrc);
+  return (usdzSrc: string, arScale: string) => {
+    const modelUrl = new URL(usdzSrc);
+    if (arScale === 'fixed') {
+      modelUrl.hash = 'allowsContentScaling=0';
+    }
+    anchor.setAttribute('href', modelUrl.toString());
     anchor.click();
   };
 })();
@@ -210,7 +214,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     async activateAR() {
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          openIOSARQuickLook(this.iosSrc!);
+          openIOSARQuickLook(this.iosSrc!, this.arScale);
           break;
         case ARMode.WEBXR:
           await this[$enterARWithWebXR]();
