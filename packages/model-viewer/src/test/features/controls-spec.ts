@@ -446,6 +446,31 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(controls.options.maximumRadius).to.be.at.least(cameraDistance);
       });
 
+      test(
+          'with a large radius, sets far plane to contain the model',
+          async () => {
+            const maxRadius = 10;
+            element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+            await timePasses();
+
+            const cameraDistance = element[$scene].camera.position.distanceTo(
+                element[$scene].model.position);
+            expect(controls.camera.far)
+                .to.be.at.least(cameraDistance + maxRadius);
+          });
+
+      test(
+          'with zero radius, sets far plane to contain the model', async () => {
+            const maxRadius = 0;
+            element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+            await timePasses();
+
+            const cameraDistance = element[$scene].camera.position.distanceTo(
+                element[$scene].model.position);
+            expect(controls.camera.far)
+                .to.be.at.least(cameraDistance + maxRadius);
+          });
+
       test('disables interaction if disabled after enabled', async () => {
         element.cameraControls = false;
         await timePasses();
