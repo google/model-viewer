@@ -112,9 +112,7 @@ const ARMode: {[index: string]: ARMode} = {
   NONE: 'none'
 };
 
-const $exitWebXRButtonContainer = Symbol('exitWebXRButtonContainer');
 const $arButtonContainer = Symbol('arButtonContainer');
-const $defaultExitWebXRButton = Symbol('defaultExitWebXRButton');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
@@ -125,8 +123,7 @@ const $quickLookBrowsers = Symbol('quickLookBrowsers');
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 
-const $exitWebXRButtonContainerClickHandler =
-    Symbol('exitWebXRButtonContainerClickHandler');
+
 const $onExitWebXR = Symbol('onExitWebXR');
 
 export declare interface ARInterface {
@@ -167,18 +164,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arButtonContainer]: HTMLElement =
         this.shadowRoot!.querySelector('.ar-button') as HTMLElement;
 
-    protected[$exitWebXRButtonContainer]: HTMLElement =
-        this.shadowRoot!.querySelector('.slot.exit-webxr-button') as
-        HTMLElement;
-    protected[$defaultExitWebXRButton]: HTMLElement =
-        this.shadowRoot!.querySelector('#default-exit-webxr-button') as
-        HTMLElement;
-
     protected[$arButtonContainerClickHandler]: (event: Event) => void =
         (event) => this[$onARButtonContainerClick](event);
-
-    protected[$exitWebXRButtonContainerClickHandler]:
-        () => void = () => this[$onExitWebXR]();
 
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
@@ -213,7 +200,6 @@ configuration or device capabilities');
     [$onExitWebXR]() {
       if (this[$renderer].isPresenting) {
         try {
-          this[$exitWebXRButtonContainer].classList.remove('enabled');
           this[$renderer].stopPresenting();
         } catch (error) {
           console.warn('Unexpected error while stopping AR presentation');
@@ -226,12 +212,10 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        this[$exitWebXRButtonContainer].classList.add('enabled');
         await this[$renderer].present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
-        this[$exitWebXRButtonContainer].classList.remove('enabled');
       }
     }
 
@@ -283,13 +267,9 @@ configuration or device capabilities');
         this[$arButtonContainer].classList.add('enabled');
         this[$arButtonContainer].addEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        this[$exitWebXRButtonContainer].addEventListener(
-            'click', this[$exitWebXRButtonContainerClickHandler]);
       } else {
         this[$arButtonContainer].removeEventListener(
             'click', this[$arButtonContainerClickHandler]);
-        this[$exitWebXRButtonContainer].removeEventListener(
-            'click', this[$exitWebXRButtonContainerClickHandler]);
         this[$arButtonContainer].classList.remove('enabled');
       }
     }

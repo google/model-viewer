@@ -72,6 +72,7 @@ const $yawDamper = Symbol('yawDamper');
 const $scaleDamper = Symbol('scaleDamper');
 const $damperRate = Symbol('damperRate');
 const $resolveCleanup = Symbol('resolveCleanup');
+const $exitWebXRButtonContainer = Symbol('exitWebXRButtonContainer');
 
 export const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
@@ -85,6 +86,8 @@ const $onSelectEnd = Symbol('onSelect');
 const $fingerSeparation = Symbol('fingerSeparation');
 const $processInput = Symbol('processInput');
 const $moveScene = Symbol('moveScene');
+const $exitWebXRButtonContainerClickHandler =
+    Symbol('exitWebXRButtonContainerClickHandler');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -110,6 +113,7 @@ export class ARRenderer extends EventDispatcher {
   private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
+  private[$exitWebXRButtonContainer]: HTMLElement|null = null;
 
   private[$initialized] = false;
   private[$initialModelToWorld] = new Matrix4();
@@ -133,6 +137,9 @@ export class ARRenderer extends EventDispatcher {
       this[$onSelectStart](event as XRInputSourceEvent);
   private[$selectEndHandler] = (event: Event) =>
       this[$onSelectEnd](event as XRInputSourceEvent);
+
+  private[$exitWebXRButtonContainerClickHandler]:
+      () => void = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
     super();
@@ -180,6 +187,13 @@ export class ARRenderer extends EventDispatcher {
     (this.threeRenderer as any).setFramebuffer(framebuffer);
     this.threeRenderer.setPixelRatio(1);
     this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
+
+    const exitButton = scene.element.shadowRoot!.querySelector(
+                           '.slot.exit-webxr-button') as HTMLElement;
+    exitButton.classList.add('enabled');
+    exitButton.addEventListener(
+        'click', this[$exitWebXRButtonContainerClickHandler]);
+    this[$exitWebXRButtonContainer] = exitButton;
 
     return session;
   }
@@ -297,14 +311,16 @@ export class ARRenderer extends EventDispatcher {
     // back to the default framebuffer for canvas output.
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(null);
-    const hitSource = this[$transientHitTestSource];
-    if (hitSource != null) {
-      hitSource.cancel();
-    }
 
     const session = this[$currentSession]!;
     session.removeEventListener('selectstart', this[$selectStartHandler]);
     session.removeEventListener('selectend', this[$selectEndHandler]);
+
+    const exitButton = this[$exitWebXRButtonContainer]!;
+    exitButton.classList.remove('enabled');
+    exitButton.removeEventListener(
+        'click', this[$exitWebXRButtonContainerClickHandler]);
+    this[$exitWebXRButtonContainer] = null;
 
     this[$currentSession] = null;
     session.cancelAnimationFrame(this[$rafId]!);
@@ -326,13 +342,33 @@ export class ARRenderer extends EventDispatcher {
       element[$onResize](element.getBoundingClientRect());
     }
 
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource != null) {
+      hitSource.cancel();
+      this[$transientHitTestSource] = null;
+    }
+
+    const hitSourceInitial = this[$initialHitSource];
+    if (hitSourceInitial != null) {
+      hitSourceInitial.cancel();
+      this[$initialHitSource] = null;
+    }
+
     if (this[$placementBox] != null) {
       this[$placementBox]!.dispose();
       this[$placementBox] = null;
     }
 
+    this[$lastTick] = null;
+    this[$turntableRotation] = null;
+    this[$oldShadowIntensity] = null;
+    this[$oldBackground] = null;
+    this[$rafId] = null;
     this[$refSpace] = null;
     this[$presentedScene] = null;
+    this[$viewerRefSpace] = null;
+    this[$frame] = null;
+    this[$inputSource] = null;
 
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
