@@ -301,10 +301,12 @@ configuration or device capabilities');
 
       this[$arMode] = ARMode.NONE;
       if (this.ar) {
-        const it = this[$arModes].values();
-        let item = it.next();
-        while (!item.done) {
-          const {value} = item;
+        const arModes: ARMode[] = [];
+        this[$arModes].forEach((value) => {
+          arModes.push(value);
+        });
+
+        for (const value of arModes) {
           if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
               await this[$renderer].supportsPresentation()) {
             this[$arMode] = ARMode.WEBXR;
@@ -318,7 +320,6 @@ configuration or device capabilities');
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
-          item = it.next();
         }
       }
 
