@@ -66,9 +66,8 @@ export class CorrelatedSceneGraph {
     const {associations} = threeGLTF.parser;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
 
-    for (const threeObject of associations.keys()) {
-      const gltfElementReference =
-          associations.get(threeObject) as GLTFReference;
+    // NOTE: IE11 does not have Map iterator methods
+    associations.forEach((gltfElementReference, threeObject) => {
       const {type, index} = gltfElementReference;
       const gltfElement = gltf[type][index] as GLTFElement;
 
@@ -80,7 +79,7 @@ export class CorrelatedSceneGraph {
       }
 
       threeObjects.add(threeObject);
-    }
+    });
 
     return new CorrelatedSceneGraph(
         threeGLTF, gltf, associations, gltfElementMap);
