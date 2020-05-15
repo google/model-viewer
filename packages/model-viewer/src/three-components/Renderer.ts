@@ -332,9 +332,9 @@ export class Renderer extends EventDispatcher {
         continue;
       }
 
-      const widthPixels = scene.width * dpr;
-      const heightPixels = scene.height * dpr;
       const {width, height} = scene;
+      const widthPixels = width * dpr;
+      const heightPixels = height * dpr;
       this.threeRenderer.getSize(size);
 
       // Need to set the render target in order to prevent
