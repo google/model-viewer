@@ -123,9 +123,6 @@ const $quickLookBrowsers = Symbol('quickLookBrowsers');
 const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 
-
-const $onExitWebXR = Symbol('onExitWebXR');
-
 export declare interface ARInterface {
   ar: boolean;
   arModes: string;
@@ -194,17 +191,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
               'No AR Mode can be activated. This is probably due to missing \
 configuration or device capabilities');
           break;
-      }
-    }
-
-    [$onExitWebXR]() {
-      if (this[$renderer].isPresenting) {
-        try {
-          this[$renderer].stopPresenting();
-        } catch (error) {
-          console.warn('Unexpected error while stopping AR presentation');
-          console.error(error);
-        }
       }
     }
 
