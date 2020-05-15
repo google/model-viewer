@@ -40,9 +40,6 @@ const $referenceCount = Symbol('referenceCount');
 const $updateVisibility = Symbol('updateVisibility');
 const $visible = Symbol('visible');
 
-const $onSlotchange = Symbol('onSlotchange');
-const $slotchangeHandler = Symbol('slotchangeHandler');
-
 /**
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
  * it should be removed from the tree so it can be garbage-collected.
@@ -53,7 +50,6 @@ export class Hotspot extends CSS2DObject {
   private[$referenceCount] = 1;
   private[$pivot] = document.createElement('div');
   private[$slot]: HTMLSlotElement = document.createElement('slot');
-  private[$slotchangeHandler] = () => this[$onSlotchange]();
 
   constructor(config: HotspotConfiguration) {
     super(document.createElement('div'));
@@ -61,15 +57,12 @@ export class Hotspot extends CSS2DObject {
     this.element.classList.add('annotation-wrapper');
 
     this[$slot].name = config.name;
-    this[$slot].addEventListener('slotchange', this[$slotchangeHandler]);
 
     this.element.appendChild(this[$pivot]);
     this[$pivot].appendChild(this[$slot]);
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
-
-    this.show();
   }
 
   /**
@@ -78,7 +71,7 @@ export class Hotspot extends CSS2DObject {
   show() {
     if (!this[$visible]) {
       this[$visible] = true;
-      this[$updateVisibility]({notify: true});
+      this[$updateVisibility]();
     }
   }
 
@@ -88,15 +81,8 @@ export class Hotspot extends CSS2DObject {
   hide() {
     if (this[$visible]) {
       this[$visible] = false;
-      this[$updateVisibility]({notify: true});
+      this[$updateVisibility]();
     }
-  }
-
-  /**
-   * Cleans up the held references of this Hotspot when it is done being used.
-   */
-  dispose() {
-    this[$slot].removeEventListener('slotchange', this[$slotchangeHandler]);
   }
 
   /**
@@ -149,7 +135,7 @@ export class Hotspot extends CSS2DObject {
     this[$pivot].style.transform = `rotate(${radians}rad)`;
   }
 
-  protected[$updateVisibility]({notify}: {notify: boolean}) {
+  protected[$updateVisibility]() {
     // NOTE: IE11 doesn't support a second arg for classList.toggle
     if (this[$visible]) {
       this.element.classList.remove('hide');
@@ -179,17 +165,11 @@ export class Hotspot extends CSS2DObject {
         }
       }
 
-      if (notify) {
-        element.dispatchEvent(new CustomEvent('hotspot-visibility', {
-          detail: {
-            visible: this[$visible],
-          },
-        }));
-      }
+      element.dispatchEvent(new CustomEvent('hotspot-visibility', {
+        detail: {
+          visible: this[$visible],
+        },
+      }));
     });
-  }
-
-  protected[$onSlotchange]() {
-    this[$updateVisibility]({notify: false});
   }
 }

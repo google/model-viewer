@@ -185,7 +185,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].model.addHotspot(hotspot);
+        // This happens automatically in render(), but we do it early so that
+        // the slots appear in the shadow DOM and the elements get attached,
+        // allowing us to dispatch events on them.
+        this[$annotationRenderer].domElement.appendChild(hotspot.element);
       }
+      this[$scene].isDirty = true;
     }
 
     private[$removeHotspot](node: Node) {
@@ -202,8 +207,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (hotspot.decrement()) {
         this[$scene].model.removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
-        hotspot.dispose();
       }
+      this[$scene].isDirty = true;
     }
   }
 
