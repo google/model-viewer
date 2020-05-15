@@ -316,12 +316,6 @@ export class ARRenderer extends EventDispatcher {
     session.removeEventListener('selectstart', this[$selectStartHandler]);
     session.removeEventListener('selectend', this[$selectEndHandler]);
 
-    const exitButton = this[$exitWebXRButtonContainer]!;
-    exitButton.classList.remove('enabled');
-    exitButton.removeEventListener(
-        'click', this[$exitWebXRButtonContainerClickHandler]);
-    this[$exitWebXRButtonContainer] = null;
-
     this[$currentSession] = null;
     session.cancelAnimationFrame(this[$rafId]!);
 
@@ -340,6 +334,14 @@ export class ARRenderer extends EventDispatcher {
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element[$onResize](element.getBoundingClientRect());
+    }
+
+    const exitButton = this[$exitWebXRButtonContainer];
+    if (exitButton != null) {
+      exitButton.classList.remove('enabled');
+      exitButton.removeEventListener(
+          'click', this[$exitWebXRButtonContainerClickHandler]);
+      this[$exitWebXRButtonContainer] = null;
     }
 
     const hitSource = this[$transientHitTestSource];
