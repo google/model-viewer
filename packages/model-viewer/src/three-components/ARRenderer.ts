@@ -171,11 +171,15 @@ export class ARRenderer extends EventDispatcher {
     });
     await waitForXRAnimationFrame;
 
+    scene.element[$onResize](window.screen);
+
+    const {framebuffer, framebufferWidth, framebufferHeight} =
+        session.renderState.baseLayer!;
     // Redirect rendering to the WebXR offscreen framebuffer.
     // TODO: this method should be added to three.js's exported interface.
-    (this.threeRenderer as any)
-        .setFramebuffer(session.renderState.baseLayer!.framebuffer);
-    scene.element[$onResize](window.screen);
+    (this.threeRenderer as any).setFramebuffer(framebuffer);
+    this.threeRenderer.setPixelRatio(1);
+    this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
 
     return session;
   }
@@ -258,7 +262,6 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this[$currentSession] = currentSession;
-    this[$presentedScene] = scene;
     this[$placementBox] = placementBox;
     this[$lastTick] = performance.now();
 
@@ -321,8 +324,6 @@ export class ARRenderer extends EventDispatcher {
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element[$onResize](element.getBoundingClientRect());
-
-      this.renderer.expandTo(scene.width, scene.height);
     }
 
     if (this[$placementBox] != null) {

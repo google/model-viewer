@@ -16,7 +16,7 @@
 import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+import ModelViewerElementBase from '../model-viewer-base.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
@@ -142,36 +142,19 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Receives the size of the 2D canvas element to make according
-   * adjustments in the scene.
+   * Updates the ModelScene for a new container size in CSS pixels.
    */
   setSize(width: number, height: number) {
-    if (width !== this.width || height !== this.height) {
-      this.width = Math.max(width, 1);
-      this.height = Math.max(height, 1);
-
-      this.aspect = this.width / this.height;
-      this.frameModel();
-
-      const renderer = this.element[$renderer];
-      renderer.expandTo(this.width, this.height);
-      this.canvas.width = renderer.width;
-      this.canvas.height = renderer.height;
-
-      // Immediately queue a render to happen at microtask timing. This is
-      // necessary because setting the width and height of the canvas has the
-      // side-effect of clearing it, and also if we wait for the next rAF to
-      // render again we might get hit with yet-another-resize, or worse we
-      // may not actually be marked as dirty and so render will just not
-      // happen. Queuing a render to happen here means we will render twice on
-      // a resize frame, but it avoids most of the visual artifacts associated
-      // with other potential mitigations for this problem. See discussion in
-      // https://github.com/GoogleWebComponents/model-viewer/pull/619 for
-      // additional considerations.
-      Promise.resolve().then(() => {
-        renderer.render(performance.now());
-      });
+    if (this.width === width && this.height === height) {
+      return;
     }
+    this.width = Math.max(width, 1);
+    this.height = Math.max(height, 1);
+
+    this.aspect = this.width / this.height;
+    this.frameModel();
+
+    this.isDirty = true;
   }
 
   /**
