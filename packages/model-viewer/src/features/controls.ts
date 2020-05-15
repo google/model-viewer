@@ -457,7 +457,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$updateCameraForRadius](style[2]);
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -476,6 +475,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         maximumPolarAngle: style[1],
         maximumRadius: style[2]
       });
+      this[$updateCameraForRadius](style[2]);
       this.jumpCameraToGoal();
     }
 

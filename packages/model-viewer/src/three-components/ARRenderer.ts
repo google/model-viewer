@@ -166,10 +166,10 @@ export class ARRenderer extends EventDispatcher {
 
     // The render state update takes effect on the next animation frame. Wait
     // for it so that we get a framebuffer.
-    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+    let waitForXRAnimationFrame = new Promise((resolve, _reject) => {
       session.requestAnimationFrame(() => resolve());
     });
-    await waitForAnimationFrame;
+    await waitForXRAnimationFrame;
 
     scene.element[$onResize](window.screen);
 
@@ -211,6 +211,15 @@ export class ARRenderer extends EventDispatcher {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
+
+    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+      requestAnimationFrame(() => resolve());
+    });
+
+    scene.model.setHotspotsVisibility(false);
+    scene.isDirty = true;
+    // Render a frame to turn off the hotspots
+    await waitForAnimationFrame;
 
     // This sets isPresenting to true
     this[$presentedScene] = scene;
@@ -363,6 +372,7 @@ export class ARRenderer extends EventDispatcher {
       scene.model.updateMatrixWorld(true);
       this[$goalYaw] = scene.yaw;
       this[$initialModelToWorld].copy(scene.model.matrixWorld);
+      scene.model.setHotspotsVisibility(true);
       this[$initialized] = true;
     }
 

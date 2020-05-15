@@ -35,7 +35,7 @@ export class Damper {
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
       xNormalization: number): number {
-    if (x == null) {
+    if (x == null || xNormalization === 0) {
       return xGoal;
     }
     if (x === xGoal && this[$velocity] === 0) {
@@ -55,7 +55,7 @@ export class Damper {
         (intermediateVelocity - NATURAL_FREQUENCY * intermediateX) * decay;
     const acceleration =
         -NATURAL_FREQUENCY * (newVelocity + intermediateVelocity * decay);
-    if (Math.abs(newVelocity) < NIL_SPEED * xNormalization &&
+    if (Math.abs(newVelocity) < NIL_SPEED * Math.abs(xNormalization) &&
         acceleration * deltaX >= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their goal.
