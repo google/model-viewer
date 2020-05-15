@@ -279,14 +279,7 @@ export class ARRenderer extends EventDispatcher {
     });
 
     try {
-      const session = this[$currentSession]!;
-      session.removeEventListener('selectstart', this[$selectStartHandler]);
-      session.removeEventListener('selectend', this[$selectEndHandler]);
-
-      this[$currentSession] = null;
-      session.cancelAnimationFrame(this[$rafId]!);
-
-      await session.end();
+      await this[$currentSession]!.end();
       await cleanupPromise;
     } catch (error) {
       console.warn('Error while trying to end AR session');
@@ -301,6 +294,17 @@ export class ARRenderer extends EventDispatcher {
     // back to the default framebuffer for canvas output.
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(null);
+    const hitSource = this[$transientHitTestSource];
+    if (hitSource != null) {
+      hitSource.cancel();
+    }
+
+    const session = this[$currentSession]!;
+    session.removeEventListener('selectstart', this[$selectStartHandler]);
+    session.removeEventListener('selectend', this[$selectEndHandler]);
+
+    this[$currentSession] = null;
+    session.cancelAnimationFrame(this[$rafId]!);
 
     const scene = this[$presentedScene];
     if (scene != null) {
