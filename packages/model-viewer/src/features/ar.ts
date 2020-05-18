@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
@@ -198,7 +198,7 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        await this[$renderer].present(this[$scene]);
+        await this[$renderer].arRenderer.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -233,7 +233,7 @@ configuration or device capabilities');
         while (!item.done) {
           const {value} = item;
           if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
-              await this[$renderer].supportsPresentation()) {
+              await this[$renderer].arRenderer.supportsPresentation()) {
             this[$arMode] = ARMode.WEBXR;
             break;
           } else if (value === 'scene-viewer' && IS_ANDROID) {
@@ -258,6 +258,11 @@ configuration or device capabilities');
             'click', this[$arButtonContainerClickHandler]);
         this[$arButtonContainer].classList.remove('enabled');
       }
+    }
+
+    [$onModelLoad](event: any) {
+      super[$onModelLoad](event);
+      this[$renderer].arRenderer.updateScene();
     }
 
     [$onARButtonContainerClick](event: Event) {

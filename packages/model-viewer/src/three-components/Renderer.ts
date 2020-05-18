@@ -70,9 +70,9 @@ export class Renderer extends EventDispatcher {
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
+  public arRenderer: ARRenderer;
 
   protected debugger: Debugger|null = null;
-  private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
 
@@ -134,7 +134,7 @@ export class Renderer extends EventDispatcher {
       console.warn(error);
     }
 
-    this[$arRenderer] = new ARRenderer(this);
+    this.arRenderer = new ARRenderer(this);
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
 
@@ -269,29 +269,8 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  async supportsPresentation() {
-    return this.canRender && this[$arRenderer].supportsPresentation();
-  }
-
-  get presentedScene() {
-    return this[$arRenderer].presentedScene;
-  }
-
-  async present(scene: ModelScene): Promise<void> {
-    try {
-      return await this[$arRenderer].present(scene);
-    } catch (error) {
-      await this[$arRenderer].stopPresenting();
-      throw error;
-    }
-  }
-
-  stopPresenting(): Promise<void> {
-    return this[$arRenderer].stopPresenting();
-  }
-
   get isPresenting(): boolean {
-    return this[$arRenderer] != null && this[$arRenderer].isPresenting;
+    return this.arRenderer.isPresenting;
   }
 
   /**

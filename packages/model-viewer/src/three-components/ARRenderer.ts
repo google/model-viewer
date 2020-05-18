@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import '../types/webxr.js';
+
 import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
@@ -382,6 +384,13 @@ export class ARRenderer extends EventDispatcher {
    */
   get isPresenting(): boolean {
     return this[$presentedScene] != null;
+  }
+
+  updateScene() {
+    if (this[$placementBox] != null) {
+      this[$placementBox]!.dispose();
+      this[$placementBox] = new PlacementBox(this[$presentedScene]!.model);
+    }
   }
 
   [$updateCamera](view: XRView) {
