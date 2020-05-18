@@ -59,7 +59,7 @@
     "typescript": "3.7.3"
   },
   "dependencies": {
-    "three": "^0.115.0"
+    "three": "mrdoob/three.js#dev"
   },
   "publishConfig": {
     "access": "public"

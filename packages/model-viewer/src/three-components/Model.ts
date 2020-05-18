@@ -18,7 +18,7 @@ import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3}
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
-import {moveChildren, reduceVertices} from './ModelUtils.js';
+import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
 export const DEFAULT_FOV_DEG = 45;
@@ -60,6 +60,10 @@ export default class Model extends Object3D {
 
   get loader() {
     return this[$loader];
+  }
+
+  get currentGLTF() {
+    return this[$currentGLTF];
   }
 
   /**
@@ -138,7 +142,7 @@ export default class Model extends Object3D {
     this[$currentGLTF] = gltf;
 
     if (gltf != null) {
-      moveChildren(gltf.scene, this.modelContainer);
+      this.modelContainer.add(gltf.scene);
     }
 
     const {animations} = gltf!;
@@ -238,7 +242,9 @@ export default class Model extends Object3D {
     const gltf = this[$currentGLTF];
     // Remove all current children
     if (gltf != null) {
-      moveChildren(this.modelContainer, gltf.scene);
+      for (const child of this.modelContainer.children) {
+        this.modelContainer.remove(child);
+      }
       gltf.dispose();
       this[$currentGLTF] = null;
     }

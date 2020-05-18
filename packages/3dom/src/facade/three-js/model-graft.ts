@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ModelGraft as ModelGraftInterface} from '../api.js';
 
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -60,9 +60,9 @@ export class ModelGraft extends EventTarget implements ModelGraftInterface {
 
   private[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
 
-  constructor(modelUri: string, gltf: GLTF) {
+  constructor(modelUri: string, correlatedSceneGraph: CorrelatedSceneGraph) {
     super();
-    this[$model] = new Model(this, modelUri, gltf);
+    this[$model] = new Model(this, modelUri, correlatedSceneGraph);
   }
 
   get model() {

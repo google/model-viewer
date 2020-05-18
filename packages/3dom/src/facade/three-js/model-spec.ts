@@ -13,38 +13,49 @@
  * limitations under the License.
  */
 
-import {BufferGeometry} from 'three/src/core/BufferGeometry.js';
-import {Object3D} from 'three/src/core/Object3D.js';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {createFakeGLTF} from '../../test-helpers.js';
+import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
 
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
+
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('facade/three-js/model', () => {
   suite('Model', () => {
-    test('exposes a list of materials in the scene', () => {
-      const materials =
-          [new MeshStandardMaterial(), new MeshStandardMaterial()];
-      const gltf = createFakeGLTF();
-      const root = new Object3D();
-      const childOne = new Object3D();
-      const childTwo = new Mesh(new BufferGeometry(), materials[1]);
-      const grandChild = new Mesh(new BufferGeometry(), materials[0]);
+    test('exposes a list of materials in the scene', async () => {
+      const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
+      const materials: Set<MeshStandardMaterial> = new Set();
 
-      gltf.scene.add(root);
-      root.add(childOne, childTwo);
-      childOne.add(grandChild);
-
-      const graft = new ModelGraft('', gltf);
-      const model = graft.model;
-
-      const collectedMaterials = model.materials.map((material) => {
-        return material.relatedObject;
+      threeGLTF.scene.traverse((object) => {
+        if ((object as Mesh).isMesh) {
+          const material = (object as Mesh).material;
+          if (Array.isArray(material)) {
+            material.forEach(
+                (material) => materials.add(material as MeshStandardMaterial));
+          } else {
+            materials.add(material as MeshStandardMaterial);
+          }
+        }
       });
 
-      expect(collectedMaterials).to.be.deep.equal(materials);
+      const graft = new ModelGraft(
+          ASTRONAUT_GLB_PATH, CorrelatedSceneGraph.from(threeGLTF));
+
+      const model = graft.model;
+      const collectedMaterials = new Set<MeshStandardMaterial>();
+
+      model.materials.forEach((material) => {
+        for (const threeMaterial of material.correlatedObjects as
+             Set<MeshStandardMaterial>) {
+          collectedMaterials.add(threeMaterial);
+          expect(materials.has(threeMaterial)).to.be.true;
+        }
+      });
+
+      expect(collectedMaterials.size).to.be.equal(materials.size);
     });
   });
 });
