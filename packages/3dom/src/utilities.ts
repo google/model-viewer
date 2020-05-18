@@ -47,6 +47,19 @@ export type VisitorCallbacks = {
  *  - allScenes: if true, all scenes (not just the active one) will be visited
  *  - sparse: if true, elements that have been visited once will not be visited
  *    again if and when they are encountered a second time in the scene graph
+ *
+ * Note that glTF defines a top-level field ("scene") that refers to the scene
+ * that will be presented first ("at load time"). In the case of <model-viewer>,
+ * there is no way to specify an alternative scene to display (although we plan
+ * to add configuration for this). Consequently, the ability to traverse all
+ * scenes is not likely to be used at this time. However, some cases will call
+ * for visiting all nodes in a glTF regardless of whether they are a part of
+ * the current scene. Eventually, <model-viewer> will support changing the
+ * active scene, and the ability to traverse all scenes at once will become
+ * handy.
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#scenes
+ * @see https://github.com/google/model-viewer/issues/195
  */
 export interface VisitOptions {
   allScenes?: boolean;
