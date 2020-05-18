@@ -143,7 +143,6 @@ export default class Model extends Object3D {
 
     if (gltf != null) {
       this.modelContainer.add(gltf.scene);
-      // moveChildren(gltf.scene, this.modelContainer);
     }
 
     const {animations} = gltf!;
@@ -246,8 +245,6 @@ export default class Model extends Object3D {
       for (const child of this.modelContainer.children) {
         this.modelContainer.remove(child);
       }
-      // this.modelContainer.children = [];
-      // moveChildren(this.modelContainer, gltf.scene);
       gltf.dispose();
       this[$currentGLTF] = null;
     }
