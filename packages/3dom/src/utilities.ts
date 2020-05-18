@@ -100,7 +100,7 @@ export class GLTFTreeVisitor {
 
   /**
    * Visit a given in-memory glTF via the configured callbacks of this visitor.
-   * Otionally, all scenes may be visited (as opposed to just the active one).
+   * Optionally, all scenes may be visited (as opposed to just the active one).
    * Sparse traversal can also be specified, in which case elements that
    * re-appear multiple times in the scene graph will only be visited once.
    */
