@@ -75,7 +75,7 @@ const $visitMaterial = Symbol('visitMaterial');
  *
  * ```javascript
  * const visitor = new GLTFTreeVisitor({
- *   material: (material, index, hierarchy) {
+ *   material: (material, index, hierarchy) => {
  *     // material is a glTF 2.0 Material
  *     // index is the index of material in gltf.materials
  *     // hierarchy includes ancestors of material in the glTF
