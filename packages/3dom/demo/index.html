@@ -161,13 +161,13 @@ class ThreeDOMDemo {
     });
   }
 
-  async activate3DOM(gltf) {
+  activate3DOM(gltf) {
     const script = document.querySelector('script[type="3DOM"]');
     const scriptText = script.textContent;
 
     const context = new ThreeDOMExecutionContext();
     const graft = new ModelGraft('../shared-assets/models/Astronaut.glb',
-        await CorrelatedSceneGraph.from(gltf));
+        CorrelatedSceneGraph.from(gltf));
 
     context.eval(scriptText);
     context.changeModel(graft);
