@@ -363,6 +363,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$controls].getFieldOfView();
     }
 
+    getMinimumFieldOfView(): number {
+      return this[$controls].options.minimumFieldOfView;
+    }
+
+    getMaximumFieldOfView(): number {
+      return this[$controls].options.maximumFieldOfView;
+    }
+
     jumpCameraToGoal() {
       this[$jumpCamera] = true;
       this.requestUpdate($jumpCamera, false);
