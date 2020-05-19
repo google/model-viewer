@@ -189,7 +189,7 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
 
     const exitButton = scene.element.shadowRoot!.querySelector(
-                           '.slot.exit-webxr-button') as HTMLElement;
+                           '.slot.exit-webxr-ar-button') as HTMLElement;
     exitButton.classList.add('enabled');
     exitButton.addEventListener(
         'click', this[$exitWebXRButtonContainerClickHandler]);

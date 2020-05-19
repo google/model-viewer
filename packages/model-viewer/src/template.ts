@@ -272,15 +272,15 @@ canvas.show {
   pointer-events: none;
 }
 
-.slot.exit-webxr-button {
+.slot.exit-webxr-ar-button {
   pointer-events: none;
 }
 
-.slot.exit-webxr-button:not(.enabled) {
+.slot.exit-webxr-ar-button:not(.enabled) {
   display: none;
 }
 
-#default-exit-webxr-button {
+#default-exit-webxr-ar-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +292,7 @@ canvas.show {
   box-sizing: border-box;
 }
 
-#default-exit-webxr-button > svg {
+#default-exit-webxr-ar-button > svg {
   fill: #fff;
 }
 </style>
@@ -341,9 +341,9 @@ canvas.show {
   <div class="slot default">
     <slot></slot>
     
-    <div class="slot exit-webxr-button">
-      <slot name="exit-webxr-button">
-        <a id="default-exit-webxr-button"
+    <div class="slot exit-webxr-ar-button">
+      <slot name="exit-webxr-ar-button">
+        <a id="default-exit-webxr-ar-button"
             tabindex="3"
             aria-label="Exit fullscreen"
             aria-hidden="true">
