@@ -705,4 +705,9 @@ export class SmoothControls extends EventDispatcher {
       event.preventDefault();
     }
   }
+
+  /** Returns a copy of the current options */
+  get options() : SmoothControlsOptions {
+    return {...this[$options]};
+  }
 }
