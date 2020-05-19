@@ -34,6 +34,12 @@ export interface ContextLostEvent extends Event {
   sourceEvent: WebGLContextEvent;
 }
 
+// Between 0 and 1: larger means the average responds faster and is less smooth.
+const DURATION_DECAY = 0.2;
+const LOW_FRAME_DURATION = 18;   // ms
+const HIGH_FRAME_DURATION = 30;  // ms
+const PIXEL_RATIO_STEP = 0.75;
+
 export const $arRenderer = Symbol('arRenderer');
 
 const $onWebGLContextLost = Symbol('onWebGLContextLost');
@@ -75,6 +81,10 @@ export class Renderer extends EventDispatcher {
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
   private lastTick: number;
+  private maxDpr: number;
+  private avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+  private slowFrame = true;
+  private didRender = false;
 
   private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
       this[$onWebGLContextLost](event);
@@ -86,10 +96,12 @@ export class Renderer extends EventDispatcher {
   constructor(options?: RendererOptions) {
     super();
 
+    this.maxDpr = resolveDpr();
+
     const webGlOptions = {
       alpha: true,
       antialias: true,
-      powerPreference: 'high-performance' as WebGLPowerPreference
+      powerPreference: 'low-power' as WebGLPowerPreference
     };
 
     this.canvasElement = document.createElement('canvas');
@@ -117,7 +129,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.outputEncoding = GammaEncoding;
       this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
-      this.threeRenderer.setPixelRatio(resolveDpr());
+      this.threeRenderer.setPixelRatio(this.maxDpr);
       this.threeRenderer.shadowMap.enabled = true;
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
@@ -140,6 +152,7 @@ export class Renderer extends EventDispatcher {
 
     this.updateRendererSize();
     this.lastTick = performance.now();
+    this.avgFrameDuration = 0;
   }
 
   /**
@@ -147,7 +160,18 @@ export class Renderer extends EventDispatcher {
    * device pixel ratio.
    */
   updateRendererSize() {
-    const dpr = resolveDpr();
+    this.maxDpr = resolveDpr();
+    let dpr = this.dpr;
+    if (this.avgFrameDuration > HIGH_FRAME_DURATION) {
+      dpr *= PIXEL_RATIO_STEP;
+      this.avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+    } else if (this.avgFrameDuration < LOW_FRAME_DURATION) {
+      dpr /= PIXEL_RATIO_STEP;
+      this.avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+    }
+    dpr = Math.min(dpr, this.maxDpr);
+    console.log('dpr = ', dpr);
+
     let dprUpdated = false;
     if (dpr !== this.dpr) {
       // If the device pixel ratio has changed due to page zoom, elements
@@ -173,6 +197,9 @@ export class Renderer extends EventDispatcher {
     if (width === size.x && height === size.y && dprUpdated === false) {
       return;
     }
+
+    // Resizing the framebuffer takes time, so ignore it when timing frames.
+    this.slowFrame = true;
 
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
@@ -318,6 +345,14 @@ export class Renderer extends EventDispatcher {
     }
 
     const delta = t - this.lastTick;
+    console.log('delta = ', delta);
+    if (this.didRender && this.slowFrame !== true) {
+      this.avgFrameDuration =
+          (1 - DURATION_DECAY) * this.avgFrameDuration + DURATION_DECAY * delta;
+    }
+    this.slowFrame = false;
+    this.didRender = false;
+    console.log('avg = ', this.avgFrameDuration);
     this.updateRendererSize();
     const {dpr} = this;
 
@@ -369,6 +404,7 @@ export class Renderer extends EventDispatcher {
       }
 
       scene.isDirty = false;
+      this.didRender = true;
     }
     this.lastTick = t;
   }
