@@ -707,7 +707,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /** Returns a copy of the current options */
-  get options() : SmoothControlsOptions {
+  get options(): SmoothControlsOptions {
     return {...this[$options]};
   }
 }
