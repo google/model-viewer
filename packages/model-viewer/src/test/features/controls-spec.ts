@@ -373,10 +373,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             }
           });
 
-          test('respects user-configured maxFieldOfView', async () => {
+          test('respects user-configured min/maxFieldOfView', async () => {
             document.body.insertBefore(
                 initiallyUnloadedElement, document.body.firstChild);
 
+            initiallyUnloadedElement.minFieldOfView = '90deg';
             initiallyUnloadedElement.maxFieldOfView = '100deg';
             initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
 
@@ -388,6 +389,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             settleControls(controls);
 
             expect(initiallyUnloadedElement.getFieldOfView())
+                .to.be.closeTo(100, 0.001);
+
+            expect(initiallyUnloadedElement.getMinimumFieldOfView())
+                .to.be.closeTo(90, 0.001);
+
+            expect(initiallyUnloadedElement.getMaximumFieldOfView())
                 .to.be.closeTo(100, 0.001);
           });
         });
