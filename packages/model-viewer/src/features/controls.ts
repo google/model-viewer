@@ -240,8 +240,8 @@ export declare interface ControlsInterface {
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
-  getMinimumFieldOfView(): number|undefined;
-  getMaximumFieldOfView(): number|undefined;
+  getMinimumFieldOfView(): number;
+  getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
   resetInteractionPrompt(): void;
 }
@@ -366,12 +366,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     // Provided so user code does not have to parse these from attributes.
-    getMinimumFieldOfView(): number|undefined {
-      return this[$controls].options.minimumFieldOfView;
+    getMinimumFieldOfView(): number {
+      const value = this[$controls].options.minimumFieldOfView;
+      if(value === undefined) {
+        throw new Error('minimumFieldOfView was undefined');
+      }
+      return value;
     }
 
-    getMaximumFieldOfView(): number|undefined {
-      return this[$controls].options.maximumFieldOfView;
+    getMaximumFieldOfView(): number {
+      const value = this[$controls].options.maximumFieldOfView;
+      if(value === undefined) {
+        throw new Error('maximumFieldOfView was undefined');
+      }
+      return value;
     }
 
     jumpCameraToGoal() {
