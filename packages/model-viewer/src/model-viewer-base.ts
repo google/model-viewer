@@ -272,7 +272,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
         }
       }, {
         root: null,
-        rootMargin: '10px',
+        // We used to have margin here, but it was causing animated models below
+        // the fold to steal the frame budget. Weirder still, it would also
+        // cause input events to be swallowed, sometimes for seconds on the
+        // model above the fold, but only when the animated model was completely
+        // below. Setting this margin to zero fixed it.
+        rootMargin: '0px',
         threshold: 0,
       });
     } else {
