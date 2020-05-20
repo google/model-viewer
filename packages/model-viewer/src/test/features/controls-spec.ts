@@ -27,7 +27,7 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
-const DEFAULT_MIN_FOV = 10;
+const DEFAULT_MIN_FOV = 25;
 const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
