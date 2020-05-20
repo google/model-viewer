@@ -365,6 +365,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$controls].getFieldOfView();
     }
 
+    // Provided so user code does not have to parse these from attributes.
     getMinimumFieldOfView(): number|undefined {
       return this[$controls].options.minimumFieldOfView;
     }
