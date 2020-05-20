@@ -27,6 +27,8 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const DEFAULT_MIN_FOV = 10;
+const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
@@ -221,6 +223,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('defaults FOV correctly', async () => {
         expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
+      });
+
+      test('defaults FOV limits correctly', async () => {
+        expect(element.getMinimumFieldOfView()).to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
+        expect(element.getMaximumFieldOfView()).to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {

@@ -367,19 +367,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     // Provided so user code does not have to parse these from attributes.
     getMinimumFieldOfView(): number {
-      const value = this[$controls].options.minimumFieldOfView;
-      if(value === undefined) {
-        throw new Error('minimumFieldOfView was undefined');
-      }
-      return value;
+      return this[$controls].options.minimumFieldOfView!;
     }
 
     getMaximumFieldOfView(): number {
-      const value = this[$controls].options.maximumFieldOfView;
-      if(value === undefined) {
-        throw new Error('maximumFieldOfView was undefined');
-      }
-      return value;
+      return this[$controls].options.maximumFieldOfView!;
     }
 
     jumpCameraToGoal() {
