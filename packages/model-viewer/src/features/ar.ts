@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
@@ -259,11 +259,6 @@ configuration or device capabilities');
             'click', this[$arButtonContainerClickHandler]);
         this[$arButtonContainer].classList.remove('enabled');
       }
-    }
-
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
-      this[$renderer].arRenderer.updateScene();
     }
 
     [$onARButtonContainerClick](event: Event) {

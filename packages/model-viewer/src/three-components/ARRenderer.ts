@@ -81,15 +81,14 @@ const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
 const $getHitPoint = Symbol('getHitPoint');
-const $selectStartHandler = Symbol('selectStartHandler');
 const $onSelectStart = Symbol('onSelectStart');
-const $selectEndHandler = Symbol('selectHandler');
 const $onSelectEnd = Symbol('onSelect');
+const $onUpdateScene = Symbol('onUpdateScene');
 const $fingerSeparation = Symbol('fingerSeparation');
 const $processInput = Symbol('processInput');
 const $moveScene = Symbol('moveScene');
-const $exitWebXRButtonContainerClickHandler =
-    Symbol('exitWebXRButtonContainerClickHandler');
+const $onExitWebXRButtonContainerClick =
+    Symbol('onExitWebXRButtonContainerClick');
 
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
@@ -135,13 +134,7 @@ export class ARRenderer extends EventDispatcher {
   private[$scaleDamper] = new Damper();
   private[$damperRate] = 1;
 
-  private[$selectStartHandler] = (event: Event) =>
-      this[$onSelectStart](event as XRInputSourceEvent);
-  private[$selectEndHandler] = (event: Event) =>
-      this[$onSelectEnd](event as XRInputSourceEvent);
-
-  private[$exitWebXRButtonContainerClickHandler]:
-      () => void = () => this.stopPresenting();
+  private[$onExitWebXRButtonContainerClick] = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
     super();
@@ -194,7 +187,7 @@ export class ARRenderer extends EventDispatcher {
                            '.slot.exit-webxr-ar-button') as HTMLElement;
     exitButton.classList.add('enabled');
     exitButton.addEventListener(
-        'click', this[$exitWebXRButtonContainerClickHandler]);
+        'click', this[$onExitWebXRButtonContainerClick]);
     this[$exitWebXRButtonContainer] = exitButton;
 
     return session;
@@ -267,6 +260,8 @@ export class ARRenderer extends EventDispatcher {
     this[$oldShadowIntensity] = scene.shadowIntensity;
     scene.setShadowIntensity(0);
 
+    scene.addEventListener('model-load', this[$onUpdateScene]);
+
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = new XRRay(
         new DOMPoint(0, 0, 0),
@@ -315,8 +310,8 @@ export class ARRenderer extends EventDispatcher {
     (this.threeRenderer as any).setFramebuffer(null);
 
     const session = this[$currentSession]!;
-    session.removeEventListener('selectstart', this[$selectStartHandler]);
-    session.removeEventListener('selectend', this[$selectEndHandler]);
+    session.removeEventListener('selectstart', this[$onSelectStart]);
+    session.removeEventListener('selectend', this[$onSelectEnd]);
 
     this[$currentSession] = null;
     session.cancelAnimationFrame(this[$rafId]!);
@@ -333,6 +328,7 @@ export class ARRenderer extends EventDispatcher {
       scene.yaw = this[$turntableRotation]!;
       scene.setShadowIntensity(this[$oldShadowIntensity]!);
       scene.background = this[$oldBackground];
+      scene.removeEventListener('model-load', this[$onUpdateScene]);
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element[$onResize](element.getBoundingClientRect());
@@ -342,7 +338,7 @@ export class ARRenderer extends EventDispatcher {
     if (exitButton != null) {
       exitButton.classList.remove('enabled');
       exitButton.removeEventListener(
-          'click', this[$exitWebXRButtonContainerClickHandler]);
+          'click', this[$onExitWebXRButtonContainerClick]);
       this[$exitWebXRButtonContainer] = null;
     }
 
@@ -386,12 +382,12 @@ export class ARRenderer extends EventDispatcher {
     return this[$presentedScene] != null;
   }
 
-  updateScene() {
+  [$onUpdateScene] = () => {
     if (this[$placementBox] != null) {
       this[$placementBox]!.dispose();
       this[$placementBox] = new PlacementBox(this[$presentedScene]!.model);
     }
-  }
+  };
 
   [$updateCamera](view: XRView) {
     const {camera} = this;
@@ -454,8 +450,8 @@ export class ARRenderer extends EventDispatcher {
     this[$initialHitSource] = null;
 
     const {session} = frame;
-    session.addEventListener('selectstart', this[$selectStartHandler]);
-    session.addEventListener('selectend', this[$selectEndHandler]);
+    session.addEventListener('selectstart', this[$onSelectStart]);
+    session.addEventListener('selectend', this[$onSelectEnd]);
     session
         .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
         .then(hitTestSource => {
@@ -534,7 +530,7 @@ export class ARRenderer extends EventDispatcher {
     this.dispatchEvent({type: 'modelmove'});
   }
 
-  [$onSelectStart](event: XRInputSourceEvent) {
+  [$onSelectStart] = (event: Event) => {
     const hitSource = this[$transientHitTestSource];
     if (hitSource == null) {
       return;
@@ -544,8 +540,8 @@ export class ARRenderer extends EventDispatcher {
     const box = this[$placementBox]!;
 
     if (fingers.length === 1) {
-      this[$inputSource] = event.inputSource;
-      const {axes} = event.inputSource.gamepad;
+      this[$inputSource] = (event as XRInputSourceEvent).inputSource;
+      const {axes} = this[$inputSource]!.gamepad;
 
       const hitPosition = box.getHit(this[$presentedScene]!, axes[0], axes[1]);
       box.show = true;
@@ -562,9 +558,9 @@ export class ARRenderer extends EventDispatcher {
       this[$isScaling] = true;
       this[$lastScalar] = this[$fingerSeparation](fingers) / scene.scale.x;
     }
-  }
+  };
 
-  [$onSelectEnd](_event: XRInputSourceEvent) {
+  [$onSelectEnd] = () => {
     this[$isTranslating] = false;
     this[$isRotating] = false;
     this[$isScaling] = false;
@@ -572,7 +568,7 @@ export class ARRenderer extends EventDispatcher {
     this[$goalPosition].y +=
         this[$placementBox]!.offsetHeight * this[$presentedScene]!.scale.x;
     this[$placementBox]!.show = false
-  }
+  };
 
   [$fingerSeparation](fingers: XRTransientInputHitTestResult[]): number {
     const fingerOne = fingers[0].inputSource.gamepad.axes;
