@@ -16,7 +16,6 @@
 import {Group, Mesh, Object3D} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
-
 import {Constructor} from '../utilities.js';
 
 export const $prepared = Symbol('prepared');
@@ -118,7 +117,6 @@ export class GLTFInstance implements GLTF {
    */
   clone<T extends GLTFInstance>(): T {
     const GLTFInstanceConstructor = this.constructor as Constructor<T>;
-
     const clonedGLTF = this[$clone]();
 
     return new GLTFInstanceConstructor(clonedGLTF);

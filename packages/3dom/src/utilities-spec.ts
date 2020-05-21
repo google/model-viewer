@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
-import {getLocallyUniqueId} from './utilities.js';
+import {GLTF} from './gltf-2.0.js';
+import {assetPath, loadThreeGLTF} from './test-helpers.js';
+import {getLocallyUniqueId, GLTFTreeVisitor} from './utilities.js';
+
+const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 
 suite('utilities', () => {
   suite('getLocallyUniqueId', () => {
@@ -27,6 +31,49 @@ suite('utilities', () => {
         }
         yieldedIds.add(nextId);
       }
+    });
+  });
+
+  suite('GLTFTreeVisitor', () => {
+    let gltf: GLTF;
+
+    setup(async () => {
+      const threeGLTF = await loadThreeGLTF(ORDER_TEST_GLB_PATH);
+      gltf = threeGLTF.parser.json;
+    });
+
+    test('visits materials in tree order', () => {
+      const materials: string[] = [];
+      const visitor = new GLTFTreeVisitor(
+          {material: (material) => materials.push(material.name!)});
+
+      visitor.visit(gltf);
+
+      expect(materials).to.be.deep.equal([
+        'Material0',
+        'Material1',
+        'Material2',
+        'Material2',
+        'Material1',
+        'Material0',
+        'Material2',
+      ]);
+    });
+
+    suite('sparse traversal', () => {
+      test('visits materials in tree order', () => {
+        const materials: string[] = [];
+        const visitor = new GLTFTreeVisitor(
+            {material: (material) => materials.push(material.name!)});
+
+        visitor.visit(gltf, {sparse: true});
+
+        expect(materials).to.be.deep.equal([
+          'Material0',
+          'Material1',
+          'Material2',
+        ]);
+      });
     });
   });
 });

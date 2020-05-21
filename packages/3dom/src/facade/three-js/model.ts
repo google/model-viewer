@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial} from 'three';
-import {Mesh as ThreeMesh} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {MeshStandardMaterial} from 'three';
 
 import {SerializedModel} from '../../protocol.js';
+import {GLTFTreeVisitor} from '../../utilities.js';
 import {Model as ModelInterface} from '../api.js';
 
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
 import {ThreeDOMElement} from './three-dom-element.js';
@@ -37,32 +37,24 @@ export class Model extends ThreeDOMElement implements ModelInterface {
   private[$modelUri] = '';
   private[$materials]: Array<Material> = [];
 
-  constructor(graft: ModelGraft, modelUri: string, gltf: GLTF) {
-    super(graft, gltf);
+  constructor(
+      graft: ModelGraft, modelUri: string,
+      correlatedSceneGraph: CorrelatedSceneGraph) {
+    super(graft, correlatedSceneGraph.gltf);
 
     this[$modelUri] = modelUri;
 
-    const visitedMaterials = new Set();
-
-    gltf.scene.traverse((object3D) => {
-      const maybeMesh = object3D as ThreeMesh;
-      let meshMaterials: Array<ThreeMaterial> = [];
-
-      if (maybeMesh.isMesh && maybeMesh.material != null) {
-        meshMaterials = Array.isArray(maybeMesh.material) ?
-            maybeMesh.material :
-            [maybeMesh.material];
-      }
-
-      for (const material of meshMaterials) {
-        if (visitedMaterials.has(material)) {
-          continue;
-        }
-
-        this[$materials].push(new Material(graft, material));
-        visitedMaterials.add(material);
+    const visitor = new GLTFTreeVisitor({
+      material: (material) => {
+        this[$materials].push(new Material(
+            graft,
+            material,
+            correlatedSceneGraph.gltfElementMap.get(material) as
+                Set<MeshStandardMaterial>));
       }
     });
+
+    visitor.visit(correlatedSceneGraph.gltf, {sparse: true});
   }
 
   /**

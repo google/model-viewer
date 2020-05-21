@@ -106,7 +106,7 @@
   "dependencies": {
     "@google/3dom": "0.0.1-alpha.4",
     "lit-element": "^2.2.0",
-    "three": "^0.115.0",
+    "three": "mrdoob/three.js#dev",
     "@types/resize-observer-browser": "^0.1.2"
   },
   "publishConfig": {

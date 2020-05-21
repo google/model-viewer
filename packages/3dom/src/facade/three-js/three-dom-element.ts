@@ -14,19 +14,22 @@
  */
 
 import {Material, Object3D} from 'three';
-import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import {GLTF, GLTFElement} from '../../gltf-2.0.js';
 import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';
 import {ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
 
 import {ModelGraft} from './model-graft.js';
 
-export const $relatedObject = Symbol('relatedObject');
+export const $correlatedObjects = Symbol('correlatedObjects');
 export const $type = Symbol('type');
+export const $sourceObject = Symbol('sourceObject');
 
 const $graft = Symbol('graft');
 const $id = Symbol('id');
+
+export type CorrelatedObjects = Set<Object3D>|Set<Material>;
 
 /**
  * A SerializableThreeDOMElement is the common primitive of all scene graph
@@ -36,13 +39,17 @@ const $id = Symbol('id');
  */
 export class ThreeDOMElement implements ThreeDOMElementInterface {
   private[$graft]: ModelGraft;
-  private[$relatedObject]: Object3D|Material|GLTF;
+  private[$sourceObject]: GLTFElement|GLTF;
+  private[$correlatedObjects]: CorrelatedObjects|null;
 
   private[$id]: number = getLocallyUniqueId();
 
-  constructor(graft: ModelGraft, relatedObject: Object3D|Material|GLTF) {
-    this[$relatedObject] = relatedObject;
+  constructor(
+      graft: ModelGraft, element: GLTFElement|GLTF,
+      correlatedObjects: CorrelatedObjects|null = null) {
     this[$graft] = graft;
+    this[$sourceObject] = element;
+    this[$correlatedObjects] = correlatedObjects;
 
     graft.adopt(this);
   }
@@ -70,26 +77,21 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * generated names are ignored.
    */
   get name() {
-    const relatedObject = this[$relatedObject];
-
-    // NOTE: Some Three.js object names are modified from the names found in the
-    // glTF. Special casing is handled here, but might be better moved to
-    // subclasses down the road:
-    if ((relatedObject as Material).isMaterial) {
-      // Material names can be safely referenced directly from the Three.js
-      // object.
-      // @see: https://github.com/mrdoob/three.js/blob/790811db742ea9d7c54fe28f83865d7576f14134/examples/js/loaders/GLTFLoader.js#L2162
-      return (relatedObject as Material).name;
-    }
-
-    return null;
+    return (this[$sourceObject] as unknown as {name?: string}).name || null;
   }
 
   /**
    * The backing Three.js scene graph construct for this element.
    */
-  get relatedObject() {
-    return this[$relatedObject];
+  get correlatedObjects() {
+    return this[$correlatedObjects];
+  }
+
+  /**
+   * The canonical GLTF or GLTFElement represented by this facade.
+   */
+  get sourceObject() {
+    return this[$sourceObject];
   }
 
   toJSON(): SerializedThreeDOMElement {
