@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
-import {isDebugMode, resolveDpr} from '../utilities.js';
+import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {Debugger} from './Debugger.js';
@@ -38,6 +38,7 @@ export interface ContextLostEvent extends Event {
 const DURATION_DECAY = 0.2;
 const LOW_FRAME_DURATION = 18;   // ms
 const HIGH_FRAME_DURATION = 26;  // ms
+const MAX_AVG_CHANGE = 2;        // ms
 const SCALE_STEP = 0.79;
 const MIN_SCALE = 0.5;
 
@@ -84,8 +85,6 @@ export class Renderer extends EventDispatcher {
   private height = 0;
   private scale = 1;
   private avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
-  private slowFrame = true;
-  private didRender = false;
 
   private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
       this[$onWebGLContextLost](event);
@@ -188,9 +187,6 @@ export class Renderer extends EventDispatcher {
     this.width = width;
     this.height = height;
 
-    // Resizing the framebuffer takes time, so ignore it when timing frames.
-    this.slowFrame = true;
-
     if (this.canRender) {
       this.threeRenderer.setSize(width, height, false);
     }
@@ -218,9 +214,8 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  updateRenderScale() {
+  updateRendererScale() {
     let {scale} = this;
-
     if (this.avgFrameDuration > HIGH_FRAME_DURATION && scale > MIN_SCALE) {
       scale *= SCALE_STEP;
       scale = Math.max(scale, MIN_SCALE);
@@ -229,21 +224,22 @@ export class Renderer extends EventDispatcher {
       scale = Math.min(scale, 1);
     }
 
-    if (scale !== this.scale) {
-      this.scale = scale;
-      this.avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+    if (scale == this.scale) {
+      return;
+    }
+    this.scale = scale;
+    this.avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
 
-      const width = this.width / scale;
-      const height = this.height / scale;
+    const width = this.width / scale;
+    const height = this.height / scale;
 
-      this.canvasElement.style.width = `${width}px`;
-      this.canvasElement.style.height = `${height}px`;
-      for (const scene of this.scenes) {
-        const {style} = scene.canvas;
-        style.width = `${width}px`;
-        style.height = `${height}px`;
-        scene.isDirty = true;
-      }
+    this.canvasElement.style.width = `${width}px`;
+    this.canvasElement.style.height = `${height}px`;
+    for (const scene of this.scenes) {
+      const {style} = scene.canvas;
+      style.width = `${width}px`;
+      style.height = `${height}px`;
+      scene.isDirty = true;
     }
     console.log('scale = ', this.scale);
   }
@@ -363,25 +359,25 @@ export class Renderer extends EventDispatcher {
   }
 
   render(t: number) {
+    const delta = t - this.lastTick;
+    this.lastTick = t;
+
     if (!this.canRender || this.isPresenting) {
       return;
     }
 
-    const delta = t - this.lastTick;
-    console.log('delta = ', delta);
-    if (this.didRender && this.slowFrame !== true) {
-      this.avgFrameDuration =
-          (1 - DURATION_DECAY) * this.avgFrameDuration + DURATION_DECAY * delta;
-    }
-    this.slowFrame = false;
-    this.didRender = false;
-    console.log('avg = ', this.avgFrameDuration);
+    this.avgFrameDuration += clamp(
+        DURATION_DECAY * (delta - this.avgFrameDuration),
+        -MAX_AVG_CHANGE,
+        MAX_AVG_CHANGE);
+
     this.updateRendererSize();
-    this.updateRenderScale();
+    this.updateRendererScale();
+
     const {dpr, scale} = this;
 
     for (const scene of this.scenes) {
-      if (!scene.visible || scene.paused) {
+      if (scene.hasRendered && (!scene.visible || scene.paused)) {
         continue;
       }
 
@@ -390,6 +386,8 @@ export class Renderer extends EventDispatcher {
       if (!scene.isDirty) {
         continue;
       }
+      scene.isDirty = false;
+      scene.hasRendered = true;
 
       const width = scene.width * scale;
       const height = scene.height * scale;
@@ -426,11 +424,7 @@ export class Renderer extends EventDispatcher {
               heightPixels);
         }
       }
-
-      scene.isDirty = false;
-      this.didRender = true;
     }
-    this.lastTick = t;
   }
 
   dispose() {
