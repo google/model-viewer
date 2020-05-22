@@ -242,9 +242,6 @@ export class ARRenderer extends EventDispatcher {
     this[$viewerRefSpace] =
         await currentSession.requestReferenceSpace('viewer');
 
-    const placementBox = new PlacementBox(scene.model);
-    this[$placementComplete] = false;
-
     scene.setCamera(this.camera);
     this[$initialized] = false;
     this[$damperRate] = INTRO_DAMPER_RATE;
@@ -273,7 +270,8 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this[$currentSession] = currentSession;
-    this[$placementBox] = placementBox;
+    this[$placementBox] = new PlacementBox(scene.model);
+    this[$placementComplete] = false;
     this[$lastTick] = performance.now();
 
     // Start the event loop.
@@ -383,11 +381,20 @@ export class ARRenderer extends EventDispatcher {
   }
 
   [$onUpdateScene] = () => {
-    if (this[$placementBox] != null) {
+    if (this[$placementBox] != null && this.isPresenting) {
       this[$placementBox]!.dispose();
       this[$placementBox] = new PlacementBox(this[$presentedScene]!.model);
     }
   };
+
+  updateTarget() {
+    const scene = this[$presentedScene];
+    if (scene != null) {
+      // Move the scene's target to the model's floor height.
+      const target = scene.getTarget();
+      scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
+    }
+  }
 
   [$updateCamera](view: XRView) {
     const {camera} = this;
