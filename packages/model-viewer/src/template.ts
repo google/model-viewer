@@ -239,8 +239,7 @@ canvas.show {
   display: var(--ar-button-display, block);
 }
 
-.slot.ar-button:not(.enabled),
-.fullscreen .slot.ar-button {
+.slot.ar-button:not(.enabled) {
   display: none;
 }
 
@@ -269,11 +268,19 @@ canvas.show {
   transform-origin: bottom right;
 }
 
-:not(.fullscreen) .slot.exit-fullscreen-button {
+.slot.default {
+  pointer-events: none;
+}
+
+.slot.exit-webxr-ar-button {
+  pointer-events: none;
+}
+
+.slot.exit-webxr-ar-button:not(.enabled) {
   display: none;
 }
 
-#default-exit-fullscreen-button {
+#default-exit-webxr-ar-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -285,7 +292,7 @@ canvas.show {
   box-sizing: border-box;
 }
 
-#default-exit-fullscreen-button > svg {
+#default-exit-webxr-ar-button > svg {
   fill: #fff;
 }
 </style>
@@ -323,17 +330,6 @@ canvas.show {
     </slot>
   </div>
 
-  <div class="slot exit-fullscreen-button">
-    <slot name="exit-fullscreen-button">
-      <a id="default-exit-fullscreen-button"
-          tabindex="3"
-          aria-label="Exit fullscreen"
-          aria-hidden="true">
-        ${CloseIcon}
-      </a>
-    </slot>
-  </div>
-
   <div class="slot interaction-prompt">
     <div class="animated-container" part="interaction-prompt">
       <slot name="interaction-prompt" aria-hidden="true">
@@ -344,6 +340,17 @@ canvas.show {
 
   <div class="slot default">
     <slot></slot>
+    
+    <div class="slot exit-webxr-ar-button">
+      <slot name="exit-webxr-ar-button">
+        <a id="default-exit-webxr-ar-button"
+            tabindex="3"
+            aria-label="Exit fullscreen"
+            aria-hidden="true">
+          ${CloseIcon}
+        </a>
+      </slot>
+    </div>
   </div>
 </div>`;
 
