@@ -105,7 +105,7 @@ export class PathtracingViewer extends LitElement {
       });
     });
 
-    const numSamples = 1;
+    const numSamples = 8;
 
     console.log('Rendering...');
     renderer.render(
