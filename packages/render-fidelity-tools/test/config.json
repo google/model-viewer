@@ -6,6 +6,10 @@
   ],
   "renderers": [
     {
+      "name": "gltfpt",
+      "description": "Pathtracing"
+    },
+    {
       "name": "model-viewer",
       "description": "<model-viewer>"
     },
