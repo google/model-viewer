@@ -55,7 +55,6 @@ export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
-export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
@@ -362,7 +361,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$displayCanvas].toDataURL(type, encoderOptions);
+    return this[$renderer]
+        .displayCanvas(this[$scene])
+        .toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -396,7 +397,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           blobContext = blobCanvas.getContext('2d');
         }
         blobContext!.drawImage(
-            this[$displayCanvas],
+            this[$renderer].displayCanvas(this[$scene]),
             offsetX,
             offsetY,
             outputWidth,
@@ -450,11 +451,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return this[$isElementInViewport];
   }
 
-  get[$displayCanvas]() {
-    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
-                                             this[$canvas];
-  }
-
   /**
    * Called on initialization and when the resize observer fires.
    */
@@ -505,14 +501,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async[$updateSource]() {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
-
-    const canvas = this[$displayCanvas];
     try {
-      canvas.classList.add('show');
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
-      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
       updateSourceProgress(1.0);

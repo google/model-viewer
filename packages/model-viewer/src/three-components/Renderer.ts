@@ -80,6 +80,7 @@ export class Renderer extends EventDispatcher {
   protected debugger: Debugger|null = null;
   private[$arRenderer]: ARRenderer;
   private scenes: Set<ModelScene> = new Set();
+  private multipleScenesVisible = false;
   private lastTick: number;
   private width = 0;
   private height = 0;
@@ -103,6 +104,7 @@ export class Renderer extends EventDispatcher {
     };
 
     this.canvasElement = document.createElement('canvas');
+    this.canvasElement.id = 'webgl-canvas';
 
     this.canvas3D = USE_OFFSCREEN_CANVAS ?
         this.canvasElement.transferControlToOffscreen() :
@@ -157,7 +159,7 @@ export class Renderer extends EventDispatcher {
    * Updates the renderer's size based on the largest scene and any changes to
    * device pixel ratio.
    */
-  updateRendererSize() {
+  private updateRendererSize() {
     const dpr = resolveDpr();
     let dprUpdated = false;
     if (dpr !== this.dpr) {
@@ -214,7 +216,7 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  updateRendererScale() {
+  private updateRendererScale() {
     let {scale} = this;
     if (this.avgFrameDuration > HIGH_FRAME_DURATION && scale > MIN_SCALE) {
       scale *= SCALE_STEP;
@@ -246,7 +248,6 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
-    this.selectCanvas();
     const {canvas} = scene;
 
     const {width, height} = this.threeRenderer.domElement;
@@ -267,13 +268,7 @@ export class Renderer extends EventDispatcher {
   }
 
   unregisterScene(scene: ModelScene) {
-    const userInputElement = scene.element[$userInputElement];
-    if (this.canvasElement.parentElement === userInputElement) {
-      userInputElement.removeChild(this.canvasElement);
-    }
-
     this.scenes.delete(scene);
-    this.selectCanvas();
 
     if (this.canRender && this.scenes.size === 0) {
       (this.threeRenderer.setAnimationLoop as any)(null);
@@ -284,12 +279,13 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  get hasOnlyOneScene(): boolean {
-    return this.scenes.size === 1;
-  }
-
   get dpr(): number {
     return this.threeRenderer.getPixelRatio();
+  }
+
+  displayCanvas(scene: ModelScene): HTMLCanvasElement {
+    return this.multipleScenesVisible ? scene.element[$canvas] :
+                                        this.canvasElement;
   }
 
   /**
@@ -298,19 +294,39 @@ export class Renderer extends EventDispatcher {
    * display. Otherwise we need to use the element's 2D canvas and copy the
    * renderer's result into it.
    */
-  selectCanvas() {
+  private selectCanvas() {
+    let visibleScenes = 0;
+    let visibleInput = null;
+    for (const scene of this.scenes) {
+      if (scene.visible) {
+        ++visibleScenes;
+        visibleInput = scene.element[$userInputElement];
+      }
+    }
+    const multipleScenesVisible = visibleScenes > 1;
+    const {canvasElement} = this;
+
+    if (multipleScenesVisible === this.multipleScenesVisible &&
+        (multipleScenesVisible ||
+         canvasElement.parentElement === visibleInput)) {
+      return;
+    }
+    this.multipleScenesVisible = multipleScenesVisible;
+
+    if (multipleScenesVisible) {
+      canvasElement.classList.remove('show');
+    }
     for (const scene of this.scenes) {
       const userInputElement = scene.element[$userInputElement];
       const canvas = scene.element[$canvas];
-      if (this.hasOnlyOneScene) {
-        userInputElement.appendChild(this.canvasElement);
-        canvas.classList.remove('show');
-      } else {
-        if (this.canvasElement.parentElement === userInputElement) {
-          userInputElement.removeChild(this.canvasElement);
-          scene.isDirty = true;
-        }
+      if (multipleScenesVisible) {
         canvas.classList.add('show');
+        scene.isDirty = true;
+      } else if (userInputElement === visibleInput) {
+        userInputElement.appendChild(canvasElement);
+        canvasElement.classList.add('show');
+        canvas.classList.remove('show');
+        scene.isDirty = true;
       }
     }
   }
@@ -371,6 +387,7 @@ export class Renderer extends EventDispatcher {
         -MAX_AVG_CHANGE,
         MAX_AVG_CHANGE);
 
+    this.selectCanvas();
     this.updateRendererSize();
     this.updateRendererScale();
 
@@ -400,7 +417,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(0, this.height - height, width, height);
       this.threeRenderer.render(scene, scene.getCamera());
 
-      if (!this.hasOnlyOneScene) {
+      if (this.multipleScenesVisible) {
         if (scene.context == null) {
           scene.createContext();
         }
