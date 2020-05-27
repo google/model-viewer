@@ -546,7 +546,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$controls].adjustOrbit(deltaTheta, 0, 0);
 
         this[$lastPromptOffset] = offset;
-        this[$needsRender]();
       }
 
       this[$controls].update(time, delta);
