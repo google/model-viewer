@@ -116,6 +116,24 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
 
+  /** @export */
+  static set minimumRenderScale(value: number) {
+    if (value > 1) {
+      console.warn(
+          'minimumRenderScale has been clamped to a maximum value of 1.');
+    }
+    if (value <= 0) {
+      console.warn(
+          'minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+    }
+    Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
+  }
+
+  /** @export */
+  static get minimumRenderScale(): number {
+    return Renderer.singleton.minScale;
+  }
+
   @property({type: String}) alt: string|null = null;
 
   @property({type: String}) src: string|null = null;

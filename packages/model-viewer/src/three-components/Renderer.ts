@@ -40,7 +40,7 @@ const LOW_FRAME_DURATION = 18;   // ms
 const HIGH_FRAME_DURATION = 26;  // ms
 const MAX_AVG_CHANGE = 2;        // ms
 const SCALE_STEP = 0.79;
-const MIN_SCALE = 0.5;
+const DEFAULT_MIN_SCALE = 0.5;
 
 export const $arRenderer = Symbol('arRenderer');
 
@@ -78,6 +78,7 @@ export class Renderer extends EventDispatcher {
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
   public dpr = 1;
+  public minScale = DEFAULT_MIN_SCALE;
 
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
@@ -216,13 +217,13 @@ export class Renderer extends EventDispatcher {
 
   private updateRendererScale() {
     let {scale} = this;
-    if (this.avgFrameDuration > HIGH_FRAME_DURATION && scale > MIN_SCALE) {
+    if (this.avgFrameDuration > HIGH_FRAME_DURATION && scale > this.minScale) {
       scale *= SCALE_STEP;
-      scale = Math.max(scale, MIN_SCALE);
     } else if (this.avgFrameDuration < LOW_FRAME_DURATION && scale < 1) {
       scale /= SCALE_STEP;
       scale = Math.min(scale, 1);
     }
+    scale = Math.max(scale, this.minScale);
 
     if (scale == this.scale) {
       return;

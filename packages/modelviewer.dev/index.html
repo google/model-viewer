@@ -472,6 +472,12 @@
               loaded from a Google CDN.</p>
             </li>
             <li>
+              <div>ModelViewer.minimumRenderScale</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering 
+              scale factor as it dynamically changes resolution to maintain framerate. Turn 
+              off this effect by setting to 1. Defaults to 0.5.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -480,7 +486,7 @@
               if they are not being used by a &lt;model-viewer&gt; element in the document.
               Note also that the cache size is measured in number of glTF models, not bytes!
               This is important to keep in mind, since any two models may have wildly
-              different byte sizes.</p>
+              different byte sizes. Default is 5.</p>
             </li>
           </ul>
 
