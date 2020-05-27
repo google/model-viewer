@@ -22,7 +22,7 @@ import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl} from './utilities.js';
+import {debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -118,8 +118,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   @property({type: String}) alt: string|null = null;
 
-  @property({converter: {fromAttribute: deserializeUrl}})
-  src: string|null = null;
+  @property({type: String}) src: string|null = null;
 
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;

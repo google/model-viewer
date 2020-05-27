@@ -198,7 +198,7 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        await this[$renderer].present(this[$scene]);
+        await this[$renderer].arRenderer.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -235,7 +235,7 @@ configuration or device capabilities');
 
         for (const value of arModes) {
           if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
-              await this[$renderer].supportsPresentation()) {
+              await this[$renderer].arRenderer.supportsPresentation()) {
             this[$arMode] = ARMode.WEBXR;
             break;
           } else if (value === 'scene-viewer' && IS_ANDROID) {
