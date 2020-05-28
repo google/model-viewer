@@ -55,7 +55,6 @@ export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
-export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
@@ -115,6 +114,24 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /** @export */
   static get modelCacheSize(): number {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
+  }
+
+  /** @export */
+  static set minimumRenderScale(value: number) {
+    if (value > 1) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
+    }
+    if (value <= 0) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+    }
+    Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
+  }
+
+  /** @export */
+  static get minimumRenderScale(): number {
+    return Renderer.singleton.minScale;
   }
 
   @property({type: String}) alt: string|null = null;
@@ -271,7 +288,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
         }
       }, {
         root: null,
-        rootMargin: '10px',
+        // We used to have margin here, but it was causing animated models below
+        // the fold to steal the frame budget. Weirder still, it would also
+        // cause input events to be swallowed, sometimes for seconds on the
+        // model above the fold, but only when the animated model was completely
+        // below. Setting this margin to zero fixed it.
+        rootMargin: '0px',
         threshold: 0,
       });
     } else {
@@ -356,7 +378,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$displayCanvas].toDataURL(type, encoderOptions);
+    return this[$renderer]
+        .displayCanvas(this[$scene])
+        .toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -390,7 +414,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           blobContext = blobCanvas.getContext('2d');
         }
         blobContext!.drawImage(
-            this[$displayCanvas],
+            this[$renderer].displayCanvas(this[$scene]),
             offsetX,
             offsetY,
             outputWidth,
@@ -444,11 +468,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return this[$isElementInViewport];
   }
 
-  get[$displayCanvas]() {
-    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
-                                             this[$canvas];
-  }
-
   /**
    * Called on initialization and when the resize observer fires.
    */
@@ -499,14 +518,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async[$updateSource]() {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
-
-    const canvas = this[$displayCanvas];
     try {
-      canvas.classList.add('show');
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
-      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
       updateSourceProgress(1.0);
