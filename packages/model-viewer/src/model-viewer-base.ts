@@ -120,11 +120,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
   static set minimumRenderScale(value: number) {
     if (value > 1) {
       console.warn(
-          '<model-vewer> minimumRenderScale has been clamped to a maximum value of 1.');
+          '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
     }
     if (value <= 0) {
       console.warn(
-          '<model-vewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
     }
     Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
   }

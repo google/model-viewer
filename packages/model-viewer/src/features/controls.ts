@@ -544,13 +544,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
 
+        this[$promptAnimatedContainer].style.opacity = `${opacity}`;
+
         if (offset !== this[$lastPromptOffset]) {
           const xOffset = offset * scene.width * 0.05;
           const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
 
           this[$promptAnimatedContainer].style.transform =
               `translateX(${xOffset}px)`;
-          this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
           this[$controls].adjustOrbit(deltaTheta, 0, 0);
 
