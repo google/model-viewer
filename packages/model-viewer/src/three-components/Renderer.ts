@@ -36,9 +36,9 @@ export interface ContextLostEvent extends Event {
 
 // Between 0 and 1: larger means the average responds faster and is less smooth.
 const DURATION_DECAY = 0.2;
-const LOW_FRAME_DURATION = 18;   // ms
-const HIGH_FRAME_DURATION = 26;  // ms
-const MAX_AVG_CHANGE = 2;        // ms
+const LOW_FRAME_DURATION_MS = 18;
+const HIGH_FRAME_DURATION_MS = 26;
+const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEP = 0.79;
 const DEFAULT_MIN_SCALE = 0.5;
 
@@ -87,7 +87,8 @@ export class Renderer extends EventDispatcher {
   private width = 0;
   private height = 0;
   private scale = 1;
-  private avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+  private avgFrameDuration =
+      (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
   private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
       this[$onWebGLContextLost](event);
@@ -102,7 +103,7 @@ export class Renderer extends EventDispatcher {
     const webGlOptions = {
       alpha: true,
       antialias: true,
-      powerPreference: 'low-power' as WebGLPowerPreference
+      powerPreference: 'high-performance' as WebGLPowerPreference
     };
 
     this.dpr = resolveDpr();
@@ -217,9 +218,10 @@ export class Renderer extends EventDispatcher {
 
   private updateRendererScale() {
     let {scale} = this;
-    if (this.avgFrameDuration > HIGH_FRAME_DURATION && scale > this.minScale) {
+    if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS &&
+        scale > this.minScale) {
       scale *= SCALE_STEP;
-    } else if (this.avgFrameDuration < LOW_FRAME_DURATION && scale < 1) {
+    } else if (this.avgFrameDuration < LOW_FRAME_DURATION_MS && scale < 1) {
       scale /= SCALE_STEP;
       scale = Math.min(scale, 1);
     }
@@ -229,7 +231,8 @@ export class Renderer extends EventDispatcher {
       return;
     }
     this.scale = scale;
-    this.avgFrameDuration = (HIGH_FRAME_DURATION + LOW_FRAME_DURATION) / 2;
+    this.avgFrameDuration =
+        (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
     const width = this.width / scale;
     const height = this.height / scale;
@@ -242,7 +245,6 @@ export class Renderer extends EventDispatcher {
       style.height = `${height}px`;
       scene.isDirty = true;
     }
-    console.log('scale = ', this.scale);
   }
 
   registerScene(scene: ModelScene) {
@@ -361,8 +363,8 @@ export class Renderer extends EventDispatcher {
 
     this.avgFrameDuration += clamp(
         DURATION_DECAY * (delta - this.avgFrameDuration),
-        -MAX_AVG_CHANGE,
-        MAX_AVG_CHANGE);
+        -MAX_AVG_CHANGE_MS,
+        MAX_AVG_CHANGE_MS);
 
     this.selectCanvas();
     this.updateRendererSize();
