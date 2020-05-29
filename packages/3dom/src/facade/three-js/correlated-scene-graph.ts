@@ -68,6 +68,16 @@ export class CorrelatedSceneGraph {
 
     // NOTE: IE11 does not have Map iterator methods
     associations.forEach((gltfElementReference, threeObject) => {
+      // Note: GLTFLoader creates a "default" material that has no corresponding
+      // glTF element in the case that no materials are specified in the source
+      // glTF. This means that for basic models without any of their own
+      // materials, we might accidentally try to present a configurable glTF
+      // material that doesn't exist. It might be valuable to make this default
+      // material configurable in the future, but for now we ignore it.
+      if (gltfElementReference == null) {
+        return;
+      }
+
       const {type, index} = gltfElementReference;
       const gltfElement = gltf[type][index] as GLTFElement;
 
