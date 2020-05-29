@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Material, Model, PBRMetallicRoughness, ThreeDOMElement, ThreeDOMElementMap} from '../api.js';
-import {MutationResultMessage, SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, ThreeDOMMessageType} from '../protocol.js';
+import {ConstructedWithArguments, Constructor, Model, ThreeDOMElement, ThreeDOMElementMap} from '../api.js';
+import {MutationResultMessage, SerializedElementMap, SerializedModel, ThreeDOMMessageTypeMap} from '../protocol.js';
+
+import {ImageConstructor} from './image.js';
+import {MaterialConstructor} from './material.js';
+import {ModelConstructor} from './model.js';
+import {PBRMetallicRoughnessConstructor} from './pbr-metallic-roughness.js';
+import {SamplerConstructor} from './sampler.js';
+import {TextureInfoConstructor} from './texture-info.js';
+import {TextureConstructor} from './texture.js';
+import {ThreeDOMElementConstructor} from './three-dom-element.js';
 
 export interface ModelKernelInterface {
   readonly model: Model;
@@ -36,14 +45,6 @@ export type ModelKernel = InstanceType<ModelKernelConstructor>;
 type ElementsByType<T = ThreeDOMElementMap, U extends keyof T = keyof T> =
     Map<U, Set<T[U]>>;
 
-type ModelConstructor = Constructor<Model>&
-    ConstructedWithArguments<[ModelKernelInterface, SerializedModel]>;
-type MaterialConstructor = Constructor<Material>&
-    ConstructedWithArguments<[ModelKernelInterface, SerializedMaterial]>;
-type PBRMetallicRoughnessConstructor =
-    Constructor<PBRMetallicRoughness>&ConstructedWithArguments<
-        [ModelKernelInterface, SerializedPBRMetallicRoughness]>;
-
 interface Deferred {
   resolve: () => void;
   reject: () => void;
@@ -59,17 +60,26 @@ interface Deferred {
  * that it can be part of a runtime-generated Worker script.
  */
 export function defineModelKernel(
+    ThreeDOMMessageType: ThreeDOMMessageTypeMap,
+    ThreeDOMElement: ThreeDOMElementConstructor,
     Model: ModelConstructor,
     Material: MaterialConstructor,
-    PBRMetallicRoughness: PBRMetallicRoughnessConstructor):
-    ModelKernelConstructor {
+    PBRMetallicRoughness: PBRMetallicRoughnessConstructor,
+    Sampler: SamplerConstructor,
+    Image: ImageConstructor,
+    Texture: TextureConstructor,
+    TextureInfo: TextureInfoConstructor): ModelKernelConstructor {
   const constructorsByType: {
     [K in keyof ThreeDOMElementMap]: Constructor<ThreeDOMElementMap[K]>&
     ConstructedWithArguments<[ModelKernelInterface, SerializedElementMap[K]]>
   } = {
     'model': Model,
     'material': Material,
-    'pbr-metallic-roughness': PBRMetallicRoughness
+    'pbr-metallic-roughness': PBRMetallicRoughness,
+    'texture-info': TextureInfo,
+    'sampler': Sampler,
+    'image': Image,
+    'texture': Texture
   };
 
   const $onMessageEvent = Symbol('onMessageEvent');
@@ -153,6 +163,10 @@ export function defineModelKernel(
 
       const id = this[$localIdsByElement].get(element);
 
+      if (value instanceof ThreeDOMElement) {
+        value = this[$localIdsByElement].get(value as ThreeDOMElement);
+      }
+
       return new Promise((resolve, reject) => {
         const mutationId = this[$nextMutationId]++;
         // TODO(#1006): Validate mutations before sending to host context:
@@ -183,6 +197,12 @@ export function defineModelKernel(
       }
 
       const {id} = serialized;
+
+      // TODO: Add test to ensure that we don't double-deserialize elements
+      if (this[$elementsByLocalId].has(id)) {
+        return this[$elementsByLocalId].get(id) as ThreeDOMElementMap[T];
+      }
+
       const ElementConstructor = constructorsByType[type];
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

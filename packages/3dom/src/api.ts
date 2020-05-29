@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
 
 /**
  * IMPORTANT NOTE: 3DOM is an experimental / radioactive API. It is very likely
@@ -30,7 +31,7 @@
  *    found in a model's scene graph
  */
 export declare type ThreeDOMCapability =
-    'messaging' | 'material-properties' | 'fetch';
+    'messaging' | 'material-properties' | 'textures' | 'fetch';
 
 /**
  * All constructs in a 3DOM scene graph have a corresponding string name.
@@ -41,6 +42,10 @@ export declare interface ThreeDOMElementMap {
   'model': Model;
   'material': Material;
   'pbr-metallic-roughness': PBRMetallicRoughness;
+  'sampler': Sampler;
+  'image': Image;
+  'texture': Texture;
+  'texture-info': TextureInfo;
 }
 
 /**
@@ -98,6 +103,14 @@ export declare interface ThreeDOMGlobalScope extends Worker {
    * checks; this class is not directly constructable.
    */
   PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+
+  Sampler: Constructor<Sampler>;
+
+  TextureInfo: Constructor<Sampler>;
+
+  Texture: Constructor<Texture>;
+
+  Image: Constructor<Image>;
 }
 
 /**
@@ -182,6 +195,56 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
    * Requires the 'material-properties' capability to be enabled.
    */
   setBaseColorFactor(rgba: RGBA): Promise<void>;
+}
+
+export declare interface TextureInfo extends ThreeDOMElement {
+  readonly texture: Texture|null;
+
+  setTexture(texture: Texture|null): Promise<void>;
+}
+
+export declare interface Texture extends ThreeDOMElement {
+  /**
+   * The name of the material, if any.
+   */
+  readonly name?: string;
+
+  readonly sampler: Sampler|null;
+  readonly source: Image|null;
+
+  setSampler(sampler: Sampler): Promise<void>;
+  setSource(image: Image): Promise<void>;
+}
+
+export declare interface Sampler extends ThreeDOMElement {
+  /**
+   * The name of the material, if any.
+   */
+  readonly name?: string;
+
+  readonly minFilter: MinFilter|null;
+  readonly magFilter: MagFilter|null;
+
+  readonly wrapS: WrapMode;
+  readonly wrapT: WrapMode;
+
+  setMinFilter(filter: MinFilter|null): Promise<void>;
+  setMagFilter(filter: MagFilter|null): Promise<void>;
+
+  setWrapS(mode: WrapMode): Promise<void>;
+  setWrapT(mode: WrapMode): Promise<void>;
+}
+
+export declare interface Image extends ThreeDOMElement {
+  /**
+   * The name of the material, if any.
+   */
+  readonly name?: string;
+
+  readonly type: 'embedded'|'external';
+  readonly uri: string|null;
+
+  setURI(uri: string): Promise<void>;
 }
 
 /**

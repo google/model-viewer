@@ -14,14 +14,17 @@
  */
 
 import {RGBA} from '../api.js';
-import {GLTF, GLTFElement} from '../gltf-2.0.js';
-import {SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedThreeDOMElement} from '../protocol.js';
+import {GLTF, GLTFElement, MagFilter, MinFilter, WrapMode} from '../gltf-2.0.js';
+import {SerializedImage, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedSampler, SerializedTexture, SerializedThreeDOMElement} from '../protocol.js';
 
 export interface ThreeDOMElement {
   readonly ownerModel: Model;
   readonly internalID: number;
   readonly name: string|null;
   readonly sourceObject: GLTF|GLTFElement;
+
+  mutate(property: string, value: unknown): Promise<void>;
+
   toJSON(): SerializedThreeDOMElement;
 }
 
@@ -32,7 +35,10 @@ export interface ThreeDOMElement {
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#pbrmetallicroughness
  */
 export interface PBRMetallicRoughness extends ThreeDOMElement {
-  baseColorFactor: RGBA;
+  readonly baseColorFactor: RGBA;
+
+  mutate(property: 'baseColorFactor', value: RGBA): Promise<void>;
+
   toJSON(): SerializedPBRMetallicRoughness;
 }
 
@@ -44,6 +50,32 @@ export interface PBRMetallicRoughness extends ThreeDOMElement {
 export interface Material extends ThreeDOMElement {
   readonly pbrMetallicRoughness: PBRMetallicRoughness|null;
   toJSON(): SerializedMaterial;
+}
+
+export type BufferView = ThreeDOMElement;
+
+export interface Image {
+  mutate(property: 'uri', value: string): Promise<void>;
+
+  toJSON(): SerializedImage;
+}
+
+export interface Sampler {
+  mutate(property: 'minFilter', value: MinFilter|null): Promise<void>;
+  mutate(property: 'magFilter', value: MagFilter|null): Promise<void>;
+  mutate(property: 'wrapS'|'wrapT', value: WrapMode|null): Promise<void>;
+
+  toJSON(): SerializedSampler;
+}
+
+export interface Texture extends ThreeDOMElement {
+  mutate(property: 'source'|'sampler', value: number|null): Promise<void>;
+
+  toJSON(): SerializedTexture;
+}
+
+export interface TextureInfo extends ThreeDOMElement {
+  mutate(property: 'texture', value: number|null): Promise<void>;
 }
 
 /**

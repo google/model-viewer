@@ -68,11 +68,55 @@ export interface OrthographicCamera {
 
 export type Camera = PerspectiveCamera|OrthographicCamera;
 
+export type NearestFilter = 9728;
+export type LinearFilter = 9729;
+export type NearestMipmapNearestFilter = 9984;
+export type LinearMipmapNearestFilter = 9985;
+export type NearestMipmapLinearFilter = 9986;
+export type LinearMipmapLinearFilter = 9987;
+
+export type MagFilter = NearestFilter|LinearFilter;
+export type MinFilter = NearestFilter|LinearFilter|NearestMipmapNearestFilter|
+    LinearMipmapNearestFilter|NearestMipmapLinearFilter|
+    LinearMipmapLinearFilter;
+
+export type ClampToEdgeWrap = 33071;
+export type MirroredRepeatWrap = 33648;
+export type RepeatWrap = 10497;
+
+export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap;
+
+export interface Sampler {
+  name?: string;
+  magFilter?: MagFilter;
+  minFilter?: MinFilter;
+  wrapS?: WrapMode;
+  wrapT?: WrapMode;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
+export interface Texture {
+  name?: string;
+  sampler?: number;
+  source?: number;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
 export interface TextureInfo {
   index: number;
   texCoord?: number;
   extensions?: ExtensionDictionary;
   extras?: Extras;
+}
+
+export interface OcclusionTextureInfo extends TextureInfo {
+  strength?: number;
+}
+
+export interface NormalTextureInfo extends TextureInfo {
+  scale?: number;
 }
 
 export interface PBRMetallicRoughness {
@@ -94,8 +138,8 @@ export interface Material {
   alphaCutoff?: number;
   emissiveFactor?: number;
   pbrMetallicRoughness?: PBRMetallicRoughness;
-  normalTexture?: TextureInfo;
-  occlusionTexture?: TextureInfo;
+  normalTexture?: NormalTextureInfo;
+  occlusionTexture?: OcclusionTextureInfo;
   emissiveTexture?: TextureInfo;
   extensions?: ExtensionDictionary;
   extras?: Extras;
@@ -144,7 +188,7 @@ export interface Texture {
 
 export interface ExternalImage {
   name?: string;
-  url: string;
+  uri: string;
   extensions?: ExtensionDictionary;
   extras?: Extras;
 }
@@ -235,15 +279,26 @@ export interface GLTFElementMap {
   'animation': Animation;
 }
 
+export interface Asset {
+  version: '2.0';
+  copyright?: string;
+  generator?: string;
+  minVersion?: string;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
 export interface GLTF {
-  scene: number;
-  scenes: Scene[];
-  nodes: Node[];
-  materials: Material[];
-  accessors: Accessor[];
-  images: Image[];
-  textures: Texture[];
-  meshes: Mesh[];
-  cameras: Camera[];
-  animations: Animation[];
+  asset: Asset;
+  scene?: number;
+  scenes?: Scene[];
+  nodes?: Node[];
+  materials?: Material[];
+  accessors?: Accessor[];
+  samplers?: Sampler[];
+  images?: Image[];
+  textures?: Texture[];
+  meshes?: Mesh[];
+  cameras?: Camera[];
+  animations?: Animation[];
 }
