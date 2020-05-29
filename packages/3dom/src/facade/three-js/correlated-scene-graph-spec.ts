@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial, Object3D} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {GLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../gltf-2.0.js';
 import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
@@ -23,6 +24,8 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
+const KHRONOS_TRIANGLE_GLB_PATH =
+    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
 
 const getObject3DByName =
     <T extends Object3D>(root: Object3D, name: string): T|null => {
@@ -86,6 +89,27 @@ suite('facade/three-js/correlated-scene-graph', () => {
       const referencedGltfTexture = threeGLTF.parser.json[type][index];
 
       expect(referencedGltfTexture).to.be.equal(gltfTexture);
+    });
+
+    suite('when correlating a cloned glTF', () => {
+      test('ignores the GLTFLoader "default" material', async () => {
+        const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
+        const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
+
+        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
+        const scenes: Group[] = [scene];
+
+        const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};
+
+        const cloneCorrelatedSceneGraph =
+            CorrelatedSceneGraph.from(cloneThreeGLTF, correlatedSceneGraph);
+
+        for (const threeObject of
+                 cloneCorrelatedSceneGraph.threeObjectMap.keys()) {
+          expect((threeObject as MeshStandardMaterial).isMaterial)
+              .to.be.undefined;
+        }
+      });
     });
   });
 });
