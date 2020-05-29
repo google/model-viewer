@@ -59,7 +59,7 @@
     "typescript": "3.7.3"
   },
   "dependencies": {
-    "three": "^0.117.0"
+    "three": "^0.117.1"
   },
   "publishConfig": {
     "access": "public"
