@@ -14,10 +14,12 @@
  */
 
 import {property} from 'lit-element';
+import {Event as ThreeEvent} from 'three';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
+import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 /**
@@ -112,6 +114,10 @@ const ARMode: {[index: string]: ARMode} = {
   NONE: 'none'
 };
 
+export interface ARStatusDetails {
+  status: ARStatus;
+}
+
 const $arButtonContainer = Symbol('arButtonContainer');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 const $canActivateAR = Symbol('canActivateAR');
@@ -120,8 +126,8 @@ const $arModes = Symbol('arModes');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 
-const $arButtonContainerClickHandler = Symbol('arButtonContainerClickHandler');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
+const $onARStatus = Symbol('onARStatus');
 
 export declare interface ARInterface {
   ar: boolean;
@@ -161,13 +167,22 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arButtonContainer]: HTMLElement =
         this.shadowRoot!.querySelector('.ar-button') as HTMLElement;
 
-    protected[$arButtonContainerClickHandler]: (event: Event) => void =
-        (event) => this[$onARButtonContainerClick](event);
-
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
 
     protected[$quickLookBrowsers]: Set<QuickLookBrowser> = new Set();
+
+    private[$onARButtonContainerClick] = (event: Event) => {
+      event.preventDefault();
+      this.activateAR();
+    };
+
+    private[$onARStatus] = ({status}: ThreeEvent) => {
+      if (this[$renderer].arRenderer.presentedScene === this[$scene]) {
+        this.dispatchEvent(
+            new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
+      }
+    };
 
     /**
      * Activates AR. Note that for any mode that is not WebXR-based, this
@@ -203,6 +218,19 @@ configuration or device capabilities');
         console.warn('Error while trying to present to AR');
         console.error(error);
       }
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+
+      this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+
+      this[$renderer].arRenderer.removeEventListener(
+          'status', this[$onARStatus]);
     }
 
     async update(changedProperties: Map<string, any>) {
@@ -253,17 +281,12 @@ configuration or device capabilities');
       if (this.canActivateAR) {
         this[$arButtonContainer].classList.add('enabled');
         this[$arButtonContainer].addEventListener(
-            'click', this[$arButtonContainerClickHandler]);
+            'click', this[$onARButtonContainerClick]);
       } else {
         this[$arButtonContainer].removeEventListener(
-            'click', this[$arButtonContainerClickHandler]);
+            'click', this[$onARButtonContainerClick]);
         this[$arButtonContainer].classList.remove('enabled');
       }
-    }
-
-    [$onARButtonContainerClick](event: Event) {
-      event.preventDefault();
-      this.activateAR();
     }
 
     get[$canLaunchQuickLook](): boolean {
