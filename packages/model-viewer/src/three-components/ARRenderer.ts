@@ -348,6 +348,9 @@ export class ARRenderer extends EventDispatcher {
       element[$onResize](element.getBoundingClientRect());
     }
 
+    // Force the Renderer to update its size
+    this.renderer.height = 0;
+
     const exitButton = this[$exitWebXRButtonContainer];
     if (exitButton != null) {
       exitButton.classList.remove('enabled');
