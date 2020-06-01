@@ -33,7 +33,7 @@ const watchFiles = ['lib/**', '../3dom/lib/**'];
 const outputOptions = [{
   input: './lib/model-viewer.js',
   output: {
-    file: './dist/model-viewer.js',
+    file: './dist/model-viewer.min.js',
     sourcemap: true,
     format: 'esm',
     name: 'ModelViewerElement'
@@ -46,28 +46,19 @@ const outputOptions = [{
 }];
 
 if (NODE_ENV !== 'development') {
-  plugins = [...plugins, cleanup({
-    // Ideally we'd also clean third_party/three, which saves
-    // ~45kb in filesize alone... but takes 2 minutes to build
-    include: ['lib/**'],
-    comments: 'none',
-  }), terser()];
+  plugins = [
+    ...plugins,
+    cleanup({
+      // Ideally we'd also clean third_party/three, which saves
+      // ~45kb in filesize alone... but takes 2 minutes to build
+      include: ['lib/**'],
+      comments: 'none',
+    })
+  ];
 
+  // IE11 does not support modules, so they are removed here, as well as in a
+  // dedicated unit test build which is needed for the same reason.
   outputOptions.push(
-      {
-        input: './lib/model-viewer.js',
-        output: {
-          file: './dist/model-viewer.min.js',
-          sourcemap: true,
-          format: 'esm',
-          name: 'ModelViewerElement'
-        },
-        watch: {
-          include: watchFiles,
-        },
-        plugins,
-        onwarn,
-      },
       {
         input: './lib/model-viewer.js',
         output: {
@@ -88,6 +79,25 @@ if (NODE_ENV !== 'development') {
           file: './dist/unit-tests-umd.js',
           format: 'umd',
           name: 'ModelViewerElementUnitTests'
+        },
+        watch: {
+          include: watchFiles,
+        },
+        plugins,
+        onwarn,
+      },
+  );
+
+  plugins = [...plugins, terser()];
+
+  outputOptions.push(
+      {
+        input: './lib/model-viewer.js',
+        output: {
+          file: './dist/model-viewer.min.js',
+          sourcemap: true,
+          format: 'esm',
+          name: 'ModelViewerElement'
         },
         watch: {
           include: watchFiles,
