@@ -33,7 +33,7 @@ const watchFiles = ['lib/**', '../3dom/lib/**'];
 const outputOptions = [{
   input: './lib/model-viewer.js',
   output: {
-    file: './dist/model-viewer.min.js',
+    file: './dist/model-viewer.js',
     sourcemap: true,
     format: 'esm',
     name: 'ModelViewerElement'
@@ -88,11 +88,11 @@ if (NODE_ENV !== 'development') {
       },
   );
 
-  plugins = [...plugins, terser()];
+  plugins = [terser()];
 
   outputOptions.push(
       {
-        input: './lib/model-viewer.js',
+        input: './dist/model-viewer.js',
         output: {
           file: './dist/model-viewer.min.js',
           sourcemap: true,
