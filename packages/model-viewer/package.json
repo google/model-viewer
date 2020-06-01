@@ -14,6 +14,7 @@
   "contributors": [
     "Jordan Santell <jsantell@google.com>",
     "Chris Joel <cdata@google.com>",
+    "Emmett Lalish <elalish@google.com",
     "Ricardo Cabello <ricardocabello@google.com>",
     "Matt Small <mbsmall@google.com>",
     "Yuin Chin <yuin@google.com>"
@@ -21,15 +22,11 @@
   "main": "./lib/model-viewer.js",
   "module": "./lib/model-viewer.js",
   "files": [
-    "src",
-    "lib",
     "dist/model-viewer.js",
     "dist/model-viewer.min.js",
     "dist/model-viewer-legacy.js",
     "dist/unit-tests-legacy.js",
-    "test.html",
-    "POLYFILLS.md",
-    "wct.conf.json"
+    "POLYFILLS.md"
   ],
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
