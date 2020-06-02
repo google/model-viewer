@@ -22,17 +22,19 @@ const require = module.createRequire(import.meta.url);
 
 import {ArtifactCreator} from '../artifact-creator.js';
 
+
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
 const config = require(configPath);
 
 const outputDirectory = join(rootDirectory, 'results');
+const portal = 9030;
 const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
-    `http://localhost:9030/test/renderers/model-viewer/`);
+    `http://localhost:${portal}/test/renderers/model-viewer/`);
 const server = HTTPServer.createServer({root: './', cache: -1});
-server.listen(9030);
+server.listen(portal);
 
 
 try {
@@ -43,6 +45,7 @@ try {
 
 let scenarioWhitelist: Set<string>|null = null;
 
+// add additional arguments into scenariowhitelist which will not be rendered
 if (process.argv.length > 3) {
   scenarioWhitelist = new Set();
 
@@ -50,6 +53,7 @@ if (process.argv.length > 3) {
     scenarioWhitelist.add(process.argv[i]);
   }
 }
+
 
 screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
