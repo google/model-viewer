@@ -46,7 +46,7 @@ const outputOptions = [{
 }];
 
 if (NODE_ENV !== 'development') {
-  plugins = [
+  const pluginsIE11 = [
     ...plugins,
     cleanup({
       // Ideally we'd also clean third_party/three, which saves
@@ -70,7 +70,7 @@ if (NODE_ENV !== 'development') {
         watch: {
           include: watchFiles,
         },
-        plugins,
+        pluginsIE11,
         onwarn,
       },
       {
@@ -83,16 +83,16 @@ if (NODE_ENV !== 'development') {
         watch: {
           include: watchFiles,
         },
-        plugins,
+        pluginsIE11,
         onwarn,
       },
   );
 
-  plugins = [terser()];
+  plugins = [...plugins, terser()];
 
   outputOptions.push(
       {
-        input: './dist/model-viewer.js',
+        input: './lib/model-viewer.js',
         output: {
           file: './dist/model-viewer.min.js',
           sourcemap: true,
