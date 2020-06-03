@@ -14,8 +14,11 @@
  */
 
 import {ThreeDOMExecutionContext} from './context.js';
+import {CorrelatedSceneGraph} from './facade/three-js/correlated-scene-graph.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
-import {createFakeGLTF, waitForEvent} from './test-helpers.js';
+import {assetPath, loadThreeGLTF, waitForEvent} from './test-helpers.js';
+
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('context', () => {
   suite('ThreeDOMExecutionContext', () => {
@@ -70,7 +73,10 @@ suite('context', () => {
 
     suite('when the model changes', () => {
       test('dispatches an event in the worker', async () => {
-        const modelGraft = new ModelGraft('', createFakeGLTF());
+        const modelGraft = new ModelGraft(
+            '',
+            await CorrelatedSceneGraph.from(
+                await loadThreeGLTF(ASTRONAUT_GLB_PATH)));
         const context = new ThreeDOMExecutionContext(['messaging']);
         const workerConfirmsEvent = waitForEvent(context.worker, 'message');
 

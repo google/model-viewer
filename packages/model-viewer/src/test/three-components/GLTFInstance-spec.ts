@@ -16,7 +16,7 @@
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$prepared, GLTFInstance, PreparedGLTF} from '../../three-components/GLTFInstance.js';
-import {createFakeGLTF} from '../helpers.js';
+import {createFakeThreeGLTF} from '../helpers.js';
 
 
 const expect = chai.expect;
@@ -26,8 +26,8 @@ suite('GLTFInstance', () => {
   let preparedGLTF: PreparedGLTF;
 
   setup(async () => {
-    rawGLTF = createFakeGLTF();
-    preparedGLTF = GLTFInstance.prepare(rawGLTF);
+    rawGLTF = createFakeThreeGLTF();
+    preparedGLTF = await GLTFInstance.prepare(rawGLTF);
   });
 
   suite('with a prepared GLTF', () => {
@@ -37,9 +37,9 @@ suite('GLTFInstance', () => {
     });
 
     suite('when cloned', () => {
-      test('creates a unique scene', () => {
+      test('creates a unique scene', async () => {
         const gltfInstance = new GLTFInstance(preparedGLTF);
-        const cloneInstance = gltfInstance.clone();
+        const cloneInstance = await gltfInstance.clone();
 
         expect(cloneInstance.scene).to.be.ok;
         expect(cloneInstance.scene).to.not.be.equal(gltfInstance.scene);

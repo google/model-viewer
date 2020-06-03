@@ -22,7 +22,7 @@ import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, deserializeUrl, resolveDpr} from './utilities.js';
+import {debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -35,19 +35,17 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 const blobCanvas = document.createElement('canvas');
 let blobContext: CanvasRenderingContext2D|null = null;
 
-const $selectCanvas = Symbol('selectCanvas');
-const $updateSize = Symbol('updateSize');
 const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
-const $lastDpr = Symbol('lastDpr');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
+export const $updateSize = Symbol('updateSize');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');
@@ -57,7 +55,6 @@ export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
-export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
@@ -119,10 +116,27 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
 
+  /** @export */
+  static set minimumRenderScale(value: number) {
+    if (value > 1) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
+    }
+    if (value <= 0) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+    }
+    Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
+  }
+
+  /** @export */
+  static get minimumRenderScale(): number {
+    return Renderer.singleton.minScale;
+  }
+
   @property({type: String}) alt: string|null = null;
 
-  @property({converter: {fromAttribute: deserializeUrl}})
-  src: string|null = null;
+  @property({type: String}) src: string|null = null;
 
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;
@@ -132,7 +146,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$defaultAriaLabel]: string;
-  protected[$lastDpr]: number = resolveDpr();
   protected[$clearModelTimeout]: number|null = null;
 
   protected[$fallbackResizeHandler] = debounce(() => {
@@ -228,7 +241,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
     Promise.resolve().then(() => {
-      this[$updateSize](this.getBoundingClientRect(), true);
+      this[$updateSize](this.getBoundingClientRect());
     });
 
     if (HAS_RESIZE_OBSERVER) {
@@ -275,7 +288,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
         }
       }, {
         root: null,
-        rootMargin: '10px',
+        // We used to have margin here, but it was causing animated models below
+        // the fold to steal the frame budget. Weirder still, it would also
+        // cause input events to be swallowed, sometimes for seconds on the
+        // model above the fold, but only when the animated model was completely
+        // below. Setting this margin to zero fixed it.
+        rootMargin: '0px',
         threshold: 0,
       });
     } else {
@@ -298,13 +316,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
-    this[$renderer].addEventListener(
+    const renderer = this[$renderer];
+    renderer.addEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].registerScene(this[$scene]);
-    this[$selectCanvas]();
-    this[$scene].isDirty = true;
+    renderer.registerScene(this[$scene]);
 
     if (this[$clearModelTimeout] != null) {
       self.clearTimeout(this[$clearModelTimeout]!);
@@ -327,12 +344,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.unobserve(this);
     }
 
-    this[$renderer].removeEventListener(
+    const renderer = this[$renderer];
+    renderer.removeEventListener(
         'contextlost',
         this[$contextLostHandler] as (event: ThreeEvent) => void);
 
-    this[$renderer].unregisterScene(this[$scene]);
-    this[$selectCanvas]();
+    renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
@@ -361,7 +378,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$displayCanvas].toDataURL(type, encoderOptions);
+    return this[$renderer]
+        .displayCanvas(this[$scene])
+        .toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -371,7 +390,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const idealAspect = options ? options.idealAspect : undefined;
 
     const {width, height, model, aspect} = this[$scene];
-    const dpr = resolveDpr();
+    const {dpr} = this[$renderer];
     let outputWidth = width * dpr;
     let outputHeight = height * dpr;
     let offsetX = 0;
@@ -395,7 +414,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           blobContext = blobCanvas.getContext('2d');
         }
         blobContext!.drawImage(
-            this[$displayCanvas],
+            this[$renderer].displayCanvas(this[$scene]),
             offsetX,
             offsetY,
             outputWidth,
@@ -450,55 +469,16 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   /**
-   * The function enables an optimization, where when there is only a single
-   * <model-viewer> element, we can use the renderer's 3D canvas directly for
-   * display. Otherwise we need to use the element's 2D canvas and copy the
-   * renderer's result into it.
-   */
-  [$selectCanvas]() {
-    if (this[$renderer].hasOnlyOneScene) {
-      this[$userInputElement].appendChild(this[$renderer].canvasElement);
-      this[$canvas].classList.remove('show');
-    } else {
-      this[$renderer].canvasElement.classList.remove('show');
-    }
-  }
-
-  get[$displayCanvas]() {
-    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
-                                             this[$canvas];
-  }
-
-  /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize](
-      {width, height}: {width: any, height: any}, forceApply = false) {
-    const {width: prevWidth, height: prevHeight} = this[$scene].getSize();
-    // Round off the pixel size
-    const intWidth = parseInt(width, 10);
-    const intHeight = parseInt(height, 10);
-
+  [$updateSize]({width, height}: {width: any, height: any}) {
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    if (forceApply || (prevWidth !== intWidth || prevHeight !== intHeight)) {
-      this[$onResize]({width: intWidth, height: intHeight});
-    }
+    this[$onResize]({width: parseFloat(width), height: parseFloat(height)});
   }
 
   [$tick](_time: number, _delta: number) {
-    const dpr = resolveDpr();
-    // There is no standard way to detect when DPR changes on account of zoom.
-    // Here we keep a local copy of DPR updated, and when it changes we invoke
-    // the fallback resize handler. It might be better to invoke the resize
-    // handler directly in this case, but the fallback is debounced which will
-    // save us from doing too much work when DPR and window size changes at the
-    // same time.
-    if (dpr !== this[$lastDpr]) {
-      this[$lastDpr] = dpr;
-      this[$fallbackResizeHandler]();
-    }
   }
 
   [$markLoaded]() {
@@ -522,7 +502,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
-    this[$needsRender]();
   }
 
   [$onContextLost](event: ContextLostEvent) {
@@ -539,14 +518,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async[$updateSource]() {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
-
-    const canvas = this[$displayCanvas];
     try {
-      canvas.classList.add('show');
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
     } catch (error) {
-      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
       updateSourceProgress(1.0);

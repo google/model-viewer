@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
+import {CorrelatedSceneGraph} from '@google/3dom/lib/facade/three-js/correlated-scene-graph.js';
 import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper.js';
 
-import {$clone, $prepare, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
+import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
 import {Renderer} from '../Renderer.js';
 import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 
 const $roughnessMipmapper = Symbol('roughnessMipmapper');
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
+const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
+
+interface PreparedModelViewerGLTF extends PreparedGLTF {
+  [$correlatedSceneGraph]?: CorrelatedSceneGraph;
+}
 
 /**
  * This specialization of GLTFInstance collects all of the processing needed
@@ -38,7 +44,12 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
    * @override
    */
   protected static[$prepare](source: GLTF) {
-    const prepared = super[$prepare](source);
+    const prepared = super[$prepare](source) as PreparedModelViewerGLTF;
+
+    if (prepared[$correlatedSceneGraph] == null) {
+      prepared[$correlatedSceneGraph] = CorrelatedSceneGraph.from(prepared);
+    }
+
     const {scene} = prepared;
 
     const meshesToDuplicate: Mesh[] = [];
@@ -109,11 +120,16 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     return prepared;
   }
 
+  get correlatedSceneGraph() {
+    return (
+        this[$preparedGLTF] as PreparedModelViewerGLTF)[$correlatedSceneGraph]!;
+  }
+
   /**
    * @override
    */
   [$clone](): PreparedGLTF {
-    const clone = super[$clone]();
+    const clone: PreparedModelViewerGLTF = super[$clone]();
     const sourceUUIDToClonedMaterial = new Map<string, Material>();
 
     clone.scene.traverse((node: any) => {
@@ -133,6 +149,12 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         }
       }
     });
+
+    // Cross-correlate the scene graph by relying on information in the
+    // current scene graph; without this step, relationships between the
+    // Three.js object graph and the glTF scene graph will be lost.
+    clone[$correlatedSceneGraph] =
+        CorrelatedSceneGraph.from(clone, this.correlatedSceneGraph);
 
     return clone;
   }

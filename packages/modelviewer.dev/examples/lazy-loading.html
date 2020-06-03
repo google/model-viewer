@@ -88,7 +88,7 @@
     --poster-color: transparent;
   }
 </style>
-<model-viewer id="reveal" preload camera-controls auto-rotate poster="../assets/poster-shishkebab.png" src="../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
+<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="../assets/poster-shishkebab.png" src="../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -105,8 +105,13 @@
         </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
+<style>
+  model-viewer#interaction {
+    --poster-color: transparent;
+  }
+</style>
 <!-- use unique asset to ensure preloading -->
-<model-viewer id="interaction" camera-controls preload reveal="interaction" poster="../assets/poster-sphere.png" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
+<model-viewer id="interaction" camera-controls loading="eager" reveal="interaction" poster="../assets/poster-sphere.png" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
           </template>
         </example-snippet>
       </div>

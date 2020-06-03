@@ -88,7 +88,8 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
-      'ChromeHeadless',
+      // TODO(#1207)
+      // 'ChromeHeadless',
     ],
   });
 
@@ -101,20 +102,28 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      'Edge (latest)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Edge',
-        browser_version: 'latest',
-      },
-      // 'Edge 80.0': {
+      // TODO(#1207)
+      // 'Edge (latest)': {
       //   base: 'BrowserStack',
       //   os: 'Windows',
       //   os_version: '10',
       //   browser: 'Edge',
-      //   browser_version: '80.0',
+      //   browser_version: 'latest',
       // },
+      'Chrome 83.0 (Beta)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Chrome',
+        browser_version: '83.0 beta',
+      },
+      'Edge 83.0 (Beta)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: '83.0 beta',
+      },
       'Firefox (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
@@ -149,18 +158,17 @@ module.exports = function(config) {
         // instances, causing them to time out:
         url: 'http://127.0.0.1:9876'
       },
-      // 'iOS Safari (iOS 13)': {
-      //   base: 'BrowserStack',
-      //   os: 'iOS',
-      //   os_version: '13',
-      //   device: 'iPhone 8',
-      //   browser: 'iPhone',
-      //   real_mobile: 'true',
-      //   // BrowserStack seems to drop the port when redirecting to this
-      //   special
-      //   // domain so we go there directly instead:
-      //   url: 'http://bs-local.com:9876'
-      // },
+      'iOS Safari (iOS 13)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '13',
+        device: 'iPhone 8',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        // BrowserStack seems to drop the port when redirecting to this special
+        // domain so we go there directly instead:
+        url: 'http://bs-local.com:9876'
+      },
       'iOS Safari (iOS 12)': {
         base: 'BrowserStack',
         os: 'iOS',

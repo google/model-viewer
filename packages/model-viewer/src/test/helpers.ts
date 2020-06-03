@@ -209,7 +209,7 @@ export const functionNode =
     (name: string, args: Array<ExpressionNode>): FunctionNode =>
         ({type: 'function', name: identNode(name), arguments: args});
 
-export const createFakeGLTF = () => {
+export const createFakeThreeGLTF = () => {
   const scene = new Group();
 
   return {
@@ -218,7 +218,11 @@ export const createFakeGLTF = () => {
     scenes: [scene],
     cameras: [],
     asset: {},
-    parser: {} as unknown as GLTFParser,
+    parser: {
+      cache: new Map(),
+      json: {scene: 0, scenes: [{}], materials: [], nodes: []},
+      associations: new Map()
+    } as unknown as GLTFParser,
     userData: {}
   };
 };

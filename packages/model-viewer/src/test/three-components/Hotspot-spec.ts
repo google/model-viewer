@@ -54,6 +54,10 @@ suite('Hotspot', () => {
       });
 
       suite('when shown', () => {
+        setup(() => {
+          hotspot.show();
+        });
+
         test('adds a corresponding data-* attribute to assigned nodes', () => {
           expect(assigned.hasAttribute('data-bar')).to.be.true;
         });
@@ -70,7 +74,7 @@ suite('Hotspot', () => {
       });
     });
 
-    suite('when hidden', () => {
+    suite('when shown', () => {
       let event: CustomEvent<HotspotVisibilityDetails>;
       let hotspot: Hotspot;
 
@@ -82,7 +86,7 @@ suite('Hotspot', () => {
 
         const assignedNodeHides = waitForEvent(assigned, 'hotspot-visibility');
 
-        hotspot.hide();
+        hotspot.show();
 
         event = await (
             assignedNodeHides as
@@ -90,22 +94,22 @@ suite('Hotspot', () => {
       });
 
       test('dispatches a "visibility-change" on assigned nodes', async () => {
-        expect(event.detail.visible).to.be.false;
+        expect(event.detail.visible).to.be.true;
       });
 
 
-      suite('and then shown', () => {
+      suite('and then hidden', () => {
         test('dispatches a "visibility-change" on assigned nodes', async () => {
           const assignedNodeHides =
               waitForEvent(assigned, 'hotspot-visibility');
 
-          hotspot.show();
+          hotspot.hide();
 
           const event = await (
               assignedNodeHides as
               Promise<CustomEvent<HotspotVisibilityDetails>>);
 
-          expect(event.detail.visible).to.be.true;
+          expect(event.detail.visible).to.be.false;
         });
       });
     });

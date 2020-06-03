@@ -19,6 +19,7 @@
 <head>
   <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
+  <meta name="description" content="Easily display interactive 3D models on the web and in AR">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
@@ -335,10 +336,14 @@
                 on lazy loading</a> for examples.</p>
             </li>
             <li>
-              <div>preload</div>
-              <p>When poster is also enabled, the model will be downloaded
-              before user action. See <a href="./examples/lazy-loading.html">our
-              section on lazy loading</a> for examples.</p>
+              <div>loading</div>
+              <p>An enumerable attribute describing under what conditions the
+              model should be preloaded. The supported values are "auto", "lazy" 
+              and "eager". Auto is equivalent to lazy, which loads the model
+              when it is near the viewport for reveal = "auto", and when interacted
+              with for reveal = "interaction". Eager loads the model immediately. 
+              See <a href="./examples/lazy-loading.html">our section on lazy loading</a> 
+              for examples. Defaults to "auto".</p>
             </li>
             <li>
               <div>quick-look-browsers</div>
@@ -349,13 +354,13 @@
             </li>
             <li>
               <div>reveal</div>
-              <p>This attribute controls whether or not the model should be
-              automatically revealed when loaded. It currently supports two
-              values: "auto" and "interaction". If reveal is set to
+              <p>This attribute controls when the model should be revealed. It currently supports three
+              values: "auto", "interaction", and "manual". If reveal is set to
               "interaction", &lt;model-viewer&gt; will wait until the user
               interacts with the poster before loading and revealing the model.
-              Otherwise, the model will be revealed as soon as it is done
-              loading and rendering. Defaults to "auto".</p>
+              If set to "auto", the model will be revealed as soon as it is done
+              loading and rendering. If set to "manual", the model will remain hidden 
+              until dismissPoster() is called. Defaults to "auto".</p>
             </li>
             <li>
               <div>shadow-intensity</div>
@@ -468,6 +473,12 @@
               loaded from a Google CDN.</p>
             </li>
             <li>
+              <div>ModelViewer.minimumRenderScale</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering 
+              scale factor as it dynamically changes resolution to maintain framerate. Turn 
+              off this effect by setting to 1. Defaults to 0.5.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -476,7 +487,7 @@
               if they are not being used by a &lt;model-viewer&gt; element in the document.
               Note also that the cache size is measured in number of glTF models, not bytes!
               This is important to keep in mind, since any two models may have wildly
-              different byte sizes.</p>
+              different byte sizes. Default is 5.</p>
             </li>
           </ul>
 
@@ -676,7 +687,7 @@
             </li>
             <li>
               <div>preload</div>
-              <p>When preload is enabled this event is fired when preloading is done.</p>
+              <p>When loading = "eager" this event is fired when preloading is done.</p>
             </li>
           </ul>
 

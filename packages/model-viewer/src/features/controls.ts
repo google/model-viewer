@@ -240,6 +240,8 @@ export declare interface ControlsInterface {
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
+  getMinimumFieldOfView(): number;
+  getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
   resetInteractionPrompt(): void;
 }
@@ -363,6 +365,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$controls].getFieldOfView();
     }
 
+    // Provided so user code does not have to parse these from attributes.
+    getMinimumFieldOfView(): number {
+      return this[$controls].options.minimumFieldOfView!;
+    }
+
+    getMaximumFieldOfView(): number {
+      return this[$controls].options.maximumFieldOfView!;
+    }
+
     jumpCameraToGoal() {
       this[$jumpCamera] = true;
       this.requestUpdate($jumpCamera, false);
@@ -457,7 +468,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
-      this[$updateCameraForRadius](style[2]);
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -476,6 +486,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         maximumPolarAngle: style[1],
         maximumRadius: style[2]
       });
+      this[$updateCameraForRadius](style[2]);
       this.jumpCameraToGoal();
     }
 
@@ -494,6 +505,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
       this[$scene].setTarget(x, y, z);
+      this[$renderer].arRenderer.updateTarget();
     }
 
     [$tick](time: number, delta: number) {
@@ -532,17 +544,19 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
 
-        const xOffset = offset * scene.width * 0.05;
-        const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
-
-        this[$promptAnimatedContainer].style.transform =
-            `translateX(${xOffset}px)`;
         this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
-        this[$controls].adjustOrbit(deltaTheta, 0, 0);
+        if (offset !== this[$lastPromptOffset]) {
+          const xOffset = offset * scene.width * 0.05;
+          const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
 
-        this[$lastPromptOffset] = offset;
-        this[$needsRender]();
+          this[$promptAnimatedContainer].style.transform =
+              `translateX(${xOffset}px)`;
+
+          this[$controls].adjustOrbit(deltaTheta, 0, 0);
+
+          this[$lastPromptOffset] = offset;
+        }
       }
 
       this[$controls].update(time, delta);

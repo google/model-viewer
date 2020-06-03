@@ -18,7 +18,7 @@ import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ModelViewerGLTFInstance} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {PreparedGLTF} from '../../../three-components/GLTFInstance.js';
-import {createFakeGLTF} from '../../helpers.js';
+import {createFakeThreeGLTF} from '../../helpers.js';
 
 
 const expect = chai.expect;
@@ -28,7 +28,7 @@ suite('ModelViewerGLTFInstance', () => {
   let preparedGLTF: PreparedGLTF;
 
   setup(async () => {
-    rawGLTF = createFakeGLTF();
+    rawGLTF = createFakeThreeGLTF();
 
     const materialOne = new MeshStandardMaterial();
     const materialTwo = new MeshStandardMaterial();
@@ -42,7 +42,7 @@ suite('ModelViewerGLTFInstance', () => {
 
     rawGLTF.scene.add(meshOne, meshTwo, meshThree);
 
-    preparedGLTF = ModelViewerGLTFInstance.prepare(rawGLTF);
+    preparedGLTF = await ModelViewerGLTFInstance.prepare(rawGLTF);
   });
 
   suite('with a prepared GLTF', () => {
@@ -50,9 +50,9 @@ suite('ModelViewerGLTFInstance', () => {
       let cloneInstance: ModelViewerGLTFInstance;
       let gltfInstance: ModelViewerGLTFInstance;
 
-      setup(() => {
+      setup(async () => {
         gltfInstance = new ModelViewerGLTFInstance(preparedGLTF);
-        cloneInstance = gltfInstance.clone();
+        cloneInstance = await gltfInstance.clone<ModelViewerGLTFInstance>();
       });
 
       teardown(() => {

@@ -27,6 +27,8 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const DEFAULT_MIN_FOV = 25;
+const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
@@ -223,6 +225,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
       });
 
+      test('defaults FOV limits correctly', async () => {
+        expect(element.getMinimumFieldOfView()).to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
+        expect(element.getMaximumFieldOfView()).to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
+      });
+
       test('can independently adjust FOV', async () => {
         const fov = element.getFieldOfView();
         const nextFov = fov - 1.0;
@@ -373,10 +380,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             }
           });
 
-          test('respects user-configured maxFieldOfView', async () => {
+          test('respects user-configured min/maxFieldOfView', async () => {
             document.body.insertBefore(
                 initiallyUnloadedElement, document.body.firstChild);
 
+            initiallyUnloadedElement.minFieldOfView = '90deg';
             initiallyUnloadedElement.maxFieldOfView = '100deg';
             initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
 
@@ -388,6 +396,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             settleControls(controls);
 
             expect(initiallyUnloadedElement.getFieldOfView())
+                .to.be.closeTo(100, 0.001);
+
+            expect(initiallyUnloadedElement.getMinimumFieldOfView())
+                .to.be.closeTo(90, 0.001);
+
+            expect(initiallyUnloadedElement.getMaximumFieldOfView())
                 .to.be.closeTo(100, 0.001);
           });
         });
@@ -445,6 +459,31 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             element[$scene].model.position);
         expect(controls.options.maximumRadius).to.be.at.least(cameraDistance);
       });
+
+      test(
+          'with a large radius, sets far plane to contain the model',
+          async () => {
+            const maxRadius = 10;
+            element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+            await timePasses();
+
+            const cameraDistance = element[$scene].camera.position.distanceTo(
+                element[$scene].model.position);
+            expect(controls.camera.far)
+                .to.be.at.least(cameraDistance + maxRadius);
+          });
+
+      test(
+          'with zero radius, sets far plane to contain the model', async () => {
+            const maxRadius = 0;
+            element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+            await timePasses();
+
+            const cameraDistance = element[$scene].camera.position.distanceTo(
+                element[$scene].model.position);
+            expect(controls.camera.far)
+                .to.be.at.least(cameraDistance + maxRadius);
+          });
 
       test('disables interaction if disabled after enabled', async () => {
         element.cameraControls = false;

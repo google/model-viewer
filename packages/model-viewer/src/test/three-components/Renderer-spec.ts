@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$canvas, $onResize, $renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $onResize, $renderer, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
@@ -77,6 +77,7 @@ suite('Renderer', () => {
 
   teardown(() => {
     renderer.unregisterScene(scene);
+    renderer.render(performance.now());
   });
 
   suite('render', () => {
@@ -88,17 +89,18 @@ suite('Renderer', () => {
 
     teardown(() => {
       renderer.unregisterScene(otherScene);
+      renderer.render(performance.now());
     });
 
     test('renders only dirty scenes', async function() {
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(1);
+      expect(otherScene.renderCount).to.be.equal(1);
 
       scene.isDirty = true;
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(otherScene.renderCount).to.be.equal(0);
+      expect(scene.renderCount).to.be.equal(2);
+      expect(otherScene.renderCount).to.be.equal(1);
     });
 
     test('marks scenes no longer dirty after rendering', async function() {
@@ -129,6 +131,24 @@ suite('Renderer', () => {
       expect(!scene.isDirty).to.be.ok;
     });
 
+    test('uses the proper canvas when unregsitering scenes', function() {
+      renderer.render(performance.now());
+
+      expect(renderer.canvasElement.classList.contains('show')).to.be.eq(false);
+      expect(scene.element[$canvas].classList.contains('show')).to.be.eq(true);
+      expect(otherScene.element[$canvas].classList.contains('show'))
+          .to.be.eq(true);
+
+      renderer.unregisterScene(scene);
+      renderer.render(performance.now());
+
+      expect(renderer.canvasElement.parentElement)
+          .to.be.eq(otherScene.element[$userInputElement]);
+      expect(renderer.canvasElement.classList.contains('show')).to.be.eq(true);
+      expect(otherScene.element[$canvas].classList.contains('show'))
+          .to.be.eq(false);
+    });
+
     suite('when resizing', () => {
       let originalDpr: number;
 
@@ -142,7 +162,7 @@ suite('Renderer', () => {
 
       test('updates effective DPR', async () => {
         const {element} = scene;
-        const initialDpr = renderer.threeRenderer.getPixelRatio();
+        const initialDpr = renderer.dpr;
         const {width, height} = scene.getSize();
 
         element[$onResize]({width, height});
@@ -152,7 +172,7 @@ suite('Renderer', () => {
 
         await new Promise(resolve => requestAnimationFrame(resolve));
 
-        const newDpr = renderer.threeRenderer.getPixelRatio();
+        const newDpr = renderer.dpr;
 
         expect(newDpr).to.be.equal(initialDpr + 1);
       });

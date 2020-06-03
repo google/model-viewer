@@ -17,10 +17,9 @@ import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
 import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {property} from 'lit-element';
-import {Group} from 'three';
-import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
 const SCENE_GRAPH_SCRIPT_TYPE = 'experimental-scene-graph-worklet';
@@ -34,6 +33,7 @@ const $createExecutionContext = Symbol('createExecutionContext');
 const $onScriptElementAdded = Symbol('onScriptElementAdded');
 const $executionContext = Symbol('executionContext');
 const $updateExecutionContextModel = Symbol('updateExecutionContextModel');
+const $currentGLTF = Symbol('currentGLTF');
 const $modelGraft = Symbol('modelGraft');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
 const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
@@ -111,6 +111,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$executionContext]: ThreeDOMExecutionContext|null = null;
 
+    protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+
     /**
      * A reference to the active worklet if one exists, or else `null`. A
      * worklet is not created until a scene graph worklet script has been
@@ -180,8 +182,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onChildListMutation](records: Array<MutationRecord>) {
       if (this.parentNode == null) {
-        // Ignore a lazily reported list of mutations if we are detached from
-        // the document...
+        // Ignore a lazily reported list of mutations if we are detached
+        // from the document...
         return;
       }
 
@@ -249,28 +251,33 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const executionContext = this[$executionContext];
 
       if (executionContext == null || this.parentNode == null) {
-        // Ignore if we don't have a 3DOM script to run, or if we are currently
-        // detached from the document
+        // Ignore if we don't have a 3DOM script to run, or if we are
+        // currently detached from the document
         return;
       }
 
       const scene = this[$scene];
-      const modelGraft: ModelGraft|null = this.loaded ?
-          // TODO: Use a proper GLTF artifact as cached by the loader for this:
-          new ModelGraft(scene.model.url || '', {
-            scene: scene as unknown as Group,
-            scenes: [scene as unknown as Group],
-            animations: [],
-            cameras: [],
-            parser: {} as unknown as GLTFParser,
-            asset: {},
-            userData: {}
-          }) :
-          null;
+      const {model} = scene;
+      const {currentGLTF} = model;
+      let modelGraft: ModelGraft|null = null;
+
+      if (currentGLTF != null) {
+        const {correlatedSceneGraph} = currentGLTF;
+        const currentModelGraft = this[$modelGraft];
+
+        if (correlatedSceneGraph != null) {
+          if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
+            return;
+          }
+
+          modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
+        }
+      }
 
       executionContext.changeModel(modelGraft);
 
       this[$modelGraft] = modelGraft;
+      this[$currentGLTF] = currentGLTF;
     }
 
     [$onModelGraftMutation](_event: Event) {
