@@ -44,7 +44,6 @@ try {
 
 let scenarioWhitelist: Set<string>|null = null;
 
-// add additional arguments into scenariowhitelist which will not be rendered
 if (process.argv.length > 3) {
   scenarioWhitelist = new Set();
 
@@ -52,6 +51,7 @@ if (process.argv.length > 3) {
     scenarioWhitelist.add(process.argv[i]);
   }
 }
+
 
 screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
