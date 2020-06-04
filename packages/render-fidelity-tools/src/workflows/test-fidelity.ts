@@ -22,7 +22,6 @@ const require = module.createRequire(import.meta.url);
 
 import {ArtifactCreator} from '../artifact-creator.js';
 
-
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
 const config = require(configPath);
@@ -53,7 +52,6 @@ if (process.argv.length > 3) {
     scenarioWhitelist.add(process.argv[i]);
   }
 }
-
 
 screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
