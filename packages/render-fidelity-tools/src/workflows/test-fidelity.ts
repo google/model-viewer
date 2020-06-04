@@ -28,13 +28,13 @@ const rootDirectory = resolve(dirname(configPath));
 const config = require(configPath);
 
 const outputDirectory = join(rootDirectory, 'results');
-const portal = 9030;
+const port = 9030;
 const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
-    `http://localhost:${portal}/test/renderers/model-viewer/`);
+    `http://localhost:${port}/test/renderers/model-viewer/`);
 const server = HTTPServer.createServer({root: './', cache: -1});
-server.listen(portal);
+server.listen(port);
 
 
 try {
