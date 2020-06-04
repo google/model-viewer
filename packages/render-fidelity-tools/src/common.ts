@@ -139,7 +139,7 @@ export class ImageComparator {
   // 3. distance ratio among only mismatched pixels
   // question: why do you only apply threshold on metric 2, not on metric 3?
   analyze(threshold: number, options: AnalysisOptions = {
-    generateVisuals: true  // what does generateVisuals do?
+    generateVisuals: true
   }): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
