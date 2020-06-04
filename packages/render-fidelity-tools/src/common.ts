@@ -132,11 +132,6 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
-  // compare two images pixel by pixel, calculate "delta" value, and then
-  // compute 3 metric :
-  // 1. how many percentage of pixels are mismatched
-  // 2. distance ratio among all pixels
-  // 3. distance ratio among only mismatched pixels
   analyze(threshold: number, options: AnalysisOptions = {
     generateVisuals: true
   }): ImageComparisonResults {
