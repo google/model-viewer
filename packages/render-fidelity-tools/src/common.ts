@@ -104,7 +104,7 @@ export interface ImageComparisonConfig {
 }
 
 export interface ComparableImage {
-  [index: number]: number;
+  [index: number]: number;  // what does this syntax mean?
   length: number;
 }
 
@@ -132,8 +132,14 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
+  // compare two images pixel by pixel, calculate "delta" value, and then
+  // compute 3 metric :
+  // 1. how many percentage of pixels are mismatched
+  // 2. distance ratio among all pixels
+  // 3. distance ratio among only mismatched pixels
+  // question: why do you only apply threshold on metric 2, not on metric 3?
   analyze(threshold: number, options: AnalysisOptions = {
-    generateVisuals: true
+    generateVisuals: true  // what does generateVisuals do?
   }): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
@@ -164,7 +170,8 @@ export class ImageComparator {
         const position = index * COMPONENTS_PER_PIXEL;
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
-        const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
+        const exactlyMatched =
+            (delta <= thresholdSquared ? 1 : 0) * 255;  // why multi it by 255?
 
         if (exactlyMatched) {
           matched++;
@@ -221,7 +228,7 @@ export class ImageComparator {
     const mismatchingPixels = this.imagePixels - matched;
 
     const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
-        mismatchingSum / (this.imagePixels - matched) / MAX_COLOR_DISTANCE :
+        mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
     const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
 
