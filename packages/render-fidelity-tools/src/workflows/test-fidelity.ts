@@ -52,7 +52,6 @@ if (process.argv.length > 3) {
   }
 }
 
-
 screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
