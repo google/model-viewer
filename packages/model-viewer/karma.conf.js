@@ -88,8 +88,7 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
-      // TODO(#1207)
-      // 'ChromeHeadless',
+      'ChromeHeadless',
     ],
   });
 
@@ -110,19 +109,19 @@ module.exports = function(config) {
       //   browser: 'Edge',
       //   browser_version: 'latest',
       // },
-      'Chrome 83.0 (Beta)': {
+      'Chrome 83.0': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Chrome',
-        browser_version: '83.0 beta',
+        browser_version: '83.0',
       },
-      'Edge 83.0 (Beta)': {
+      'Edge 83.0': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Edge',
-        browser_version: '83.0 beta',
+        browser_version: '83.0',
       },
       'Firefox (latest)': {
         base: 'BrowserStack',
@@ -131,12 +130,12 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      'Firefox 72.0': {
+      'Firefox 76.0': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Firefox',
-        browser_version: '72.0',
+        browser_version: '76.0',
       },
       'Safari (latest)': {
         base: 'BrowserStack',
