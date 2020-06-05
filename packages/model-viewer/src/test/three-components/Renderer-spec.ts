@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $onResize, $renderer, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
@@ -142,11 +143,19 @@ suite('Renderer', () => {
       renderer.unregisterScene(scene);
       renderer.render(performance.now());
 
-      expect(renderer.canvasElement.parentElement)
-          .to.be.eq(otherScene.element[$userInputElement]);
-      expect(renderer.canvasElement.classList.contains('show')).to.be.eq(true);
-      expect(otherScene.element[$canvas].classList.contains('show'))
-          .to.be.eq(false);
+      if (USE_OFFSCREEN_CANVAS) {
+        expect(renderer.canvasElement.classList.contains('show'))
+            .to.be.eq(false);
+        expect(otherScene.element[$canvas].classList.contains('show'))
+            .to.be.eq(true);
+      } else {
+        expect(renderer.canvasElement.parentElement)
+            .to.be.eq(otherScene.element[$userInputElement]);
+        expect(renderer.canvasElement.classList.contains('show'))
+            .to.be.eq(true);
+        expect(otherScene.element[$canvas].classList.contains('show'))
+            .to.be.eq(false);
+      }
     });
 
     suite('when resizing', () => {
