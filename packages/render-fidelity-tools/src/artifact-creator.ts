@@ -56,7 +56,7 @@ export class ArtifactCreator {
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
-      const scenario = this[$configReader].scenarioConfig(scenarioName)!;  // ??
+      const scenario = this[$configReader].scenarioConfig(scenarioName)!;
       const {dimensions} = scenario;
 
       if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
@@ -70,8 +70,7 @@ export class ArtifactCreator {
       mkdirp.sync(scenarioOutputDirectory);
 
       const screenshot = await this.captureScreenshot(
-          'model-viewer',  // hard code to model viewer?  how do you load other
-                           // renders?
+          'model-viewer',
           scenarioName,
           dimensions,
           join(scenarioOutputDirectory, 'model-viewer.png'));
@@ -173,7 +172,7 @@ export class ArtifactCreator {
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
       outputPath: string = join(this.outputDirectory, 'model-viewer.png')) {
-    const devicePixelRatio = 2;  // hard code?
+    const devicePixelRatio = 2;
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
