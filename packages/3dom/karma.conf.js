@@ -93,12 +93,12 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      'Firefox 72.0': {
+      'Firefox 76.0': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Firefox',
-        browser_version: '72.0',
+        browser_version: '76.0',
       },
       'Safari (latest)': {
         base: 'BrowserStack',
