@@ -97,6 +97,10 @@ export class Renderer extends EventDispatcher {
     return this.threeRenderer != null && this.context3D != null;
   }
 
+  get scaleFactor() {
+    return this.scale;
+  }
+
   constructor(options?: RendererOptions) {
     super();
 
