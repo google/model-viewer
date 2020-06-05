@@ -26,8 +26,8 @@ export const MAX_COLOR_DISTANCE: number = 35215;
 
 export interface ImageComparisonAnalysis {
   matchingRatio: number;
-  averageDistanceRatio: number;
-  mismatchingAverageDistanceRatio: number;
+  averageRmsDistance: number;
+  mismatchingRmsDistance: number;
 }
 
 export interface ImageComparisonResults {
@@ -149,8 +149,8 @@ export class ImageComparator {
     const thresholdSquared = threshold * threshold;
 
     let matched = 0;
-    let sum = 0;
-    let mismatchingSum = 0;
+    let squareSum = 0;
+    let mismatchingSquareSum = 0;
     let maximumDeltaIntensity = 0;
 
     if (candidateImage.length != goldenImage.length) {
@@ -169,12 +169,12 @@ export class ImageComparator {
         if (exactlyMatched) {
           matched++;
         } else {
-          mismatchingSum += delta;
+          mismatchingSquareSum += delta * delta;
         }
 
         const thresholdDelta = Math.max(0, delta - thresholdSquared);
 
-        sum += thresholdDelta;
+        squareSum += thresholdDelta * thresholdDelta;
 
         if (generateVisuals) {
           const deltaIntensity =
@@ -220,16 +220,24 @@ export class ImageComparator {
 
     const mismatchingPixels = this.imagePixels - matched;
 
+    /*
     const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
         mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
     const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
+    */
+    const mismatchingRmsDistance =
+        mismatchingPixels > 0 ?  // i think the name
+                                 // mismatchingRootMeanSquareDistance is too long
+        Math.sqrt(mismatchingSquareSum / mismatchingPixels) :
+        0;
+    const averageRmsDistance = Math.sqrt(squareSum / this.imagePixels);
 
     return {
       analysis: {
         matchingRatio: matched / this.imagePixels,
-        averageDistanceRatio,
-        mismatchingAverageDistanceRatio,
+        averageRmsDistance,
+        mismatchingRmsDistance,
       },
       imageBuffers: {
         delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
