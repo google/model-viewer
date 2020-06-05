@@ -13,40 +13,57 @@
  * limitations under the License.
  */
 
-// import {MeshStandardMaterial} from
-// 'three/src/materials/MeshStandardMaterial.js'; import {Color} from
-// 'three/src/math/Color.js';
+import {Texture} from 'three';
 
-// import {Sampler as GLTFSampler} from '../../gltf-2.0.js';
-// import {createFakeThreeGLTF} from '../../test-helpers.js';
+import {Sampler as GLTFSampler} from '../../gltf-2.0.js';
+import {createFakeThreeGLTF} from '../../test-helpers.js';
 
-// import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
-// import {Sampler} from './sampler.js';
-// import {ModelGraft} from './model-graft.js';
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
+import {ModelGraft} from './model-graft.js';
+import {Sampler} from './sampler.js';
 
-// suite('facade/three-js/sampler', () => {
-//   suite('Sampler', () => {
-//     test(
-//         'expresses Three.js material color as PBRMetallicRoughness base color
-//         factor', async () => {
-//           const graft = new ModelGraft(
-//               '', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
-//           const gltfMaterial: GLTFMaterial = {
-//             pbrMetallicRoughness: {baseColorFactor: [1, 0.5, 0, 1]}
-//           };
+suite('facade/three-js/sampler', () => {
+  suite('Sampler', () => {
+    test('expresses Three.js texture wrap mode', () => {
+      const texture = new Texture();
+      texture.wrapS = 10497;
+      texture.wrapT = 33071;
 
-//           const threeMaterial = new MeshStandardMaterial();
-//           threeMaterial.color = new Color('rgb(255, 127, 0)');
+      const graft =
+          new ModelGraft('', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
 
-//           const material =
-//               new Material(graft, gltfMaterial, new Set([threeMaterial]));
-//           const {pbrMetallicRoughness} = material;
+      const gltfSampler: GLTFSampler = {
+        wrapS: 10497,
+        wrapT: 33071,
+      };
 
+      const sampler = new Sampler(graft, gltfSampler, new Set([texture]));
 
-//           expect(pbrMetallicRoughness).to.be.ok;
-//           expect((pbrMetallicRoughness as
-//           PBRMetallicRoughness).baseColorFactor)
-//               .to.be.deep.equal([1, 0.5, 0, 1]);
-//         });
-//   });
-// });
+      const {wrapS, wrapT} = sampler.toJSON();
+
+      expect(wrapS).to.be.undefined;
+      expect(wrapT).to.be.equal(33071);
+    });
+
+    test('expresses Three.js texture filter', () => {
+      const texture = new Texture();
+      texture.minFilter = 9987;
+      texture.magFilter = 9728;
+
+      const graft =
+          new ModelGraft('', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+
+      const gltfSampler: GLTFSampler = {
+        minFilter: 9987,
+        magFilter: 9728,
+      };
+
+      const sampler = new Sampler(graft, gltfSampler, new Set([texture]));
+
+      const {minFilter, magFilter} = sampler.toJSON();
+
+      expect(minFilter).to.be.equal(9987);
+      expect(magFilter).to.be.equal(9728);
+    });
+  });
+});

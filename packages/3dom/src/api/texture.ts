@@ -21,6 +21,17 @@ import {ModelKernel} from './model-kernel.js';
 export type TextureConstructor = Constructor<TextureInterface>&
     ConstructedWithArguments<[ModelKernel, SerializedTexture]>;
 
+/**
+ * A constructor factory for a Texture class. The Texture is defined
+ * based on a provided implementation for all specified 3DOM scene graph element
+ * types.
+ *
+ * The sole reason for using this factory pattern is to enable sound type
+ * checking while also providing for the ability to stringify the factory so
+ * that it can be part of a runtime-generated Worker script.
+ *
+ * @see ../api.ts
+ */
 export function defineTexture(ThreeDOMElement: Constructor<ThreeDOMElement>):
     TextureConstructor {
   const $kernel = Symbol('kernel');

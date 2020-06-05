@@ -27,7 +27,7 @@ import {ThreeDOMElement} from './three-dom-element.js';
 const $texture = Symbol('texture');
 
 /**
- * Material facade implementation for Three.js materials
+ * TextureInfo facade implementation for Three.js materials
  */
 export class TextureInfo extends ThreeDOMElement implements
     TextureInfoInterface {

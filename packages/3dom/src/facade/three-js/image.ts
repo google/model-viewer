@@ -56,8 +56,6 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       throw new Error(`Cannot configure property "${property}" on Image`);
     }
 
-    console.log('MUTATING URI', value);
-
     if (value != null) {
       image = await new Promise((resolve, reject) => {
         loader.load(value, resolve, undefined, reject);

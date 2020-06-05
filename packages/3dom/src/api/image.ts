@@ -21,6 +21,16 @@ import {ModelKernel} from './model-kernel.js';
 export type ImageConstructor = Constructor<ImageInterface>&
     ConstructedWithArguments<[ModelKernel, SerializedImage]>;
 
+/**
+ * A constructor factory for a Image class. The Image is defined based on
+ * a provided implementation for all specified 3DOM scene graph element types.
+ *
+ * The sole reason for using this factory pattern is to enable sound type
+ * checking while also providing for the ability to stringify the factory so
+ * that it can be part of a runtime-generated Worker script.
+ *
+ * @see ../api.ts
+ */
 export function defineImage(ThreeDOMElement: Constructor<ThreeDOMElement>):
     ImageConstructor {
   const $kernel = Symbol('kernel');

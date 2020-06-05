@@ -135,6 +135,9 @@ export declare interface SerializedPBRMetallicRoughness extends
  */
 export declare interface SerializedMaterial extends SerializedThreeDOMElement {
   pbrMetallicRoughness: SerializedPBRMetallicRoughness;
+  normalTexture?: SerializedTextureInfo;
+  occlusionTexture?: SerializedTextureInfo;
+  emissiveTexture?: SerializedTextureInfo;
 }
 
 export declare interface SerializedSampler extends SerializedThreeDOMElement {

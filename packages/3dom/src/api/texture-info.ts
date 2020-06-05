@@ -21,6 +21,17 @@ import {ModelKernel} from './model-kernel.js';
 export type TextureInfoConstructor = Constructor<TextureInfoInterface>&
     ConstructedWithArguments<[ModelKernel, SerializedTextureInfo]>;
 
+/**
+ * A constructor factory for a TextureInfo class. The TextureInfo is defined
+ * based on a provided implementation for all specified 3DOM scene graph element
+ * types.
+ *
+ * The sole reason for using this factory pattern is to enable sound type
+ * checking while also providing for the ability to stringify the factory so
+ * that it can be part of a runtime-generated Worker script.
+ *
+ * @see ../api.ts
+ */
 export function defineTextureInfo(
     ThreeDOMElement: Constructor<ThreeDOMElement>): TextureInfoConstructor {
   const $kernel = Symbol('kernel');
