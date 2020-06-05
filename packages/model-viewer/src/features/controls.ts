@@ -214,6 +214,8 @@ const $focusedTime = Symbol('focusedTime');
 const $zoomAdjustedFieldOfView = Symbol('zoomAdjustedFieldOfView');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
+const $initialized = Symbol('initialized');
+const $maintainThetaPhi = Symbol('maintainThetaPhi');
 
 const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
@@ -342,6 +344,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
+    protected[$initialized] = false;
+    protected[$maintainThetaPhi] = false;
 
     protected[$changeHandler] = (event: Event) =>
         this[$onChange](event as ChangeEvent);
@@ -436,7 +440,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
         if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
-            this.cameraControls) {
+            this.cameraControls && !this[$userHasInteracted]) {
           this[$waitingToPromptUser] = true;
         } else {
           this[$deferInteractionPrompt]();
@@ -468,6 +472,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      if (this[$maintainThetaPhi]) {
+        const {theta, phi} = this.getCameraOrbit();
+        style[0] = theta;
+        style[1] = phi;
+        this[$maintainThetaPhi] = false;
+      }
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -533,7 +543,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$promptElement].classList.add('visible');
         }
       }
-
 
       if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
@@ -644,11 +653,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;
 
+      if (this[$initialized]) {
+        this[$maintainThetaPhi] = true;
+      } else {
+        this[$initialized] = true;
+      }
       this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
-      this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('minCameraOrbit', this.minCameraOrbit);
       this.requestUpdate('maxCameraOrbit', this.maxCameraOrbit);
+      this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
@@ -678,6 +692,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onBlur]() {
+      if (this.interactionPrompt !== InteractionPromptStrategy.WHEN_FOCUSED) {
+        return;
+      }
+
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
 
