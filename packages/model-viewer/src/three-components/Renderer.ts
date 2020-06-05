@@ -77,6 +77,8 @@ export class Renderer extends EventDispatcher {
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
+  public width = 0;
+  public height = 0;
   public dpr = 1;
   public minScale = DEFAULT_MIN_SCALE;
 
@@ -84,8 +86,6 @@ export class Renderer extends EventDispatcher {
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
-  private width = 0;
-  private height = 0;
   private scale = 1;
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;

@@ -394,6 +394,16 @@
               to force the button to be hidden. Defaults to block.</p>
             </li>
             <li>
+              <div>ar-status</div>
+              <p>This read-only attribute enables DOM content to be styled based 
+              on the status of the WebXR AR presentation. Possible values include 
+              'not-presenting', 'session-started', and 'object-placed'. For instance, 
+              a prompt for the user to move their phone until the object is 
+              successfully placed in their space can be shown by scoping a CSS rule
+              to model-viewer[ar-status="session-started"]. Setting this attribute
+              has no effect.</p>
+            </li>
+            <li>
               <div>--interaction-prompt-display</div>
               <p>Sets the display property of the interaction prompt. Intended
               to be used to force the prompt to be hidden. Defaults to flex.</p>
@@ -630,6 +640,14 @@
           <h3 class="grouping-title">Events</h3>
 
           <ul class="list-attribute">
+            <li>
+              <div>ar-status</div>
+              <p>Fired when the ar-status attribute above fires. The event.detail.status
+              property will be set to the same value as the ar-status attribute, either
+              'not-presenting', 'session-started', or 'object-placed'. This event is
+              only enabled for WebXR AR sessions. 
+              </p>
+            </li>
             <li>
               <div>camera-change</div>
               <p>Fired when the camera position and/or field of view have
