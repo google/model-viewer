@@ -41,13 +41,11 @@ const INTRO_DAMPER_RATE = 0.4;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
-export type ARStatus =
-    'session-started'|'session-ended'|'object-visible'|'object-placed';
+export type ARStatus = 'not-presenting'|'session-started'|'object-placed';
 
 export const ARStatus: {[index: string]: ARStatus} = {
+  NOT_PRESENTING: 'not-presenting',
   SESSION_STARTED: 'session-started',
-  SESSION_ENDED: 'session-ended',
-  OBJECT_VISIBLE: 'object-visible',
   OBJECT_PLACED: 'object-placed'
 };
 
@@ -244,8 +242,6 @@ export class ARRenderer extends EventDispatcher {
     // Render a frame to turn off the hotspots
     await waitForAnimationFrame;
 
-    this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
-
     // This sets isPresenting to true
     this[$presentedScene] = scene;
 
@@ -391,7 +387,7 @@ export class ARRenderer extends EventDispatcher {
       this[$resolveCleanup]!();
     }
 
-    this.dispatchEvent({type: 'status', status: ARStatus.SESSION_ENDED});
+    this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
   /**
@@ -449,8 +445,7 @@ export class ARRenderer extends EventDispatcher {
       this[$initialModelToWorld].copy(scene.model.matrixWorld);
       scene.model.setHotspotsVisibility(true);
       this[$initialized] = true;
-
-      this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_VISIBLE});
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     this[$presentedScene]!.model.orientHotspots(

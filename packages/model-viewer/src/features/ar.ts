@@ -178,11 +178,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     private[$onARStatus] = ({status}: ThreeEvent) => {
-      if (status === ARStatus.SESSION_ENDED) {
-        this.setAttribute('ar-status', 'not-presenting');
-        this.dispatchEvent(
-            new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
-      } else if (this[$renderer].arRenderer.presentedScene === this[$scene]) {
+      if (status === ARStatus.NOT_PRESENTING ||
+          this[$renderer].arRenderer.presentedScene === this[$scene]) {
         this.setAttribute('ar-status', status);
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
@@ -229,7 +226,7 @@ configuration or device capabilities');
       super.connectedCallback();
 
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
-      this.setAttribute('ar-status', 'not-presenting');
+      this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
     }
 
     disconnectedCallback() {
