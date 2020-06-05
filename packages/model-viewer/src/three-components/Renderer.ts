@@ -303,7 +303,7 @@ export class Renderer extends EventDispatcher {
         visibleInput = scene.element[$userInputElement];
       }
     }
-    const multipleScenesVisible = visibleScenes > 1;
+    const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
