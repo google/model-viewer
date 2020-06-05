@@ -26,10 +26,10 @@ export const MAX_COLOR_DISTANCE: number = 35215;
 
 export interface ImageComparisonAnalysis {
   matchingRatio: number;
-  mismatchingAverageDistanceRatio: number;
   averageDistanceRatio: number;
-  mismatchingRmsDistanceRatio: number;
+  mismatchingAverageDistanceRatio: number;
   rmsDistanceRatio: number;
+  mismatchingRmsDistanceRatio: number;
 }
 
 export interface ImageComparisonResults {
@@ -226,7 +226,6 @@ export class ImageComparator {
 
     const mismatchingPixels = this.imagePixels - matched;
 
-
     const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
         mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
@@ -241,10 +240,10 @@ export class ImageComparator {
     return {
       analysis: {
         matchingRatio: matched / this.imagePixels,
-        mismatchingAverageDistanceRatio,
-        mismatchingRmsDistanceRatio,
         averageDistanceRatio,
-        rmsDistanceRatio
+        mismatchingAverageDistanceRatio,
+        rmsDistanceRatio,
+        mismatchingRmsDistanceRatio
       },
       imageBuffers: {
         delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
