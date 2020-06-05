@@ -678,6 +678,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onBlur]() {
+      if (this.interactionPrompt !== InteractionPromptStrategy.WHEN_FOCUSED) {
+        return;
+      }
+
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
 
