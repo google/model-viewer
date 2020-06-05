@@ -221,7 +221,7 @@ export class ImageComparator {
     const mismatchingPixels = this.imagePixels - matched;
 
     const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
-        mismatchingSum / (this.imagePixels - matched) / MAX_COLOR_DISTANCE :
+        mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
     const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
 
