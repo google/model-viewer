@@ -436,7 +436,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
         if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
-            this.cameraControls) {
+            this.cameraControls && !this[$userHasInteracted]) {
           this[$waitingToPromptUser] = true;
         } else {
           this[$deferInteractionPrompt]();
