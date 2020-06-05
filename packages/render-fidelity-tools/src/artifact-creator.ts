@@ -141,17 +141,27 @@ export class ArtifactCreator {
       for (const threshold of analysisThresholds) {
         console.log(`\n  📏 Using threshold ${threshold.toFixed(1)}`);
         const {analysis} = comparator.analyze(threshold);
-        const {matchingRatio, averageRmsDistance, mismatchingRmsDistance} =
-            analysis;
+        const {
+          matchingRatio,
+          averageDistanceRatio,
+          mismatchingAverageDistanceRatio,
+          rmsDistanceRatio,
+          mismatchingRmsDistanceRatio
+        } = analysis;
 
         thresholdResults.push(analysis);
 
         console.log(
             `  📊 Matching pixels: ${(matchingRatio * 100).toFixed(2)}%`);
         console.log(`  📊 Mean color distance: ${
-            (averageRmsDistance * 100).toFixed(2)}%`);
+            (averageDistanceRatio * 100).toFixed(2)}%`);
         console.log(`  📊 Mean color distance (mismatching pixels only): ${
-            (mismatchingRmsDistance * 100).toFixed(2)}%`);
+            (mismatchingAverageDistanceRatio * 100).toFixed(2)}%`);
+        console.log(`  📊 Root Mean Square color distance: ${
+            (rmsDistanceRatio * 100).toFixed(2)}%`);
+        console.log(
+            `  📊 Root Mean Square color distance (mismatching pixels only): ${
+                (mismatchingRmsDistanceRatio * 100).toFixed(2)}%`);
       }
 
       analysisResults.push(thresholdResults);

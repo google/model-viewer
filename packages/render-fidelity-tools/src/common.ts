@@ -26,8 +26,10 @@ export const MAX_COLOR_DISTANCE: number = 35215;
 
 export interface ImageComparisonAnalysis {
   matchingRatio: number;
-  averageRmsDistance: number;
-  mismatchingRmsDistance: number;
+  mismatchingAverageDistanceRatio: number;
+  averageDistanceRatio: number;
+  mismatchingRmsDistanceRatio: number;
+  rmsDistanceRatio: number;
 }
 
 export interface ImageComparisonResults {
@@ -149,7 +151,9 @@ export class ImageComparator {
     const thresholdSquared = threshold * threshold;
 
     let matched = 0;
+    let sum = 0;
     let squareSum = 0;
+    let mismatchingSum = 0;
     let mismatchingSquareSum = 0;
     let maximumDeltaIntensity = 0;
 
@@ -169,11 +173,13 @@ export class ImageComparator {
         if (exactlyMatched) {
           matched++;
         } else {
+          mismatchingSum += delta;
           mismatchingSquareSum += delta * delta;
         }
 
         const thresholdDelta = Math.max(0, delta - thresholdSquared);
 
+        sum += thresholdDelta;
         squareSum += thresholdDelta * thresholdDelta;
 
         if (generateVisuals) {
@@ -220,24 +226,25 @@ export class ImageComparator {
 
     const mismatchingPixels = this.imagePixels - matched;
 
-    /*
+
     const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
         mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
     const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
-    */
-    const mismatchingRmsDistance =
-        mismatchingPixels > 0 ?  // i think the name
-                                 // mismatchingRootMeanSquareDistance is too long
-        Math.sqrt(mismatchingSquareSum / mismatchingPixels) :
+    const mismatchingRmsDistanceRatio = mismatchingPixels > 0 ?
+        Math.sqrt(mismatchingSquareSum / mismatchingPixels) /
+            MAX_COLOR_DISTANCE :
         0;
-    const averageRmsDistance = Math.sqrt(squareSum / this.imagePixels);
+    const rmsDistanceRatio =
+        Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
 
     return {
       analysis: {
         matchingRatio: matched / this.imagePixels,
-        averageRmsDistance,
-        mismatchingRmsDistance,
+        mismatchingAverageDistanceRatio,
+        mismatchingRmsDistanceRatio,
+        averageDistanceRatio,
+        rmsDistanceRatio
       },
       imageBuffers: {
         delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
