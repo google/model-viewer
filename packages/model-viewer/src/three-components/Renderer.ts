@@ -97,6 +97,10 @@ export class Renderer extends EventDispatcher {
     return this.threeRenderer != null && this.context3D != null;
   }
 
+  get scaleFactor() {
+    return this.scale;
+  }
+
   constructor(options?: RendererOptions) {
     super();
 
@@ -303,7 +307,7 @@ export class Renderer extends EventDispatcher {
         visibleInput = scene.element[$userInputElement];
       }
     }
-    const multipleScenesVisible = visibleScenes > 1;
+    const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
