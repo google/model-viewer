@@ -45,7 +45,10 @@
       },
       "orbit": {
         "radius": 6
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AnimatedCube",
@@ -127,7 +130,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
       "orbit": {
         "radius": 0.03
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoomBoxWithAxes",
@@ -140,7 +146,10 @@
       },
       "orbit": {
         "radius": 0.05
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Box",
@@ -167,7 +176,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoxTextured",
@@ -194,7 +206,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BrainStem",
@@ -218,7 +233,10 @@
         "theta": -60,
         "phi": 60,
         "radius": 286
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-CesiumMan",
@@ -238,7 +256,10 @@
       },
       "orbit": {
         "radius": 7.8
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Corset",
@@ -291,7 +312,10 @@
       },
       "orbit": {
         "radius": 20
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-FlightHelmet",
@@ -302,7 +326,10 @@
       },
       "target": {
         "y": 0.32
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-GearboxAssy",
@@ -318,7 +345,10 @@
       },
       "orbit": {
         "radius": 25
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-InterpolationTest",
@@ -349,7 +379,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
       "orbit": {
         "radius": 12
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
@@ -357,7 +390,10 @@
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
       "orbit": {
         "radius": 12
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",
@@ -365,7 +401,10 @@
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
       "orbit": {
         "radius": 12
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-MorphPrimitivesTest",
@@ -377,7 +416,10 @@
       "orbit": {
         "phi": 60,
         "radius": 1.2
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-MultiUVTest",
@@ -468,7 +510,10 @@
       },
       "orbit": {
         "radius": 3
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-SimpleMorph",
@@ -479,7 +524,10 @@
       },
       "orbit": {
         "radius": 3.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-SimpleSparseAccessor",
@@ -490,14 +538,20 @@
       },
       "orbit": {
         "radius": 9
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-SpecGlossVsMetalRough",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb",
       "orbit": {
         "radius": 0.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Sponza",
@@ -508,7 +562,10 @@
       "orbit": {
         "theta": 90,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Suzanne",
@@ -522,21 +579,30 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb",
       "orbit": {
         "radius": 4
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-TextureSettingsTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb",
       "orbit": {
         "radius": 15
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-TextureTransformTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureTransformTest/glTF/TextureTransformTest.gltf",
       "orbit": {
         "radius": 4
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Triangle",
@@ -547,7 +613,10 @@
       },
       "orbit": {
         "radius": 1.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-TriangleWithoutIndices",
@@ -558,7 +627,10 @@
       },
       "orbit": {
         "radius": 1.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-TwoSidedPlane",
@@ -566,14 +638,20 @@
       "orbit": {
         "phi": 60,
         "radius": 3.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-UnlitTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf",
       "orbit": {
         "radius": 7
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-VC",
@@ -584,14 +662,20 @@
       "orbit": {
         "phi": 70,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-VertexColorTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/VertexColorTest/glTF/VertexColorTest.gltf",
       "orbit": {
         "radius": 4
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "Astronaut",
@@ -615,7 +699,10 @@
       },
       "orbit": {
         "radius": 10
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "DirectionalLightTest",
@@ -629,14 +716,20 @@
       },
       "orbit": {
         "radius": 20
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "AlphaBlendLitmusTest",
       "model": "../../../shared-assets/models/alpha-blend-litmus.glb",
       "orbit": {
         "radius": 11
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     }
   ]
 }
