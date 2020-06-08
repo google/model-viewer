@@ -43,7 +43,6 @@ export const IS_MOBILE = (() => {
 })();
 
 export const IS_CHROMEOS = /\bCrOS\b/.test(navigator.userAgent);
-console.log(IS_CHROMEOS);
 
 // Disabling offscreen canvas for now because it is slower and has bugs relating
 // to janky updates and out of sync frames.
