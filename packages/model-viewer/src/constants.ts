@@ -42,10 +42,13 @@ export const IS_MOBILE = (() => {
   return check;
 })();
 
+export const IS_CHROMEOS = /CrOS\//.test(navigator.userAgent);
+
 // Disabling offscreen canvas for now because it is slower and has bugs relating
 // to janky updates and out of sync frames.
 export const USE_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas) &&
-    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap);
+    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap) &&
+    !IS_CHROMEOS;  // TODO(elalish): file a bug on inverted renders
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
