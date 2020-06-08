@@ -14,7 +14,7 @@
     "build": "./node_modules/.bin/lerna run build --stream",
     "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1",
-    "update:package-lock": "./node_modules/.bin/lerna run update:package-lock --stream"
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production && ./node_modules/.bin/lerna run update:package-lock --stream"
   },
   "husky": {
     "hooks": {
