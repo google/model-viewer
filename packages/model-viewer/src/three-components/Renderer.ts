@@ -107,7 +107,8 @@ export class Renderer extends EventDispatcher {
     const webGlOptions = {
       alpha: true,
       antialias: true,
-      powerPreference: 'high-performance' as WebGLPowerPreference
+      powerPreference: 'high-performance' as WebGLPowerPreference,
+      preserveDrawingBuffer: true
     };
 
     this.dpr = resolveDpr();
