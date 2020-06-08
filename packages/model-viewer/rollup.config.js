@@ -28,6 +28,7 @@ const onwarn = (warning, warn) => {
 };
 
 let plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+
 const watchFiles = ['lib/**', '../3dom/lib/**'];
 
 const outputOptions = [{
@@ -88,11 +89,19 @@ if (NODE_ENV !== 'development') {
       },
   );
 
-  plugins = [...plugins, terser()];
+  plugins = [
+    ...plugins,
+    terser({
+      sourcemap: {
+        includeSources: true,
+        filename: 'model-viewer.min.js.map',
+      }
+    }),
+  ];
 
   outputOptions.push(
       {
-        input: './lib/model-viewer.js',
+        input: './dist/model-viewer.js',
         output: {
           file: './dist/model-viewer.min.js',
           sourcemap: true,
