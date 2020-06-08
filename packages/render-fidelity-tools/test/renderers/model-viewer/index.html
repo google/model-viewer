@@ -71,6 +71,8 @@
       modelViewer.src = scenario.model;
       modelViewer.skyboxImage = scenario.lighting;
       const {theta, phi, radius} = scenario.orbit;
+      modelViewer.minCameraOrbit = `auto auto ${radius}m`;
+      modelViewer.maxCameraOrbit = `auto auto ${radius}m`;
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
