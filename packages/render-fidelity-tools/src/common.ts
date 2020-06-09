@@ -29,7 +29,6 @@ export interface ImageComparisonAnalysis {
   averageDistanceRatio: number;
   mismatchingAverageDistanceRatio: number;
   rmsDistanceRatio: number;
-  mismatchingRmsDistanceRatio: number;
 }
 
 export interface ImageComparisonResults {
@@ -154,7 +153,6 @@ export class ImageComparator {
     let sum = 0;
     let squareSum = 0;
     let mismatchingSum = 0;
-    let mismatchingSquareSum = 0;
     let maximumDeltaIntensity = 0;
 
     if (candidateImage.length != goldenImage.length) {
@@ -174,13 +172,12 @@ export class ImageComparator {
           matched++;
         } else {
           mismatchingSum += delta;
-          mismatchingSquareSum += delta * delta;
         }
 
         const thresholdDelta = Math.max(0, delta - thresholdSquared);
 
         sum += thresholdDelta;
-        squareSum += thresholdDelta * thresholdDelta;
+        squareSum += delta * delta;
 
         if (generateVisuals) {
           const deltaIntensity =
@@ -230,10 +227,6 @@ export class ImageComparator {
         mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
         0;
     const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
-    const mismatchingRmsDistanceRatio = mismatchingPixels > 0 ?
-        Math.sqrt(mismatchingSquareSum / mismatchingPixels) /
-            MAX_COLOR_DISTANCE :
-        0;
     const rmsDistanceRatio =
         Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
 
@@ -242,8 +235,7 @@ export class ImageComparator {
         matchingRatio: matched / this.imagePixels,
         averageDistanceRatio,
         mismatchingAverageDistanceRatio,
-        rmsDistanceRatio,
-        mismatchingRmsDistanceRatio
+        rmsDistanceRatio
       },
       imageBuffers: {
         delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,

@@ -144,8 +144,6 @@ export class ArtifactCreator {
           matchingRatio,
           averageDistanceRatio,
           mismatchingAverageDistanceRatio,
-          rmsDistanceRatio,
-          mismatchingRmsDistanceRatio
         } = analysis;
 
         thresholdResults.push(analysis);
@@ -156,12 +154,11 @@ export class ArtifactCreator {
             (averageDistanceRatio * 100).toFixed(2)}%`);
         console.log(`  📊 Mean color distance (mismatching pixels only): ${
             (mismatchingAverageDistanceRatio * 100).toFixed(2)}%`);
-        console.log(`  📊 Root Mean Square color distance: ${
-            (rmsDistanceRatio * 100).toFixed(2)}%`);
-        console.log(
-            `  📊 Root Mean Square color distance (mismatching pixels only): ${
-                (mismatchingRmsDistanceRatio * 100).toFixed(2)}%`);
       }
+
+      const {rmsDistanceRatio} = thresholdResults[0];
+      console.log(`\n  📊 Root mean square color distance (without threshold): ${
+          (rmsDistanceRatio * 100).toFixed(2)}%`);
 
       analysisResults.push(thresholdResults);
     }
