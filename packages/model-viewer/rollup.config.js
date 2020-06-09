@@ -71,7 +71,7 @@ if (NODE_ENV !== 'development') {
         watch: {
           include: watchFiles,
         },
-        pluginsIE11,
+        plugins: pluginsIE11,
         onwarn,
       },
       {
@@ -84,7 +84,7 @@ if (NODE_ENV !== 'development') {
         watch: {
           include: watchFiles,
         },
-        pluginsIE11,
+        plugins: pluginsIE11,
         onwarn,
       },
   );
