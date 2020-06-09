@@ -157,8 +157,9 @@ export class ArtifactCreator {
       }
 
       const {rmsDistanceRatio} = thresholdResults[0];
-      console.log(`\n  📊 Root mean square color distance (without threshold): ${
-          (rmsDistanceRatio * 100).toFixed(2)}%`);
+      console.log(
+          `\n  📊 Decibel of root mean square color distance (without threshold): ${
+              10 * Math.log10(rmsDistanceRatio * 100)}`);
 
       analysisResults.push(thresholdResults);
     }
