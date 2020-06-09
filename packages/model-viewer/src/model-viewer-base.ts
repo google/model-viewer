@@ -390,9 +390,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const idealAspect = options ? options.idealAspect : undefined;
 
     const {width, height, model, aspect} = this[$scene];
-    const {dpr} = this[$renderer];
-    let outputWidth = width * dpr;
-    let outputHeight = height * dpr;
+    const {dpr, scaleFactor} = this[$renderer];
+    let outputWidth = width * scaleFactor * dpr;
+    let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
     let offsetY = 0;
     if (idealAspect === true) {

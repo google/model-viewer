@@ -195,7 +195,7 @@ the rest of your application code:
 
     <!-- Loads <model-viewer> only on modern browsers: -->
     <script type="module"
-        src="./node_modules/@google/model-viewer/dist/model-viewer.js">
+        src="./node_modules/@google/model-viewer/dist/model-viewer.min.js">
     </script>
 
     <!-- Loads <model-viewer> only on old browsers like IE11: -->
@@ -243,7 +243,7 @@ recommended polyfills and `<model-viewer>`:
 
     <!-- Loads <model-viewer> only on modern browsers: -->
     <script type="module"
-        src="https://unpkg.com/@google/model-viewer@0.1.0/dist/model-viewer.js">
+        src="https://unpkg.com/@google/model-viewer@0.1.0/dist/model-viewer.min.js">
     </script>
 
     <!-- Loads <model-viewer> only on old browsers like IE11: -->

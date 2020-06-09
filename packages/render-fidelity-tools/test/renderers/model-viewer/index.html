@@ -51,7 +51,7 @@
     </model-viewer>
   </renderer-harness>
   <script type="module" src="../../../dist/renderer-harness.js"></script>
-  <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
+  <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script type="module">
     customElements.get("model-viewer").minimumRenderScale = 1;
   </script>
@@ -71,6 +71,8 @@
       modelViewer.src = scenario.model;
       modelViewer.skyboxImage = scenario.lighting;
       const {theta, phi, radius} = scenario.orbit;
+      modelViewer.minCameraOrbit = `auto auto ${radius}m`;
+      modelViewer.maxCameraOrbit = `auto auto ${radius}m`;
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;

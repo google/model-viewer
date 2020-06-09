@@ -77,6 +77,8 @@ export class Renderer extends EventDispatcher {
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
+  public width = 0;
+  public height = 0;
   public dpr = 1;
   public minScale = DEFAULT_MIN_SCALE;
 
@@ -84,8 +86,6 @@ export class Renderer extends EventDispatcher {
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
-  private width = 0;
-  private height = 0;
   private scale = 1;
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
@@ -97,13 +97,18 @@ export class Renderer extends EventDispatcher {
     return this.threeRenderer != null && this.context3D != null;
   }
 
+  get scaleFactor() {
+    return this.scale;
+  }
+
   constructor(options?: RendererOptions) {
     super();
 
     const webGlOptions = {
       alpha: true,
       antialias: true,
-      powerPreference: 'high-performance' as WebGLPowerPreference
+      powerPreference: 'high-performance' as WebGLPowerPreference,
+      preserveDrawingBuffer: true
     };
 
     this.dpr = resolveDpr();
@@ -303,7 +308,7 @@ export class Renderer extends EventDispatcher {
         visibleInput = scene.element[$userInputElement];
       }
     }
-    const multipleScenesVisible = visibleScenes > 1;
+    const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&

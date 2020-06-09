@@ -15,7 +15,7 @@
 
 import '../types/webxr.js';
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -40,6 +40,18 @@ const HIT_ANGLE_DEG = 20;
 const INTRO_DAMPER_RATE = 0.4;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
+
+export type ARStatus = 'not-presenting'|'session-started'|'object-placed';
+
+export const ARStatus: {[index: string]: ARStatus} = {
+  NOT_PRESENTING: 'not-presenting',
+  SESSION_STARTED: 'session-started',
+  OBJECT_PLACED: 'object-placed'
+};
+
+export interface ARStatusEvent extends ThreeEvent {
+  status: ARStatus,
+}
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -332,6 +344,9 @@ export class ARRenderer extends EventDispatcher {
       element[$onResize](element.getBoundingClientRect());
     }
 
+    // Force the Renderer to update its size
+    this.renderer.height = 0;
+
     const exitButton = this[$exitWebXRButtonContainer];
     if (exitButton != null) {
       exitButton.classList.remove('enabled');
@@ -371,6 +386,8 @@ export class ARRenderer extends EventDispatcher {
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
     }
+
+    this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
   /**
@@ -428,6 +445,7 @@ export class ARRenderer extends EventDispatcher {
       this[$initialModelToWorld].copy(scene.model.matrixWorld);
       scene.model.setHotspotsVisibility(true);
       this[$initialized] = true;
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     this[$presentedScene]!.model.orientHotspots(
@@ -534,7 +552,7 @@ export class ARRenderer extends EventDispatcher {
     // Ignore the y-coordinate and set on the floor instead.
     goal.y = floor;
 
-    this.dispatchEvent({type: 'modelmove'});
+    this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
   }
 
   [$onSelectStart] = (event: Event) => {
