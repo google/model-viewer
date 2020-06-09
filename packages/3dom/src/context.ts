@@ -87,8 +87,6 @@ const ALL_CAPABILITIES: Readonly<Array<ThreeDOMCapability>> =
 export const generateContextScriptSource =
     (capabilities: Readonly<Array<ThreeDOMCapability>> = ALL_CAPABILITIES) => {
       return `;(function() {
-var ThreeDOMMessageType = ${JSON.stringify(ThreeDOMMessageType)};
-
 var preservedContext = {
   postMessage: self.postMessage.bind(self),
   addEventListener: self.addEventListener.bind(self),
@@ -98,9 +96,7 @@ var preservedContext = {
 ${generateContextPatch(ALLOWLISTED_GLOBALS)}
 ${generateAPI()}
 ${generateCapabilityFilter(capabilities)}
-${generateInitializer()}
-
-initialize.call(self, ModelKernel, preservedContext);
+(${generateInitializer()}).call(self, ThreeDOMMessageType, ModelKernel, preservedContext);
 
 })();`;
     };

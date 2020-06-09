@@ -16,13 +16,17 @@
 import {EventDispatcher, Group} from 'three';
 import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {Material, Model, PBRMetallicRoughness, RGBA, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
+import {Image, Material, Model, PBRMetallicRoughness, RGBA, Sampler, Texture, TextureInfo, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
 import {ModelKernel} from './api/model-kernel.js';
-import {SerializedElementMap, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness} from './protocol.js';
+import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
+import {SerializedElementMap, SerializedImage, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedSampler} from './protocol.js';
 
 export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   readonly baseColorFactor: RGBA = [0, 0, 0, 1];
   private static count = 0;
+
+  readonly baseColorTexture = null;
+  readonly metallicRoughnessTexture = null;
 
   constructor(
       private kernel: ModelKernel, _serialized: SerializedPBRMetallicRoughness,
@@ -39,15 +43,22 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   }
 }
 
-export class FakeMaterial implements Material {
+export class FakeThreeDOMElement implements ThreeDOMElement {}
+
+export class FakeMaterial extends FakeThreeDOMElement implements Material {
   readonly pbrMetallicRoughness = new FakePBRMetallicRoughness(
       this.kernel, this.serialized.pbrMetallicRoughness);
+
+  readonly normalTexture = null;
+  readonly occlusionTexture = null;
+  readonly emissiveTexture = null;
 
   private static count = 0;
 
   constructor(
       private kernel: ModelKernel, private serialized: SerializedMaterial,
       readonly name = `fake-material-${FakeMaterial.count++}`) {
+    super();
   }
 
   get ownerModel() {
@@ -55,13 +66,14 @@ export class FakeMaterial implements Material {
   }
 }
 
-export class FakeModel implements Model {
+export class FakeModel extends FakeThreeDOMElement implements Model {
   readonly materials: Readonly<Array<Material>>;
   private static count = 0;
 
   constructor(
       kernel: ModelKernel, serialized: SerializedModel,
       readonly name = `fake-model-${FakeModel.count++}`) {
+    super();
     const materials: Material[] = [];
     for (const material of serialized.materials) {
       materials.push(new FakeMaterial(kernel, material));
@@ -70,10 +82,87 @@ export class FakeModel implements Model {
   }
 }
 
+export class FakeImage extends FakeThreeDOMElement implements Image {
+  private static count = 0;
+  uri: string|null = null;
+
+  get type() {
+    return this.uri ? 'external' : 'embedded';
+  }
+
+  constructor(
+      _kernel: ModelKernel, _serialized: SerializedImage,
+      readonly name = `fake-image-${FakeImage.count++}`) {
+    super();
+  }
+
+  async setURI(uri: string): Promise<void> {
+    this.uri = uri;
+  }
+}
+
+export class FakeSampler extends FakeThreeDOMElement implements Sampler {
+  private static count = 0;
+
+  minFilter: MinFilter|null = null;
+  magFilter: MagFilter|null = null;
+  wrapS: WrapMode = 10497;
+  wrapT: WrapMode = 10497;
+
+  constructor(
+      _kernel: ModelKernel, serialized: SerializedSampler,
+      readonly name = serialized.name || `fake-image-${FakeSampler.count++}`) {
+    super();
+  }
+
+  async setMinFilter(filter: 9728|9729|9984|9985|9986|9987|
+                     null): Promise<void> {
+    this.minFilter = filter;
+  }
+
+  async setMagFilter(filter: 9728|9729|null): Promise<void> {
+    this.magFilter = filter;
+  }
+
+  async setWrapS(mode: WrapMode): Promise<void> {
+    this.wrapS = mode;
+  }
+
+  async setWrapT(mode: WrapMode): Promise<void> {
+    this.wrapT = mode;
+  }
+}
+
+export class FakeTexture extends FakeThreeDOMElement implements Texture {
+  sampler: Sampler|null = null;
+  source: Image|null = null;
+
+  async setSampler(sampler: Sampler): Promise<void> {
+    this.sampler = sampler;
+  }
+
+  async setSource(image: Image): Promise<void> {
+    this.source = image;
+  }
+}
+
+export class FakeTextureInfo extends FakeThreeDOMElement implements
+    TextureInfo {
+  texture: Texture|null = null;
+
+  async setTexture(texture: Texture|null): Promise<void> {
+    this.texture = texture;
+  }
+}
+
 export const FakeThreeDOMElementMap = {
   'model': FakeModel,
   'material': FakeMaterial,
-  'pbr-metallic-roughness': FakePBRMetallicRoughness
+  'pbr-metallic-roughness': FakePBRMetallicRoughness,
+  'image': FakeImage,
+  'sampler': FakeSampler,
+  'texture': FakeTexture,
+  'texture-info': FakeTextureInfo
 };
 
 export class FakeModelKernel implements ModelKernel {

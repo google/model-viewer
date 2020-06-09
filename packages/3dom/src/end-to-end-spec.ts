@@ -35,6 +35,17 @@ const prepareConstructsFor =
   return {executionContext, graft, gltf};
 };
 
+const imageURL = (() => {
+  const canvas = document.createElement('canvas');
+
+  return (width: number, height: number): string => {
+    canvas.width = width;
+    canvas.height = height;
+
+    return canvas.toDataURL();
+  };
+})();
+
 suite('end-to-end', () => {
   test('can operate on a scene graph via a custom script in a worker', async () => {
     const {executionContext, graft, gltf} =
@@ -95,10 +106,41 @@ suite('end-to-end', () => {
     expect(messageEvent.data).to.be.equal(material.name);
   });
 
+  suite('configuring textures', () => {
+    test('can change the base color texture image', async () => {
+      const {executionContext, graft, gltf} = await prepareConstructsFor(
+          ASTRONAUT_GLB_PATH, ['messaging', 'material-properties', 'textures']);
+      const textureURL = imageURL(64, 64);
+
+      executionContext.changeModel(graft);
+
+      executionContext.eval(`
+self.addEventListener('message', function(event) {
+  var textureURL = event.data;
+  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(textureURL);
+});
+
+self.postMessage('ready');
+`);
+
+      await waitForEvent(executionContext.worker, 'message');
+
+      executionContext.worker.postMessage(textureURL);
+
+      await waitForEvent(graft, 'mutation');
+
+      const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
+          MeshStandardMaterial;
+
+      expect(material.map?.image.src).to.be.equal(textureURL);
+    });
+  });
+
   suite('scene graph order', () => {
     test('orders materials deterministically', async () => {
       const {executionContext, graft} = await prepareConstructsFor(
           ORDER_TEST_GLB_PATH, ['messaging', 'material-properties']);
+
 
       executionContext.changeModel(graft);
 

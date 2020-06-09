@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
 
 /**
  * IMPORTANT NOTE: 3DOM is an experimental / radioactive API. It is very likely
@@ -30,7 +31,7 @@
  *    found in a model's scene graph
  */
 export declare type ThreeDOMCapability =
-    'messaging' | 'material-properties' | 'fetch';
+    'messaging' | 'material-properties' | 'textures' | 'fetch';
 
 /**
  * All constructs in a 3DOM scene graph have a corresponding string name.
@@ -41,6 +42,10 @@ export declare interface ThreeDOMElementMap {
   'model': Model;
   'material': Material;
   'pbr-metallic-roughness': PBRMetallicRoughness;
+  'sampler': Sampler;
+  'image': Image;
+  'texture': Texture;
+  'texture-info': TextureInfo;
 }
 
 /**
@@ -98,6 +103,30 @@ export declare interface ThreeDOMGlobalScope extends Worker {
    * checks; this class is not directly constructable.
    */
   PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+
+  /**
+   * A reference to the Sampler constructor. Supports instanceof checks; this
+   * class is not directly constructable.
+   */
+  Sampler: Constructor<Sampler>;
+
+  /**
+   * A reference to the TextureInfo constructor. Supports instanceof checks;
+   * this class is not directly constructable.
+   */
+  TextureInfo: Constructor<Sampler>;
+
+  /**
+   * A reference to the Texture constructor. Supports instanceof checks; this
+   * class is not directly constructable.
+   */
+  Texture: Constructor<Texture>;
+
+  /**
+   * A reference to the Image constructor. Supports instanceof checks; this
+   * class is not directly constructable.
+   */
+  Image: Constructor<Image>;
 }
 
 /**
@@ -160,6 +189,10 @@ export declare interface Material extends ThreeDOMElement {
    */
   readonly name?: string;
 
+  readonly normalTexture: TextureInfo|null;
+  readonly occlusionTexture: TextureInfo|null;
+  readonly emissiveTexture: TextureInfo|null;
+
   /**
    * The PBRMetallicRoughness configuration of the material.
    */
@@ -178,10 +211,164 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
   readonly baseColorFactor: Readonly<RGBA>;
 
   /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing base color factor for a UV coordinate space.
+   */
+  readonly baseColorTexture: TextureInfo|null;
+
+  /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing metalness (B channel) and roughness (G channel)
+   * for a UV coordinate space.
+   */
+  readonly metallicRoughnessTexture: TextureInfo|null;
+
+  /**
    * Changes the base color factor of the material to the given value.
    * Requires the 'material-properties' capability to be enabled.
    */
   setBaseColorFactor(rgba: RGBA): Promise<void>;
+}
+
+/**
+ * A TextureInfo is a pointer to a specific Texture in use on a Material
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-textureinfo
+ */
+export declare interface TextureInfo extends ThreeDOMElement {
+  /**
+   * The Texture being referenced by this TextureInfo
+   */
+  readonly texture: Texture|null;
+
+  /**
+   * Configure the Texture referenced by this TextureInfo
+   * Requires the 'textures' capability to be enabled.
+   */
+  setTexture(texture: Texture|null): Promise<void>;
+}
+
+/**
+ * A Texture pairs an Image and a Sampler for use in a Material
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-texture
+ */
+export declare interface Texture extends ThreeDOMElement {
+  /**
+   * The name of the texture, if any.
+   */
+  readonly name?: string;
+
+  /**
+   * The Sampler for this Texture
+   */
+  readonly sampler: Sampler|null;
+
+  /**
+   * The source Image for this Texture
+   */
+  readonly source: Image|null;
+
+  /**
+   * Configure the Sampler used for this Texture.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setSampler(sampler: Sampler): Promise<void>;
+
+  /**
+   * Configure the source Image used for this Texture.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setSource(image: Image): Promise<void>;
+}
+
+/**
+ * A Sampler describes how to filter and wrap textures
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
+ */
+export declare interface Sampler extends ThreeDOMElement {
+  /**
+   * The name of the sampler, if any.
+   */
+  readonly name?: string;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerminfilter
+   */
+  readonly minFilter: MinFilter|null;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplermagfilter
+   */
+  readonly magFilter: MagFilter|null;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerwraps
+   */
+  readonly wrapS: WrapMode;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerwrapt
+   */
+  readonly wrapT: WrapMode;
+
+  /**
+   * Configure the minFilter value of the Sampler.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setMinFilter(filter: MinFilter|null): Promise<void>;
+
+  /**
+   * Configure the magFilter value of the Sampler.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setMagFilter(filter: MagFilter|null): Promise<void>;
+
+  /**
+   * Configure the S (U) wrap mode of the Sampler.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setWrapS(mode: WrapMode): Promise<void>;
+
+  /**
+   * Configure the T (V) wrap mode of the Sampler.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setWrapT(mode: WrapMode): Promise<void>;
+}
+
+
+/**
+ * An Image represents an embedded or external image used to provide texture
+ * color data.
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-image
+ */
+export declare interface Image extends ThreeDOMElement {
+  /**
+   * The name of the image, if any.
+   */
+  readonly name?: string;
+
+  /**
+   * The type is 'external' if the image has a configured URI. Otherwise, it is
+   * considered to be 'embedded'. Note: this distinction is only implied by the
+   * glTF spec, and is made explicit here for convenience.
+   */
+  readonly type: 'embedded'|'external';
+
+  /**
+   * The URI of the image, if it is external.
+   */
+  readonly uri: string|null;
+
+  /**
+   * Configure the URI of the image. If a URI is specified for an otherwise
+   * embedded image, the URI will take precedence over an embedded buffer.
+   * Requires the 'textures' capability to be enabled.
+   */
+  setURI(uri: string): Promise<void>;
 }
 
 /**
