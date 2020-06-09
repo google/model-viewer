@@ -130,13 +130,14 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      'Firefox 76.0': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Firefox',
-        browser_version: '76.0',
-      },
+      // TODO(#1207)
+      // 'Firefox 76.0': {
+      //   base: 'BrowserStack',
+      //   os: 'Windows',
+      //   os_version: '10',
+      //   browser: 'Firefox',
+      //   browser_version: '76.0',
+      // },
       'Safari (latest)': {
         base: 'BrowserStack',
         os: 'OS X',
