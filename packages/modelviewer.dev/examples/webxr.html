@@ -1,0 +1,280 @@
+<!--
+/* @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; WebXR Demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
+  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>
+
+</head>
+<body>
+
+  <div class="sample">
+    <div id="demo-container-1" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <div class="heading">
+          <h2 class="demo-title">WebXR Demo</h2>
+          <h4>Customize a WebXR Augmented Reality session with HTML, CSS, and JS in Chrome 83+ on Android.</h4>
+          <p>
+            This demonstrates the use of slots, as well as shared and unshared DOM between the 3D and AR modes.
+          </p>
+          <p>
+            A slot is used here for replacing the default AR button with a custom one - in this case
+            the one recommended by SceneViewer. This is not the default only because this way localization of the text is left
+            to whatever system you prefer to use. Note the AR button will only be visible on AR-capable Android devices.
+          </p>
+          <p>
+            By styling based on the <code>ar-status</code> attribute, you can add DOM that only shows up in certain modes.
+            In this case a CSS animation has been added to prompt the user to move their phone around to help ARCore find
+            their floor so that the object can be placed. User studies show a prompt like this is an important part of 
+            guiding users to a good AR experience.
+          </p>
+          <p>
+            Finally, even complex DOM can easily function in both 3D and AR modes, including interactions via script. In 
+            this case a simple carousel of models is demonstrated. Unfortunately none of this DOM content can flow into 
+            SceneViewer or QuickLook, as these are native apps. Only through WebXR, now our default AR mode, can this be
+            achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
+          </p>
+        </div>
+        <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <template>
+<model-viewer src="../assets/ShopifyModels/Chair.glb" poster="../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls alt="A 3D model carousel">
+  
+  <button slot="ar-button" id="ar-button">
+    View in your space
+  </button>
+
+  <div id="ar-prompt">
+    <img src="../assets/hand.png">
+  </div>
+
+  <div class="slider">
+    <div class="slides">
+      <button class="slide selected" onclick="switchSrc(this, 'Chair')"
+        style="background-image: url('../assets/ShopifyModels/Chair.png');">
+
+      <button class="slide" onclick="switchSrc(this, 'Mixer')"
+        style="background-image: url('../assets/ShopifyModels/Mixer.png');">
+
+      <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
+        style="background-image: url('../assets/ShopifyModels/GeoPlanter.png');">
+      
+      <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
+        style="background-image: url('../assets/ShopifyModels/ToyTrain.png');">
+      
+      <button class="slide" onclick="switchSrc(this, 'Canoe')"
+        style="background-image: url('../assets/ShopifyModels/Canoe.png');">    
+    </div>
+  </div>
+</model-viewer>
+
+<script type="module">
+  const modelViewer = document.querySelector("model-viewer");
+
+  window.switchSrc = (element, name) => {
+    const base = "../assets/ShopifyModels/" + name;
+    modelViewer.src = base + '.glb';
+    modelViewer.poster = base + '.png';
+    const slides = document.querySelectorAll(".slide");
+    slides.forEach((element) => {element.classList.remove("selected");});
+    element.classList.add("selected");
+  };
+
+  document.querySelector(".slider").addEventListener('beforexrselect', (ev) => {
+    // Keep slider interactions from affecting the XR scene.
+    ev.preventDefault();
+  });
+</script>
+
+<style>
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+
+  model-viewer {
+    background-color: #eee;
+    --poster-color: #eee;
+  }
+
+  #ar-button {
+    background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+    background-position: 12px 50%;
+    background-color: #fff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 132px;
+    padding: 0px 16px 0px 40px;
+    font-family: Roboto Regular, Helvetica Neue, sans-serif;
+    font-size: 14px;
+    color:#4285f4;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 18px;
+    border: 1px solid #DADCE0;
+  }
+
+  #ar-button:active {
+    background-color: #E8EAED;
+  }
+
+  #ar-button:focus {
+    outline: none;
+  }
+
+  #ar-button:focus-visible {
+    outline: 1px solid #4285f4;
+  }
+
+  @keyframes circle {
+    from { transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg); }
+    to   { transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg); }
+  }
+
+  @keyframes elongate {
+    from { transform: translateX(100px); }
+    to   { transform: translateX(-100px); }
+  }
+
+  model-viewer > #ar-prompt {
+    position: absolute;
+    left: 50%;
+    bottom: 175px;
+    animation: elongate 2s infinite ease-in-out alternate;
+    display: none;
+  }
+
+  model-viewer[ar-status="session-started"] > #ar-prompt {
+    display: block;
+  }
+
+  model-viewer > #ar-prompt > img {
+    animation: circle 4s linear infinite;
+  }
+
+  .slider {
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    position: absolute;
+    bottom: 16px;
+  }
+
+  .slides {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slide {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #fff;
+    margin-right: 10px;
+    border-radius: 10px;
+    border: none;
+    display: flex;
+  }
+
+  .slide.selected {
+    border: 2px solid #4285f4;
+  }
+
+  .slide:focus {
+    outline: none;
+  }
+
+  .slide:focus-visible {
+    outline: 1px solid #4285f4;
+  }
+
+</style>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <ul>
+      <li class="attribution">
+        Chair, Mixer, GeoPlanter, ToyTrain, Canoe ©Copyright 2020 <a href="https://www.shopify.com/">Shopify Inc.</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+      </li>
+    </ul>
+
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+  </div>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="./built/dependencies.js">
+  </script>
+  <script nomodule
+      src="./built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+
+</body>
+</html>
