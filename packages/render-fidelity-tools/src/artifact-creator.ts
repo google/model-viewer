@@ -143,7 +143,7 @@ export class ArtifactCreator {
         const {
           matchingRatio,
           averageDistanceRatio,
-          mismatchingAverageDistanceRatio,
+          mismatchingAverageDistanceRatio
         } = analysis;
 
         thresholdResults.push(analysis);
