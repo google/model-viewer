@@ -189,9 +189,9 @@ export declare interface Material extends ThreeDOMElement {
    */
   readonly name?: string;
 
-  readonly normalTexture?: TextureInfo|null;
-  readonly occlusionTexture?: TextureInfo|null;
-  readonly emissiveTexture?: TextureInfo|null;
+  readonly normalTexture: TextureInfo|null;
+  readonly occlusionTexture: TextureInfo|null;
+  readonly emissiveTexture: TextureInfo|null;
 
   /**
    * The PBRMetallicRoughness configuration of the material.
@@ -209,6 +209,19 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
    * The base color factor of the material, represented as RGBA values
    */
   readonly baseColorFactor: Readonly<RGBA>;
+
+  /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing base color factor for a UV coordinate space.
+   */
+  readonly baseColorTexture: TextureInfo|null;
+
+  /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing metalness (B channel) and roughness (G channel)
+   * for a UV coordinate space.
+   */
+  readonly metallicRoughnessTexture: TextureInfo|null;
 
   /**
    * Changes the base color factor of the material to the given value.

@@ -25,6 +25,9 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   readonly baseColorFactor: RGBA = [0, 0, 0, 1];
   private static count = 0;
 
+  readonly baseColorTexture = null;
+  readonly metallicRoughnessTexture = null;
+
   constructor(
       private kernel: ModelKernel, _serialized: SerializedPBRMetallicRoughness,
       readonly name = `fake-pbr-metallic-roughness-${
@@ -45,6 +48,10 @@ export class FakeThreeDOMElement implements ThreeDOMElement {}
 export class FakeMaterial extends FakeThreeDOMElement implements Material {
   readonly pbrMetallicRoughness = new FakePBRMetallicRoughness(
       this.kernel, this.serialized.pbrMetallicRoughness);
+
+  readonly normalTexture = null;
+  readonly occlusionTexture = null;
+  readonly emissiveTexture = null;
 
   private static count = 0;
 
