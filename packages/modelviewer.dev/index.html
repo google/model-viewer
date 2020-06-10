@@ -72,6 +72,10 @@
           <h3 class="grouping-title border-bottom">Examples</h3>
           <ul id="list-example">
 
+            <li><a href="examples/webxr.html"><h4>WebXR Demo</h4></a></li>
+
+            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
+
             <li><a href="examples/animation.html"><h4>Animation</h4></a></li>
 
             <li><a href="examples/lazy-loading.html"><h4>Lazy Loading</h4></a></li>
@@ -85,8 +89,6 @@
             <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
 
             <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
-
-            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
 			
 			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
           </ul>
@@ -139,9 +141,8 @@
               Augmented Reality</a>.
               Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
               to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
+              app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
+              whitespace. Defaults to "webxr scene-viewer quick-look".
             </li>
             <li>
               <div>ar-scale</div>
@@ -291,15 +292,6 @@
               Quick Look</a> on Safari. See <a
               href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
               Reality</a>.</p>
-            </li>
-            <li>
-              <div>magic-leap</div>
-              <p>Enables the ability to view models in AR when viewing content
-              on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a>
-              browser, requires that src is a GLB model, and requires the
-              inclusion of the <a
-              href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
-              library.</p>
             </li>
             <li>
               <div>max-camera-orbit</div>

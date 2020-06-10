@@ -15,7 +15,7 @@
 
 import {ModelChangeEvent, ThreeDOMGlobalScope} from '../api.js';
 import {ModelKernel, ModelKernelConstructor} from '../api/model-kernel.js';
-import {SerializedModel, ThreeDOMMessageType} from '../protocol.js';
+import {SerializedModel, ThreeDOMMessageTypeMap} from '../protocol.js';
 
 /**
  * The "preserved" context includes the original native implementations
@@ -31,7 +31,6 @@ export interface PreservedContext {
   importScripts: (...scripts: Array<string>) => unknown;
 }
 
-
 /**
  * A function that will be stringified and appended the a runtime-generated
  * execution context script to initialize the scene graph execution context.
@@ -42,6 +41,7 @@ export interface PreservedContext {
  */
 function initialize(
     this: ThreeDOMGlobalScope,
+    ThreeDOMMessageType: ThreeDOMMessageTypeMap,
     ModelKernel: ModelKernelConstructor,
     preservedContext: PreservedContext) {
   let currentKernel: ModelKernel|null = null;

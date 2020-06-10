@@ -79,7 +79,13 @@ export class CorrelatedSceneGraph {
       }
 
       const {type, index} = gltfElementReference;
-      const gltfElement = gltf[type][index] as GLTFElement;
+      const elementArray = gltf[type] || [];
+      const gltfElement = elementArray[index];
+
+      if (gltfElement == null) {
+        // TODO: Maybe throw here...
+        return;
+      }
 
       let threeObjects = gltfElementMap.get(gltfElement);
 
@@ -120,7 +126,7 @@ export class CorrelatedSceneGraph {
 
             if (elementReference != null) {
               const {type, index} = elementReference;
-              const cloneElement = cloneGLTF[type][index];
+              const cloneElement = cloneGLTF[type]![index];
 
               cloneThreeObjectMap.set(cloneObject, {type, index});
 

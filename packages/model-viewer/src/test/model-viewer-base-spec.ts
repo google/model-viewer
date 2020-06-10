@@ -35,8 +35,8 @@ const expectBlobDimensions =
     img.src = url;
   });
 
-  expect(img.width).to.be.equal(width);
-  expect(img.height).to.be.equal(height);
+  expect(img.width).to.be.equal(Math.round(width));
+  expect(img.height).to.be.equal(Math.round(height));
 };
 
 suite('ModelViewerElementBase', () => {

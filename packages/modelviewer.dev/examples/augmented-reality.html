@@ -55,11 +55,11 @@
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
         <div class="heading">
           <h2 class="demo-title">Augmented Reality</h2>
-          <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code>, &amp; the accompanying attributes, <code>magic-leap</code>, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
+          <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look fallback" ar-scale="auto" magic-leap camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
           </template>
         </example-snippet>
 
@@ -76,9 +76,8 @@
             Augmented Reality</a>.
             Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
             to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-            app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-            experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-            whitespace. Defaults to "webxr scene-viewer quick-look fallback".
+            app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
+            whitespace. Defaults to "webxr scene-viewer quick-look".
           </li>
           <li>
             <div>ar-scale</div>
@@ -100,10 +99,6 @@
               to launch AR Quick Look on iOS. Allowed values are "safari" and
               "chrome". You can specify any number of browsers separated by
               whitespace, for example: "safari chrome". Defaults to "safari".</p>
-          </li>
-          <li>
-            <div>magic-leap</div>
-            <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
           </li>
         </ul>
 

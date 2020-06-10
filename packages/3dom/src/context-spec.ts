@@ -75,8 +75,7 @@ suite('context', () => {
       test('dispatches an event in the worker', async () => {
         const modelGraft = new ModelGraft(
             '',
-            await CorrelatedSceneGraph.from(
-                await loadThreeGLTF(ASTRONAUT_GLB_PATH)));
+            CorrelatedSceneGraph.from(await loadThreeGLTF(ASTRONAUT_GLB_PATH)));
         const context = new ThreeDOMExecutionContext(['messaging']);
         const workerConfirmsEvent = waitForEvent(context.worker, 'message');
 

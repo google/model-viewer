@@ -15,6 +15,33 @@
 
 import {ThreeDOMCapability, ThreeDOMGlobalScope} from '../api.js';
 
+function filterTextures(this: ThreeDOMGlobalScope) {
+  const errorMessage = 'Capability "textures" not allowed';
+  const descriptor = {
+    value: () => {
+      throw new Error(errorMessage);
+    },
+    configurable: false,
+    writable: false
+  };
+
+  Object.defineProperties(this.Texture.prototype, {
+    'setSampler': descriptor,
+    'setSource': descriptor,
+  });
+
+  Object.defineProperties(this.Image.prototype, {
+    'setURI': descriptor,
+  });
+
+  Object.defineProperties(this.Sampler.prototype, {
+    'setMinFilter': descriptor,
+    'setMagFilter': descriptor,
+    'setWrapS': descriptor,
+    'setWrapT': descriptor,
+  });
+}
+
 /**
  * Given a 3DOM execution context, patch any methods that give write access
  * to otherwise configurable material properties so that they are automatically
@@ -92,6 +119,7 @@ type CapabilityFilterMap = {
 };
 
 const capabilityFilterMap: CapabilityFilterMap = {
+  'textures': filterTextures,
   'messaging': filterMessaging,
   'material-properties': filterMaterialProperties,
   'fetch': filterFetch

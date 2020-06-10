@@ -108,7 +108,8 @@ cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
 for file_to_patch in "${FILES_TO_PATCH_WITH_MINIFIED_BUNDLE[@]}"; do
-  sed -i '' 's/model-viewer\.js/model-viewer\.min\.js/g' $file_to_patch
+  sed -i.bak 's/model-viewer\.js/model-viewer\.min\.js/g' $file_to_patch
+  rm $file_to_patch.bak
 done
 
 # Add a "VERSION" file containing the last git commit message
