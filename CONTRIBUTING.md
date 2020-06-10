@@ -57,6 +57,6 @@ consider the API as documented on [modelviewer.dev](https://modelviewer.dev)
 our public API.
 
 We'll also strive to keep rendering changes in the spirit of semver - although
-in general, most of our rendering changes are likely to be increased adherence
-to PBR, which we wouldn't consider to be an incompatible change for purposes
-of semver.
+most of our rendering changes are likely to be increased adherence to PBR,
+which we wouldn't consider to be an incompatible change for purposes of
+semver.
