@@ -1,6 +1,3 @@
-> ## 🛠 Status: In Development
-> `<model-viewer>` is currently in development. It's on the fast track to a 1.0 release, so we encourage you to use it and give us your feedback, but there are things that haven't been finalized yet and you can expect some changes.
-
 <p align="center">
   <img alt="A 3D model of an astronaut" src="screenshot.png" width="480">
 </p>
