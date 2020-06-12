@@ -319,12 +319,13 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(null);
 
-    const session = this[$currentSession]!;
-    session.removeEventListener('selectstart', this[$onSelectStart]);
-    session.removeEventListener('selectend', this[$onSelectEnd]);
-
-    this[$currentSession] = null;
-    session.cancelAnimationFrame(this[$rafId]!);
+    const session = this[$currentSession];
+    if (session != null) {
+      session.removeEventListener('selectstart', this[$onSelectStart]);
+      session.removeEventListener('selectend', this[$onSelectEnd]);
+      session.cancelAnimationFrame(this[$rafId]!);
+      this[$currentSession] = null;
+    }
 
     const scene = this[$presentedScene];
     if (scene != null) {
@@ -335,9 +336,18 @@ export class ARRenderer extends EventDispatcher {
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
       model.setShadowScaleAndOffset(1, 0);
-      scene.yaw = this[$turntableRotation]!;
-      scene.setShadowIntensity(this[$oldShadowIntensity]!);
-      scene.background = this[$oldBackground];
+      const yaw = this[$turntableRotation];
+      if (yaw != null) {
+        scene.yaw = yaw;
+      }
+      const intensity = this[$oldShadowIntensity];
+      if (intensity != null) {
+        scene.setShadowIntensity(intensity);
+      }
+      const background = this[$oldBackground];
+      if (background != null) {
+        scene.background = background;
+      }
       scene.removeEventListener('model-load', this[$onUpdateScene]);
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');

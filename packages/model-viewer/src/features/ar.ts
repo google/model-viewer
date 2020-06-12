@@ -219,6 +219,7 @@ configuration or device capabilities');
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
+        await this[$renderer].arRenderer.stopPresenting();
       }
     }
 
