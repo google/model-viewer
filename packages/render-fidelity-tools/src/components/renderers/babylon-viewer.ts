@@ -14,8 +14,7 @@
  */
 
 import '@babylonjs/loaders/glTF';
-
-import {ArcRotateCamera, Engine, HemisphericLight, MeshBuilder, Scene, SceneLoader, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Engine, HemisphericLight, Scene, SceneLoader, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -32,7 +31,6 @@ const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $camera = Symbol('camera');
 const $light1 = Symbol('light1');
-const $sphere = Symbol('sphere');
 
 
 @customElement('babylon-viewer')
@@ -43,11 +41,11 @@ export class BabylonViewer extends LitElement {
   private[$scene]: Scene;
   private[$camera]: ArcRotateCamera;
   private[$light1]: HemisphericLight;
-  private[$sphere]: any;
 
   constructor() {
     super();
     console.log(SceneLoader);
+    console.log(this[$light1]);
   }
 
   connectedCallback() {
@@ -99,34 +97,10 @@ export class BabylonViewer extends LitElement {
 
     this[$light1] =
         new HemisphericLight('light1', new Vector3(1, 1, 0), this[$scene]);
-    // var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1,
-    // -1), scene);
-
-    // Add and manipulate meshes in the scene
-    this[$sphere] =
-        MeshBuilder.CreateSphere('sphere', {diameter: 2}, this[$scene]);
-
-    // this is async , so may need to replace it to promise
-
-    SceneLoader.Append(
-        '../../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedTriangle/glTF/',
-        'AnimatedTriangle.gltf',
-        this[$scene],
-        () => {
-
-        });
-
-
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
     });
-
-    console.log(this[$scene]);
-    console.log(this[$engine]);
-    console.log(this[$camera]);
-    console.log(this[$light1]);
-    console.log(this[$sphere]);
   }
 
   /*
@@ -141,7 +115,21 @@ export class BabylonViewer extends LitElement {
 
     this[$updateSize]();
 
-    console.log(scenario);
+    const lastSlashIndex = scenario.model.lastIndexOf('/');
+    const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
+    const modelFileName =
+        scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
+    console.log(lastSlashIndex);
+    console.log(scenario.model);
+    console.log(modelRootPath);
+    console.log(modelFileName);
+
+    await new Promise((resolve) => {
+      console.log('Loading models for', scenario.model);
+      SceneLoader.Append(modelRootPath, modelFileName, this[$scene], () => {
+        resolve();
+      });
+    });
   }
 
   private[$render]() {
