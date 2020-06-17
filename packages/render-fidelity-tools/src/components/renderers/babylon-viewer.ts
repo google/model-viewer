@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ArcRotateCamera, Engine, Scene, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Engine, HemisphericLight, MeshBuilder, Scene, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -29,6 +29,8 @@ const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $camera = Symbol('camera');
+const $light1 = Symbol('light1');
+const $sphere = Symbol('sphere');
 
 
 @customElement('babylon-viewer')
@@ -38,6 +40,8 @@ export class BabylonViewer extends LitElement {
   private[$engine]: Engine;
   private[$scene]: Scene;
   private[$camera]: ArcRotateCamera;
+  private[$light1]: HemisphericLight;
+  private[$sphere]: any;
 
   constructor() {
     super();
@@ -90,19 +94,24 @@ export class BabylonViewer extends LitElement {
         this[$scene]);
     this[$camera].attachControl(this[$canvas]!, true);
 
+    this[$light1] =
+        new HemisphericLight('light1', new Vector3(1, 1, 0), this[$scene]);
+    // var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1,
+    // -1), scene);
+
+    // Add and manipulate meshes in the scene
+    this[$sphere] =
+        MeshBuilder.CreateSphere('sphere', {diameter: 2}, this[$scene]);
+
+
+    this[$engine].runRenderLoop(() => {
+      this[$scene].render();
+    });
     console.log(this[$scene]);
     console.log(this[$engine]);
     console.log(this[$camera]);
-    /*
-    // Add lights to the scene
-    var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1,
-    1, 0), scene); var light2 = new BABYLON.PointLight("light2", new
-    BABYLON.Vector3(0, 1, -1), scene);
-
-    // Add and manipulate meshes in the scene
-    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2},
-    scene);
-    */
+    console.log(this[$light1]);
+    console.log(this[$sphere]);
   }
 
   /*
