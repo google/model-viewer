@@ -110,7 +110,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
   toJSON(): SerializedPBRMetallicRoughness {
     const serialized: Partial<SerializedPBRMetallicRoughness> = super.toJSON();
-    const {baseColorTexture, baseColorFactor} = this;
+    const {baseColorTexture, metallicRoughnessTexture, baseColorFactor} = this;
 
     if (baseColorTexture != null) {
       serialized.baseColorTexture = baseColorTexture.toJSON();
@@ -118,6 +118,10 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     if (baseColorFactor != null) {
       serialized.baseColorFactor = baseColorFactor;
+    }
+
+    if (metallicRoughnessTexture != null) {
+      serialized.metallicRoughnessTexture = metallicRoughnessTexture.toJSON();
     }
 
     return serialized as SerializedPBRMetallicRoughness;
