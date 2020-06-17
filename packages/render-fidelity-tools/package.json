@@ -19,6 +19,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
+    "@babylonjs/loaders": "^4.1.0",
     "@babylonjs/core": "^4.1.0",
     "@google/model-viewer": "^1.0.0",
     "@magicleap/prismatic": "^2.0.2",
