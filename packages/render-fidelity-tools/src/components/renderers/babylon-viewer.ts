@@ -124,7 +124,8 @@ export class BabylonViewer extends LitElement {
       this[$initialize]();
     }
 
-    console.log(this[$canvas]);
+    this[$updateSize]();
+
     console.log(scenario);
   }
 
@@ -132,5 +133,21 @@ export class BabylonViewer extends LitElement {
   }
 
   private[$updateSize]() {
+    if (this[$canvas] == null || this.scenario == null) {
+      // Not initialized yet. This will be invoked again when initialized.
+      return;
+    }
+
+    const canvas = this[$canvas]!;
+    const {dimensions} = this.scenario;
+
+    const dpr = window.devicePixelRatio;
+    const width = dimensions.width * dpr;
+    const height = dimensions.height * dpr;
+
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.width = `${dimensions.width}px`;
+    canvas.style.height = `${dimensions.height}px`;
   }
 }
