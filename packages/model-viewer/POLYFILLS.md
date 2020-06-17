@@ -27,7 +27,6 @@ Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | I
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
 Resize Observer[¹](1)      |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋ |               ✅
 Intersection Observer[²](2)|     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋ |               ✅
-Fullscreen API[³](3)       |     ✅ |     ✅ |        ✋ |         ✅ |   ✋ |   ✋ |               ✋
 `:focus-visible`[⁴](4)     |     ✋ |     ✋ |        ✋ |         ✋ |   ✋ |   ✋ |               ✋
 
 These browser features are **optional** and are only needed if you wish to use
@@ -41,7 +40,6 @@ WebXR HitTest API          |     🚧 |     ✅ |        🚫 |         🚫 |  
 
 [1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer
 [2]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-intersection-observer
-[3]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-fullscreen-api
 [4]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-focus-visible
 
 ### Regarding IE 11
@@ -66,7 +64,6 @@ The following emerging web platform APIs are *optional*, and will be used by
 
  - [Resize Observer](https://wicg.github.io/ResizeObserver/) ([CanIUse](https://caniuse.com/#feat=resizeobserver), [Chrome Platform Status](https://www.chromestatus.com/features/5705346022637568))
  - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Chrome Platform Status](https://www.chromestatus.com/features/5695342691483648))
- - [Fullscreen API](https://fullscreen.spec.whatwg.org/) ([CanIUse](https://caniuse.com/#feat=fullscreen), [Chrome Platform Status](https://www.chromestatus.com/features/6596356319739904))
  - [`:focus-visible`]() ([CanIUse](https://caniuse.com/#feat=css-focus-visible), [Chrome Platform Status](https://chromestatus.com/features/5823526732824576))
 
 Additionally, the following _highly experimental and volatile_ APIs are needed
@@ -84,23 +81,10 @@ fine. The following is a selection of recommended polyfill implementations:
  - [Web Components Polyfill](https://github.com/webcomponents/webcomponentsjs) (includes Custom Elements and Shadow DOM)
  - [Resize Observer Polyfill](https://github.com/que-etc/resize-observer-polyfill)
  - [Intersection Observer Polyfill](https://github.com/w3c/IntersectionObserver/tree/master/polyfill)
- - [Fullscreen Polyfill](https://github.com/nguyenj/fullscreen-polyfill)
  - [`:focus-visible` Polyfill](https://github.com/WICG/focus-visible)
 
 Please keep in mind that your mileage may vary depending on the browsers you
 need to support and the fidelity of the polyfills used.
-
-### Regarding Fullscreen API
-
-The Fullscreen API is necessary for AR use cases. Currently, it is  necessary
-for the experimental Web XR Device API-based AR mode. Since this is only
-available behind a flag in Chrome Dev today, it is not necessary to load a
-Fullscreen API polyfill in production scenarios.
-
-**Importantly:** Fullscreen API is used as a fallback when Scene Viewer fails
-to launch on Android. If you do not include a polyfill for this API, the AR
-button may appear to do nothing on Samsung Internet and other browsers like it
-that do not have Fullscreen API yet.
 
 ### Regarding Resize Observer
 
@@ -156,7 +140,6 @@ this NPM command:
 ```
 npm i --save @webcomponents/webcomponentsjs \
              resize-observer-polyfill \
-             fullscreen-polyfill \
              intersection-observer
 ```
 
@@ -179,9 +162,6 @@ the rest of your application code:
 
     <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
     <script src="./node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-    <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
-    <script src="./node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 
     <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="./node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -227,9 +207,6 @@ recommended polyfills and `<model-viewer>`:
 
     <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
     <script src="https://unpkg.com/resize-observer-polyfill@1.5.0/dist/ResizeObserver.js"></script>
-
-    <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
-    <script src="https://unpkg.com/fullscreen-polyfill@1.0.2/dist/fullscreen.polyfill.js"></script>
 
     <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="https://unpkg.com/focus-visible@5.0.1/dist/focus-visible.js" defer></script>
