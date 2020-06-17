@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// import {Engine, Scene} from '@babylonjs/core';
+import {ArcRotateCamera, Engine, Scene, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -26,15 +26,21 @@ const $updateScenario = Symbol('scenario');
 const $updateSize = Symbol('updateSize');
 const $render = Symbol('render');
 const $canvas = Symbol('canvas');
+const $engine = Symbol('engine');
+const $scene = Symbol('scene');
+const $camera = Symbol('camera');
+
 
 @customElement('babylon-viewer')
 export class BabylonViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
   private[$canvas]: HTMLCanvasElement|null;
+  private[$engine]: Engine;
+  private[$scene]: Scene;
+  private[$camera]: ArcRotateCamera;
 
   constructor() {
     super();
-    this[$initialize]();
   }
 
   connectedCallback() {
@@ -66,22 +72,54 @@ export class BabylonViewer extends LitElement {
     return html`<canvas id="canvas"></canvas>`;
   }
 
+
   private[$initialize]() {
-    this[$updateSize]();
-    this[$updateScenario](this.scenario!);
+    this[$canvas] = this.shadowRoot!.querySelector('canvas');
+
+    // Create the scene space
+    this[$engine] = new Engine(this[$canvas], true);
+    this[$scene] = new Scene(this[$engine]);
+
+    // Add a camera to the scene and attach it to the canvas
+    this[$camera] = new ArcRotateCamera(
+        'Camera',
+        Math.PI / 2,
+        Math.PI / 2,
+        2,
+        new Vector3(0, 0, 5),
+        this[$scene]);
+    this[$camera].attachControl(this[$canvas]!, true);
+
+    console.log(this[$scene]);
+    console.log(this[$engine]);
+    console.log(this[$camera]);
+    /*
+    // Add lights to the scene
+    var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1,
+    1, 0), scene); var light2 = new BABYLON.PointLight("light2", new
+    BABYLON.Vector3(0, 1, -1), scene);
+
+    // Add and manipulate meshes in the scene
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2},
+    scene);
+    */
   }
 
+  /*
+    since in lit element life cycle the canvas is add to shadow dom after the
+    constructor is called, i can't get <canvas>'s ref in the constructor, so i
+    have to add it here. but it should only be called once
+  */
   private async[$updateScenario](scenario: ScenarioConfig) {
-    if (this.scenario == null)
-      return;
+    if (this[$canvas] == null) {
+      this[$initialize]();
+    }
+
+    console.log(this[$canvas]);
     console.log(scenario);
   }
 
   private[$render]() {
-    if (!this[$canvas]) {
-      this[$canvas] = this.shadowRoot!.querySelector('canvas');
-      console.log(this[$canvas]);
-    }
   }
 
   private[$updateSize]() {
