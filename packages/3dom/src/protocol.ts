@@ -125,6 +125,8 @@ export declare interface SerializedThreeDOMElement {
 export declare interface SerializedPBRMetallicRoughness extends
     SerializedThreeDOMElement {
   baseColorFactor: RGBA;
+  metallicFactor: number;
+  roughnessFactor: number;
   baseColorTexture?: SerializedTextureInfo;
   metallicRoughnessTexture?: SerializedTextureInfo;
 }

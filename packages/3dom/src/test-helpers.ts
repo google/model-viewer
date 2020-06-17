@@ -23,6 +23,8 @@ import {SerializedElementMap, SerializedImage, SerializedMaterial, SerializedMod
 
 export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   readonly baseColorFactor: RGBA = [0, 0, 0, 1];
+  readonly metallicFactor = 0;
+  readonly roughnessFactor = 0;
   private static count = 0;
 
   readonly baseColorTexture = null;
@@ -39,6 +41,14 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   }
 
   setBaseColorFactor(_value: RGBA) {
+    return Promise.resolve();
+  }
+
+  setMetallicFactor(_value: number) {
+    return Promise.resolve();
+  }
+
+  setRoughnessFactor(_value: number) {
     return Promise.resolve();
   }
 }

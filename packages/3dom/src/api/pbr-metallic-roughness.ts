@@ -40,6 +40,8 @@ export function definePBRMetallicRoughness(
   const $baseColorFactor = Symbol('baseColorFactor');
   const $baseColorTexture = Symbol('baseColorTexture');
   const $metallicRoughnessTexture = Symbol('metallicRoughnessTexture');
+  const $metallicFactor = Symbol('metallicFactor');
+  const $roughnessFactor = Symbol('roughnessFactor');
 
   /**
    * PBRMetallicRoughness exposes the PBR properties for a given Material.
@@ -49,6 +51,8 @@ export function definePBRMetallicRoughness(
     protected[$kernel]: ModelKernel;
     protected[$baseColorFactor]: Readonly<RGBA>;
     protected[$baseColorTexture]: TextureInfo|null = null;
+    protected[$metallicFactor]: Readonly<number>;
+    protected[$roughnessFactor]: Readonly<number>;
     protected[$metallicRoughnessTexture]: TextureInfo|null = null;
 
     constructor(
@@ -58,6 +62,10 @@ export function definePBRMetallicRoughness(
       this[$kernel] = kernel;
       this[$baseColorFactor] =
           Object.freeze(serialized.baseColorFactor) as RGBA;
+      this[$metallicFactor] =
+          Object.freeze(serialized.metallicFactor) as number;
+      this[$roughnessFactor] =
+          Object.freeze(serialized.roughnessFactor) as number;
 
       const {baseColorTexture, metallicRoughnessTexture} = serialized;
 
@@ -79,6 +87,20 @@ export function definePBRMetallicRoughness(
       return this[$baseColorFactor];
     }
 
+    /**
+     * The metalness factor of the material in range [0,1].
+     */
+    get metallicFactor() {
+      return this[$metallicFactor];
+    }
+
+    /**
+     * The roughness factor of the material in range [0,1].
+     */
+    get roughnessFactor() {
+      return this[$roughnessFactor];
+    }
+
     get baseColorTexture() {
       return this[$baseColorTexture];
     }
@@ -96,6 +118,28 @@ export function definePBRMetallicRoughness(
     async setBaseColorFactor(color: RGBA) {
       await this[$kernel].mutate(this, 'baseColorFactor', color);
       this[$baseColorFactor] = Object.freeze(color) as RGBA;
+    }
+
+    /**
+     * Set the metallic factor of the material.
+     * Requires the material-properties capability.
+     *
+     * @see ../api.ts
+     */
+    async setMetallicFactor(color: number) {
+      await this[$kernel].mutate(this, 'metallicFactor', color);
+      this[$metallicFactor] = Object.freeze(color) as number;
+    }
+
+    /**
+     * Set the roughness factor of the material.
+     * Requires the material-properties capability.
+     *
+     * @see ../api.ts
+     */
+    async setRoughnessFactor(color: number) {
+      await this[$kernel].mutate(this, 'roughnessFactor', color);
+      this[$roughnessFactor] = Object.freeze(color) as number;
     }
   }
 
