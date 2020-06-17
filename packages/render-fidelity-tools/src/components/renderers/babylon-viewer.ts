@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-import {ArcRotateCamera, Engine, HemisphericLight, MeshBuilder, Scene, Vector3} from '@babylonjs/core';
+import '@babylonjs/loaders/glTF';
+
+import {ArcRotateCamera, Engine, HemisphericLight, MeshBuilder, Scene, SceneLoader, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -45,6 +47,7 @@ export class BabylonViewer extends LitElement {
 
   constructor() {
     super();
+    console.log(SceneLoader);
   }
 
   connectedCallback() {
@@ -103,6 +106,14 @@ export class BabylonViewer extends LitElement {
     this[$sphere] =
         MeshBuilder.CreateSphere('sphere', {diameter: 2}, this[$scene]);
 
+    // this is async , so may need to replace it to promise
+    SceneLoader.Append(
+        '../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedCube/',
+        'glTF/AnimatedCube.gltf',
+        this[$scene],
+        () => {
+
+        });
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
