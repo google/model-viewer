@@ -107,17 +107,21 @@ export class BabylonViewer extends LitElement {
         MeshBuilder.CreateSphere('sphere', {diameter: 2}, this[$scene]);
 
     // this is async , so may need to replace it to promise
+
     SceneLoader.Append(
-        '../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedCube/',
-        'glTF/AnimatedCube.gltf',
+        '../../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedTriangle/glTF/',
+        'AnimatedTriangle.gltf',
         this[$scene],
         () => {
 
         });
 
+
+
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
     });
+
     console.log(this[$scene]);
     console.log(this[$engine]);
     console.log(this[$camera]);
