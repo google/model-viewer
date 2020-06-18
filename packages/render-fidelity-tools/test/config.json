@@ -31,7 +31,10 @@
       },
       "orbit": {
         "radius": 800
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AlphaBlendModeTest",
