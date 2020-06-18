@@ -166,9 +166,6 @@ the rest of your application code:
     <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="./node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
-    <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-    <!--<script src="./node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
-
   </head>
   <body>
     <!-- etc -->
@@ -210,9 +207,6 @@ recommended polyfills and `<model-viewer>`:
 
     <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="https://unpkg.com/focus-visible@5.0.1/dist/focus-visible.js" defer></script>
-
-    <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-    <!--<script src="https://unpkg.com/@magicleap/prismatic@0.18.2/prismatic.min.js"></script>-->
 
   </head>
   <body>

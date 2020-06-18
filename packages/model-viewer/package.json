@@ -70,7 +70,6 @@
   "devDependencies": {
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@jsantell/event-target": "^1.1.2",
-    "@magicleap/prismatic": "^2.0.2",
     "@open-wc/karma-esm": "^2.11.1",
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.5",
