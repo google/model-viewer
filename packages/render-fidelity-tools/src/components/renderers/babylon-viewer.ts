@@ -14,7 +14,8 @@
  */
 
 import '@babylonjs/loaders/glTF';
-import {ArcRotateCamera, Engine, HDRCubeTexture, Scene, SceneLoader, Vector3} from '@babylonjs/core';
+
+import {ArcRotateCamera, Axis, Engine, HDRCubeTexture, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -117,11 +118,16 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // load hdr directly
+    // load hdr directly (the size of cubmap is set to be 256 for all renderers)
     this[$hdrTexture] = new HDRCubeTexture(
-        scenario.lighting, this[$scene], 128, false, false, false);
+        scenario.lighting, this[$scene], 256, false, false, false);
     this[$scene].environmentTexture = this[$hdrTexture];
-    this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
+    this[$hdrTexture].setReflectionTextureMatrix(
+        Matrix.RotationY(Tools.ToRadians(180)));
+
+    const skyboxHolder =
+        this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
+    skyboxHolder?.rotate(Axis.Y, Math.PI, Space.WORLD);
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
