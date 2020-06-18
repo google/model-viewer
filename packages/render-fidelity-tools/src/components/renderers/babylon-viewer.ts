@@ -132,6 +132,13 @@ export class BabylonViewer extends LitElement {
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
     });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.dispatchEvent(
+            new CustomEvent('model-visibility', {detail: {visible: true}}));
+      });
+    });
   }
 
   private[$render]() {
