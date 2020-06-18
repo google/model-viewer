@@ -84,20 +84,6 @@ export class BabylonViewer extends LitElement {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
     this[$engine] = new Engine(this[$canvas], true);
     this[$scene] = new Scene(this[$engine]);
-    this[$camera] = new ArcRotateCamera(
-        'Camera',
-        Math.PI / 2,
-        Math.PI / 2,
-        2,
-        new Vector3(0, 0, 5),
-        this[$scene]);
-    this[$camera].attachControl(this[$canvas]!, true);
-    this[$light] =
-        new HemisphericLight('light', new Vector3(1, 1, 0), this[$scene]);
-
-    this[$engine].runRenderLoop(() => {
-      this[$scene].render();
-    });
   }
 
   /*
@@ -109,12 +95,30 @@ export class BabylonViewer extends LitElement {
     if (this[$scene] != null) {
       this[$scene].dispose();
     }
+
     this[$initialize]();
 
     this[$updateSize]();
 
-    // load model
+    // create camera
+    const {orbit, target} = scenario;
+    const alpha = orbit.phi * Math.PI / 180;
+    const beta = orbit.phi * Math.PI / 180;
+    this[$camera] = new ArcRotateCamera(
+        'Camera',
+        alpha,
+        beta,
+        orbit.radius,
+        new Vector3(target.x, target.y, target.z),
+        this[$scene]);
 
+    this[$camera].attachControl(this[$canvas]!, true);
+
+    this[$engine].runRenderLoop(() => {
+      this[$scene].render();
+    });
+
+    // load model
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
     const modelFileName =
@@ -124,20 +128,14 @@ export class BabylonViewer extends LitElement {
       console.log('Loading models for', scenario.model);
 
       SceneLoader.Append(modelRootPath, modelFileName, this[$scene], () => {
-        console.log('loading done')!resolve();
+        console.log('loading done')!;
+        resolve();
       });
     });
 
-    // load hdr
-    console.log(scenario.lighting);
-    console.log('loading hdr');
+    // load hdr directly
     this[$hdrTexture] = new HDRCubeTexture(
-        '../../../shared-assets/environments/lightroom_14b.hdr',
-        this[$scene],
-        128,
-        false,
-        false,
-        false);
+        scenario.lighting, this[$scene], 128, false, false, false);
     this[$scene].environmentTexture = this[$hdrTexture];
     this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
   }
@@ -150,7 +148,6 @@ export class BabylonViewer extends LitElement {
   */
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
-      // Not initialized yet. This will be invoked again when initialized.
       return;
     }
 
