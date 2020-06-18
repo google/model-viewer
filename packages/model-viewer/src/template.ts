@@ -272,6 +272,10 @@ canvas.show {
   pointer-events: none;
 }
 
+.slot.progress-bar {
+  pointer-events: none;
+}
+
 .slot.exit-webxr-ar-button {
   pointer-events: none;
 }
@@ -311,15 +315,6 @@ canvas.show {
     </slot>
   </div>
 
-  <div class="slot progress-bar">
-    <slot name="progress-bar">
-      <div id="default-progress-bar" aria-hidden="true">
-        <div class="mask"></div>
-        <div class="bar"></div>
-      </div>
-    </slot>
-  </div>
-
   <div class="slot ar-button">
     <slot name="ar-button">
       <a id="default-ar-button" class="fab"
@@ -340,12 +335,21 @@ canvas.show {
 
   <div class="slot default">
     <slot></slot>
+
+    <div class="slot progress-bar">
+      <slot name="progress-bar">
+        <div id="default-progress-bar" aria-hidden="true">
+          <div class="mask"></div>
+          <div class="bar"></div>
+        </div>
+      </slot>
+    </div>
     
     <div class="slot exit-webxr-ar-button">
       <slot name="exit-webxr-ar-button">
         <a id="default-exit-webxr-ar-button"
             tabindex="3"
-            aria-label="Exit fullscreen"
+            aria-label="Exit AR"
             aria-hidden="true">
           ${CloseIcon}
         </a>

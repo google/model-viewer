@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three';
+import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {RGBA} from '../../api.js';
 import {PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../gltf-2.0.js';
@@ -21,15 +21,21 @@ import {SerializedPBRMetallicRoughness} from '../../protocol.js';
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from '../api.js';
 
 import {ModelGraft} from './model-graft.js';
+import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $threeMaterials = Symbol('threeMaterials');
+const $baseColorTexture = Symbol('baseColorTexture');
+const $metallicRoughnessTexture = Symbol('metallicRoughnessTexture');
 
 /**
  * PBR material properties facade implementation for Three.js materials
  */
 export class PBRMetallicRoughness extends ThreeDOMElement implements
     PBRMetallicRoughnessInterface {
+  private[$baseColorTexture]: TextureInfo|null = null;
+  private[$metallicRoughnessTexture]: TextureInfo|null = null;
+
   private get[$threeMaterials](): Set<MeshStandardMaterial> {
     return this[$correlatedObjects] as Set<MeshStandardMaterial>;
   }
@@ -38,14 +44,54 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       graft: ModelGraft, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
       correlatedMaterials: Set<MeshStandardMaterial>) {
     super(graft, pbrMetallicRoughness, correlatedMaterials);
+
+    const {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
+    const baseColorTextures = new Set<ThreeTexture>();
+    const metallicRoughnessTextures = new Set<ThreeTexture>();
+
+    for (const material of correlatedMaterials) {
+      if (baseColorTexture != null && material.map != null) {
+        baseColorTextures.add(material.map);
+      }
+
+      // NOTE: GLTFLoader users the same texture for metalnessMap and
+      // roughnessMap in this case
+      // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
+      if (metallicRoughnessTexture != null && material.metalnessMap != null) {
+        metallicRoughnessTextures.add(material.metalnessMap);
+      }
+    }
+
+    if (baseColorTextures.size > 0) {
+      this[$baseColorTexture] =
+          new TextureInfo(graft, baseColorTexture!, baseColorTextures);
+    }
+
+    if (metallicRoughnessTextures.size > 0) {
+      this[$metallicRoughnessTexture] = new TextureInfo(
+          graft, metallicRoughnessTexture!, metallicRoughnessTextures);
+    }
   }
+
 
   get baseColorFactor(): RGBA {
     return (this.sourceObject as PBRMetallicRoughness).baseColorFactor ||
         [1, 1, 1, 1];
   }
 
-  set baseColorFactor(value: RGBA) {
+  get baseColorTexture() {
+    return this[$baseColorTexture];
+  }
+
+  get metallicRoughnessTexture() {
+    return this[$metallicRoughnessTexture];
+  }
+
+  async mutate(property: 'baseColorFactor', value: RGBA): Promise<void> {
+    if (property !== 'baseColorFactor') {
+      throw new Error(`Cannot mutate ${property} on PBRMetallicRoughness`);
+    }
+
     for (const material of this[$threeMaterials]) {
       material.color.fromArray(value);
       material.opacity = value[3];
@@ -64,7 +110,16 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
   toJSON(): SerializedPBRMetallicRoughness {
     const serialized: Partial<SerializedPBRMetallicRoughness> = super.toJSON();
-    serialized.baseColorFactor = this.baseColorFactor;
+    const {baseColorTexture, baseColorFactor} = this;
+
+    if (baseColorTexture != null) {
+      serialized.baseColorTexture = baseColorTexture.toJSON();
+    }
+
+    if (baseColorFactor != null) {
+      serialized.baseColorFactor = baseColorFactor;
+    }
+
     return serialized as SerializedPBRMetallicRoughness;
   }
 }

@@ -35,8 +35,6 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/@google/model-viewer/dist \
   node_modules/focus-visible \
   node_modules/intersection-observer \
-  node_modules/@magicleap \
-  node_modules/fullscreen-polyfill \
   node_modules/resize-observer-polyfill \
   shared-assets/models/*.glb \
   shared-assets/models/*.gltf \
@@ -104,6 +102,13 @@ mkdir -p $DEPLOY_ROOT/dist
 mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
 cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
+
+FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
+
+for file_to_patch in "${FILES_TO_PATCH_WITH_MINIFIED_BUNDLE[@]}"; do
+  sed -i.bak 's/model-viewer\.js/model-viewer\.min\.js/g' $file_to_patch
+  rm $file_to_patch.bak
+done
 
 # Add a "VERSION" file containing the last git commit message
 git log -n 1 > $DEPLOY_ROOT/VERSION

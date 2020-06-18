@@ -14,7 +14,7 @@
  */
 
 import {IS_IE11} from '../constants.js';
-import ModelViewerElementBase, {$scene, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor} from '../utilities.js';
 
@@ -35,9 +35,8 @@ const expectBlobDimensions =
     img.src = url;
   });
 
-  const dpr = window.devicePixelRatio;
-  expect(img.width).to.be.equal(width * dpr);
-  expect(img.height).to.be.equal(height * dpr);
+  expect(img.width).to.be.equal(Math.round(width));
+  expect(img.height).to.be.equal(Math.round(height));
 };
 
 suite('ModelViewerElementBase', () => {
@@ -200,13 +199,17 @@ suite('ModelViewerElementBase', () => {
 
     suite('capturing screenshots', () => {
       let element: ModelViewerElementBase;
+      let width: number;
+      let height: number;
       setup(async () => {
         element = new ModelViewerElement();
 
         // Avoid testing our memory ceiling in CI by limiting the size
         // of the screenshots we produce in these tests:
-        element.style.width = '32px';
-        element.style.height = '64px';
+        width = 32;
+        height = 64;
+        element.style.width = `${width}px`;
+        element.style.height = `${height}px`;
 
         document.body.insertBefore(element, document.body.firstChild);
 
@@ -306,8 +309,11 @@ suite('ModelViewerElementBase', () => {
           const idealBlob = await element.toBlob({idealAspect: true});
           const idealHeight =
               Math.round(32 / element[$scene].model.fieldOfViewAspect);
-          await expectBlobDimensions(basicBlob, 32, 64);
-          await expectBlobDimensions(idealBlob, 32, idealHeight);
+
+          const {dpr, scaleFactor} = element[$renderer];
+          const f = dpr * scaleFactor;
+          await expectBlobDimensions(basicBlob, width * f, height * f);
+          await expectBlobDimensions(idealBlob, width * f, idealHeight * f);
         });
       });
     });

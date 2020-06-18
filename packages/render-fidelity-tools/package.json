@@ -19,8 +19,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@google/model-viewer": "^0.10.0",
-    "@magicleap/prismatic": "^2.0.2",
+    "@google/model-viewer": "^1.0.0",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
     "@polymer/paper-slider": "^3.0.1",
@@ -34,13 +33,12 @@
     "dspbr-pt": "git+https://github.com/DassaultSystemes-Technology/dspbr-pt.git",
     "filament": "1.5.2",
     "focus-visible": "^5.0.1",
-    "fullscreen-polyfill": "^1.0.2",
     "http-server": "^0.12.1",
     "intersection-observer": "^0.5.1",
     "lit-element": "^2.2.1",
     "mkdirp": "^0.5.1",
     "pngjs": "^3.3.3",
-    "puppeteer": "^2.0.0",
+    "puppeteer": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
     "rimraf": "^2.6.2"
   },
@@ -51,6 +49,6 @@
     "rollup-plugin-external-globals": "^0.5.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
-    "typescript": "3.7.3"
+    "typescript": "3.8.2"
   }
 }

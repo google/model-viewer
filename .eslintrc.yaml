@@ -60,6 +60,6 @@ overrides:
       no-unused-vars: off
       no-invalid-this: off
       new-cap: off
-  - files: ["packages/**/*-spec.ts"]
+  - files: ["packages/**/*.ts"]
     rules:
       "@typescript-eslint/no-non-null-assertion": off

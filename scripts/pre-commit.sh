@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CHANGED_TYPESCRIPT_FILES=$(git diff-index --cached --name-only HEAD | grep '.*\.ts')
+CHANGED_TYPESCRIPT_FILES=$(git diff-index --diff-filter=d --cached --name-only HEAD | grep '.*\.ts')
 
 if [ ! "$CHANGED_TYPESCRIPT_FILES" ]; then
   exit 0

@@ -36,14 +36,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
 <body>
@@ -145,7 +139,7 @@
         </div>
         <example-snippet stamp-to="demo-container-5" highlight-as="html">
           <template>
-<model-viewer camera-controls auto-rotate src="../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look fallback"></model-viewer>
+<model-viewer camera-controls auto-rotate src="../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -162,7 +156,7 @@
         </div>
         <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
-<model-viewer camera-controls camera-target="0m 0m 0m" auto-rotate src="../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look fallback"></model-viewer>
+<model-viewer camera-controls camera-target="0m 0m 0m" auto-rotate src="../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
           </template>
         </example-snippet>
       </div>

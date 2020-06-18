@@ -21,6 +21,7 @@ import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
 const $model = Symbol('model');
+const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 const $elementsByInternalId = Symbol('elementsByInternalId');
 
 /**
@@ -57,12 +58,18 @@ const $elementsByInternalId = Symbol('elementsByInternalId');
  */
 export class ModelGraft extends EventTarget implements ModelGraftInterface {
   private[$model]: Model;
+  private[$correlatedSceneGraph]: CorrelatedSceneGraph;
 
   private[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
 
   constructor(modelUri: string, correlatedSceneGraph: CorrelatedSceneGraph) {
     super();
+    this[$correlatedSceneGraph] = correlatedSceneGraph;
     this[$model] = new Model(this, modelUri, correlatedSceneGraph);
+  }
+
+  get correlatedSceneGraph() {
+    return this[$correlatedSceneGraph];
   }
 
   get model() {
@@ -89,8 +96,8 @@ export class ModelGraft extends EventTarget implements ModelGraftInterface {
     // execution context side, but it would be safer to do it on both sides
     const element = this.getElementByInternalId(id);
 
-    if (element != null && property in element) {
-      (element as unknown as {[index: string]: unknown})[property] = value;
+    if (element != null) {
+      await element.mutate(property, value);
 
       this.dispatchEvent(
           new CustomEvent('mutation', {detail: {element: element}}));

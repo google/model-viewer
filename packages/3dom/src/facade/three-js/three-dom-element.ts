@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material, Object3D} from 'three';
+import {Material, Object3D, Texture} from 'three';
 
 import {GLTF, GLTFElement} from '../../gltf-2.0.js';
 import {SerializedThreeDOMElement} from '../../protocol.js';
@@ -29,7 +29,7 @@ export const $sourceObject = Symbol('sourceObject');
 const $graft = Symbol('graft');
 const $id = Symbol('id');
 
-export type CorrelatedObjects = Set<Object3D>|Set<Material>;
+export type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
 
 /**
  * A SerializableThreeDOMElement is the common primitive of all scene graph
@@ -94,6 +94,17 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
     return this[$sourceObject];
   }
 
+  /**
+   * Mutate a property of the scene graph element. Returns a promise that
+   * resolves when the mutation has been successfully applied.
+   */
+  mutate(_property: string, _value: unknown): Promise<void> {
+    throw new Error('Mutation not implemented for this element');
+  }
+
+  /**
+   * Serialize the element in order to share it with a worker context.
+   */
   toJSON(): SerializedThreeDOMElement {
     const serialized: SerializedThreeDOMElement = {id: this[$id]};
     const {name} = this;

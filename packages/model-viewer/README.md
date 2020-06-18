@@ -1,6 +1,3 @@
-> ## 🛠 Status: In Development
-> `<model-viewer>` is currently in development. It's on the fast track to a 1.0 release, so we encourage you to use it and give us your feedback, but there are things that haven't been finalized yet and you can expect some changes.
-
 <p align="center">
   <img alt="A 3D model of an astronaut" src="screenshot.png" width="480">
 </p>
@@ -35,7 +32,7 @@ npm install @google/model-viewer
 It can also be used directly from various free CDNs such as [unpkg.com](https://unpkg.com):
 
 ```html
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 ```
 
@@ -63,7 +60,7 @@ below with the full version number (like `0.10.0`) to be pinned to.
 ```html
 <!-- Loads <model-viewer> for modern browsers: -->
 <script type="module"
-    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.js">
+    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.min.js">
 </script>
 ```
 

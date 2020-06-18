@@ -5,6 +5,7 @@ on: [pull_request]
 jobs:
   minimal_test_run:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     if: github.event.pull_request.base.repo.id != github.event.pull_request.head.repo.id
 

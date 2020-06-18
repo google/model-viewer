@@ -30,9 +30,6 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../../../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -51,7 +48,10 @@
     </model-viewer>
   </renderer-harness>
   <script type="module" src="../../../dist/renderer-harness.js"></script>
-  <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
+  <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module">
+    customElements.get("model-viewer").minimumRenderScale = 1;
+  </script>
   <script>
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
@@ -68,6 +68,8 @@
       modelViewer.src = scenario.model;
       modelViewer.skyboxImage = scenario.lighting;
       const {theta, phi, radius} = scenario.orbit;
+      modelViewer.minCameraOrbit = `auto auto ${radius}m`;
+      modelViewer.maxCameraOrbit = `auto auto ${radius}m`;
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;

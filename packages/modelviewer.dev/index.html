@@ -19,6 +19,7 @@
 <head>
   <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
+  <meta name="description" content="Easily display interactive 3D models on the web and in AR">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
@@ -35,14 +36,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 </head>
 <body>
 
@@ -60,7 +55,7 @@
         <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
           <template>
 <!-- Import the component -->
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 <!-- Use it like any other HTML element -->
 <model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
@@ -70,6 +65,10 @@
         <div id="section-examples">
           <h3 class="grouping-title border-bottom">Examples</h3>
           <ul id="list-example">
+
+            <li><a href="examples/webxr.html"><h4>WebXR Demo</h4></a></li>
+
+            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
 
             <li><a href="examples/animation.html"><h4>Animation</h4></a></li>
 
@@ -84,8 +83,6 @@
             <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
 
             <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
-
-            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
 			
 			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
           </ul>
@@ -138,9 +135,8 @@
               Augmented Reality</a>.
               Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
               to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
+              app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
+              whitespace. Defaults to "webxr scene-viewer quick-look".
             </li>
             <li>
               <div>ar-scale</div>
@@ -292,15 +288,6 @@
               Reality</a>.</p>
             </li>
             <li>
-              <div>magic-leap</div>
-              <p>Enables the ability to view models in AR when viewing content
-              on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a>
-              browser, requires that src is a GLB model, and requires the
-              inclusion of the <a
-              href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
-              library.</p>
-            </li>
-            <li>
               <div>max-camera-orbit</div>
               <p>Set the maximum orbital values of the camera. Takes values in
                 the same form as camera-orbit, but does not support env().
@@ -393,6 +380,16 @@
               to force the button to be hidden. Defaults to block.</p>
             </li>
             <li>
+              <div>ar-status</div>
+              <p>This read-only attribute enables DOM content to be styled based 
+              on the status of the WebXR AR presentation. Possible values include 
+              'not-presenting', 'session-started', and 'object-placed'. For instance, 
+              a prompt for the user to move their phone until the object is 
+              successfully placed in their space can be shown by scoping a CSS rule
+              to model-viewer[ar-status="session-started"]. Setting this attribute
+              has no effect.</p>
+            </li>
+            <li>
               <div>--interaction-prompt-display</div>
               <p>Sets the display property of the interaction prompt. Intended
               to be used to force the prompt to be hidden. Defaults to flex.</p>
@@ -472,6 +469,12 @@
               loaded from a Google CDN.</p>
             </li>
             <li>
+              <div>ModelViewer.minimumRenderScale</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering 
+              scale factor as it dynamically changes resolution to maintain framerate. Turn 
+              off this effect by setting to 1. Defaults to 0.5.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -480,7 +483,7 @@
               if they are not being used by a &lt;model-viewer&gt; element in the document.
               Note also that the cache size is measured in number of glTF models, not bytes!
               This is important to keep in mind, since any two models may have wildly
-              different byte sizes.</p>
+              different byte sizes. Default is 5.</p>
             </li>
           </ul>
 
@@ -624,6 +627,14 @@
 
           <ul class="list-attribute">
             <li>
+              <div>ar-status</div>
+              <p>Fired when the ar-status attribute above fires. The event.detail.status
+              property will be set to the same value as the ar-status attribute, either
+              'not-presenting', 'session-started', or 'object-placed'. This event is
+              only enabled for WebXR AR sessions. 
+              </p>
+            </li>
+            <li>
               <div>camera-change</div>
               <p>Fired when the camera position and/or field of view have
               changed. If the change occurred due to user interaction, the
@@ -765,16 +776,6 @@
               <td><img class="icon-warning"></td>
               <td><img class="icon-check"></td>
               <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-            </tr>
-            <tr>
-              <td>Fullscreen API</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
               <td><img class="icon-warning"></td>
               <td><img class="icon-check"></td>
             </tr>

@@ -214,6 +214,8 @@ const $focusedTime = Symbol('focusedTime');
 const $zoomAdjustedFieldOfView = Symbol('zoomAdjustedFieldOfView');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
+const $initialized = Symbol('initialized');
+const $maintainThetaPhi = Symbol('maintainThetaPhi');
 
 const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
@@ -240,6 +242,8 @@ export declare interface ControlsInterface {
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
+  getMinimumFieldOfView(): number;
+  getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
   resetInteractionPrompt(): void;
 }
@@ -340,6 +344,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
+    protected[$initialized] = false;
+    protected[$maintainThetaPhi] = false;
 
     protected[$changeHandler] = (event: Event) =>
         this[$onChange](event as ChangeEvent);
@@ -361,6 +367,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     getFieldOfView(): number {
       return this[$controls].getFieldOfView();
+    }
+
+    // Provided so user code does not have to parse these from attributes.
+    getMinimumFieldOfView(): number {
+      return this[$controls].options.minimumFieldOfView!;
+    }
+
+    getMaximumFieldOfView(): number {
+      return this[$controls].options.maximumFieldOfView!;
     }
 
     jumpCameraToGoal() {
@@ -425,7 +440,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
         if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
-            this.cameraControls) {
+            this.cameraControls && !this[$userHasInteracted]) {
           this[$waitingToPromptUser] = true;
         } else {
           this[$deferInteractionPrompt]();
@@ -457,6 +472,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      if (this[$maintainThetaPhi]) {
+        const {theta, phi} = this.getCameraOrbit();
+        style[0] = theta;
+        style[1] = phi;
+        this[$maintainThetaPhi] = false;
+      }
       this[$controls].setOrbit(style[0], style[1], style[2]);
     }
 
@@ -494,6 +515,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
       this[$scene].setTarget(x, y, z);
+      this[$renderer].arRenderer.updateTarget();
     }
 
     [$tick](time: number, delta: number) {
@@ -522,7 +544,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-
       if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
         const scene = this[$scene];
@@ -532,17 +553,19 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         const offset = wiggle(animationTime);
         const opacity = fade(animationTime);
 
-        const xOffset = offset * scene.width * 0.05;
-        const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
-
-        this[$promptAnimatedContainer].style.transform =
-            `translateX(${xOffset}px)`;
         this[$promptAnimatedContainer].style.opacity = `${opacity}`;
 
-        this[$controls].adjustOrbit(deltaTheta, 0, 0);
+        if (offset !== this[$lastPromptOffset]) {
+          const xOffset = offset * scene.width * 0.05;
+          const deltaTheta = (offset - this[$lastPromptOffset]) * Math.PI / 16;
 
-        this[$lastPromptOffset] = offset;
-        this[$needsRender]();
+          this[$promptAnimatedContainer].style.transform =
+              `translateX(${xOffset}px)`;
+
+          this[$controls].adjustOrbit(deltaTheta, 0, 0);
+
+          this[$lastPromptOffset] = offset;
+        }
       }
 
       this[$controls].update(time, delta);
@@ -630,11 +653,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;
 
+      if (this[$initialized]) {
+        this[$maintainThetaPhi] = true;
+      } else {
+        this[$initialized] = true;
+      }
       this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
       this.requestUpdate('fieldOfView', this.fieldOfView);
-      this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('minCameraOrbit', this.minCameraOrbit);
       this.requestUpdate('maxCameraOrbit', this.maxCameraOrbit);
+      this.requestUpdate('cameraOrbit', this.cameraOrbit);
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
@@ -664,6 +692,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onBlur]() {
+      if (this.interactionPrompt !== InteractionPromptStrategy.WHEN_FOCUSED) {
+        return;
+      }
+
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
 

@@ -156,6 +156,11 @@ export class ArtifactCreator {
             (mismatchingAverageDistanceRatio * 100).toFixed(2)}%`);
       }
 
+      const {rmsDistanceRatio} = thresholdResults[0];
+      console.log(
+          `\n  📊 Decibels of root mean square color distance (without threshold): ${
+              (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
+
       analysisResults.push(thresholdResults);
     }
 

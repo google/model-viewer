@@ -19,7 +19,6 @@ import {ARMixin} from './features/ar.js';
 import {ControlsMixin} from './features/controls.js';
 import {EnvironmentMixin} from './features/environment.js';
 import {LoadingMixin} from './features/loading.js';
-import {MagicLeapMixin} from './features/magic-leap.js';
 import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
@@ -29,10 +28,9 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-export const ModelViewerElement =
-    AnnotationMixin(SceneGraphMixin(MagicLeapMixin(StagingMixin(
-        EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
-            FocusVisiblePolyfillMixin(ModelViewerElementBase))))))))));
+export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
+    EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
+        FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 

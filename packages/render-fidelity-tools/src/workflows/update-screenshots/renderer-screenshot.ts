@@ -14,17 +14,10 @@
  */
 
 import HTTPServer from 'http-server';
-
-// const require = module.createRequire(import.meta.url);
 import {ArtifactCreator} from '../../artifact-creator.js';
-// import module from 'module';
-// import {dirname, resolve} from 'path';
-
 import {ImageComparisonConfig} from '../../common.js';
 
-// const configPath = resolve('./test/fidelity/config.json');
-// const rootDirectory = resolve(dirname(configPath));
-// const config = require(configPath);
+const port = 9040;
 
 export const rendererScreenshot = async(
     config: ImageComparisonConfig,
@@ -38,12 +31,12 @@ export const rendererScreenshot = async(
   const dimensions = {width, height};
   const server = HTTPServer.createServer({root: './', cache: -1});
 
-  server.listen(9040);
+  server.listen(port);
 
   const screenshotCreator = new ArtifactCreator(
       config,
       rootDirectory,
-      `http://localhost:9040/test/renderers/${renderer}/`);
+      `http://localhost:${port}/test/renderers/${renderer}/`);
 
   if (scenarioName == null) {
     throw new Error(' Scenario name not specified!');

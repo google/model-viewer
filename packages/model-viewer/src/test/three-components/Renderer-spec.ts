@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $onResize, $renderer, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
@@ -77,6 +78,7 @@ suite('Renderer', () => {
 
   teardown(() => {
     renderer.unregisterScene(scene);
+    renderer.render(performance.now());
   });
 
   suite('render', () => {
@@ -88,6 +90,7 @@ suite('Renderer', () => {
 
     teardown(() => {
       renderer.unregisterScene(otherScene);
+      renderer.render(performance.now());
     });
 
     test('renders only dirty scenes', async function() {
@@ -130,21 +133,29 @@ suite('Renderer', () => {
     });
 
     test('uses the proper canvas when unregsitering scenes', function() {
-      expect(renderer.canvasElement.parentElement).to.be.not.ok;
+      renderer.render(performance.now());
+
+      expect(renderer.canvasElement.classList.contains('show')).to.be.eq(false);
       expect(scene.element[$canvas].classList.contains('show')).to.be.eq(true);
       expect(otherScene.element[$canvas].classList.contains('show'))
           .to.be.eq(true);
 
       renderer.unregisterScene(scene);
+      renderer.render(performance.now());
 
-      expect(renderer.canvasElement.parentElement)
-          .to.be.eq(otherScene.element[$userInputElement]);
-      expect(otherScene.element[$canvas].classList.contains('show'))
-          .to.be.eq(false);
-
-      renderer.unregisterScene(otherScene);
-
-      expect(renderer.canvasElement.parentElement).to.be.not.ok;
+      if (USE_OFFSCREEN_CANVAS) {
+        expect(renderer.canvasElement.classList.contains('show'))
+            .to.be.eq(false);
+        expect(otherScene.element[$canvas].classList.contains('show'))
+            .to.be.eq(true);
+      } else {
+        expect(renderer.canvasElement.parentElement)
+            .to.be.eq(otherScene.element[$userInputElement]);
+        expect(renderer.canvasElement.classList.contains('show'))
+            .to.be.eq(true);
+        expect(otherScene.element[$canvas].classList.contains('show'))
+            .to.be.eq(false);
+      }
     });
 
     suite('when resizing', () => {

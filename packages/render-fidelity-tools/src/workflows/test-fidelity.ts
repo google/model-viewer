@@ -27,12 +27,13 @@ const rootDirectory = resolve(dirname(configPath));
 const config = require(configPath);
 
 const outputDirectory = join(rootDirectory, 'results');
+const port = 9030;
 const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
-    `http://localhost:9030/test/renderers/model-viewer/`);
+    `http://localhost:${port}/test/renderers/model-viewer/`);
 const server = HTTPServer.createServer({root: './', cache: -1});
-server.listen(9030);
+server.listen(port);
 
 
 try {
