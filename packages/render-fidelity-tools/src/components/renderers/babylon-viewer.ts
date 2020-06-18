@@ -14,7 +14,8 @@
  */
 
 import '@babylonjs/loaders/glTF';
-import {ArcRotateCamera, Engine, HemisphericLight, Scene, SceneLoader, Vector3} from '@babylonjs/core';
+
+import {ArcRotateCamera, Engine, HDRCubeTexture, HemisphericLight, Scene, SceneLoader, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -30,7 +31,8 @@ const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $camera = Symbol('camera');
-const $light1 = Symbol('light1');
+const $light = Symbol('light');
+const $hdrTexture = Symbol('hdrTexture');
 
 
 @customElement('babylon-viewer')
@@ -40,12 +42,12 @@ export class BabylonViewer extends LitElement {
   private[$engine]: Engine;
   private[$scene]: Scene;
   private[$camera]: ArcRotateCamera;
-  private[$light1]: HemisphericLight;
+  private[$light]: HemisphericLight;
+  private[$hdrTexture]: HDRCubeTexture;
 
   constructor() {
     super();
-    console.log(SceneLoader);
-    console.log(this[$light1]);
+    console.log(this[$light]);
   }
 
   connectedCallback() {
@@ -80,12 +82,8 @@ export class BabylonViewer extends LitElement {
 
   private[$initialize]() {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-
-    // Create the scene space
     this[$engine] = new Engine(this[$canvas], true);
     this[$scene] = new Scene(this[$engine]);
-
-    // Add a camera to the scene and attach it to the canvas
     this[$camera] = new ArcRotateCamera(
         'Camera',
         Math.PI / 2,
@@ -94,9 +92,8 @@ export class BabylonViewer extends LitElement {
         new Vector3(0, 0, 5),
         this[$scene]);
     this[$camera].attachControl(this[$canvas]!, true);
-
-    this[$light1] =
-        new HemisphericLight('light1', new Vector3(1, 1, 0), this[$scene]);
+    this[$light] =
+        new HemisphericLight('light', new Vector3(1, 1, 0), this[$scene]);
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
@@ -104,37 +101,53 @@ export class BabylonViewer extends LitElement {
   }
 
   /*
-    since in lit element life cycle the canvas is add to shadow dom after the
-    constructor is called, i can't get <canvas>'s ref in the constructor, so i
-    have to add it here. but it should only be called once
+    since in lit element life cycle the canvas is added to shadow dom after the
+    constructor is called, is impossible to get <canvas>'s ref in the
+    constructor, so initialize function is called here.
   */
   private async[$updateScenario](scenario: ScenarioConfig) {
-    if (this[$canvas] == null) {
-      this[$initialize]();
+    if (this[$scene] != null) {
+      this[$scene].dispose();
     }
+    this[$initialize]();
 
     this[$updateSize]();
+
+    // load model
 
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
     const modelFileName =
         scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
-    console.log(lastSlashIndex);
-    console.log(scenario.model);
-    console.log(modelRootPath);
-    console.log(modelFileName);
 
     await new Promise((resolve) => {
       console.log('Loading models for', scenario.model);
+
       SceneLoader.Append(modelRootPath, modelFileName, this[$scene], () => {
-        resolve();
+        console.log('loading done')!resolve();
       });
     });
+
+    // load hdr
+    console.log(scenario.lighting);
+    console.log('loading hdr');
+    this[$hdrTexture] = new HDRCubeTexture(
+        '../../../shared-assets/environments/lightroom_14b.hdr',
+        this[$scene],
+        128,
+        false,
+        false,
+        false);
+    this[$scene].environmentTexture = this[$hdrTexture];
+    this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
   }
 
   private[$render]() {
   }
 
+  /*
+    update size funciton is not complete, finish later
+  */
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
       // Not initialized yet. This will be invoked again when initialized.
