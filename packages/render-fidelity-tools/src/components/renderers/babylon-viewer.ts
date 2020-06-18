@@ -93,7 +93,7 @@ export class BabylonViewer extends LitElement {
 
     // create camera
     const {orbit, target} = scenario;
-    const alpha = orbit.phi * Math.PI / 180;
+    const alpha = (orbit.theta + 90) * Math.PI / 180;
     const beta = orbit.phi * Math.PI / 180;
     this[$camera] = new ArcRotateCamera(
         'Camera',
