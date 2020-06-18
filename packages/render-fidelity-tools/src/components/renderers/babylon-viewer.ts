@@ -14,12 +14,10 @@
  */
 
 import '@babylonjs/loaders/glTF';
-
-import {ArcRotateCamera, Engine, HDRCubeTexture, HemisphericLight, Scene, SceneLoader, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Engine, HDRCubeTexture, Scene, SceneLoader, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
-
 
 // const IS_BINARY_RE = /\.glb$/;
 
@@ -31,7 +29,6 @@ const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $camera = Symbol('camera');
-const $light = Symbol('light');
 const $hdrTexture = Symbol('hdrTexture');
 
 
@@ -42,12 +39,10 @@ export class BabylonViewer extends LitElement {
   private[$engine]: Engine;
   private[$scene]: Scene;
   private[$camera]: ArcRotateCamera;
-  private[$light]: HemisphericLight;
   private[$hdrTexture]: HDRCubeTexture;
 
   constructor() {
     super();
-    console.log(this[$light]);
   }
 
   connectedCallback() {
@@ -86,18 +81,13 @@ export class BabylonViewer extends LitElement {
     this[$scene] = new Scene(this[$engine]);
   }
 
-  /*
-    since in lit element life cycle the canvas is added to shadow dom after the
-    constructor is called, is impossible to get <canvas>'s ref in the
-    constructor, so initialize function is called here.
-  */
+
   private async[$updateScenario](scenario: ScenarioConfig) {
     if (this[$scene] != null) {
       this[$scene].dispose();
     }
 
     this[$initialize]();
-
     this[$updateSize]();
 
     // create camera
@@ -111,12 +101,7 @@ export class BabylonViewer extends LitElement {
         orbit.radius,
         new Vector3(target.x, target.y, target.z),
         this[$scene]);
-
     this[$camera].attachControl(this[$canvas]!, true);
-
-    this[$engine].runRenderLoop(() => {
-      this[$scene].render();
-    });
 
     // load model
     const lastSlashIndex = scenario.model.lastIndexOf('/');
@@ -125,27 +110,27 @@ export class BabylonViewer extends LitElement {
         scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
 
     await new Promise((resolve) => {
-      console.log('Loading models for', scenario.model);
-
       SceneLoader.Append(modelRootPath, modelFileName, this[$scene], () => {
-        console.log('loading done')!;
         resolve();
       });
     });
+
+    this[$scene].stopAllAnimations();
 
     // load hdr directly
     this[$hdrTexture] = new HDRCubeTexture(
         scenario.lighting, this[$scene], 128, false, false, false);
     this[$scene].environmentTexture = this[$hdrTexture];
     this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
+
+    this[$engine].runRenderLoop(() => {
+      this[$scene].render();
+    });
   }
 
   private[$render]() {
   }
 
-  /*
-    update size funciton is not complete, finish later
-  */
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
       return;
