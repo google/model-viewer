@@ -35,8 +35,6 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/@google/model-viewer/dist \
   node_modules/focus-visible \
   node_modules/intersection-observer \
-  node_modules/@magicleap \
-  node_modules/fullscreen-polyfill \
   node_modules/resize-observer-polyfill \
   shared-assets/models/*.glb \
   shared-assets/models/*.gltf \

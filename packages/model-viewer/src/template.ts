@@ -349,7 +349,7 @@ canvas.show {
       <slot name="exit-webxr-ar-button">
         <a id="default-exit-webxr-ar-button"
             tabindex="3"
-            aria-label="Exit fullscreen"
+            aria-label="Exit AR"
             aria-hidden="true">
           ${CloseIcon}
         </a>
