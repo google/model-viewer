@@ -28,11 +28,11 @@ const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
-  if (IS_IE11) {
-    // TODO(#999): Unskip this suite when we support IE11 in 3DOM
-    console.warn('Skipping this suite for IE11 only');
-    return;
-  }
+  // if (IS_IE11) {
+  //   // TODO(#999): Unskip this suite when we support IE11 in 3DOM
+  //   console.warn('Skipping this suite for IE11 only');
+  //   return;
+  // }
 
   let nextId = 0;
   let tagName: string;
