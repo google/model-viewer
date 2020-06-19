@@ -378,7 +378,7 @@ export class Renderer extends EventDispatcher {
     const {dpr, scale} = this;
 
     for (const scene of this.scenes) {
-      if (scene.hasRendered && (!scene.visible || scene.paused)) {
+      if (scene.hasRendered && !scene.visible) {
         continue;
       }
 

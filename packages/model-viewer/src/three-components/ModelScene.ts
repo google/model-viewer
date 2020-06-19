@@ -44,16 +44,12 @@ const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
 
-const $paused = Symbol('paused');
-
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  private[$paused]: boolean = false;
-
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public shadowIntensity = 0;
@@ -101,18 +97,6 @@ export class ModelScene extends Scene {
 
     this.model.addEventListener(
         'model-load', (event: any) => this.onModelLoad(event));
-  }
-
-  get paused() {
-    return this[$paused];
-  }
-
-  pause() {
-    this[$paused] = true;
-  }
-
-  resume() {
-    this[$paused] = false;
   }
 
   /**
