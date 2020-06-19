@@ -15,7 +15,6 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
-import {IS_IE11} from '../../constants.js';
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
@@ -28,12 +27,6 @@ const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
-  // if (IS_IE11) {
-  //   // TODO(#999): Unskip this suite when we support IE11 in 3DOM
-  //   console.warn('Skipping this suite for IE11 only');
-  //   return;
-  // }
-
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:
