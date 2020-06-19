@@ -15,6 +15,10 @@
       "scripts": {
         "setup": "prepare-ibl.sh"
       }
+    },
+    {
+      "name": "babylon",
+      "description": "Babylon"
     }
   ],
   "scenarios": [
