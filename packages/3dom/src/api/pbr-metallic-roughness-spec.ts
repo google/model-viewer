@@ -25,8 +25,12 @@ suite('api/pbr-metallic-roughness', () => {
   suite('definePBRMetallicRoughness', () => {
     test('yields a valid constructor', () => {
       const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
-          new FakeModelKernel(), {id: 0, baseColorFactor: [0, 0, 0, 1], metallicFactor: 0, roughnessFactor: 0});
+      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+        id: 0,
+        baseColorFactor: [0, 0, 0, 1],
+        metallicFactor: 0,
+        roughnessFactor: 0
+      });
 
       expect(instance).to.be.ok;
     });
@@ -34,14 +38,18 @@ suite('api/pbr-metallic-roughness', () => {
     test('produces elements with the correct owner model', () => {
       const kernel = new FakeModelKernel();
       const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
-          kernel, {id: 0, baseColorFactor: [0, 0, 0, 1], metallicFactor: 0, roughnessFactor: 0});
+      const instance = new GeneratedConstructor(kernel, {
+        id: 0,
+        baseColorFactor: [0, 0, 0, 1],
+        metallicFactor: 0,
+        roughnessFactor: 0
+      });
 
       expect(instance.ownerModel).to.be.equal(kernel.model);
     });
 
     suite('PBRMetallicRoughness', () => {
-      test('is configured with the serialized base color factor', () => {
+      test('is configured with the serialized material parameters', () => {
         const GeneratedConstructor =
             definePBRMetallicRoughness(ThreeDOMElement);
         const baseColorFactor: RGBA =
@@ -50,9 +58,12 @@ suite('api/pbr-metallic-roughness', () => {
         const roughnessFactor: number = Math.random();
 
         const instance = new GeneratedConstructor(
-            new FakeModelKernel(), {id: 0, baseColorFactor, metallicFactor, roughnessFactor});
+            new FakeModelKernel(),
+            {id: 0, baseColorFactor, metallicFactor, roughnessFactor});
 
         expect(instance.baseColorFactor).to.be.deep.equal(baseColorFactor);
+        expect(instance.metallicFactor).to.be.equal(metallicFactor);
+        expect(instance.roughnessFactor).to.be.equal(roughnessFactor);
       });
     });
   });
