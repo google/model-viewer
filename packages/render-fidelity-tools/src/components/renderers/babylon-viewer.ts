@@ -80,6 +80,7 @@ export class BabylonViewer extends LitElement {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
     this[$engine] = new Engine(this[$canvas], true);
     this[$scene] = new Scene(this[$engine]);
+    SceneLoader.ShowLoadingScreen = false;
   }
 
 
@@ -133,12 +134,14 @@ export class BabylonViewer extends LitElement {
       this[$scene].render();
     });
 
-    requestAnimationFrame(() => {
+    this[$scene].executeWhenReady(() => {
       requestAnimationFrame(() => {
-        this.dispatchEvent(
-            new CustomEvent('model-visibility', {detail: {visible: true}}));
+        requestAnimationFrame(() => {
+          this.dispatchEvent(
+              new CustomEvent('model-visibility', {detail: {visible: true}}));
+        });
       });
-    });
+    })
   }
 
   private[$render]() {
