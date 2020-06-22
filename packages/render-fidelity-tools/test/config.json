@@ -15,7 +15,7 @@
       "scripts": {
         "setup": "prepare-ibl.sh"
       }
-    },
+    }, 
     {
       "name": "babylon",
       "description": "Babylon"
@@ -365,7 +365,10 @@
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
       "orbit": {
         "radius": 12
-      }
+      },
+      "exclude":[
+        "babylon"
+      ]
     },
     {
       "name": "khronos-MorphPrimitivesTest",
@@ -616,6 +619,10 @@
       "orbit": {
         "radius": 10
       }
+      ,
+      "exclude":[
+        "babylon"
+      ]
     },
     {
       "name": "DirectionalLightTest",
@@ -630,6 +637,10 @@
       "orbit": {
         "radius": 20
       }
+      ,
+      "exclude":[
+        "babylon"
+      ]
     },
     {
       "name": "AlphaBlendLitmusTest",
