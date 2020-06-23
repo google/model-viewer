@@ -112,9 +112,11 @@ export class BabylonViewer extends LitElement {
               this[$scene].meshes[0].getHierarchyBoundingVectors();
           const modelRadius =
               Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
-          const far = 2 * Math.max(modelRadius, orbit.radius);
-          const near = far / 1000;
-          camera.minZ = near;
+          const farClip = 2 * Math.max(modelRadius, orbit.radius);
+          const nearClip = farClip / 1000;
+          // not setting maxZ(far clip) because it will clip the skybox, and the
+          // rendering result is the same
+          camera.minZ = nearClip;
         });
 
     this[$scene].stopAllAnimations();
