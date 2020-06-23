@@ -106,7 +106,7 @@ export class BabylonViewer extends LitElement {
         alpha,
         beta,
         orbit.radius,
-        new Vector3(target.x, target.y, target.z),
+        new Vector3(-target.x, target.y, target.z),
         this[$scene]);
     this[$camera].attachControl(this[$canvas]!, true);
     console.log(this[$camera]);
@@ -149,7 +149,9 @@ export class BabylonViewer extends LitElement {
 
     const skyboxHolder =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skyboxHolder?.rotate(Axis.Y, Math.PI, Space.WORLD);
+    skyboxHolder!.rotate(Axis.Y, Math.PI, Space.WORLD);
+    skyboxHolder!.infiniteDistance = true;
+
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
