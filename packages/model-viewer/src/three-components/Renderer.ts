@@ -303,7 +303,7 @@ export class Renderer extends EventDispatcher {
     let visibleScenes = 0;
     let visibleInput = null;
     for (const scene of this.scenes) {
-      if (scene.visible) {
+      if (scene.element.modelIsVisible) {
         ++visibleScenes;
         visibleInput = scene.element[$userInputElement];
       }
@@ -378,17 +378,12 @@ export class Renderer extends EventDispatcher {
     const {dpr, scale} = this;
 
     for (const scene of this.scenes) {
-      if (scene.hasRendered && !scene.visible) {
-        continue;
-      }
-
       this.preRender(scene, t, delta);
 
       if (!scene.isDirty) {
         continue;
       }
       scene.isDirty = false;
-      scene.hasRendered = true;
 
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.

@@ -404,12 +404,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get[$shouldAttemptPreload](): boolean {
-      const {src} = this;
-
-      return !!src &&
+      return !!this.src &&
           (this.loading === LoadingStrategy.EAGER ||
-           this[$shouldRevealModel]) &&
-          this[$isElementInViewport];
+           (this[$shouldRevealModel] && this[$isElementInViewport]));
     }
 
     async[$updateLoadingAndVisibility]() {

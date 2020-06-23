@@ -521,7 +521,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (this[$renderer].isPresenting) {
+      if (this[$renderer].isPresenting || !this.modelIsVisible) {
         return;
       }
 

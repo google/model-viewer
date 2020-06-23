@@ -57,7 +57,6 @@ export class ModelScene extends Scene {
   public width = 1;
   public height = 1;
   public isDirty = false;
-  public hasRendered = true;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
@@ -120,7 +119,6 @@ export class ModelScene extends Scene {
       source: string|null, progressCallback?: (progress: number) => void) {
     try {
       await this.model.setSource(source, progressCallback);
-      this.hasRendered = false;
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);

@@ -271,8 +271,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           if (entry.target === this) {
             const oldVisibility = this.modelIsVisible;
             const oldValue = this[$isElementInViewport];
-            this[$isElementInViewport] = this[$scene].visible =
-                entry.isIntersecting;
+            this[$isElementInViewport] = entry.isIntersecting;
             this.requestUpdate($isElementInViewport, oldValue);
             this[$announceModelVisibility](oldVisibility);
 
@@ -299,7 +298,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this[$isElementInViewport] = this[$scene].visible = true;
+      this[$isElementInViewport] = true;
       this.requestUpdate($isElementInViewport, false);
     }
   }
