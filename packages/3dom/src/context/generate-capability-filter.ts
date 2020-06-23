@@ -58,6 +58,23 @@ function filterMaterialProperties(this: ThreeDOMGlobalScope) {
         configurable: false,
         writable: false
       });
+  Object.defineProperty(
+      this.PBRMetallicRoughness.prototype, 'setMetallicFactor', {
+        value: () => {
+          throw new Error(errorMessage);
+        },
+        configurable: false,
+        writable: false
+      });
+
+  Object.defineProperty(
+      this.PBRMetallicRoughness.prototype, 'setRoughnessFactor', {
+        value: () => {
+          throw new Error(errorMessage);
+        },
+        configurable: false,
+        writable: false
+      });
 }
 
 /**
