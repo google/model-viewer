@@ -21,12 +21,11 @@ import {css, customElement, html, LitElement, property} from 'lit-element';
 import {ScenarioConfig} from '../../common.js';
 
 const $initialize = Symbol('initialize');
-const $updateScenario = Symbol('scenario');
+const $updateScenario = Symbol('updateScenario');
 const $updateSize = Symbol('updateSize');
 const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
-const $camera = Symbol('camera');
 
 
 @customElement('babylon-viewer')
@@ -35,7 +34,6 @@ export class BabylonViewer extends LitElement {
   private[$canvas]: HTMLCanvasElement|null;
   private[$engine]: Engine;
   private[$scene]: Scene;
-  private[$camera]: ArcRotateCamera;
 
 
   constructor() {
@@ -74,34 +72,39 @@ export class BabylonViewer extends LitElement {
   private[$initialize]() {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
     this[$engine] = new Engine(this[$canvas], true);
-    this[$scene] = new Scene(this[$engine]);
     SceneLoader.ShowLoadingScreen = false;
   }
 
 
   private async[$updateScenario](scenario: ScenarioConfig) {
+    // call initialize here instead of inside constructor because in lit
+    // element's life cycle, canvas element is added to dom after the
+    // constructor is called.
+    if (this[$engine] == null) {
+      this[$initialize]();
+    }
+
     if (this[$scene] != null) {
       this[$scene].dispose();
     }
-
-    this[$initialize]();
+    this[$scene] = new Scene(this[$engine]);
     this[$updateSize]();
 
-    // create camera
     const {orbit, target} = scenario;
     const alpha = (orbit.theta + 90) * Math.PI / 180;
     let beta = orbit.phi * Math.PI / 180;
-
-    this[$camera] = new ArcRotateCamera(
+    const camera = new ArcRotateCamera(
         'Camera',
         alpha,
         beta,
         orbit.radius,
-        new Vector3(-target.x, target.y, target.z),
+        new Vector3(
+            -target.x,
+            target.y,
+            target.z),  // babylon use oppsite x coordinate than model-viewer
         this[$scene]);
-    this[$camera].attachControl(this[$canvas]!, true);
-    console.log(this[$camera]);
-    // load model
+    camera.attachControl(this[$canvas]!, true);
+
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
     const modelFileName =
@@ -115,8 +118,7 @@ export class BabylonViewer extends LitElement {
               Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
           const far = 2 * Math.max(modelRadius, orbit.radius);
           const near = far / 1000;
-          console.log(near, far);
-          this[$camera].minZ = near;
+          camera.minZ = near;
           // this[$camera].maxZ = far;
         });
 
@@ -126,13 +128,13 @@ export class BabylonViewer extends LitElement {
     const hdrTexture = new HDRCubeTexture(
         scenario.lighting, this[$scene], 256, false, false, false);
     this[$scene].environmentTexture = hdrTexture;
+    // rotate both skybox and hdr texture for 180 deg to match other renderers
     hdrTexture.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(180)));
     const skyboxHolder =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
     skyboxHolder!.rotate(Axis.Y, Math.PI, Space.WORLD);
     skyboxHolder!.infiniteDistance = true;
-
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();

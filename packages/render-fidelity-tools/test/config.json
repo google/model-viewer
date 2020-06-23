@@ -15,7 +15,7 @@
       "scripts": {
         "setup": "prepare-ibl.sh"
       }
-    }, 
+    },
     {
       "name": "babylon",
       "description": "Babylon"
@@ -31,7 +31,10 @@
       },
       "orbit": {
         "radius": 800
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-AlphaBlendModeTest",
@@ -366,7 +369,7 @@
       "orbit": {
         "radius": 12
       },
-      "exclude":[
+      "exclude": [
         "babylon"
       ]
     },
@@ -511,7 +514,10 @@
       "orbit": {
         "theta": 90,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-Suzanne",
@@ -587,7 +593,10 @@
       "orbit": {
         "phi": 70,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-VertexColorTest",
@@ -618,9 +627,8 @@
       },
       "orbit": {
         "radius": 10
-      }
-      ,
-      "exclude":[
+      },
+      "exclude": [
         "babylon"
       ]
     },
@@ -636,9 +644,8 @@
       },
       "orbit": {
         "radius": 20
-      }
-      ,
-      "exclude":[
+      },
+      "exclude": [
         "babylon"
       ]
     },
