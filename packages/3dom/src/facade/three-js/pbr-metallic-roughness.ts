@@ -79,6 +79,14 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         [1, 1, 1, 1];
   }
 
+  get metallicFactor(): number {
+    return (this.sourceObject as PBRMetallicRoughness).metallicFactor || 0;
+  }
+
+  get roughnessFactor(): number {
+    return (this.sourceObject as PBRMetallicRoughness).roughnessFactor || 0;
+  }
+
   get baseColorTexture() {
     return this[$baseColorTexture];
   }
@@ -87,30 +95,47 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     return this[$metallicRoughnessTexture];
   }
 
-  async mutate(property: 'baseColorFactor', value: RGBA): Promise<void> {
-    if (property !== 'baseColorFactor') {
+  async mutate(property: 'baseColorFactor' | 'metallicFactor' | 'roughnessFactor', value: RGBA | number): Promise<void> {
+    if (!['baseColorFactor', 'metallicFactor', 'roughnessFactor'].includes(property)) {
       throw new Error(`Cannot mutate ${property} on PBRMetallicRoughness`);
     }
+    switch(property) {
+      case 'baseColorFactor':
+        for (const material of this[$threeMaterials]) {
+          material.color.fromArray(value as RGBA);
+          material.opacity = (value as RGBA)[3];
 
-    for (const material of this[$threeMaterials]) {
-      material.color.fromArray(value);
-      material.opacity = value[3];
+          const pbrMetallicRoughness =
+              this[$sourceObject] as GLTFPBRMetallicRoughness;
 
-      const pbrMetallicRoughness =
-          this[$sourceObject] as GLTFPBRMetallicRoughness;
-
-      if (value[0] === 1 && value[1] === 1 && value[2] === 1 &&
-          value[3] === 1) {
-        delete pbrMetallicRoughness.baseColorFactor;
-      } else {
-        pbrMetallicRoughness.baseColorFactor = value;
-      }
+          if (value as RGBA[0] === 1 && value as RGBA[1] === 1 && value as RGBA[2] === 1 &&
+              value as RGBA[3] === 1) {
+            delete pbrMetallicRoughness.baseColorFactor;
+          } else {
+            pbrMetallicRoughness.baseColorFactor = value as RGBA;
+          }
+        }
+        break;
+      case 'metallicFactor':
+        for (const material of this[$threeMaterials]) {
+          material.metalness = value as number;
+          const pbrMetallicRoughness = this[$sourceObject] as GLTFPBRMetallicRoughness;
+          pbrMetallicRoughness.metallicFactor = value as number;
+        }
+        break;
+      case 'roughnessFactor':
+        for (const material of this[$threeMaterials]) {
+          material.roughness = value as number;
+          const pbrMetallicRoughness = this[$sourceObject] as GLTFPBRMetallicRoughness;
+          pbrMetallicRoughness.roughnessFactor = value as number;
+        }
+        break;
     }
   }
 
   toJSON(): SerializedPBRMetallicRoughness {
     const serialized: Partial<SerializedPBRMetallicRoughness> = super.toJSON();
-    const {baseColorTexture, baseColorFactor} = this;
+    const {baseColorTexture, metallicRoughnessTexture, baseColorFactor, roughnessFactor, metallicFactor} = this;
 
     if (baseColorTexture != null) {
       serialized.baseColorTexture = baseColorTexture.toJSON();
@@ -118,6 +143,18 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     if (baseColorFactor != null) {
       serialized.baseColorFactor = baseColorFactor;
+    }
+
+    if (metallicFactor != null) {
+      serialized.metallicFactor = metallicFactor;
+    }
+
+    if (roughnessFactor != null) {
+      serialized.roughnessFactor = roughnessFactor;
+    }
+
+    if (metallicRoughnessTexture != null) {
+      serialized.metallicRoughnessTexture = metallicRoughnessTexture.toJSON();
     }
 
     return serialized as SerializedPBRMetallicRoughness;
