@@ -90,17 +90,14 @@ export class BabylonViewer extends LitElement {
     }
 
     this[$initialize]();
+    // this[$scene].clearColor = new Color4(0,0,0,0);
     this[$updateSize]();
 
     // create camera
     const {orbit, target} = scenario;
     const alpha = (orbit.theta + 90) * Math.PI / 180;
     let beta = orbit.phi * Math.PI / 180;
-    /*
-    if(beta==0 || beta ==Math.PI){
-      beta += 0.1;
-    }
-    */
+
     this[$camera] = new ArcRotateCamera(
         'Camera',
         alpha,
@@ -134,8 +131,9 @@ export class BabylonViewer extends LitElement {
               Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
           const far = 2 * Math.max(modelRadius, orbit.radius);
           const near = far / 1000;
+          console.log(near, far);
           this[$camera].minZ = near;
-          this[$camera].maxZ = far;
+          // this[$camera].maxZ = far;
         });
 
     this[$scene].stopAllAnimations();
@@ -187,14 +185,4 @@ export class BabylonViewer extends LitElement {
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
   }
-
-  /*
-  private getBoundingInfo(meshes: Mesh[]){
-    if(meshes.length<=1){
-      return [];
-    }
-
-
-  }
-  */
 }
