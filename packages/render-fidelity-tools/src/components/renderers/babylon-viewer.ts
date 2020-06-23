@@ -95,7 +95,12 @@ export class BabylonViewer extends LitElement {
     // create camera
     const {orbit, target} = scenario;
     const alpha = (orbit.theta + 90) * Math.PI / 180;
-    const beta = orbit.phi * Math.PI / 180;
+    let beta = orbit.phi * Math.PI / 180;
+    /*
+    if(beta==0 || beta ==Math.PI){
+      beta += 0.1;
+    }
+    */
     this[$camera] = new ArcRotateCamera(
         'Camera',
         alpha,
@@ -104,18 +109,34 @@ export class BabylonViewer extends LitElement {
         new Vector3(target.x, target.y, target.z),
         this[$scene]);
     this[$camera].attachControl(this[$canvas]!, true);
-
+    console.log(this[$camera]);
     // load model
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
     const modelFileName =
         scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
 
+    /*
     await new Promise((resolve) => {
-      SceneLoader.Append(modelRootPath, modelFileName, this[$scene], () => {
-        resolve();
+        SceneLoader.LoadAssetContainer(modelRootPath, modelFileName,
+    this[$scene], (container)=>{ console.log(container);
+          console.log(container.meshes[0].getHierarchyBoundingVectors());
+          container.addAllToScene();
+          resolve();
+        });
       });
-    });
+    */
+    await SceneLoader.AppendAsync(modelRootPath, modelFileName, this[$scene])
+        .then(() => {
+          const {min, max} =
+              this[$scene].meshes[0].getHierarchyBoundingVectors();
+          const modelRadius =
+              Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
+          const far = 2 * Math.max(modelRadius, orbit.radius);
+          const near = far / 1000;
+          this[$camera].minZ = near;
+          this[$camera].maxZ = far;
+        });
 
     this[$scene].stopAllAnimations();
 
@@ -164,4 +185,14 @@ export class BabylonViewer extends LitElement {
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
   }
+
+  /*
+  private getBoundingInfo(meshes: Mesh[]){
+    if(meshes.length<=1){
+      return [];
+    }
+
+
+  }
+  */
 }
