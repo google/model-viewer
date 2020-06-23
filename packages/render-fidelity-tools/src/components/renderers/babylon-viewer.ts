@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2020 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License atQ
@@ -95,9 +95,9 @@ export class BabylonViewer extends LitElement {
         beta,
         orbit.radius,
         new Vector3(
-            -target.x,
+            -target.x,  // babylon use oppsite x coordinate than model-viewer
             target.y,
-            target.z),  // babylon use oppsite x coordinate than model-viewer
+            target.z),
         this[$scene]);
     camera.attachControl(this[$canvas]!, true);
 
