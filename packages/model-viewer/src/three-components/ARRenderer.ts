@@ -53,6 +53,8 @@ export interface ARStatusEvent extends ThreeEvent {
   status: ARStatus,
 }
 
+let ANCHORS_SUPPORTED = self.XRHitTestResult?.prototype.createAnchor != null;
+
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
 const $lastTick = Symbol('lastTick');
@@ -92,7 +94,10 @@ export const $onWebXRFrame = Symbol('onWebXRFrame');
 const $postSessionCleanup = Symbol('postSessionCleanup');
 const $updateCamera = Symbol('updateCamera');
 const $placeInitially = Symbol('placeInitially');
+const $placeInitiallyWithAnchor = Symbol('placeInitiallyWithAnchor');
+const $processAnchorUpdates = Symbol('processAnchorUpdates');
 const $getHitPoint = Symbol('getHitPoint');
+const $getHitPointForAnchor = Symbol('getHitPointForAnchor');
 const $onSelectStart = Symbol('onSelectStart');
 const $onSelectEnd = Symbol('onSelect');
 const $onUpdateScene = Symbol('onUpdateScene');
@@ -105,6 +110,9 @@ const $onExitWebXRButtonContainerClick =
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
+
+const $anchorCreationPending = Symbol('anchorCreationPending');
+const $modelAnchor = Symbol('modelAnchor');
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
@@ -122,6 +130,8 @@ export class ARRenderer extends EventDispatcher {
   private[$viewerRefSpace]: XRReferenceSpace|null = null;
   private[$frame]: XRFrame|null = null;
   private[$initialHitSource]: XRHitTestSource|null = null;
+  private[$anchorCreationPending]: boolean = false;
+  private[$modelAnchor]: XRAnchor|null = null;
   private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
   private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
@@ -162,7 +172,8 @@ export class ARRenderer extends EventDispatcher {
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
-          optionalFeatures: ['dom-overlay'],
+          optionalFeatures: ANCHORS_SUPPORTED ? ['dom-overlay', 'anchors']
+                                              : ['dom-overlay'],
           domOverlay: {
             root: scene.element.shadowRoot!.querySelector(
                 'div.annotation-container')
@@ -382,6 +393,13 @@ export class ARRenderer extends EventDispatcher {
       this[$placementBox] = null;
     }
 
+    if(this[$modelAnchor] != null) {
+      this[$modelAnchor]!.delete();
+      this[$modelAnchor] = null;
+    }
+
+    this[$anchorCreationPending] = false;
+
     this[$lastTick] = null;
     this[$turntableRotation] = null;
     this[$oldShadowIntensity] = null;
@@ -462,6 +480,93 @@ export class ARRenderer extends EventDispatcher {
         Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
 
+  [$placeInitiallyWithAnchor](frame: XRFrame) {
+    // If the initial hit test source is no longer present, the initial
+    // placement has completed.
+    const hitSource = this[$initialHitSource];
+    if (hitSource == null) {
+      return;
+    }
+
+    if(this[$modelAnchor]) {
+      // Main anchor for the model was already created - check if the anchor
+      // is tracked in the current frame - if not, keep waiting, the placement
+      // is not yet done.
+      if(frame.trackedAnchors!.has(this[$modelAnchor]!)) {
+        const hitMatrix = this[$getHitPointForAnchor](frame, this[$modelAnchor]!);
+        if (hitMatrix == null) {
+          return;
+        }
+
+      this.placeModel(hitMatrix);
+
+      // Anchor was created & we used it to place the object,
+      // initial hit test source will not be needed anymore.
+      hitSource.cancel();
+      this[$initialHitSource] = null;
+
+      const {session} = frame;
+      session.addEventListener('selectstart', this[$onSelectStart]);
+      session.addEventListener('selectend', this[$onSelectEnd]);
+      session
+          .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
+          .then(hitTestSource => {
+            this[$transientHitTestSource] = hitTestSource;
+          });
+        }
+
+      return;
+    }
+
+    if(this[$modelAnchor] == null && !this[$anchorCreationPending]) {
+      // Main anchor was not yet created - grab hit test source results to create it:
+      const hitTestResults = frame.getHitTestResults(hitSource);
+      if (hitTestResults.length == 0) {
+        return;
+      }
+
+      const hit = hitTestResults[0];
+
+      // Mark anchor creation as pending so that we do not re-run anchor
+      // creation logic, & kick off the anchor creation.
+      this[$anchorCreationPending] = true;
+
+      hit.createAnchor!().then((anchor) => {
+        console.log("Anchor created.");
+        this[$modelAnchor] = anchor;
+        this[$anchorCreationPending] = false;
+      }).catch((error) => {
+        if(error instanceof DOMException && error.name == "NotSupportedError") {
+          ANCHORS_SUPPORTED = false;
+        }
+
+        this[$anchorCreationPending] = false;
+      });
+    }
+  }
+
+  [$processAnchorUpdates](frame: XRFrame) {
+    if(this[$initialHitSource] != null)
+      return
+
+    // Initial placement is done - model anchor should be available
+    // & we can use it to update current model position.
+
+    if(!frame.trackedAnchors!.has(this[$modelAnchor]!))
+      return;
+
+    // The anchor is tracked - let's try to use its pose to update the
+    // model position.
+
+    const hitMatrix = this[$getHitPointForAnchor](frame, this[$modelAnchor]!);
+    if(hitMatrix == null)
+      return;
+
+    // We have the updated anchor location - apply it.
+
+    this[$goalPosition] = hitMatrix;
+  }
+
   [$placeInitially](frame: XRFrame) {
     const hitSource = this[$initialHitSource];
     if (hitSource == null) {
@@ -496,6 +601,20 @@ export class ARRenderer extends EventDispatcher {
 
   [$getHitPoint](hitResult: XRHitTestResult): Vector3|null {
     const pose = hitResult.getPose(this[$refSpace]!);
+    if (pose == null) {
+      return null;
+    }
+
+    const hitMatrix = matrix4.fromArray(pose.transform.matrix);
+    // Check that the y-coordinate of the normal is large enough that the normal
+    // is pointing up.
+    return hitMatrix.elements[5] > 0.75 ?
+        hitPosition.setFromMatrixPosition(hitMatrix) :
+        null;
+  }
+
+  [$getHitPointForAnchor](frame: XRFrame, anchor: XRAnchor): Vector3|null {
+    const pose = frame.getPose(anchor.anchorSpace!, this[$refSpace]!);
     if (pose == null) {
       return null;
     }
@@ -747,7 +866,13 @@ export class ARRenderer extends EventDispatcher {
 
     this[$updateCamera](pose.views[0]);
 
-    this[$placeInitially](frame);
+    if(ANCHORS_SUPPORTED) {
+      this[$processAnchorUpdates](frame);
+
+      this[$placeInitiallyWithAnchor](frame);
+    } else {
+      this[$placeInitially](frame);
+    }
 
     this[$processInput](frame);
 

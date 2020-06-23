@@ -35,8 +35,17 @@ declare interface XRTransientInputHitTestSource {
   cancel(): void;
 }
 
+declare interface XRAnchor {
+  readonly anchorSpace?: XRSpace;
+
+  delete(): void;
+}
+
 declare interface XRHitTestResult {
   getPose(baseSpace: XRSpace): XRPose|null;
+
+  // Anchor creation may not be available on some browsers, check before using!
+  createAnchor?: () => Promise<XRAnchor>;
 }
 
 declare interface XRTransientInputHitTestResult {
@@ -113,6 +122,10 @@ declare interface XRInputSourceEvent extends Event {
   readonly inputSource: XRInputSource;
 }
 
+declare interface XRAnchorSet {
+  has(anchor: XRAnchor) : boolean;
+}
+
 declare interface XRFrame {
   readonly session: XRSession;
   getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose;
@@ -121,6 +134,8 @@ declare interface XRFrame {
   getHitTestResultsForTransientInput(hitTestSource:
                                          XRTransientInputHitTestSource):
       Array<XRTransientInputHitTestResult>;
+
+  readonly trackedAnchors? : XRAnchorSet;
 }
 
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
@@ -161,6 +176,8 @@ declare interface XRSession extends EventTarget {
   requestAnimationFrame(callback: XRFrameRequestCallback): number;
   cancelAnimationFrame(id: number): void;
   end(): Promise<void>;
+
+  createAnchor?: (pose: XRRigidTransform, space: XRSpace) => Promise<XRAnchor>;
 }
 
 declare interface XRViewport {
@@ -195,6 +212,7 @@ declare class XRWebGLLayer implements XRLayer {
 declare interface Window {
   XRSession?: Constructor<XRSession>;
   XR?: Constructor<XR>;
+  XRHitTestResult?: Constructor<XRHitTestResult>;
 }
 
 declare interface Navigator {
