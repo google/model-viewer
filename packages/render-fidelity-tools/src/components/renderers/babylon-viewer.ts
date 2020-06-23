@@ -20,17 +20,13 @@ import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
 
-// const IS_BINARY_RE = /\.glb$/;
-
 const $initialize = Symbol('initialize');
 const $updateScenario = Symbol('scenario');
 const $updateSize = Symbol('updateSize');
-const $render = Symbol('render');
 const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $camera = Symbol('camera');
-const $hdrTexture = Symbol('hdrTexture');
 
 
 @customElement('babylon-viewer')
@@ -40,7 +36,7 @@ export class BabylonViewer extends LitElement {
   private[$engine]: Engine;
   private[$scene]: Scene;
   private[$camera]: ArcRotateCamera;
-  private[$hdrTexture]: HDRCubeTexture;
+
 
   constructor() {
     super();
@@ -71,7 +67,6 @@ export class BabylonViewer extends LitElement {
   }
 
   render() {
-    this[$render]();
     return html`<canvas id="canvas"></canvas>`;
   }
 
@@ -90,7 +85,6 @@ export class BabylonViewer extends LitElement {
     }
 
     this[$initialize]();
-    // this[$scene].clearColor = new Color4(0,0,0,0);
     this[$updateSize]();
 
     // create camera
@@ -113,16 +107,6 @@ export class BabylonViewer extends LitElement {
     const modelFileName =
         scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
 
-    /*
-    await new Promise((resolve) => {
-        SceneLoader.LoadAssetContainer(modelRootPath, modelFileName,
-    this[$scene], (container)=>{ console.log(container);
-          console.log(container.meshes[0].getHierarchyBoundingVectors());
-          container.addAllToScene();
-          resolve();
-        });
-      });
-    */
     await SceneLoader.AppendAsync(modelRootPath, modelFileName, this[$scene])
         .then(() => {
           const {min, max} =
@@ -139,12 +123,11 @@ export class BabylonViewer extends LitElement {
     this[$scene].stopAllAnimations();
 
     // load hdr directly (the size of cubmap is set to be 256 for all renderers)
-    this[$hdrTexture] = new HDRCubeTexture(
+    const hdrTexture = new HDRCubeTexture(
         scenario.lighting, this[$scene], 256, false, false, false);
-    this[$scene].environmentTexture = this[$hdrTexture];
-    this[$hdrTexture].setReflectionTextureMatrix(
+    this[$scene].environmentTexture = hdrTexture;
+    hdrTexture.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(180)));
-
     const skyboxHolder =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
     skyboxHolder!.rotate(Axis.Y, Math.PI, Space.WORLD);
@@ -165,8 +148,6 @@ export class BabylonViewer extends LitElement {
     })
   }
 
-  private[$render]() {
-  }
 
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
