@@ -36,10 +36,6 @@ export class BabylonViewer extends LitElement {
   private[$scene]: Scene;
 
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     super.connectedCallback();
   }
@@ -119,7 +115,6 @@ export class BabylonViewer extends LitElement {
           const far = 2 * Math.max(modelRadius, orbit.radius);
           const near = far / 1000;
           camera.minZ = near;
-          // this[$camera].maxZ = far;
         });
 
     this[$scene].stopAllAnimations();
