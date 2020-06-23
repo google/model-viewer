@@ -15,9 +15,9 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $renderer, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -52,7 +52,6 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
 const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
@@ -172,7 +171,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * from .ZIP files, drag-and-drop APIs, and Data URIs.
      */
     static mapURLs(callback: (url: string) => string) {
-      loader[$loader].manager.setURLModifier(callback);
+      Renderer.singleton.loader[$loader].manager.setURLModifier(callback);
     }
 
     /**
@@ -419,7 +418,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           const src = this.src!;
           const detail = {url: src};
 
-          await loader.preload(src, updatePreloadProgress);
+          await this[$renderer].loader.preload(src, updatePreloadProgress);
           this.dispatchEvent(new CustomEvent('preload', {detail}));
         } catch (error) {
           this.dispatchEvent(new CustomEvent(

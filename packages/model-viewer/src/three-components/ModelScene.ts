@@ -16,7 +16,7 @@
 import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
@@ -118,7 +118,8 @@ export class ModelScene extends Scene {
   async setModelSource(
       source: string|null, progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(source, progressCallback);
+      await this.model.setSource(
+          this.element[$renderer].loader, source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);

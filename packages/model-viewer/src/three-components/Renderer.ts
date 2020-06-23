@@ -14,13 +14,16 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
@@ -77,6 +80,8 @@ export class Renderer extends EventDispatcher {
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
+  public roughnessMipmapper: RoughnessMipmapper;
+  public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
   public width = 0;
   public height = 0;
   public dpr = 1;
@@ -159,6 +164,7 @@ export class Renderer extends EventDispatcher {
     this.arRenderer = new ARRenderer(this);
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
+    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
