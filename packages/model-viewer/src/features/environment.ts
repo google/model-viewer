@@ -40,18 +40,10 @@ export declare interface EnvironmentInterface {
 export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<EnvironmentInterface>&T => {
   class EnvironmentModelViewerElement extends ModelViewerElement {
-    @property({
-      type: String,
-      attribute: 'environment-image',
-      converter: {fromAttribute: deserializeUrl}
-    })
+    @property({type: String, attribute: 'environment-image'})
     environmentImage: string|null = null;
 
-    @property({
-      type: String,
-      attribute: 'skybox-image',
-      converter: {fromAttribute: deserializeUrl}
-    })
+    @property({type: String, attribute: 'skybox-image'})
     skyboxImage: string|null = null;
 
     @property({type: Number, attribute: 'shadow-intensity'})
@@ -124,8 +116,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         const {environmentMap, skybox} =
             await new Promise(async (resolve, reject) => {
               const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  skyboxImage,
-                  environmentImage,
+                  deserializeUrl(skyboxImage),
+                  deserializeUrl(environmentImage),
                   {progressTracker: this[$progressTracker]});
               this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
               resolve(await texturesLoad);
