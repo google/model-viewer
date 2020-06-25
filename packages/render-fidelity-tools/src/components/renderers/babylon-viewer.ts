@@ -36,13 +36,6 @@ export class BabylonViewer extends LitElement {
   private[$scene]: Scene;
 
 
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-  }
-
   updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
     this[$updateSize]();
@@ -88,7 +81,7 @@ export class BabylonViewer extends LitElement {
 
     const {orbit, target} = scenario;
     const alpha = (orbit.theta + 90) * Math.PI / 180;
-    let beta = orbit.phi * Math.PI / 180;
+    const beta = orbit.phi * Math.PI / 180;
     const camera = new ArcRotateCamera(
         'Camera',
         alpha,
@@ -122,16 +115,16 @@ export class BabylonViewer extends LitElement {
     this[$scene].stopAllAnimations();
 
     // load hdr directly (the size of cubmap is set to be 256 for all renderers)
-    const hdrTexture = new HDRCubeTexture(
+    const environment = new HDRCubeTexture(
         scenario.lighting, this[$scene], 256, false, false, false);
-    this[$scene].environmentTexture = hdrTexture;
+    this[$scene].environmentTexture = environment;
     // rotate both skybox and hdr texture for 180 deg to match other renderers
-    hdrTexture.setReflectionTextureMatrix(
+    environment.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(180)));
-    const skyboxHolder =
+    const skybox =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skyboxHolder!.rotate(Axis.Y, Math.PI, Space.WORLD);
-    skyboxHolder!.infiniteDistance = true;
+    skybox!.rotate(Axis.Y, Math.PI, Space.WORLD);
+    skybox!.infiniteDistance = true;
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
@@ -139,12 +132,10 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].executeWhenReady(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.dispatchEvent(
-              new CustomEvent('model-visibility', {detail: {visible: true}}));
-        });
+        this.dispatchEvent(
+            new CustomEvent('model-visibility', {detail: {visible: true}}));
       });
-    })
+    });
   }
 
 
