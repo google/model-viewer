@@ -307,8 +307,7 @@ suite('ModelViewerElementBase', () => {
         test('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
-          const idealHeight =
-              Math.round(32 / element[$scene].model.fieldOfViewAspect);
+          const idealHeight = 32 / element[$scene].model.fieldOfViewAspect;
 
           const {dpr, scaleFactor} = element[$renderer];
           const f = dpr * scaleFactor;
