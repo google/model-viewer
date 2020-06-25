@@ -646,7 +646,8 @@
         "radius": 20
       },
       "exclude": [
-        "babylon"
+        "babylon",
+        "filament"
       ]
     },
     {
