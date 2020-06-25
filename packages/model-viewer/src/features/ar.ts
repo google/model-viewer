@@ -32,7 +32,7 @@ export const openIOSARQuickLook = (() => {
   anchor.appendChild(document.createElement('img'));
 
   return (usdzSrc: string, arScale: string) => {
-    const modelUrl = new URL(usdzSrc);
+    const modelUrl = new URL(usdzSrc, self.location.toString());
     if (arScale === 'fixed') {
       modelUrl.hash = 'allowsContentScaling=0';
     }
@@ -58,7 +58,7 @@ export const openSceneViewer = (() => {
 
     const location = self.location.toString();
     const locationUrl = new URL(location);
-    const modelUrl = new URL(gltfSrc);
+    const modelUrl = new URL(gltfSrc, location);
     const scheme = modelUrl.protocol.replace(':', '');
 
     locationUrl.hash = noArViewerSigil;
