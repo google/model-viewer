@@ -155,6 +155,27 @@ self.addEventListener('model-change', function() {
             .to.include({r: 1, g: 0, b: 0});
       });
 
+      test('fdsfdsafdsafsdafdsafdsafdsa', () =>{
+
+      });
+
+      test('allows image.setURI to be called when "textures" is in capabilities', async () => {
+        const script = document.createElement('script');
+        script.type = 'experimental-scene-graph-worklet';
+        script.setAttribute('allow', 'messaging; textures');
+        script.textContent = `
+self.addEventListener('model-change', function() {
+  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(null).then(function() {
+    self.postMessage('done');
+  });
+});
+`;
+        element.appendChild(script);
+        await waitForEvent(element, 'worklet-created');
+        await waitForEvent(element.worklet!, 'message');
+        // This test is only meant to check if the call is allowed at all. If not, we would've never gotten to this point and the case would time out.
+      });
+
       suite('when the model changes', () => {
         test('updates when the model changes', async () => {
           const script = document.createElement('script');
