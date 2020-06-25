@@ -36,11 +36,6 @@ export class BabylonViewer extends LitElement {
   private[$scene]: Scene;
 
 
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
-
   updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
     this[$updateSize]();
