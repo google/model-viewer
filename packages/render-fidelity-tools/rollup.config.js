@@ -59,6 +59,7 @@ const outputOptions = [
   buildTarget('./lib/components/image-comparison-app.js', 'esm'),
   buildTarget('./lib/components/renderer-harness.js', 'esm'),
   buildTarget('./lib/components/renderers/filament-viewer.js', 'esm'),
+  buildTarget('./lib/components/renderers/babylon-viewer.js', 'esm'),
   buildTarget('./lib/image-comparison-worker.js', 'iife')
 ];
 

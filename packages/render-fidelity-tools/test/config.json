@@ -15,6 +15,10 @@
       "scripts": {
         "setup": "prepare-ibl.sh"
       }
+    },
+    {
+      "name": "babylon",
+      "description": "Babylon"
     }
   ],
   "scenarios": [
@@ -27,7 +31,10 @@
       },
       "orbit": {
         "radius": 800
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-AlphaBlendModeTest",
@@ -361,7 +368,10 @@
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
       "orbit": {
         "radius": 12
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-MorphPrimitivesTest",
@@ -504,7 +514,10 @@
       "orbit": {
         "theta": 90,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-Suzanne",
@@ -580,7 +593,10 @@
       "orbit": {
         "phi": 70,
         "radius": 0
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "khronos-VertexColorTest",
@@ -611,7 +627,10 @@
       },
       "orbit": {
         "radius": 10
-      }
+      },
+      "exclude": [
+        "babylon"
+      ]
     },
     {
       "name": "DirectionalLightTest",
@@ -625,7 +644,11 @@
       },
       "orbit": {
         "radius": 20
-      }
+      },
+      "exclude": [
+        "babylon",
+        "filament"
+      ]
     },
     {
       "name": "AlphaBlendLitmusTest",
