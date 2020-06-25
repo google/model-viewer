@@ -64,6 +64,7 @@ export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
+export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
 
 export interface Vector3D {
   x: number
@@ -465,6 +466,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
     return this[$isElementInViewport];
+  }
+
+  [$shouldAttemptPreload](): boolean {
+    return !!this.src;
   }
 
   /**

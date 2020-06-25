@@ -14,9 +14,10 @@
  */
 
 import {property} from 'lit-element';
-import {Texture} from 'three';
+import {Event as ThreeEvent, Texture} from 'three';
 
-import ModelViewerElementBase, {$isElementInViewport, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
+import {PreloadEvent} from '../three-components/CachingGLTFLoader.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 export const BASE_OPACITY = 0.1;
@@ -28,6 +29,7 @@ const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
 const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
+const $onPreload = Symbol('onPreload');
 
 export declare interface EnvironmentInterface {
   environmentImage: string|null;
@@ -69,6 +71,22 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
+    private[$onPreload] = (event: ThreeEvent) => {
+      if ((event as PreloadEvent).element === this) {
+        this[$updateEnvironment]();
+      }
+    };
+
+    connectedCallback() {
+      super.connectedCallback();
+      this[$renderer].loader.addEventListener('preload', this[$onPreload]);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this[$renderer].loader.removeEventListener('preload', this[$onPreload]);
+    }
+
     updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
@@ -87,9 +105,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$needsRender]();
       }
 
-      if (changedProperties.has('environmentImage') ||
-          changedProperties.has('skyboxImage') ||
-          changedProperties.has($isElementInViewport)) {
+      if ((changedProperties.has('environmentImage') ||
+           changedProperties.has('skyboxImage')) &&
+          this[$shouldAttemptPreload]()) {
         this[$updateEnvironment]();
       }
     }
@@ -103,10 +121,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateEnvironment]() {
-      if (!this[$isElementInViewport]) {
-        return;
-      }
-
       const {skyboxImage, environmentImage} = this;
 
       if (this[$cancelEnvironmentUpdate] != null) {

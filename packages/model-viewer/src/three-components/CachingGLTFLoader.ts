@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
+import {Event as ThreeEvent, EventDispatcher} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
 import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
 
 export type ProgressCallback = (progress: number) => void;
+
+export interface PreloadEvent extends ThreeEvent {
+  type: 'preload';
+  element: ModelViewerElementBase;
+  src: String;
+}
 
 /**
  * A helper to Promise-ify a Three.js GLTFLoader
@@ -48,7 +56,8 @@ export const $evictionPolicy = Symbol('evictionPolicy');
 const $GLTFInstance = Symbol('GLTFInstance');
 
 export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
-                                             GLTFInstanceConstructor> {
+                                             GLTFInstanceConstructor> extends
+    EventDispatcher {
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -102,6 +111,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   }
 
   constructor(GLTFInstance: T) {
+    super();
     this[$GLTFInstance] = GLTFInstance;
     this[$loader].setDRACOLoader(dracoLoader);
   }
@@ -117,7 +127,11 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
    * Preloads a glTF, populating the cache. Returns a promise that resolves
    * when the cache is populated.
    */
-  async preload(url: string, progressCallback: ProgressCallback = () => {}) {
+  async preload(
+      url: string, progressCallback: ProgressCallback = () => {},
+      element: ModelViewerElementBase) {
+    this.dispatchEvent(
+        {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {
       const rawGLTFLoads =
           loadWithLoader(url, this[$loader], (progress: number) => {
@@ -151,9 +165,10 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
    * glTF. If the glTF has already been loaded, makes a clone of the cached
    * copy.
    */
-  async load(url: string, progressCallback: ProgressCallback = () => {}):
-      Promise<InstanceType<T>> {
-    await this.preload(url, progressCallback);
+  async load(
+      url: string, element: ModelViewerElementBase,
+      progressCallback: ProgressCallback = () => {}): Promise<InstanceType<T>> {
+    await this.preload(url, progressCallback, element);
 
     const gltf = await cache.get(url)!;
     const clone = await gltf.clone() as InstanceType<T>;

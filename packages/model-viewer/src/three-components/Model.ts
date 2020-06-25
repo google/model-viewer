@@ -15,7 +15,8 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
 
-import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
@@ -93,8 +94,8 @@ export default class Model extends Object3D {
   }
 
   async setSource(
-      loader: CachingGLTFLoader<typeof ModelViewerGLTFInstance>,
-      url: string|null, progressCallback?: (progress: number) => void) {
+      element: ModelViewerElementBase, url: string|null,
+      progressCallback?: (progress: number) => void) {
     if (!url || url === this.url) {
       if (progressCallback) {
         progressCallback(1);
@@ -118,7 +119,8 @@ export default class Model extends Object3D {
           async (resolve, reject) => {
             this[$cancelPendingSourceChange] = () => reject();
             try {
-              const result = await loader.load(url, progressCallback);
+              const result = await element[$renderer].loader.load(
+                  url, element, progressCallback);
               resolve(result);
             } catch (error) {
               reject(error);

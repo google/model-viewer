@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $renderer, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $renderer, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, deserializeUrl, throttle} from '../utilities.js';
@@ -63,7 +63,6 @@ export const $defaultPosterElement = Symbol('defaultPosterElement');
 const $posterDismissalSource = Symbol('posterDismissalSource');
 
 const $modelIsReadyForReveal = Symbol('modelIsReadyForReveal');
-const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
 const $shouldRevealModel = Symbol('shouldRevealModel');
 const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
@@ -402,14 +401,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           !!this[$posterDismissalSource];
     }
 
-    get[$shouldAttemptPreload](): boolean {
-      return !!this.src &&
+    [$shouldAttemptPreload](): boolean {
+      return super[$shouldAttemptPreload]() &&
           (this.loading === LoadingStrategy.EAGER ||
            (this[$shouldRevealModel] && this[$isElementInViewport]));
     }
 
     async[$updateLoadingAndVisibility]() {
-      if (this[$shouldAttemptPreload] && !this[$preloadAttempted]) {
+      if (this[$shouldAttemptPreload]() && !this[$preloadAttempted]) {
         this[$preloadAttempted] = true;
 
         const updatePreloadProgress = this[$progressTracker].beginActivity();
@@ -418,7 +417,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           const src = this.src!;
           const detail = {url: src};
 
-          await this[$renderer].loader.preload(src, updatePreloadProgress);
+          await this[$renderer].loader.preload(
+              src, updatePreloadProgress, this);
           this.dispatchEvent(new CustomEvent('preload', {detail}));
         } catch (error) {
           this.dispatchEvent(new CustomEvent(
