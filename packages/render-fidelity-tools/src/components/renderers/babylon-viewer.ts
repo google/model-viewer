@@ -137,12 +137,10 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].executeWhenReady(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.dispatchEvent(
-              new CustomEvent('model-visibility', {detail: {visible: true}}));
-        });
+        this.dispatchEvent(
+            new CustomEvent('model-visibility', {detail: {visible: true}}));
       });
-    })
+    });
   }
 
 
