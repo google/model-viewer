@@ -128,8 +128,8 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
    * when the cache is populated.
    */
   async preload(
-      url: string, progressCallback: ProgressCallback = () => {},
-      element: ModelViewerElementBase) {
+      url: string, element: ModelViewerElementBase,
+      progressCallback: ProgressCallback = () => {}) {
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {
@@ -168,7 +168,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async load(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}): Promise<InstanceType<T>> {
-    await this.preload(url, progressCallback, element);
+    await this.preload(url, element, progressCallback);
 
     const gltf = await cache.get(url)!;
     const clone = await gltf.clone() as InstanceType<T>;

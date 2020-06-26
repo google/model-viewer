@@ -20,7 +20,7 @@ import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_
 import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
-import {Constructor, deserializeUrl} from '../utilities.js';
+import {Constructor} from '../utilities.js';
 
 /**
  * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
@@ -32,7 +32,7 @@ export const openIOSARQuickLook = (() => {
   anchor.appendChild(document.createElement('img'));
 
   return (usdzSrc: string, arScale: string) => {
-    const modelUrl = new URL(usdzSrc);
+    const modelUrl = new URL(usdzSrc, self.location.toString());
     if (arScale === 'fixed') {
       modelUrl.hash = 'allowsContentScaling=0';
     }
@@ -58,7 +58,7 @@ export const openSceneViewer = (() => {
 
     const location = self.location.toString();
     const locationUrl = new URL(location);
-    const modelUrl = new URL(gltfSrc);
+    const modelUrl = new URL(gltfSrc, location);
     const scheme = modelUrl.protocol.replace(':', '');
 
     locationUrl.hash = noArViewerSigil;
@@ -149,9 +149,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'ar-modes'})
     arModes: string = DEFAULT_AR_MODES;
 
-    @property(
-        {converter: {fromAttribute: deserializeUrl}, attribute: 'ios-src'})
-    iosSrc: string|null = null;
+    @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
 
     @property({type: String, attribute: 'quick-look-browsers'})
     quickLookBrowsers: string = 'safari';

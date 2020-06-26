@@ -18,7 +18,7 @@ import {property} from 'lit-element';
 import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $renderer, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
-import {Constructor, deserializeUrl, throttle} from '../utilities.js';
+import {Constructor, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
@@ -177,8 +177,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * A URL pointing to the image to use as a poster in scenarios where the
      * <model-viewer> is not ready to reveal a rendered model to the viewer.
      */
-    @property({converter: {fromAttribute: deserializeUrl}})
-    poster: string|null = null;
+    @property({type: String}) poster: string|null = null;
 
     /**
      * An enumerable attribute describing under what conditions the
@@ -340,7 +339,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      this[$updateLoadingAndVisibility]()
+      this[$updateLoadingAndVisibility]();
     }
 
     [$onClick]() {
@@ -418,7 +417,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           const detail = {url: src};
 
           await this[$renderer].loader.preload(
-              src, updatePreloadProgress, this);
+              src, this, updatePreloadProgress);
           this.dispatchEvent(new CustomEvent('preload', {detail}));
         } catch (error) {
           this.dispatchEvent(new CustomEvent(
@@ -427,11 +426,11 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           updatePreloadProgress(1.0);
           this.requestUpdate();
         }
+
+        await this[$updateSource]();
       }
 
-      if (this[$modelIsReadyForReveal]) {
-        await this[$updateSource]();
-      } else {
+      if (!super[$getModelIsVisible]()) {
         this[$showPoster]();
       }
     }
@@ -499,7 +498,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
+      if (this[$shouldAttemptPreload] && !this[$sourceUpdated]) {
         this[$sourceUpdated] = true;
         await super[$updateSource]();
         this[$hidePoster]();
