@@ -16,6 +16,7 @@
 import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
 import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
@@ -41,6 +42,17 @@ const $isValid3DOMScript = Symbol('isValid3DOMScript');
 
 export interface SceneGraphInterface {
   worklet: Worker|null;
+  exportScene(options?: {
+    binary?: Boolean,
+    trs?: Boolean,
+    onlyVisible?: Boolean,
+    truncateDrawRange?: Boolean,
+    embedImages?: Boolean,
+    maxTextureSize?: Number,
+    animations?: [],
+    forcePowerOfTwoTextures?: Boolean,
+    includeCustomExtensions?: Boolean
+  }): Promise<Blob>;
 }
 
 /**
@@ -283,6 +295,33 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelGraftMutation](_event: Event) {
       this[$needsRender]();
     }
+
+    /** @export */
+    async exportScene(options: {
+			binary: false,
+			trs: false,
+			onlyVisible: true,
+			truncateDrawRange: true,
+			embedImages: true,
+			maxTextureSize: 1024,
+			animations: [],
+			forcePowerOfTwoTextures: false,
+			includeCustomExtensions: false
+		}): Promise<Blob> {
+      
+      const { model } = this[$scene];
+      return new Promise<Blob>(async (resolve, reject) => {
+        if (model == null) { 
+          return reject( 'Model missing or not yet loaded' );
+        }
+        
+        var exporter = new GLTFExporter();
+        exporter.parse( model, ( gltf ) => {
+            return resolve(new Blob([options.binary ? gltf as Blob : JSON.stringify(gltf)], {type: options.binary ? 'application/octet-stream' : 'application/json'}));
+        }, options );
+      });
+    }
+
   }
 
   return SceneGraphModelViewerElement;
