@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -309,7 +309,7 @@ export class Renderer extends EventDispatcher {
     let visibleScenes = 0;
     let visibleInput = null;
     for (const scene of this.scenes) {
-      if (scene.element.modelIsVisible) {
+      if (scene.element[$sceneIsReady]()) {
         ++visibleScenes;
         visibleInput = scene.element[$userInputElement];
       }
@@ -384,6 +384,10 @@ export class Renderer extends EventDispatcher {
     const {dpr, scale} = this;
 
     for (const scene of this.scenes) {
+      if (!scene.element[$sceneIsReady]()) {
+        continue;
+      }
+
       this.preRender(scene, t, delta);
 
       if (!scene.isDirty) {

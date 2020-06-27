@@ -65,6 +65,7 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+export const $sceneIsReady = Symbol('sceneIsReady');
 
 export interface Vector3D {
   x: number
@@ -265,24 +266,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      const enterRenderTreeProgress = this[$progressTracker].beginActivity();
-
       this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
             const oldVisibility = this.modelIsVisible;
-            const oldValue = this[$isElementInViewport];
             this[$isElementInViewport] = entry.isIntersecting;
-            this.requestUpdate($isElementInViewport, oldValue);
             this[$announceModelVisibility](oldVisibility);
-
-            if (this[$isElementInViewport]) {
-              // Wait a microtask to give other properties a chance to respond
-              // to the state change, then resolve progress on entering the
-              // render tree:
-              Promise.resolve().then(() => {
-                enterRenderTreeProgress(1);
-              });
+            if (this[$isElementInViewport] && !this[$sceneIsReady]()) {
+              this[$updateSource]();
             }
           }
         }
@@ -300,7 +291,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
       this[$isElementInViewport] = true;
-      this.requestUpdate($isElementInViewport, false);
     }
   }
 
@@ -472,6 +462,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return !!this.src;
   }
 
+  [$sceneIsReady](): boolean {
+    return this[$loaded];
+  }
+
   /**
    * Called on initialization and when the resize observer fires.
    */
@@ -525,6 +519,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     try {
       await this[$scene].setModelSource(
           source, (progress: number) => updateSourceProgress(progress * 0.9));
+      const detail = {url: source};
+      this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
