@@ -647,8 +647,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.jumpCameraToGoal();
     }
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;

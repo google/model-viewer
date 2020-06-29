@@ -184,12 +184,12 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           });
 
           suite('interaction', () => {
-            test('retains poster after preloading', async () => {
+            test('retains poster after loading', async () => {
               element.loading = 'eager';
               element.reveal = 'interaction';
               element.src = ASTRONAUT_GLB_PATH;
 
-              await waitForEvent(element, 'preload');
+              await waitForEvent(element, 'load');
               await timePasses(POSTER_TRANSITION_TIME + 100);
 
               const input = element[$userInputElement];
@@ -209,7 +209,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                         (element as any)[$defaultPosterElement];
                     const inputElement = element[$userInputElement];
 
-                    await waitForEvent(element, 'preload');
+                    await waitForEvent(element, 'load');
 
                     // NOTE(cdata): Currently, Firefox does not forward focus
                     // when delegatesFocus is true but focus is triggered
@@ -238,7 +238,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               const posterElement = (element as any)[$defaultPosterElement];
               const input = element[$userInputElement];
 
-              await waitForEvent(element, 'preload');
+              await waitForEvent(element, 'load');
 
               posterElement.focus();
 

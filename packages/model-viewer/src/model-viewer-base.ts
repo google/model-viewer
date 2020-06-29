@@ -234,7 +234,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
-      this[$onModelLoad](event);
+      this[$onModelLoad]();
 
       this.dispatchEvent(
           new CustomEvent('load', {detail: {url: (event as any).url}}));
@@ -494,7 +494,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene].isDirty = true;
   }
 
-  [$onModelLoad](_event: any) {
+  [$onModelLoad]() {
     this[$needsRender]();
   }
 
@@ -521,13 +521,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const source = this.src;
     try {
       await this[$scene].setModelSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.9));
+          source, (progress: number) => updateSourceProgress(progress * 0.8));
+
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
-      updateSourceProgress(1.0);
+      updateSourceProgress(0.9);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          updateSourceProgress(1.0);
+        });
+      });
     }
   }
 }

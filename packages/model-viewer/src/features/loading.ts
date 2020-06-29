@@ -360,8 +360,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
-        if (this[$posterDismissalSource] != null ||
-            this.reveal === RevealStrategy.AUTO) {
+        if (this[$sceneIsReady]() &&
+            (this[$posterDismissalSource] != null ||
+             this.reveal === RevealStrategy.AUTO)) {
           this[$hidePoster]();
         }
       }

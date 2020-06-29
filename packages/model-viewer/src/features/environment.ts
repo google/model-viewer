@@ -104,8 +104,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
       if (this[$currentEnvironmentMap] != null) {
         this[$applyEnvironmentMap](this[$currentEnvironmentMap]);

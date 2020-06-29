@@ -38,7 +38,7 @@ export const loadWithLoader =
      loader: GLTFLoader,
      progressCallback: ProgressCallback = () => {}) => {
       const onProgress = (event: ProgressEvent) => {
-        progressCallback!(event.loaded / event.total);
+        progressCallback!(Math.max(0, Math.min(1, event.loaded / event.total)));
       };
       return new Promise<GLTF>((resolve, reject) => {
         loader.load(url, resolve, onProgress, reject);
