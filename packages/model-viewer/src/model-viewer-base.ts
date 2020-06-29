@@ -35,7 +35,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 const blobCanvas = document.createElement('canvas');
 let blobContext: CanvasRenderingContext2D|null = null;
 
-const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
@@ -45,6 +44,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
+export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
