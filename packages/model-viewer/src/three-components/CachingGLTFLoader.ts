@@ -153,11 +153,11 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
     await cache.get(url);
 
+    preloaded.set(url, true);
+
     if (progressCallback) {
       progressCallback(1.0);
     }
-
-    preloaded.set(url, true);
   }
 
   /**

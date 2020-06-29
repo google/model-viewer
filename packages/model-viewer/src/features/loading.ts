@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -64,7 +64,6 @@ const $posterDismissalSource = Symbol('posterDismissalSource');
 const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
-const $sourceUpdated = Symbol('sourceUpdated');
 const $updateProgressBar = Symbol('updateProgressBar');
 const $lastReportedProgress = Symbol('lastReportedProgress');
 
@@ -209,7 +208,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     protected[$modelIsRevealed] = false;
-    protected[$sourceUpdated] = false;
 
     protected[$lastReportedProgress]: number = 0;
 
@@ -362,9 +360,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
-        if (this[$sceneIsReady]() &&
-            (this[$posterDismissalSource] != null ||
-             this.reveal === RevealStrategy.AUTO)) {
+        if (this[$posterDismissalSource] != null ||
+            this.reveal === RevealStrategy.AUTO) {
           this[$hidePoster]();
         }
       }
@@ -384,7 +381,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$sceneIsReady](): boolean {
       const {src} = this;
       return !!src && super[$sceneIsReady]() &&
-          CachingGLTFLoader.hasFinishedLoading(src) &&
           this[$lastReportedProgress] === 1.0;
     }
 
@@ -445,21 +441,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
     }
 
-    [$getLoaded]() {
-      const src = this.src;
-      return super[$getLoaded]() ||
-          !!(src && CachingGLTFLoader.hasFinishedLoading(src));
-    }
-
     async[$updateSource](reveal = false) {
       this[$lastReportedProgress] = 0;
 
       this[$showPoster]();
-      if ((reveal || this[$shouldAttemptPreload]()) && !this[$sourceUpdated] &&
-          !this[$getLoaded]()) {
-        this[$sourceUpdated] = true;
+      if ((reveal || this[$shouldAttemptPreload]()) && !this.loaded) {
         await super[$updateSource]();
-        this[$sourceUpdated] = false;
       }
     }
   }
