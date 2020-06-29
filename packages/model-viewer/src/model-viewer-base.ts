@@ -486,8 +486,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$loaded] = true;
     this[$loadedTime] = performance.now();
-    // Asynchronously invoke `update`:
-    this.requestUpdate();
   }
 
   [$needsRender]() {
@@ -495,7 +493,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$onModelLoad]() {
-    this[$needsRender]();
   }
 
   [$onResize](e: {width: number, height: number}) {
@@ -530,9 +527,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } finally {
       updateSourceProgress(0.9);
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          updateSourceProgress(1.0);
-        });
+        updateSourceProgress(1.0);
       });
     }
   }
