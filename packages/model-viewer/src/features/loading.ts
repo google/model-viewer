@@ -203,7 +203,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$hidePoster]();
       } else {
         this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
-        this[$updateSource](true);
+        this[$updateSource]();
       }
     }
 
@@ -373,8 +373,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$shouldAttemptPreload](): boolean {
-      return super[$shouldAttemptPreload]() &&
-          (this.loading === LoadingStrategy.EAGER ||
+      return !!this.src &&
+          (this[$posterDismissalSource] != null ||
+           this.loading === LoadingStrategy.EAGER ||
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
     }
 
@@ -441,13 +442,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
     }
 
-    async[$updateSource](reveal = false) {
+    async[$updateSource]() {
       this[$lastReportedProgress] = 0;
-
       this[$showPoster]();
-      if ((reveal || this[$shouldAttemptPreload]()) && !this.loaded) {
-        await super[$updateSource]();
-      }
+      await super[$updateSource]();
     }
   }
 

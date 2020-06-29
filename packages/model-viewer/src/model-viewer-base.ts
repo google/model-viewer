@@ -455,11 +455,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
-    return this[$isElementInViewport];
+    return this.loaded && this[$isElementInViewport];
   }
 
   [$shouldAttemptPreload](): boolean {
-    return !!this.src;
+    return !!this.src && this[$isElementInViewport];
   }
 
   [$sceneIsReady](): boolean {
@@ -514,6 +514,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * attribute.
    */
   async[$updateSource]() {
+    if (this.loaded || !this[$shouldAttemptPreload]()) {
+      return;
+    }
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
