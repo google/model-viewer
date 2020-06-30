@@ -148,6 +148,23 @@ self.addEventListener('model-change', function() {
             .to.include({r: 1, g: 0, b: 0});
       });
 
+      test('allows image.setURI to be called when "textures" is in capabilities', async () => {
+        const script = document.createElement('script');
+        script.type = 'experimental-scene-graph-worklet';
+        script.setAttribute('allow', 'messaging; textures');
+        script.textContent = `
+self.addEventListener('model-change', function() {
+  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(null).then(function() {
+    self.postMessage('done');
+  });
+});
+`;
+        element.appendChild(script);
+        await waitForEvent(element, 'worklet-created');
+        await waitForEvent(element.worklet!, 'message');
+        // No further checks needed. If the call is disallowed, we would never get the 'message' event, thus failing via timeout.
+      });
+
       suite('when the model changes', () => {
         test('updates when the model changes', async () => {
           const script = document.createElement('script');

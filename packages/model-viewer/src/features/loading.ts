@@ -18,7 +18,7 @@ import {property} from 'lit-element';
 import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-import {Constructor, deserializeUrl, throttle} from '../utilities.js';
+import {Constructor, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
@@ -179,8 +179,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * A URL pointing to the image to use as a poster in scenarios where the
      * <model-viewer> is not ready to reveal a rendered model to the viewer.
      */
-    @property({converter: {fromAttribute: deserializeUrl}})
-    poster: string|null = null;
+    @property({type: String}) poster: string|null = null;
 
     /**
      * An enumerable attribute describing under what conditions the
