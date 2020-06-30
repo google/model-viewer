@@ -130,6 +130,7 @@ export class BabylonViewer extends LitElement {
     const skybox =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
     skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
+    skybox!.infiniteDistance = true;
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
