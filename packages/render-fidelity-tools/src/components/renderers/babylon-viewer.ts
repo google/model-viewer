@@ -26,6 +26,7 @@ const $updateSize = Symbol('updateSize');
 const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
+const $degToRadians = Symbol('degToRadians');
 
 
 @customElement('babylon-viewer')
@@ -79,9 +80,9 @@ export class BabylonViewer extends LitElement {
     this[$scene] = new Scene(this[$engine]);
     this[$updateSize]();
 
-    const {orbit, target} = scenario;
-    const alpha = (orbit.theta + 90) * Math.PI / 180;
-    const beta = orbit.phi * Math.PI / 180;
+    const {orbit, target, verticalFoV} = scenario;
+    const alpha = this[$degToRadians](orbit.theta + 90);
+    const beta = this[$degToRadians](orbit.phi);
     const camera = new ArcRotateCamera(
         'Camera',
         alpha,
@@ -93,6 +94,9 @@ export class BabylonViewer extends LitElement {
             target.z),
         this[$scene]);
     camera.attachControl(this[$canvas]!, true);
+    // in babylon, camera use VERTICAL_FIXED mode by default, so fov here is
+    // equal to vertical fov
+    camera.fov = this[$degToRadians](verticalFoV);
 
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
@@ -156,5 +160,9 @@ export class BabylonViewer extends LitElement {
     canvas.height = height;
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
+  }
+
+  private[$degToRadians](degree: number) {
+    return Math.PI * (degree / 180);
   }
 }
