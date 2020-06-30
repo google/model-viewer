@@ -114,16 +114,17 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // load and prefilter HDR texture (the size of cubmap is set to be 256 for all renderers)
+    // load and prefilter HDR texture (the size of cubmap is set to be 256 for
+    // all renderers)
     const environment = new HDRCubeTexture(
-        scenario.lighting, this[$scene], 256, false,false,false,true);
+        scenario.lighting, this[$scene], 256, false, false, false, true);
     this[$scene].environmentTexture = environment;
     // rotate both skybox and hdr texture for 180 deg to match other renderers
     environment.setReflectionTextureMatrix(
-        Matrix.RotationY(Tools.ToRadians(180)));
+        Matrix.RotationY(Tools.ToRadians(90)));
     const skybox =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skybox!.rotate(Axis.Y, Math.PI, Space.WORLD);
+    skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
     skybox!.infiniteDistance = true;
 
     this[$engine].runRenderLoop(() => {
