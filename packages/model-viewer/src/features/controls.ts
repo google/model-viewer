@@ -521,7 +521,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (this[$renderer].isPresenting) {
+      if (this[$renderer].isPresenting || !this.modelIsVisible) {
         return;
       }
 
@@ -647,8 +647,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.jumpCameraToGoal();
     }
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
       const {framedFieldOfView} = this[$scene];
       this[$zoomAdjustedFieldOfView] = framedFieldOfView;

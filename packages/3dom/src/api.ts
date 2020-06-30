@@ -239,17 +239,17 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
    */
   setBaseColorFactor(rgba: RGBA): Promise<void>;
 
-   /**
-    * Changes the metalness factor of the material to the given value.
-    * Requires the 'material-properties' capability to be enabled.
-    */
+  /**
+   * Changes the metalness factor of the material to the given value.
+   * Requires the 'material-properties' capability to be enabled.
+   */
   setMetallicFactor(value: number): Promise<void>;
 
-   /**
-    * Changes the roughness factor of the material to the given value.
-    * Requires the 'material-properties' capability to be enabled.
-    */
-   setRoughnessFactor(value: number): Promise<void>;
+  /**
+   * Changes the roughness factor of the material to the given value.
+   * Requires the 'material-properties' capability to be enabled.
+   */
+  setRoughnessFactor(value: number): Promise<void>;
 }
 
 /**

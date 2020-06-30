@@ -15,7 +15,8 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
 
-import {CachingGLTFLoader} from './CachingGLTFLoader.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
@@ -29,7 +30,6 @@ export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 export const $shadow = Symbol('shadow');
 const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
 const $currentGLTF = Symbol('currentGLTF');
-const $loader = Symbol('loader');
 
 const view = new Vector3();
 const target = new Vector3();
@@ -42,7 +42,6 @@ export default class Model extends Object3D {
   protected[$shadow]: Shadow|null = null;
 
   private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
-  private[$loader] = new CachingGLTFLoader(ModelViewerGLTFInstance);
   private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
   private animations: Array<AnimationClip> = [];
@@ -57,10 +56,6 @@ export default class Model extends Object3D {
   public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
-
-  get loader() {
-    return this[$loader];
-  }
 
   get currentGLTF() {
     return this[$currentGLTF];
@@ -99,7 +94,8 @@ export default class Model extends Object3D {
   }
 
   async setSource(
-      url: string|null, progressCallback?: (progress: number) => void) {
+      element: ModelViewerElementBase, url: string|null,
+      progressCallback?: (progress: number) => void) {
     if (!url || url === this.url) {
       if (progressCallback) {
         progressCallback(1);
@@ -123,7 +119,8 @@ export default class Model extends Object3D {
           async (resolve, reject) => {
             this[$cancelPendingSourceChange] = () => reject();
             try {
-              const result = await this.loader.load(url, progressCallback);
+              const result = await element[$renderer].loader.load(
+                  url, element, progressCallback);
               resolve(result);
             } catch (error) {
               reject(error);

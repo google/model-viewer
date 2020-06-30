@@ -168,8 +168,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
       this[$updateExecutionContextModel]();
     }

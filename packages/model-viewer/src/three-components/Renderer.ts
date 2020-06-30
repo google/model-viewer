@@ -14,13 +14,16 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import * as WebGLUtils from './WebGLUtils.js';
@@ -77,6 +80,8 @@ export class Renderer extends EventDispatcher {
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
+  public roughnessMipmapper: RoughnessMipmapper;
+  public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
   public width = 0;
   public height = 0;
   public dpr = 1;
@@ -159,6 +164,7 @@ export class Renderer extends EventDispatcher {
     this.arRenderer = new ARRenderer(this);
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
+    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
@@ -303,7 +309,7 @@ export class Renderer extends EventDispatcher {
     let visibleScenes = 0;
     let visibleInput = null;
     for (const scene of this.scenes) {
-      if (scene.visible) {
+      if (scene.element[$sceneIsReady]()) {
         ++visibleScenes;
         visibleInput = scene.element[$userInputElement];
       }
@@ -378,7 +384,7 @@ export class Renderer extends EventDispatcher {
     const {dpr, scale} = this;
 
     for (const scene of this.scenes) {
-      if (scene.hasRendered && (!scene.visible || scene.paused)) {
+      if (!scene.element[$sceneIsReady]()) {
         continue;
       }
 
@@ -388,7 +394,6 @@ export class Renderer extends EventDispatcher {
         continue;
       }
       scene.isDirty = false;
-      scene.hasRendered = true;
 
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.

@@ -44,16 +44,12 @@ const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
 
-const $paused = Symbol('paused');
-
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  private[$paused]: boolean = false;
-
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public shadowIntensity = 0;
@@ -61,7 +57,6 @@ export class ModelScene extends Scene {
   public width = 1;
   public height = 1;
   public isDirty = false;
-  public hasRendered = true;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
@@ -103,18 +98,6 @@ export class ModelScene extends Scene {
         'model-load', (event: any) => this.onModelLoad(event));
   }
 
-  get paused() {
-    return this[$paused];
-  }
-
-  pause() {
-    this[$paused] = true;
-  }
-
-  resume() {
-    this[$paused] = false;
-  }
-
   /**
    * Function to create the context lazily, as when there is only one
    * <model-viewer> element, the renderer's 3D context can be displayed
@@ -135,8 +118,7 @@ export class ModelScene extends Scene {
   async setModelSource(
       source: string|null, progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(source, progressCallback);
-      this.hasRendered = false;
+      await this.model.setSource(this.element, source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);
