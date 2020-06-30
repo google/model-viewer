@@ -78,7 +78,7 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html',
         ui: 'tdd',
-        timeout: 3000,
+        timeout: 30000,
       },
     },
 
