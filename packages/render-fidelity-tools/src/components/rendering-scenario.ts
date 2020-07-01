@@ -80,16 +80,26 @@ export class RenderingScenario extends LitElement {
   <div class="check"></div>
   <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
-  <h2 class = "metrics"> ${
+   ${
                     index == 0 || this.analysis == null ?
-                        '---' :
-                        `${
+                        html`<h2>---</h2>` :
+                        html`<div class = "metrics">
+                            <span>${
                             this.toDecibels(
                                 this.analysis.analysisResults[index - 1][0]
-                                    .rmsDistanceRatio)} db`} </h2>
+                                    .rmsDistanceRatio)} db
+                            </span>
+                            <div class="tooltip">
+                              <a class="question-icon">  </a>
+                              <span class="tooltiptext">Tooltip text</span>
+                            </div>
+
+                        </div>`} 
+
 </div>`);
 
     return html`
+
 <style>
 :host {
   display: inline-flex;
@@ -108,6 +118,39 @@ export class RenderingScenario extends LitElement {
 h1 {
   font-size: 1.5em;
   margin: 0.166em 0.33em 0.33em;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.question-icon{
+  background-image: url(../../shared-assets/icons/help_outline-24px.svg);
+  background-size : 1em;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  width: 2em;
+  height: 100%;
+  display: inline-block;
 }
 
 .screenshot > header {
@@ -196,7 +239,9 @@ h2 {
   transform: translateY(-0.5em) scale(1.025);
   box-shadow: 0px 6px 12px rgba(100, 100, 100, 0.2);
 }
+
 </style>
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <h1>${this.name}</h1>
 <div id="screenshots">
   ${images}
