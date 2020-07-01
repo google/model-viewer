@@ -31,6 +31,8 @@ export class RenderingScenario extends LitElement {
 
   @property({type: Array}) exclude: Array<string> = [];
 
+  @property({type: Object}) analysis: any|null;  // change to correct type later
+
   get basePath() {
     if (!this.name) {
       return '';
@@ -39,6 +41,24 @@ export class RenderingScenario extends LitElement {
     return `./results/${this.name}`;
   }
 
+  // is this the correct way to do ? i tried to fetch ayalysis in constructor,
+  // but the basePath isn't showing correctly in constructor
+  updated(changedProperties: Map<any, any>) {
+    super.updated(changedProperties);
+
+    if (this.analysis == null) {
+      this.loadAnalysis();
+    }
+  }
+
+  private async loadAnalysis() {
+    const analysisPath = `${this.basePath}/analysis.json`;
+    this.analysis = await (await fetch(analysisPath)).json();
+  }
+
+  private getMetric(index: number) {
+    return index;
+  }
   render() {
     const {basePath} = this;
     const {width} = this.dimensions;
@@ -49,7 +69,7 @@ export class RenderingScenario extends LitElement {
                      file: 'model-viewer.png'
                    }].concat(this.goldens)
                        .filter(golden => !this.exclude.includes(golden.name))
-                       .map(golden => html`
+                       .map((golden, index) => html`
 <div class="screenshot">
   <header>
     <h2>${golden.description}</h2>
@@ -57,6 +77,7 @@ export class RenderingScenario extends LitElement {
   <div class="check"></div>
   <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
+  <h2> ${this.getMetric(index)} </h2>
 </div>`);
 
     return html`
