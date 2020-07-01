@@ -14,9 +14,10 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $onResize, $renderer, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $loaded, $onResize, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
+import {assetPath, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -32,18 +33,17 @@ interface TestScene {
 
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
-function createScene(): ModelScene&TestScene {
+async function createScene(): Promise<ModelScene&TestScene> {
   const element = new ModelViewerElement();
-  const scene: ModelScene&TestScene = new ModelScene({
-    element: element,
-    canvas: element[$canvas],
-    width: 200,
-    height: 100,
-  });
-  scene.visible = true;
-  scene.createContext();
+  document.body.insertBefore(element, document.body.firstChild);
+  const sourceLoads = waitForEvent(element, 'load');
+  element.src = assetPath('models/Astronaut.glb');
+  await sourceLoads;
 
+  const scene = element[$scene] as ModelScene & TestScene;
   scene.renderCount = 0;
+
+  scene.createContext();
   const {context} = scene;
   if (context instanceof CanvasRenderingContext2D) {
     const drawImage = context.drawImage;
@@ -62,8 +62,6 @@ function createScene(): ModelScene&TestScene {
         'context is neither a CanvasRenderingContext2D nor an ImageBitmapRenderingContext.');
   }
 
-  element[$renderer].registerScene(scene);
-
   return scene;
 }
 
@@ -71,9 +69,9 @@ suite('Renderer', () => {
   let scene: ModelScene&TestScene;
   let renderer: Renderer;
 
-  setup(() => {
+  setup(async () => {
     renderer = Renderer.singleton;
-    scene = createScene();
+    scene = await createScene();
   });
 
   teardown(() => {
@@ -84,8 +82,8 @@ suite('Renderer', () => {
   suite('render', () => {
     let otherScene: ModelScene&TestScene;
 
-    setup(() => {
-      otherScene = createScene();
+    setup(async () => {
+      otherScene = await createScene();
     });
 
     teardown(() => {
@@ -93,7 +91,7 @@ suite('Renderer', () => {
       renderer.render(performance.now());
     });
 
-    test('renders only dirty scenes', async function() {
+    test('renders only dirty scenes', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(otherScene.renderCount).to.be.equal(1);
@@ -104,7 +102,7 @@ suite('Renderer', () => {
       expect(otherScene.renderCount).to.be.equal(1);
     });
 
-    test('marks scenes no longer dirty after rendering', async function() {
+    test('marks scenes no longer dirty after rendering', () => {
       scene.isDirty = true;
 
       renderer.render(performance.now());
@@ -117,22 +115,22 @@ suite('Renderer', () => {
       expect(!scene.isDirty).to.be.ok;
     });
 
-    test('does not render scenes marked as not visible', async function() {
-      scene.visible = false;
+    test('does not render scenes that have not been loaded', () => {
+      scene.element[$loaded] = false;
       scene.isDirty = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
       expect(scene.isDirty).to.be.ok;
 
-      scene.visible = true;
+      scene.element[$loaded] = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
       expect(!scene.isDirty).to.be.ok;
     });
 
-    test('uses the proper canvas when unregsitering scenes', function() {
+    test('uses the proper canvas when unregsitering scenes', () => {
       renderer.render(performance.now());
 
       expect(renderer.canvasElement.classList.contains('show')).to.be.eq(false);

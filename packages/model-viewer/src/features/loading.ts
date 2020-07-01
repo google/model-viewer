@@ -15,9 +15,9 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -52,7 +52,6 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
 const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
@@ -62,18 +61,9 @@ export const $posterContainerElement = Symbol('posterContainerElement');
 export const $defaultPosterElement = Symbol('defaultPosterElement');
 
 const $posterDismissalSource = Symbol('posterDismissalSource');
-
-const $modelIsReadyForReveal = Symbol('modelIsReadyForReveal');
-const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
-const $shouldRevealModel = Symbol('shouldRevealModel');
 const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
-const $preloadAttempted = Symbol('preloadAttempted');
-const $sourceUpdated = Symbol('sourceUpdated');
-
-const $updateLoadingAndVisibility = Symbol('updateLoadingAndVisibility');
-
 const $updateProgressBar = Symbol('updateProgressBar');
 const $lastReportedProgress = Symbol('lastReportedProgress');
 
@@ -172,7 +162,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * from .ZIP files, drag-and-drop APIs, and Data URIs.
      */
     static mapURLs(callback: (url: string) => string) {
-      loader[$loader].manager.setURLModifier(callback);
+      Renderer.singleton.loader[$loader].manager.setURLModifier(callback);
     }
 
     /**
@@ -209,13 +199,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * the poster via user input.
      */
     dismissPoster() {
-      this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
-      this.requestUpdate();
+      if (this[$sceneIsReady]()) {
+        this[$hidePoster]();
+      } else {
+        this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
+        this[$updateSource]();
+      }
     }
 
     protected[$modelIsRevealed] = false;
-    protected[$preloadAttempted] = false;
-    protected[$sourceUpdated] = false;
 
     protected[$lastReportedProgress]: number = 0;
 
@@ -325,37 +317,28 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `url(${this.poster})`;
       }
 
-      if (changedProperties.has('src')) {
-        if (!this[$modelIsReadyForReveal]) {
-          this[$lastReportedProgress] = 0;
-        }
-
-        this[$posterDismissalSource] = null;
-        this[$preloadAttempted] = false;
-        this[$sourceUpdated] = false;
-      }
-
       if (changedProperties.has('alt')) {
         this[$defaultPosterElement].setAttribute(
             'aria-label',
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      this[$updateLoadingAndVisibility]()
+      if (changedProperties.has('reveal') || changedProperties.has('loaded')) {
+        if (!this[$sceneIsReady]()) {
+          this[$updateSource]();
+        }
+      }
     }
 
     [$onClick]() {
-      if (this[$posterDismissalSource] != null ||
-          this.reveal === RevealStrategy.MANUAL) {
+      if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
-      this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
-      this.requestUpdate();
+      this.dismissPoster();
     }
 
     [$onKeydown](event: KeyboardEvent) {
-      if (this[$posterDismissalSource] != null ||
-          this.reveal === RevealStrategy.MANUAL) {
+      if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
       switch (event.keyCode) {
@@ -363,80 +346,44 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         // both spacebar and enter to produce a synthetic click action
         case SPACE_KEY:
         case ENTER_KEY:
-          this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
+          this.dismissPoster();
           break;
         default:
           break;
       }
-
-      this.requestUpdate();
     }
 
     [$onProgress](event: Event) {
       const progress = (event as any).detail.totalProgress;
-
-      this.requestUpdate();
+      this[$lastReportedProgress] =
+          Math.max(progress, this[$lastReportedProgress]);
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
+        if (this[$sceneIsReady]() &&
+            (this[$posterDismissalSource] != null ||
+             this.reveal === RevealStrategy.AUTO)) {
+          this[$hidePoster]();
+        }
       }
 
       this[$updateProgressBar](progress);
 
       this.dispatchEvent(
           new CustomEvent('progress', {detail: {totalProgress: progress}}));
-
-      this[$lastReportedProgress] =
-          Math.max(progress, this[$lastReportedProgress]);
     }
 
-    get[$modelIsReadyForReveal](): boolean {
+    [$shouldAttemptPreload](): boolean {
+      return !!this.src &&
+          (this[$posterDismissalSource] != null ||
+           this.loading === LoadingStrategy.EAGER ||
+           (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
+    }
+
+    [$sceneIsReady](): boolean {
       const {src} = this;
-
-      return !!src && CachingGLTFLoader.hasFinishedLoading(src) &&
-          this[$lastReportedProgress] === 1.0 && this[$shouldRevealModel]
-    }
-
-    get[$shouldRevealModel](): boolean {
-      return this.reveal === RevealStrategy.AUTO ||
-          !!this[$posterDismissalSource];
-    }
-
-    get[$shouldAttemptPreload](): boolean {
-      const {src} = this;
-
-      return !!src &&
-          (this.loading === LoadingStrategy.EAGER ||
-           this[$shouldRevealModel]) &&
-          this[$isElementInViewport];
-    }
-
-    async[$updateLoadingAndVisibility]() {
-      if (this[$shouldAttemptPreload] && !this[$preloadAttempted]) {
-        this[$preloadAttempted] = true;
-
-        const updatePreloadProgress = this[$progressTracker].beginActivity();
-
-        try {
-          const src = this.src!;
-          const detail = {url: src};
-
-          await loader.preload(src, updatePreloadProgress);
-          this.dispatchEvent(new CustomEvent('preload', {detail}));
-        } catch (error) {
-          this.dispatchEvent(new CustomEvent(
-              'error', {detail: {type: 'loadfailure', sourceError: error}}));
-        } finally {
-          updatePreloadProgress(1.0);
-          this.requestUpdate();
-        }
-      }
-
-      if (this[$modelIsReadyForReveal]) {
-        await this[$updateSource]();
-      } else {
-        this[$showPoster]();
-      }
+      return !!src && super[$sceneIsReady]() &&
+          this[$lastReportedProgress] === 1.0;
     }
 
     [$showPoster]() {
@@ -459,6 +406,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$hidePoster]() {
+      this[$posterDismissalSource] = null;
       const posterContainerElement = this[$posterContainerElement];
       const defaultPosterElement = this[$defaultPosterElement];
 
@@ -495,18 +443,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
     }
 
-    [$getLoaded]() {
-      const src = this.src;
-      return super[$getLoaded]() ||
-          !!(src && CachingGLTFLoader.hasFinishedLoading(src));
-    }
-
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
-        this[$sourceUpdated] = true;
-        await super[$updateSource]();
-        this[$hidePoster]();
-      }
+      this[$lastReportedProgress] = 0;
+      this[$showPoster]();
+      await super[$updateSource]();
     }
   }
 

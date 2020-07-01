@@ -16,14 +16,11 @@
 import {CorrelatedSceneGraph} from '@google/3dom/lib/facade/three-js/correlated-scene-graph.js';
 import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
 import {Renderer} from '../Renderer.js';
 import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
-
-const $roughnessMipmapper = Symbol('roughnessMipmapper');
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
@@ -37,9 +34,6 @@ interface PreparedModelViewerGLTF extends PreparedGLTF {
  * <model-viewer> use cases.
  */
 export class ModelViewerGLTFInstance extends GLTFInstance {
-  protected static[$roughnessMipmapper]: RoughnessMipmapper =
-      new RoughnessMipmapper(Renderer.singleton.threeRenderer);
-
   /**
    * @override
    */
@@ -83,7 +77,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
             transparent = true;
             material.side = FrontSide;
           }
-          this[$roughnessMipmapper].generateMipmaps(
+          Renderer.singleton.roughnessMipmapper.generateMipmaps(
               material as MeshStandardMaterial);
         }
       });
