@@ -80,7 +80,7 @@ export class RenderingScenario extends LitElement {
   <div class="check"></div>
   <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
-  <h2> ${
+  <h2 class = "metrics"> ${
                     index == 0 || this.analysis == null ?
                         '---' :
                         `${
@@ -114,7 +114,7 @@ h1 {
   display: block;
   position: absolute;
   width: 100%;
-  bottom: 1em;
+  bottom: 2em;
   left: 0;
   text-align: center;
 
@@ -133,6 +133,10 @@ h2 {
 
   background-color: rgba(255, 255, 255, 0.75);
   pointer-events: none;
+}
+
+.metrics{
+  text-align: center;
 }
 
 #screenshots {
