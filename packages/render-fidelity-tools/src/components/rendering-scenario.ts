@@ -51,25 +51,28 @@ export class RenderingScenario extends LitElement {
     }
   }
 
+  private toDecibels(rmsDistanceRatio: number) {
+    return (10 * Math.log10(rmsDistanceRatio)).toFixed(2)
+  }
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
+    console.log(this.analysis);
   }
 
-  private getMetric(index: number) {
-    return index;
-  }
   render() {
     const {basePath} = this;
     const {width} = this.dimensions;
 
-    const images = [{
-                     name: 'model-viewer',
-                     description: '<model-viewer> (this version)',
-                     file: 'model-viewer.png'
-                   }].concat(this.goldens)
-                       .filter(golden => !this.exclude.includes(golden.name))
-                       .map((golden, index) => html`
+    const images =
+        [{
+          name: 'model-viewer',
+          description: '<model-viewer> (this version)',
+          file: 'model-viewer.png'
+        }].concat(this.goldens)
+            .filter(golden => !this.exclude.includes(golden.name))
+            .map(
+                (golden, index) => html`
 <div class="screenshot">
   <header>
     <h2>${golden.description}</h2>
@@ -77,7 +80,13 @@ export class RenderingScenario extends LitElement {
   <div class="check"></div>
   <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
-  <h2> ${this.getMetric(index)} </h2>
+  <h2> ${
+                    index == 0 || this.analysis == null ?
+                        '---' :
+                        `${
+                            this.toDecibels(
+                                this.analysis.analysisResults[index - 1][0]
+                                    .rmsDistanceRatio)} db`} </h2>
 </div>`);
 
     return html`
