@@ -13,35 +13,28 @@
  * limitations under the License.
  */
 
-import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
-import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
+import {ThreeDOM} from '@google/3dom/lib/api.js';
+import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
+import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
+import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
-const SCENE_GRAPH_SCRIPT_TYPE = 'experimental-scene-graph-worklet';
-const VALID_CAPABILITIES: Set<ThreeDOMCapability> =
-    new Set(['messaging', 'fetch', 'material-properties', 'textures']);
-
-const $onChildListMutation = Symbol('onChildListMutation');
-const $childListMutationHandler = Symbol('childListMutationHandler');
-const $mutationObserver = Symbol('mutationObserver');
-const $createExecutionContext = Symbol('createExecutionContext');
-const $onScriptElementAdded = Symbol('onScriptElementAdded');
-const $executionContext = Symbol('executionContext');
-const $updateExecutionContextModel = Symbol('updateExecutionContextModel');
+const $updateThreeSide = Symbol('updateThreeSide');
 const $currentGLTF = Symbol('currentGLTF');
 const $modelGraft = Symbol('modelGraft');
+const $mainPort = Symbol('mainPort');
+const $threePort = Symbol('threePort');
+const $manipulator = Symbol('manipulator');
+const $modelKernel = Symbol('modelKernel');
+const $setUpMainSide = Symbol('setUpMainSide');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
-const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
-const $isValid3DOMScript = Symbol('isValid3DOMScript');
 
-export interface SceneGraphInterface {
-  worklet: Worker|null;
-}
+export interface SceneGraphInterface {}
 
 /**
  * SceneGraphMixin manages a `<model-viewer>` integration with the 3DOM library
@@ -97,56 +90,40 @@ export interface SceneGraphInterface {
  */
 export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<SceneGraphInterface>&T => {
-  class SceneGraphModelViewerElement extends ModelViewerElement {
+  class SceneGraphModelViewerElement extends ModelViewerElement implements
+      ThreeDOM {
     @property({type: Object}) protected[$modelGraft]: ModelGraft|null = null;
 
-    protected[$childListMutationHandler] = (records: Array<MutationRecord>) =>
-        this[$onChildListMutation](records);
-
-    protected[$modelGraftMutationHandler] = (event: Event) =>
-        this[$onModelGraftMutation](event);
-
-    protected[$mutationObserver] =
-        new MutationObserver(this[$childListMutationHandler]);
-
-    protected[$executionContext]: ThreeDOMExecutionContext|null = null;
-
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+    protected[$mainPort]: MessagePort|null = null;
+    protected[$threePort]: MessagePort|null = null;
+    protected[$manipulator]: ModelGraftManipulator|null = null;
+    protected[$modelKernel]: ModelKernel|null = null;
 
-    /**
-     * A reference to the active worklet if one exists, or else `null`. A
-     * worklet is not created until a scene graph worklet script has been
-     * detected as a child of this `<model-viewer>`.
-     */
-    get worklet() {
-      const executionContext = this[$executionContext];
-      return executionContext != null ? executionContext.worker : null;
+    /** @export */
+    get model() {
+      const kernel = this[$modelKernel];
+      return kernel ? kernel.model : undefined;
     }
 
     connectedCallback() {
       super.connectedCallback();
 
-      this[$mutationObserver].observe(this, {childList: true});
-
-      const script = this.querySelector<HTMLScriptElement>(
-          `script[type="${SCENE_GRAPH_SCRIPT_TYPE}"]:last-of-type`);
-
-      if (script != null && this[$isValid3DOMScript](script)) {
-        this[$onScriptElementAdded](script);
-      }
+      const {port1, port2} = new MessageChannel();
+      port1.start();
+      port2.start();
+      this[$mainPort] = port1;
+      this[$threePort] = port2;
+      this[$setUpMainSide]();
     }
 
-    async disconnectedCallback() {
+    disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$mutationObserver].disconnect();
-
-      const executionContext = this[$executionContext];
-
-      if (executionContext != null) {
-        await executionContext.terminate();
-        this[$executionContext] = null;
-      }
+      this[$mainPort]!.close();
+      this[$threePort]!.close();
+      this[$mainPort] = null;
+      this[$threePort] = null;
     }
 
     updated(changedProperties: Map<string|symbol, unknown>): void {
@@ -156,14 +133,13 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
             changedProperties.get($modelGraft) as ModelGraft | null;
         if (oldModelGraft != null) {
           oldModelGraft.removeEventListener(
-              'mutation', this[$modelGraftMutationHandler]);
+              'mutation', this[$onModelGraftMutation]);
         }
 
         const modelGraft = this[$modelGraft];
 
         if (modelGraft != null) {
-          modelGraft.addEventListener(
-              'mutation', this[$modelGraftMutationHandler]);
+          modelGraft.addEventListener('mutation', this[$onModelGraftMutation]);
         }
       }
     }
@@ -171,116 +147,79 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelLoad]() {
       super[$onModelLoad]();
 
-      this[$updateExecutionContextModel]();
+      this[$updateThreeSide]();
     }
 
-    [$isValid3DOMScript](node: Node) {
-      return node instanceof HTMLScriptElement &&
-          (node.textContent || node.src) &&
-          node.getAttribute('type') === SCENE_GRAPH_SCRIPT_TYPE
-    }
-
-    [$onChildListMutation](records: Array<MutationRecord>) {
-      if (this.parentNode == null) {
-        // Ignore a lazily reported list of mutations if we are detached
-        // from the document...
-        return;
-      }
-
-      let lastScriptElement: HTMLScriptElement|null = null;
-
-      for (const record of records) {
-        for (const node of Array.from(record.addedNodes)) {
-          if (this[$isValid3DOMScript](node)) {
-            lastScriptElement = node as HTMLScriptElement;
-          }
-        }
-      }
-
-      if (lastScriptElement != null) {
-        this[$onScriptElementAdded](lastScriptElement);
-      }
-    }
-
-    [$onScriptElementAdded](script: HTMLScriptElement) {
-      if (!this[$isValid3DOMScript](script)) {
-        return;
-      }
-
-      const allowString = script.getAttribute('allow') || '';
-      const allowList =
-          allowString.split(';')
-              .map((fragment) => fragment.trim())
-              .filter<ThreeDOMCapability>(
-                  (capability): capability is ThreeDOMCapability =>
-                      VALID_CAPABILITIES.has(capability as ThreeDOMCapability));
-
-      if (script.src) {
-        this[$createExecutionContext](script.src, allowList);
-      } else {
-        this[$createExecutionContext](
-            script.textContent!, allowList, {eval: true});
-      }
-    }
-
-    async[$createExecutionContext](
-        scriptSource: string, capabilities: Array<ThreeDOMCapability>,
-        options = {eval: false}) {
-      let executionContext = this[$executionContext];
-
-      if (executionContext != null) {
-        await executionContext.terminate();
-      }
-
-      this[$executionContext] = executionContext =
-          new ThreeDOMExecutionContext(capabilities);
-
-      this.dispatchEvent(new CustomEvent(
-          'worklet-created', {detail: {worklet: this.worklet}}));
-
-      if (options.eval) {
-        await executionContext.eval(scriptSource);
-      } else {
-        await executionContext.import(scriptSource);
-      }
-
-      this[$updateExecutionContextModel]();
-    }
-
-    [$updateExecutionContextModel]() {
-      const executionContext = this[$executionContext];
-
-      if (executionContext == null || this.parentNode == null) {
-        // Ignore if we don't have a 3DOM script to run, or if we are
-        // currently detached from the document
-        return;
-      }
-
+    [$updateThreeSide]() {
+      // Three.js side (will eventually move to worker)
       const scene = this[$scene];
       const {model} = scene;
       const {currentGLTF} = model;
       let modelGraft: ModelGraft|null = null;
+      let manipulator: ModelGraftManipulator|null = null;
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
         const currentModelGraft = this[$modelGraft];
+        const currentManipulator = this[$manipulator];
 
         if (correlatedSceneGraph != null) {
+          if (currentManipulator != null) {
+            currentManipulator.dispose();
+          }
+
           if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
             return;
           }
 
           modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
+
+          if (modelGraft != null) {
+            manipulator =
+                new ModelGraftManipulator(modelGraft, this[$threePort]!);
+          }
+
+          this[$threePort]!.postMessage(
+              {
+                type: ThreeDOMMessageType.MODEL_CHANGE,
+                model: modelGraft != null && modelGraft.model != null ?
+                    modelGraft.model.toJSON() :
+                    null
+              },
+              [this[$mainPort]!]);
         }
       }
 
-      executionContext.changeModel(modelGraft);
-
       this[$modelGraft] = modelGraft;
+      this[$manipulator] = manipulator;
       this[$currentGLTF] = currentGLTF;
     }
 
-    [$onModelGraftMutation](_event: Event) {
+    [$setUpMainSide]() {
+      this[$mainPort]!.addEventListener('message', (event: MessageEvent) => {
+        const {data} = event;
+        if (data && data.type === ThreeDOMMessageType.MODEL_CHANGE) {
+          const serialized: SerializedModel|null = data.model;
+          const port = event.ports[0];
+          const currentKernel = this[$modelKernel];
+
+          if (currentKernel != null) {
+            currentKernel.deactivate();
+          } else if (serialized == null) {
+            // Do not proceed if transitioning from null to null
+            return;
+          }
+
+          if (serialized != null) {
+            this[$modelKernel] = new ModelKernel(port, serialized);
+          } else {
+            this[$modelKernel] = null;
+          }
+        }
+      });
+    }
+
+    [$onModelGraftMutation] = (_event: Event) => {
       this[$needsRender]();
     }
   }

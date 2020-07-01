@@ -15,16 +15,12 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineImage, ImageConstructor} from './image.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {Image} from './image.js';
 
 suite('api/image', () => {
   suite('defineImage', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineImage(ThreeDOMElement);
-      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+      const instance = new Image(new FakeModelKernel(), {
         uri: 'http://example.com',
         id: 0,
       });
@@ -34,15 +30,13 @@ suite('api/image', () => {
 
     suite('the generated class', () => {
       let kernel: FakeModelKernel;
-      let GeneratedConstructor: ImageConstructor;
 
       setup(() => {
         kernel = new FakeModelKernel();
-        GeneratedConstructor = defineImage(ThreeDOMElement);
       });
 
       test('produces elements with the correct owner model', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Image(kernel, {
           uri: 'http://example.com',
           id: 0,
         });
@@ -51,13 +45,13 @@ suite('api/image', () => {
       });
 
       test('expresses the image name when available', () => {
-        const instance = new GeneratedConstructor(kernel, {id: 0, name: 'foo'});
+        const instance = new Image(kernel, {id: 0, name: 'foo'});
 
         expect(instance.name).to.be.equal('foo');
       });
 
       test('expresses the image uri when available', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Image(kernel, {
           id: 0,
           uri: 'http://example.com',
         });
@@ -66,7 +60,7 @@ suite('api/image', () => {
       });
 
       test('is external if a uri is available', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Image(kernel, {
           id: 0,
           uri: 'http://example.com',
         });
@@ -75,7 +69,7 @@ suite('api/image', () => {
       });
 
       test('is embedded if no uri is available', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Image(kernel, {
           id: 0,
         });
 

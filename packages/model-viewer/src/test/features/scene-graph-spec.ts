@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial} from 'three';
+// import {Mesh, MeshStandardMaterial} from 'three';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
-import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
+import ModelViewerElementBase from '../../model-viewer-base.js';
+// import {ModelScene} from '../../three-components/ModelScene.js';
+// import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
-const expect = chai.expect;
+// const expect = chai.expect;
 
-const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
-const HORSE_GLB_PATH = assetPath('models/Horse.glb');
+// const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+// const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
   let nextId = 0;
@@ -48,17 +48,18 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   });
 
   teardown(() => {
-    const {worklet} = element;
+    // const {worklet} = element;
 
-    if (worklet != null) {
-      worklet.terminate();
-    }
+    // if (worklet != null) {
+    //   worklet.terminate();
+    // }
 
     document.body.removeChild(element);
   });
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
+  /*
   suite('without a scene graph worklet script', () => {
     suite('with a loaded model', () => {
       setup(async () => {
@@ -128,8 +129,8 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         script.setAttribute('allow', 'material-properties; messaging');
         script.textContent = `
 self.addEventListener('model-change', function() {
-  model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]).then(function() {
-    self.postMessage('done');
+  model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0,
+1]).then(function() { self.postMessage('done');
   });
 });
 `;
@@ -156,8 +157,8 @@ self.addEventListener('model-change', function() {
             script.setAttribute('allow', 'messaging; textures');
             script.textContent = `
 self.addEventListener('model-change', function() {
-  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(null).then(function() {
-    self.postMessage('done');
+  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(null).then(function()
+{ self.postMessage('done');
   });
 });
 `;
@@ -203,5 +204,5 @@ self.addEventListener('model-change', function() {
         });
       });
     });
-  });
+  });**/
 });
