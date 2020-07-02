@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig, ImageComparisonAnalysis} from '../common.js';
+import {Dimensions, GoldenConfig} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
