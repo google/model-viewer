@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig} from '../common.js';
+import {Dimensions, GoldenConfig, ImageComparisonAnalysis} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
@@ -31,7 +31,7 @@ export class RenderingScenario extends LitElement {
 
   @property({type: Array}) exclude: Array<string> = [];
 
-  @property({type: Object}) analysis: any|null;  // change to correct type later
+  @property({type: Object}) analysis: any|null;
 
   get basePath() {
     if (!this.name) {
@@ -41,8 +41,6 @@ export class RenderingScenario extends LitElement {
     return `./results/${this.name}`;
   }
 
-  // is this the correct way to do ? i tried to fetch ayalysis in constructor,
-  // but the basePath isn't showing correctly in constructor
   updated(changedProperties: Map<any, any>) {
     super.updated(changedProperties);
 
@@ -54,6 +52,7 @@ export class RenderingScenario extends LitElement {
   private toDecibels(rmsDistanceRatio: number) {
     return (10 * Math.log10(rmsDistanceRatio)).toFixed(2)
   }
+
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
@@ -84,25 +83,21 @@ export class RenderingScenario extends LitElement {
       ${
                     index == 0 || this.analysis == null ?
                         html` <span> --- </span>` :
-                        html`
-        <span>${
+                        html` <span>${
                             this.toDecibels(
                                 this.analysis.analysisResults[index - 1][0]
                                     .rmsDistanceRatio)} db
-          </span>
-          <div class="tooltip">
-            <span class="question-icon"> </span>
-            <span class="tooltiptext">
-              Root mean square color distance between ${
+             </span>
+              <div class="tooltip">
+                <span class="question-icon"> </span>
+                <span class="tooltiptext">
+                  Root mean square color distance between ${
                             golden
                                 .name} and current version of model-viewer on rendering ${
                             this.name} in decibels.
-              The decibel is given by: 10 * log(root mean square color distance).
-            </span>
-          </div>
-        `}
-      
-
+                  The decibel is given by: 10 * log(root mean square color distance).
+                </span>
+              </div>`}
   </div>
 </div>`);
 
@@ -143,8 +138,6 @@ h1 {
   text-align: left;
   border-radius: 6px;
   padding: 5px 5px;
-
-  /* Position the tooltip */
   position: absolute;
   z-index: 1;
 }
@@ -161,6 +154,11 @@ h1 {
   width: 1em;
   height: 1em;
   display: inline-block;
+}
+
+.metrics{
+  text-align: center;
+  height: 2em;
 }
 
 .screenshot > header {
@@ -186,11 +184,6 @@ h2 {
 
   background-color: rgba(255, 255, 255, 0.75);
   pointer-events: none;
-}
-
-.metrics{
-  text-align: center;
-  height: 2em;
 }
 
 #screenshots {
@@ -250,9 +243,7 @@ h2 {
   transform: translateY(-0.5em) scale(1.025);
   box-shadow: 0px 6px 12px rgba(100, 100, 100, 0.2);
 }
-
 </style>
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <h1>${this.name}</h1>
 <div id="screenshots">
   ${images}
