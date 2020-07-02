@@ -80,22 +80,30 @@ export class RenderingScenario extends LitElement {
   <div class="check"></div>
   <img data-id="${this.name} ${golden.name}"
        style="width:${width}px" src="${basePath}/${golden.file}">
-   ${
+    <div class = "metrics">
+      ${
                     index == 0 || this.analysis == null ?
-                        html`<h2>---</h2>` :
-                        html`<div class = "metrics">
-                            <span>${
+                        html` <span> --- </span>` :
+                        html`
+        <span>${
                             this.toDecibels(
                                 this.analysis.analysisResults[index - 1][0]
                                     .rmsDistanceRatio)} db
-                            </span>
-                            <div class="tooltip">
-                              <a class="question-icon">  </a>
-                              <span class="tooltiptext">Tooltip text</span>
-                            </div>
+          </span>
+          <div class="tooltip">
+            <span class="question-icon"> </span>
+            <span class="tooltiptext">
+              Root mean square color distance between ${
+                            golden
+                                .name} and current version of model-viewer on rendering ${
+                            this.name} in decibels.
+              The decibel is given by: 10 * log(root mean square color distance).
+            </span>
+          </div>
+        `}
+      
 
-                        </div>`} 
-
+  </div>
 </div>`);
 
     return html`
@@ -126,13 +134,15 @@ h1 {
 }
 
 .tooltip .tooltiptext {
+  opacity: 0.4;
   visibility: hidden;
-  width: 120px;
+  width: 200px;
+  font-size: 0.8em;
   background-color: black;
   color: #fff;
-  text-align: center;
+  text-align: left;
   border-radius: 6px;
-  padding: 5px 0;
+  padding: 5px 5px;
 
   /* Position the tooltip */
   position: absolute;
@@ -145,11 +155,11 @@ h1 {
 
 .question-icon{
   background-image: url(../../shared-assets/icons/help_outline-24px.svg);
-  background-size : 1em;
+  background-size : 0.8em;
   background-repeat: no-repeat;
-  background-position: 50% 50%;
-  width: 2em;
-  height: 100%;
+  background-position: 0% 100%;
+  width: 1em;
+  height: 1em;
   display: inline-block;
 }
 
@@ -157,7 +167,7 @@ h1 {
   display: block;
   position: absolute;
   width: 100%;
-  bottom: 2em;
+  bottom: 3em;
   left: 0;
   text-align: center;
 
@@ -180,6 +190,7 @@ h2 {
 
 .metrics{
   text-align: center;
+  height: 2em;
 }
 
 #screenshots {
