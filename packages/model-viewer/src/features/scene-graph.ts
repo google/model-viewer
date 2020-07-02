@@ -24,7 +24,7 @@ import {Constructor} from '../utilities.js';
 
 const SCENE_GRAPH_SCRIPT_TYPE = 'experimental-scene-graph-worklet';
 const VALID_CAPABILITIES: Set<ThreeDOMCapability> =
-    new Set(['messaging', 'fetch', 'material-properties']);
+    new Set(['messaging', 'fetch', 'material-properties', 'textures']);
 
 const $onChildListMutation = Symbol('onChildListMutation');
 const $childListMutationHandler = Symbol('childListMutationHandler');
@@ -168,8 +168,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
       this[$updateExecutionContextModel]();
     }

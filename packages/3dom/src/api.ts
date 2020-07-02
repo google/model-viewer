@@ -211,6 +211,16 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
   readonly baseColorFactor: Readonly<RGBA>;
 
   /**
+   * Metalness factor of the material, represented as number between 0 and 1
+   */
+  readonly metallicFactor: Readonly<number>;
+
+  /**
+   * Roughness factor of the material, represented as number between 0 and 1
+   */
+  readonly roughnessFactor: Readonly<number>;
+
+  /**
    * A texture reference, associating an image with color information and
    * a sampler for describing base color factor for a UV coordinate space.
    */
@@ -228,6 +238,18 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
    * Requires the 'material-properties' capability to be enabled.
    */
   setBaseColorFactor(rgba: RGBA): Promise<void>;
+
+  /**
+   * Changes the metalness factor of the material to the given value.
+   * Requires the 'material-properties' capability to be enabled.
+   */
+  setMetallicFactor(value: number): Promise<void>;
+
+  /**
+   * Changes the roughness factor of the material to the given value.
+   * Requires the 'material-properties' capability to be enabled.
+   */
+  setRoughnessFactor(value: number): Promise<void>;
 }
 
 /**

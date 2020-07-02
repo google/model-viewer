@@ -85,6 +85,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     const environmentChangeHandler = () => environmentChangeCount++;
     element.addEventListener('environment-change', environmentChangeHandler);
     element.style.display = 'none';
+    element.src = MODEL_URL;
     document.body.insertBefore(element, document.body.firstChild);
     await rafPasses();
     expect(environmentChangeCount).to.be.equal(0);

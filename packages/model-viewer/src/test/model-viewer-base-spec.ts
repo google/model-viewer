@@ -307,8 +307,7 @@ suite('ModelViewerElementBase', () => {
         test('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
-          const idealHeight =
-              Math.round(32 / element[$scene].model.fieldOfViewAspect);
+          const idealHeight = 32 / element[$scene].model.fieldOfViewAspect;
 
           const {dpr, scaleFactor} = element[$renderer];
           const f = dpr * scaleFactor;
@@ -326,16 +325,12 @@ suite('ModelViewerElementBase', () => {
         elements.push(new ModelViewerElement());
         elements.push(new ModelViewerElement());
 
-        const loaded = elements.map(e => waitForEvent(e, 'load'));
-
         for (let element of elements) {
           element.style.position = 'relative';
           element.style.marginBottom = '100vh';
           element.src = assetPath('models/cube.gltf');
           document.body.insertBefore(element, document.body.firstChild);
         }
-
-        await Promise.all(loaded);
       });
 
       teardown(() => {
@@ -346,10 +341,10 @@ suite('ModelViewerElementBase', () => {
 
       test('sets a model within viewport to be visible', async () => {
         await until(() => {
-          return elements[2][$scene].visible;
+          return elements[2].modelIsVisible;
         });
 
-        expect(elements[2][$scene].visible).to.be.true;
+        expect(elements[2].modelIsVisible).to.be.true;
       });
 
       test.skip('only models visible in the viewport', async () => {
@@ -359,14 +354,14 @@ suite('ModelViewerElementBase', () => {
         await until(() => {
           return elements
               .map((element, index) => {
-                return (index === 0) === element[$scene].visible;
+                return (index === 0) === element.modelIsVisible;
               })
               .reduce(((l, r) => l && r), true);
         });
 
-        expect(elements[0][$scene].visible).to.be.ok;
-        expect(elements[1][$scene].visible).to.not.be.ok;
-        expect(elements[2][$scene].visible).to.not.be.ok;
+        expect(elements[0].modelIsVisible).to.be.ok;
+        expect(elements[1].modelIsVisible).to.not.be.ok;
+        expect(elements[2].modelIsVisible).to.not.be.ok;
       });
     });
   });

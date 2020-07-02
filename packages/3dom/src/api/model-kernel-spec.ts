@@ -51,7 +51,7 @@ suite('api/model-kernel', () => {
         kernel.deactivate();
       });
 
-      suite('with a Model cntaining a Material', () => {
+      suite('with a Model containing a Material', () => {
         let kernel: ModelKernel;
 
         setup(() => {
@@ -62,7 +62,9 @@ suite('api/model-kernel', () => {
               id: getLocallyUniqueId(),
               pbrMetallicRoughness: {
                 id: getLocallyUniqueId(),
-                baseColorFactor: [0, 0, 0, 1] as RGBA
+                baseColorFactor: [0, 0, 0, 1] as RGBA,
+                metallicFactor: 0 as number,
+                roughnessFactor: 0 as number,
               }
             }],
             modelUri: ''
