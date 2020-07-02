@@ -105,13 +105,17 @@ export class PathtracingViewer extends LitElement {
       });
     });
 
-    const numSamples = 8;
+    let numSamples = scenario.pt?.numSamples;
 
-    console.log('Rendering...');
+    if (numSamples == null)
+      numSamples = 512;
+
+    console.log('Rendering ' + numSamples + ' samples');
     renderer.render(
         numSamples,
-        () => {
-          console.log('frame finished');
+        (frame: number) => {
+          // printProgress('frame finished: ' + frame);
+          console.log('frame finished ' + frame);
         },
         () => {
           // Wait two rAFs to ensure we rendered at least once //TODO: clarify

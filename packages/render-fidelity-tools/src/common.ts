@@ -87,6 +87,7 @@ export interface ScenarioConfig {
   orbit: {theta: number, phi: number, radius: number};
   verticalFoV: number;
   exclude?: Array<string>;
+  pt?: {numSamples?: number};
 }
 
 export interface RendererConfig {

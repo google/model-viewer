@@ -60,7 +60,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 4.75
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AnimatedMorphCube",
@@ -69,14 +72,20 @@
         "theta": 30,
         "phi": 60,
         "radius": 4.75
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AnimatedMorphSphere",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb",
       "orbit": {
         "radius": 3
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AnimatedTriangle",
@@ -161,7 +170,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoxAnimated",
@@ -170,7 +182,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoxInterleaved",
@@ -191,7 +206,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoxTexturedNonPowerOfTwo",
@@ -200,7 +218,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-BoxVertexColors",
@@ -222,7 +243,10 @@
       },
       "orbit": {
         "radius": 3.6
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Buggy",
@@ -329,10 +353,7 @@
       },
       "target": {
         "y": 0.32
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-GearboxAssy",
@@ -361,7 +382,10 @@
       },
       "orbit": {
         "radius": 18.4
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Lantern",
@@ -375,7 +399,10 @@
       },
       "orbit": {
         "radius": 39
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-MetalRoughSpheres",
@@ -429,7 +456,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MultiUVTest/glTF/MultiUVTest.gltf",
       "orbit": {
         "radius": 4.25
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-NormalTangentMirrorTest",
@@ -469,7 +499,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 300
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-RiggedFigure",
@@ -479,7 +512,10 @@
       },
       "orbit": {
         "radius": 2
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-RiggedSimple",
@@ -490,7 +526,10 @@
       "orbit": {
         "theta": 90,
         "radius": 13
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-SciFiHelmet",
@@ -575,7 +614,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
         "radius": 3
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-TextureCoordinateTest",
