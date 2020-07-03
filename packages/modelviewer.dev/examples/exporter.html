@@ -48,9 +48,6 @@
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
         <div class="heading">
           <h2 class="demo-title">Exporter</h2>
-          <div id='download-container'>
-
-          </div>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
@@ -62,9 +59,50 @@
 <script>
   async function exportScene(binary){
     let modelViewer = document.getElementById("model");
-    const options = { binary };
+    const glTF = await modelViewer.exportScene();
+    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+          </template>
+        </example-snippet>
+        <button onclick="exportScene(true)">Export GLB</button>
+        <button onclick="exportScene(false)">Export GLTF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Exporter with options</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<model-viewer id="model" src="../shared-assets/models/Horse.glb" autoplay ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
+          </template>
+        </example-snippet>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<script>
+  async function exportScene(binary){
+    let options = {
+      binary: binary,
+      trs: true,
+      onlyVisible: true,
+      maxTextureSize: 256,
+      forcePowerOfTwoTextures: true,
+      includeCustomExtensions: false,
+      embedImages: true
+    };
+    let modelViewer = document.getElementById("model");
     const glTF = await modelViewer.exportScene(options);
-    var file = new File([glTF], options.binary ? "export.glb" : "export.gltf");
+    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
     var link = document.createElement("a");
     link.download =file.name;
     link.href = URL.createObjectURL(file);

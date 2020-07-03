@@ -40,19 +40,19 @@ const $onModelGraftMutation = Symbol('onModelGraftMutation');
 const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
 const $isValid3DOMScript = Symbol('isValid3DOMScript');
 
+interface SceneExportOptions {
+  binary?: boolean,
+  trs?: boolean,
+  onlyVisible?: boolean,
+  embedImages?: boolean,
+  maxTextureSize?: number,
+  forcePowerOfTwoTextures?: boolean,
+  includeCustomExtensions?: boolean,
+}
+
 export interface SceneGraphInterface {
   worklet: Worker|null;
-  exportScene(options?: {
-    binary?: Boolean,
-    trs?: Boolean,
-    onlyVisible?: Boolean,
-    truncateDrawRange?: Boolean,
-    embedImages?: Boolean,
-    maxTextureSize?: Number,
-    animations?: [],
-    forcePowerOfTwoTextures?: Boolean,
-    includeCustomExtensions?: Boolean
-  }): Promise<Blob>;
+  exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
 /**
@@ -297,28 +297,38 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /** @export */
-    async exportScene(options: {
-			binary: false,
-			trs: false,
-			onlyVisible: true,
-			truncateDrawRange: true,
-			embedImages: true,
-			maxTextureSize: 1024,
-			animations: [],
-			forcePowerOfTwoTextures: false,
-			includeCustomExtensions: false
-		}): Promise<Blob> {
-      
+    async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const { model } = this[$scene];
       return new Promise<Blob>(async (resolve, reject) => {
+
         if (model == null) { 
           return reject( 'Model missing or not yet loaded' );
         }
-        
-        var exporter = new GLTFExporter();
+
+        const opts = {
+          //NOTE: automatically include all animations to be exported
+          animations: model.animationClips,
+          binary: options?.binary || false,
+          trs: options?.trs || true,
+          onlyVisible: options?.onlyVisible || true,
+          maxTextureSize: options?.maxTextureSize || Infinity,
+          forcePowerOfTwoTextures: options?.forcePowerOfTwoTextures || false,
+          includeCustomExtensions: options?.includeCustomExtensions || false,
+          embedImages: options?.embedImages || true,
+          //NOTE: automatically set truncate draw range to true since
+          //we don't expose those parameters
+          truncateDrawRange: true
+        };
+
+        const exporter = new GLTFExporter();
         exporter.parse( model, ( gltf ) => {
-            return resolve(new Blob([options.binary ? gltf as Blob : JSON.stringify(gltf)], {type: options.binary ? 'application/octet-stream' : 'application/json'}));
-        }, options );
+            return resolve(
+              new Blob(
+                [ opts.binary ? gltf as Blob : JSON.stringify(gltf) ],
+                { type: opts.binary ? 'application/octet-stream' : 'application/json' }
+              )
+            );
+        }, opts );
       });
     }
 

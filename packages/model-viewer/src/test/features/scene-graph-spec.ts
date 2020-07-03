@@ -92,14 +92,12 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
       test('exports the loaded model to GLTF', async () => {
         const exported = await element.exportScene({binary: false});
-        console.log(exported.size);
         expect(exported).to.be.not.undefined;
         expect(exported.size).to.be.greaterThan(500);
       });
 
       test('exports the loaded model to GLB', async () => {
         const exported = await element.exportScene({binary: true});
-        console.log(exported.size);
         expect(exported).to.be.not.undefined;
         expect(exported.size).to.be.greaterThan(500);
       });
