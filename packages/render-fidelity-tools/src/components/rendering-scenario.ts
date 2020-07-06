@@ -85,19 +85,17 @@ export class RenderingScenario extends LitElement {
                         html` <span>${
                             this.toDecibels(
                                 this.analysis.analysisResults[index - 1][0]
-                                    .rmsDistanceRatio)} db
-             </span>
-              <div class="tooltip">
-                <span class="question-icon"> </span>
-                <span class="tooltiptext">
-                  Root mean square color distance between ${
-                            golden
-                                .name} and current version of model-viewer on rendering ${
-                            this.name} in decibels.
-                  The decibel is given by: 10 * log(root mean square color distance).
-                </span>
-              </div>`}
-  </div>
+                                    .rmsDistanceRatio)} dB </span>`}
+      <div class="tooltip">
+        <span class="question-icon"> </span>
+        <span class="tooltiptext">
+          Root mean square(RMS) color distance between ${golden.name} 
+          and current version of model-viewer on rendering ${
+                    this.name} in decibels.
+          The decibel is given by: 10 * log(RMS). More negative means a closer match.
+        </span>
+      </div>
+    </div>
 </div>`);
 
     return html`
