@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {resolveDpr} from '@google/model-viewer/lib/utilities.js';
 // @ts-ignore
 import {PathtracingRenderer} from 'dspbr-pt/lib/renderer.js';
 import {css, customElement, html, LitElement, property} from 'lit-element';
@@ -77,44 +76,34 @@ export class PathtracingViewer extends LitElement {
   private async[$updateScenario](scenario: ScenarioConfig) {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
 
-    const dpr = resolveDpr();
-
-    const settings = {
-      pathtracing: true,
-      debugMode: 'None',
-      maxBounceDepth: 1,
-      useIBL: true,
-      autoScaleOnImport: false,
-      pixelRatio: 1.0 / dpr,  // TODO: clarify
-      autoRotate: false,
-      disableDirectShadows: true
-    };
-
-    this[$renderer] =
-        new PathtracingRenderer({'canvas': this[$canvas]!}, settings);
+    const enableControls = false;
+    this[$renderer] = new PathtracingRenderer(this[$canvas]!, enableControls);
 
     const renderer = this[$renderer];
+    renderer.autoScaleOnImport(false);
+    renderer.setPixelRatio(0.5);
+    renderer.setMaxBounceDepth(8);
 
     await new Promise((resolve) => {
       console.log('Loading resources for', scenario.model);
       renderer.loadScene(scenario.model, scenario.lighting, () => {
         this[$updateSize]();
         // console.log(this[$canvas]!.width, this[$canvas]!.height);
-        renderer.resize(this[$canvas]!.width, this[$canvas]!.height)
+        renderer.resize(this[$canvas]!.width, this[$canvas]!.height);
         resolve();
       });
     });
 
     let numSamples = scenario.pt?.numSamples;
 
-    if (numSamples == null)
-      numSamples = 512;
+    if (numSamples == null) {
+      numSamples = 1024;
+    }
 
     console.log('Rendering ' + numSamples + ' samples');
-    renderer.render(
+    this[$renderer].render(
         numSamples,
         (frame: number) => {
-          // printProgress('frame finished: ' + frame);
           console.log('frame finished ' + frame);
         },
         () => {
@@ -134,14 +123,12 @@ export class PathtracingViewer extends LitElement {
       return;
     }
 
-    // const Fov = Camera$Fov;
     const canvas = this[$canvas]!;
     const {dimensions, target, orbit, verticalFoV} = this.scenario;
     console.log('Scenario:', dimensions, target, orbit, verticalFoV);
 
-    // const dpr = resolveDpr(); //TODO: clarify
-    const width = dimensions.width;    // * dpr;
-    const height = dimensions.height;  // * dpr;
+    const width = dimensions.width;
+    const height = dimensions.height;
 
     canvas.width = width;
     canvas.height = height;
@@ -173,17 +160,10 @@ export class PathtracingViewer extends LitElement {
     const far = 2 * Math.max(modelRadius, orbit.radius);
     const near = far / 1000;
 
-    const camera = this[$renderer].getCamera();
-    camera.position.set(eye[0], eye[1], eye[2]);
-    camera.up.set(0, 1, 0);
-    camera.lookAt(center[0], center[1], center[2]);
-    camera.updateMatrixWorld();
+    this[$renderer].setLookAt(eye, center, [0, 1, 0]);
     console.log(eye, center);
 
-    camera.fov = verticalFoV;
-    camera.near = near;
-    camera.far = far;
-    camera.updateProjectionMatrix();
+    this[$renderer].setPerspective(verticalFoV, near, far);
     console.log('perspective: ', near, far);
   }
 }

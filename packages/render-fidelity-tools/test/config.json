@@ -7,7 +7,7 @@
   "renderers": [
     {
       "name": "gltfpt",
-      "description": "Pathtracing"
+      "description": "gltf-pt"
     },
     {
       "name": "model-viewer",
@@ -37,7 +37,7 @@
         "radius": 800
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon"
       ]
     },
@@ -101,7 +101,10 @@
       },
       "orbit": {
         "radius": 1.5
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-AntiqueCamera",
@@ -304,7 +307,10 @@
       },
       "orbit": {
         "radius": 0.095
-      }
+      },
+      "exclude": [
+        "gltfpt"
+      ]
     },
     {
       "name": "khronos-Cube",
@@ -404,20 +410,14 @@
       },
       "orbit": {
         "radius": 39
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-MetalRoughSpheres",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
       "orbit": {
         "radius": 12
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
@@ -425,10 +425,7 @@
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
       "orbit": {
         "radius": 12
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",
@@ -438,7 +435,7 @@
         "radius": 12
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon"
       ]
     },
@@ -612,7 +609,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon"
       ]
     },
@@ -716,7 +713,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon"
       ]
     },
@@ -754,7 +751,7 @@
         "radius": 10
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon"
       ]
     },
@@ -772,7 +769,7 @@
         "radius": 20
       },
       "exclude": [
-        "gltfpt"
+        "gltfpt",
         "babylon",
         "filament"
       ]
