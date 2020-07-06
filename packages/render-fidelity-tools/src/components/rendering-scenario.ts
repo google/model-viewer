@@ -71,32 +71,33 @@ export class RenderingScenario extends LitElement {
             .filter(golden => !this.exclude.includes(golden.name))
             .map(
                 (golden, index) => html`
-<div class="screenshot">
-  <header>
-    <h2>${golden.description}</h2>
-  </header>
-  <div class="check"></div>
-  <img data-id="${this.name} ${golden.name}"
-       style="width:${width}px" src="${basePath}/${golden.file}">
-    <div class = "metrics">
-      ${
+              <div class="screenshot">
+                <header>
+                  <h2>${golden.description}</h2>
+                </header>
+                <div class="check"></div>
+                <img data-id="${this.name} ${golden.name}"
+                    style="width:${width}px" src="${basePath}/${golden.file}">
+                  <div class = "metrics">
+                    ${
                     index == 0 || this.analysis == null ?
                         html` <span> --- </span>` :
                         html` <span>${
                             this.toDecibels(
                                 this.analysis.analysisResults[index - 1][0]
                                     .rmsDistanceRatio)} dB </span>`}
-      <div class="tooltip">
-        <span class="question-icon"> </span>
-        <span class="tooltiptext">
-          Root mean square(RMS) color distance between ${golden.name} 
-          and current version of model-viewer on rendering ${
+                    <div class="tooltip">
+                      <span class="question-icon"> </span>
+                      <span class="tooltiptext">
+                        Root mean square(RMS) color distance between ${
+                    golden.name} 
+                        and current version of model-viewer on rendering ${
                     this.name} in decibels.
-          The decibel is given by: 10 * log(RMS). More negative means a closer match.
-        </span>
-      </div>
-    </div>
-</div>`);
+                        The decibel is given by: 10 * log(RMS). More negative means a closer match.
+                      </span>
+                    </div>
+                  </div>
+              </div>`);
 
     return html`
 
