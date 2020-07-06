@@ -100,6 +100,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$manipulator]: ModelGraftManipulator|null = null;
     protected[$modelKernel]: ModelKernel|null = null;
 
+    // ThreeDOM implementation is currently just .model.
     /** @export */
     get model() {
       const kernel = this[$modelKernel];
@@ -179,14 +180,12 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 new ModelGraftManipulator(modelGraft, this[$threePort]!);
           }
 
-          this[$threePort]!.postMessage(
-              {
-                type: ThreeDOMMessageType.MODEL_CHANGE,
-                model: modelGraft != null && modelGraft.model != null ?
-                    modelGraft.model.toJSON() :
-                    null
-              },
-              [this[$mainPort]!]);
+          this[$threePort]!.postMessage({
+            type: ThreeDOMMessageType.MODEL_CHANGE,
+            model: modelGraft != null && modelGraft.model != null ?
+                modelGraft.model.toJSON() :
+                null
+          });
         }
       }
 
@@ -200,7 +199,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const {data} = event;
         if (data && data.type === ThreeDOMMessageType.MODEL_CHANGE) {
           const serialized: SerializedModel|null = data.model;
-          const port = event.ports[0];
           const currentKernel = this[$modelKernel];
 
           if (currentKernel != null) {
@@ -211,7 +209,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           }
 
           if (serialized != null) {
-            this[$modelKernel] = new ModelKernel(port, serialized);
+            this[$modelKernel] = new ModelKernel(this[$mainPort]!, serialized);
           } else {
             this[$modelKernel] = null;
           }

@@ -65,30 +65,15 @@ button {
     <div class="content">
       <div class="wrapper">
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
-        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph using a special kind of &lt;script&gt; tag</h4>
+        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</h4>
         <div class="heading">
-          <h2 class="demo-title">Scene Graph Worklet</h2>
+          <h2 class="demo-title">Change Material Base Color</h2>
           <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
 
-<model-viewer id="astronaut" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <script type="experimental-scene-graph-worklet" allow="messaging; material-properties">
-self.addEventListener('model-change', (event) => {
-  const {model} = event;
-  const [material] = model.materials;
-
-  self.addEventListener('message', (event) => {
-    switch(event.data.action) {
-      case 'change-color':
-        console.log('Changing color to:', event.data.payload);
-        material.pbrMetallicRoughness.setBaseColorFactor(event.data.payload);
-        break;
-    }
-  });
-});
-  </script>
+<model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <div id="controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
@@ -96,6 +81,8 @@ self.addEventListener('model-change', (event) => {
   </div>
 </model-viewer>
 <script>
+const modelViewer = document.querySelector("model-viewer");
+
 document.querySelector('#controls').addEventListener('click', (event) => {
   const colorString = event.target.dataset.color;
 
@@ -106,11 +93,9 @@ document.querySelector('#controls').addEventListener('click', (event) => {
   const color = colorString.split(',')
       .map(numberString => parseFloat(numberString));
 
-  // Forward interaction details to the <model-viewer> worklet:
-  astronaut.worklet.postMessage({
-    action: 'change-color',
-    payload: color
-  });
+  console.log('Changing color to: ', color);
+  const [material] = modelViewer.model.materials;
+  material.pbrMetallicRoughness.setBaseColorFactor(color);
 });
 </script>
           </template>
