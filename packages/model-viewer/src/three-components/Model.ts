@@ -45,13 +45,12 @@ export default class Model extends Object3D {
   private[$loader] = new CachingGLTFLoader(ModelViewerGLTFInstance);
   private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
-  private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
 
+  public animations: Array<AnimationClip> = [];
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
-  public animationClips: Array<AnimationClip> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
   public idealCameraDistance = 0;
@@ -158,7 +157,6 @@ export default class Model extends Object3D {
     this.animations = animations;
     this.animationsByName = animationsByName;
     this.animationNames = animationNames;
-    this.animationClips = new Array<AnimationClip>(...animations);
 
     this.userData.url = url;
 

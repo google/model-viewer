@@ -51,14 +51,14 @@
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer id="model" src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer id="static-model" src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
           </template>
         </example-snippet>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
 <script>
   async function exportScene(binary){
-    let modelViewer = document.getElementById("model");
+    let modelViewer = document.getElementById("static-model");
     const glTF = await modelViewer.exportScene();
     var file = new File([glTF], binary ? "export.glb" : "export.gltf");
     var link = document.createElement("a");
@@ -84,7 +84,7 @@
         </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-<model-viewer id="model" src="../shared-assets/models/Horse.glb" autoplay ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer id="animated-model" src="../shared-assets/models/Horse.glb" autoplay ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
           </template>
         </example-snippet>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
@@ -100,7 +100,7 @@
       includeCustomExtensions: false,
       embedImages: true
     };
-    let modelViewer = document.getElementById("model");
+    let modelViewer = document.getElementById("animated-model");
     const glTF = await modelViewer.exportScene(options);
     var file = new File([glTF], binary ? "export.glb" : "export.gltf");
     var link = document.createElement("a");

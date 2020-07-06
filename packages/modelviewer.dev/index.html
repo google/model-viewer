@@ -511,8 +511,10 @@
               <p>Exports the model in glTF or GLB formats. Returns a promise
               that resolves in a Blob of type "application/octet-stream" or
               "application/json" depending on the export format.
-              For a comprehensive list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'>
-              GLTF exporter</a> documentation
+              For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'>
+              GLTF exporter</a> documentation, with the exception that all 
+              animations are automatically exported and truncateDrawRange 
+              defaults to true.
               </p>
             </li>
             <li>

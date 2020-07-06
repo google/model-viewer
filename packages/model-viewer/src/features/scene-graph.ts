@@ -16,8 +16,8 @@
 import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
 import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 import {property} from 'lit-element';
+import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
@@ -41,13 +41,9 @@ const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
 const $isValid3DOMScript = Symbol('isValid3DOMScript');
 
 interface SceneExportOptions {
-  binary?: boolean,
-  trs?: boolean,
-  onlyVisible?: boolean,
-  embedImages?: boolean,
-  maxTextureSize?: number,
-  forcePowerOfTwoTextures?: boolean,
-  includeCustomExtensions?: boolean,
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
+      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
+      includeCustomExtensions?: boolean,
 }
 
 export interface SceneGraphInterface {
@@ -298,16 +294,15 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
-      const { model } = this[$scene];
+      const {model} = this[$scene];
       return new Promise<Blob>(async (resolve, reject) => {
-
-        if (model == null) { 
-          return reject( 'Model missing or not yet loaded' );
+        if (model == null) {
+          return reject('Model missing or not yet loaded');
         }
 
         const opts = {
-          //NOTE: automatically include all animations to be exported
-          animations: model.animationClips,
+          // NOTE: automatically include all animations to be exported
+          animations: model.animations,
           binary: options?.binary || false,
           trs: options?.trs || true,
           onlyVisible: options?.onlyVisible || true,
@@ -315,23 +310,21 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           forcePowerOfTwoTextures: options?.forcePowerOfTwoTextures || false,
           includeCustomExtensions: options?.includeCustomExtensions || false,
           embedImages: options?.embedImages || true,
-          //NOTE: automatically set truncate draw range to true since
-          //we don't expose those parameters
+          // NOTE: automatically set truncate draw range to true since
+          // we don't expose those parameters
           truncateDrawRange: true
         };
 
         const exporter = new GLTFExporter();
-        exporter.parse( model, ( gltf ) => {
-            return resolve(
-              new Blob(
-                [ opts.binary ? gltf as Blob : JSON.stringify(gltf) ],
-                { type: opts.binary ? 'application/octet-stream' : 'application/json' }
-              )
-            );
-        }, opts );
+        exporter.parse(model, (gltf) => {
+          return resolve(
+              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                type: opts.binary ? 'application/octet-stream' :
+                                    'application/json'
+              }));
+        }, opts);
       });
     }
-
   }
 
   return SceneGraphModelViewerElement;
