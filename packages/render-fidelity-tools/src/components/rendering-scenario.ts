@@ -58,19 +58,34 @@ export class RenderingScenario extends LitElement {
     this.analysis = await (await fetch(analysisPath)).json();
   }
 
+  // where should I call this method?
+  private renderMetric(analysisResults: any|null, goldenName: string) {
+    const rmsInDecible =
+        this.toDecibels(analysisResults[0].rmsDistanceRatio).toFixed(2)
+    return html` <span>${rmsInDecible} dB </span>
+      <div class="tooltip">
+        <span class="question-icon"> </span>
+        <span class="tooltiptext">
+          Root mean square(RMS) color distance between ${goldenName} 
+          and current version of model-viewer on rendering ${
+        this.name} in decibels.
+          The decibel is given by: 10 * log(RMS). More negative means a closer match.
+        </span>
+      </div>`
+  }
+
   render() {
     const {basePath} = this;
     const {width} = this.dimensions;
 
-    const images =
-        [{
-          name: 'model-viewer',
-          description: '<model-viewer> (this version)',
-          file: 'model-viewer.png'
-        }].concat(this.goldens)
-            .filter(golden => !this.exclude.includes(golden.name))
-            .map(
-                (golden, index) => html`
+    const images = [{
+                     name: 'model-viewer',
+                     description: '<model-viewer> (this version)',
+                     file: 'model-viewer.png'
+                   }].concat(this.goldens)
+                       .filter(golden => !this.exclude.includes(golden.name))
+                       .map(
+                           (golden, index) => html`
               <div class="screenshot">
                 <header>
                   <h2>${golden.description}</h2>
@@ -80,23 +95,11 @@ export class RenderingScenario extends LitElement {
                     style="width:${width}px" src="${basePath}/${golden.file}">
                   <div class = "metrics">
                     ${
-                    index == 0 || this.analysis == null ?
-                        html` <span> --- </span>` :
-                        html` <span>${
-                            this.toDecibels(
-                                    this.analysis.analysisResults[index - 1][0]
-                                        .rmsDistanceRatio)
-                                .toFixed(2)} dB </span>
-                    <div class="tooltip">
-                      <span class="question-icon"> </span>
-                      <span class="tooltiptext">
-                        Root mean square(RMS) color distance between ${
-                            golden.name} 
-                        and current version of model-viewer on rendering ${
-                            this.name} in decibels.
-                        The decibel is given by: 10 * log(RMS). More negative means a closer match.
-                      </span>
-                    </div>`}
+                               index == 0 || this.analysis == null ?
+                                   html`<span>---</span>` :
+                                   this.renderMetric(
+                                       this.analysis.analysisResults[index - 1],
+                                       golden.name)}
                   </div>
               </div>`);
 
@@ -246,7 +249,10 @@ h2 {
 <h1>${this.name}</h1>
 <div id="screenshots">
   ${images}
-</div>`;
+</div>
+<template>
+add a template here
+</template>`;
   }
 }
 
