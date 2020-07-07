@@ -249,10 +249,7 @@ h2 {
 <h1>${this.name}</h1>
 <div id="screenshots">
   ${images}
-</div>
-<template>
-add a template here
-</template>`;
+</div>`;
   }
 }
 
