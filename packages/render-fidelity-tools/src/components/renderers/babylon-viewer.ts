@@ -80,7 +80,7 @@ export class BabylonViewer extends LitElement {
     this[$scene] = new Scene(this[$engine]);
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV} = scenario;
+    const {orbit, target, verticalFoV, renderSkybox} = scenario;
     const alpha = this[$degToRadians](orbit.theta + 90);
     const beta = this[$degToRadians](orbit.phi);
     const camera = new ArcRotateCamera(
@@ -127,10 +127,12 @@ export class BabylonViewer extends LitElement {
     // in other renderers
     environment.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(90)));
-    const skybox =
-        this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
-    skybox!.infiniteDistance = true;
+    if (renderSkybox) {
+      const skybox =
+          this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
+      skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
+      skybox!.infiniteDistance = true;
+    }
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
