@@ -44,10 +44,10 @@ export default class Model extends Object3D {
   private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
   private mixer: AnimationMixer;
   private[$cancelPendingSourceChange]: (() => void)|null;
-  private animations: Array<AnimationClip> = [];
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
 
+  public animations: Array<AnimationClip> = [];
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();

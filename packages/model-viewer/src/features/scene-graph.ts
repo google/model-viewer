@@ -19,6 +19,7 @@ import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
 import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
+import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
@@ -34,7 +35,15 @@ const $modelKernel = Symbol('modelKernel');
 const $setUpMainSide = Symbol('setUpMainSide');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
 
-export interface SceneGraphInterface {}
+interface SceneExportOptions {
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
+      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
+      includeCustomExtensions?: boolean,
+}
+
+export interface SceneGraphInterface {
+  exportScene(options?: SceneExportOptions): Promise<Blob>;
+}
 
 /**
  * SceneGraphMixin manages a `<model-viewer>` integration with the 3DOM library
@@ -219,6 +228,40 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onModelGraftMutation] = (_event: Event) => {
       this[$needsRender]();
+    }
+
+    /** @export */
+    async exportScene(options?: SceneExportOptions): Promise<Blob> {
+      const {model} = this[$scene];
+      return new Promise<Blob>(async (resolve, reject) => {
+        if (model == null) {
+          return reject('Model missing or not yet loaded');
+        }
+
+        // Defaults
+        const opts = {
+          binary: true,
+          onlyVisible: true,
+          maxTextureSize: Infinity,
+          forcePowerOfTwoTextures: false,
+          includeCustomExtensions: false,
+          embedImages: true
+        } as GLTFExporterOptions;
+
+        Object.assign(opts, options);
+        // Not configurable
+        opts.animations = model.animations;
+        opts.truncateDrawRange = true;
+
+        const exporter = new GLTFExporter();
+        exporter.parse(model, (gltf) => {
+          return resolve(
+              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                type: opts.binary ? 'application/octet-stream' :
+                                    'application/json'
+              }));
+        }, opts);
+      });
     }
   }
 

@@ -75,6 +75,30 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
+  suite('scene export', () => {
+    suite('with a loaded model', () => {
+      setup(async () => {
+        element.src = ASTRONAUT_GLB_PATH;
+
+        await waitForEvent(element, 'load');
+        await rafPasses();
+      });
+
+      test('exports the loaded model to GLTF', async () => {
+        const exported = await element.exportScene({binary: false});
+        expect(exported).to.be.not.undefined;
+        expect(exported.size).to.be.greaterThan(500);
+      });
+
+      test('exports the loaded model to GLB', async () => {
+        const exported = await element.exportScene({binary: true});
+        expect(exported).to.be.not.undefined;
+        expect(exported.size).to.be.greaterThan(500);
+      });
+    });
+  });
+
+
   suite('with a scene graph worklet script', () => {
     test('eventually creates a new worklet', async () => {
       const script = document.createElement('script');

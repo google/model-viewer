@@ -26,6 +26,7 @@ const $updateSize = Symbol('updateSize');
 const $canvas = Symbol('canvas');
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
+const $degToRadians = Symbol('degToRadians');
 
 
 @customElement('babylon-viewer')
@@ -79,9 +80,9 @@ export class BabylonViewer extends LitElement {
     this[$scene] = new Scene(this[$engine]);
     this[$updateSize]();
 
-    const {orbit, target} = scenario;
-    const alpha = (orbit.theta + 90) * Math.PI / 180;
-    const beta = orbit.phi * Math.PI / 180;
+    const {orbit, target, verticalFoV} = scenario;
+    const alpha = this[$degToRadians](orbit.theta + 90);
+    const beta = this[$degToRadians](orbit.phi);
     const camera = new ArcRotateCamera(
         'Camera',
         alpha,
@@ -93,6 +94,9 @@ export class BabylonViewer extends LitElement {
             target.z),
         this[$scene]);
     camera.attachControl(this[$canvas]!, true);
+    // in babylon, camera use VERTICAL_FIXED mode by default, so fov here is
+    // equal to vertical fov
+    camera.fov = this[$degToRadians](verticalFoV);
 
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);
@@ -114,16 +118,18 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // load hdr directly (the size of cubmap is set to be 256 for all renderers)
+    // load and prefilter HDR texture (the size of cubmap is set to be 256 for
+    // all renderers)
     const environment = new HDRCubeTexture(
-        scenario.lighting, this[$scene], 256, false, false, false);
+        scenario.lighting, this[$scene], 256, false, false, false, true);
     this[$scene].environmentTexture = environment;
-    // rotate both skybox and hdr texture for 180 deg to match other renderers
+    // rotate environment for 90 deg, skybox for 270 deg to match the rotation
+    // in other renderers
     environment.setReflectionTextureMatrix(
-        Matrix.RotationY(Tools.ToRadians(180)));
+        Matrix.RotationY(Tools.ToRadians(90)));
     const skybox =
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skybox!.rotate(Axis.Y, Math.PI, Space.WORLD);
+    skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
     skybox!.infiniteDistance = true;
 
     this[$engine].runRenderLoop(() => {
@@ -155,5 +161,9 @@ export class BabylonViewer extends LitElement {
     canvas.height = height;
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
+  }
+
+  private[$degToRadians](degree: number) {
+    return Math.PI * (degree / 180);
   }
 }
