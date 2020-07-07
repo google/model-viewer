@@ -88,11 +88,14 @@ describe('camera constraints test', () => {
   });
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
+    const orbit = {phi: degToRad(12), theta: degToRad(34), radius: 56};
+    dispatchInitialOrbit(orbit);
     await cameraSettings.updateComplete;
     await cameraSettings.cameraOrbitEditor!.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
+    expect(yawInput).not.toBeNull();
     yawInput.setValue(42);
     const stateOrbit = reduxStore.getState().camera.orbit;
     expect(stateOrbit!.theta).toBeCloseTo(degToRad(42));

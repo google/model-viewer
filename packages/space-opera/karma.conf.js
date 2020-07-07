@@ -65,7 +65,6 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      // TODO(#1207)
       // 'Edge (latest)': {
       //   base: 'BrowserStack',
       //   os: 'Windows',
@@ -94,7 +93,6 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      // TODO(#1207)
       // 'Firefox 76.0': {
       //   base: 'BrowserStack',
       //   os: 'Windows',
