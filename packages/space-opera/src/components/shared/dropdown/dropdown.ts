@@ -79,7 +79,16 @@ export class Dropdown extends LitElement {
   }
 
   render() {
+    // The custom style gets rid of the underline in the NPM build.
     return html`
+      <custom-style>
+        <style>
+        paper-dropdown-menu {
+          --paper-input-container-underline: { display: none; };
+          --paper-input-container-underline-focus: { display: none; };
+        }
+        </style>
+      </custom-style>
       <paper-dropdown-menu class="EditorDropdown exportEditorDropdown exportSpacecraftTheme" label="${
         this.label}" no-label-float @value-changed="${this.onValueChanged}">
         <paper-listbox slot="dropdown-content" class="exportSelectPopup" selected="${
