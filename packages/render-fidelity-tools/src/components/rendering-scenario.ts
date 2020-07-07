@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig} from '../common.js';
+import {Dimensions, GoldenConfig, ImageComparisonAnalysis} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
@@ -56,10 +56,13 @@ export class RenderingScenario extends LitElement {
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
+    console.log(this.analysis);
   }
 
   // where should I call this method?
-  private renderMetric(analysisResults: any|null, goldenName: string) {
+  private metricTemplate(
+      analysisResults: Array<ImageComparisonAnalysis>, goldenName: string) {
+    console.log(analysisResults);
     const rmsInDecible =
         this.toDecibels(analysisResults[0].rmsDistanceRatio).toFixed(2)
     return html` <span>${rmsInDecible} dB </span>
@@ -97,7 +100,7 @@ export class RenderingScenario extends LitElement {
                     ${
                                index == 0 || this.analysis == null ?
                                    html`<span>---</span>` :
-                                   this.renderMetric(
+                                   this.metricTemplate(
                                        this.analysis.analysisResults[index - 1],
                                        golden.name)}
                   </div>
