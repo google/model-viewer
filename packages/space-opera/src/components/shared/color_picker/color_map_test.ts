@@ -20,8 +20,6 @@ import './color_map.js';
 
 import {ColorMap} from './color_map.js';
 
-const EXAMPLE_HSV_TO_HEX = '#743e3e';
-
 describe('color map test', () => {
   let colorMap: ColorMap;
 
@@ -51,9 +49,9 @@ describe('color map test', () => {
     await colorMap.updateComplete;
 
     expect(colorMap.saturation).toBe(0.46);
-    expect(colorMap.value).toBe(115.6);
-    // Should be a nice medium red.
-    expect(colorMap.selectedColorHex).toBe(EXAMPLE_HSV_TO_HEX);
+    // Allow some room for error in the value.
+    expect(colorMap.value).toBeLessThan(117);
+    expect(colorMap.value).toBeGreaterThan(115);
 
     expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
     expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
