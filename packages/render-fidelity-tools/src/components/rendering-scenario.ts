@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig, ImageComparisonAnalysis} from '../common.js';
+import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
@@ -31,7 +31,7 @@ export class RenderingScenario extends LitElement {
 
   @property({type: Array}) exclude: Array<string> = [];
 
-  @property({type: Object}) analysis: any|null;
+  @property({type: Object}) analysis: ScenarioRecord|null = null;
 
   get basePath() {
     if (!this.name) {

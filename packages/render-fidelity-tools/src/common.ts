@@ -36,6 +36,11 @@ export interface ImageComparisonResults {
   imageBuffers: {delta: ArrayBuffer|null; blackWhite: ArrayBuffer | null;};
 }
 
+export interface ScenarioRecord {
+  analysisResults: Array<Array<ImageComparisonAnalysis>>;
+  scenarioConfig: ScenarioConfig;
+}
+
 export interface ImageComparisonMessage {
   type: 'canvases-ready'|'images-assigned'|'threshold-changed'|
       'analysis-completed';

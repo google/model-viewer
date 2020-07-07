@@ -83,7 +83,8 @@ export class ArtifactCreator {
       const analysisResults = await this.analyze(
           screenshot, goldens, scenario, dimensions, analysisThresholds);
 
-      const scenarioRecord = Object.assign({analysisResults}, scenario);
+      // const scenarioRecord = Object.assign({analysisResults}, scenario);
+      const scenarioRecord = {analysisResults, scenario};
 
       console.log(`\n💾 Recording analysis`);
 
