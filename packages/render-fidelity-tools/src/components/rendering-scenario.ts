@@ -50,7 +50,7 @@ export class RenderingScenario extends LitElement {
   }
 
   private toDecibels(rmsDistanceRatio: number) {
-    return (10 * Math.log10(rmsDistanceRatio)).toFixed(2)
+    return 10 * Math.log10(rmsDistanceRatio);
   }
 
   private async loadAnalysis() {
@@ -84,18 +84,19 @@ export class RenderingScenario extends LitElement {
                         html` <span> --- </span>` :
                         html` <span>${
                             this.toDecibels(
-                                this.analysis.analysisResults[index - 1][0]
-                                    .rmsDistanceRatio)} dB </span>`}
+                                    this.analysis.analysisResults[index - 1][0]
+                                        .rmsDistanceRatio)
+                                .toFixed(2)} dB </span>
                     <div class="tooltip">
                       <span class="question-icon"> </span>
                       <span class="tooltiptext">
                         Root mean square(RMS) color distance between ${
-                    golden.name} 
+                            golden.name} 
                         and current version of model-viewer on rendering ${
-                    this.name} in decibels.
+                            this.name} in decibels.
                         The decibel is given by: 10 * log(RMS). More negative means a closer match.
                       </span>
-                    </div>
+                    </div>`}
                   </div>
               </div>`);
 
@@ -144,7 +145,7 @@ h1 {
   visibility: visible;
 }
 
-.question-icon{
+.question-icon {
   background-image: url(../../shared-assets/icons/help_outline-24px.svg);
   background-size : 0.8em;
   background-repeat: no-repeat;
@@ -154,7 +155,7 @@ h1 {
   display: inline-block;
 }
 
-.metrics{
+.metrics {
   text-align: center;
   height: 2em;
 }
