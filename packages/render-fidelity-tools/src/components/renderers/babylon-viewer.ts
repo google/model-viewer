@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Engine, HDRCubeTexture, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -80,7 +80,11 @@ export class BabylonViewer extends LitElement {
     this[$scene] = new Scene(this[$engine]);
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV, renderSkybox} = scenario;
+    const {orbit, target, verticalFoV, renderSkybox, clearColor} = scenario;
+
+    this[$scene].clearColor =
+        new Color4(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+
     const alpha = this[$degToRadians](orbit.theta + 90);
     const beta = this[$degToRadians](orbit.phi);
     const camera = new ArcRotateCamera(
