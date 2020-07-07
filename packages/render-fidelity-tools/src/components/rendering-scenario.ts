@@ -56,16 +56,13 @@ export class RenderingScenario extends LitElement {
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
-    console.log(this.analysis);
   }
 
-  // where should I call this method?
   private metricTemplate(
       analysisResults: Array<ImageComparisonAnalysis>, goldenName: string) {
-    console.log(analysisResults);
-    const rmsInDecible =
+    const rmsInDecibel =
         this.toDecibels(analysisResults[0].rmsDistanceRatio).toFixed(2)
-    return html` <span>${rmsInDecible} dB </span>
+    return html` <span>${rmsInDecibel} dB </span>
       <div class="tooltip">
         <span class="question-icon"> </span>
         <span class="tooltiptext">
