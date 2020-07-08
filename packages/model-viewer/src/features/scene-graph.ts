@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-import {Model, ThreeDOM} from '@google/3dom/lib/api.js';
+import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, ThreeDOM} from '@google/3dom/lib/api.js';
 import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
+import {TextureInfo} from '@google/3dom/lib/facade/three-js/texture-info';
 import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
 import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
@@ -66,12 +67,24 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$manipulator]: ModelGraftManipulator|null = null;
     protected[$modelKernel]: ModelKernel|null = null;
 
-    // ThreeDOM implementation is currently just .model.
+    // ThreeDOM implementation:
     /** @export */
     get model() {
       const kernel = this[$modelKernel];
       return kernel ? kernel.model : undefined;
     }
+
+    /**
+     * References to each 3DOM constructor. Supports instanceof checks; these
+     * classes are not directly constructable.
+     */
+    static Model: Constructor<Model>;
+    static Material: Constructor<Material>;
+    static PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+    static Sampler: Constructor<Sampler>;
+    static TextureInfo: Constructor<TextureInfo>;
+    static Texture: Constructor<Texture>;
+    static Image: Constructor<Image>;
 
     connectedCallback() {
       super.connectedCallback();
