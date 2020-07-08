@@ -15,6 +15,10 @@
  *
  */
 
+const {applyKarmaHacks} = require('./karma-hacks.js');
+
+const browserStackTunnelID = applyKarmaHacks();
+
 /**
  * Karma configuration
  * @param {!Object} config config object from Karma

@@ -486,7 +486,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const material = this.materials[this.selectedMaterialId];
     const currentTextureId = material.normalTextureId;
     return html`
-  <me-expandable-tab tabName="Normal Map Texture">
+  <me-expandable-tab tabName="Normal Map">
     <div slot="content">
       <me-section-row label="Texture">
         <me-texture-picker .selectedIndex=${
@@ -512,7 +512,7 @@ export class MaterialPanel extends ConnectedLitElement {
         emissiveFactor.map((color: number) => Math.round(color * 255));
     const selectedColorHex = color.rgbArrayToHex(selectedColorRgb);
     return html`
-  <me-expandable-tab tabName="Emissive Map Texture">
+  <me-expandable-tab tabName="Emissive">
     <div slot="content">
       <me-section-row label="Factor">
         <me-color-picker selectedColorHex=${
@@ -539,7 +539,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const material = this.materials[this.selectedMaterialId];
     const currentTextureId = material.occlusionTextureId;
     return html`
-  <me-expandable-tab tabName="Occlusion Texture">
+  <me-expandable-tab tabName="Occlusion">
     <div slot="content">
       <me-section-row label="Texture">
         <me-texture-picker .selectedIndex=${
