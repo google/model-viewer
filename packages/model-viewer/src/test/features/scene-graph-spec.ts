@@ -115,7 +115,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       expect(uri).to.be.eql(SUNRISE_IMG_PATH);
     });
 
-    suite.skip('when the model changes', () => {
+    suite('when the model changes', () => {
       test('updates when the model changes', async () => {
         const color =
             element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
@@ -124,7 +124,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         element.src = HORSE_GLB_PATH;
 
-        // Why does the second postMessage never come through?
         await waitForEvent(element, 'scene-graph-ready');
 
         const nextColor =

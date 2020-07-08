@@ -30,6 +30,8 @@ const $currentGLTF = Symbol('currentGLTF');
 const $modelGraft = Symbol('modelGraft');
 const $mainPort = Symbol('mainPort');
 const $threePort = Symbol('threePort');
+const $graftPort = Symbol('graftPort');
+const $kernelPort = Symbol('kernelPort');
 const $manipulator = Symbol('manipulator');
 const $modelKernel = Symbol('modelKernel');
 const $onModelChange = Symbol('onModelChange');
@@ -59,6 +61,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
     protected[$mainPort]: MessagePort|null = null;
     protected[$threePort]: MessagePort|null = null;
+    protected[$graftPort]: MessagePort|null = null;
+    protected[$kernelPort]: MessagePort|null = null;
     protected[$manipulator]: ModelGraftManipulator|null = null;
     protected[$modelKernel]: ModelKernel|null = null;
 
@@ -78,6 +82,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$mainPort] = port1;
       this[$threePort] = port2;
       this[$mainPort]!.onmessage = this[$onModelChange];
+      const channel = new MessageChannel();
+      this[$graftPort] = channel.port1;
+      this[$kernelPort] = channel.port2;
     }
 
     disconnectedCallback() {
@@ -87,6 +94,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$threePort]!.close();
       this[$mainPort] = null;
       this[$threePort] = null;
+      if (this[$manipulator] != null) {
+        this[$manipulator]!.dispose();
+      }
+      if (this[$modelKernel] != null) {
+        this[$modelKernel]!.deactivate();
+      }
+      this[$graftPort] = null;
+      this[$kernelPort] = null;
     }
 
     updated(changedProperties: Map<string|symbol, unknown>): void {
@@ -139,7 +154,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
           if (modelGraft != null) {
             manipulator =
-                new ModelGraftManipulator(modelGraft, this[$threePort]!);
+                new ModelGraftManipulator(modelGraft, this[$graftPort]!);
           }
 
           this[$threePort]!.postMessage({
@@ -170,7 +185,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         if (serialized != null) {
-          this[$modelKernel] = new ModelKernel(this[$mainPort]!, serialized);
+          this[$modelKernel] = new ModelKernel(this[$kernelPort]!, serialized);
         } else {
           this[$modelKernel] = null;
         }
