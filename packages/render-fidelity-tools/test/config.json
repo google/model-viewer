@@ -362,6 +362,9 @@
       "orbit": {
         "radius": 12
       },
+      "exclude":[
+        "filament"
+      ],
       "renderSkybox": true
     },
     {
@@ -372,7 +375,8 @@
         "radius": 12
       },
       "exclude": [
-        "babylon"
+        "babylon",
+        "filament"
       ],
       "renderSkybox": true
     },

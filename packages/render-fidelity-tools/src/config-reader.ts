@@ -22,7 +22,7 @@ const defaultScenario = {
   orbit: {theta: 0, phi: 90, radius: 1},
   verticalFoV: 45,
   renderSkybox: false,
-  clearColor: {r: 0, g: 0, b: 0, a: 0}
+  clearColor: {r: 0.8, g: 0.8, b: 0.8}
 };
 
 export class ConfigReader {
