@@ -34,8 +34,8 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   protected[$kernel]: ModelKernelInterface;
   protected[$baseColorFactor]: Readonly<RGBA>;
   protected[$baseColorTexture]: TextureInfo|null = null;
-  protected[$metallicFactor]: Readonly<number>;
-  protected[$roughnessFactor]: Readonly<number>;
+  protected[$metallicFactor]: number;
+  protected[$roughnessFactor]: number;
   protected[$metallicRoughnessTexture]: TextureInfo|null = null;
 
   constructor(
@@ -45,9 +45,8 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     this[$kernel] = kernel;
     this[$baseColorFactor] = Object.freeze(serialized.baseColorFactor) as RGBA;
-    this[$metallicFactor] = Object.freeze(serialized.metallicFactor) as number;
-    this[$roughnessFactor] =
-        Object.freeze(serialized.roughnessFactor) as number;
+    this[$metallicFactor] = serialized.metallicFactor;
+    this[$roughnessFactor] = serialized.roughnessFactor;
 
     const {baseColorTexture, metallicRoughnessTexture} = serialized;
 
@@ -93,7 +92,6 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
   /**
    * Set the base color factor of the material.
-   * Requires the material-properties capability.
    *
    * @see ../api.ts
    */
@@ -104,23 +102,21 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
   /**
    * Set the metallic factor of the material.
-   * Requires the material-properties capability.
    *
    * @see ../api.ts
    */
-  async setMetallicFactor(color: number) {
-    await this[$kernel].mutate(this, 'metallicFactor', color);
-    this[$metallicFactor] = Object.freeze(color) as number;
+  async setMetallicFactor(factor: number) {
+    await this[$kernel].mutate(this, 'metallicFactor', factor);
+    this[$metallicFactor] = factor;
   }
 
   /**
    * Set the roughness factor of the material.
-   * Requires the material-properties capability.
    *
    * @see ../api.ts
    */
-  async setRoughnessFactor(color: number) {
-    await this[$kernel].mutate(this, 'roughnessFactor', color);
-    this[$roughnessFactor] = Object.freeze(color) as number;
+  async setRoughnessFactor(factor: number) {
+    await this[$kernel].mutate(this, 'roughnessFactor', factor);
+    this[$roughnessFactor] = factor;
   }
 }
