@@ -22,7 +22,8 @@ import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {dispatchCurrentCameraState} from '../../redux/space_opera_base.js';
 import {reduxStore} from '../../redux/space_opera_base.js';
 import {Vector3D} from '../../redux/state_types.js';
-import {CameraSettings, CameraTargetInput, dispatchCameraTarget, dispatchInitialOrbit} from './camera_settings.js';
+
+import {CameraSettings, CameraTargetInput, dispatchAutoRotate, dispatchCameraTarget, dispatchInitialOrbit} from './camera_settings.js';
 
 describe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
@@ -100,4 +101,23 @@ describe('camera constraints test', () => {
     const stateOrbit = reduxStore.getState().camera.orbit;
     expect(stateOrbit!.theta).toBeCloseTo(degToRad(42));
   });
+
+  it('dispatches auto-rotate change when checkbox clicked', async () => {
+    dispatchAutoRotate(false);
+    expect(reduxStore.getState().config.autoRotate).toBe(false);
+    await cameraSettings.updateComplete;
+    cameraSettings.autoRotateCheckbox.click();
+    expect(reduxStore.getState().config.autoRotate).toBe(true);
+  });
+
+  it('updates checkbox state when receiving auto-rotate change', async () => {
+    dispatchAutoRotate(false);
+    await cameraSettings.updateComplete;
+    expect(cameraSettings.autoRotateCheckbox.checked).toBe(false);
+
+    dispatchAutoRotate(true);
+    await cameraSettings.updateComplete;
+    expect(cameraSettings.autoRotateCheckbox.checked).toBe(true);
+  });
+
 });

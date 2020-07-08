@@ -55,6 +55,11 @@ export class CheckboxElement extends LitElement {
     this.checked = this.checkbox.checked;
     this.dispatchEvent(new Event('change'));
   }
+
+  // Convenience function for testing
+  click() {
+    this.checkbox.click();
+  }
 }
 
 declare global {

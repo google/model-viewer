@@ -40,13 +40,18 @@ export function renderModelViewer(
     config: ModelViewerConfig, eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
   const styles = {backgroundColor: config.bgColor || 'unset'};
+  const skyboxImage =
+      config.useEnvAsSkybox ? config.environmentImage : undefined;
   return html`<model-viewer
         src=${config.src || ''}
         ?autoplay=${!!config.autoplay}
         ?auto-rotate=${!!config.autoRotate}
         ?camera-controls=${!!config.cameraControls}
         environment-image=${ifDefined(config.environmentImage)}
+        skybox-image=${ifDefined(skyboxImage)}
         exposure=${ifDefined(config.exposure)}
+        shadow-intensity=${ifDefined(config.shadowIntensity)}
+        shadow-softness=${ifDefined(config.shadowSoftness)}
         style=${styleMap(styles)}
         camera-target=${ifDefined(config.cameraTarget)}
         camera-orbit=${ifDefined(config.cameraOrbit)}

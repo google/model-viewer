@@ -9,7 +9,7 @@
     "build:tsc": "tsc --incremental && cp src/gltf/*.d.ts lib/gltf",
     "build:rollup": "rollup -c --environment NODE_ENV:production",
     "clean": "rm -rf lib && rm -rf dist",
-    "test": "cp ../shared-assets/scripts/karma-hacks.js . && karma start --single-run && rm karma-hacks.js",
+    "test": "karma start --single-run",
     "test:ci": "npm run test",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
     "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js"

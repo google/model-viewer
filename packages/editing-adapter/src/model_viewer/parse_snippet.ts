@@ -17,6 +17,16 @@
 
 import {ModelViewerConfig} from './model_viewer_config.js';
 
+function tryParseNumberAttribute(element: Element, attribute: string): number|
+    undefined {
+  const attributeValue = element.getAttribute(attribute);
+  if (element.hasAttribute(attribute) && attributeValue !== '' &&
+      isFinite(Number(attributeValue))) {
+    return Number(attributeValue);
+  }
+  return undefined;
+}
+
 /**
  * Parse a string representation of a model-viewer tag.
  */
@@ -31,12 +41,13 @@ export function parseSnippet(snippet: string): ModelViewerConfig {
   // the style tag. Will need to reconsider how we approach style in general.
   config.environmentImage =
       modelViewer.getAttribute('environment-image') || undefined;
-  const exposureAttr = 'exposure';
-  const exposureValue = modelViewer.getAttribute(exposureAttr);
-  if (modelViewer.hasAttribute(exposureAttr) && exposureValue !== '' &&
-      isFinite(Number(exposureValue))) {
-    config.exposure = Number(exposureValue);
-  }
+  config.useEnvAsSkybox = config.environmentImage !== undefined &&
+      modelViewer.getAttribute('skybox-image') === config.environmentImage;
+  config.exposure = tryParseNumberAttribute(modelViewer, 'exposure');
+  config.shadowIntensity =
+      tryParseNumberAttribute(modelViewer, 'shadow-intensity');
+  config.shadowSoftness =
+      tryParseNumberAttribute(modelViewer, 'shadow-softness');
   config.maxCameraOrbit =
       modelViewer.getAttribute('max-camera-orbit') || undefined;
   config.minCameraOrbit =

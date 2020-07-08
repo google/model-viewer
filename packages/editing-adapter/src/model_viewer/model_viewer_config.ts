@@ -30,9 +30,14 @@ export interface ModelViewerConfig {
   fieldOfView?: string;
   environmentImage?: string;  // IBL/HDRI lighting
   exposure?: number;  // Environment for hdr environment, used as ibl intensity
+  shadowIntensity?: number;
+  shadowSoftness?: number;
   maxCameraOrbit?: string;
   maxFov?: string;  // Field of view
   minCameraOrbit?: string;
   minFov?: string;  // Field of view
   src?: string;
+  // This doesn't correspond to a modelviewer attribute, but ultimately MVC is
+  // app state - not MV state.
+  useEnvAsSkybox?: boolean;
 }

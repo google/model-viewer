@@ -149,7 +149,7 @@ export class ModelViewerSnippet extends LitElement {
 
   render() {
     const exampleLoadableSnippet =
-        `<model-viewer src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' autoplay animation-name="Wave"></model-viewer>`;
+        `<model-viewer src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' autoplay animation-name="Wave" shadow-intensity="0.5"></model-viewer>`;
 
     return html`
     <me-expandable-tab tabName="Import" .open=${true}>

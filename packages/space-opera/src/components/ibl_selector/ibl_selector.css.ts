@@ -24,7 +24,7 @@ export const styles: CSSResult = css`.HeaderLabel {
 
 .EnvironmnetImageDropdown,
 .UploadButton,
-.ExposureRow {
+.Row {
   margin-top: 10px;
 }
 `;

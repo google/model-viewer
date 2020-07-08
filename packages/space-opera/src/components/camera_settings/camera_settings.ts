@@ -34,6 +34,7 @@ import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {registerStateMutator, State} from '../../redux/space_opera_base.js';
 import {SphericalPosition, Vector3D} from '../../redux/state_types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
@@ -73,6 +74,14 @@ export const dispatchInitialOrbit = registerStateMutator(
         ...state.camera,
         orbit,
       };
+    });
+
+/**
+ * Dispatch changes to auto rotate
+ */
+export const dispatchAutoRotate =
+    registerStateMutator('SET_AUTO_ROTATE', (state, autoRotate?: boolean) => {
+      state.config = {...state.config, autoRotate};
     });
 
 @customElement('me-camera-orbit-editor')
@@ -188,6 +197,15 @@ export class CameraSettings extends ConnectedLitElement {
   @internalProperty() initialCamera: Camera = INITIAL_CAMERA;
 
   @query('me-camera-orbit-editor') cameraOrbitEditor?: CameraOrbitEditor;
+  @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
+
+  // Specifically overriding a super class method.
+  // tslint:disable-next-line:enforce-name-casing
+  async _getUpdateComplete() {
+    await super._getUpdateComplete();
+    await this.cameraOrbitEditor!.updateComplete;
+    await this.autoRotateCheckbox.updateComplete;
+  }
 
   stateChanged(state: State) {
     this.config = state.config;
@@ -205,6 +223,10 @@ export class CameraSettings extends ConnectedLitElement {
 
   onCameraTargetChange(newValue: Vector3D) {
     dispatchCameraTarget(newValue);
+  }
+
+  onAutoRotateChange() {
+    dispatchAutoRotate(this.autoRotateCheckbox.checked);
   }
 
   render() {
@@ -245,6 +267,10 @@ export class CameraSettings extends ConnectedLitElement {
 
       <me-camera-target-input .change=${
         this.onCameraTargetChange}></me-camera-target-input>
+
+      <me-checkbox id="auto-rotate" label="Auto-rotate"
+        ?checked="${!!this.config.autoRotate}"
+        @change=${this.onAutoRotateChange}></me-checkbox>
 
     </div>
     </me-expandable-tab>

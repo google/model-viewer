@@ -90,6 +90,12 @@ export class SliderWithInputElement extends LitElement {
       </div>
     </div>`;
   }
+
+  // Convenience function for testing
+  clickTo(value: number) {
+    this.value = value;
+    this.dispatchEvent(new Event('change'));
+  }
 }
 
 declare global {
