@@ -170,8 +170,6 @@ export class FilamentViewer extends LitElement {
       this[$directionalLight] = null;
     }
 
-    const {r, g, b} = scenario.clearColor;
-    this[$view].setClearColor([r, g, b, 1]);
     await fetchFilamentAssets([modelUrl]);
 
     // This special case is for the DirectionalLightTest, where we compare the
@@ -203,10 +201,8 @@ export class FilamentViewer extends LitElement {
       this[$ibl] = ibl
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
-      if (scenario.renderSkybox) {
-        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-        this[$scene].setSkybox(this[$skybox]);
-      }
+      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+      this[$scene].setSkybox(this[$skybox]);
     }
 
     const loader = this[$engine].createAssetLoader();
