@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ThreeDOM} from '@google/3dom/lib/api.js';
+import {Model, ThreeDOM} from '@google/3dom/lib/api.js';
 import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
@@ -32,7 +32,7 @@ const $mainPort = Symbol('mainPort');
 const $threePort = Symbol('threePort');
 const $manipulator = Symbol('manipulator');
 const $modelKernel = Symbol('modelKernel');
-const $setUpMainSide = Symbol('setUpMainSide');
+const $onModelChange = Symbol('onModelChange');
 const $onModelGraftMutation = Symbol('onModelGraftMutation');
 
 interface SceneExportOptions {
@@ -42,60 +42,13 @@ interface SceneExportOptions {
 }
 
 export interface SceneGraphInterface {
+  readonly model?: Model;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
 /**
  * SceneGraphMixin manages a `<model-viewer>` integration with the 3DOM library
- * in order to support custom scripts that operate on the <model-viewer> scene
- * graph.
- *
- * When applied, users can specify a special `<script>` type that can be added
- * as a child of `<model-viewer>`. The script will be invoked in a special
- * Web Worker, conventionally referred to as a "scene graph worklet."
- *
- * Script on the browser main thread can communicate with the scene graph
- * worklet via `modelViewer.worklet` using `postMessage`, much like they would
- * with any other Web Worker.
- *
- * Scene graph worklet scripts must be bestowed capabilities by the author of
- * the `<model-viewer>` markup. The three capabilities currently available
- * include:
- *
- *  - `messaging`: The ability to communicate with other contexts via
- *    `postMessage` and `MessageChannel`
- *  - `fetch`: Access to the global `fetch` method for network operations
- *  - `material-properties`: The ability to manipulate the basic properties of
- *    a Material and its associated constructs in the scene graph
- *
- * A trivial example of creating a scene graph worklet that can manipulate
- * material properties looks like this:
- *
- * ```html
- * <model-viewer>
- *   <script type="experimental-scene-graph-worklet"
- *       allow="material-properties">
- *
- *     console.log('Hello from the scene graph worklet!');
- *
- *     self.addEventListener('model-change', () => {
- *       model.materials[0].pbrMetallicRoughness
- *         .setBaseColorFactor([1, 0, 0, 1]);
- *     });
- *
- *   </script>
- * </model-viewer>
- * ```
- *
- * Only one worklet is allowed per `<model-viewer>` at a time. If a new worklet
- * script is appended to a `<model-viewer>` with a running worklet, a new
- * worklet will be created and the previous one will be terminated. If there
- * is more than one worklet script at HTML parse time, the last one in tree
- * order will be used.
- *
- * When a worklet is created, `<model-viewer>` will dispatch a 'worklet-created'
- * event. At the time that this event is dispatched, the worklet will be created
- * but the model is not guaranteed to have been made available to the worklet.
+ * in order to support operations on the <model-viewer> scene graph.
  */
 export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<SceneGraphInterface>&T => {
@@ -124,7 +77,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       port2.start();
       this[$mainPort] = port1;
       this[$threePort] = port2;
-      this[$setUpMainSide]();
+      this[$mainPort]!.onmessage = this[$onModelChange];
     }
 
     disconnectedCallback() {
@@ -203,28 +156,30 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$currentGLTF] = currentGLTF;
     }
 
-    [$setUpMainSide]() {
-      this[$mainPort]!.addEventListener('message', (event: MessageEvent) => {
-        const {data} = event;
-        if (data && data.type === ThreeDOMMessageType.MODEL_CHANGE) {
-          const serialized: SerializedModel|null = data.model;
-          const currentKernel = this[$modelKernel];
+    [$onModelChange] = (event: MessageEvent) => {
+      const {data} = event;
+      if (data && data.type === ThreeDOMMessageType.MODEL_CHANGE) {
+        const serialized: SerializedModel|null = data.model;
+        const currentKernel = this[$modelKernel];
 
-          if (currentKernel != null) {
-            currentKernel.deactivate();
-          } else if (serialized == null) {
-            // Do not proceed if transitioning from null to null
-            return;
-          }
-
-          if (serialized != null) {
-            this[$modelKernel] = new ModelKernel(this[$mainPort]!, serialized);
-          } else {
-            this[$modelKernel] = null;
-          }
+        if (currentKernel != null) {
+          currentKernel.deactivate();
+        } else if (serialized == null) {
+          // Do not proceed if transitioning from null to null
+          return;
         }
-      });
-    }
+
+        if (serialized != null) {
+          this[$modelKernel] = new ModelKernel(this[$mainPort]!, serialized);
+        } else {
+          this[$modelKernel] = null;
+        }
+
+        this.dispatchEvent(new CustomEvent(
+            'scene-graph-ready',
+            {detail: {url: serialized ? serialized.modelUri : null}}));
+      }
+    };
 
     [$onModelGraftMutation] = (_event: Event) => {
       this[$needsRender]();

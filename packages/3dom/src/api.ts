@@ -126,19 +126,16 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
 
   /**
    * Changes the base color factor of the material to the given value.
-   * Requires the 'material-properties' capability to be enabled.
    */
   setBaseColorFactor(rgba: RGBA): Promise<void>;
 
   /**
    * Changes the metalness factor of the material to the given value.
-   * Requires the 'material-properties' capability to be enabled.
    */
   setMetallicFactor(value: number): Promise<void>;
 
   /**
    * Changes the roughness factor of the material to the given value.
-   * Requires the 'material-properties' capability to be enabled.
    */
   setRoughnessFactor(value: number): Promise<void>;
 }
@@ -156,7 +153,6 @@ export declare interface TextureInfo extends ThreeDOMElement {
 
   /**
    * Configure the Texture referenced by this TextureInfo
-   * Requires the 'textures' capability to be enabled.
    */
   setTexture(texture: Texture|null): Promise<void>;
 }
@@ -184,13 +180,11 @@ export declare interface Texture extends ThreeDOMElement {
 
   /**
    * Configure the Sampler used for this Texture.
-   * Requires the 'textures' capability to be enabled.
    */
   setSampler(sampler: Sampler): Promise<void>;
 
   /**
    * Configure the source Image used for this Texture.
-   * Requires the 'textures' capability to be enabled.
    */
   setSource(image: Image): Promise<void>;
 }
@@ -228,25 +222,21 @@ export declare interface Sampler extends ThreeDOMElement {
 
   /**
    * Configure the minFilter value of the Sampler.
-   * Requires the 'textures' capability to be enabled.
    */
   setMinFilter(filter: MinFilter|null): Promise<void>;
 
   /**
    * Configure the magFilter value of the Sampler.
-   * Requires the 'textures' capability to be enabled.
    */
   setMagFilter(filter: MagFilter|null): Promise<void>;
 
   /**
    * Configure the S (U) wrap mode of the Sampler.
-   * Requires the 'textures' capability to be enabled.
    */
   setWrapS(mode: WrapMode): Promise<void>;
 
   /**
    * Configure the T (V) wrap mode of the Sampler.
-   * Requires the 'textures' capability to be enabled.
    */
   setWrapT(mode: WrapMode): Promise<void>;
 }
@@ -279,7 +269,6 @@ export declare interface Image extends ThreeDOMElement {
   /**
    * Configure the URI of the image. If a URI is specified for an otherwise
    * embedded image, the URI will take precedence over an embedded buffer.
-   * Requires the 'textures' capability to be enabled.
    */
   setURI(uri: string): Promise<void>;
 }

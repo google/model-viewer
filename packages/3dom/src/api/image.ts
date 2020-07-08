@@ -53,5 +53,6 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   async setURI(uri: string|null): Promise<void> {
     this[$kernel].mutate(this, 'uri', uri);
+    this[$uri] = uri;
   }
 }
