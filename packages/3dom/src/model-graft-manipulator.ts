@@ -51,14 +51,14 @@ export class ModelGraftManipulator {
     this[$port].close();
   }
 
-  [$onMessageEvent](event: MessageEvent) {
+  async[$onMessageEvent](event: MessageEvent) {
     const {data} = event;
     if (data && data.type) {
       if (data.type === ThreeDOMMessageType.MUTATE) {
         let applied = false;
         const {mutationId} = data as MutateMessage;
         try {
-          this[$modelGraft].mutate(data.id, data.property, data.value);
+          await this[$modelGraft].mutate(data.id, data.property, data.value);
           applied = true;
         } finally {
           this[$port].postMessage(
