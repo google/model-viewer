@@ -180,17 +180,7 @@ async function testTextureApi(
   expect(originalTex!.uri).toEqual('originalTexture.png');
 }
 
-class DummyWorklet {
-  lastMessageData?: object;
-
-  postMessage(data: object) {
-    this.lastMessageData = data;
-  }
-}
-
 class DummyModelViewer {
-  readonly worklet = new DummyWorklet();
-
   constructor(public src?: string) {}
 }
 
@@ -472,42 +462,18 @@ describe('gltf model test', () => {
            downcastedModelViewer);
        expect(modelViewer.src).toEqual('orig.glb');
 
-       // Add a normal texture. NOTE: Of course, this test will need to change
+       // Set alpha mode. NOTE: Of course, this test will need to change
        // as MV implements more.
-       const texUri =
-           createSafeObjectURL(await generatePngBlob('#fff')).unsafeUrl;
        const mat0 = (await model.materials)[0];
-       expect(await mat0.normalTexture).toBeNull();
-       await mat0.setNormalTexture(texUri);
+       await mat0.setAlphaMode('MASK');
        const newSrc = modelViewer.src;
        expect(newSrc).not.toEqual('orig.glb');
 
-       // Download it, make sure it has the new texture
+       // Download it, make sure it has the new values
        const newGlbBuffer = await fetchBufferForUri(newSrc!);
        const newModel = GltfModel.fromGlb(newGlbBuffer);
-       expect(await (await newModel.materials)[0].normalTexture).not.toBeNull();
+       expect(await (await newModel.materials)[0].alphaMode).toEqual('MASK');
      });
-
-  it('communicates base color factor mutation to worklet', async () => {
-    const modelViewer = new DummyModelViewer('orig.glb');
-    const downcastedModelViewer =
-        (modelViewer as unknown) as ModelViewerElement;
-
-    const model = new GltfModel(
-        cloneJson(TEST_GLTF_JSON), EXAMPLE_BIN_AS_ARRAY_BUFFER,
-        downcastedModelViewer);
-
-    const materials = await model.materials;
-    const pbr = materials[1].pbrMetallicRoughness;
-    await pbr.setBaseColorFactor([0.1, 0.2, 0.3, 0.4]);
-    expect(modelViewer.worklet.lastMessageData!).toEqual({
-      action: 'set-base-color-factor',
-      payload: {
-        materialIndex: 1,
-        factor: [0.1, 0.2, 0.3, 0.4],
-      }
-    });
-  });
 
   it('exports a valid GLB after deleting a texture', async () => {
     const {model} = await createGltfWithTexture();
