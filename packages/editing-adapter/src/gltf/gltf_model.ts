@@ -189,7 +189,7 @@ export class PbrMetallicRoughness {
     if (handle === null) {
       delete this.getOrCreatePbr()[textureProperty];
       // TODO: Using 3DOM does not work yet, but it would be like this:
-      // pbr?.baseColorTexture?.setTexture(null);
+      // pbr?.[textureProperty]?.setTexture(null);
       await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
@@ -322,16 +322,21 @@ export class Material {
               this.materialJson[textureProperty] || {index: -1});
     };
 
+    const material = this.gltfModel.modelViewer?.model?.materials[this.materialIndex];
+
     if (handle === null) {
       delete this.materialJson[textureProperty];
+      // TODO: Using 3DOM does not work yet, but it would be like this:
+      // material?.[textureProperty]?.setTexture(null);
+      await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
+      material?.[textureProperty]?.texture?.source?.setURI(handle.uri);
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
+      material?.[textureProperty]?.texture?.source?.setURI(handle);
     }
-
-    await this.gltfModel[$onModelViewerDirty]();
   }
 }
 
