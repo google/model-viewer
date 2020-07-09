@@ -47,17 +47,5 @@ export default [
     watch: {
       include: watchFiles,
     },
-  },
-  {
-    input: './lib/gltf/scene_graph_worklet.js',
-    output: {
-      file: './dist/scene_graph_worklet.js',
-      format: 'esm',
-      name: 'Editing Adapter Worklet'
-    },
-    plugins,
-    watch: {
-      include: watchFiles,
-    },
   }
 ];

@@ -104,14 +104,8 @@ export class PbrMetallicRoughness {
     }
     this.getOrCreatePbr().baseColorFactor = [...factor];
 
-    const worklet = this.gltfModel.modelViewer?.worklet;
-    worklet?.postMessage({
-      'action': 'set-base-color-factor',
-      'payload': {
-        'materialIndex': this.materialIndex,
-        'factor': factor,
-      },
-    });
+    const model = this.gltfModel.modelViewer?.model;
+    model?.materials[this.materialIndex].pbrMetallicRoughness.setBaseColorFactor(factor);
   }
 
   get baseColorFactor(): Promise<RGBA> {

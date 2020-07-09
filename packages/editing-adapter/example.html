@@ -19,9 +19,6 @@
 <script type="module" src="../model-viewer/dist/model-viewer.js"></script>
 <html>
 <model-viewer id="astronaut" src="http://modelviewer.dev/shared-assets/models/Astronaut.glb" auto-rotate>
-  <script src="./dist/scene_graph_worklet.js"
-      type="experimental-scene-graph-worklet"
-      allow="messaging; material-properties"></script>
 </model-viewer>
 The astronaut should be slowly rotating and changing color every 0.5 seconds.
 
@@ -30,9 +27,6 @@ The astronaut should be slowly rotating and changing color every 0.5 seconds.
   import {GltfModel} from './dist/editing-adapter.js';
 
   async function onLoad() {
-    if(!astronaut.worklet) {
-      throw new Error('Model-viewer worklet did not load correctly?');
-    }
     const adapter = await GltfModel.fromModelViewer(astronaut);
     const pbrApi = (await adapter.materials)[0].pbrMetallicRoughness;
     // Randomly change color periodically

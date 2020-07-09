@@ -157,15 +157,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
     };
     applyCameraEdits(editedConfig, this.camera);
 
-    const workletElement = html`<script
-    src="./node_modules/@google/model-viewer-editing-adapter/dist/scene_graph_worklet.js"
-    type="experimental-scene-graph-worklet"
-    allow="messaging; material-properties"></script>`;
     const screenshotButton =
         html`<mwc-icon-button icon="photo_camera" class="ScreenShotButton" @click=${
             this.downloadScreenshot}></mwc-icon-button>`;
     const childElements =
-        [workletElement, ...renderHotspots(this.hotspots), screenshotButton];
+        [...renderHotspots(this.hotspots), screenshotButton];
 
     return html`${
         renderModelViewer(
