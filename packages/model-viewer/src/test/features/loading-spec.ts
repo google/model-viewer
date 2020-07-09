@@ -158,6 +158,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                 await until(() => element.loaded);
 
+                await timePasses();
+
                 element.removeEventListener<any>('preload', onPreload);
 
                 expect(preloadEvent).to.be.ok;

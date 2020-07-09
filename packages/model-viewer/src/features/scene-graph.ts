@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, ThreeDOM} from '@google/3dom/lib/api.js';
+import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, TextureInfo, ThreeDOM} from '@google/3dom/lib/api.js';
 import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
-import {TextureInfo} from '@google/3dom/lib/facade/three-js/texture-info';
 import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
 import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
