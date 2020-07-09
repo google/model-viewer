@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Engine, HDRCubeTexture, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -78,6 +78,10 @@ export class BabylonViewer extends LitElement {
       this[$scene].dispose();
     }
     this[$scene] = new Scene(this[$engine]);
+    this[$scene].imageProcessingConfiguration.toneMappingEnabled = true;
+    this[$scene].imageProcessingConfiguration.toneMappingType =
+        ImageProcessingConfiguration.TONEMAPPING_ACES;
+
     this[$updateSize]();
 
     const {orbit, target, verticalFoV} = scenario;
