@@ -182,16 +182,21 @@ export class PbrMetallicRoughness {
               this.getOrCreatePbr()[textureProperty] || {index: -1});
     };
 
+    const pbr = this.gltfModel.modelViewer?.model?.materials[this.materialIndex].pbrMetallicRoughness;
+
     if (handle === null) {
       delete this.getOrCreatePbr()[textureProperty];
+      // TODO: Using 3DOM does not work yet, but it would be like this:
+      // pbr?.baseColorTexture?.setTexture(null);
+      await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
+      pbr?.[textureProperty]?.texture?.source?.setURI(handle.uri);
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
+      pbr?.[textureProperty]?.texture?.source?.setURI(handle);
     }
-
-    await this.gltfModel[$onModelViewerDirty]();
   }
 }
 
