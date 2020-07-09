@@ -15,16 +15,12 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineMaterial, MaterialConstructor} from './material.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {Material} from './material.js';
 
 suite('api/material', () => {
   suite('defineMaterial', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineMaterial(ThreeDOMElement);
-      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+      const instance = new Material(new FakeModelKernel(), {
         pbrMetallicRoughness: {
           id: 1,
           baseColorFactor: [0, 0, 0, 1],
@@ -39,16 +35,13 @@ suite('api/material', () => {
 
     suite('the generated class', () => {
       let kernel: FakeModelKernel;
-      let GeneratedConstructor: MaterialConstructor;
-
 
       setup(() => {
         kernel = new FakeModelKernel();
-        GeneratedConstructor = defineMaterial(ThreeDOMElement);
       });
 
       test('produces elements with the correct owner model', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Material(kernel, {
           pbrMetallicRoughness: {
             id: 1,
             baseColorFactor: [0, 0, 0, 1],
@@ -62,7 +55,7 @@ suite('api/material', () => {
       });
 
       test('expresses the material name when available', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Material(kernel, {
           pbrMetallicRoughness: {
             id: 1,
             baseColorFactor: [0, 0, 0, 1],
