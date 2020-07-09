@@ -77,10 +77,15 @@ export class BabylonViewer extends LitElement {
     if (this[$scene] != null) {
       this[$scene].dispose();
     }
+
+
     this[$scene] = new Scene(this[$engine]);
     this[$scene].imageProcessingConfiguration.toneMappingEnabled = true;
     this[$scene].imageProcessingConfiguration.toneMappingType =
         ImageProcessingConfiguration.TONEMAPPING_ACES;
+    // tone mapping makes a shift on explosure, so it should be increased be
+    // some factor
+    this[$scene].environmentIntensity = 1 / 0.6;
 
     this[$updateSize]();
 
