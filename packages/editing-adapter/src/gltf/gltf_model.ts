@@ -80,6 +80,8 @@ function areRgbEqual(a: RGB, b: RGB) {
   return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
 }
 
+type PbrTextureProperty = 'baseColorTexture'|'metallicRoughnessTexture';
+
 /** Class for accessing glTF PBR properties. */
 export class PbrMetallicRoughness {
   /**
@@ -158,28 +160,11 @@ export class PbrMetallicRoughness {
     return Promise.resolve(this.gltfModel[$getTextureHandle](index));
   }
 
-  private getOrCreateBaseColorTextureInfo(): gltfSpec.TextureInfo {
-    return (
-        this.getOrCreatePbr().baseColorTexture =
-            this.getOrCreatePbr().baseColorTexture || {index: -1});
-  }
-
   async setBaseColorTexture(handle: TextureHandle|string|null) {
     if (await this.baseColorTexture === handle) {
       return;
     }
-
-    if (handle === null) {
-      delete this.getOrCreatePbr().baseColorTexture;
-    } else if (handle instanceof TextureHandle) {
-      this.getOrCreateBaseColorTextureInfo().index =
-          this.gltfModel[$getTextureIndex](handle);
-    } else if (typeof handle === 'string') {
-      this.getOrCreateBaseColorTextureInfo().index =
-          this.gltfModel[$getOrAddTextureByUri](handle);
-    }
-
-    await this.gltfModel[$onModelViewerDirty]();
+    await this.setTexture('baseColorTexture', handle);
   }
 
   get metallicRoughnessTexture(): Promise<TextureHandle|null> {
@@ -188,30 +173,36 @@ export class PbrMetallicRoughness {
     return Promise.resolve(this.gltfModel[$getTextureHandle](index));
   }
 
-  private getOrCreateMetallicRoughnessTextureInfo(): gltfSpec.TextureInfo {
-    return (
-        this.getOrCreatePbr().metallicRoughnessTexture =
-            this.getOrCreatePbr().metallicRoughnessTexture || {index: -1});
-  }
-
   async setMetallicRoughnessTexture(handle: TextureHandle|string|null) {
     if (await this.metallicRoughnessTexture === handle) {
       return;
     }
+    await this.setTexture('metallicRoughnessTexture', handle);
+  }
+
+  async setTexture(
+      textureProperty: PbrTextureProperty, handle: TextureHandle|string|null) {
+    const getOrCreateTexInfo = () => {
+      return (
+          this.getOrCreatePbr()[textureProperty] =
+              this.getOrCreatePbr()[textureProperty] || {index: -1});
+    };
 
     if (handle === null) {
-      delete this.getOrCreatePbr().metallicRoughnessTexture;
+      delete this.getOrCreatePbr()[textureProperty];
     } else if (handle instanceof TextureHandle) {
-      this.getOrCreateMetallicRoughnessTextureInfo().index =
-          this.gltfModel[$getTextureIndex](handle);
+      getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
     } else if (typeof handle === 'string') {
-      this.getOrCreateMetallicRoughnessTextureInfo().index =
+      getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
     }
 
     await this.gltfModel[$onModelViewerDirty]();
   }
 }
+
+type MaterialTextureProperty =
+    'normalTexture'|'emissiveTexture'|'occlusionTexture';
 
 /** Class for accessing material properties. */
 export class Material {
@@ -260,25 +251,6 @@ export class Material {
     return Promise.resolve(this.materialJson.doubleSided);
   }
 
-  private getOrCreateNormalTextureInfo(): gltfSpec.MaterialNormalTextureInfo {
-    return (
-        this.materialJson.normalTexture =
-            this.materialJson.normalTexture || {index: -1});
-  }
-
-  private getOrCreateEmissiveTextureInfo(): gltfSpec.TextureInfo {
-    return (
-        this.materialJson.emissiveTexture =
-            this.materialJson.emissiveTexture || {index: -1});
-  }
-
-  private getOrCreateOcclusionTextureInfo():
-      gltfSpec.MaterialOcclusionTextureInfo {
-    return (
-        this.materialJson.occlusionTexture =
-            this.materialJson.occlusionTexture || {index: -1});
-  }
-
   async setDoubleSided(doubleSided: boolean|undefined) {
     if (await this.doubleSided === doubleSided) {
       return;
@@ -292,36 +264,14 @@ export class Material {
     if (await this.normalTexture === handle) {
       return;
     }
-
-    if (handle === null) {
-      delete this.materialJson.normalTexture;
-    } else if (handle instanceof TextureHandle) {
-      this.getOrCreateNormalTextureInfo().index =
-          this.gltfModel[$getTextureIndex](handle);
-    } else if (typeof handle === 'string') {
-      this.getOrCreateNormalTextureInfo().index =
-          this.gltfModel[$getOrAddTextureByUri](handle);
-    }
-
-    await this.gltfModel[$onModelViewerDirty]();
+    await this.setTexture('normalTexture', handle);
   }
 
   async setEmissiveTexture(handle: TextureHandle|string|null) {
     if (await this.emissiveTexture === handle) {
       return;
     }
-
-    if (handle === null) {
-      delete this.materialJson.emissiveTexture;
-    } else if (handle instanceof TextureHandle) {
-      this.getOrCreateEmissiveTextureInfo().index =
-          this.gltfModel[$getTextureIndex](handle);
-    } else if (typeof handle === 'string') {
-      this.getOrCreateEmissiveTextureInfo().index =
-          this.gltfModel[$getOrAddTextureByUri](handle);
-    }
-
-    await this.gltfModel[$onModelViewerDirty]();
+    await this.setTexture('emissiveTexture', handle);
   }
 
   async setEmissiveFactor(emissiveFactor: RGB|undefined) {
@@ -338,18 +288,7 @@ export class Material {
     if (await this.occlusionTexture === handle) {
       return;
     }
-
-    if (handle === null) {
-      delete this.materialJson.occlusionTexture;
-    } else if (handle instanceof TextureHandle) {
-      this.getOrCreateOcclusionTextureInfo().index =
-          this.gltfModel[$getTextureIndex](handle);
-    } else if (typeof handle === 'string') {
-      this.getOrCreateOcclusionTextureInfo().index =
-          this.gltfModel[$getOrAddTextureByUri](handle);
-    }
-
-    await this.gltfModel[$onModelViewerDirty]();
+    await this.setTexture('occlusionTexture', handle);
   }
 
   async setAlphaMode(alphaMode: string|undefined) {
@@ -368,6 +307,28 @@ export class Material {
     }
 
     this.materialJson.alphaCutoff = alphaCutoff;
+
+    await this.gltfModel[$onModelViewerDirty]();
+  }
+
+  async setTexture(
+      textureProperty: MaterialTextureProperty,
+      handle: TextureHandle|string|null) {
+    const getOrCreateTexInfo = () => {
+      // This string cast is necessary to pass type checks.
+      return (
+          this.materialJson[textureProperty as string] =
+              this.materialJson[textureProperty] || {index: -1});
+    };
+
+    if (handle === null) {
+      delete this.materialJson[textureProperty];
+    } else if (handle instanceof TextureHandle) {
+      getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
+    } else if (typeof handle === 'string') {
+      getOrCreateTexInfo().index =
+          this.gltfModel[$getOrAddTextureByUri](handle);
+    }
 
     await this.gltfModel[$onModelViewerDirty]();
   }
