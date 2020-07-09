@@ -132,6 +132,27 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         expect(nextColor).to.be.eql([1, 1, 1, 1]);
       });
+
+      test('allows the scene graph to be manipulated', async () => {
+        element.src = HORSE_GLB_PATH;
+
+        await waitForEvent(element, 'scene-graph-ready');
+
+        await element.model!.materials[0]
+            .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
+
+        const color =
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
+
+        expect(color).to.be.eql([1, 0, 0, 1]);
+
+        const newMaterial =
+            (element[$scene].model.modelContainer.children[0].children[0] as
+             Mesh)
+                .material as MeshStandardMaterial;
+
+        expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
+      });
     });
   });
 });

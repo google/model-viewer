@@ -30,8 +30,6 @@ const $currentGLTF = Symbol('currentGLTF');
 const $modelGraft = Symbol('modelGraft');
 const $mainPort = Symbol('mainPort');
 const $threePort = Symbol('threePort');
-const $graftPort = Symbol('graftPort');
-const $kernelPort = Symbol('kernelPort');
 const $manipulator = Symbol('manipulator');
 const $modelKernel = Symbol('modelKernel');
 const $onModelChange = Symbol('onModelChange');
@@ -61,8 +59,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
     protected[$mainPort]: MessagePort|null = null;
     protected[$threePort]: MessagePort|null = null;
-    protected[$graftPort]: MessagePort|null = null;
-    protected[$kernelPort]: MessagePort|null = null;
     protected[$manipulator]: ModelGraftManipulator|null = null;
     protected[$modelKernel]: ModelKernel|null = null;
 
@@ -94,9 +90,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$mainPort] = port1;
       this[$threePort] = port2;
       this[$mainPort]!.onmessage = this[$onModelChange];
-      const channel = new MessageChannel();
-      this[$graftPort] = channel.port1;
-      this[$kernelPort] = channel.port2;
     }
 
     disconnectedCallback() {
@@ -112,8 +105,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$modelKernel] != null) {
         this[$modelKernel]!.deactivate();
       }
-      this[$graftPort] = null;
-      this[$kernelPort] = null;
     }
 
     updated(changedProperties: Map<string|symbol, unknown>): void {
@@ -164,17 +155,25 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
           modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
 
-          if (modelGraft != null) {
-            manipulator =
-                new ModelGraftManipulator(modelGraft, this[$graftPort]!);
-          }
+          let channel = null;
+          if (modelGraft != null && modelGraft.model != null) {
+            channel = new MessageChannel();
+            manipulator = new ModelGraftManipulator(modelGraft, channel.port1);
 
-          this[$threePort]!.postMessage({
-            type: ThreeDOMMessageType.MODEL_CHANGE,
-            model: modelGraft != null && modelGraft.model != null ?
-                modelGraft.model.toJSON() :
-                null
-          });
+            this[$threePort]!.postMessage(
+                {
+                  type: ThreeDOMMessageType.MODEL_CHANGE,
+                  model: modelGraft.model.toJSON(),
+                  port: channel.port2
+                },
+                [channel.port2]);
+          } else {
+            this[$threePort]!.postMessage({
+              type: ThreeDOMMessageType.MODEL_CHANGE,
+              model: null,
+              port: null
+            });
+          }
         }
       }
 
@@ -197,7 +196,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         if (serialized != null) {
-          this[$modelKernel] = new ModelKernel(this[$kernelPort]!, serialized);
+          this[$modelKernel] = new ModelKernel(data.port, serialized);
         } else {
           this[$modelKernel] = null;
         }
