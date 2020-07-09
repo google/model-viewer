@@ -15,32 +15,25 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineTextureInfo, TextureInfoConstructor} from './texture-info.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {TextureInfo} from './texture-info.js';
 
 suite('api/texture-info', () => {
   suite('defineTextureInfo', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineTextureInfo(ThreeDOMElement);
-      const instance = new GeneratedConstructor(new FakeModelKernel(), {id: 0});
+      const instance = new TextureInfo(new FakeModelKernel(), {id: 0});
 
       expect(instance).to.be.ok;
     });
 
     suite('the generated class', () => {
       let kernel: FakeModelKernel;
-      let GeneratedConstructor: TextureInfoConstructor;
-
 
       setup(() => {
         kernel = new FakeModelKernel();
-        GeneratedConstructor = defineTextureInfo(ThreeDOMElement);
       });
 
       test('produces elements with the correct owner model', () => {
-        const instance = new GeneratedConstructor(kernel, {id: 0});
+        const instance = new TextureInfo(kernel, {id: 0});
 
         expect(instance.ownerModel).to.be.equal(kernel.model);
       });

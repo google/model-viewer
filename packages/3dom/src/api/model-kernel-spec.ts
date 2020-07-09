@@ -14,28 +14,12 @@
  */
 
 import {RGBA} from '../api.js';
-import {ThreeDOMMessageType} from '../protocol.js';
-import {FakeImage, FakeMaterial, FakeModel, FakePBRMetallicRoughness, FakeSampler, FakeTexture, FakeTextureInfo, FakeThreeDOMElement} from '../test-helpers.js';
 import {getLocallyUniqueId} from '../utilities.js';
 
-import {defineModelKernel, ModelKernel, ModelKernelConstructor} from './model-kernel.js';
+import {ModelKernel} from './model-kernel.js';
 
 suite('api/model-kernel', () => {
   suite('defineModelKernel', () => {
-    let ModelKernel: ModelKernelConstructor;
-    setup(() => {
-      ModelKernel = defineModelKernel(
-          ThreeDOMMessageType,
-          FakeThreeDOMElement,
-          FakeModel,
-          FakeMaterial,
-          FakePBRMetallicRoughness,
-          FakeSampler,
-          FakeImage,
-          FakeTexture,
-          FakeTextureInfo);
-    });
-
     suite('ModelKernel', () => {
       test('deserializes a sparse, serialized model', () => {
         const channel = new MessageChannel();

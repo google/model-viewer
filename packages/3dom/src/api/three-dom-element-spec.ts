@@ -15,21 +15,19 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineThreeDOMElement} from './three-dom-element.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
 suite('api/three-dom-element', () => {
   suite('defineThreeDOMElement', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineThreeDOMElement();
-      const instance = new GeneratedConstructor(new FakeModelKernel());
+      const instance = new ThreeDOMElement(new FakeModelKernel());
 
       expect(instance).to.be.ok;
     });
 
     test('produces elements with the correct owner model', () => {
       const kernel = new FakeModelKernel();
-      const GeneratedConstructor = defineThreeDOMElement();
-      const instance = new GeneratedConstructor(kernel);
+      const instance = new ThreeDOMElement(kernel);
 
       expect(instance.ownerModel).to.be.equal(kernel.model);
     });

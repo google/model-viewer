@@ -15,16 +15,12 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineTexture, TextureConstructor} from './texture.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {Texture} from './texture.js';
 
 suite('api/texture', () => {
   suite('defineTexture', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineTexture(ThreeDOMElement);
-      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+      const instance = new Texture(new FakeModelKernel(), {
         id: 0,
       });
 
@@ -33,21 +29,19 @@ suite('api/texture', () => {
 
     suite('the generated class', () => {
       let kernel: FakeModelKernel;
-      let GeneratedConstructor: TextureConstructor;
 
       setup(() => {
         kernel = new FakeModelKernel();
-        GeneratedConstructor = defineTexture(ThreeDOMElement);
       });
 
       test('produces elements with the correct owner model', () => {
-        const instance = new GeneratedConstructor(kernel, {id: 0});
+        const instance = new Texture(kernel, {id: 0});
 
         expect(instance.ownerModel).to.be.equal(kernel.model);
       });
 
       test('expresses the texture name when available', () => {
-        const instance = new GeneratedConstructor(kernel, {
+        const instance = new Texture(kernel, {
           id: 0,
           name: 'foo',
         });
@@ -57,7 +51,7 @@ suite('api/texture', () => {
 
       suite('with a configured sampler', () => {
         test('expresses the sampler on the instance', () => {
-          const instance = new GeneratedConstructor(kernel, {
+          const instance = new Texture(kernel, {
             id: 0,
             name: 'foo',
             sampler: {
