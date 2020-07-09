@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig} from '../common.js';
+import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
@@ -31,12 +31,47 @@ export class RenderingScenario extends LitElement {
 
   @property({type: Array}) exclude: Array<string> = [];
 
+  @property({type: Object}) analysis: ScenarioRecord|null = null;
+
   get basePath() {
     if (!this.name) {
       return '';
     }
 
     return `./results/${this.name}`;
+  }
+
+  updated(changedProperties: Map<any, any>) {
+    super.updated(changedProperties);
+
+    if (this.analysis == null) {
+      this.loadAnalysis();
+    }
+  }
+
+  private toDecibels(rmsDistanceRatio: number) {
+    return 10 * Math.log10(rmsDistanceRatio);
+  }
+
+  private async loadAnalysis() {
+    const analysisPath = `${this.basePath}/analysis.json`;
+    this.analysis = await (await fetch(analysisPath)).json();
+  }
+
+  private metricTemplate(
+      analysisResults: Array<ImageComparisonAnalysis>, goldenName: string) {
+    const rmsInDecibel =
+        this.toDecibels(analysisResults[0].rmsDistanceRatio).toFixed(2)
+    return html` <span>${rmsInDecibel} dB </span>
+      <div class="tooltip">
+        <span class="question-icon"> </span>
+        <span class="tooltiptext">
+          Root mean square(RMS) color distance between ${goldenName} 
+          and current version of model-viewer on rendering ${
+        this.name} in decibels.
+          The decibel is given by: 10 * log(RMS). More negative means a closer match.
+        </span>
+      </div>`
   }
 
   render() {
@@ -49,17 +84,27 @@ export class RenderingScenario extends LitElement {
                      file: 'model-viewer.png'
                    }].concat(this.goldens)
                        .filter(golden => !this.exclude.includes(golden.name))
-                       .map(golden => html`
-<div class="screenshot">
-  <header>
-    <h2>${golden.description}</h2>
-  </header>
-  <div class="check"></div>
-  <img data-id="${this.name} ${golden.name}"
-       style="width:${width}px" src="${basePath}/${golden.file}">
-</div>`);
+                       .map(
+                           (golden, index) => html`
+              <div class="screenshot">
+                <header>
+                  <h2>${golden.description}</h2>
+                </header>
+                <div class="check"></div>
+                <img data-id="${this.name} ${golden.name}"
+                    style="width:${width}px" src="${basePath}/${golden.file}">
+                  <div class = "metrics">
+                    ${
+                               index == 0 || this.analysis == null ?
+                                   html`<span>---</span>` :
+                                   this.metricTemplate(
+                                       this.analysis.analysisResults[index - 1],
+                                       golden.name)}
+                  </div>
+              </div>`);
 
     return html`
+
 <style>
 :host {
   display: inline-flex;
@@ -80,11 +125,49 @@ h1 {
   margin: 0.166em 0.33em 0.33em;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  opacity: 0.4;
+  visibility: hidden;
+  width: 200px;
+  font-size: 0.8em;
+  background-color: black;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 5px 5px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.question-icon {
+  background-image: url(../../shared-assets/icons/help_outline-24px.svg);
+  background-size : 0.8em;
+  background-repeat: no-repeat;
+  background-position: 0% 100%;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+}
+
+.metrics {
+  text-align: center;
+  height: 2em;
+}
+
 .screenshot > header {
   display: block;
   position: absolute;
   width: 100%;
-  bottom: 1em;
+  bottom: 3em;
   left: 0;
   text-align: center;
 
