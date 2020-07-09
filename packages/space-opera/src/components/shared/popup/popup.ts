@@ -33,13 +33,11 @@ export class PopUp extends LitElement {
 
   render() {
     return html`
-  <div>
-    <div class="PopupLabel" @click="${this.togglePopup}">
-      <slot name="label"></slot>
-    </div>
-    <div class="PopupContainer" ?open=${this.open}>
-      <slot name="content"></slot>
-    </div>
+  <div class="PopupLabel" @click="${this.togglePopup}">
+    <slot name="label"></slot>
+  </div>
+  <div class="PopupContainer" ?open=${this.open}>
+    <slot name="content"></slot>
   </div>
   `;
   }
