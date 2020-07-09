@@ -185,6 +185,7 @@ export class PbrMetallicRoughness {
     };
 
     const pbr = this.gltfModel.modelViewer?.model?.materials[this.materialIndex].pbrMetallicRoughness;
+    const wasEmpty = !(textureProperty in this.getOrCreatePbr());
 
     if (handle === null) {
       delete this.getOrCreatePbr()[textureProperty];
@@ -193,11 +194,21 @@ export class PbrMetallicRoughness {
       await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
-      pbr?.[textureProperty]?.texture?.source?.setURI(handle.uri);
+      if(wasEmpty) {
+        await this.gltfModel[$onModelViewerDirty]();
+      }
+      else {
+        pbr?.[textureProperty]?.texture?.source?.setURI(handle.uri);
+      }
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
-      pbr?.[textureProperty]?.texture?.source?.setURI(handle);
+      if(wasEmpty) {
+        await this.gltfModel[$onModelViewerDirty]();
+      }
+      else {
+        pbr?.[textureProperty]?.texture?.source?.setURI(handle);
+      }
     }
   }
 }
@@ -323,6 +334,7 @@ export class Material {
     };
 
     const material = this.gltfModel.modelViewer?.model?.materials[this.materialIndex];
+    const wasEmpty = !(textureProperty in this.materialJson);
 
     if (handle === null) {
       delete this.materialJson[textureProperty];
@@ -331,11 +343,21 @@ export class Material {
       await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
-      material?.[textureProperty]?.texture?.source?.setURI(handle.uri);
+      if(wasEmpty) {
+        await this.gltfModel[$onModelViewerDirty]();
+      }
+      else {
+        material?.[textureProperty]?.texture?.source?.setURI(handle.uri);
+      }
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
-      material?.[textureProperty]?.texture?.source?.setURI(handle);
+      if(wasEmpty) {
+        await this.gltfModel[$onModelViewerDirty]();
+      }
+      else {
+        material?.[textureProperty]?.texture?.source?.setURI(handle);
+      }
     }
   }
 }
