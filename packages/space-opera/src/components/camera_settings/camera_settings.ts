@@ -76,9 +76,7 @@ export const dispatchInitialOrbit = registerStateMutator(
       };
     });
 
-/**
- * Dispatch changes to auto rotate
- */
+/** Dispatch changes to auto rotate */
 export const dispatchAutoRotate =
     registerStateMutator('SET_AUTO_ROTATE', (state, autoRotate?: boolean) => {
       state.config = {...state.config, autoRotate};

@@ -65,9 +65,7 @@ export const dispatchAddEnvironmentImage = registerStateMutator(
       state.environmentImages = [...state.environmentImages, image];
     });
 
-/**
- * Dispatch an edit to model viewer exposure attribute
- */
+/** Dispatch an edit to model viewer exposure attribute */
 export const dispatchUseEnvAsSkybox = registerStateMutator(
     'SET_USE_ENV_AS_SKYBOX', (state, useEnvAsSkybox?: boolean) => {
       state.config = {...state.config, useEnvAsSkybox};
