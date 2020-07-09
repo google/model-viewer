@@ -17,7 +17,11 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`.PopupLabel {
+export const styles: CSSResult = css`:host {
+  position: relative;
+}
+
+.PopupLabel {
   cursor: pointer;
   display: inline-block;
 }
