@@ -15,8 +15,8 @@
 
 import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, TextureInfo, ThreeDOM} from '@google/3dom/lib/api.js';
 import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
+import {ModelGraftManipulator} from '@google/3dom/lib/facade/model-graft-manipulator.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
-import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
 import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';

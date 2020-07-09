@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {ModelGraft} from './facade/api.js';
-import {MutateMessage, ThreeDOMMessageType} from './protocol.js';
+import {MutateMessage, ThreeDOMMessageType} from '../protocol.js';
+
+import {ModelGraft} from './api.js';
 
 const $modelGraft = Symbol('modelGraft');
 const $port = Symbol('port');
