@@ -129,7 +129,8 @@ export class PbrMetallicRoughness {
     }
     this.getOrCreatePbr().roughnessFactor = factor;
 
-    await this.gltfModel[$onModelViewerDirty]();
+    const model = this.gltfModel.modelViewer?.model;
+    model?.materials[this.materialIndex].pbrMetallicRoughness.setRoughnessFactor(factor);
   }
 
   get metallicFactor(): Promise<number> {
@@ -145,7 +146,8 @@ export class PbrMetallicRoughness {
     }
     this.getOrCreatePbr().metallicFactor = factor;
 
-    await this.gltfModel[$onModelViewerDirty]();
+    const model = this.gltfModel.modelViewer?.model;
+    model?.materials[this.materialIndex].pbrMetallicRoughness.setMetallicFactor(factor);
   }
 
   get baseColorTexture(): Promise<TextureHandle|null> {
