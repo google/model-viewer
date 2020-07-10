@@ -37,4 +37,13 @@ export const styles: CSSResult = css`model-viewer {
   position: absolute;
   right: 25px;
 }
+
+.HelpText {
+  font-family: Roboto;
+  font-size: 20pt;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 `;
