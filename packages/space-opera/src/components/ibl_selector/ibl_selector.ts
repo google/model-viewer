@@ -91,8 +91,7 @@ export const dispatchShadowSoftness = registerStateMutator(
 
 const DEFAULT_SHADOW_SOFTNESS = 1;
 
-// TODO:: Support HDR images
-const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',');
+const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
 /**
  * IBL environment selector.
@@ -165,13 +164,16 @@ export class IblSelector extends ConnectedLitElement {
       return;
     }
 
-    const name = (files[0] as File).name;
+    const filename = (files[0] as File).name;
 
     const arrayBuffer = await files[0].arrayBuffer();
-    const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer);
-    dispatchAddEnvironmentImage({uri: url.unsafeUrl, name});
+    const safeObjectUrl = createSafeObjectUrlFromArrayBuffer(arrayBuffer);
+    const unsafeUrl = filename.match(/\.(hdr)$/) ?
+        safeObjectUrl.unsafeUrl + '#.hdr' :
+        safeObjectUrl.unsafeUrl;
 
-    dispatchEnvrionmentImage(url.unsafeUrl);
+    dispatchAddEnvironmentImage({uri: unsafeUrl, name: filename});
+    dispatchEnvrionmentImage(unsafeUrl);
   }
 
   // TODO: On snippet input if IBL is defined, select the
