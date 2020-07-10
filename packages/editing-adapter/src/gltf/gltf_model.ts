@@ -176,7 +176,7 @@ export class PbrMetallicRoughness {
     await this.setTexture('metallicRoughnessTexture', handle);
   }
 
-  async setTexture(
+  private async setTexture(
       textureProperty: PbrTextureProperty, handle: TextureHandle|string|null) {
     const getOrCreateTexInfo = () => {
       return (
@@ -323,7 +323,7 @@ export class Material {
     await this.gltfModel[$onModelViewerDirty]();
   }
 
-  async setTexture(
+  private async setTexture(
       textureProperty: MaterialTextureProperty,
       handle: TextureHandle|string|null) {
     const getOrCreateTexInfo = () => {
