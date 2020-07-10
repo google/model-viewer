@@ -73,7 +73,9 @@ module.exports = function(config) {
     mochaReporter: {output: 'autowatch'},
 
     // Note setting --browsers on the command-line always overrides this list.
-    browsers: [],
+    browsers: [
+      'ChromeHeadless',
+    ],
   });
 
   if (process.env.USE_BROWSER_STACK) {

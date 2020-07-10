@@ -21,7 +21,7 @@
   "scripts": {
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
     "prepack": "rm $(find ./lib -name *-spec.* -o -name test-helpers.*) 2>/dev/null",
-    "build": "npm run build:tsc && npm run build:rollup",
+    "build": "npm run build:tsc",
     "build:tsc": "tsc",
     "build:rollup": "rollup -c",
     "clean": "rm -rf ./lib",

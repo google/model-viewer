@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader';
 import {Object3D} from 'three/src/core/Object3D.js';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {ThreeDOMCapability} from './api.js';
-import {ThreeDOMExecutionContext} from './context.js';
+import {ModelKernel} from './api/model-kernel.js';
+import {ModelGraftManipulator} from './facade/model-graft-manipulator.js';
 import {CorrelatedSceneGraph} from './facade/three-js/correlated-scene-graph.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
-import {assetPath, loadThreeGLTF, waitForEvent} from './test-helpers.js';
+import {assetPath, loadThreeGLTF} from './test-helpers.js';
 
-const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
-const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
+const prepareConstructsFor = async (url: string) => {
+  const glTF = await loadThreeGLTF(url);
+  const graft = new ModelGraft(url, CorrelatedSceneGraph.from(glTF));
 
-const prepareConstructsFor =
-    async (url: string, capabilities: ThreeDOMCapability[] = []) => {
-  const gltf = await loadThreeGLTF(url);
-  const executionContext = new ThreeDOMExecutionContext(capabilities);
-  const graft = new ModelGraft(url, CorrelatedSceneGraph.from(gltf));
+  const {port1, port2} = new MessageChannel();
+  const graftManipulator = new ModelGraftManipulator(graft, port1);
+  const modelKernel = new ModelKernel(port2, graft.model.toJSON());
 
-  return {executionContext, graft, gltf};
+  return {graftManipulator, modelKernel, glTF};
 };
 
 const imageURL = (() => {
@@ -47,122 +47,97 @@ const imageURL = (() => {
 })();
 
 suite('end-to-end', () => {
-  test('can operate on a scene graph via a custom script in a worker', async () => {
-    const {executionContext, graft, gltf} =
-        await prepareConstructsFor(ASTRONAUT_GLB_PATH, ['material-properties']);
+  suite('with Astronaut.glb', () => {
+    let manipulator: ModelGraftManipulator;
+    let kernel: ModelKernel;
+    let gltf: GLTF;
+    let material: MeshStandardMaterial;
 
-    // Note that this lookup is specific to the Astronaut model and will need
-    // to be adapted in case the model changes:
-    const material =
-        ((gltf.scene.children[0] as Object3D).children[0] as Mesh).material as
-        MeshStandardMaterial;
-
-    executionContext.changeModel(graft);
-
-    executionContext.eval(
-        'model.materials[0].pbrMetallicRoughness.setBaseColorFactor([0, 0, 1])');
-
-    await waitForEvent(graft, 'mutation');
-
-    expect(material.color.r).to.be.equal(0);
-    expect(material.color.b).to.be.equal(1);
-  });
-
-  test('can operate on the artifact of a Three.js GLTFLoader', async () => {
-    const {executionContext, graft, gltf} =
-        await prepareConstructsFor(ASTRONAUT_GLB_PATH, ['material-properties']);
-
-    const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
-        MeshStandardMaterial;
-
-    executionContext.changeModel(graft);
-
-    executionContext.eval(
-        'model.materials[0].pbrMetallicRoughness.setBaseColorFactor([0, 0, 1])');
-
-    await waitForEvent(graft, 'mutation');
-
-    expect(material.color.r).to.be.equal(0);
-    expect(material.color.b).to.be.equal(1);
-  });
-
-  test('expresses the name of a material in the worklet context', async () => {
-    const {executionContext, graft, gltf} = await prepareConstructsFor(
-        ASTRONAUT_GLB_PATH, ['messaging', 'material-properties']);
-
-    const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
-        MeshStandardMaterial;
-
-    executionContext.changeModel(graft);
-
-    const messageEventArrives =
-        waitForEvent<MessageEvent>(executionContext.worker, 'message');
-    executionContext.eval('self.postMessage(model.materials[0].name)');
-
-    const messageEvent = await messageEventArrives;
-
-    expect(messageEvent.data).to.be.ok;
-    expect(messageEvent.data).to.not.be.equal('');
-    expect(messageEvent.data).to.be.equal(material.name);
-  });
-
-  suite('configuring textures', () => {
-    test('can change the base color texture image', async () => {
-      const {executionContext, graft, gltf} = await prepareConstructsFor(
-          ASTRONAUT_GLB_PATH, ['messaging', 'material-properties', 'textures']);
-      const textureURL = imageURL(64, 64);
-
-      executionContext.changeModel(graft);
-
-      executionContext.eval(`
-self.addEventListener('message', function(event) {
-  var textureURL = event.data;
-  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(textureURL);
-});
-
-self.postMessage('ready');
-`);
-
-      await waitForEvent(executionContext.worker, 'message');
-
-      executionContext.worker.postMessage(textureURL);
-
-      await waitForEvent(graft, 'mutation');
-
-      const material = (gltf.scene.children[0]!.children[0] as Mesh).material as
+    setup(async () => {
+      const {graftManipulator, modelKernel, glTF} =
+          await prepareConstructsFor(assetPath('models/Astronaut.glb'));
+      manipulator = graftManipulator;
+      kernel = modelKernel;
+      gltf = glTF;
+      // Note that this lookup is specific to the Astronaut model and will need
+      // to be adapted in case the model changes:
+      material =
+          ((gltf.scene.children[0] as Object3D).children[0] as Mesh).material as
           MeshStandardMaterial;
+    });
 
-      expect(material.map?.image.src).to.be.equal(textureURL);
+    teardown(() => {
+      manipulator.dispose();
+      kernel.deactivate();
+    });
+
+    test(
+        'can operate on a scene graph and the artifact of a Three.js GLTFLoader',
+        async () => {
+          await kernel.model.materials[0]
+              .pbrMetallicRoughness.setBaseColorFactor([0, 0, 1, 1]);
+
+          expect(material.color.r).to.be.equal(0);
+          expect(material.color.b).to.be.equal(1);
+
+          const color =
+              kernel.model.materials[0].pbrMetallicRoughness.baseColorFactor;
+
+          expect(color[0]).to.be.equal(0);
+          expect(color[2]).to.be.equal(1);
+        });
+
+    test('expresses the name of a material', async () => {
+      const name = kernel.model.materials[0].name;
+
+      expect(name).to.be.ok;
+      expect(name).to.not.be.equal('');
+      expect(name).to.be.equal(material.name);
+    });
+
+    suite('configuring textures', () => {
+      test('can change the base color texture image', async () => {
+        const textureURL = imageURL(64, 64);
+
+        const texture = kernel.model.materials[0]
+                            .pbrMetallicRoughness.baseColorTexture!.texture!;
+
+        await texture.source!.setURI(textureURL);
+
+        expect(texture.source!.uri).to.be.equal(textureURL);
+        expect(material.map!.image.src).to.be.equal(textureURL);
+      });
     });
   });
 
-  suite('scene graph order', () => {
-    test('orders materials deterministically', async () => {
-      const {executionContext, graft} = await prepareConstructsFor(
-          ORDER_TEST_GLB_PATH, ['messaging', 'material-properties']);
+  suite('with order-test.glb', () => {
+    let manipulator: ModelGraftManipulator;
+    let kernel: ModelKernel;
 
+    setup(async () => {
+      const {graftManipulator, modelKernel} = await prepareConstructsFor(
+          assetPath('models/order-test/order-test.glb'));
+      manipulator = graftManipulator;
+      kernel = modelKernel;
+    });
 
-      executionContext.changeModel(graft);
+    teardown(() => {
+      manipulator.dispose();
+      kernel.deactivate();
+    });
 
-      const messageEventArrives =
-          waitForEvent<MessageEvent>(executionContext.worker, 'message');
+    suite('scene graph order', () => {
+      test('orders materials deterministically', async () => {
+        const materialNames = kernel.model.materials.map(function(material) {
+          return material.name;
+        });
 
-      executionContext.eval(`
-var materialNames = model.materials.map(function (material) {
-  return material.name;
-});
-
-self.postMessage(JSON.stringify(materialNames));
-      `);
-
-      const messageEvent = await messageEventArrives;
-      const materialNames = JSON.parse(messageEvent.data);
-
-      expect(materialNames).to.be.deep.equal([
-        'Material0',
-        'Material1',
-        'Material2',
-      ]);
+        expect(materialNames).to.be.deep.equal([
+          'Material0',
+          'Material1',
+          'Material2',
+        ]);
+      });
     });
   });
 });

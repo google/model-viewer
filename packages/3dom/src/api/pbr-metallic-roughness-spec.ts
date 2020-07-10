@@ -16,16 +16,12 @@
 import {RGBA} from '../api.js';
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {definePBRMetallicRoughness} from './pbr-metallic-roughness.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 
 suite('api/pbr-metallic-roughness', () => {
   suite('definePBRMetallicRoughness', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(new FakeModelKernel(), {
+      const instance = new PBRMetallicRoughness(new FakeModelKernel(), {
         id: 0,
         baseColorFactor: [0, 0, 0, 1],
         metallicFactor: 0,
@@ -37,8 +33,7 @@ suite('api/pbr-metallic-roughness', () => {
 
     test('produces elements with the correct owner model', () => {
       const kernel = new FakeModelKernel();
-      const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(kernel, {
+      const instance = new PBRMetallicRoughness(kernel, {
         id: 0,
         baseColorFactor: [0, 0, 0, 1],
         metallicFactor: 0,
@@ -50,14 +45,12 @@ suite('api/pbr-metallic-roughness', () => {
 
     suite('PBRMetallicRoughness', () => {
       test('is configured with the serialized material parameters', () => {
-        const GeneratedConstructor =
-            definePBRMetallicRoughness(ThreeDOMElement);
         const baseColorFactor: RGBA =
             [Math.random(), Math.random(), Math.random(), Math.random()];
         const metallicFactor: number = Math.random();
         const roughnessFactor: number = Math.random();
 
-        const instance = new GeneratedConstructor(
+        const instance = new PBRMetallicRoughness(
             new FakeModelKernel(),
             {id: 0, baseColorFactor, metallicFactor, roughnessFactor});
 

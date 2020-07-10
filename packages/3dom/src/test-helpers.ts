@@ -17,7 +17,7 @@ import {EventDispatcher, Group} from 'three';
 import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {Image, Material, Model, PBRMetallicRoughness, RGBA, Sampler, Texture, TextureInfo, ThreeDOMElement, ThreeDOMElementMap} from './api.js';
-import {ModelKernel} from './api/model-kernel.js';
+import {ModelKernelInterface} from './api/model-kernel.js';
 import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
 import {SerializedElementMap, SerializedImage, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedSampler} from './protocol.js';
 
@@ -31,7 +31,8 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
   readonly metallicRoughnessTexture = null;
 
   constructor(
-      private kernel: ModelKernel, _serialized: SerializedPBRMetallicRoughness,
+      private kernel: ModelKernelInterface,
+      _serialized: SerializedPBRMetallicRoughness,
       readonly name = `fake-pbr-metallic-roughness-${
           FakePBRMetallicRoughness.count++}`) {
   }
@@ -66,7 +67,8 @@ export class FakeMaterial extends FakeThreeDOMElement implements Material {
   private static count = 0;
 
   constructor(
-      private kernel: ModelKernel, private serialized: SerializedMaterial,
+      private kernel: ModelKernelInterface,
+      private serialized: SerializedMaterial,
       readonly name = `fake-material-${FakeMaterial.count++}`) {
     super();
   }
@@ -81,7 +83,7 @@ export class FakeModel extends FakeThreeDOMElement implements Model {
   private static count = 0;
 
   constructor(
-      kernel: ModelKernel, serialized: SerializedModel,
+      kernel: ModelKernelInterface, serialized: SerializedModel,
       readonly name = `fake-model-${FakeModel.count++}`) {
     super();
     const materials: Material[] = [];
@@ -101,7 +103,7 @@ export class FakeImage extends FakeThreeDOMElement implements Image {
   }
 
   constructor(
-      _kernel: ModelKernel, _serialized: SerializedImage,
+      _kernel: ModelKernelInterface, _serialized: SerializedImage,
       readonly name = `fake-image-${FakeImage.count++}`) {
     super();
   }
@@ -120,7 +122,7 @@ export class FakeSampler extends FakeThreeDOMElement implements Sampler {
   wrapT: WrapMode = 10497;
 
   constructor(
-      _kernel: ModelKernel, serialized: SerializedSampler,
+      _kernel: ModelKernelInterface, serialized: SerializedSampler,
       readonly name = serialized.name || `fake-image-${FakeSampler.count++}`) {
     super();
   }
@@ -175,7 +177,7 @@ export const FakeThreeDOMElementMap = {
   'texture-info': FakeTextureInfo
 };
 
-export class FakeModelKernel implements ModelKernel {
+export class FakeModelKernel implements ModelKernelInterface {
   readonly model: Model = {} as unknown as Model;
 
   async mutate(_element: ThreeDOMElement, _property: string, _value: unknown):

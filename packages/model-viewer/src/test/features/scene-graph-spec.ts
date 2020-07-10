@@ -18,7 +18,6 @@ import {Mesh, MeshStandardMaterial} from 'three';
 import {IS_IE11} from '../../constants.js';
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
@@ -26,14 +25,9 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
+const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
-  if (IS_IE11) {
-    // TODO(#999): Unskip this suite when we support IE11 in 3DOM
-    console.warn('Skipping this suite for IE11 only');
-    return;
-  }
-
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement:
@@ -55,33 +49,12 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   });
 
   teardown(() => {
-    const {worklet} = element;
-
-    if (worklet != null) {
-      worklet.terminate();
-    }
-
     document.body.removeChild(element);
   });
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('without a scene graph worklet script', () => {
-    suite('with a loaded model', () => {
-      setup(async () => {
-        element.src = ASTRONAUT_GLB_PATH;
-
-        await waitForEvent(element, 'load');
-        await rafPasses();
-      });
-
-      test('does not activate a scene graph worklet', () => {
-        expect(element.worklet).to.not.be.ok;
-      });
-    });
-  });
-
-  suite('scene export', () => {
+  (IS_IE11 ? suite.skip : suite)('scene export', () => {
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;
@@ -104,134 +77,81 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
+  (IS_IE11 ? suite.skip : suite)('with a loaded scene graph', () => {
+    let material: MeshStandardMaterial;
 
-  suite('with a scene graph worklet script', () => {
-    test('eventually creates a new worklet', async () => {
-      const script = document.createElement('script');
-      script.type = 'experimental-scene-graph-worklet';
-      script.textContent = 'console.log("Hello, worklet!");';
+    setup(async () => {
+      element.src = ASTRONAUT_GLB_PATH;
 
-      element.appendChild(script);
+      await waitForEvent(element, 'scene-graph-ready');
 
-      await waitForEvent(element, 'worklet-created');
-
-      expect(element.worklet).to.be.ok;
+      material = (element[$scene]
+                      .model.modelContainer.children[0]
+                      .children[0]
+                      .children[0] as Mesh)
+                     .material as MeshStandardMaterial;
     });
 
-    suite('in an external script file', () => {
-      test('eventually creates a new worklet', async () => {
-        const scriptText = 'console.log("Hello, worklet!");';
-        const url = URL.createObjectURL(
-            new Blob([scriptText], {type: 'text/javascript'}));
+    test('allows the scene graph to be manipulated', async () => {
+      await element.model!.materials[0].pbrMetallicRoughness.setBaseColorFactor(
+          [1, 0, 0, 1]);
 
-        const script = document.createElement('script');
-        script.type = 'experimental-scene-graph-worklet';
-        script.src = url;
+      expect(material.color).to.include({r: 1, g: 0, b: 0});
 
-        try {
-          element.appendChild(script);
+      const color =
+          element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
-          await waitForEvent(element, 'worklet-created');
-
-          expect(element.worklet).to.be.ok;
-        } finally {
-          if (url != null) {
-            URL.revokeObjectURL(url);
-          }
-        }
-      });
+      expect(color).to.be.eql([1, 0, 0, 1]);
     });
 
-    suite('with a loaded model', () => {
-      setup(async () => {
-        element.src = ASTRONAUT_GLB_PATH;
+    test('image.setURI sets the appropriate texture', async () => {
+      await element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture!.texture!.source!.setURI(
+              SUNRISE_IMG_PATH);
 
-        await waitForEvent(element, 'load');
-        await rafPasses();
+      const uri =
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture!.texture!.source!.uri;
+
+      expect(uri).to.be.eql(SUNRISE_IMG_PATH);
+    });
+
+    suite('when the model changes', () => {
+      test('updates when the model changes', async () => {
+        const color =
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
+
+        expect(color).to.be.eql([0.5, 0.5, 0.5, 1]);
+
+        element.src = HORSE_GLB_PATH;
+
+        await waitForEvent(element, 'scene-graph-ready');
+
+        const nextColor =
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
+
+        expect(nextColor).to.be.eql([1, 1, 1, 1]);
       });
 
       test('allows the scene graph to be manipulated', async () => {
-        const scene = element[$scene] as ModelScene;
+        element.src = HORSE_GLB_PATH;
 
-        const script = document.createElement('script');
+        await waitForEvent(element, 'scene-graph-ready');
 
-        script.type = 'experimental-scene-graph-worklet';
-        script.setAttribute('allow', 'material-properties; messaging');
-        script.textContent = `
-self.addEventListener('model-change', function() {
-  model.materials[0].pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]).then(function() {
-    self.postMessage('done');
-  });
-});
-`;
+        await element.model!.materials[0]
+            .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
 
-        element.appendChild(script);
+        const color =
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
-        await waitForEvent(element, 'worklet-created');
+        expect(color).to.be.eql([1, 0, 0, 1]);
 
-        await waitForEvent(element.worklet!, 'message');
+        const newMaterial =
+            (element[$scene].model.modelContainer.children[0].children[0] as
+             Mesh)
+                .material as MeshStandardMaterial;
 
-        expect(
-            ((scene.model.modelContainer.children[0].children[0].children[0] as
-              Mesh)
-                 .material as MeshStandardMaterial)
-                .color)
-            .to.include({r: 1, g: 0, b: 0});
-      });
-
-      test(
-          'allows image.setURI to be called when "textures" is in capabilities',
-          async () => {
-            const script = document.createElement('script');
-            script.type = 'experimental-scene-graph-worklet';
-            script.setAttribute('allow', 'messaging; textures');
-            script.textContent = `
-self.addEventListener('model-change', function() {
-  model.materials[0].pbrMetallicRoughness.baseColorTexture.texture.source.setURI(null).then(function() {
-    self.postMessage('done');
-  });
-});
-`;
-            element.appendChild(script);
-            await waitForEvent(element, 'worklet-created');
-            await waitForEvent(element.worklet!, 'message');
-            // No further checks needed. If the call is disallowed, we would
-            // never get the 'message' event, thus failing via timeout.
-          });
-
-      suite('when the model changes', () => {
-        test('updates when the model changes', async () => {
-          const script = document.createElement('script');
-
-          script.type = 'experimental-scene-graph-worklet';
-          script.setAttribute('allow', 'material-properties; messaging');
-          script.textContent = `
-self.addEventListener('model-change', function() {
-  self.postMessage(JSON.stringify(model.materials[0].pbrMetallicRoughness.baseColorFactor));
-});
-`;
-
-          element.appendChild(script);
-
-          await waitForEvent(element, 'worklet-created');
-
-          const message =
-              await waitForEvent<MessageEvent>(element.worklet!, 'message');
-
-          expect(JSON.parse(message.data)).to.be.eql([0.5, 0.5, 0.5, 1]);
-
-          const nextMessageArrives =
-              waitForEvent<MessageEvent>(element.worklet!, 'message');
-
-          element.src = HORSE_GLB_PATH;
-
-          await waitForEvent(element, 'load');
-          await rafPasses();
-
-          const nextMessage = await nextMessageArrives;
-
-          expect(JSON.parse(nextMessage.data)).to.be.eql([1, 1, 1, 1]);
-        });
+        expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
       });
     });
   });
