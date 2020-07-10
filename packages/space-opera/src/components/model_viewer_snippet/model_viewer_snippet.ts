@@ -102,22 +102,22 @@ export class ModelViewerSnippet extends LitElement {
 
   @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
 
+  @internalProperty() errors: string[] = [];
+
   async handleSubmitSnippet(event: Event) {
     event.preventDefault();
     if (!this.textArea) return;
-    const textArea = this.textArea;
-    const inputText: string = textArea.value.trim();
+    this.errors = [];
+    const inputText: string = this.textArea.value.trim();
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
-      // Change background color on valid/invalid input.
-      textArea.style.backgroundColor = 'white';
       const config = parseSnippet(inputText);
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
       // TODO:: Properly display errors to user
       for (const error of hotspotErrors) {
-        console.warn(error);
+        this.errors.push(error.message);
       }
 
       try {
@@ -143,13 +143,16 @@ export class ModelViewerSnippet extends LitElement {
                 e.message}`);
       }
     } else {
-      textArea.style.backgroundColor = 'pink';
+      this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
   }
 
   render() {
-    const exampleLoadableSnippet =
-        `<model-viewer src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' autoplay animation-name="Wave" shadow-intensity="0.5"></model-viewer>`;
+    const exampleLoadableSnippet = `<model-viewer
+  src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb'
+  autoplay animation-name="Wave"
+  shadow-intensity="0.5">
+</model-viewer>`;
 
     return html`
     <me-expandable-tab tabName="Import" .open=${true}>
@@ -158,7 +161,9 @@ export class ModelViewerSnippet extends LitElement {
       <br/>
       Or load a model-viewer snippet:<br/>
       <br/>
-      <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
+      <textarea id="mv-input" rows=10
+        >${exampleLoadableSnippet}</textarea>
+      ${this.errors.map(error => html`<div>${error}</div>`)}
       <mwc-button unelevated icon="folder_open"
         @click=${this.handleSubmitSnippet}
         >Import snippet</mwc-button>
@@ -167,6 +172,12 @@ export class ModelViewerSnippet extends LitElement {
 
     <me-export-panel></me-export-panel>
             `;
+  }
+
+  updated() {
+    // Work-around closureZ issue.
+    this.textArea.style.backgroundColor =
+        this.errors.length > 0 ? 'pink' : 'white';
   }
 }
 

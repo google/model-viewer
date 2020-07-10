@@ -55,7 +55,8 @@ function parseHotspotConfig(element: HTMLElement): HotspotConfig {
         `Invalid hotspot slot name: ${element.getAttribute('slot')}`);
   }
   if (!element.dataset['position']) {
-    throw new Error('No position found for hotspot');
+    throw new Error(`No position found for hotspot at slot "${
+        element.getAttribute('slot')}"`);
   }
   const position = parseVector3D(element.dataset['position']);
   const normal = element.dataset['normal'] ?

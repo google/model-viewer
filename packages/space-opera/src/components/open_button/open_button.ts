@@ -42,6 +42,9 @@ import {FileModalElement} from '../file_modal/file_modal.js';
 
   async onClick() {
     const files = await this.fileModal.open();
+    if (!files) {
+      return;
+    }
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     dispatchGltfUrl(url);
