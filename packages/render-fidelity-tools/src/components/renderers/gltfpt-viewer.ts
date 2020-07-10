@@ -86,7 +86,6 @@ export class PathtracingViewer extends LitElement {
 
     await new Promise((resolve) => {
       console.log('Loading resources for', scenario.model);
-      // is this where you load skybox?
       renderer.loadScene(scenario.model, scenario.lighting, () => {
         this[$updateSize]();
         // console.log(this[$canvas]!.width, this[$canvas]!.height);

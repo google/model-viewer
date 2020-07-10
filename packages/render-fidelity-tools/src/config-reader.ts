@@ -41,7 +41,6 @@ export class ConfigReader {
         output.target =
             Object.assign({}, defaultScenario.target, scenario.target);
         output.orbit = Object.assign({}, defaultScenario.orbit, scenario.orbit);
-
         return output;
       }
     }
