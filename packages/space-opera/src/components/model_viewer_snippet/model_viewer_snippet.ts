@@ -115,17 +115,15 @@ export class ModelViewerSnippet extends LitElement {
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
-      // TODO:: Properly display errors to user
       for (const error of hotspotErrors) {
         this.errors.push(error.message);
       }
 
       try {
-        // TODO: Because of update-batching, we need to sleep in
-        // order to force a GLB reload. Better way?
         dispatchGltfUrl(undefined);
+        // Because of update-batching, we need to sleep first to force reload.
         await new Promise(resolve => {
-          setTimeout(resolve, 100);
+          setTimeout(resolve, 0);
         });
 
         dispatchGltfUrl(config.src);

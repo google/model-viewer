@@ -87,7 +87,9 @@ snippet without position',
        const hotspots = parseHotspotsFromSnippet(snippet, errorList);
        expect(hotspots.length).toBe(0);
        expect(errorList.length).toBe(1);
-       expect(errorList[0]).toEqual(new Error('No position found for hotspot'));
+       expect(errorList[0])
+           .toEqual(
+               new Error('No position found for hotspot at slot "hotspot-1"'));
      });
 
   it('returns an empty hotspot list and registers an error when given an invalid \
