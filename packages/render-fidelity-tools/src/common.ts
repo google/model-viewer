@@ -93,7 +93,6 @@ export interface ScenarioConfig {
   verticalFoV: number;
   exclude?: Array<string>;
   renderSkybox: boolean;
-  clearColor: {r: number, g: number, b: number};
   pt?: {numSamples?: number};
 }
 

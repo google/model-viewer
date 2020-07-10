@@ -93,6 +93,7 @@ export class PathtracingViewer extends LitElement {
         renderer.resize(this[$canvas]!.width, this[$canvas]!.height);
 
         if (!scenario.renderSkybox) {
+          // when set to false, it will make the background to be white
           renderer.useBackgroundFromIBL(false);
         }
         resolve();

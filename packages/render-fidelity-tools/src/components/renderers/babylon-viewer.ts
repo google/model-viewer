@@ -88,10 +88,9 @@ export class BabylonViewer extends LitElement {
 
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV, renderSkybox, clearColor} = scenario;
+    const {orbit, target, verticalFoV, renderSkybox} = scenario;
 
-    const {r, g, b} = clearColor;
-    this[$scene].clearColor = new Color4(r, g, b, 1);
+    this[$scene].clearColor = new Color4(1, 1, 1, 1);
 
     const alpha = this[$degToRadians](orbit.theta + 90);
     const beta = this[$degToRadians](orbit.phi);
