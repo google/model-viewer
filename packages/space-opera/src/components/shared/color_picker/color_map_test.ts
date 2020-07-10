@@ -50,7 +50,7 @@ describe('color map test', () => {
 
     expect(colorMap.saturation).toBe(0.46);
     // Allow some room for error in the value.
-    expect(colorMap.value).toBeLessThan(117);
+    expect(colorMap.value).toBeLessThan(118);
     expect(colorMap.value).toBeGreaterThan(115);
 
     expect(dispatchEventSpy).toHaveBeenCalledTimes(1);

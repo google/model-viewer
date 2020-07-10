@@ -108,8 +108,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (url) {
       try {
         this.gltfError = '';
-        // TODO: we should probably do validation of the GLB and
-        // show a UI error if it doesn't unpack successfully.
         const glbContents = await downloadContents(url);
         const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
         const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
