@@ -19,9 +19,9 @@ import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js'
 import {Mesh} from 'three/src/objects/Mesh.js';
 
 import {ModelKernel} from './api/model-kernel.js';
+import {ModelGraftManipulator} from './facade/model-graft-manipulator.js';
 import {CorrelatedSceneGraph} from './facade/three-js/correlated-scene-graph.js';
 import {ModelGraft} from './facade/three-js/model-graft.js';
-import {ModelGraftManipulator} from './model-graft-manipulator.js';
 import {assetPath, loadThreeGLTF} from './test-helpers.js';
 
 const prepareConstructsFor = async (url: string) => {
