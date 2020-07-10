@@ -124,8 +124,7 @@ export class TexturePicker extends LitElement {
 
   async openFileModal() {
     const files = await this.textureFileModal.open();
-
-    if (files.length === 0) {
+    if (!files) {
       return;
     }
 

@@ -38,7 +38,7 @@ export class FileModalElement extends LitElement {
 
   private blobsResolver?: BlobArrayResolver;
 
-  open(): Promise<Blob[]> {
+  open(): Promise<Blob[]|undefined> {
     // Reset this, so the user can reload the same file again.
     this.fileInput.value = '';
     this.show = true;
@@ -76,7 +76,7 @@ export class FileModalElement extends LitElement {
     if (!this.blobsResolver) {
       throw new Error('onCancel called but no blobsResolver was presetn');
     }
-    this.blobsResolver.reject(new Error('File upload cancelled'));
+    this.blobsResolver.resolve(undefined);
     delete this.blobsResolver;
   }
 

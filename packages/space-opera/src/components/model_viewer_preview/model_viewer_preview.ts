@@ -81,6 +81,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$edits]: GltfEdits = INITIAL_GLTF_EDITS;
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
+  @internalProperty() gltfError: string = '';
 
   stateChanged(state: State) {
     this.addHotspotMode = state.addHotspotMode || false;
@@ -105,12 +106,17 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const url = this[$gltfUrl];
     if (url) {
-      // TODO: we should probably do validation of the GLB and
-      // show a UI error if it doesn't unpack successfully.
-      const glbContents = await downloadContents(url);
-      const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
-      const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-      await dispatchGltfAndEdits(gltf);
+      try {
+        this.gltfError = '';
+        // TODO: we should probably do validation of the GLB and
+        // show a UI error if it doesn't unpack successfully.
+        const glbContents = await downloadContents(url);
+        const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
+        const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
+        await dispatchGltfAndEdits(gltf);
+      } catch (error) {
+        this.gltfError = error.message;
+      }
     } else {
       await dispatchGltfAndEdits(undefined);
     }
@@ -170,7 +176,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
         [...renderHotspots(this.hotspots), screenshotButton];
 
     const hasModel = !!editedConfig.src;
-    if (!hasModel) {
+    if (this.gltfError) {
+      childElements.push(
+          html`<div class="ErrorText">Error loading GLB:<br/>${
+              this.gltfError}</div>`);
+    } else if (!hasModel) {
       childElements.push(html`<div class="HelpText">Drag a GLB here!</div>`);
     }
 

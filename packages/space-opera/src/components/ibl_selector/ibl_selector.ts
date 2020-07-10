@@ -160,7 +160,7 @@ export class IblSelector extends ConnectedLitElement {
   async openFileModal() {
     const files = await this.imageFileModal.open();
 
-    if (files.length === 0) {
+    if (!files) {
       return;
     }
 

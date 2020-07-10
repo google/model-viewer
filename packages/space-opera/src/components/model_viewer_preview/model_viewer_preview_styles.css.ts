@@ -46,4 +46,14 @@ export const styles: CSSResult = css`model-viewer {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.ErrorText {
+  font-family: Roboto;
+  color: darkred;
+  font-size: 20pt;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 `;
