@@ -94,6 +94,7 @@ export interface ScenarioConfig {
   exclude?: Array<string>;
   renderSkybox: boolean;
   clearColor: {r: number, g: number, b: number};
+  pt?: {numSamples?: number};
 }
 
 export interface RendererConfig {

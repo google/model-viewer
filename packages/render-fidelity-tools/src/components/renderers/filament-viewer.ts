@@ -230,8 +230,7 @@ export class FilamentViewer extends LitElement {
     this[$renderer].setClearOptions(
         {clearColor: [r, g, b, 1], clear: true, discard: true});
     */
-    const {r, g, b} = scenario.clearColor;
-    this[$view].setClearColor([r, g, b, 1]);
+    this[$view].setClearColor([1000, 1000, 1000, 1]);
 
     // Wait two rAFs to ensure we rendered at least once:
     requestAnimationFrame(() => {

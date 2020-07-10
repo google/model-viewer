@@ -1,0 +1,42 @@
+{
+  "name": "@google/model-viewer-editing-adapter",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Adapter for using model-viewer as a preview and importer/exporter in editing apps.",
+  "scripts": {
+    "prepack": "rm $(find ./lib -name *_test.*)",
+    "build": "npm run build:tsc && npm run build:rollup",
+    "build:tsc": "tsc --incremental && cp src/gltf/*.d.ts lib/gltf",
+    "build:rollup": "rollup -c --environment NODE_ENV:production",
+    "clean": "rm -rf lib && rm -rf dist",
+    "test": "karma start --single-run",
+    "test:ci": "npm run test",
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "contributors": [
+    "Charles Han <charleshan@google.com>",
+    "Daniel Bauman <dbauman@google.com>",
+    "Emma Freeman <efree@google.com>",
+    "Steven An <stevenan@google.com>",
+    "James Ma <ziyanma@google.com>"
+  ],
+  "devDependencies": {
+    "@open-wc/karma-esm": "^2.11.1",
+    "@types/jasmine": "^3.3.13",
+    "karma": "^5.0.2",
+    "karma-browserstack-launcher": "^1.5.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-jasmine": "^3.2.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "rollup": "^0.66.0",
+    "rollup-plugin-node-resolve": "^3.0.0"
+  },
+  "dependencies": {
+    "@google/model-viewer": "^1.0.0",
+    "ts-closure-library": "^2019.11.1-1.10"
+  }
+}
