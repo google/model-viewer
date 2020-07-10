@@ -6,10 +6,6 @@
   ],
   "renderers": [
     {
-      "name": "gltfpt",
-      "description": "gltf-pt"
-    },
-    {
       "name": "model-viewer",
       "description": "<model-viewer>"
     },
@@ -23,6 +19,10 @@
     {
       "name": "babylon",
       "description": "Babylon"
+    },    
+    {
+      "name": "gltfpt",
+      "description": "gltf-pt"
     }
   ],
   "scenarios": [
