@@ -26,12 +26,13 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 import {ModelViewerElement} from '@google/model-viewer';
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.js';
 import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchAddHotspot, dispatchAddHotspotMode, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
-import {dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchInitialCameraState, State} from '../../redux/space_opera_base.js';
+import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
+import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -90,6 +91,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$gltf] = state.gltf;
     this[$gltfUrl] = state.gltfUrl;
     this[$playAnimation] = state.playAnimation;
+  }
+
+  firstUpdated() {
+    this.addEventListener('drop', this.onDrop);
+    this.addEventListener('dragover', this.onDragover);
   }
 
   private async onGltfUrlChanged() {
@@ -162,6 +168,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
             this.downloadScreenshot}></mwc-icon-button>`;
     const childElements =
         [...renderHotspots(this.hotspots), screenshotButton];
+
+    const hasModel = !!editedConfig.src;
+    if (!hasModel) {
+      childElements.push(html`<div class="HelpText">Drag a GLB here!</div>`);
+    }
 
     return html`${
         renderModelViewer(
@@ -247,6 +258,30 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!this.modelViewer) return;
     await safeDownloadCallback(
         await this.modelViewer.toBlob(), 'Space Opera Screenshot.png', '')();
+  }
+
+  private onDragover(event: DragEvent) {
+    if (!event.dataTransfer) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  private async onDrop(event: DragEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (event.dataTransfer && event.dataTransfer.items[0].kind === 'file') {
+      const file = event.dataTransfer.items[0].getAsFile();
+      if (!file) return;
+      if (file.name.match(/\.(glb)$/)) {
+        const arrayBuffer = await file.arrayBuffer();
+        const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+        dispatchGltfUrl(url);
+        dispatchConfig({});
+        dispatchSetHotspots([]);
+      }
+    }
   }
 }
 
