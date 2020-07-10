@@ -13,98 +13,81 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Sampler as SamplerInterface, ThreeDOMElement} from '../api.js';
+import {Sampler as SamplerInterface} from '../api.js';
 import {MagFilter, MinFilter, WrapMode} from '../gltf-2.0.js';
 import {SerializedSampler} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type SamplerConstructor = Constructor<SamplerInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedSampler]>;
+const $kernel = Symbol('kernel');
+const $minFilter = Symbol('minFilter');
+const $magFilter = Symbol('magFilter');
+const $wrapS = Symbol('wrapS');
+const $wrapT = Symbol('wrapT');
+const $name = Symbol('name');
 
-/**
- * A constructor factory for a Sampler class. The Sampler is defined based on
- * a provided implementation for all specified 3DOM scene graph element types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
- */
-export function defineSampler(ThreeDOMElement: Constructor<ThreeDOMElement>):
-    SamplerConstructor {
-  const $kernel = Symbol('kernel');
-  const $minFilter = Symbol('minFilter');
-  const $magFilter = Symbol('magFilter');
-  const $wrapS = Symbol('wrapS');
-  const $wrapT = Symbol('wrapT');
-  const $name = Symbol('name');
+export class Sampler extends ThreeDOMElement implements SamplerInterface {
+  private[$kernel]: ModelKernelInterface;
 
-  class Sampler extends ThreeDOMElement implements SamplerInterface {
-    private[$kernel]: ModelKernel;
+  private[$minFilter]: MinFilter|null = null;
+  private[$magFilter]: MagFilter|null = null;
 
-    private[$minFilter]: MinFilter|null = null;
-    private[$magFilter]: MagFilter|null = null;
+  private[$wrapS]: WrapMode;
+  private[$wrapT]: WrapMode;
 
-    private[$wrapS]: WrapMode;
-    private[$wrapT]: WrapMode;
+  private[$name]?: string;
 
-    private[$name]?: string;
+  constructor(kernel: ModelKernelInterface, serialized: SerializedSampler) {
+    super(kernel);
 
-    constructor(kernel: ModelKernel, serialized: SerializedSampler) {
-      super(kernel);
+    this[$kernel] = kernel;
 
-      this[$kernel] = kernel;
+    this[$name] = serialized.name;
 
-      this[$name] = serialized.name;
-
-      this[$minFilter] = serialized.minFilter || null;
-      this[$magFilter] = serialized.magFilter || null;
-      this[$wrapS] = serialized.wrapS || 10497;
-      this[$wrapT] = serialized.wrapT || 10497;
-    }
-
-    get name() {
-      return this[$name];
-    }
-
-    get minFilter() {
-      return this[$minFilter];
-    }
-
-    get magFilter() {
-      return this[$magFilter];
-    }
-
-    get wrapS() {
-      return this[$wrapS];
-    }
-
-    get wrapT() {
-      return this[$wrapT];
-    }
-
-    async setMinFilter(filter: MinFilter|null): Promise<void> {
-      await this[$kernel].mutate(this, 'minFilter', filter);
-      this[$minFilter] = filter;
-    }
-
-    async setMagFilter(filter: MagFilter|null): Promise<void> {
-      await this[$kernel].mutate(this, 'magFilter', filter);
-      this[$magFilter] = filter;
-    }
-
-    async setWrapS(mode: WrapMode): Promise<void> {
-      await this[$kernel].mutate(this, 'wrapS', mode);
-      this[$wrapS] = mode;
-    }
-
-    async setWrapT(mode: WrapMode): Promise<void> {
-      await this[$kernel].mutate(this, 'wrapT', mode);
-      this[$wrapT] = mode;
-    }
+    this[$minFilter] = serialized.minFilter || null;
+    this[$magFilter] = serialized.magFilter || null;
+    this[$wrapS] = serialized.wrapS || 10497;
+    this[$wrapT] = serialized.wrapT || 10497;
   }
 
-  return Sampler;
+  get name() {
+    return this[$name];
+  }
+
+  get minFilter() {
+    return this[$minFilter];
+  }
+
+  get magFilter() {
+    return this[$magFilter];
+  }
+
+  get wrapS() {
+    return this[$wrapS];
+  }
+
+  get wrapT() {
+    return this[$wrapT];
+  }
+
+  async setMinFilter(filter: MinFilter|null): Promise<void> {
+    await this[$kernel].mutate(this, 'minFilter', filter);
+    this[$minFilter] = filter;
+  }
+
+  async setMagFilter(filter: MagFilter|null): Promise<void> {
+    await this[$kernel].mutate(this, 'magFilter', filter);
+    this[$magFilter] = filter;
+  }
+
+  async setWrapS(mode: WrapMode): Promise<void> {
+    await this[$kernel].mutate(this, 'wrapS', mode);
+    this[$wrapS] = mode;
+  }
+
+  async setWrapT(mode: WrapMode): Promise<void> {
+    await this[$kernel].mutate(this, 'wrapT', mode);
+    this[$wrapT] = mode;
+  }
 }

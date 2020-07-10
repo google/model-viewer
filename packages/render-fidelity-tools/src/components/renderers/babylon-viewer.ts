@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -77,7 +77,15 @@ export class BabylonViewer extends LitElement {
     if (this[$scene] != null) {
       this[$scene].dispose();
     }
+
     this[$scene] = new Scene(this[$engine]);
+    this[$scene].imageProcessingConfiguration.toneMappingEnabled = true;
+    this[$scene].imageProcessingConfiguration.toneMappingType =
+        ImageProcessingConfiguration.TONEMAPPING_ACES;
+    // tone mapping makes a shift on explosure, so it should be increased be
+    // some factor
+    this[$scene].imageProcessingConfiguration.exposure = 2.0;
+
     this[$updateSize]();
 
     const {orbit, target, verticalFoV, renderSkybox, clearColor} = scenario;

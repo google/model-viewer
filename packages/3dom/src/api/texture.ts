@@ -13,80 +13,62 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Image, Sampler, Texture as TextureInterface, ThreeDOMElement} from '../api.js';
+import {Image, Sampler, Texture as TextureInterface} from '../api.js';
 import {SerializedTexture} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type TextureConstructor = Constructor<TextureInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedTexture]>;
+const $kernel = Symbol('kernel');
+const $source = Symbol('source');
+const $sampler = Symbol('sampler');
+const $name = Symbol('name');
 
-/**
- * A constructor factory for a Texture class. The Texture is defined
- * based on a provided implementation for all specified 3DOM scene graph element
- * types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
- */
-export function defineTexture(ThreeDOMElement: Constructor<ThreeDOMElement>):
-    TextureConstructor {
-  const $kernel = Symbol('kernel');
-  const $source = Symbol('source');
-  const $sampler = Symbol('sampler');
-  const $name = Symbol('name');
+export class Texture extends ThreeDOMElement implements TextureInterface {
+  private[$kernel]: ModelKernelInterface;
 
-  class Texture extends ThreeDOMElement implements TextureInterface {
-    private[$kernel]: ModelKernel;
+  private[$source]: Image|null = null;
+  private[$sampler]: Sampler|null = null;
 
-    private[$source]: Image|null = null;
-    private[$sampler]: Sampler|null = null;
+  private[$name]?: string;
 
-    private[$name]?: string;
+  constructor(kernel: ModelKernelInterface, serialized: SerializedTexture) {
+    super(kernel);
 
-    constructor(kernel: ModelKernel, serialized: SerializedTexture) {
-      super(kernel);
+    this[$kernel] = kernel;
 
-      this[$kernel] = kernel;
+    const {sampler, source, name} = serialized;
 
-      const {sampler, source, name} = serialized;
+    this[$name] = name;
 
-      this[$name] = name;
-
-      if (sampler != null) {
-        this[$sampler] = kernel.deserialize('sampler', sampler);
-      }
-
-      if (source != null) {
-        this[$source] = kernel.deserialize('image', source);
-      }
+    if (sampler != null) {
+      this[$sampler] = kernel.deserialize('sampler', sampler);
     }
 
-    get name() {
-      return this[$name];
-    }
-
-    get sampler() {
-      return this[$sampler];
-    }
-
-    get source() {
-      return this[$source];
-    }
-
-    async setSampler(sampler: Sampler|null): Promise<void> {
-      await this[$kernel].mutate(this, 'sampler', sampler);
-      this[$sampler] = sampler;
-    }
-
-    async setSource(image: Image|null): Promise<void> {
-      await this[$kernel].mutate(this, 'source', image);
-      this[$source] = image;
+    if (source != null) {
+      this[$source] = kernel.deserialize('image', source);
     }
   }
 
-  return Texture;
+  get name() {
+    return this[$name];
+  }
+
+  get sampler() {
+    return this[$sampler];
+  }
+
+  get source() {
+    return this[$source];
+  }
+
+  async setSampler(sampler: Sampler|null): Promise<void> {
+    await this[$kernel].mutate(this, 'sampler', sampler);
+    this[$sampler] = sampler;
+  }
+
+  async setSource(image: Image|null): Promise<void> {
+    await this[$kernel].mutate(this, 'source', image);
+    this[$source] = image;
+  }
 }

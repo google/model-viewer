@@ -15,28 +15,22 @@
 
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {defineModel} from './model.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {Model} from './model.js';
 
 suite('api/model', () => {
   suite('defineModel', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = defineModel(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
+      const instance = new Model(
           new FakeModelKernel(), {id: 0, modelUri: '', materials: []});
 
       expect(instance).to.be.ok;
     });
 
-    test('produces elements with an undefined owner model', () => {
+    test('produces elements with self-referencing owner model', () => {
       const kernel = new FakeModelKernel();
-      const GeneratedConstructor = defineModel(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
-          kernel, {id: 0, modelUri: '', materials: []});
+      const instance = new Model(kernel, {id: 0, modelUri: '', materials: []});
 
-      expect(instance.ownerModel).to.be.undefined;
+      expect(instance.ownerModel).to.be.eq(instance);
     });
   });
 });

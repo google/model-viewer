@@ -13,56 +13,39 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Texture, TextureInfo as TextureInfoInterface, ThreeDOMElement} from '../api.js';
+import {Texture, TextureInfo as TextureInfoInterface} from '../api.js';
 import {SerializedTextureInfo} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type TextureInfoConstructor = Constructor<TextureInfoInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedTextureInfo]>;
+const $kernel = Symbol('kernel');
+const $texture = Symbol('texture');
 
-/**
- * A constructor factory for a TextureInfo class. The TextureInfo is defined
- * based on a provided implementation for all specified 3DOM scene graph element
- * types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
- */
-export function defineTextureInfo(
-    ThreeDOMElement: Constructor<ThreeDOMElement>): TextureInfoConstructor {
-  const $kernel = Symbol('kernel');
-  const $texture = Symbol('texture');
+export class TextureInfo extends ThreeDOMElement implements
+    TextureInfoInterface {
+  private[$kernel]: ModelKernelInterface;
 
-  class TextureInfo extends ThreeDOMElement implements TextureInfoInterface {
-    private[$kernel]: ModelKernel;
+  private[$texture]: Texture|null = null;
 
-    private[$texture]: Texture|null = null;
+  constructor(kernel: ModelKernelInterface, serialized: SerializedTextureInfo) {
+    super(kernel);
 
-    constructor(kernel: ModelKernel, serialized: SerializedTextureInfo) {
-      super(kernel);
+    this[$kernel] = kernel;
 
-      this[$kernel] = kernel;
+    const {texture} = serialized;
 
-      const {texture} = serialized;
-
-      if (texture != null) {
-        this[$texture] = kernel.deserialize('texture', texture);
-      }
-    }
-
-    get texture() {
-      return this[$texture];
-    }
-
-    async setTexture(texture: Texture|null): Promise<void> {
-      await this[$kernel].mutate(this, 'texture', texture);
-      this[$texture] = texture;
+    if (texture != null) {
+      this[$texture] = kernel.deserialize('texture', texture);
     }
   }
 
-  return TextureInfo;
+  get texture() {
+    return this[$texture];
+  }
+
+  async setTexture(texture: Texture|null): Promise<void> {
+    await this[$kernel].mutate(this, 'texture', texture);
+    this[$texture] = texture;
+  }
 }
