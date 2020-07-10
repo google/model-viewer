@@ -224,11 +224,11 @@ export class ArtifactCreator {
     await page.evaluate(async () => {
       const modelBecomesReady = (self as any).modelLoaded ?
           Promise.resolve() :
-          new Promise((resolve, reject) => {
-            const timeout = setTimeout(reject, 60000);
+          new Promise((resolve) => {
+            // const timeout = setTimeout(reject, 60000);
 
             self.addEventListener('model-ready', () => {
-              clearTimeout(timeout);
+              // clearTimeout(timeout);
               resolve();
             }, {once: true});
           });
