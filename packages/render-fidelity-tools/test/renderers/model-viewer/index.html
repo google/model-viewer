@@ -65,8 +65,7 @@
       modelViewer.style.width = `${scenario.dimensions.width}px`;
       modelViewer.style.height = `${scenario.dimensions.height}px`;
 
-      const {r,g,b} = scenario.clearColor;
-      modelViewer.style.backgroundColor = `rgb(${r*255},${g*255},${b*255})`;
+      modelViewer.style.backgroundColor = `rgb(${255},${255},${255})`;
 
       modelViewer.src = scenario.model;
       if(scenario.renderSkybox){
