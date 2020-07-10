@@ -170,11 +170,6 @@ export class FilamentViewer extends LitElement {
       this[$directionalLight] = null;
     }
 
-    /*
-    const {r, g, b} = scenario.clearColor;
-    this[$renderer].setClearOptions(
-        {clearColor: [r, g, b, 1], clear: true, discard: true});
-    */
     await fetchFilamentAssets([modelUrl]);
 
     // This special case is for the DirectionalLightTest, where we compare the
@@ -230,6 +225,13 @@ export class FilamentViewer extends LitElement {
     this[$scene].addEntities(asset.getEntities());
 
     this[$updateSize]();
+
+    /*
+    this[$renderer].setClearOptions(
+        {clearColor: [r, g, b, 1], clear: true, discard: true});
+    */
+    const {r, g, b} = scenario.clearColor;
+    this[$view].setClearColor([r, g, b, 1]);
 
     // Wait two rAFs to ensure we rendered at least once:
     requestAnimationFrame(() => {
