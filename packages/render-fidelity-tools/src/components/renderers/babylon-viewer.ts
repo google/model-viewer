@@ -85,7 +85,8 @@ export class BabylonViewer extends LitElement {
         ImageProcessingConfiguration.TONEMAPPING_ACES;
     // tone mapping makes a shift on explosure, so it should be increased be
     // some factor
-    this[$scene].environmentIntensity = 1 / 0.6;
+    this[$scene].imageProcessingConfiguration.exposure = 2.0;
+
 
     this[$updateSize]();
 
@@ -140,6 +141,9 @@ export class BabylonViewer extends LitElement {
         this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
     skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
     skybox!.infiniteDistance = true;
+
+    console.log(this[$scene]);
+    console.log(skybox);
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
