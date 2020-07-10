@@ -91,16 +91,11 @@ export class ModelGraft extends EventTarget implements ModelGraftInterface {
   }
 
   async mutate(id: number, property: string, value: unknown) {
-    // TODO(#1005): Manipulations probably need to be validated against
-    // allowed capabilities here. We already do this on the scene graph
-    // execution context side, but it would be safer to do it on both sides
     const element = this.getElementByInternalId(id);
 
-    if (element != null) {
-      await element.mutate(property, value);
+    await element!.mutate(property, value);
 
-      this.dispatchEvent(
-          new CustomEvent('mutation', {detail: {element: element}}));
-    }
+    this.dispatchEvent(
+        new CustomEvent('mutation', {detail: {element: element}}));
   }
 }

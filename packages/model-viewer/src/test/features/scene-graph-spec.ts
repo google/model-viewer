@@ -15,6 +15,7 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
+import {IS_IE11} from '../../constants.js';
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
@@ -53,7 +54,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  suite('scene export', () => {
+  (IS_IE11 ? suite.skip : suite)('scene export', () => {
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;
@@ -76,7 +77,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
-  suite('with a loaded scene graph', () => {
+  (IS_IE11 ? suite.skip : suite)('with a loaded scene graph', () => {
     let material: MeshStandardMaterial;
 
     setup(async () => {
@@ -115,7 +116,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       expect(uri).to.be.eql(SUNRISE_IMG_PATH);
     });
 
-    suite.skip('when the model changes', () => {
+    suite('when the model changes', () => {
       test('updates when the model changes', async () => {
         const color =
             element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
@@ -124,13 +125,33 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         element.src = HORSE_GLB_PATH;
 
-        // Why does the second postMessage never come through?
         await waitForEvent(element, 'scene-graph-ready');
 
         const nextColor =
             element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
         expect(nextColor).to.be.eql([1, 1, 1, 1]);
+      });
+
+      test('allows the scene graph to be manipulated', async () => {
+        element.src = HORSE_GLB_PATH;
+
+        await waitForEvent(element, 'scene-graph-ready');
+
+        await element.model!.materials[0]
+            .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
+
+        const color =
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
+
+        expect(color).to.be.eql([1, 0, 0, 1]);
+
+        const newMaterial =
+            (element[$scene].model.modelContainer.children[0].children[0] as
+             Mesh)
+                .material as MeshStandardMaterial;
+
+        expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
       });
     });
   });

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {ModelGraft} from './facade/api.js';
-import {MutateMessage, ThreeDOMMessageType} from './protocol.js';
+import {MutateMessage, ThreeDOMMessageType} from '../protocol.js';
+
+import {ModelGraft} from './api.js';
 
 const $modelGraft = Symbol('modelGraft');
 const $port = Symbol('port');
@@ -51,14 +52,14 @@ export class ModelGraftManipulator {
     this[$port].close();
   }
 
-  [$onMessageEvent](event: MessageEvent) {
+  async[$onMessageEvent](event: MessageEvent) {
     const {data} = event;
     if (data && data.type) {
       if (data.type === ThreeDOMMessageType.MUTATE) {
         let applied = false;
         const {mutationId} = data as MutateMessage;
         try {
-          this[$modelGraft].mutate(data.id, data.property, data.value);
+          await this[$modelGraft].mutate(data.id, data.property, data.value);
           applied = true;
         } finally {
           this[$port].postMessage(

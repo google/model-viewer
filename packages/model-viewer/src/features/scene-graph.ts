@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {Model, ThreeDOM} from '@google/3dom/lib/api.js';
+import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, TextureInfo, ThreeDOM} from '@google/3dom/lib/api.js';
 import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
+import {ModelGraftManipulator} from '@google/3dom/lib/facade/model-graft-manipulator.js';
 import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
-import {ModelGraftManipulator} from '@google/3dom/lib/model-graft-manipulator.js';
 import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
 import {property} from 'lit-element';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
@@ -62,12 +62,24 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$manipulator]: ModelGraftManipulator|null = null;
     protected[$modelKernel]: ModelKernel|null = null;
 
-    // ThreeDOM implementation is currently just .model.
+    // ThreeDOM implementation:
     /** @export */
     get model() {
       const kernel = this[$modelKernel];
       return kernel ? kernel.model : undefined;
     }
+
+    /**
+     * References to each 3DOM constructor. Supports instanceof checks; these
+     * classes are not directly constructable.
+     */
+    static Model: Constructor<Model>;
+    static Material: Constructor<Material>;
+    static PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+    static Sampler: Constructor<Sampler>;
+    static TextureInfo: Constructor<TextureInfo>;
+    static Texture: Constructor<Texture>;
+    static Image: Constructor<Image>;
 
     connectedCallback() {
       super.connectedCallback();
@@ -87,6 +99,12 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$threePort]!.close();
       this[$mainPort] = null;
       this[$threePort] = null;
+      if (this[$manipulator] != null) {
+        this[$manipulator]!.dispose();
+      }
+      if (this[$modelKernel] != null) {
+        this[$modelKernel]!.deactivate();
+      }
     }
 
     updated(changedProperties: Map<string|symbol, unknown>): void {
@@ -137,17 +155,25 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
           modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
 
-          if (modelGraft != null) {
-            manipulator =
-                new ModelGraftManipulator(modelGraft, this[$threePort]!);
-          }
+          let channel = null;
+          if (modelGraft != null && modelGraft.model != null) {
+            channel = new MessageChannel();
+            manipulator = new ModelGraftManipulator(modelGraft, channel.port1);
 
-          this[$threePort]!.postMessage({
-            type: ThreeDOMMessageType.MODEL_CHANGE,
-            model: modelGraft != null && modelGraft.model != null ?
-                modelGraft.model.toJSON() :
-                null
-          });
+            this[$threePort]!.postMessage(
+                {
+                  type: ThreeDOMMessageType.MODEL_CHANGE,
+                  model: modelGraft.model.toJSON(),
+                  port: channel.port2
+                },
+                [channel.port2]);
+          } else {
+            this[$threePort]!.postMessage({
+              type: ThreeDOMMessageType.MODEL_CHANGE,
+              model: null,
+              port: null
+            });
+          }
         }
       }
 
@@ -170,7 +196,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         if (serialized != null) {
-          this[$modelKernel] = new ModelKernel(this[$mainPort]!, serialized);
+          this[$modelKernel] = new ModelKernel(data.port, serialized);
         } else {
           this[$modelKernel] = null;
         }

@@ -104,12 +104,12 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
   /**
    * Metalness factor of the material, represented as number between 0 and 1
    */
-  readonly metallicFactor: Readonly<number>;
+  readonly metallicFactor: number;
 
   /**
    * Roughness factor of the material, represented as number between 0 and 1
    */
-  readonly roughnessFactor: Readonly<number>;
+  readonly roughnessFactor: number;
 
   /**
    * A texture reference, associating an image with color information and
@@ -272,15 +272,6 @@ export declare interface Image extends ThreeDOMElement {
    */
   setURI(uri: string): Promise<void>;
 }
-
-/**
- * A constructor is the class or function that produces an object of a given
- * type when invoked with `new`.
- */
-export declare type Constructor<T = object> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  new (...args: any[]): T; prototype: T;
-};
 
 /**
  * An RGBA-encoded color, with channels represented as floating point values
