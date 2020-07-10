@@ -78,7 +78,6 @@ export class BabylonViewer extends LitElement {
       this[$scene].dispose();
     }
 
-
     this[$scene] = new Scene(this[$engine]);
     this[$scene].imageProcessingConfiguration.toneMappingEnabled = true;
     this[$scene].imageProcessingConfiguration.toneMappingType =
