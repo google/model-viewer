@@ -53,6 +53,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
   shared-assets/environments \
+  shared-assets/icons \
 )
 
 PACKAGE_ROOT=`pwd`
