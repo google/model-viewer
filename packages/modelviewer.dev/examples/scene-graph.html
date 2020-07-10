@@ -105,6 +105,102 @@ document.querySelector('#controls').addEventListener('click', (event) => {
   </div>
 
 
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Change Material Metalness and Roughness Factors</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+
+<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a horse">
+  <div id="controls">
+    <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
+    <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+  </div>
+</model-viewer>
+<script>
+const modelViewerParameters = document.querySelector("model-viewer#sphere");
+
+document.querySelector('#metalness').addEventListener('input', (event) => {
+  const [material] = modelViewerParameters.model.materials;
+  console.log(event.target.value);
+  material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+});
+
+document.querySelector('#roughness').addEventListener('input', (event) => {
+  const [material] = modelViewerParameters.model.materials;
+  material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+});
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-3" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Swap textures</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <template>
+
+<model-viewer id="box" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a horse">
+  <div id="controls">
+    <div>
+      <p>Diffuse</p>
+      <input id="diffuse" type="file" accept="image/png, image/jpeg"/>
+    </div>
+    <div>
+      <p>Normals</p>
+      <input id="normals" type="file" accept="image/png, image/jpeg"/>
+    </div>
+    <div>
+      <p>Metallic-roughness</p>
+      <input id="metallicRoughness" type="file" accept="image/png, image/jpeg"/>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#box");
+
+document.querySelector('#diffuse').addEventListener('input', (event) => {
+  const [material] = modelViewerTexture.model.materials;
+  if(event.target.files.length > 0){
+    var url = URL.createObjectURL(event.target.files[0]);
+    material.pbrMetallicRoughness.baseColorTexture.texture.source.setURI(url);
+  }
+});
+
+document.querySelector('#normals').addEventListener('input', (event) => {
+  const [material] = modelViewerTexture.model.materials;
+  if(event.target.files.length > 0){
+    var url = URL.createObjectURL(event.target.files[0]);
+    material.normalTexture.texture.source.setURI(url);
+  }
+});
+
+document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+  const [material] = modelViewerTexture.model.materials;
+  if(event.target.files.length > 0){
+    var url = URL.createObjectURL(event.target.files[0]);
+    material.pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(url);
+  }
+});
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+
   <div class="footer">
     <ul>
       <li class="attribution">
