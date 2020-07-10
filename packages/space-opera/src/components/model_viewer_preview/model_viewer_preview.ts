@@ -179,9 +179,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const hasModel = !!editedConfig.src;
     if (this.gltfError) {
-      childElements.push(
-          html`<div class="ErrorText">Error loading GLB:<br/>${
-              this.gltfError}</div>`);
+      childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
+          this.gltfError}</div>`);
     } else if (!hasModel) {
       childElements.push(html`<div class="HelpText">Drag a GLB here!</div>`);
     }
