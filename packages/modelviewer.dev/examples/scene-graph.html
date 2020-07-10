@@ -115,7 +115,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
 
-<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a horse">
+<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
   <div id="controls">
     <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
     <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
@@ -146,12 +146,12 @@ document.querySelector('#roughness').addEventListener('input', (event) => {
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Swap textures</h2>
+          <h2 class="demo-title">Swap textures - Diffuse/Normal/MetallicRoughness</h2>
         </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
 
-<model-viewer id="box" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a horse">
+<model-viewer id="lantern" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
   <div id="controls">
     <div>
       <p>Diffuse</p>
@@ -168,7 +168,7 @@ document.querySelector('#roughness').addEventListener('input', (event) => {
   </div>
 </model-viewer>
 <script type="module">
-const modelViewerTexture = document.querySelector("model-viewer#box");
+const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
 document.querySelector('#diffuse').addEventListener('input', (event) => {
   const [material] = modelViewerTexture.model.materials;
@@ -200,12 +200,67 @@ document.querySelector('#metallicRoughness').addEventListener('input', (event) =
     </div>
   </div>
 
+  <div class="sample">
+    <div id="demo-container-4" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Swap textures - Occlusion/Emission</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <template>
+
+<model-viewer id="helmet" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
+  <div id="controls">
+    <div>
+      <p>Occlusion</p>
+      <input id="occlusion" type="file" accept="image/png, image/jpeg"/>
+    </div>
+    <div>
+      <p>Emission</p>
+      <input id="emission" type="file" accept="image/png, image/jpeg"/>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#helmet");
+
+document.querySelector('#occlusion').addEventListener('input', (event) => {
+  const [material] = modelViewerTexture.model.materials;
+  if(event.target.files.length > 0){
+    var url = URL.createObjectURL(event.target.files[0]);
+    material.occlusionTexture.texture.source.setURI(url);
+  }
+});
+
+document.querySelector('#emission').addEventListener('input', (event) => {
+  const [material] = modelViewerTexture.model.materials;
+  if(event.target.files.length > 0){
+    var url = URL.createObjectURL(event.target.files[0]);
+    material.emissiveTexture.texture.source.setURI(url);
+  }
+});
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
 
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Lantern</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
       </li>
     </ul>
     <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
