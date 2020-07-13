@@ -11,7 +11,14 @@
     "clean": "rm -rf lib && rm -rf dist",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "update:package-lock": "rm ./package-lock.json && npm i --only=production"
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production",
+    "watch:test": "karma start",
+    "watch:tsc": "tsc -w",
+    "watch:rollup": "rollup -c -w",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /demo/ -c-1",
+    "pyserve": "echo This assumes 'python' is Python 2. && which python && echo Visit $(hostname):8000/example.html && python -m SimpleHTTPServer 8000",
+    "dev": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:rollup' 'watch:test' 'serve -- -s'",
+    "dev-py": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:rollup' 'watch:test' 'pyserve'"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -27,11 +34,13 @@
   "devDependencies": {
     "@open-wc/karma-esm": "^2.11.1",
     "@types/jasmine": "^3.3.13",
+    "http-server": "^0.12.1",
     "karma": "^5.0.2",
     "karma-browserstack-launcher": "^1.5.1",
     "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "^3.2.0",
     "karma-sourcemap-loader": "^0.3.7",
+    "npm-run-all": "^4.1.5",
     "rollup": "^0.66.0",
     "rollup-plugin-node-resolve": "^3.0.0"
   },
