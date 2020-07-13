@@ -24,7 +24,7 @@ import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
 
-export type AnalysisResults = Array<Array<ImageComparisonAnalysis>>;
+export type AnalysisResults = Array<ImageComparisonAnalysis>;
 
 export interface ScenarioRecord extends ScenarioConfig {
   analysisResults: AnalysisResults;
@@ -50,7 +50,7 @@ export class ArtifactCreator {
 
   async captureAndAnalyzeScreenshots(
       scenarioWhitelist: Set<string>|null = null) {
-    const {scenarios, analysisThresholds} = this.config;
+    const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
 
@@ -80,8 +80,8 @@ export class ArtifactCreator {
         continue;
       }
 
-      const analysisResults = await this.analyze(
-          screenshot, goldens, scenario, dimensions, analysisThresholds);
+      const analysisResults =
+          await this.analyze(screenshot, goldens, scenario, dimensions);
 
       const scenarioRecord = {analysisResults, scenario};
 
@@ -107,8 +107,8 @@ export class ArtifactCreator {
 
   protected async analyze(
       screenshot: Buffer, goldens: Array<GoldenConfig>,
-      scenario: ScenarioConfig, dimensions: Dimensions,
-      analysisThresholds: Array<number>): Promise<AnalysisResults> {
+      scenario: ScenarioConfig,
+      dimensions: Dimensions): Promise<AnalysisResults> {
     const analysisResults: AnalysisResults = [];
     const {rootDirectory, outputDirectory} = this;
     const {name: scenarioName, exclude} = scenario;
@@ -123,7 +123,6 @@ export class ArtifactCreator {
       console.log(
           `\n🔍 Comparing <model-viewer> to ${goldenConfig.description}`);
 
-      const thresholdResults: Array<ImageComparisonAnalysis> = [];
       const goldenPath =
           join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
       const golden = await fs.readFile(goldenPath);
@@ -137,19 +136,14 @@ export class ArtifactCreator {
       await fs.writeFile(
           join(outputDirectory, scenarioName, goldenConfig.file), golden);
 
-      for (const threshold of analysisThresholds) {
-        console.log(`\n  📏 Using threshold ${threshold.toFixed(1)}`);
-        const {analysis} = comparator.analyze();
 
-        thresholdResults.push(analysis);
-      }
-
-      const {rmsDistanceRatio} = thresholdResults[0];
+      const {analysis} = comparator.analyze();
+      const {rmsDistanceRatio} = analysis;
       console.log(
           `\n  📊 Decibels of root mean square color distance (without threshold): ${
               (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
 
-      analysisResults.push(thresholdResults);
+      analysisResults.push(analysis);
     }
 
     return analysisResults;

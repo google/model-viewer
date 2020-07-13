@@ -37,7 +37,7 @@ export interface Visuals {
 }
 
 export interface ScenarioRecord {
-  analysisResults: Array<Array<ImageComparisonAnalysis>>;
+  analysisResults: Array<ImageComparisonAnalysis>;
   scenarioConfig: ScenarioConfig;
 }
 
