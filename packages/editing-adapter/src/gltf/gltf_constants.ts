@@ -20,7 +20,7 @@
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
  */
 
-import {RGB, RGBA} from './three_dom.js';
+import {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
 
 /** Value to use if pbrMetallicRoughness.baseColorFactor is missing. */
 export const DEFAULT_BASE_COLOR_FACTOR: RGBA = [1, 1, 1, 1];
