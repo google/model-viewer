@@ -657,7 +657,7 @@ export class SmoothControls extends EventDispatcher {
     }
 
     const deltaZoom = (event as WheelEvent).deltaY *
-        ((event as WheelEvent).deltaMode == 1 ? 15 : 1) * ZOOM_SENSITIVITY / 30;
+        ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
 
     if ((this[$userAdjustOrbit](0, 0, deltaZoom) ||
          this[$options].eventHandlingBehavior === 'prevent-all') &&
