@@ -39,8 +39,8 @@ export const loadWithLoader =
      progressCallback: ProgressCallback = () => {}) => {
       const onProgress = (event: ProgressEvent) => {
         const fraction = event.loaded / event.total;
-        progressCallback!(
-            Math.max(0, Math.min(1, Number.isFinite(fraction) ? fraction : 1)));
+        progressCallback!
+            (Math.max(0, Math.min(1, isFinite(fraction) ? fraction : 1)));
       };
       return new Promise<GLTF>((resolve, reject) => {
         loader.load(url, resolve, onProgress, reject);
