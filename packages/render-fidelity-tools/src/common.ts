@@ -32,7 +32,10 @@ export interface ImageComparisonAnalysis {
 }
 
 export interface ImageComparisonResults {
-  analysis: ImageComparisonAnalysis;
+  analysis: ImageComparisonAnalysis
+}
+
+export interface Visuals {
   imageBuffers: {delta: ArrayBuffer|null; blackWhite: ArrayBuffer | null;};
 }
 
@@ -64,7 +67,7 @@ export interface ThresholdChangedMessage extends ImageComparisonMessage {
 }
 
 export interface AnalysisCompletedMessage extends ImageComparisonMessage {
-  result: ImageComparisonResults
+  result: Visuals
 }
 
 export interface Dimensions {
@@ -140,7 +143,7 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
-  generateVisuals(threshold: number) {
+  generateVisuals(threshold: number): Visuals {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
 
@@ -214,19 +217,9 @@ export class ImageComparator {
     };
   }
 
-  analyze(threshold: number, options: AnalysisOptions = {
-    generateVisuals: true
-  }): ImageComparisonResults {
+  analyze(threshold: number): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
-    const {generateVisuals} = options;
-
-    const blackWhiteImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
-    const deltaImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
 
     const thresholdSquared = threshold * threshold;
 
@@ -234,7 +227,6 @@ export class ImageComparator {
     let sum = 0;
     let squareSum = 0;
     let mismatchingSum = 0;
-    let maximumDeltaIntensity = 0;
 
     if (candidateImage.length != goldenImage.length) {
       throw new Error(`Image sizes do not match (candidate: ${
@@ -259,46 +251,6 @@ export class ImageComparator {
 
         sum += thresholdDelta;
         squareSum += delta * delta;
-
-        if (generateVisuals) {
-          const deltaIntensity =
-              Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
-
-          maximumDeltaIntensity =
-              Math.max(deltaIntensity, maximumDeltaIntensity);
-
-          this.drawPixel(
-              blackWhiteImage!,
-              position,
-              exactlyMatched,
-              exactlyMatched,
-              exactlyMatched);
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              255 - deltaIntensity,
-              255 - deltaIntensity);
-        }
-      }
-    }
-
-    if (generateVisuals) {
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
-          const index = y * width + x;
-          const position = index * COMPONENTS_PER_PIXEL;
-          const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
-          const relativeDeltaIntensity = Math.round(
-              255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
-
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              relativeDeltaIntensity,
-              relativeDeltaIntensity);
-        }
       }
     }
 
@@ -317,11 +269,6 @@ export class ImageComparator {
         averageDistanceRatio,
         mismatchingAverageDistanceRatio,
         rmsDistanceRatio
-      },
-      imageBuffers: {
-        delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
-        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
-                                      null
       }
     };
   }
