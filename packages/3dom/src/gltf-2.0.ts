@@ -1,3 +1,5 @@
+export type RGB = [number, number, number];
+
 export type RGBA = [number, number, number, number];
 
 export type Quaternion = [number, number, number, number];
@@ -136,7 +138,7 @@ export interface Material {
   doubleSided?: boolean;
   alphaMode?: AlphaMode;
   alphaCutoff?: number;
-  emissiveFactor?: number;
+  emissiveFactor?: RGB;
   pbrMetallicRoughness?: PBRMetallicRoughness;
   normalTexture?: NormalTextureInfo;
   occlusionTexture?: OcclusionTextureInfo;
