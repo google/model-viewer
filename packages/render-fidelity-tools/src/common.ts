@@ -25,9 +25,6 @@ export const COMPONENTS_PER_PIXEL: number = 4;
 export const MAX_COLOR_DISTANCE: number = 35215;
 
 export interface ImageComparisonAnalysis {
-  matchingRatio: number;
-  averageDistanceRatio: number;
-  mismatchingAverageDistanceRatio: number;
   rmsDistanceRatio: number;
 }
 
@@ -217,16 +214,11 @@ export class ImageComparator {
     };
   }
 
-  analyze(threshold: number): ImageComparisonResults {
+  analyze(): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
 
-    const thresholdSquared = threshold * threshold;
-
-    let matched = 0;
-    let sum = 0;
     let squareSum = 0;
-    let mismatchingSum = 0;
 
     if (candidateImage.length != goldenImage.length) {
       throw new Error(`Image sizes do not match (candidate: ${
@@ -239,37 +231,14 @@ export class ImageComparator {
         const position = index * COMPONENTS_PER_PIXEL;
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
-        const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
 
-        if (exactlyMatched) {
-          matched++;
-        } else {
-          mismatchingSum += delta;
-        }
-
-        const thresholdDelta = Math.max(0, delta - thresholdSquared);
-
-        sum += thresholdDelta;
         squareSum += delta * delta;
       }
     }
 
-    const mismatchingPixels = this.imagePixels - matched;
-
-    const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
-        mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
-        0;
-    const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
     const rmsDistanceRatio =
         Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
 
-    return {
-      analysis: {
-        matchingRatio: matched / this.imagePixels,
-        averageDistanceRatio,
-        mismatchingAverageDistanceRatio,
-        rmsDistanceRatio
-      }
-    };
+    return {analysis: {rmsDistanceRatio}};
   }
 }
