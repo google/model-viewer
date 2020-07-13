@@ -140,6 +140,80 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
+  generateVisuals(threshold: number) {
+    const {candidateImage, goldenImage} = this;
+    const {width, height} = this.dimensions;
+
+    const blackWhiteImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
+    const deltaImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
+
+    const thresholdSquared = threshold * threshold;
+
+    let maximumDeltaIntensity = 0;
+
+    if (candidateImage.length != goldenImage.length) {
+      throw new Error(`Image sizes do not match (candidate: ${
+          candidateImage.length}, golden: ${goldenImage.length})`);
+    }
+
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        const position = index * COMPONENTS_PER_PIXEL;
+        const delta =
+            colorDelta(candidateImage, goldenImage, position, position);
+        const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
+
+        const thresholdDelta = Math.max(0, delta - thresholdSquared);
+
+        const deltaIntensity =
+            Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
+
+        maximumDeltaIntensity = Math.max(deltaIntensity, maximumDeltaIntensity);
+
+        this.drawPixel(
+            blackWhiteImage!,
+            position,
+            exactlyMatched,
+            exactlyMatched,
+            exactlyMatched);
+        this.drawPixel(
+            deltaImage!,
+            position,
+            255,
+            255 - deltaIntensity,
+            255 - deltaIntensity);
+      }
+    }
+
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        const position = index * COMPONENTS_PER_PIXEL;
+        const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
+        const relativeDeltaIntensity = Math.round(
+            255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
+
+        this.drawPixel(
+            deltaImage!,
+            position,
+            255,
+            relativeDeltaIntensity,
+            relativeDeltaIntensity);
+      }
+    }
+
+    return {
+      imageBuffers: {
+        delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
+        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
+                                      null
+      }
+    };
+  }
+
   analyze(threshold: number, options: AnalysisOptions = {
     generateVisuals: true
   }): ImageComparisonResults {
