@@ -136,13 +136,16 @@ export class ModelViewerSnippet extends LitElement {
       }
 
       try {
-        dispatchGltfUrl(undefined);
-        // Because of update-batching, we need to sleep first to force reload.
-        await new Promise(resolve => {
-          setTimeout(resolve, 0);
-        });
-
-        dispatchGltfUrl(config.src);
+        // If we can't fetch the snippet's src, don't even bother using it.
+        // But still dispatch the config, hotspots, etc.
+        if(config.src && (await fetch(config.src)).ok) {
+          dispatchGltfUrl(undefined);
+          // Because of update-batching, we need to sleep first to force reload.
+          await new Promise(resolve => {
+            setTimeout(resolve, 0);
+          });
+          dispatchGltfUrl(config.src);
+        }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
         // we dispatch the config and THEN clear the model URL, then
