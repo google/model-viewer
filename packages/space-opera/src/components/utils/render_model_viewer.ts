@@ -19,7 +19,6 @@ import '@google/model-viewer';
 
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
-import {styleMap} from 'lit-html/directives/style-map';
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 

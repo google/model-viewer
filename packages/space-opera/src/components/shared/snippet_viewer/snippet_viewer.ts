@@ -71,8 +71,13 @@ ${css_beautify(this.renderedStyle)}
   }
 
   get formattedHtml() {
-    const html = this.shadowTag.innerHTML.replace(
-        /<!---->/g, '');  // Removes LitElement render artifacts
+    // Removes LitElement render artifacts
+    let html = this.shadowTag.innerHTML.replace(
+        /<!---->/g, '');
+    // Remove the ar-status runtime-added tag
+    html = html.replace(/ar-status="[\w- ]+" */, '');
+    // Remove redundant ="" for boolean attribs
+    html = html.replace(/=""/, '');
     return html_beautify(html);
   }
 }
