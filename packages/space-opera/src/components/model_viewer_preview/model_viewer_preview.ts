@@ -179,7 +179,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
     } else if (!hasModel) {
-      childElements.push(html`<div class="HelpText">Drag a GLB here!</div>`);
+      childElements.push(html`<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
     return html`${
