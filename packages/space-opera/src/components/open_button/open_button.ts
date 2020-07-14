@@ -22,7 +22,7 @@ import {customElement, html, LitElement, query} from 'lit-element';
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {dispatchConfig, dispatchGltfUrl} from '../../redux/space_opera_base.js';
+import {extractStagingConfig, reduxStore, dispatchConfig, dispatchGltfUrl} from '../../redux/space_opera_base.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 
 /**
@@ -48,7 +48,7 @@ import {FileModalElement} from '../file_modal/file_modal.js';
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     dispatchGltfUrl(url);
-    dispatchConfig({});
+    dispatchConfig(extractStagingConfig(reduxStore.getState().config));
     dispatchSetHotspots([]);
   }
 }
