@@ -15,7 +15,8 @@
  *
  */
 
-import {EnvironmentImage} from './environment_lighting_state.js';
+import {EnvironmentImage} from './lighting_state.js';
+
 /**
  * A list of built in environment images to select from
  */
