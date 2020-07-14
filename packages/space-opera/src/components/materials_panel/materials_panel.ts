@@ -20,12 +20,12 @@ import '../shared/color_picker/color_picker.js';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
-import '../shared/pill_buttons/pill_buttons.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
+import '@material/mwc-icon-button';
 
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 import {customElement, html, internalProperty, property, query} from 'lit-element';
@@ -52,6 +52,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @property({type: Number}) selectedMaterialId?: number;
 
   @internalProperty() materials: Material[] = [];
+  @internalProperty() originalMaterials: Material[] = [];
   @internalProperty() texturesById?: TexturesById;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
@@ -82,6 +83,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.materials = state.edits.materials;
+    this.originalMaterials = state.origEdits.materials;
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
@@ -144,6 +146,13 @@ export class MaterialPanel extends ConnectedLitElement {
       </me-dropdown>
     </me-expandable-tab>
     `;
+  }
+
+  get safeSelectedMaterialId() {
+    if (this.selectedMaterialId === undefined) {
+      throw new Error('No material selected');
+    }
+    return this.selectedMaterialId;
   }
 
   get selectedBaseColor(): RGBA {
@@ -447,6 +456,12 @@ export class MaterialPanel extends ConnectedLitElement {
   </me-expandable-tab>`;
   }
 
+  revertBaseColorFactor() {
+    const index = this.safeSelectedMaterialId;
+    const baseColorFactor = this.originalMaterials[index].baseColorFactor;
+    dispatchMaterialBaseColor({index, baseColorFactor});
+  }
+
   renderBaseColorTab() {
     if (this.selectedMaterialId === undefined) {
       return `No material selected`;
@@ -464,6 +479,8 @@ export class MaterialPanel extends ConnectedLitElement {
         <me-color-picker id="base-color-picker"
         selectedColorHex=${selectedColorHex} @change=${this.onBaseColorChange}>
         </me-color-picker>
+        <mwc-icon-button id="revert-base-color-factor" icon="undo"
+          @click=${this.revertBaseColorFactor}</mwc-icon-button>
       </me-section-row>
       <me-section-row label="Texture">
         <me-texture-picker .selectedIndex=${

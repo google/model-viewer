@@ -38,6 +38,8 @@ export interface State {
   animationNames: string[];
   gltfJsonString: string;
   edits: GltfEdits;
+  // A copy of the original, so we can revert individual properties.
+  origEdits: GltfEdits;
   playAnimation?: boolean;
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
@@ -55,6 +57,7 @@ export interface State {
 const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
+  origEdits: INITIAL_GLTF_EDITS,
   animationNames: [],
   gltfJsonString: '',
   camera: INITIAL_CAMERA,
@@ -166,6 +169,7 @@ const dispatchGltf = registerStateMutator(
             `Same edits was given! Only call this upon actual change`);
       }
       state.edits = edits;
+      state.origEdits = edits;
       state.animationNames = args.animationNames;
       state.gltfJsonString = args.jsonString;
     });
