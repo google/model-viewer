@@ -27,9 +27,9 @@ import '../file_modal/file_modal.js';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {EnvironmentImage} from '../../redux/environment_lighting_state.js';
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../../redux/lighting_dispatchers.js';
+import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from '../../redux/lighting_state.js';
+import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -37,59 +37,6 @@ import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
 import {styles} from './ibl_selector.css.js';
-
-/**
- * Dispatch an edit to model viewer environmentImage attribute
- */
-export const dispatchEnvrionmentImage =
-    registerStateMutator('UPDATE_IBL', (state, ibl?: string) => {
-      state.config = {...state.config, environmentImage: ibl};
-    });
-
-/**
- * Dispatch an edit to model viewer exposure attribute
- */
-export const dispatchExposure =
-    registerStateMutator('UPDATE_EXPOSURE', (state, exposure?: number) => {
-      state.config = {...state.config, exposure};
-    });
-
-const DEFAULT_EXPOSURE = 1;
-
-/** Dispatch an edit to potential environment images to select */
-export const dispatchAddEnvironmentImage = registerStateMutator(
-    'UPLOAD_ENVIRONMENT_IMAGE', (state, image?: EnvironmentImage) => {
-      if (!image) {
-        return;
-      }
-      state.environmentImages = [...state.environmentImages, image];
-    });
-
-/** Dispatch an edit to model viewer exposure attribute */
-export const dispatchUseEnvAsSkybox = registerStateMutator(
-    'SET_USE_ENV_AS_SKYBOX', (state, useEnvAsSkybox?: boolean) => {
-      state.config = {...state.config, useEnvAsSkybox};
-    });
-
-/**
- * Dispatch an edit to model viewer shadow intensity
- */
-export const dispatchShadowIntensity = registerStateMutator(
-    'UPDATE_SHADOW_INTENSITY', (state, shadowIntensity?: number) => {
-      state.config = {...state.config, shadowIntensity};
-    });
-
-const DEFAULT_SHADOW_INTENSITY = 0;
-
-/**
- * Dispatch an edit to model viewer shadow softness
- */
-export const dispatchShadowSoftness = registerStateMutator(
-    'UPDATE_SHADOW_SOFTNESS', (state, shadowSoftness?: number) => {
-      state.config = {...state.config, shadowSoftness};
-    });
-
-const DEFAULT_SHADOW_SOFTNESS = 1;
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
@@ -164,15 +111,10 @@ export class IblSelector extends ConnectedLitElement {
       return;
     }
 
-    const filename = (files[0] as File).name;
+    const file = files[0] as File;
+    const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
-    const arrayBuffer = await files[0].arrayBuffer();
-    const safeObjectUrl = createSafeObjectUrlFromArrayBuffer(arrayBuffer);
-    const unsafeUrl = filename.match(/\.(hdr)$/) ?
-        safeObjectUrl.unsafeUrl + '#.hdr' :
-        safeObjectUrl.unsafeUrl;
-
-    dispatchAddEnvironmentImage({uri: unsafeUrl, name: filename});
+    dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
     dispatchEnvrionmentImage(unsafeUrl);
   }
 

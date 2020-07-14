@@ -52,8 +52,9 @@ paper-slider {
   border-radius: 4px;
   display: inline-flex;
   justify-content: space-between;
-  padding: 6px 12px;
+  max-width: 60px;
   overflow: hidden;
+  padding: 6px 12px;
 }
 
 .InlineInput {

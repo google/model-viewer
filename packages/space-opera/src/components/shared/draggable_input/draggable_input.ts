@@ -32,7 +32,8 @@ export class DraggableInput extends LitElement {
   @property({type: String}) innerLabel = 'X';
   @property({type: Number}) min = 0;
   @property({type: Number}) max = 100;
-  @property({type: Number}) stepSize = 1;
+  @property({type: Number}) dragStepSize = 1;
+  @property({type: Number}) precision = 2;
 
   private readonly bodyMoveHandler =
       this.onDocumentBodyMove.bind(this);                       // NOTYPO
@@ -51,7 +52,8 @@ export class DraggableInput extends LitElement {
   <input class="InlineInput exportInputInlineInput"
          type="number"
          @change="${this.onChange}"
-         .value="${this.value.toString()}">
+         .value="${this.value.toFixed(this.precision)}"
+         .step="${String(Math.pow(10, -this.precision))}">
   <div class="InlineLabel exportInputInlineLabel" @mousedown="${
         this.onMousedown}">
     ${this.innerLabel}
@@ -80,7 +82,7 @@ export class DraggableInput extends LitElement {
     const currentX = e.clientX;
     this.setValue(
         this.startingDragValue +
-        Math.round((currentX - this.startingDragX)) * this.stepSize);
+        Math.round((currentX - this.startingDragX)) * this.dragStepSize);
   }
 
   setValue(value: number) {

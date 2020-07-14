@@ -24,3 +24,12 @@ export interface EnvironmentImage {
   // The display name of the environment image to users
   readonly name?: string;
 }
+
+/** Default exposure for model-viewer */
+export const DEFAULT_EXPOSURE = 1.0;
+
+/** Default shadow intensity for model-viewer */
+export const DEFAULT_SHADOW_INTENSITY = 0;
+
+/** Default shadow softness for model-viewer */
+export const DEFAULT_SHADOW_SOFTNESS = 1;

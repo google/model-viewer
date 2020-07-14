@@ -60,6 +60,9 @@ export class ExportPanel extends ConnectedLitElement {
     // Don't render the data URI. Users should download the edited GLB and put
     // the right URL here.
     editedConfig.src = `model.glb`;
+    if (editedConfig.environmentImage) {
+      editedConfig.environmentImage = `environment-image.hdr`;
+    }
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
 

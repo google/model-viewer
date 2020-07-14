@@ -41,10 +41,15 @@ export const styles: CSSResult = css`model-viewer {
 .HelpText {
   font-family: Roboto;
   font-size: 20pt;
+  text-align: center;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.HelpText small {
+  font-size: 12pt;
 }
 
 .ErrorText {

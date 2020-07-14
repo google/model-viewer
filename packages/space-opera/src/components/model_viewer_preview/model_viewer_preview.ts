@@ -32,6 +32,7 @@ import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state
 import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.js';
 import {HotspotConfig} from '../../redux/hotspot_config.js';
 import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../../redux/lighting_dispatchers.js';
 import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -178,7 +179,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
     } else if (!hasModel) {
-      childElements.push(html`<div class="HelpText">Drag a GLB here!</div>`);
+      childElements.push(html`<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
     return html`${
@@ -287,6 +288,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
         dispatchGltfUrl(url);
         dispatchConfig({});
         dispatchSetHotspots([]);
+      }
+      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/)) {
+        const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
+
+        dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
+        dispatchEnvrionmentImage(unsafeUrl);
       }
     }
   }

@@ -20,10 +20,10 @@ import * as Redux from 'redux'; // from //third_party/javascript/redux:redux_clo
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {EnvironmentImage} from './environment_lighting_state.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
 import {HotspotConfig} from './hotspot_config.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
+import {EnvironmentImage} from './lighting_state.js';
 
 /**
  * Space Opera state.
