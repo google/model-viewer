@@ -39,7 +39,6 @@ export interface ModelViewerEventHandlers {
 export function renderModelViewer(
     config: ModelViewerConfig, eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
-  const styles = {backgroundColor: config.bgColor || 'unset'};
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
   return html`<model-viewer
@@ -52,7 +51,6 @@ export function renderModelViewer(
         exposure=${ifDefined(config.exposure)}
         shadow-intensity=${ifDefined(config.shadowIntensity)}
         shadow-softness=${ifDefined(config.shadowSoftness)}
-        style=${styleMap(styles)}
         camera-target=${ifDefined(config.cameraTarget)}
         camera-orbit=${ifDefined(config.cameraOrbit)}
         field-of-view=${ifDefined(config.fieldOfView)}
