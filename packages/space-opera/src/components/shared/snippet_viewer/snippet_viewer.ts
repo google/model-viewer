@@ -59,7 +59,7 @@ export class SnippetViewer extends LitElement {
   }
 
   protected updated() {
-    this.snippet.textContent = this.formattedStyle + this.formattedHtml;
+    this.snippet.textContent = this.formattedHtml + '\n' + this.formattedStyle;
   }
 
   get formattedStyle() {
