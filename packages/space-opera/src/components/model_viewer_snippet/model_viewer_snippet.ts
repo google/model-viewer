@@ -35,6 +35,7 @@ import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
 /**
  * Export panel.
@@ -44,6 +45,7 @@ export class ExportPanel extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
+  @internalProperty() gltfUrl?: string;
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
@@ -52,17 +54,28 @@ export class ExportPanel extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspots;
+    this.gltfUrl = state.gltfUrl;
   }
 
   render() {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
-    // Don't render the data URI. Users should download the edited GLB and put
-    // the right URL here.
-    editedConfig.src = `model.glb`;
-    if (editedConfig.environmentImage) {
-      editedConfig.environmentImage = `environment-image.hdr`;
+
+    // If the last loaded URL is not an object URL, echo it here for convenience.
+    if(this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
+      editedConfig.src = this.gltfUrl;
     }
+    else {
+      // Uploaded GLB
+      editedConfig.src = `Change this to your GLB URL`;
+    }
+
+    if (editedConfig.environmentImage &&
+      isObjectUrl(editedConfig.environmentImage)) {
+      // Uploaded env image
+      editedConfig.environmentImage = `Change this to your HDR URL`;
+    }
+
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
 

@@ -35,7 +35,11 @@ export function createSafeObjectURL(blob: Blob): SafeObjectUrl {
 
 /** Returns true if the given raw URL is an object URL. */
 export function isObjectUrl(url: string): boolean {
-  return new URL(url).protocol === 'blob:';
+  try {
+    return new URL(url).protocol === 'blob:';
+  } catch (_) {
+    return false;
+  }
 }
 
 /**
