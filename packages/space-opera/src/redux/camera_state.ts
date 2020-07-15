@@ -16,8 +16,10 @@
  */
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-
+import {roundToDigits} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {Limits, SphericalPositionDeg, Vector3D} from './state_types.js';
+
+const DIGITS = 4;
 
 /**
  * Space Opera camera state. For any field, if defined. All units are degrees
@@ -42,14 +44,14 @@ function getMinString(limits: Limits|undefined, suffix: string) {
   if (!limits || !limits.enabled) {
     return 'auto';
   }
-  return `${limits.min}${suffix}`;
+  return `${roundToDigits(limits.min, DIGITS)}${suffix}`;
 }
 
 function getMaxString(limits: Limits|undefined, suffix: string) {
   if (!limits || !limits.enabled) {
     return 'auto';
   }
-  return `${limits.max}${suffix}`;
+  return `${roundToDigits(limits.max, DIGITS)}${suffix}`;
 }
 
 /**
@@ -59,18 +61,20 @@ function getMaxString(limits: Limits|undefined, suffix: string) {
 export function applyCameraEdits(config: ModelViewerConfig, edits: Camera) {
   const orbit = edits.orbit;
   if (orbit) {
-    config.cameraOrbit =
-        `${orbit.thetaDeg}deg ${orbit.phiDeg}deg ${orbit.radius}m`;
+    config.cameraOrbit = `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
+        roundToDigits(
+            orbit.phiDeg, DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`;
   }
 
   const target = edits.target;
   if (target) {
-    config.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
+    config.cameraTarget = `${roundToDigits(target.x, DIGITS)}m ${
+        roundToDigits(target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
   }
 
   const fov = edits.fieldOfViewDeg;
   if (fov) {
-    config.fieldOfView = `${fov}deg`;
+    config.fieldOfView = `${roundToDigits(fov, DIGITS)}deg`;
   }
 
   if (edits.yawLimitsDeg || edits.pitchLimitsDeg || edits.radiusLimits) {
