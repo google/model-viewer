@@ -50,10 +50,10 @@ const $playAnimation = Symbol('playAnimation');
 function getCameraState(viewer: ModelViewerElement) {
   const orbitRad = viewer.getCameraOrbit();
   return {
-    orbitDeg: {
+    orbit: {
       thetaDeg: radToDeg(orbitRad.theta),
       phiDeg: radToDeg(orbitRad.phi),
-      orbit: orbitRad.radius
+      radius: orbitRad.radius
     },
     target: viewer.getCameraTarget(),
     fieldOfViewDeg: viewer.getFieldOfView(),

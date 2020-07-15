@@ -153,7 +153,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target = state.camera.target || state.initialCamera.target;
+    this.target = state.camera.target ?? state.initialCamera.target;
   }
 
   protected onInputChange(event: Event) {
