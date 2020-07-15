@@ -56,7 +56,7 @@ function getCameraState(viewer: ModelViewerElement) {
       orbit: orbitRad.radius
     },
     target: viewer.getCameraTarget(),
-    fieldOfView: viewer.getFieldOfView(),
+    fieldOfViewDeg: viewer.getFieldOfView(),
   } as Camera;
 }
 
@@ -168,10 +168,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
     const editedConfig = {
       ...this.config,
       // If the gltf model has a URL, it must be more recent
-      src: this[$gltf]?.getModelViewerSource() ? ? this[$gltfUrl],
+      src: this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl],
       // Always enable camera controls for preview
-      cameraControls :
-      true };
+      cameraControls: true
+    };
     applyCameraEdits(editedConfig, this.camera);
 
     const screenshotButton = html

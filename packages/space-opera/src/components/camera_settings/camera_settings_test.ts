@@ -18,7 +18,6 @@
 
 import './camera_settings.js';
 
-import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {dispatchCurrentCameraState} from '../../redux/space_opera_base.js';
 import {reduxStore} from '../../redux/space_opera_base.js';
 import {Vector3D} from '../../redux/state_types.js';
@@ -39,7 +38,7 @@ describe('camera constraints test', () => {
   });
 
   it('dispatches save camera orbit state mutator on click', async () => {
-    dispatchCurrentCameraState({orbit: {theta: 12, phi: 34, radius: 56}});
+    dispatchCurrentCameraState({orbit: {thetaDeg: 12, phiDeg: 34, radius: 56}});
 
     await cameraSettings.updateComplete;
     const saveCameraOrbitButton =
@@ -48,8 +47,8 @@ describe('camera constraints test', () => {
     saveCameraOrbitButton.click();
 
     const orbit = reduxStore.getState().camera.orbit!;
-    expect(orbit.theta).toBeCloseTo(12);
-    expect(orbit.phi).toBeCloseTo(34);
+    expect(orbit.thetaDeg).toBeCloseTo(12);
+    expect(orbit.phiDeg).toBeCloseTo(34);
     expect(orbit.radius).toBeCloseTo(56);
   });
 
@@ -78,18 +77,18 @@ describe('camera constraints test', () => {
   });
 
   it('reflects the correct camera orbit in its editor UI', async () => {
-    const orbit = {phi: degToRad(12), theta: degToRad(34), radius: 56};
+    const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     dispatchInitialOrbit(orbit);
     await cameraSettings.updateComplete;
     await cameraSettings.cameraOrbitEditor!.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
-    expect(actualOrbit.phi).toBeCloseTo(orbit.phi);
-    expect(actualOrbit.theta).toBeCloseTo(orbit.theta);
+    expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
+    expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
     expect(actualOrbit.radius).toBeCloseTo(orbit.radius);
   });
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
-    const orbit = {phi: degToRad(12), theta: degToRad(34), radius: 56};
+    const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     dispatchInitialOrbit(orbit);
     await cameraSettings.updateComplete;
     await cameraSettings.cameraOrbitEditor!.updateComplete;
@@ -99,7 +98,7 @@ describe('camera constraints test', () => {
     expect(yawInput).not.toBeNull();
     yawInput.setValue(42);
     const stateOrbit = reduxStore.getState().camera.orbit;
-    expect(stateOrbit!.theta).toBeCloseTo(degToRad(42));
+    expect(stateOrbit!.thetaDeg).toBeCloseTo(42);
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {
@@ -119,5 +118,4 @@ describe('camera constraints test', () => {
     await cameraSettings.updateComplete;
     expect(cameraSettings.autoRotateCheckbox.checked).toBe(true);
   });
-
 });
