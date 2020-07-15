@@ -159,7 +159,7 @@ export class IblSelector extends ConnectedLitElement {
           </me-section-row>
 
           <me-section-row class="Row" label="Shadow Intensity">
-            <me-slider-with-input min="0" max="1" step="0.01" id="shadow-intensity"
+            <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
               @change="${this.onShadowIntensityChange}"
               value="${
         this.config.shadowIntensity ?? DEFAULT_SHADOW_INTENSITY}">
