@@ -53,6 +53,13 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
   shared-assets/environments \
+  node_modules/@google/model-viewer-space-opera/node_modules/web-animations-js/web-animations-next-lite.min.js \
+  node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-html.js \
+  node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-css.js \
+  node_modules/@google/model-viewer-space-opera/index.html \
+  node_modules/@google/model-viewer-space-opera/node_modules/@google/model-viewer-shared-assets/environments/spruit_sunrise_1k_HDR.hdr \
+  node_modules/@google/model-viewer-space-opera/node_modules/@google/model-viewer-shared-assets/environments/aircraft_workshop_01_1k.hdr \
+  node_modules/@google/model-viewer-space-opera/dist/space-opera.js
 )
 
 PACKAGE_ROOT=`pwd`
