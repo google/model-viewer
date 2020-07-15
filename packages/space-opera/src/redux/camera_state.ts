@@ -16,24 +16,23 @@
  */
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 
-import {Limits, SphericalPosition, Vector3D} from './state_types.js';
+import {Limits, SphericalPositionDeg, Vector3D} from './state_types.js';
 
 /**
  * Space Opera camera state. For any field, if defined. All units are degrees
  * and meters, unless otherwise specified (such as orbit.phi, in radians).
  */
 export interface Camera {
-  readonly orbit?: SphericalPosition;
-  readonly fieldOfView?: number;
+  readonly orbit?: SphericalPositionDeg;
+  readonly fieldOfViewDeg?: number;
   readonly target?: Vector3D;
 
   // Limits
-  readonly yawLimits?: Limits;
-  readonly pitchLimits?: Limits;
+  readonly yawLimitsDeg?: Limits;
+  readonly pitchLimitsDeg?: Limits;
   readonly radiusLimits?: Limits;
-  readonly fovLimits?: Limits;
+  readonly fovLimitsDeg?: Limits;
 }
 
 /** Initial values. All are undefined, which is to say "no opinion". */
@@ -60,8 +59,8 @@ function getMaxString(limits: Limits|undefined, suffix: string) {
 export function applyCameraEdits(config: ModelViewerConfig, edits: Camera) {
   const orbit = edits.orbit;
   if (orbit) {
-    config.cameraOrbit = `${radToDeg(orbit.theta)}deg ${
-        radToDeg(orbit.phi)}deg ${orbit.radius}m`;
+    config.cameraOrbit =
+        `${orbit.thetaDeg}deg ${orbit.phiDeg}deg ${orbit.radius}m`;
   }
 
   const target = edits.target;
@@ -69,22 +68,22 @@ export function applyCameraEdits(config: ModelViewerConfig, edits: Camera) {
     config.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
   }
 
-  const fov = edits.fieldOfView;
+  const fov = edits.fieldOfViewDeg;
   if (fov) {
     config.fieldOfView = `${fov}deg`;
   }
 
-  if (edits.yawLimits || edits.pitchLimits || edits.radiusLimits) {
-    config.minCameraOrbit = getMinString(edits.yawLimits, 'deg') + ' ' +
-        getMinString(edits.pitchLimits, 'deg') + ' ' +
+  if (edits.yawLimitsDeg || edits.pitchLimitsDeg || edits.radiusLimits) {
+    config.minCameraOrbit = getMinString(edits.yawLimitsDeg, 'deg') + ' ' +
+        getMinString(edits.pitchLimitsDeg, 'deg') + ' ' +
         getMinString(edits.radiusLimits, 'm');
-    config.maxCameraOrbit = getMaxString(edits.yawLimits, 'deg') + ' ' +
-        getMaxString(edits.pitchLimits, 'deg') + ' ' +
+    config.maxCameraOrbit = getMaxString(edits.yawLimitsDeg, 'deg') + ' ' +
+        getMaxString(edits.pitchLimitsDeg, 'deg') + ' ' +
         getMaxString(edits.radiusLimits, 'm');
   }
 
-  if (edits.fovLimits) {
-    config.minFov = getMinString(edits.fovLimits, 'deg');
-    config.maxFov = getMaxString(edits.fovLimits, 'deg');
+  if (edits.fovLimitsDeg) {
+    config.minFov = getMinString(edits.fovLimitsDeg, 'deg');
+    config.maxFov = getMaxString(edits.fovLimitsDeg, 'deg');
   }
 }

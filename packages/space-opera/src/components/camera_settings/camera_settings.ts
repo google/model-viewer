@@ -26,13 +26,12 @@ import '../shared/section_row/section_row.js';
 import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
+import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
-import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {degToRad, radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {registerStateMutator, State} from '../../redux/space_opera_base.js';
-import {SphericalPosition, Vector3D} from '../../redux/state_types.js';
+import {SphericalPositionDeg, Vector3D} from '../../redux/state_types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
@@ -50,13 +49,15 @@ const dispatchCameraControlsEnabled = registerStateMutator(
 // Orbit
 const dispatchSaveCameraOrbit =
     registerStateMutator('SAVE_CAMERA_ORBIT', (state) => {
-      if (!state.currentCamera) return;
+      if (!state.currentCamera)
+        return;
       const currentOrbit = state.currentCamera.orbit;
-      if (!currentOrbit) return;
+      if (!currentOrbit)
+        return;
       state.camera = {
         ...state.camera,
         orbit: {...currentOrbit},
-        fieldOfView: state.currentCamera.fieldOfView,
+        fieldOfViewDeg: state.currentCamera.fieldOfViewDeg,
       };
     });
 
@@ -68,8 +69,9 @@ export const dispatchCameraTarget =
 
 /** Dispatch initial orbit in camera state */
 export const dispatchInitialOrbit = registerStateMutator(
-    'SET_CAMERA_STATE_INITIAL_ORBIT', (state, orbit?: SphericalPosition) => {
-      if (!orbit) return;
+    'SET_CAMERA_STATE_INITIAL_ORBIT', (state, orbit?: SphericalPositionDeg) => {
+      if (!orbit)
+        return;
       state.camera = {
         ...state.camera,
         orbit,
@@ -90,15 +92,15 @@ class CameraOrbitEditor extends LitElement {
   @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
   @query('me-draggable-input#radius') radiusInput?: DraggableInput;
 
-  @property({type: Object}) orbit?: SphericalPosition;
+  @property({type: Object}) orbit?: SphericalPositionDeg;
 
   get currentOrbit() {
     if (!this.yawInput || !this.pitchInput || !this.radiusInput) {
       throw new Error('Rendering not complete');
     }
     return {
-      phi: degToRad(this.pitchInput.value),
-      theta: degToRad(this.yawInput.value),
+      phiDeg: this.pitchInput.value,
+      thetaDeg: this.yawInput.value,
       radius: this.radiusInput.value,
     };
   }
@@ -108,12 +110,13 @@ class CameraOrbitEditor extends LitElement {
   }
 
   render() {
-    if (!this.orbit) return html``;
+    if (!this.orbit)
+      return html``;
     return html`
         <me-draggable-input
           id="yaw"
           innerLabel="yaw"
-          value=${radToDeg(this.orbit.theta)}
+          value=${this.orbit.thetaDeg}
           min=-9999 max=9999
           @change=${this.onChange}>
         </me-draggable-input>
@@ -121,7 +124,7 @@ class CameraOrbitEditor extends LitElement {
         <me-draggable-input
           id="pitch"
           innerLabel="pitch"
-          value=${radToDeg(this.orbit.phi)}
+          value=${this.orbit.phiDeg}
           min=-9999 max=9999
           @change=${this.onChange}>
         </me-draggable-input>
@@ -150,7 +153,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target = state.camera.target ?? state.initialCamera.target;
+    this.target = state.camera.target || state.initialCamera.target;
   }
 
   protected onInputChange(event: Event) {
@@ -290,7 +293,8 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onCameraOrbitEditorChange() {
-    if (!this.cameraOrbitEditor) return;
+    if (!this.cameraOrbitEditor)
+      return;
     dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit);
   }
 }
