@@ -89,9 +89,10 @@ describe('material panel test', () => {
     await panel.updateComplete;
     const actualTexturesById = panel.texturesById!.values().next().value;
     expect(actualTexturesById).toBeDefined();
-    const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker');
-
     expect(actualTexturesById.uri).toBe('originalTexture.png');
+
+    const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker')!;
+    await texturePicker.updateComplete;
     expect(texturePicker!.images.length).toBe(5);
   });
 

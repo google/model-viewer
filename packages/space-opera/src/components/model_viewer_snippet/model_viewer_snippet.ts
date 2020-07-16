@@ -22,6 +22,7 @@ import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
@@ -37,13 +38,14 @@ import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 /**
- * Export panel.
+ *
  */
 @customElement('me-export-panel')
 export class ExportPanel extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
+  @internalProperty() gltfUrl?: string;
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
@@ -52,14 +54,32 @@ export class ExportPanel extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspots;
+    this.gltfUrl = state.gltfUrl;
   }
 
   render() {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
-    // Don't render the data URI. Users should download the edited GLB and put
-    // the right URL here.
-    editedConfig.src = `model.glb`;
+
+    // If the last loaded URL is not an object URL, echo it here for
+    // convenience.
+    if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
+      editedConfig.src = this.gltfUrl;
+    } else {
+      // Uploaded GLB
+      editedConfig.src = `Change this to your GLB URL`;
+    }
+
+    if (editedConfig.environmentImage &&
+        isObjectUrl(editedConfig.environmentImage)) {
+      // Uploaded env image
+      editedConfig.environmentImage = `Change this to your HDR URL`;
+    }
+
+    if (editedConfig.poster && isObjectUrl(editedConfig.poster)) {
+      editedConfig.poster = `Change this to your poster URL`;
+    }
+
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
 
@@ -121,13 +141,16 @@ export class ModelViewerSnippet extends LitElement {
       }
 
       try {
-        dispatchGltfUrl(undefined);
-        // Because of update-batching, we need to sleep first to force reload.
-        await new Promise(resolve => {
-          setTimeout(resolve, 0);
-        });
-
-        dispatchGltfUrl(config.src);
+        // If we can't fetch the snippet's src, don't even bother using it.
+        // But still dispatch the config, hotspots, etc.
+        if (config.src && (await fetch(config.src)).ok) {
+          dispatchGltfUrl(undefined);
+          // Because of update-batching, we need to sleep first to force reload.
+          await new Promise(resolve => {
+            setTimeout(resolve, 0);
+          });
+          dispatchGltfUrl(config.src);
+        }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
         // we dispatch the config and THEN clear the model URL, then

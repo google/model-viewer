@@ -85,8 +85,10 @@
             <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
 
             <li><a href="examples/scene-graph.html"><h4>Scene Graph</h4></a></li>
-			
-			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
+
+            <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
+
+            <li><a href="./node_modules/@google/model-viewer-space-opera/index.html"><h4>Model Editor</h4></a></li>
           </ul>
         </div>
 
@@ -132,11 +134,11 @@
             </li>
             <li>
               <div>ar-modes</div>
-              <p>A prioritized list of the types of AR experiences to enable, if available; see 
+              <p>A prioritized list of the types of AR experiences to enable, if available; see
               <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
               Augmented Reality</a>.
               Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
-              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
+              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
               app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
               whitespace. Defaults to "webxr scene-viewer quick-look".
             </li>
@@ -326,11 +328,11 @@
             <li>
               <div>loading</div>
               <p>An enumerable attribute describing under what conditions the
-              model should be preloaded. The supported values are "auto", "lazy" 
+              model should be preloaded. The supported values are "auto", "lazy"
               and "eager". Auto is equivalent to lazy, which loads the model
               when it is near the viewport for reveal = "auto", and when interacted
-              with for reveal = "interaction". Eager loads the model immediately. 
-              See <a href="./examples/lazy-loading.html">our section on lazy loading</a> 
+              with for reveal = "interaction". Eager loads the model immediately.
+              See <a href="./examples/lazy-loading.html">our section on lazy loading</a>
               for examples. Defaults to "auto".</p>
             </li>
             <li>
@@ -347,7 +349,7 @@
               "interaction", &lt;model-viewer&gt; will wait until the user
               interacts with the poster before loading and revealing the model.
               If set to "auto", the model will be revealed as soon as it is done
-              loading and rendering. If set to "manual", the model will remain hidden 
+              loading and rendering. If set to "manual", the model will remain hidden
               until dismissPoster() is called. Defaults to "auto".</p>
             </li>
             <li>
@@ -357,8 +359,8 @@
             </li>
             <li>
               <div>shadow-softness</div>
-              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
-              Softness should not be changed every frame as it incurs a 
+              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows.
+              Softness should not be changed every frame as it incurs a
               performance cost. Softer shadows render faster. Defaults to 1.</p>
             </li>
           </ul>
@@ -383,10 +385,10 @@
             </li>
             <li>
               <div>ar-status</div>
-              <p>This read-only attribute enables DOM content to be styled based 
-              on the status of the WebXR AR presentation. Possible values include 
-              'not-presenting', 'session-started', and 'object-placed'. For instance, 
-              a prompt for the user to move their phone until the object is 
+              <p>This read-only attribute enables DOM content to be styled based
+              on the status of the WebXR AR presentation. Possible values include
+              'not-presenting', 'session-started', and 'object-placed'. For instance,
+              a prompt for the user to move their phone until the object is
               successfully placed in their space can be shown by scoping a CSS rule
               to model-viewer[ar-status="session-started"]. Setting this attribute
               has no effect.</p>
@@ -453,7 +455,7 @@
             </li>
             <li>
               <div>modelIsVisible</div>
-              <p>This property is read-only. It returns true if the element is 
+              <p>This property is read-only. It returns true if the element is
               visible on the page (assuming there is an IntersectionObserver) and the
               poster has been dismissed.</p>
             </li>
@@ -472,8 +474,8 @@
             </li>
             <li>
               <div>ModelViewer.minimumRenderScale</div>
-              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering 
-              scale factor as it dynamically changes resolution to maintain framerate. Turn 
+              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering
+              scale factor as it dynamically changes resolution to maintain framerate. Turn
               off this effect by setting to 1. Defaults to 0.5.</p>
             </li>
             <li>
@@ -514,8 +516,8 @@
               that resolves in a Blob of type "application/octet-stream" or
               "application/json" depending on the export format.
               For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'>
-              GLTF exporter</a> documentation, with the exception that all 
-              animations are automatically exported and truncateDrawRange 
+              GLTF exporter</a> documentation, with the exception that all
+              animations are automatically exported and truncateDrawRange
               defaults to true.
               </p>
             </li>
@@ -544,8 +546,8 @@
             </li>
             <li>
               <div>getFieldOfView()</div>
-              <p>Returns the realtime camera vertical field of view in degrees. 
-              This value may differ from the value configured with the field-of-view 
+              <p>Returns the realtime camera vertical field of view in degrees.
+              This value may differ from the value configured with the field-of-view
               attribute on account of user interaction or camera interpolation.</p>
             </li>
             <li>
@@ -559,7 +561,7 @@
             </li>
             <li>
               <div>jumpCameraToGoal()</div>
-              <p>Changes the camera to its last configured goal state immediately on 
+              <p>Changes the camera to its last configured goal state immediately on
               the next update instead of interpolating the motion over time.</p>
             </li>
             <li>
@@ -644,7 +646,7 @@
               <p>Fired when the ar-status attribute above fires. The event.detail.status
               property will be set to the same value as the ar-status attribute, either
               'not-presenting', 'session-started', or 'object-placed'. This event is
-              only enabled for WebXR AR sessions. 
+              only enabled for WebXR AR sessions.
               </p>
             </li>
             <li>
@@ -681,8 +683,8 @@
             <li>
               <div>model-visibility</div>
               <p>This event is fired when the visibility of the model changes. When the
-              model is loaded, the element is in the viewport (assuming there is an 
-              IntersectionObserver), and the poster has been dismissed, this event will fire 
+              model is loaded, the element is in the viewport (assuming there is an
+              IntersectionObserver), and the poster has been dismissed, this event will fire
               and <span class="attribute">event.detail.visible</span> will be "true".</p>
             </li>
             <li>
@@ -818,7 +820,7 @@
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
               <th><img class="logo-samsung" title="Samsung Internet"></th>
             </tr>
-            
+
             <tr>
               <td>WebXR Device API</td>
               <td><img class="icon-flag"></td>
@@ -854,7 +856,7 @@
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
     <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
   </div>
 

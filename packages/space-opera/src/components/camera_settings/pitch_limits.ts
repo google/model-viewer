@@ -16,7 +16,6 @@
  */
 
 
-import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {customElement, internalProperty} from 'lit-element';
 
 import {Camera} from '../../redux/camera_state.js';
@@ -35,18 +34,18 @@ export const DEFAULT_MAX_PITCH = 180;
 
 /** Dispatch change to maximum pitch */
 export const dispatchPitchLimits = registerStateMutator(
-    'SET_CAMERA_PITCH_LIMITS', (state, pitchLimits?: Limits) => {
-      if (!pitchLimits) {
+    'SET_CAMERA_PITCH_LIMITS', (state, pitchLimitsDeg?: Limits) => {
+      if (!pitchLimitsDeg) {
         throw new Error('No valid limits given');
       }
-      if (pitchLimits === state.camera.pitchLimits) {
+      if (pitchLimitsDeg === state.camera.pitchLimitsDeg) {
         throw new Error(
-            'Do not edit pitchLimits in place. You passed in the same object');
+            'Do not edit pitchLimitsDeg in place. You passed in the same object');
       }
 
       state.camera = {
         ...state.camera,
-        pitchLimits,
+        pitchLimitsDeg,
       };
     });
 
@@ -54,11 +53,11 @@ export const dispatchPitchLimits = registerStateMutator(
 /** The Camera Settings panel. */
 @customElement('me-camera-pitch-limits')
 export class PitchLimits extends LimitsBase {
-  @internalProperty() pitchLimits?: Limits;
+  @internalProperty() pitchLimitsDeg?: Limits;
   @internalProperty() currentCamera?: Camera;
 
   stateChanged(state: State) {
-    this.pitchLimits = state.camera.pitchLimits;
+    this.pitchLimitsDeg = state.camera.pitchLimitsDeg;
     this.currentCamera = state.currentCamera;
   }
 
@@ -81,11 +80,11 @@ export class PitchLimits extends LimitsBase {
   get currentPreviewValue() {
     if (!this.currentCamera || !this.currentCamera.orbit)
       return 0;
-    return Math.round(radToDeg(this.currentCamera.orbit.phi));
+    return Math.round(this.currentCamera.orbit.phiDeg);
   }
 
   get limitsProperty() {
-    return this.pitchLimits;
+    return this.pitchLimitsDeg;
   }
 }
 

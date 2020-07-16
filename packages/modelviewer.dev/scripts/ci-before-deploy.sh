@@ -54,6 +54,11 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
   shared-assets/environments \
   shared-assets/icons \
+  node_modules/@google/model-viewer-space-opera/node_modules/web-animations-js/web-animations-next-lite.min.js \
+  node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-html.js \
+  node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-css.js \
+  node_modules/@google/model-viewer-space-opera/index.html \
+  node_modules/@google/model-viewer-space-opera/dist/space-opera.js
 )
 
 PACKAGE_ROOT=`pwd`

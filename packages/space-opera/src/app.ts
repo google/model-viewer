@@ -20,18 +20,19 @@
  */
 
 import '@material/mwc-button';
-
 import '@polymer/paper-dialog/paper-dialog';
-import './components/animation_controls/animation_controls.js'; // from //vr/ads/editor/space_opera/components/animation_controls
-import './components/camera_settings/camera_settings.js'; // from //vr/ads/editor/space_opera/components/camera_settings
-import './components/download_button/download_button.js'; // from //vr/ads/editor/space_opera/components/download_button
-import './components/file_modal/file_modal.js'; // from //vr/ads/editor/space_opera/components/file_modal
-import './components/hotspot_panel/hotspot_panel.js'; // from //vr/ads/editor/space_opera/components/hotspot_panel
-import './components/ibl_selector/ibl_selector.js'; // from //vr/ads/editor/space_opera/components/ibl_selector
-import './components/materials_panel/materials_panel.js'; // from //vr/ads/editor/space_opera/components/materials_panel
-import './components/open_button/open_button.js'; // from //vr/ads/editor/space_opera/components/open_button
-import './components/model_editor/model_editor.js'; // from //vr/ads/editor/space_opera/components/model_editor
-import './components/model_viewer_preview/model_viewer_preview.js'; // from //vr/ads/editor/space_opera/components/model_viewer_preview
-import './components/model_viewer_snippet/model_viewer_snippet.js'; // from //vr/ads/editor/space_opera/components/model_viewer_snippet
-import './components/inspector/inspector.js'; // from //vr/ads/editor/space_opera/components/inspector
-import './components/shared/tabs/tabs.js'; // from //vr/ads/editor/space_opera/components/shared/tabs
+
+import './components/animation_controls/animation_controls.js';
+import './components/camera_settings/camera_settings.js';
+import './components/download_button/download_button.js';
+import './components/file_modal/file_modal.js';
+import './components/hotspot_panel/hotspot_panel.js';
+import './components/poster_controls/poster_controls.js';
+import './components/ibl_selector/ibl_selector.js';
+import './components/materials_panel/materials_panel.js';
+import './components/open_button/open_button.js';
+import './components/model_editor/model_editor.js';
+import './components/model_viewer_preview/model_viewer_preview.js';
+import './components/model_viewer_snippet/model_viewer_snippet.js';
+import './components/inspector/inspector.js';
+import './components/shared/tabs/tabs.js';

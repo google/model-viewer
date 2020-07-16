@@ -45,7 +45,7 @@ export class CheckboxElement extends LitElement {
     return html`
   <mwc-checkbox ?checked="${this.checked}" @change="${
         this.onCheckedChange}"></mwc-checkbox>
-  <div>
+  <div class="Label">
     ${this.label}
   </div>
     `;

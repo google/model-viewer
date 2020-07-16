@@ -15,17 +15,18 @@
  *
  */
 
-import {EnvironmentImage} from './environment_lighting_state.js';
+import {EnvironmentImage} from './lighting_state.js';
+
 /**
  * A list of built in environment images to select from
  */
 export const INITIAL_ENVIRONMENT_IMAGES: EnvironmentImage[] = [
   {
-    uri: '../shared-assets/environments/spruit_sunrise_1k_HDR.hdr',
+    uri: '/shared-assets/environments/spruit_sunrise_1k_HDR.hdr',
     name: 'Spruit Sunrise'
   },
   {
-    uri: '../shared-assets/environments/aircraft_workshop_01_1k.hdr',
+    uri: '/shared-assets/environments/aircraft_workshop_01_1k.hdr',
     name: 'Aircraft Workshop'
   },
 ];

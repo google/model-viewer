@@ -15,38 +15,16 @@
  *
  */
 
-.EditingMaterial {
-  padding-bottom: 5px;
-}
 
-.MaterialInfo {
-  display: flex;
-  flex-direction: column;
-  padding-left: 15px;
-}
-
-.MRSliderLabel {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.MRSlider {
-  margin-left: -15px;
-}
-
-.MRSliders {
-  display: flex;
-  flex-direction: column;
-  padding: 15px 0 5px 0;
-}
-
-.SectionLabel {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-#alpha-mode-picker,
-#alpha-cutoff-label {
+import {css, CSSResult} from 'lit-element';
+export const styles: CSSResult = css`
+.ButtonContainer:not(:first-child) {
   margin-top: 10px;
 }
 
+mwc-button {
+  --mdc-button-disabled-fill-color: #db4437;
+  --mdc-button-disabled-ink-color: #fff;
+  width: 180px;
+}
+`;

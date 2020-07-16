@@ -18,48 +18,46 @@
 
 import './pitch_limits.js';
 
-import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_base.js';
 
 import {DEFAULT_MAX_PITCH, dispatchPitchLimits, PitchLimits} from './pitch_limits.js';
 
 describe('pitch limits editor test', () => {
-  let pitchLimits: PitchLimits;
+  let pitchLimitsDeg: PitchLimits;
 
   beforeEach(async () => {
-    pitchLimits = new PitchLimits();
-    document.body.appendChild(pitchLimits);
+    pitchLimitsDeg = new PitchLimits();
+    document.body.appendChild(pitchLimitsDeg);
     dispatchPitchLimits({enabled: false, min: 0, max: 0});
-    await pitchLimits.updateComplete;
+    await pitchLimitsDeg.updateComplete;
   });
 
   afterEach(() => {
-    document.body.removeChild(pitchLimits);
+    document.body.removeChild(pitchLimitsDeg);
   });
 
   it('correctly loads pitch limits', async () => {
     dispatchPitchLimits({enabled: true, min: 12, max: 34});
-    await pitchLimits.updateComplete;
-    expect(pitchLimits.inputLimits.enabled).toEqual(true);
-    expect(pitchLimits.inputLimits.min).toEqual(12);
-    expect(pitchLimits.inputLimits.max).toEqual(34);
+    await pitchLimitsDeg.updateComplete;
+    expect(pitchLimitsDeg.inputLimits.enabled).toEqual(true);
+    expect(pitchLimitsDeg.inputLimits.min).toEqual(12);
+    expect(pitchLimitsDeg.inputLimits.max).toEqual(34);
   });
 
   it('correctly dispatches when I click set and clear', async () => {
-    dispatchPitchLimits({enabled: true, min: 0, max: degToRad(99)});
-    dispatchCurrentCameraState(
-        {orbit: {theta: 0, radius: 10, phi: degToRad(33)}});
-    await pitchLimits.updateComplete;
+    dispatchPitchLimits({enabled: true, min: 0, max: 99});
+    dispatchCurrentCameraState({orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}});
+    await pitchLimitsDeg.updateComplete;
 
-    (pitchLimits.shadowRoot!.querySelector('#set-max-button')! as
+    (pitchLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.pitchLimits!.max).toEqual(33);
+    expect(reduxStore.getState().camera.pitchLimitsDeg!.max).toEqual(33);
 
-    (pitchLimits.shadowRoot!.querySelector('#clear-max-button')! as
+    (pitchLimitsDeg.shadowRoot!.querySelector('#clear-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.pitchLimits!.max)
+    expect(reduxStore.getState().camera.pitchLimitsDeg!.max)
         .toEqual(DEFAULT_MAX_PITCH);
   });
 });

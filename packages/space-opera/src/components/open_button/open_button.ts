@@ -22,7 +22,7 @@ import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-a
 import {customElement, html, LitElement, query} from 'lit-element';
 
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {dispatchConfig, dispatchGltfUrl} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore} from '../../redux/space_opera_base.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 
 /**
@@ -49,7 +49,7 @@ export class OpenButton extends LitElement {
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     dispatchGltfUrl(url);
-    dispatchConfig({});
+    dispatchConfig(extractStagingConfig(reduxStore.getState().config));
     dispatchSetHotspots([]);
   }
 }

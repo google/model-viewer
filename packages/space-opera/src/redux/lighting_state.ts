@@ -15,29 +15,21 @@
  *
  */
 
-.LabeledSwitchContainer {
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  line-height: 40px;
-  margin: 0 16px;
+/**
+ * An environment image that can be used in model-viewer environment attribute
+ */
+export interface EnvironmentImage {
+  readonly uri: string;
+
+  // The display name of the environment image to users
+  readonly name?: string;
 }
 
-mwc-switch {
-  --mdc-theme-secondary: white;
-}
+/** Default exposure for model-viewer */
+export const DEFAULT_EXPOSURE = 1.0;
 
-.LabeledSwitch {
-  align-self: center;
-}
+/** Default shadow intensity for model-viewer */
+export const DEFAULT_SHADOW_INTENSITY = 0;
 
-.SwitchLabel {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.Spacer {
-  background-color: #2b2d30;
-  display: flex;
-  height: 2px;
-}
+/** Default shadow softness for model-viewer */
+export const DEFAULT_SHADOW_SOFTNESS = 1;
