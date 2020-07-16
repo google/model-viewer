@@ -338,7 +338,6 @@ describe('gltf model test', () => {
     await model.materials[1].setEmissiveFactor([0, 0, 0]);
     expect(model.materials[1].emissiveFactor).toBeUndefined();
 
-
     // Re-use
     await pbr1.setBaseColorTexture(baseColorTex);
     expect(pbr1.baseColorTexture).toBe(baseColorTex);
