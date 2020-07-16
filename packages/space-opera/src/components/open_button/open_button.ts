@@ -18,27 +18,19 @@
 import '@material/mwc-button';
 import '../file_modal/file_modal.js';
 
-import {ModelViewerElement} from '@google/model-viewer';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {customElement, html, query} from 'lit-element';
+import {customElement, html, LitElement, query} from 'lit-element';
 
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore, State} from '../../redux/space_opera_base.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore} from '../../redux/space_opera_base.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 
 /**
  * A button to open file resources.
  */
 @customElement('me-open-button')
-export class OpenButton extends ConnectedLitElement {
+export class OpenButton extends LitElement {
   @query('me-file-modal') fileModal!: FileModalElement;
-
-  private modelViewer?: ModelViewerElement;
-
-  stateChanged(state: State) {
-    this.modelViewer = state.modelViewer;
-  }
 
   render() {
     return html`
@@ -56,11 +48,6 @@ export class OpenButton extends ConnectedLitElement {
     }
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-    if (this.modelViewer) {
-      // Clear potential poster settings.
-      this.modelViewer.reveal = 'auto';
-      this.modelViewer.poster = '';
-    }
     dispatchGltfUrl(url);
     dispatchConfig(extractStagingConfig(reduxStore.getState().config));
     dispatchSetHotspots([]);
