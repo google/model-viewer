@@ -27,11 +27,11 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '@material/mwc-icon-button';
 
-import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
-import {customElement, html, internalProperty, property, query} from 'lit-element';
-
 import {ALPHA_BLEND_MODES, checkFinite, DEFAULT_EMISSIVE_FACTOR, RGB, RGBA} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {customElement, html, internalProperty, property, query} from 'lit-element';
+import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
+
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../../redux/edit_dispatchers.js';
 import {TexturesById} from '../../redux/material_state.js';
 import {Material} from '../../redux/material_state.js';
@@ -165,7 +165,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255, selectedColor[1] / 255, selectedColor[2] / 255,
+      selectedColor[0] / 255,
+      selectedColor[1] / 255,
+      selectedColor[2] / 255,
       alphaFactor
     ];
   }
@@ -180,7 +182,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255, selectedColor[1] / 255, selectedColor[2] / 255
+      selectedColor[0] / 255,
+      selectedColor[1] / 255,
+      selectedColor[2] / 255
     ];
   }
 
@@ -504,32 +508,38 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="metallic-roughness-texture-picker" @texture-changed=${
         this.onMetallicRoughnessTextureChange} @texture-uploaded=${
         this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
-        <mwc-icon-button id="revert-metallic-roughness-texture" icon="undo"
-        @click=${this.revertMetallicRoughnessTexture}</mwc-icon-button>
+          </me-texture-picker>
+        </div>
       </me-section-row>
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
-        <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
+        <div class="MRSliderContainer">
+          <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
+          @click=${this.revertMetallicFactor}></mwc-icon-button>
+          <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
         step="0.01" value="${material.metallicFactor}" @change=${
         this.onMetallicChange}>
-        </me-slider-with-input>
-        <mwc-icon-button id="revert-metallic-factor" icon="undo"
-        @click=${this.revertMetallicFactor}</mwc-icon-button>
+          </me-slider-with-input>
+        </div>
 
         <div class="MRSliderLabel">Roughness factor</div>
-        <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
-        step="0.01" value="${material.roughnessFactor}" @change=${
+        <div class="MRSliderContainer">
+          <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
+          @click=${this.revertRoughnessFactor}></mwc-icon-button>
+          <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
+          step="0.01" value="${material.roughnessFactor}" @change=${
         this.onRoughnessChange}>
-        </me-slider-with-input>
-        <mwc-icon-button id="revert-roughness-factor" icon="undo"
-        @click=${this.revertRoughnessFactor}</mwc-icon-button>
+          </me-slider-with-input>
+        </div>
       </div>
     </div>
   </me-expandable-tab>`;
@@ -549,22 +559,27 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Base Color">
     <div slot="content">
       <me-section-row label="Factor">
-        <me-color-picker id="base-color-picker"
-        selectedColorHex=${selectedColorHex} @change=${this.onBaseColorChange}>
-        </me-color-picker>
-        <mwc-icon-button id="revert-base-color-factor" icon="undo"
-          @click=${this.revertBaseColorFactor}</mwc-icon-button>
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
+            @click=${this.revertBaseColorFactor}></mwc-icon-button>
+          <me-color-picker id="base-color-picker"
+          selectedColorHex=${selectedColorHex} @change=${
+        this.onBaseColorChange}>
+          </me-color-picker>
+        </div>
       </me-section-row>
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
+            @click=${this.revertBaseColorTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="base-color-texture-picker" @texture-changed=${
         this.onBaseColorTextureChange} @texture-uploaded=${
         this.onBaseColorTextureUpload} .images=${
         this.safeTextureUrls}></me-texture-picker>
-        <mwc-icon-button id="revert-base-color-texture" icon="undo"
-          @click=${this.revertBaseColorTexture}</mwc-icon-button>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>
@@ -581,15 +596,17 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
+            @click=${this.revertNormalTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
         this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
-        <mwc-icon-button id="revert-normal-map-texture" icon="undo"
-          @click=${this.revertNormalTexture}</mwc-icon-button>
+          </me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
@@ -609,22 +626,26 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Emissive">
     <div slot="content">
       <me-section-row label="Factor">
-        <me-color-picker selectedColorHex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
+          @click=${this.revertEmissiveFactor}></mwc-icon-button>
+          <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
         this.onEmissiveFactorChanged}></me-color-picker>
-        <mwc-icon-button id="revert-emissive-factor" icon="undo"
-        @click=${this.revertEmissiveFactor}</mwc-icon-button>
+        </div>
       </me-section-row>
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
+          @click=${this.revertEmissiveTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="emissive-texture-picker" @texture-changed=${
         this.onEmissiveTextureChange} @texture-uploaded=${
         this.onEmissiveTextureUpload} .images=${this.safeTextureUrls}>
         </me-texture-picker>
-        <mwc-icon-button id="revert-emissive-texture" icon="undo"
-        @click=${this.revertEmissiveTexture}</mwc-icon-button>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
@@ -640,15 +661,17 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+          @click=${this.revertOcclusionTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
         this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
-        <mwc-icon-button id="revert-occlusion-texture" icon="undo"
-        @click=${this.revertOcclusionTexture}</mwc-icon-button>
+          </me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
