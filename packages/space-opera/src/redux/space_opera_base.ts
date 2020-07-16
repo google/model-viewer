@@ -179,19 +179,16 @@ const dispatchGltf = registerStateMutator(
 /**
  * Helper async function
  */
-export async function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
+export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
   // NOTE: This encodes a design decision: Whether or not we reset edits
   // upon loading a new GLTF. It may be sensible to not reset edits and just
   // apply previous edits to the same, but updated, GLTF. That could be
   // later exposed as an option, and in that case we would simply apply the
   // existing edits (with null previousEdits) to this new model and not
   // dispatch new edits.
-  const edits = gltf ? await getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
+  const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
   dispatchGltf(new DispatchGltfArgs(
-      gltf,
-      edits,
-      (await gltf?.animationNames) ?? [],
-      (await gltf?.jsonString) ?? ''));
+      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
 }
 
 /** Only use in intialization. */

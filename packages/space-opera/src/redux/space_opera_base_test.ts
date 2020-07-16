@@ -159,13 +159,13 @@ async function applyEditsToStoredGltf() {
 describe('space opera base test', () => {
   beforeEach(async () => {
     jasmine.addCustomEqualityTester(arrayBufferEqualityTester);
-    await dispatchGltfAndEdits(undefined);
+    dispatchGltfAndEdits(undefined);
   });
 
   it('produces the correct materials when dispatching a GLTF action',
      async () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-       await dispatchGltfAndEdits(gltf);
+       dispatchGltfAndEdits(gltf);
 
        expect(reduxStore.getState().edits.materials).toEqual([
          jasmine.objectContaining({
@@ -185,7 +185,7 @@ describe('space opera base test', () => {
 
   it('color dispatch affects edit state, but not gltf state', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    await dispatchGltfAndEdits(gltf);
+    dispatchGltfAndEdits(gltf);
     dispatchMaterialBaseColor({
       index: 1,
       baseColorFactor: [0.1, 0.2, 0.3, 0.5],
@@ -207,16 +207,16 @@ describe('space opera base test', () => {
       }),
     ]);
 
-    const gltfMaterials = (await reduxStore.getState().gltf!.materials);
+    const gltfMaterials = (reduxStore.getState().gltf!.materials);
     // Should not be changed!
-    expect(await gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
+    expect(gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
         .toEqual([0.8, 0.2, 0.8, 1.0]);
   });
 
   it('roughness factor dispatch affects edit state, but not gltf state',
      async () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-       await dispatchGltfAndEdits(gltf);
+       dispatchGltfAndEdits(gltf);
        dispatchRoughnessFactor({id: 1, roughnessFactor: 0.5});
 
        expect(reduxStore.getState().edits.materials).toEqual([
@@ -235,16 +235,16 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials = (await reduxStore.getState().gltf!.materials);
+       const gltfMaterials = (reduxStore.getState().gltf!.materials);
        // Should not be changed!
-       expect(await gltfMaterials[1].pbrMetallicRoughness.roughnessFactor)
+       expect(gltfMaterials[1].pbrMetallicRoughness.roughnessFactor)
            .toEqual(0.2);
      });
 
   it('metallic factor dispatch affects edit state, but not gltf state',
      async () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-       await dispatchGltfAndEdits(gltf);
+       dispatchGltfAndEdits(gltf);
        dispatchMetallicFactor({id: 1, metallicFactor: 0.5});
 
        expect(reduxStore.getState().edits.materials).toEqual([
@@ -263,9 +263,9 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials = (await reduxStore.getState().gltf!.materials);
+       const gltfMaterials = (reduxStore.getState().gltf!.materials);
        // Should not be changed!
-       expect(await gltfMaterials[1].pbrMetallicRoughness.metallicFactor)
+       expect(gltfMaterials[1].pbrMetallicRoughness.metallicFactor)
            .toEqual(0.3);
      });
 
@@ -290,32 +290,32 @@ describe('space opera base test', () => {
        };
 
        await applyEdits(gltf, gltfEdits);
-       const material = (await gltf.materials)[0];
-       expect(await material.name).toEqual('yellow');
-       expect(await material.pbrMetallicRoughness.baseColorFactor)
+       const material = (gltf.materials)[0];
+       expect(material.name).toEqual('yellow');
+       expect(material.pbrMetallicRoughness.baseColorFactor)
            .toEqual([0.8, 0.8, 0.2, 1.0]);
-       expect(await material.pbrMetallicRoughness.roughnessFactor).toEqual(0.4);
-       expect(await material.pbrMetallicRoughness.metallicFactor).toEqual(0.3);
+       expect(material.pbrMetallicRoughness.roughnessFactor).toEqual(0.4);
+       expect(material.pbrMetallicRoughness.metallicFactor).toEqual(0.3);
      });
 
   it('getEditedGltf after color dispatch should work', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    await dispatchGltfAndEdits(gltf);
+    dispatchGltfAndEdits(gltf);
     dispatchMaterialBaseColor(
         {index: 1, baseColorFactor: [0.1, 0.2, 0.3, 0.4]});
 
     const newGltf = await applyEditsToStoredGltf();
-    const gltfMaterials = (await newGltf.materials);
+    const gltfMaterials = (newGltf.materials);
     expect(gltfMaterials).toBeDefined();
     // Should be changed!
-    expect(await gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
+    expect(gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
         .toEqual([0.1, 0.2, 0.3, 0.4]);
   });
 
   it('getGltfEdits should produce identity edits', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     const expectedBytes = await gltf.packGlb();
-    const edits = await getGltfEdits(gltf);
+    const edits = getGltfEdits(gltf);
     await applyEdits(gltf, edits);
     const actualBytes = await gltf.packGlb();
     expect(actualBytes).toEqual(expectedBytes);
@@ -332,7 +332,7 @@ describe('space opera base test', () => {
        delete NO_PBR_BLOCK_JSON.materials[1]
            .pbrMetallicRoughness.metallicFactor;
        const gltf = new GltfModel(NO_PBR_BLOCK_JSON, null);
-       await dispatchGltfAndEdits(gltf);
+       dispatchGltfAndEdits(gltf);
 
        // Make sure they have sensible defaults in edits
        expect(reduxStore.getState().edits.materials).toEqual([
@@ -354,7 +354,7 @@ describe('space opera base test', () => {
   it('loading a gltf with textures results in the correct app state',
      async () => {
        const model = (await createGltfWithTexture());
-       await dispatchGltfAndEdits(model);
+       dispatchGltfAndEdits(model);
 
        const {texturesById, materials} = reduxStore.getState().edits;
        expect(texturesById.size).toEqual(3);
@@ -363,24 +363,21 @@ describe('space opera base test', () => {
 
        const texId = materials[0].baseColorTextureId!;
        expect(texturesById.get(texId)!.id).toEqual(texId);
-       expect(texturesById.get(texId)!.uri)
-           .toEqual((await model.textures)[0].uri);
+       expect(texturesById.get(texId)!.uri).toEqual((model.textures)[0].uri);
      });
 
   it('applying texture edits works', async () => {
     const gltf = (await createGltfWithTexture());
 
     // Set the other material to use the texture
-    expect(
-        await (await gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
         .toBeNull();
-    expect(await (await gltf.materials)[1]
-               .pbrMetallicRoughness.metallicRoughnessTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.metallicRoughnessTexture)
         .toBeNull();
-    expect(await (await gltf.materials)[1].normalTexture).toBeNull();
-    expect(await (await gltf.materials)[1].emissiveTexture).toBeNull();
-    expect(await (await gltf.materials)[1].occlusionTexture).toBeNull();
-    const edits1 = await getGltfEdits(gltf);
+    expect((gltf.materials)[1].normalTexture).toBeNull();
+    expect((gltf.materials)[1].emissiveTexture).toBeNull();
+    expect((gltf.materials)[1].occlusionTexture).toBeNull();
+    const edits1 = getGltfEdits(gltf);
     edits1.materials[1] = {
       ...edits1.materials[1],
       baseColorTextureId: edits1.materials[0].baseColorTextureId,
@@ -391,34 +388,29 @@ describe('space opera base test', () => {
       occlusionTextureId: edits1.materials[0].occlusionTextureId,
     };
     await applyEdits(gltf, edits1);
-    expect(
-        await (await gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
         .not.toBeNull();
-    expect(await (await gltf.materials)[1]
-               .pbrMetallicRoughness.metallicRoughnessTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.metallicRoughnessTexture)
         .not.toBeNull();
-    expect(await (await gltf.materials)[1].normalTexture).not.toBeNull();
-    expect(await (await gltf.materials)[1].emissiveTexture).not.toBeNull();
-    expect(await (await gltf.materials)[1].occlusionTexture).not.toBeNull();
+    expect((gltf.materials)[1].normalTexture).not.toBeNull();
+    expect((gltf.materials)[1].emissiveTexture).not.toBeNull();
+    expect((gltf.materials)[1].occlusionTexture).not.toBeNull();
 
     // Handle should've been re-used
-    expect(
-        await (await gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
-        .toEqual(await (await gltf.materials)[0]
-                     .pbrMetallicRoughness.baseColorTexture);
-    expect(await (await gltf.materials)[1]
-               .pbrMetallicRoughness.metallicRoughnessTexture)
-        .toEqual(await (await gltf.materials)[0]
-                     .pbrMetallicRoughness.metallicRoughnessTexture);
-    expect(await (await gltf.materials)[1].normalTexture)
-        .toEqual(await (await gltf.materials)[0].normalTexture);
-    expect(await (await gltf.materials)[1].emissiveTexture)
-        .toEqual(await (await gltf.materials)[0].emissiveTexture);
-    expect(await (await gltf.materials)[1].occlusionTexture)
-        .toEqual(await (await gltf.materials)[0].occlusionTexture);
+    expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
+        .toEqual((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture);
+    expect((gltf.materials)[1].pbrMetallicRoughness.metallicRoughnessTexture)
+        .toEqual(
+            (gltf.materials)[0].pbrMetallicRoughness.metallicRoughnessTexture);
+    expect((gltf.materials)[1].normalTexture)
+        .toEqual((gltf.materials)[0].normalTexture);
+    expect((gltf.materials)[1].emissiveTexture)
+        .toEqual((gltf.materials)[0].emissiveTexture);
+    expect((gltf.materials)[1].occlusionTexture)
+        .toEqual((gltf.materials)[0].occlusionTexture);
 
     // Clear the first material
-    const edits2 = await getGltfEdits(gltf);
+    const edits2 = getGltfEdits(gltf);
     edits2.materials[0] = {
       ...edits2.materials[0],
       baseColorTextureId: undefined,
@@ -428,50 +420,46 @@ describe('space opera base test', () => {
       occlusionTextureId: undefined,
     };
     await applyEdits(gltf, edits2);
-    expect(
-        await (await gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)
+    expect((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)
         .toBeNull();
-    expect(
-        await (await gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
         .not.toBeNull();
-    expect(await (await gltf.materials)[0]
-               .pbrMetallicRoughness.metallicRoughnessTexture)
+    expect((gltf.materials)[0].pbrMetallicRoughness.metallicRoughnessTexture)
         .toBeNull();
-    expect(await (await gltf.materials)[1]
-               .pbrMetallicRoughness.metallicRoughnessTexture)
+    expect((gltf.materials)[1].pbrMetallicRoughness.metallicRoughnessTexture)
         .not.toBeNull();
-    expect(await (await gltf.materials)[0].normalTexture).toBeNull();
-    expect(await (await gltf.materials)[1].normalTexture).not.toBeNull();
-    expect(await (await gltf.materials)[0].emissiveTexture).toBeNull();
-    expect(await (await gltf.materials)[1].emissiveTexture).not.toBeNull();
-    expect(await (await gltf.materials)[0].occlusionTexture).toBeNull();
-    expect(await (await gltf.materials)[1].occlusionTexture).not.toBeNull();
+    expect((gltf.materials)[0].normalTexture).toBeNull();
+    expect((gltf.materials)[1].normalTexture).not.toBeNull();
+    expect((gltf.materials)[0].emissiveTexture).toBeNull();
+    expect((gltf.materials)[1].emissiveTexture).not.toBeNull();
+    expect((gltf.materials)[0].occlusionTexture).toBeNull();
+    expect((gltf.materials)[1].occlusionTexture).not.toBeNull();
   });
 
   it('applies edits to texture doublesidedness', async () => {
     const gltf = (await createGltfWithTexture());
-    expect(await (await gltf.materials)[0].doubleSided).toBeTrue();
-    expect(await (await gltf.materials)[1].doubleSided).not.toBeDefined();
+    expect((gltf.materials)[0].doubleSided).toBeTrue();
+    expect((gltf.materials)[1].doubleSided).not.toBeDefined();
 
     // Set material 1 to be not double sided.
-    const edits1 = await getGltfEdits(gltf);
+    const edits1 = getGltfEdits(gltf);
     edits1.materials[1] = {
       ...edits1.materials[1],
       doubleSided: false,
     };
     await applyEdits(gltf, edits1);
-    expect(await (await gltf.materials)[1].doubleSided).toBeFalse();
+    expect((gltf.materials)[1].doubleSided).toBeFalse();
 
     // Clear mat 0's doublesidedness.
-    const edits2 = await getGltfEdits(gltf);
+    const edits2 = getGltfEdits(gltf);
     edits2.materials[0] = {
       ...edits2.materials[0],
       doubleSided: undefined,
     };
     await applyEdits(gltf, edits2);
 
-    expect(await (await gltf.materials)[0].doubleSided).not.toBeDefined();
-    expect(await (await gltf.materials)[1].doubleSided).toBeFalse();
+    expect((gltf.materials)[0].doubleSided).not.toBeDefined();
+    expect((gltf.materials)[1].doubleSided).toBeFalse();
   });
 
   it('adding and assigning a new texture works', async () => {
@@ -500,25 +488,20 @@ describe('space opera base test', () => {
       normalTextureId: newNormalTexId,
     };
     await applyEdits(gltf, edits1);
-    expect(
-        (await (await gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)
-            ?.uri)
+    expect(((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)?.uri)
         .toEqual(newBaseColorTexUri);
-    expect((await (await gltf.materials)[0]
-                .pbrMetallicRoughness.metallicRoughnessTexture)
+    expect(((gltf.materials)[0].pbrMetallicRoughness.metallicRoughnessTexture)
                ?.uri)
         .toEqual(newMetallicRoughnessTexUri);
-    expect((await (await gltf.materials)[0].normalTexture)?.uri)
-        .toEqual(newNormalTexUri);
+    expect(((gltf.materials)[0].normalTexture)?.uri).toEqual(newNormalTexUri);
   });
 
   it('dispatchBaseColorTexture can be used to share textures and clear them',
      async () => {
-       await dispatchGltfAndEdits(await createGltfWithTexture());
+       dispatchGltfAndEdits(await createGltfWithTexture());
 
        let gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1]
-                  .pbrMetallicRoughness.baseColorTexture)
+       expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
            .toBeNull();
 
        // Set mat 1 to use mat 0's texture
@@ -527,25 +510,22 @@ describe('space opera base test', () => {
        expect(textureId).toBeDefined();
        dispatchBaseColorTexture({id: 1, textureId});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1]
-                  .pbrMetallicRoughness.baseColorTexture)
-           .toEqual(await (await gltf.materials)[0]
-                        .pbrMetallicRoughness.baseColorTexture);
+       expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
+           .toEqual((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture);
 
        // Clear mat 0's texture
        dispatchBaseColorTexture({id: 0, textureId: undefined});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[0]
-                  .pbrMetallicRoughness.baseColorTexture)
+       expect((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)
            .toBeNull();
      });
 
   it('can share or clear textures when using dispatchNormalTexture',
      async () => {
-       await dispatchGltfAndEdits(await createGltfWithTexture());
+       dispatchGltfAndEdits(await createGltfWithTexture());
 
        let gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].normalTexture).toBeNull();
+       expect((gltf.materials)[1].normalTexture).toBeNull();
 
        // Set mat 1 to use mat 0's texture
        const textureId =
@@ -553,21 +533,21 @@ describe('space opera base test', () => {
        expect(textureId).toBeDefined();
        dispatchNormalTexture({id: 1, textureId});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].normalTexture)
-           .toEqual(await (await gltf.materials)[0].normalTexture);
+       expect((gltf.materials)[1].normalTexture)
+           .toEqual((gltf.materials)[0].normalTexture);
 
        // Clear mat 0's texture
        dispatchNormalTexture({id: 0, textureId: undefined});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[0].normalTexture).toBeNull();
+       expect((gltf.materials)[0].normalTexture).toBeNull();
      });
 
   it('can share or clear textures when using dispatchEmissiveTexture',
      async () => {
-       await dispatchGltfAndEdits(await createGltfWithTexture());
+       dispatchGltfAndEdits(await createGltfWithTexture());
 
        let gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].emissiveTexture).toBeNull();
+       expect((gltf.materials)[1].emissiveTexture).toBeNull();
 
        // Set mat 1 to use mat 0's texture
        const textureId =
@@ -575,21 +555,21 @@ describe('space opera base test', () => {
        expect(textureId).toBeDefined();
        dispatchEmissiveTexture({id: 1, textureId});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].emissiveTexture)
-           .toEqual(await (await gltf.materials)[0].emissiveTexture);
+       expect((gltf.materials)[1].emissiveTexture)
+           .toEqual((gltf.materials)[0].emissiveTexture);
 
        // Clear mat 0's texture
        dispatchEmissiveTexture({id: 0, textureId: undefined});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[0].emissiveTexture).toBeNull();
+       expect((gltf.materials)[0].emissiveTexture).toBeNull();
      });
 
   it('can share or clear textures when using dispatchOcclusionTexture',
      async () => {
-       await dispatchGltfAndEdits(await createGltfWithTexture());
+       dispatchGltfAndEdits(await createGltfWithTexture());
 
        let gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].occlusionTexture).toBeNull();
+       expect((gltf.materials)[1].occlusionTexture).toBeNull();
 
        // Set mat 1 to use mat 0's texture
        const textureId =
@@ -597,98 +577,92 @@ describe('space opera base test', () => {
        expect(textureId).toBeDefined();
        dispatchOcclusionTexture({id: 1, textureId});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[1].occlusionTexture)
-           .toEqual(await (await gltf.materials)[0].occlusionTexture);
+       expect((gltf.materials)[1].occlusionTexture)
+           .toEqual((gltf.materials)[0].occlusionTexture);
 
        // Clear mat 0's texture
        dispatchOcclusionTexture({id: 0, textureId: undefined});
        gltf = await applyEditsToStoredGltf();
-       expect(await (await gltf.materials)[0].occlusionTexture).toBeNull();
+       expect((gltf.materials)[0].occlusionTexture).toBeNull();
      });
 
   it('should reuse textures when applying edits to the same model',
      async () => {
-       await dispatchGltfAndEdits(await createGltfWithTexture());
+       dispatchGltfAndEdits(await createGltfWithTexture());
 
        const gltf = reduxStore.getState().gltf!;
        expect(gltf).toBeDefined();
-       expect((await gltf.textures).length).toEqual(3);
+       expect((gltf.textures).length).toEqual(3);
 
        await applyEdits(gltf, reduxStore.getState().edits);
-       expect((await gltf.textures).length).toEqual(3);
+       expect((gltf.textures).length).toEqual(3);
      });
 
   it('dispatchAddBaseColorTexture can add new textures', async () => {
-    await dispatchGltfAndEdits(await createGltfWithTexture());
+    dispatchGltfAndEdits(await createGltfWithTexture());
     dispatchAddBaseColorTexture({id: 1, uri: 'grass.png'});
 
     const gltf = await applyEditsToStoredGltf();
-    expect((await (await gltf.materials)[1]
-                .pbrMetallicRoughness.baseColorTexture)!.uri)
+    expect(((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)!.uri)
         .toEqual('grass.png');
     // Shouldn't affect mat[0]
-    expect((await (await gltf.materials)[0]
-                .pbrMetallicRoughness.baseColorTexture)!.uri)
+    expect(((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)!.uri)
         .not.toBeNull();
     // Should have at least 2 textures..
-    expect((await gltf.textures).length).toBeGreaterThanOrEqual(2);
+    expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
   it('adds new textures with dispatchAddMetallicRoughnessTexture', async () => {
-    await dispatchGltfAndEdits(await createGltfWithTexture());
+    dispatchGltfAndEdits(await createGltfWithTexture());
     dispatchAddMetallicRoughnessTexture({id: 1, uri: 'roughness.png'});
 
     const gltf = await applyEditsToStoredGltf();
-    expect((await (await gltf.materials)[1]
-                .pbrMetallicRoughness.metallicRoughnessTexture)!.uri)
+    expect(((gltf.materials)[1].pbrMetallicRoughness.metallicRoughnessTexture)!
+               .uri)
         .toEqual('roughness.png');
     // Shouldn't affect mat[0]
-    expect((await (await gltf.materials)[0]
-                .pbrMetallicRoughness.metallicRoughnessTexture)!.uri)
+    expect(((gltf.materials)[0].pbrMetallicRoughness.metallicRoughnessTexture)!
+               .uri)
         .not.toBeNull();
     // Should have at least 2 textures..
-    expect((await gltf.textures).length).toBeGreaterThanOrEqual(2);
+    expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
   it('adds new textures with dispatchAddNormalTexture', async () => {
-    await dispatchGltfAndEdits(await createGltfWithTexture());
+    dispatchGltfAndEdits(await createGltfWithTexture());
     dispatchAddNormalTexture({id: 1, uri: 'normal.png'});
 
     const gltf = await applyEditsToStoredGltf();
-    expect((await (await gltf.materials)[1].normalTexture)!.uri)
-        .toEqual('normal.png');
+    expect(((gltf.materials)[1].normalTexture)!.uri).toEqual('normal.png');
     // Shouldn't affect mat[0]
-    expect((await (await gltf.materials)[0].normalTexture)!.uri).not.toBeNull();
+    expect(((gltf.materials)[0].normalTexture)!.uri).not.toBeNull();
     // Should have at least 2 textures..
-    expect((await gltf.textures).length).toBeGreaterThanOrEqual(2);
+    expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
   it('adds new textures with dispatchAddEmissiveTexture', async () => {
-    await dispatchGltfAndEdits(await createGltfWithTexture());
+    dispatchGltfAndEdits(await createGltfWithTexture());
     dispatchAddEmissiveTexture({id: 1, uri: 'emissive.png'});
 
     const gltf = await applyEditsToStoredGltf();
-    expect((await (await gltf.materials)[1].emissiveTexture)!.uri)
-        .toEqual('emissive.png');
+    expect(((gltf.materials)[1].emissiveTexture)!.uri).toEqual('emissive.png');
     // Shouldn't affect mat[0]
-    expect((await (await gltf.materials)[0].emissiveTexture)!.uri)
-        .not.toBeNull();
+    expect(((gltf.materials)[0].emissiveTexture)!.uri).not.toBeNull();
     // Should have at least 2 textures..
-    expect((await gltf.textures).length).toBeGreaterThanOrEqual(2);
+    expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
   it('adds new textures with dispatchAddOcclusionTexture', async () => {
-    await dispatchGltfAndEdits(await createGltfWithTexture());
+    dispatchGltfAndEdits(await createGltfWithTexture());
     dispatchAddOcclusionTexture({id: 1, uri: 'occlusion.png'});
 
     const gltf = await applyEditsToStoredGltf();
-    expect((await (await gltf.materials)[1].occlusionTexture)!.uri)
+    expect(((gltf.materials)[1].occlusionTexture)!.uri)
         .toEqual('occlusion.png');
     // Shouldn't affect mat[0]
-    expect((await (await gltf.materials)[0].occlusionTexture)!.uri)
-        .not.toBeNull();
+    expect(((gltf.materials)[0].occlusionTexture)!.uri).not.toBeNull();
     // Should have at least 2 textures..
-    expect((await gltf.textures).length).toBeGreaterThanOrEqual(2);
+    expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
   it('throws if we try to add duplicate mutator action names', () => {
@@ -783,7 +757,7 @@ describe('space opera base test', () => {
 
   it('applies edits to texture emissiveFactor', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    await dispatchGltfAndEdits(gltf);
+    dispatchGltfAndEdits(gltf);
 
     expect(reduxStore.getState().edits.materials[0].emissiveFactor)
         .toEqual([0.3, 0.4, 0.5]);
@@ -793,15 +767,15 @@ describe('space opera base test', () => {
     dispatchSetEmissiveFactor({id: 1, emissiveFactor: [0.5, 0.6, 0.7]});
 
     const newGltf = await applyEditsToStoredGltf();
-    const gltfMaterials = (await newGltf.materials);
+    const gltfMaterials = (newGltf.materials);
     expect(gltfMaterials).toBeDefined();
 
-    expect(await gltfMaterials[1].emissiveFactor).toEqual([0.5, 0.6, 0.7]);
+    expect(gltfMaterials[1].emissiveFactor).toEqual([0.5, 0.6, 0.7]);
   });
 
   it('applies edits to texture alphaMode', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    await dispatchGltfAndEdits(gltf);
+    dispatchGltfAndEdits(gltf);
 
     expect(reduxStore.getState().edits.materials[0].alphaMode).toBe('MASK');
     expect(reduxStore.getState().edits.materials[1].alphaMode).toBeUndefined();
@@ -809,15 +783,15 @@ describe('space opera base test', () => {
     dispatchSetAlphaMode({id: 1, alphaMode: 'BLEND'});
 
     const newGltf = await applyEditsToStoredGltf();
-    const gltfMaterials = (await newGltf.materials);
+    const gltfMaterials = newGltf.materials;
     expect(gltfMaterials).toBeDefined();
 
-    expect(await gltfMaterials[1].alphaMode).toBe('BLEND');
+    expect(gltfMaterials[1].alphaMode).toBe('BLEND');
   });
 
   it('applies edits to texture alphaCutoff', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    await dispatchGltfAndEdits(gltf);
+    dispatchGltfAndEdits(gltf);
 
     expect(reduxStore.getState().edits.materials[0].alphaCutoff).toBe(0.25);
     expect(reduxStore.getState().edits.materials[1].alphaCutoff)
@@ -826,9 +800,9 @@ describe('space opera base test', () => {
     dispatchSetAlphaCutoff({id: 0, alphaCutoff: 0.6});
 
     const newGltf = await applyEditsToStoredGltf();
-    const gltfMaterials = (await newGltf.materials);
+    const gltfMaterials = newGltf.materials;
     expect(gltfMaterials).toBeDefined();
 
-    expect(await gltfMaterials[0].alphaCutoff).toBe(0.6);
+    expect(gltfMaterials[0].alphaCutoff).toBe(0.6);
   });
 });

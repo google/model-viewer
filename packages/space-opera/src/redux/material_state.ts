@@ -68,20 +68,20 @@ export interface Material {
   // Add later: other textures and scales, flipNormalY, culling.
 }
 
-async function createMaterial(
+function createMaterial(
     domMaterial: GltfMaterial,
-    texturesByHandle: Map<TextureHandle, Texture>): Promise<Material> {
-  const name = await domMaterial.name;
+    texturesByHandle: Map<TextureHandle, Texture>): Material {
+  const name = domMaterial.name;
   const pbr = domMaterial.pbrMetallicRoughness;
-  const baseColorTexture = await pbr.baseColorTexture;
+  const baseColorTexture = pbr.baseColorTexture;
   const baseColorTextureId =
       baseColorTexture ? texturesByHandle.get(baseColorTexture)?.id : undefined;
-  if (!baseColorTextureId && await pbr.baseColorTexture) {
+  if (!baseColorTextureId && pbr.baseColorTexture) {
     throw new Error(
         'Could not find the base color texture ID for a texture handle');
   }
 
-  const metallicRoughnessTexture = await pbr.metallicRoughnessTexture;
+  const metallicRoughnessTexture = pbr.metallicRoughnessTexture;
   const metallicRoughnessTextureId = metallicRoughnessTexture ?
       texturesByHandle.get(metallicRoughnessTexture)?.id :
       undefined;
@@ -90,7 +90,7 @@ async function createMaterial(
         'Could not find the roughness texture ID for a texture handle');
   }
 
-  const normalTexture = await domMaterial.normalTexture;
+  const normalTexture = domMaterial.normalTexture;
   const normalTextureId =
       normalTexture ? texturesByHandle.get(normalTexture)?.id : undefined;
   if (!normalTextureId && normalTexture) {
@@ -98,7 +98,7 @@ async function createMaterial(
         'Could not find the normal texture ID for a texture handle');
   }
 
-  const emissiveTexture = await domMaterial.emissiveTexture;
+  const emissiveTexture = domMaterial.emissiveTexture;
   const emissiveTextureId =
       emissiveTexture ? texturesByHandle.get(emissiveTexture)?.id : undefined;
   if (!emissiveTextureId && emissiveTexture) {
@@ -106,7 +106,7 @@ async function createMaterial(
         'Could not find the emissive texture ID for a texture handle');
   }
 
-  const occlusionTexture = await domMaterial.occlusionTexture;
+  const occlusionTexture = domMaterial.occlusionTexture;
   const occlusionTextureId =
       occlusionTexture ? texturesByHandle.get(occlusionTexture)?.id : undefined;
   if (!occlusionTextureId && occlusionTexture) {
@@ -117,30 +117,30 @@ async function createMaterial(
   return {
     name,
     baseColorTextureId,
-    baseColorFactor: await pbr.baseColorFactor,
-    doubleSided: await domMaterial.doubleSided,
-    roughnessFactor: await pbr.roughnessFactor,
-    metallicFactor: await pbr.metallicFactor,
+    baseColorFactor: pbr.baseColorFactor,
+    doubleSided: domMaterial.doubleSided,
+    roughnessFactor: pbr.roughnessFactor,
+    metallicFactor: pbr.metallicFactor,
     metallicRoughnessTextureId,
     normalTextureId,
     emissiveTextureId,
     occlusionTextureId,
-    emissiveFactor: await domMaterial.emissiveFactor,
-    alphaMode: await domMaterial.alphaMode,
-    alphaCutoff: await domMaterial.alphaCutoff,
+    emissiveFactor: domMaterial.emissiveFactor,
+    alphaMode: domMaterial.alphaMode,
+    alphaCutoff: domMaterial.alphaCutoff,
   };
 }
 
 /**
  * Creates material state representative of the given gltf's materials.
  */
-export async function createMaterials(
+export function createMaterials(
     model: GltfModel,
-    texturesByHandle: Map<TextureHandle, Texture>): Promise<Material[]> {
-  const modelMaterials = await model.materials;
+    texturesByHandle: Map<TextureHandle, Texture>): Material[] {
+  const modelMaterials = model.materials;
   const editMaterials = [];
   for (const m of modelMaterials) {
-    editMaterials.push(await createMaterial(m, texturesByHandle));
+    editMaterials.push(createMaterial(m, texturesByHandle));
   }
   return editMaterials;
 }
