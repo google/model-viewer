@@ -755,7 +755,8 @@
       "exclude": [
         "gltfpt",
         "babylon"
-      ]
+      ],
+      "renderSkybox": true
     },
     {
       "name": "DirectionalLightTest",
@@ -774,7 +775,8 @@
         "gltfpt",
         "babylon",
         "filament"
-      ]
+      ],
+      "renderSkybox": true
     },
     {
       "name": "AlphaBlendLitmusTest",
