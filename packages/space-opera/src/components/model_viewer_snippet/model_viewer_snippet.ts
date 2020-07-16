@@ -76,6 +76,10 @@ export class ExportPanel extends ConnectedLitElement {
       editedConfig.environmentImage = `Change this to your HDR URL`;
     }
 
+    if (editedConfig.poster && isObjectUrl(editedConfig.poster)) {
+      editedConfig.poster = `Change this to your poster URL`;
+    }
+
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
 
