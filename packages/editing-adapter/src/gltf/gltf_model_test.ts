@@ -148,36 +148,36 @@ async function testTextureApi(
     ],
   } as GlTf;
   const model = new GltfModel(gltfJson, null);
-  const mat0 = (await model.materials)[0];
-  const mat1 = (await model.materials)[1];
+  const mat0 = model.materials[0];
+  const mat1 = model.materials[1];
 
   // Loads and reads correctly
-  expect((await model.textures).length).toBe(1);
+  expect(model.textures.length).toBe(1);
 
-  const originalTex = await getTexture(mat0);
+  const originalTex = getTexture(mat0);
   expect(originalTex!.uri).toEqual('originalTexture.png');
-  expect(await getTexture(mat1)).toBeNull();
+  expect(getTexture(mat1)).toBeNull();
 
   // Re-use
   await setTexture(mat1, originalTex);
-  expect(await getTexture(mat1)).toBe(originalTex);
-  expect((await model.textures).length).toBe(1);
+  expect(getTexture(mat1)).toBe(originalTex);
+  expect(model.textures.length).toBe(1);
 
   // Clear
   await setTexture(mat0, null);
-  expect(await getTexture(mat0)).toBeNull();
+  expect(getTexture(mat0)).toBeNull();
 
   // Restore
   await setTexture(mat0, originalTex);
-  expect(await getTexture(mat0)).toBe(originalTex);
+  expect(getTexture(mat0)).toBe(originalTex);
 
   // Add
   await setTexture(mat0, 'newTexture.png');
-  expect((await model.textures).length).toBe(2);
-  expect((await getTexture(mat0))!.uri).toEqual('newTexture.png');
+  expect(model.textures.length).toBe(2);
+  expect(getTexture(mat0)!.uri).toEqual('newTexture.png');
 
   // Make sure nothing else got changed
-  expect(await getTexture(mat1)).toEqual(originalTex);
+  expect(getTexture(mat1)).toEqual(originalTex);
   expect(originalTex!.uri).toEqual('originalTexture.png');
 }
 
@@ -193,23 +193,23 @@ describe('gltf model test', () => {
 
   it('setters work', async () => {
     const model = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
-    const material = (await model.materials)[0];
+    const material = model.materials[0];
     expect(material).toBeDefined();
     const pbr = material.pbrMetallicRoughness;
     expect(pbr).toBeDefined();
 
-    expect(await pbr.baseColorFactor).toEqual([0.8, 0.8, 0.2, 1.0]);
-    expect(await pbr.roughnessFactor).toEqual(0.9);
+    expect(pbr.baseColorFactor).toEqual([0.8, 0.8, 0.2, 1.0]);
+    expect(pbr.roughnessFactor).toEqual(0.9);
 
     await pbr.setBaseColorFactor([0, 0.5, 1.0, 0.5]);
-    expect(await pbr.baseColorFactor).toEqual([0, 0.5, 1.0, 0.5]);
+    expect(pbr.baseColorFactor).toEqual([0, 0.5, 1.0, 0.5]);
 
     await pbr.setRoughnessFactor(0.5);
-    expect(await pbr.roughnessFactor).toEqual(0.5);
+    expect(pbr.roughnessFactor).toEqual(0.5);
 
     // Check 0 case, for bad use of || operator.
     await pbr.setRoughnessFactor(0.0);
-    expect(await pbr.roughnessFactor).toEqual(0.0);
+    expect(pbr.roughnessFactor).toEqual(0.0);
   });
 
   it('for missing material properties, reading them returns default values and does not modify JSON',
@@ -229,11 +229,11 @@ describe('gltf model test', () => {
          ],
        };
        const model = new GltfModel(emptyMaterialsRoot, null);
-       const pbr = (await model.materials)[0].pbrMetallicRoughness;
+       const pbr = model.materials[0].pbrMetallicRoughness;
 
        // Getters should return defaults.
-       expect(await pbr.baseColorFactor).toEqual([1, 1, 1, 1]);
-       expect(await pbr.roughnessFactor).toEqual(1);
+       expect(pbr.baseColorFactor).toEqual([1, 1, 1, 1]);
+       expect(pbr.roughnessFactor).toEqual(1);
 
        // Setting to default values should not add properties to underlying
        // JSON.
@@ -249,10 +249,10 @@ describe('gltf model test', () => {
 
        // ..and setting should actually still work
        await pbr.setBaseColorFactor([0.1, 0.2, 0.3, 0.4]);
-       expect(await pbr.baseColorFactor).toEqual([0.1, 0.2, 0.3, 0.4]);
+       expect(pbr.baseColorFactor).toEqual([0.1, 0.2, 0.3, 0.4]);
 
        await pbr.setRoughnessFactor(0.123);
-       expect(await pbr.roughnessFactor).toEqual(0.123);
+       expect(pbr.roughnessFactor).toEqual(0.123);
      });
 
   it('texture getters/setters should work as expected', async () => {
@@ -288,8 +288,8 @@ describe('gltf model test', () => {
     const model =
         new GltfModel(cloneJson(GLTF_JSON), EXAMPLE_BIN_AS_ARRAY_BUFFER);
 
-    const materials = await model.materials;
-    const textures = await model.textures;
+    const materials = model.materials;
+    const textures = model.textures;
 
     expect(textures.length).toBe(3);
     expect(materials.length).toBe(2);
@@ -297,116 +297,112 @@ describe('gltf model test', () => {
     const pbr0 = materials[0].pbrMetallicRoughness;
     const pbr1 = materials[1].pbrMetallicRoughness;
 
-    const baseColorTex = await pbr0.baseColorTexture;
+    const baseColorTex = pbr0.baseColorTexture;
     expect(baseColorTex).not.toBeNull();
     expect(baseColorTex!.uri).toEqual('basecolor.png');
-    expect(await pbr1.baseColorTexture).toBeNull();
+    expect(pbr1.baseColorTexture).toBeNull();
 
-    const metallicRoughnessTex = await pbr0.metallicRoughnessTexture;
+    const metallicRoughnessTex = pbr0.metallicRoughnessTexture;
     expect(metallicRoughnessTex).not.toBeNull();
     expect(metallicRoughnessTex!.uri).toEqual('roughness.png');
-    expect(await pbr1.metallicRoughnessTexture).toBeNull();
+    expect(pbr1.metallicRoughnessTexture).toBeNull();
 
-    const normalTex0 = (await materials[0].normalTexture)!;
-    const normalTex1 = (await materials[1].normalTexture)!;
+    const normalTex0 = materials[0].normalTexture!;
+    const normalTex1 = materials[1].normalTexture!;
 
     expect(normalTex0).not.toBeNull();
     expect(normalTex0?.uri).toEqual('normal.png');
     expect(normalTex1).toBeNull();
 
-    expect(await (await model.materials)[0].doubleSided).toBe(true);
-    expect(await (await model.materials)[1].doubleSided).not.toBeDefined();
+    expect(model.materials[0].doubleSided).toBe(true);
+    expect(model.materials[1].doubleSided).not.toBeDefined();
 
-    await (await model.materials)[0].setDoubleSided(false);
-    expect(await (await model.materials)[0].doubleSided).toBe(false);
+    await model.materials[0].setDoubleSided(false);
+    expect(model.materials[0].doubleSided).toBe(false);
 
-    expect(await (await model.materials)[0].alphaMode).toBe('MASK');
-    expect(await (await model.materials)[1].alphaMode).not.toBeDefined();
+    expect(model.materials[0].alphaMode).toBe('MASK');
+    expect(model.materials[1].alphaMode).not.toBeDefined();
 
-    await (await model.materials)[0].setAlphaMode('OPAQUE');
-    expect(await (await model.materials)[0].alphaMode).toBe('OPAQUE');
+    await model.materials[0].setAlphaMode('OPAQUE');
+    expect(model.materials[0].alphaMode).toBe('OPAQUE');
 
-    expect(await (await model.materials)[0].alphaCutoff).toBe(0.25);
-    expect(await (await model.materials)[1].alphaCutoff).not.toBeDefined();
-    await (await model.materials)[0].setAlphaCutoff(0.5);
-    expect(await (await model.materials)[0].alphaCutoff).toBe(0.5);
+    expect(model.materials[0].alphaCutoff).toBe(0.25);
+    expect(model.materials[1].alphaCutoff).not.toBeDefined();
+    await model.materials[0].setAlphaCutoff(0.5);
+    expect(model.materials[0].alphaCutoff).toBe(0.5);
 
-    expect(await (await model.materials)[0].emissiveFactor)
-        .toEqual([0.3, 0.4, 0.5]);
-    expect(await (await model.materials)[1].emissiveFactor).toBeUndefined();
-    await (await model.materials)[0].setEmissiveFactor([0.6, 0.7, 0.8]);
-    expect(await (await model.materials)[0].emissiveFactor)
-        .toEqual([0.6, 0.7, 0.8]);
-    await (await model.materials)[1].setEmissiveFactor([0, 0, 0]);
-    expect(await (await model.materials)[1].emissiveFactor).toBeUndefined();
+    expect(model.materials[0].emissiveFactor).toEqual([0.3, 0.4, 0.5]);
+    expect(model.materials[1].emissiveFactor).toBeUndefined();
+    await model.materials[0].setEmissiveFactor([0.6, 0.7, 0.8]);
+    expect(model.materials[0].emissiveFactor).toEqual([0.6, 0.7, 0.8]);
+    await model.materials[1].setEmissiveFactor([0, 0, 0]);
+    expect(model.materials[1].emissiveFactor).toBeUndefined();
 
 
     // Re-use
     await pbr1.setBaseColorTexture(baseColorTex);
-    expect(await pbr1.baseColorTexture).toBe(baseColorTex);
-    expect(await pbr0.baseColorTexture).toBe(baseColorTex);
-    expect((await model.textures).length).toBe(3);
+    expect(pbr1.baseColorTexture).toBe(baseColorTex);
+    expect(pbr0.baseColorTexture).toBe(baseColorTex);
+    expect(model.textures.length).toBe(3);
 
     await pbr1.setMetallicRoughnessTexture(metallicRoughnessTex);
-    expect(await pbr1.metallicRoughnessTexture).toBe(metallicRoughnessTex);
-    expect(await pbr0.metallicRoughnessTexture).toBe(metallicRoughnessTex);
-    expect((await model.textures).length).toBe(3);
+    expect(pbr1.metallicRoughnessTexture).toBe(metallicRoughnessTex);
+    expect(pbr0.metallicRoughnessTexture).toBe(metallicRoughnessTex);
+    expect(model.textures.length).toBe(3);
 
-    await (await model.materials)[1].setNormalTexture(normalTex0);
-    expect(await (await model.materials)[0].normalTexture).toBe(normalTex0);
-    expect(await (await model.materials)[1].normalTexture).toBe(normalTex0);
-    expect((await model.textures).length).toBe(3);
+    await model.materials[1].setNormalTexture(normalTex0);
+    expect(model.materials[0].normalTexture).toBe(normalTex0);
+    expect(model.materials[1].normalTexture).toBe(normalTex0);
+    expect(model.textures.length).toBe(3);
 
     // Delete
     await pbr0.setBaseColorTexture(null);
-    expect(await pbr0.baseColorTexture).toBeNull();
+    expect(pbr0.baseColorTexture).toBeNull();
     await pbr0.setMetallicRoughnessTexture(null);
-    expect(await pbr0.metallicRoughnessTexture).toBeNull();
-    await (await model.materials)[0].setNormalTexture(null);
-    expect(await (await model.materials)[0].normalTexture).toBeNull();
+    expect(pbr0.metallicRoughnessTexture).toBeNull();
+    await model.materials[0].setNormalTexture(null);
+    expect(model.materials[0].normalTexture).toBeNull();
 
     // Set again
     await pbr0.setBaseColorTexture(baseColorTex);
-    expect(await pbr0.baseColorTexture).toBe(baseColorTex);
+    expect(pbr0.baseColorTexture).toBe(baseColorTex);
     await pbr0.setMetallicRoughnessTexture(metallicRoughnessTex);
-    expect(await pbr0.metallicRoughnessTexture).toBe(metallicRoughnessTex);
-    await (await model.materials)[0].setNormalTexture(normalTex0);
-    expect(await (await model.materials)[0].normalTexture).toBe(normalTex0);
+    expect(pbr0.metallicRoughnessTexture).toBe(metallicRoughnessTex);
+    await model.materials[0].setNormalTexture(normalTex0);
+    expect(model.materials[0].normalTexture).toBe(normalTex0);
 
     // Add
     await pbr0.setBaseColorTexture('brick.png');
-    expect((await model.textures).length).toBe(4);
-    expect(await pbr0.baseColorTexture).not.toBe(baseColorTex);
-    expect((await pbr0.baseColorTexture)!.uri).toEqual('brick.png');
+    expect(model.textures.length).toBe(4);
+    expect(pbr0.baseColorTexture).not.toBe(baseColorTex);
+    expect(pbr0.baseColorTexture!.uri).toEqual('brick.png');
 
     await pbr0.setMetallicRoughnessTexture('shiny.png');
-    expect((await model.textures).length).toBe(5);
-    expect(await pbr0.metallicRoughnessTexture).not.toBe(metallicRoughnessTex);
-    expect((await pbr0.metallicRoughnessTexture)!.uri).toEqual('shiny.png');
+    expect(model.textures.length).toBe(5);
+    expect(pbr0.metallicRoughnessTexture).not.toBe(metallicRoughnessTex);
+    expect(pbr0.metallicRoughnessTexture!.uri).toEqual('shiny.png');
 
-    await (await model.materials)[0].setNormalTexture('bumpy.png');
-    expect((await model.textures).length).toBe(6);
-    expect(await (await model.materials)[0].normalTexture).not.toBe(normalTex0);
-    expect((await (await model.materials)[0].normalTexture)!.uri)
-        .toEqual('bumpy.png');
+    await model.materials[0].setNormalTexture('bumpy.png');
+    expect(model.textures.length).toBe(6);
+    expect(model.materials[0].normalTexture).not.toBe(normalTex0);
+    expect((model.materials[0].normalTexture)!.uri).toEqual('bumpy.png');
 
     // Make sure nothing else got changed
     expect(baseColorTex!.uri).toEqual('basecolor.png');
-    expect((await pbr1.baseColorTexture)!.uri).toEqual('basecolor.png');
+    expect(pbr1.baseColorTexture!.uri).toEqual('basecolor.png');
     expect(metallicRoughnessTex!.uri).toEqual('roughness.png');
-    expect((await pbr1.metallicRoughnessTexture)!.uri).toEqual('roughness.png');
+    expect(pbr1.metallicRoughnessTexture!.uri).toEqual('roughness.png');
     expect(normalTex0.uri).toEqual('normal.png');
-    expect((await (await model.materials)[1].normalTexture)!.uri)
-        .toEqual('normal.png');
+    expect(model.materials[1].normalTexture!.uri).toEqual('normal.png');
   });
 
   it('should correctly load textures with in-buffer images', async () => {
     const {model, buffers} = await createGltfWithTexture();
 
-    expect((await model.textures).length).toBe(2);
-    const tex0 = (await model.textures)[0];
+    expect(model.textures.length).toBe(2);
+    const tex0 = model.textures[0];
     expect(tex0.uri).toBeDefined();
-    const tex1 = (await model.textures)[1];
+    const tex1 = model.textures[1];
     expect(tex1.uri).toBeDefined();
 
     // Fetch the data and make sure it's the PNG we expect at each uri.
@@ -468,7 +464,7 @@ describe('gltf model test', () => {
 
        // Set alpha mode. NOTE: Of course, this test will need to change
        // as MV implements more.
-       const mat0 = (await model.materials)[0];
+       const mat0 = model.materials[0];
        await mat0.setAlphaMode('MASK');
        const newSrc = modelViewer.src;
        expect(newSrc).not.toEqual('orig.glb');
@@ -476,39 +472,39 @@ describe('gltf model test', () => {
        // Download it, make sure it has the new values
        const newGlbBuffer = await fetchBufferForUri(newSrc!);
        const newModel = GltfModel.fromGlb(newGlbBuffer);
-       expect(await (await newModel.materials)[0].alphaMode).toEqual('MASK');
+       expect(newModel.materials[0].alphaMode).toEqual('MASK');
      });
 
   it('exports a valid GLB after deleting a texture', async () => {
     const {model} = await createGltfWithTexture();
-    expect((await model.textures).length).toBe(2);
+    expect(model.textures.length).toBe(2);
 
-    await (await model.textures)[0].delete();
-    expect((await model.textures).length).toBe(1);
+    await model.textures[0].delete();
+    expect(model.textures.length).toBe(1);
     const glb1Tex = await model.packGlb();
 
     const newModel = GltfModel.fromGlb(glb1Tex);
-    expect((await newModel.textures).length).toBe(1);
+    expect(newModel.textures.length).toBe(1);
   });
 
   it('exports smaller GLB files after deleting a texture', async () => {
     const {model} = await createGltfWithTexture();
-    expect((await model.textures).length).toBe(2);
+    expect(model.textures.length).toBe(2);
     const glb2Tex = await model.packGlb();
 
-    const bytesSavedA = expectedBytesSaved(
-        await getByteLengthForUrl((await model.textures)[0].uri));
-    await (await model.textures)[0].delete();
-    expect((await model.textures).length).toBe(1);
+    const bytesSavedA =
+        expectedBytesSaved(await getByteLengthForUrl(model.textures[0].uri));
+    await model.textures[0].delete();
+    expect(model.textures.length).toBe(1);
     const glb1Tex = await model.packGlb();
     expect(glb1Tex.byteLength)
         .toBeLessThanOrEqual(glb2Tex.byteLength - bytesSavedA);
 
     // Do it again to be sure.
-    const bytesSavedB = expectedBytesSaved(
-        await getByteLengthForUrl((await model.textures)[0].uri));
-    await (await model.textures)[0].delete();
-    expect((await model.textures).length).toBe(0);
+    const bytesSavedB =
+        expectedBytesSaved(await getByteLengthForUrl(model.textures[0].uri));
+    await model.textures[0].delete();
+    expect(model.textures.length).toBe(0);
     const glb0Tex = await model.packGlb();
     expect(glb0Tex.byteLength)
         .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSavedB);
@@ -520,18 +516,17 @@ describe('gltf model test', () => {
            {asset: {generator: 'FBX2glTF', version: '2.0'}, materials: [{}]},
            null);
        const pngUrl = await generatePngObjectUrl('#fff');
-       await (await model.materials)[0]
-           .pbrMetallicRoughness.setBaseColorTexture(pngUrl);
-       expect((await model.textures).length).toBe(1);
+       await model.materials[0].pbrMetallicRoughness.setBaseColorTexture(
+           pngUrl);
+       expect(model.textures.length).toBe(1);
        const glb1Tex = await model.packGlb();
 
-       const bytesSaved = expectedBytesSaved(
-           await getByteLengthForUrl((await model.textures)[0].uri));
-       await (await model.materials)[0]
-           .pbrMetallicRoughness.setBaseColorTexture(null);
-       expect((await model.textures).length).toBe(1);
-       await (await model.textures)[0].delete();
-       expect((await model.textures).length).toBe(0);
+       const bytesSaved =
+           expectedBytesSaved(await getByteLengthForUrl(model.textures[0].uri));
+       await model.materials[0].pbrMetallicRoughness.setBaseColorTexture(null);
+       expect(model.textures.length).toBe(1);
+       await model.textures[0].delete();
+       expect(model.textures.length).toBe(0);
        const glb0Tex = await model.packGlb();
        expect(glb0Tex.byteLength)
            .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSaved);
@@ -549,25 +544,25 @@ describe('gltf model test', () => {
     const tex1Url = await generatePngObjectUrl('#0f0');
     const tex2Url = await generatePngObjectUrl('#00f');
 
-    await (await model.materials)[0].setEmissiveTexture(tex0Url);
-    await (await model.materials)[1].setEmissiveTexture(tex1Url);
-    await (await model.materials)[2].setEmissiveTexture(tex2Url);
+    await model.materials[0].setEmissiveTexture(tex0Url);
+    await model.materials[1].setEmissiveTexture(tex1Url);
+    await model.materials[2].setEmissiveTexture(tex2Url);
 
     const newModel = GltfModel.fromGlb(await model.packGlb());
-    expect((await newModel.materials).length).toBe(3);
-    expect((await newModel.textures).length).toBe(3);
+    expect(newModel.materials.length).toBe(3);
+    expect(newModel.textures.length).toBe(3);
 
-    const newTex0 = await (await newModel.materials)[0].emissiveTexture;
-    const newTex1 = await (await newModel.materials)[1].emissiveTexture;
-    const newTex2 = await (await newModel.materials)[2].emissiveTexture;
+    const newTex0 = newModel.materials[0].emissiveTexture;
+    const newTex1 = newModel.materials[1].emissiveTexture;
+    const newTex2 = newModel.materials[2].emissiveTexture;
 
     await newTex1!.delete();
-    expect((await newModel.textures).length).toBe(2);
+    expect(newModel.textures.length).toBe(2);
 
     await newModel.packGlb();
-    expect(await (await newModel.materials)[0].emissiveTexture).toBe(newTex0);
-    expect(await (await newModel.materials)[1].emissiveTexture).toBeNull();
-    expect(await (await newModel.materials)[2].emissiveTexture).toBe(newTex2);
+    expect(newModel.materials[0].emissiveTexture).toBe(newTex0);
+    expect(newModel.materials[1].emissiveTexture).toBeNull();
+    expect(newModel.materials[2].emissiveTexture).toBe(newTex2);
   });
 
   it('accurately reports texture used state', async () => {
@@ -576,14 +571,13 @@ describe('gltf model test', () => {
         null);
     const tex0Url = await generatePngObjectUrl('#f00');
 
-    await (await model.materials)[0].setEmissiveTexture(tex0Url);
-    expect(await (await model.textures)[0].isUsed()).toBeTrue();
+    await model.materials[0].setEmissiveTexture(tex0Url);
+    expect(model.textures[0].isUsed()).toBeTrue();
 
-    await (await model.materials)[0].setEmissiveTexture(null);
-    expect(await (await model.textures)[0].isUsed()).toBeFalse();
+    await model.materials[0].setEmissiveTexture(null);
+    expect(model.textures[0].isUsed()).toBeFalse();
 
-    await (await model.materials)[0].setEmissiveTexture(
-        (await model.textures)[0]);
-    expect(await (await model.textures)[0].isUsed()).toBeTrue();
+    await model.materials[0].setEmissiveTexture(model.textures[0]);
+    expect(model.textures[0].isUsed()).toBeTrue();
   });
 });

@@ -375,7 +375,7 @@ export class TextureHandle {
     this.gltfModel.deleteTexture(this);
   }
 
-  async isUsed() {
+  isUsed() {
     return this.gltfModel.isTextureUsed(this);
   }
 }
