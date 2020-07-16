@@ -51,6 +51,7 @@ export function renderModelViewer(
         skybox-image=${ifDefined(skyboxImage)}
         exposure=${ifDefined(config.exposure)}
         poster=${ifDefined(config.poster)}
+        reveal=${ifDefined(config.reveal)}
         shadow-intensity=${ifDefined(config.shadowIntensity)}
         shadow-softness=${ifDefined(config.shadowSoftness)}
         style=${styleMap(styles)}

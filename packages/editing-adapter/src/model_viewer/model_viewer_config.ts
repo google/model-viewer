@@ -30,6 +30,8 @@ export interface ModelViewerConfig {
   fieldOfView?: string;
   environmentImage?: string;  // IBL/HDRI lighting
   exposure?: number;  // Environment for hdr environment, used as ibl intensity
+  poster?: string;    // Display an image before model finished loading
+  reveal?: string;    // Controls when the model should be revealed
   shadowIntensity?: number;
   shadowSoftness?: number;
   maxCameraOrbit?: string;

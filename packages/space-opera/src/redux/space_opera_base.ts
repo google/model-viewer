@@ -15,6 +15,7 @@
  *
  */
 
+import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
@@ -28,6 +29,7 @@ import {EnvironmentImage} from './lighting_state.js';
  * Space Opera state.
  */
 export interface State {
+  modelViewer?: ModelViewerElement;
   config: ModelViewerConfig;
   // This should only be modified by actions that load entirely new glTFs.
   gltfUrl?: string;
@@ -49,9 +51,6 @@ export interface State {
   addHotspotMode?: boolean;
   // A list of user provided environment images to select from
   environmentImages: EnvironmentImage[];
-  // A trigger to request set poster in model_viewer_preview
-  setPosterTrigger: boolean;
-  displayPoster: boolean;
 }
 
 const INITIAL_STATE: State = {
@@ -64,8 +63,6 @@ const INITIAL_STATE: State = {
   hotspots: [],
   playAnimation: true,
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
-  setPosterTrigger: false,
-  displayPoster: false,
 };
 
 interface Action extends Redux.Action {
@@ -192,6 +189,12 @@ export async function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
       (await gltf?.animationNames) ?? [],
       (await gltf?.jsonString) ?? ''));
 }
+
+/** Only use in intialization. */
+export const dispatchModelViewer = registerStateMutator(
+    'MODEL_VIEWER', (state: State, modelViewer?: ModelViewerElement) => {
+      state.modelViewer = modelViewer;
+    })
 
 /** Use when the user wants to load a new config (probably from a snippet). */
 export const dispatchConfig = registerStateMutator(

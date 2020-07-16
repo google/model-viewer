@@ -24,7 +24,7 @@ import '@material/mwc-icon-button';
 
 import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectURL, createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -33,8 +33,7 @@ import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.
 import {HotspotConfig} from '../../redux/hotspot_config.js';
 import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../../redux/lighting_dispatchers.js';
-import {dispatchSetDisplayPoster, dispatchSetPoster, dispatchSetPosterTrigger} from '../../redux/poster_dispatcher';
-import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, State} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, dispatchModelViewer, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -94,17 +93,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$gltf] = state.gltf;
     this[$gltfUrl] = state.gltfUrl;
     this[$playAnimation] = state.playAnimation;
-    if (state.setPosterTrigger) {
-      this.createPoster();
-    }
-    if (state.displayPoster) {
-      this.reloadScene();
-    }
   }
 
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
+    dispatchModelViewer(this.modelViewer);
   }
 
   private async onGltfUrlChanged() {
@@ -276,23 +270,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
       return;
     await safeDownloadCallback(
         await this.modelViewer.toBlob(), 'Space Opera Screenshot.png', '')();
-  }
-
-  private async createPoster() {
-    if (!this.modelViewer)
-      return;
-    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob());
-    dispatchSetPosterTrigger(false);
-    dispatchSetPoster(posterUrl.unsafeUrl);
-  }
-
-  private reloadScene() {
-    if (this.modelViewer) {
-      this.modelViewer.reveal = 'interaction';
-      this.modelViewer.src = '';
-      this.modelViewer.src = this.config.src;
-      dispatchSetDisplayPoster(false);
-    }
   }
 
   private onDragover(event: DragEvent) {
