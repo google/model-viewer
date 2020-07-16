@@ -17,11 +17,10 @@
 
 import '@google/model-viewer';
 
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
 import {styleMap} from 'lit-html/directives/style-map';
-
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -37,7 +36,8 @@ export interface ModelViewerEventHandlers {
  * Renders a model-viewer tag given the config.
  */
 export function renderModelViewer(
-    config: ModelViewerConfig, eventHandlers?: ModelViewerEventHandlers,
+    config: ModelViewerConfig,
+    eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
   const styles = {backgroundColor: config.bgColor || 'unset'};
   const skyboxImage =
@@ -50,6 +50,7 @@ export function renderModelViewer(
         environment-image=${ifDefined(config.environmentImage)}
         skybox-image=${ifDefined(skyboxImage)}
         exposure=${ifDefined(config.exposure)}
+        poster=${ifDefined(config.poster)}
         shadow-intensity=${ifDefined(config.shadowIntensity)}
         shadow-softness=${ifDefined(config.shadowSoftness)}
         style=${styleMap(styles)}

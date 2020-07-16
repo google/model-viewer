@@ -15,9 +15,8 @@
  *
  */
 
-import * as Redux from 'redux'; // from //third_party/javascript/redux:redux_closurized
-
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
+import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
@@ -50,6 +49,9 @@ export interface State {
   addHotspotMode?: boolean;
   // A list of user provided environment images to select from
   environmentImages: EnvironmentImage[];
+  // A trigger to request set poster in model_viewer_preview
+  setPosterTrigger: boolean;
+  displayPoster: boolean;
 }
 
 const INITIAL_STATE: State = {
@@ -62,6 +64,8 @@ const INITIAL_STATE: State = {
   hotspots: [],
   playAnimation: true,
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
+  setPosterTrigger: false,
+  displayPoster: false,
 };
 
 interface Action extends Redux.Action {
@@ -142,7 +146,8 @@ export const dispatchGltfUrl =
 class DispatchGltfArgs {
   constructor(
       readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {}
+      readonly animationNames: string[], readonly jsonString: string) {
+  }
 }
 
 const dispatchGltf = registerStateMutator(
@@ -182,7 +187,9 @@ export async function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
   // dispatch new edits.
   const edits = gltf ? await getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
   dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (await gltf?.animationNames) ?? [],
+      gltf,
+      edits,
+      (await gltf?.animationNames) ?? [],
       (await gltf?.jsonString) ?? ''));
 }
 
@@ -212,7 +219,8 @@ export const dispatchConfig = registerStateMutator(
  */
 export const dispatchInitialCameraState = registerStateMutator(
     'SET_INITIAL_CAMERA_STATE', (state, initialCamera?: Camera) => {
-      if (!initialCamera) return;
+      if (!initialCamera)
+        return;
       state.initialCamera = {...initialCamera};
     });
 
@@ -222,6 +230,7 @@ export const dispatchInitialCameraState = registerStateMutator(
  */
 export const dispatchCurrentCameraState = registerStateMutator(
     'SET_CURRENT_CAMERA_STATE', (state, currentCamera?: Camera) => {
-      if (!currentCamera) return;
+      if (!currentCamera)
+        return;
       state.currentCamera = {...currentCamera};
     });

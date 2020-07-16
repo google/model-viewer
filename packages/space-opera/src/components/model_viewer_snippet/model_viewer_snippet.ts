@@ -21,9 +21,9 @@ import '../download_button/download_button.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
+import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {HotspotConfig} from '../../redux/hotspot_config.js';
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
@@ -62,6 +62,9 @@ export class ExportPanel extends ConnectedLitElement {
     editedConfig.src = `model.glb`;
     if (editedConfig.environmentImage) {
       editedConfig.environmentImage = `environment-image.hdr`;
+    }
+    if (editedConfig.poster) {
+      editedConfig.poster = `poster.hdr`;
     }
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
@@ -109,7 +112,8 @@ export class ModelViewerSnippet extends LitElement {
 
   async handleSubmitSnippet(event: Event) {
     event.preventDefault();
-    if (!this.textArea) return;
+    if (!this.textArea)
+      return;
     this.errors = [];
     const inputText: string = this.textArea.value.trim();
     if (inputText.match(
