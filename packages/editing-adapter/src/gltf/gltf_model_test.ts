@@ -123,7 +123,7 @@ async function createGltfWithTexture() {
   };
 }
 
-type TextureGetter = (material: Material) => Promise<TextureHandle|null>;
+type TextureGetter = (material: Material) => TextureHandle|null;
 type TextureSetter =
     (material: Material, newHandle: TextureHandle|string|null) => Promise<void>;
 

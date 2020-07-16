@@ -97,9 +97,8 @@ export class PbrMetallicRoughness {
   }
 
   private getOrCreatePbr(): gltfSpec.MaterialPbrMetallicRoughness {
-    return (
-        this.materialJson.pbrMetallicRoughness =
-            this.materialJson.pbrMetallicRoughness || {});
+    return this.materialJson.pbrMetallicRoughness =
+               this.materialJson.pbrMetallicRoughness || {};
   }
 
   async setBaseColorFactor(factor: RGBA) {
@@ -114,16 +113,14 @@ export class PbrMetallicRoughness {
         .pbrMetallicRoughness.setBaseColorFactor(factor);
   }
 
-  get baseColorFactor(): Promise<RGBA> {
-    return Promise.resolve(
-        this.materialJson.pbrMetallicRoughness?.baseColorFactor as RGBA ||
-        DEFAULT_BASE_COLOR_FACTOR);
+  get baseColorFactor(): RGBA {
+    return this.materialJson.pbrMetallicRoughness?.baseColorFactor as RGBA ||
+        DEFAULT_BASE_COLOR_FACTOR;
   }
 
-  get roughnessFactor(): Promise<number> {
-    return Promise.resolve(
-        this.materialJson.pbrMetallicRoughness?.roughnessFactor ??
-        DEFAULT_ROUGHNESS_FACTOR);
+  get roughnessFactor(): number {
+    return this.materialJson.pbrMetallicRoughness?.roughnessFactor ??
+        DEFAULT_ROUGHNESS_FACTOR;
   }
 
   async setRoughnessFactor(factor: number) {
@@ -138,10 +135,9 @@ export class PbrMetallicRoughness {
         .pbrMetallicRoughness.setRoughnessFactor(factor);
   }
 
-  get metallicFactor(): Promise<number> {
-    return Promise.resolve(
-        this.materialJson.pbrMetallicRoughness?.metallicFactor ??
-        DEFAULT_METALLIC_FACTOR);
+  get metallicFactor(): number {
+    return this.materialJson.pbrMetallicRoughness?.metallicFactor ??
+        DEFAULT_METALLIC_FACTOR;
   }
 
   async setMetallicFactor(factor: number) {
@@ -156,10 +152,10 @@ export class PbrMetallicRoughness {
         factor);
   }
 
-  get baseColorTexture(): Promise<TextureHandle|null> {
+  get baseColorTexture(): TextureHandle|null {
     const index =
         this.materialJson.pbrMetallicRoughness?.baseColorTexture?.index;
-    return Promise.resolve(this.gltfModel[$getTextureHandle](index));
+    return this.gltfModel[$getTextureHandle](index);
   }
 
   async setBaseColorTexture(handle: TextureHandle|string|null) {
@@ -169,10 +165,10 @@ export class PbrMetallicRoughness {
     await this.setTexture('baseColorTexture', handle);
   }
 
-  get metallicRoughnessTexture(): Promise<TextureHandle|null> {
+  get metallicRoughnessTexture(): TextureHandle|null {
     const index =
         this.materialJson.pbrMetallicRoughness?.metallicRoughnessTexture?.index;
-    return Promise.resolve(this.gltfModel[$getTextureHandle](index));
+    return this.gltfModel[$getTextureHandle](index);
   }
 
   async setMetallicRoughnessTexture(handle: TextureHandle|string|null) {
@@ -185,9 +181,8 @@ export class PbrMetallicRoughness {
   private async setTexture(
       textureProperty: PbrTextureProperty, handle: TextureHandle|string|null) {
     const getOrCreateTexInfo = () => {
-      return (
-          this.getOrCreatePbr()[textureProperty] =
-              this.getOrCreatePbr()[textureProperty] || {index: -1});
+      return this.getOrCreatePbr()[textureProperty] =
+                 this.getOrCreatePbr()[textureProperty] || {index: -1};
     };
 
     const pbr = this.gltfModel.modelViewer?.model?.materials[this.materialIndex]
@@ -233,39 +228,39 @@ export class Material {
         this.gltfModel, this.materialJson, this.materialIndex);
   }
 
-  get name(): Promise<string> {
-    return Promise.resolve(this.materialJson.name);
+  get name(): string {
+    return this.materialJson.name;
   }
 
-  get normalTexture(): Promise<TextureHandle|null> {
+  get normalTexture(): TextureHandle|null {
     const index = this.materialJson.normalTexture?.index;
-    return Promise.resolve(this.gltfModel[$getTextureHandle](index));
+    return this.gltfModel[$getTextureHandle](index);
   }
 
-  get emissiveTexture(): Promise<TextureHandle|null> {
+  get emissiveTexture(): TextureHandle|null {
     const index = this.materialJson.emissiveTexture?.index;
-    return Promise.resolve(this.gltfModel[$getTextureHandle](index));
+    return this.gltfModel[$getTextureHandle](index);
   }
 
-  get occlusionTexture(): Promise<TextureHandle|null> {
+  get occlusionTexture(): TextureHandle|null {
     const index = this.materialJson.occlusionTexture?.index;
-    return Promise.resolve(this.gltfModel[$getTextureHandle](index));
+    return this.gltfModel[$getTextureHandle](index);
   }
 
-  get emissiveFactor(): Promise<RGB|undefined> {
-    return Promise.resolve(this.materialJson.emissiveFactor as RGB);
+  get emissiveFactor(): RGB|undefined {
+    return this.materialJson.emissiveFactor as RGB;
   }
 
-  get alphaMode(): Promise<string|undefined> {
-    return Promise.resolve(this.materialJson.alphaMode);
+  get alphaMode(): string|undefined {
+    return this.materialJson.alphaMode;
   }
 
-  get alphaCutoff(): Promise<number|undefined> {
-    return Promise.resolve(this.materialJson.alphaCutoff);
+  get alphaCutoff(): number|undefined {
+    return this.materialJson.alphaCutoff;
   }
 
-  get doubleSided(): Promise<boolean|undefined> {
-    return Promise.resolve(this.materialJson.doubleSided);
+  get doubleSided(): boolean|undefined {
+    return this.materialJson.doubleSided;
   }
 
   async setDoubleSided(doubleSided: boolean|undefined) {
@@ -381,7 +376,7 @@ export class TextureHandle {
   }
 
   async isUsed() {
-    return Promise.resolve(this.gltfModel.isTextureUsed(this));
+    return this.gltfModel.isTextureUsed(this);
   }
 }
 
@@ -417,14 +412,14 @@ export class GltfModel {
     return new GltfModel(gltfJson, gltfBuffer, modelViewer);
   }
 
-  get materials(): Promise<Material[]> {
-    return Promise.resolve(this.materialInstances);
+  get materials(): Material[] {
+    return this.materialInstances;
   }
 
   private readonly materialInstances: Material[];
 
-  get textures(): Promise<TextureHandle[]> {
-    return Promise.resolve(this.textureInstances);
+  get textures(): TextureHandle[] {
+    return this.textureInstances;
   }
 
   // Although it is not required by the API, for simpilicity, the order of this
@@ -725,12 +720,12 @@ export class GltfModel {
     this.modelViewer.src = this.glbObjectUrl;
   }
 
-  get animationNames(): Promise<string[]> {
-    return Promise.resolve((this.root.animations ?? []).map(anim => anim.name));
+  get animationNames(): string[] {
+    return (this.root.animations ?? []).map(anim => anim.name);
   }
 
-  get jsonString(): Promise<string> {
-    return Promise.resolve(JSON.stringify(this.root, null, 2));
+  get jsonString(): string {
+    return JSON.stringify(this.root, null, 2);
   }
 
   get images(): gltfSpec.Image[]|undefined {
