@@ -34,7 +34,7 @@ import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.
 import {HotspotConfig} from '../../redux/hotspot_config.js';
 import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../../redux/lighting_dispatchers.js';
-import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, extractStagingConfig, State} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, dispatchModelViewer, extractStagingConfig, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -104,12 +104,22 @@ export class ModelViewerPreview extends ConnectedLitElement {
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
+    dispatchModelViewer(this.modelViewer);
   }
 
   private async onGltfUrlChanged() {
     if (!this.modelViewer) {
       throw new Error(`model-viewer element was not ready`);
     }
+
+    // Clear potential poster settings.
+    if (this.config.reveal === 'interaction' ||
+        this.config.reveal === 'manual') {
+      this.modelViewer.reveal = this.config.reveal;
+    } else {
+      this.modelViewer.reveal = 'auto';
+    }
+    this.modelViewer.poster = this.config.poster || '';
 
     const url = this[$gltfUrl];
     if (url) {
