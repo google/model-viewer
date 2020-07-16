@@ -234,10 +234,8 @@ export class FilamentViewer extends LitElement {
 
     // Wait two rAFs to ensure we rendered at least once:
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.dispatchEvent(
-            new CustomEvent('model-visibility', {detail: {visible: true}}));
-      });
+      this.dispatchEvent(
+          new CustomEvent('model-visibility', {detail: {visible: true}}));
     });
   }
 

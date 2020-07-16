@@ -103,7 +103,7 @@ export class PathtracingViewer extends LitElement {
 
     // set back to 1024 later
     if (numSamples == null) {
-      numSamples = 10;
+      numSamples = 1024;
     }
 
     console.log('Rendering ' + numSamples + ' samples');
@@ -115,10 +115,8 @@ export class PathtracingViewer extends LitElement {
         () => {
           // Wait two rAFs to ensure we rendered at least once //TODO: clarify
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              this.dispatchEvent(new CustomEvent(
-                  'model-visibility', {detail: {visible: true}}));
-            });
+            this.dispatchEvent(
+                new CustomEvent('model-visibility', {detail: {visible: true}}));
           });
         });
   }
