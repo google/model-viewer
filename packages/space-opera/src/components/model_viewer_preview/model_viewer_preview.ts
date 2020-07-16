@@ -107,7 +107,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
 
     // Clear potential poster settings.
-    this.modelViewer.reveal = this.config.reveal || 'auto';
+    if (this.config.reveal === 'interaction' ||
+        this.config.reveal === 'manual') {
+      this.modelViewer.reveal = this.config.reveal;
+    } else {
+      this.modelViewer.reveal = 'auto';
+    }
     this.modelViewer.poster = this.config.poster || '';
 
     const url = this[$gltfUrl];
