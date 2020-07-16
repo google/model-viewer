@@ -293,14 +293,14 @@ export class ModelViewerPreview extends ConnectedLitElement {
       const file = event.dataTransfer.items[0].getAsFile();
       if (!file)
         return;
-      if (file.name.match(/\.(glb)$/)) {
+      if (file.name.match(/\.(glb)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         dispatchGltfUrl(url);
         dispatchConfig(extractStagingConfig(this.config));
         dispatchSetHotspots([]);
       }
-      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/)) {
+      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
         const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
         dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
