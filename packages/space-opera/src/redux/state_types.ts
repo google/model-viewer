@@ -20,9 +20,9 @@
 // want them to be read-only.
 
 /** Spherical coordinate. Follow model-viewer's convention of theta/phi. */
-export interface SphericalPosition {
-  readonly theta: number;
-  readonly phi: number;
+export interface SphericalPositionDeg {
+  readonly thetaDeg: number;
+  readonly phiDeg: number;
   readonly radius: number;
 }
 

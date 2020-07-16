@@ -18,7 +18,6 @@
 
 import './radius_limits.js';
 
-import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {dispatchCurrentCameraState, dispatchInitialCameraState, reduxStore} from '../../redux/space_opera_base.js';
 
 import {DEFAULT_MIN_RADIUS, dispatchRadiusLimits, RadiusLimits} from './radius_limits.js';
@@ -39,7 +38,7 @@ describe('radius limits editor test', () => {
 
   it('correctly loads radius limits', async () => {
     // Needed to even allow max of 34
-    dispatchInitialCameraState({orbit: {theta: 0, phi: 0, radius: 10}});
+    dispatchInitialCameraState({orbit: {thetaDeg: 0, phiDeg: 0, radius: 10}});
     dispatchRadiusLimits({enabled: true, min: 12, max: 34});
     await radiusLimits.updateComplete;
     expect(radiusLimits.inputLimits.enabled).toEqual(true);
@@ -50,8 +49,7 @@ describe('radius limits editor test', () => {
   it('correctly dispatches when I click set and clear', async () => {
     // Enable to show the buttons
     dispatchRadiusLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState(
-        {orbit: {theta: 0, radius: 10, phi: degToRad(33)}});
+    dispatchCurrentCameraState({orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}});
     await radiusLimits.updateComplete;
 
     (radiusLimits.shadowRoot!.querySelector('#set-min-button')! as

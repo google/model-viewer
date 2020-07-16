@@ -8,7 +8,7 @@
     "build": "npm run build:tsc && npm run build:rollup",
     "build:tsc": "tsc --incremental && cp src/gltf/*.d.ts lib/gltf",
     "build:rollup": "rollup -c --environment NODE_ENV:production",
-    "clean": "rm -rf lib && rm -rf dist",
+    "clean": "rm tsconfig.tsbuildinfo; rm -rf lib && rm -rf dist",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
     "update:package-lock": "rm ./package-lock.json; npm i --only=production",

@@ -8,7 +8,7 @@
     "build": "npm run build:tsc && npm run build:rollup",
     "build:tsc": "tsc --incremental",
     "build:rollup": "rollup -c --environment NODE_ENV:production",
-    "clean": "rm -rf lib && rm -rf dist",
+    "clean": "rm tsconfig.tsbuildinfo; rm -rf lib && rm -rf dist",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",

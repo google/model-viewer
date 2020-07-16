@@ -19,7 +19,6 @@
 
 import {arrayBufferEqualityTester, createBufferFromString, generatePngBlob, GlTf, GltfModel, ModelViewerConfig, RGBA} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_json.js'
-import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 
 import {applyCameraEdits, Camera} from './camera_state.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from './edit_dispatchers.js';
@@ -118,7 +117,9 @@ async function createGltfWithTexture() {
       {mimeType: 'image/png', bufferView: 2}
     ],
     textures: [
-      {source: 0, sampler: 0}, {source: 1, sampler: 0}, {source: 2, sampler: 0}
+      {source: 0, sampler: 0},
+      {source: 1, sampler: 0},
+      {source: 2, sampler: 0}
     ],
     materials: [
       {
@@ -291,9 +292,8 @@ describe('space opera base test', () => {
        await applyEdits(gltf, gltfEdits);
        const material = (await gltf.materials)[0];
        expect(await material.name).toEqual('yellow');
-       expect(await material.pbrMetallicRoughness.baseColorFactor).toEqual([
-         0.8, 0.8, 0.2, 1.0
-       ]);
+       expect(await material.pbrMetallicRoughness.baseColorFactor)
+           .toEqual([0.8, 0.8, 0.2, 1.0]);
        expect(await material.pbrMetallicRoughness.roughnessFactor).toEqual(0.4);
        expect(await material.pbrMetallicRoughness.metallicFactor).toEqual(0.3);
      });
@@ -701,9 +701,9 @@ describe('space opera base test', () => {
 
   it('applies camera edits correctly to a model viewer config', () => {
     const camera = {
-      orbit: {theta: degToRad(1.2), phi: degToRad(3.4), radius: 5.6},
+      orbit: {thetaDeg: 1.2, phiDeg: 3.4, radius: 5.6},
       target: {x: 1, y: 2, z: 3},
-      fieldOfView: 42,
+      fieldOfViewDeg: 42,
     };
     const config = {} as ModelViewerConfig;
     applyCameraEdits(config, camera);
@@ -729,7 +729,7 @@ describe('space opera base test', () => {
       fieldOfView: 'some fov',
       minCameraOrbit: 'some min orbit',
       maxCameraOrbit: 'some max orbit',
-    } as ModelViewerConfig;
+    };
     applyCameraEdits(config, camera);
     expect(config.cameraOrbit).toEqual('some orbit');
     expect(config.cameraTarget).toEqual('some target');
@@ -740,7 +740,7 @@ describe('space opera base test', () => {
 
   it('sets correct attributes for disabled camera pitch limits', () => {
     const camera = {
-      pitchLimits: {min: 10, max: 20, enabled: false},
+      pitchLimitsDeg: {min: 10, max: 20, enabled: false},
     } as Camera;
     const config = {} as ModelViewerConfig;
     applyCameraEdits(config, camera);
@@ -750,7 +750,7 @@ describe('space opera base test', () => {
 
   it('sets correct attributes for enabled pitch limits', () => {
     const camera = {
-      pitchLimits: {min: 10, max: 20, enabled: true},
+      pitchLimitsDeg: {min: 10, max: 20, enabled: true},
     } as Camera;
     const config = {} as ModelViewerConfig;
     applyCameraEdits(config, camera);
@@ -759,16 +759,16 @@ describe('space opera base test', () => {
   });
 
   it('correctly updates state upon dispatching camera fields', () => {
-    dispatchCurrentCameraState({fieldOfView: 42});
-    expect(reduxStore.getState().currentCamera!.fieldOfView).toEqual(42);
+    dispatchCurrentCameraState({fieldOfViewDeg: 42});
+    expect(reduxStore.getState().currentCamera!.fieldOfViewDeg).toEqual(42);
 
-    dispatchInitialCameraState({fieldOfView: 451});
-    expect(reduxStore.getState().initialCamera.fieldOfView).toEqual(451);
+    dispatchInitialCameraState({fieldOfViewDeg: 451});
+    expect(reduxStore.getState().initialCamera.fieldOfViewDeg).toEqual(451);
   });
 
   it('sets correct attributes for FOV limits', () => {
     const camera = {
-      fovLimits: {min: 10, max: 20, enabled: true},
+      fovLimitsDeg: {min: 10, max: 20, enabled: true},
     } as Camera;
     const config = {} as ModelViewerConfig;
     applyCameraEdits(config, camera);
@@ -785,9 +785,8 @@ describe('space opera base test', () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     await dispatchGltfAndEdits(gltf);
 
-    expect(reduxStore.getState().edits.materials[0].emissiveFactor).toEqual([
-      0.3, 0.4, 0.5
-    ]);
+    expect(reduxStore.getState().edits.materials[0].emissiveFactor)
+        .toEqual([0.3, 0.4, 0.5]);
     expect(reduxStore.getState().edits.materials[1].emissiveFactor)
         .toBeUndefined();
 

@@ -17,7 +17,6 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {Camera} from '../../redux/camera_state.js';
 import {registerStateMutator, State} from '../../redux/space_opera_base.js';
 import {Limits} from '../../redux/state_types.js';
@@ -34,18 +33,18 @@ export const DEFAULT_MAX_YAW = 180;
 
 /** Dispatch change to maximum pitch */
 export const dispatchYawLimits = registerStateMutator(
-    'SET_CAMERA_YAW_LIMITS', (state, yawLimits?: Limits) => {
-      if (!yawLimits) {
+    'SET_CAMERA_YAW_LIMITS', (state, yawLimitsDeg?: Limits) => {
+      if (!yawLimitsDeg) {
         throw new Error('No limits given');
       }
-      if (yawLimits === state.camera.yawLimits) {
+      if (yawLimitsDeg === state.camera.yawLimitsDeg) {
         throw new Error(
-            'Do not edit yawLimits in place. You passed in the same object');
+            'Do not edit yawLimitsDeg in place. You passed in the same object');
       }
 
       state.camera = {
         ...state.camera,
-        yawLimits,
+        yawLimitsDeg,
       };
     });
 
@@ -53,11 +52,11 @@ export const dispatchYawLimits = registerStateMutator(
 /** The Camera Settings panel. */
 @customElement('me-camera-yaw-limits')
 export class YawLimits extends LimitsBase {
-  @internalProperty() yawLimits?: Limits;
+  @internalProperty() yawLimitsDeg?: Limits;
   @internalProperty() currentCamera?: Camera;
 
   stateChanged(state: State) {
-    this.yawLimits = state.camera.yawLimits;
+    this.yawLimitsDeg = state.camera.yawLimitsDeg;
     this.currentCamera = state.currentCamera;
   }
 
@@ -78,11 +77,11 @@ export class YawLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    return Math.round(radToDeg(this.currentCamera?.orbit?.theta ?? 0));
+    return Math.round(this.currentCamera?.orbit?.thetaDeg ?? 0);
   }
 
   get limitsProperty() {
-    return this.yawLimits;
+    return this.yawLimitsDeg;
   }
 }
 

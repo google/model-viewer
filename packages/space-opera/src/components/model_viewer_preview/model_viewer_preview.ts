@@ -25,6 +25,7 @@ import '@material/mwc-icon-button';
 import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -47,10 +48,15 @@ const $gltf = Symbol('gltf');
 const $playAnimation = Symbol('playAnimation');
 
 function getCameraState(viewer: ModelViewerElement) {
+  const orbitRad = viewer.getCameraOrbit();
   return {
-    orbit: viewer.getCameraOrbit(),
+    orbit: {
+      thetaDeg: radToDeg(orbitRad.theta),
+      phiDeg: radToDeg(orbitRad.phi),
+      radius: orbitRad.radius
+    },
     target: viewer.getCameraTarget(),
-    fieldOfView: viewer.getFieldOfView(),
+    fieldOfViewDeg: viewer.getFieldOfView(),
   } as Camera;
 }
 
@@ -178,10 +184,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
     };
     applyCameraEdits(editedConfig, this.camera);
 
-    const screenshotButton =
-        html`<mwc-icon-button icon="photo_camera" class="ScreenShotButton" @click=${
-            this.downloadScreenshot}></mwc-icon-button>`;
-
+    const screenshotButton = html
+    `<mwc-icon-button icon="photo_camera" class="ScreenShotButton" @click=${
+        this.downloadScreenshot}></mwc-icon-button>`;
     const childElements = [...renderHotspots(this.hotspots), screenshotButton];
 
     const hasModel = !!editedConfig.src;
@@ -190,7 +195,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
           this.gltfError}</div>`);
     } else if (!hasModel) {
       childElements.push(
-          html`<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
+          html
+          `<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
     return html`${
