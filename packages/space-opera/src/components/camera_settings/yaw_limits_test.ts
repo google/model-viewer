@@ -18,48 +18,46 @@
 
 import './yaw_limits.js';
 
-import {degToRad} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_base.js';
 
 import {DEFAULT_MAX_YAW, dispatchYawLimits, YawLimits} from './yaw_limits.js';
 
 describe('yaw limits editor test', () => {
-  let yawLimits: YawLimits;
+  let yawLimitsDeg: YawLimits;
 
   beforeEach(async () => {
-    yawLimits = new YawLimits();
-    document.body.appendChild(yawLimits);
+    yawLimitsDeg = new YawLimits();
+    document.body.appendChild(yawLimitsDeg);
     dispatchYawLimits({enabled: false, min: 0, max: 0});
-    await yawLimits.updateComplete;
+    await yawLimitsDeg.updateComplete;
   });
 
   afterEach(() => {
-    document.body.removeChild(yawLimits);
+    document.body.removeChild(yawLimitsDeg);
   });
 
   it('correctly loads yaw limits', async () => {
     dispatchYawLimits({enabled: true, min: 12, max: 34});
-    await yawLimits.updateComplete;
-    expect(yawLimits.inputLimits.enabled).toEqual(true);
-    expect(yawLimits.inputLimits.min).toEqual(12);
-    expect(yawLimits.inputLimits.max).toEqual(34);
+    await yawLimitsDeg.updateComplete;
+    expect(yawLimitsDeg.inputLimits.enabled).toEqual(true);
+    expect(yawLimitsDeg.inputLimits.min).toEqual(12);
+    expect(yawLimitsDeg.inputLimits.max).toEqual(34);
   });
 
   it('correctly dispatches when I click set and clear', async () => {
-    dispatchYawLimits({enabled: true, min: 0, max: degToRad(99)});
-    dispatchCurrentCameraState(
-        {orbit: {theta: degToRad(33), radius: 10, phi: 0}});
-    await yawLimits.updateComplete;
+    dispatchYawLimits({enabled: true, min: 0, max: 99});
+    dispatchCurrentCameraState({orbit: {thetaDeg: 33, radius: 10, phiDeg: 0}});
+    await yawLimitsDeg.updateComplete;
 
-    (yawLimits.shadowRoot!.querySelector('#set-max-button')! as
+    (yawLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.yawLimits!.max).toEqual(33);
+    expect(reduxStore.getState().camera.yawLimitsDeg!.max).toEqual(33);
 
-    (yawLimits.shadowRoot!.querySelector('#clear-max-button')! as
+    (yawLimitsDeg.shadowRoot!.querySelector('#clear-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.yawLimits!.max)
+    expect(reduxStore.getState().camera.yawLimitsDeg!.max)
         .toEqual(DEFAULT_MAX_YAW);
   });
 });

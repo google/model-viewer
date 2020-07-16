@@ -23,41 +23,41 @@ import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_ba
 import {DEFAULT_MAX_FOV, dispatchFovLimits, FovLimits} from './fov_limits.js';
 
 describe('fov limits editor test', () => {
-  let fovLimits: FovLimits;
+  let fovLimitsDeg: FovLimits;
 
   beforeEach(async () => {
-    fovLimits = new FovLimits();
-    document.body.appendChild(fovLimits);
+    fovLimitsDeg = new FovLimits();
+    document.body.appendChild(fovLimitsDeg);
     dispatchFovLimits({enabled: false, min: 0, max: 0});
-    await fovLimits.updateComplete;
+    await fovLimitsDeg.updateComplete;
   });
 
   afterEach(() => {
-    document.body.removeChild(fovLimits);
+    document.body.removeChild(fovLimitsDeg);
   });
 
   it('correctly loads fov limits', async () => {
     dispatchFovLimits({enabled: true, min: 12, max: 34});
-    await fovLimits.updateComplete;
-    expect(fovLimits.inputLimits.enabled).toEqual(true);
-    expect(fovLimits.inputLimits.min).toEqual(12);
-    expect(fovLimits.inputLimits.max).toEqual(34);
+    await fovLimitsDeg.updateComplete;
+    expect(fovLimitsDeg.inputLimits.enabled).toEqual(true);
+    expect(fovLimitsDeg.inputLimits.min).toEqual(12);
+    expect(fovLimitsDeg.inputLimits.max).toEqual(34);
   });
 
   it('correctly dispatches when I click set and clear', async () => {
     dispatchFovLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({fieldOfView: 42});
-    await fovLimits.updateComplete;
+    dispatchCurrentCameraState({fieldOfViewDeg: 42});
+    await fovLimitsDeg.updateComplete;
 
-    (fovLimits.shadowRoot!.querySelector('#set-max-button')! as
+    (fovLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.fovLimits!.max).toEqual(42);
+    expect(reduxStore.getState().camera.fovLimitsDeg!.max).toEqual(42);
 
-    (fovLimits.shadowRoot!.querySelector('#clear-max-button')! as
+    (fovLimitsDeg.shadowRoot!.querySelector('#clear-max-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.fovLimits!.max)
+    expect(reduxStore.getState().camera.fovLimitsDeg!.max)
         .toEqual(DEFAULT_MAX_FOV);
   });
 });
