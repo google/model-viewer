@@ -107,8 +107,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
 
     // Clear potential poster settings.
-    this.modelViewer.reveal = 'auto';
-    this.modelViewer.poster = '';
+    this.modelViewer.reveal = this.config.reveal || 'auto';
+    this.modelViewer.poster = this.config.poster || '';
 
     const url = this[$gltfUrl];
     if (url) {
