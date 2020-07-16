@@ -706,6 +706,7 @@ export class MaterialPanel extends ConnectedLitElement {
       </me-dropdown>
       <mwc-icon-button id="revert-alpha-mode" icon="undo"
       title="Revert to original alpha mode"
+      style="display: none;"
       @click=${this.revertAlphaMode}</mwc-icon-button>
 
       ${
@@ -718,6 +719,7 @@ export class MaterialPanel extends ConnectedLitElement {
             }" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
             <mwc-icon-button id="revert-alpha-cutoff" icon="undo"
             title="Revert to original alpha cutoff"
+            style="display: none;"
             @click=${this.revertAlphaCutoff}</mwc-icon-button>` :
             html``}
       `;
@@ -737,6 +739,7 @@ export class MaterialPanel extends ConnectedLitElement {
         @change=${this.onDoubleSidedChange}></me-checkbox>
         <mwc-icon-button id="revert-double-sided" icon="undo"
         title="Revert to original double sided"
+        style="display: none;"
         @click=${this.revertDoubleSided}</mwc-icon-button>`;
   }
 
