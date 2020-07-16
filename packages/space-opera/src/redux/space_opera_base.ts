@@ -15,9 +15,8 @@
  *
  */
 
-import * as Redux from 'redux'; // from //third_party/javascript/redux:redux_closurized
-
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
+import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
@@ -145,7 +144,8 @@ export const dispatchGltfUrl =
 class DispatchGltfArgs {
   constructor(
       readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {}
+      readonly animationNames: string[], readonly jsonString: string) {
+  }
 }
 
 const dispatchGltf = registerStateMutator(
@@ -186,7 +186,9 @@ export async function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
   // dispatch new edits.
   const edits = gltf ? await getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
   dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (await gltf?.animationNames) ?? [],
+      gltf,
+      edits,
+      (await gltf?.animationNames) ?? [],
       (await gltf?.jsonString) ?? ''));
 }
 
@@ -216,7 +218,8 @@ export const dispatchConfig = registerStateMutator(
  */
 export const dispatchInitialCameraState = registerStateMutator(
     'SET_INITIAL_CAMERA_STATE', (state, initialCamera?: Camera) => {
-      if (!initialCamera) return;
+      if (!initialCamera)
+        return;
       state.initialCamera = {...initialCamera};
     });
 
@@ -226,7 +229,8 @@ export const dispatchInitialCameraState = registerStateMutator(
  */
 export const dispatchCurrentCameraState = registerStateMutator(
     'SET_CURRENT_CAMERA_STATE', (state, currentCamera?: Camera) => {
-      if (!currentCamera) return;
+      if (!currentCamera)
+        return;
       state.currentCamera = {...currentCamera};
     });
 
@@ -235,14 +239,13 @@ export const dispatchCurrentCameraState = registerStateMutator(
  * We consider "staging config" to be properties that are applicable to any
  * model, and thus are sensible to preserve when a new model is loaded.
  */
-export function extractStagingConfig(config: ModelViewerConfig): ModelViewerConfig {
+export function extractStagingConfig(config: ModelViewerConfig):
+    ModelViewerConfig {
   return {
-    environmentImage: config.environmentImage,
-    exposure: config.exposure,
-    useEnvAsSkybox: config.useEnvAsSkybox,
-    shadowIntensity: config.shadowIntensity,
-    shadowSoftness: config.shadowSoftness,
-    cameraControls: config.cameraControls,
-    autoRotate: config.autoRotate,
+    environmentImage: config.environmentImage, exposure: config.exposure,
+        useEnvAsSkybox: config.useEnvAsSkybox,
+        shadowIntensity: config.shadowIntensity,
+        shadowSoftness: config.shadowSoftness,
+        cameraControls: config.cameraControls, autoRotate: config.autoRotate,
   }
 }

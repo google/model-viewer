@@ -61,11 +61,13 @@ export async function generatePngBlob(strokeStyle: string = '#f0f'):
  * Returns true if two ArrayBuffers are equal, byte for byte.
  */
 export function areBuffersEqual(buffer0: ArrayBuffer, buffer1: ArrayBuffer) {
-  if (buffer0.byteLength !== buffer1.byteLength) return false;
+  if (buffer0.byteLength !== buffer1.byteLength)
+    return false;
   const view0 = new Uint8Array(buffer0);
   const view1 = new Uint8Array(buffer1);
   for (let i = 0; i < view0.length; i++) {
-    if (view0[i] !== view1[i]) return false;
+    if (view0[i] !== view1[i])
+      return false;
   }
   return true;
 }

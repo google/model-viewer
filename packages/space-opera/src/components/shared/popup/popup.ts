@@ -65,7 +65,7 @@ export class PopUp extends LitElement {
   }
 }
 
-declare global{
+declare global {
   interface HTMLElementTagNameMap {
     'me-popup': PopUp;
   }

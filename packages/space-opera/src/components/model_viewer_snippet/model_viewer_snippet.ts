@@ -21,43 +21,24 @@ import '../download_button/download_button.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
-import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
-
 import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {parseHotspotsFromSnippet} from '../../redux/parse_hotspot_config.js';
-import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {ExportZipButton} from '../download_button/download_button.js';
-import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
-import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {renderModelViewer} from '../utils/render_model_viewer.js';
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-/**
+    /**
  * Export panel.
  */
-@customElement('me-export-panel')
-export class ExportPanel extends ConnectedLitElement {
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
-  @internalProperty() gltfUrl?: string;
+    @customElement('me-export-panel') export class ExportPanel extends ConnectedLitElement {@internalProperty() config: ModelViewerConfig = {}; @internalProperty() hotspots: HotspotConfig[] = []; @internalProperty() camera: Camera = INITIAL_CAMERA; @internalProperty() gltfUrl?: string;
 
-  @query('snippet-viewer') snippetViewer!: SnippetViewer;
-  @query('me-export-zip-button') exportZipButton!: ExportZipButton;
+                                                                                                                                                                                                                                                                             @query('snippet-viewer') snippetViewer!: SnippetViewer; @query('me-export-zip-button') exportZipButton!: ExportZipButton;
 
-  stateChanged(state: State) {
+                                                                                                                                                                                                                                                                             stateChanged(state: State) {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspots;
     this.gltfUrl = state.gltfUrl;
-  }
+                                                                                                                                                                                                                                                                             }
 
-  render() {
+                                                                                                                                                                                                                                                                             render() {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
 
@@ -92,35 +73,32 @@ export class ExportPanel extends ConnectedLitElement {
       </snippet-viewer>
     </div>
     </me-expandable-tab>`;
-  }
+                                                                                                                                                                                                                                                                             }
 
-  protected updated() {
+                                                                                                                                                                                                                                                                             protected updated() {
     this.snippetViewer.updateComplete.then(() => {
       this.exportZipButton.snippetText =
           this.snippetViewer.snippet.textContent || '';
     });
-  }
-}
+                                                                                                                                                                                                                                                                             }}
 
 /**
  * Import/Export panel.
  * TODO:: This should be factored out/renamed.
  */
-@customElement('model-viewer-snippet')
-export class ModelViewerSnippet extends LitElement {
-  static get styles() {
+@customElement('model-viewer-snippet') export class ModelViewerSnippet extends LitElement {static get styles() {
     return css`
   #mv-input {
     width: 95%;
   }
         `;
-  }
+}
 
-  @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
+                                                                                           @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
 
-  @internalProperty() errors: string[] = [];
+                                                                                           @internalProperty() errors: string[] = [];
 
-  async handleSubmitSnippet(event: Event) {
+                                                                                           async handleSubmitSnippet(event: Event) {
     event.preventDefault();
     if (!this.textArea) return;
     this.errors = [];
@@ -162,9 +140,9 @@ export class ModelViewerSnippet extends LitElement {
     } else {
       this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
-  }
+                                                                                           }
 
-  render() {
+                                                                                           render() {
     const exampleLoadableSnippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb'
   autoplay animation-name="Wave"
@@ -189,18 +167,27 @@ export class ModelViewerSnippet extends LitElement {
 
     <me-export-panel></me-export-panel>
             `;
-  }
+                                                                                           }
 
-  updated() {
+                                                                                           updated() {
     // Work-around closureZ issue.
     this.textArea.style.backgroundColor =
         this.errors.length > 0 ? 'pink' : 'white';
-  }
-}
+                                                                                           }}
 
-declare global {
-  interface HTMLElementTagNameMap {
+declare global {interface HTMLElementTagNameMap {
     'model-viewer-snippet': ModelViewerSnippet;
     'me-export-panel': ExportPanel;
-  }
-}
+}} import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
+
+import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
+import {HotspotConfig} from '../../redux/hotspot_config.js';
+import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
+import {parseHotspotsFromSnippet} from '../../redux/parse_hotspot_config.js';
+import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
+import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {ExportZipButton} from '../download_button/download_button.js';
+import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
+import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
+import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
+import {renderModelViewer} from '../utils/render_model_viewer.js';
