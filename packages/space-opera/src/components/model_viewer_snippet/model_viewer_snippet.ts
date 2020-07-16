@@ -22,37 +22,56 @@ import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
+import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-    /**
- * Export panel.
+import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
+import {HotspotConfig} from '../../redux/hotspot_config.js';
+import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
+import {parseHotspotsFromSnippet} from '../../redux/parse_hotspot_config.js';
+import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
+import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {ExportZipButton} from '../download_button/download_button.js';
+import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
+import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
+import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
+import {renderModelViewer} from '../utils/render_model_viewer.js';
+
+/**
+ *
  */
-    @customElement('me-export-panel') export class ExportPanel extends ConnectedLitElement {@internalProperty() config: ModelViewerConfig = {}; @internalProperty() hotspots: HotspotConfig[] = []; @internalProperty() camera: Camera = INITIAL_CAMERA; @internalProperty() gltfUrl?: string;
+@customElement('me-export-panel')
+export class ExportPanel extends ConnectedLitElement {
+  @internalProperty() config: ModelViewerConfig = {};
+  @internalProperty() hotspots: HotspotConfig[] = [];
+  @internalProperty() camera: Camera = INITIAL_CAMERA;
+  @internalProperty() gltfUrl?: string;
 
-                                                                                                                                                                                                                                                                             @query('snippet-viewer') snippetViewer!: SnippetViewer; @query('me-export-zip-button') exportZipButton!: ExportZipButton;
+  @query('snippet-viewer') snippetViewer!: SnippetViewer;
+  @query('me-export-zip-button') exportZipButton!: ExportZipButton;
 
-                                                                                                                                                                                                                                                                             stateChanged(state: State) {
+  stateChanged(state: State) {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspots;
     this.gltfUrl = state.gltfUrl;
-                                                                                                                                                                                                                                                                             }
+  }
 
-                                                                                                                                                                                                                                                                             render() {
+  render() {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
 
-    // If the last loaded URL is not an object URL, echo it here for convenience.
-    if(this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
+    // If the last loaded URL is not an object URL, echo it here for
+    // convenience.
+    if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
       editedConfig.src = this.gltfUrl;
-    }
-    else {
+    } else {
       // Uploaded GLB
       editedConfig.src = `Change this to your GLB URL`;
     }
 
     if (editedConfig.environmentImage &&
-      isObjectUrl(editedConfig.environmentImage)) {
+        isObjectUrl(editedConfig.environmentImage)) {
       // Uploaded env image
       editedConfig.environmentImage = `Change this to your HDR URL`;
     }
@@ -73,34 +92,38 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
       </snippet-viewer>
     </div>
     </me-expandable-tab>`;
-                                                                                                                                                                                                                                                                             }
+  }
 
-                                                                                                                                                                                                                                                                             protected updated() {
+  protected updated() {
     this.snippetViewer.updateComplete.then(() => {
       this.exportZipButton.snippetText =
           this.snippetViewer.snippet.textContent || '';
     });
-                                                                                                                                                                                                                                                                             }}
+  }
+}
 
 /**
  * Import/Export panel.
  * TODO:: This should be factored out/renamed.
  */
-@customElement('model-viewer-snippet') export class ModelViewerSnippet extends LitElement {static get styles() {
+@customElement('model-viewer-snippet')
+export class ModelViewerSnippet extends LitElement {
+  static get styles() {
     return css`
   #mv-input {
     width: 95%;
   }
         `;
-}
+  }
 
-                                                                                           @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
+  @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
 
-                                                                                           @internalProperty() errors: string[] = [];
+  @internalProperty() errors: string[] = [];
 
-                                                                                           async handleSubmitSnippet(event: Event) {
+  async handleSubmitSnippet(event: Event) {
     event.preventDefault();
-    if (!this.textArea) return;
+    if (!this.textArea)
+      return;
     this.errors = [];
     const inputText: string = this.textArea.value.trim();
     if (inputText.match(
@@ -116,7 +139,7 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
       try {
         // If we can't fetch the snippet's src, don't even bother using it.
         // But still dispatch the config, hotspots, etc.
-        if(config.src && (await fetch(config.src)).ok) {
+        if (config.src && (await fetch(config.src)).ok) {
           dispatchGltfUrl(undefined);
           // Because of update-batching, we need to sleep first to force reload.
           await new Promise(resolve => {
@@ -140,9 +163,9 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
     } else {
       this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
-                                                                                           }
+  }
 
-                                                                                           render() {
+  render() {
     const exampleLoadableSnippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb'
   autoplay animation-name="Wave"
@@ -167,27 +190,18 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
 
     <me-export-panel></me-export-panel>
             `;
-                                                                                           }
+  }
 
-                                                                                           updated() {
+  updated() {
     // Work-around closureZ issue.
     this.textArea.style.backgroundColor =
         this.errors.length > 0 ? 'pink' : 'white';
-                                                                                           }}
+  }
+}
 
-declare global {interface HTMLElementTagNameMap {
+declare global {
+  interface HTMLElementTagNameMap {
     'model-viewer-snippet': ModelViewerSnippet;
     'me-export-panel': ExportPanel;
-}} import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
-
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {parseHotspotsFromSnippet} from '../../redux/parse_hotspot_config.js';
-import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {ExportZipButton} from '../download_button/download_button.js';
-import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
-import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {renderModelViewer} from '../utils/render_model_viewer.js';
+  }
+}
