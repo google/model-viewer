@@ -23,7 +23,7 @@ import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-a
 import {customElement, html, query} from 'lit-element';
 
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {extractStagingConfig, dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 
