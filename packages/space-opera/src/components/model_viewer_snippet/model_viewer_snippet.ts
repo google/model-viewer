@@ -22,6 +22,7 @@ import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
@@ -35,7 +36,6 @@ import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
-import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
 /**
  * Export panel.
@@ -61,22 +61,22 @@ export class ExportPanel extends ConnectedLitElement {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
 
-    // If the last loaded URL is not an object URL, echo it here for convenience.
-    if(this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
+    // If the last loaded URL is not an object URL, echo it here for
+    // convenience.
+    if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
       editedConfig.src = this.gltfUrl;
-    }
-    else {
+    } else {
       // Uploaded GLB
       editedConfig.src = `Change this to your GLB URL`;
     }
 
     if (editedConfig.environmentImage &&
-      isObjectUrl(editedConfig.environmentImage)) {
+        isObjectUrl(editedConfig.environmentImage)) {
       // Uploaded env image
       editedConfig.environmentImage = `Change this to your HDR URL`;
     }
     if (editedConfig.poster) {
-      editedConfig.poster = `poster.hdr`;
+      editedConfig.poster = `Change this to your poster URL`;
     }
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
@@ -141,7 +141,7 @@ export class ModelViewerSnippet extends LitElement {
       try {
         // If we can't fetch the snippet's src, don't even bother using it.
         // But still dispatch the config, hotspots, etc.
-        if(config.src && (await fetch(config.src)).ok) {
+        if (config.src && (await fetch(config.src)).ok) {
           dispatchGltfUrl(undefined);
           // Because of update-batching, we need to sleep first to force reload.
           await new Promise(resolve => {
