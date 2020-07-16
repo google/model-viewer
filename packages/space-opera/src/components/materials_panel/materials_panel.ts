@@ -696,7 +696,10 @@ export class MaterialPanel extends ConnectedLitElement {
     const selectedIndex =
         material.alphaMode ? ALPHA_BLEND_MODES.indexOf(material.alphaMode) : 0;
     return html`
-      <div class="SectionLabel">Alpha Blend Mode:</div>
+    <div class="SectionLabel">Alpha Blend Mode:</div>
+    <div class="DropdownContainer">
+      <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
+            @click=${this.revertAlphaMode}></mwc-icon-button>
       <me-dropdown id="alpha-mode-picker"
         selectedIndex=${selectedIndex}
         @select=${this.onAlphaModeSelect}>
@@ -704,23 +707,21 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES.map(
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
       </me-dropdown>
-      <mwc-icon-button id="revert-alpha-mode" icon="undo"
-      title="Revert to original alpha mode"
-      style="display: none;"
-      @click=${this.revertAlphaMode}</mwc-icon-button>
-
+    </div>
       ${
         material.alphaMode === 'MASK' ?
-            html`<div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
-        <me-slider-with-input id="alpha-cutoff" min="0.0" max="1.0"
-        step="0.01" value="${
+            html`
+      <div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
+        <div class="MRSliderContainer">
+          <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
+        @click=${this.revertAlphaCutoff}></mwc-icon-button>
+          <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
+          step="0.01" value="${
                 material.alphaCutoff ??
                 0.5  // Alpha cutoff defaults to 0.5 by gltf specification
             }" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
-            <mwc-icon-button id="revert-alpha-cutoff" icon="undo"
-            title="Revert to original alpha cutoff"
-            style="display: none;"
-            @click=${this.revertAlphaCutoff}</mwc-icon-button>` :
+        </div>
+      ` :
             html``}
       `;
   }
@@ -732,15 +733,15 @@ export class MaterialPanel extends ConnectedLitElement {
 
     // By default, double sided is false. So if it's undefined, assume false.
     return html`
-      <me-checkbox id="doubleSidedCheckbox"
-        ?checked=${
+      <div class="CheckboxContainer">
+        <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+      @click=${this.revertDoubleSided}></mwc-icon-button>
+        <me-checkbox id="doubleSidedCheckbox"
+          ?checked=${
     !!this.materials[this.selectedMaterialId].doubleSided}
-        label="Double Sided"
-        @change=${this.onDoubleSidedChange}></me-checkbox>
-        <mwc-icon-button id="revert-double-sided" icon="undo"
-        title="Revert to original double sided"
-        style="display: none;"
-        @click=${this.revertDoubleSided}</mwc-icon-button>`;
+          label="Double Sided"
+          @change=${this.onDoubleSidedChange}></me-checkbox>
+      </div>`;
   }
 
   renderOtherTab() {
@@ -752,8 +753,8 @@ export class MaterialPanel extends ConnectedLitElement {
         <div slot="content">
         ${this.renderDoubleSidedSection()}
         ${this.renderAlphaBlendModeSection()}
-        </div>
-      </me-expandable-tab>
+        </div><
+        /me-expandable-tab>
     `;
   }
 

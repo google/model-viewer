@@ -40,6 +40,14 @@ export const styles: CSSResult = css`.EditingMaterial {
   padding: 9px 0;
 }
 
+.CheckboxContainer .RevertButton {
+  padding: 4px 0;
+}
+
+.DropdownContainer .RevertButton {
+  padding: 6px 0;
+}
+
 .MRSliderLabel {
   font-size: 14px;
   font-weight: 500;
@@ -61,10 +69,12 @@ export const styles: CSSResult = css`.EditingMaterial {
   font-weight: 500;
 }
 
+.DropdownContainer me-dropdown {
+  width: calc(100% - 40px);
+}
+
 #alpha-mode-picker,
 #alpha-cutoff-label {
   margin-top: 10px;
 }
-
-
 `;
