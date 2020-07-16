@@ -29,3 +29,13 @@ export function radToDeg(radians: number): number {
 export function clamp(value: number, lowerLimit: number, upperLimit: number) {
   return Math.min(Math.max(value, lowerLimit), upperLimit);
 }
+
+/** Round to the given number of significant figures (digits) */
+export function roundToDigits(value: number, digits: number): number {
+  if (value === 0) {
+    return 0;
+  }
+  const x =
+      10 ** (Math.floor(digits) - Math.floor(Math.log10(Math.abs(value))) - 1);
+  return Math.round(value * x) / x;
+}
