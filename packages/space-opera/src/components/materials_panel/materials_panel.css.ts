@@ -27,6 +27,27 @@ export const styles: CSSResult = css`.EditingMaterial {
   padding-left: 15px;
 }
 
+.TexturePickerContainer {
+  width: 100%;
+}
+
+.RevertButton {
+  float: right;
+  --mdc-icon-button-size: 32px;
+}
+
+.TexturePickerContainer .RevertButton {
+  padding: 9px 0;
+}
+
+.CheckboxContainer .RevertButton {
+  padding: 4px 0;
+}
+
+.DropdownContainer .RevertButton {
+  padding: 6px 0;
+}
+
 .MRSliderLabel {
   font-size: 14px;
   font-weight: 500;
@@ -34,6 +55,7 @@ export const styles: CSSResult = css`.EditingMaterial {
 
 .MRSlider {
   margin-left: -15px;
+  width: calc(100% - 32px);
 }
 
 .MRSliders {
@@ -47,9 +69,12 @@ export const styles: CSSResult = css`.EditingMaterial {
   font-weight: 500;
 }
 
+.DropdownContainer me-dropdown {
+  width: calc(100% - 40px);
+}
+
 #alpha-mode-picker,
 #alpha-cutoff-label {
   margin-top: 10px;
 }
-
 `;
