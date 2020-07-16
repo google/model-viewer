@@ -33,7 +33,7 @@ import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.
 import {HotspotConfig} from '../../redux/hotspot_config.js';
 import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../../redux/lighting_dispatchers.js';
-import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, dispatchModelViewer, State} from '../../redux/space_opera_base.js';
+import {extractStagingConfig, dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, dispatchModelViewer, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -292,7 +292,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         const arrayBuffer = await file.arrayBuffer();
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         dispatchGltfUrl(url);
-        dispatchConfig({});
+        dispatchConfig(extractStagingConfig(this.config));
         dispatchSetHotspots([]);
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/)) {
