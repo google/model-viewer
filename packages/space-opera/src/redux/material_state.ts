@@ -155,9 +155,12 @@ async function isTextureHandleValid(
  * Applies the given material state to the given model. 'model' will be mutated.
  */
 export async function applyMaterials(
-    model: GltfModel, materials: Material[], oldMaterials: Material[],
+    model: GltfModel,
+    materials: Material[],
+    oldMaterials: Material[],
     texturesById: TexturesById) {
-  if (materials === oldMaterials) return;
+  if (materials === oldMaterials)
+    return;
   const modelMaterials = await model.materials;
 
   if (materials.length !== modelMaterials.length) {
@@ -177,7 +180,8 @@ export async function applyMaterials(
   for (const [i, mat] of materials.entries()) {
     const oldMat = oldMaterials[i];
 
-    if (mat === oldMat) continue;
+    if (mat === oldMat)
+      continue;
     const materialApi = modelMaterials[i];
     const pbrApi = modelMaterials[i].pbrMetallicRoughness;
     if (mat.doubleSided !== oldMat.doubleSided) {
@@ -333,7 +337,8 @@ class TextureHandleCache {
 
   private constructor(
       readonly model: GltfModel, readonly texturesById: TexturesById,
-      readonly textureHandlesById: Map<string, TextureHandle>) {}
+      readonly textureHandlesById: Map<string, TextureHandle>) {
+  }
 
   async getOrSetTextureHandle(
       texId: string, createNewHandle: () => Promise<TextureHandle|null>) {

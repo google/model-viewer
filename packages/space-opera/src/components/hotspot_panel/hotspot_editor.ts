@@ -41,7 +41,8 @@ export class HotspotEditorElement extends LitElement {
   }
 
   render() {
-    if (!this.config) return html``;
+    if (!this.config)
+      return html``;
 
     return html`
     <me-section-row label="Label:">
@@ -55,7 +56,8 @@ export class HotspotEditorElement extends LitElement {
   }
 
   onAnnotationInput() {
-    if (!this.annotationInput) return;
+    if (!this.annotationInput)
+      return;
     const newConfig = {
       ...this.config,
       annotation: this.annotationInput.value

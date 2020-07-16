@@ -72,8 +72,7 @@ ${css_beautify(this.renderedStyle)}
 
   get formattedHtml() {
     // Removes LitElement render artifacts
-    let html = this.shadowTag.innerHTML.replace(
-        /<!---->/g, '');
+    let html = this.shadowTag.innerHTML.replace(/<!---->/g, '');
     // Remove the ar-status runtime-added tag
     html = html.replace(/ar-status="[\w- ]+" */, '');
     // Remove redundant ="" for boolean attribs

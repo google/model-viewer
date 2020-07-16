@@ -57,9 +57,11 @@ export interface AddTextureArgs {
  * Note: updateMaterial must NOT mutate the arg, but rather returns a new object
  */
 function setMaterialTexture(
-    state: State, args: SetTextureArgs|undefined,
+    state: State,
+    args: SetTextureArgs|undefined,
     updateMaterial: (material: Material) => Material) {
-  if (!args) return;
+  if (!args)
+    return;
   const materials = state.edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID was out of bounds');
@@ -86,9 +88,11 @@ function setMaterialTexture(
  * Note: updateMaterial must NOT mutate the arg, but rather returns a new object
  */
 function addMaterialTexture(
-    state: State, args: AddTextureArgs|undefined,
+    state: State,
+    args: AddTextureArgs|undefined,
     updateMaterial: (material: Material, textureId: string) => Material) {
-  if (!args) return;
+  if (!args)
+    return;
   const materials = state.edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID is out of bounds');
@@ -116,7 +120,8 @@ function addMaterialTexture(
 export const dispatchMaterialBaseColor = registerStateMutator(
     'SET_MATERIAL_BASE_COLOR_FACTOR',
     (state: State, args?: MaterialBaseColorArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const index = args.index;
       const baseColorFactor = args.baseColorFactor;
       const materials = state.edits.materials;
@@ -136,7 +141,8 @@ export const dispatchMaterialBaseColor = registerStateMutator(
  */
 export const dispatchRoughnessFactor = registerStateMutator(
     'SET_MATERIAL_ROUGHNESS', (state: State, args?: RoughnessFactorArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const roughnessFactor = args.roughnessFactor;
       const materials = state.edits.materials;
@@ -154,7 +160,8 @@ export const dispatchRoughnessFactor = registerStateMutator(
 /** Dispatch an edit to a material's metallic factor. */
 export const dispatchMetallicFactor = registerStateMutator(
     'SET_MATERIAL_METALLIC', (state: State, args?: MetallicFactorArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const metallicFactor = args.metallicFactor;
       const materials = state.edits.materials;
@@ -172,7 +179,8 @@ export const dispatchMetallicFactor = registerStateMutator(
 /** Dispatch an edit to a material's base color texture */
 export const dispatchBaseColorTexture = registerStateMutator(
     'SET_BASE_COLOR_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       setMaterialTexture(state, args, (material: Material) => {
         return {
           ...material,
@@ -193,7 +201,8 @@ export const dispatchAddBaseColorTexture = registerStateMutator(
 /** Dispatch an edit to a material's Metallic-Roughness texture. */
 export const dispatchMetallicRoughnessTexture = registerStateMutator(
     'SET_METALLIC_ROUGHNESS_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       setMaterialTexture(state, args, (material: Material) => {
         return {...material, metallicRoughnessTextureId: args.textureId};
       });
@@ -211,7 +220,8 @@ export const dispatchAddMetallicRoughnessTexture = registerStateMutator(
 /** Dispatch an edit to a material's normal texture. */
 export const dispatchNormalTexture = registerStateMutator(
     'SET_NORMAL_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       setMaterialTexture(state, args, (material: Material) => {
         return {...material, normalTextureId: args.textureId};
       });
@@ -229,7 +239,8 @@ export const dispatchAddNormalTexture = registerStateMutator(
 /** Dispatch an edit to a material's normal texture. */
 export const dispatchEmissiveTexture = registerStateMutator(
     'SET_EMISSIVE_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       setMaterialTexture(state, args, (material: Material) => {
         return {...material, emissiveTextureId: args.textureId};
       });
@@ -247,7 +258,8 @@ export const dispatchAddEmissiveTexture = registerStateMutator(
 /** Dispatch an edit to a material's occlusion texture. */
 export const dispatchOcclusionTexture = registerStateMutator(
     'SET_OCCLUSION_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       setMaterialTexture(state, args, (material: Material) => {
         return {...material, occlusionTextureId: args.textureId};
       });
@@ -271,7 +283,8 @@ export interface EmissiveFactorArgs {
 /** Dispatch an edit to a material's emissiveFactor. */
 export const dispatchSetEmissiveFactor = registerStateMutator(
     'SET_EMISSIVE_FACTOR', (state: State, args?: EmissiveFactorArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const emissiveFactor = args.emissiveFactor;
       const materials = state.edits.materials;
@@ -295,7 +308,8 @@ export interface DoubleSidedArgs {
 /** Dispatch an edit to a material's doublesidedness. */
 export const dispatchDoubleSided = registerStateMutator(
     'SET_DOUBLESIDED', (state: State, args?: DoubleSidedArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const doubleSided = args.doubleSided;
       const materials = state.edits.materials;
@@ -319,7 +333,8 @@ export interface AlphaModeArgs {
 /** Dispatch an edit to a material's alpha mode. */
 export const dispatchSetAlphaMode = registerStateMutator(
     'SET_ALPHA_MODE', (state: State, args?: AlphaModeArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const alphaMode = args.alphaMode;
       const materials = state.edits.materials;
@@ -343,7 +358,8 @@ export interface AlphaCutoffArgs {
 /** Dispatch an edit to a material's alpha cutoff. */
 export const dispatchSetAlphaCutoff = registerStateMutator(
     'SET_ALPHA_CUTOFF', (state: State, args?: AlphaCutoffArgs) => {
-      if (!args) return;
+      if (!args)
+        return;
       const id = args.id;
       const alphaCutoff = args.alphaCutoff;
       const materials = state.edits.materials;

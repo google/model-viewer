@@ -20,7 +20,8 @@
  * the actual url, just access the .url member.
  */
 export class SafeObjectUrl {
-  constructor(readonly url: string) {}
+  constructor(readonly url: string) {
+  }
   get unsafeUrl(): string {
     return this.url;
   }

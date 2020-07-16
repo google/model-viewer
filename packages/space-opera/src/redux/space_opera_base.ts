@@ -247,14 +247,13 @@ export const dispatchCurrentCameraState = registerStateMutator(
  * We consider "staging config" to be properties that are applicable to any
  * model, and thus are sensible to preserve when a new model is loaded.
  */
-export function extractStagingConfig(config: ModelViewerConfig): ModelViewerConfig {
+export function extractStagingConfig(config: ModelViewerConfig):
+    ModelViewerConfig {
   return {
-    environmentImage: config.environmentImage,
-    exposure: config.exposure,
-    useEnvAsSkybox: config.useEnvAsSkybox,
-    shadowIntensity: config.shadowIntensity,
-    shadowSoftness: config.shadowSoftness,
-    cameraControls: config.cameraControls,
-    autoRotate: config.autoRotate,
+    environmentImage: config.environmentImage, exposure: config.exposure,
+        useEnvAsSkybox: config.useEnvAsSkybox,
+        shadowIntensity: config.shadowIntensity,
+        shadowSoftness: config.shadowSoftness,
+        cameraControls: config.cameraControls, autoRotate: config.autoRotate,
   }
 }

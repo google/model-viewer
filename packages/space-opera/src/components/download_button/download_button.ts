@@ -17,12 +17,12 @@
 
 import '@material/mwc-button';
 
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 // tslint:disable-next-line:enforce-name-casing JSZip is a class.
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
@@ -50,7 +50,8 @@ class GenericDownloadButton extends ConnectedLitElement {
   // side-effects anyway, so nothing bad can happen.
   async onDownloadClick() {
     const payload = await this.preparePayload!();
-    if (!payload) return;
+    if (!payload)
+      return;
     await safeDownloadCallback(
         payload.blob, payload.filename, payload.contentType ?? '')();
   }
@@ -75,8 +76,8 @@ async function prepareGlbPayload(gltf: GltfModel): Promise<Payload> {
 }
 
 async function prepareZipArchive(
-    gltf: GltfModel, urls: string[],
-    data: {snippetText: string}): Promise<Payload> {
+    gltf: GltfModel, urls: string[], data: {snippetText: string}):
+    Promise<Payload> {
   const zip = new JSZip();
 
   const glb = await prepareGlbPayload(gltf);

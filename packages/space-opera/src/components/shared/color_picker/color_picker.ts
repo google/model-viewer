@@ -18,9 +18,9 @@
 import './color_map.js';
 import '../popup/popup.js';
 
-import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 import {customElement, html, LitElement, property, query} from 'lit-element';
 import {styleMap} from 'lit-html/directives/style-map';
+import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {ColorMap} from './color_map.js';
 import {styles} from './color_picker.css.js';
@@ -46,7 +46,8 @@ export class ColorPicker extends LitElement {
 
   onHueInput() {
     this.selectedColorHex = color.hsvToHex(
-        Number(this.hueSlider.value), this.selectedColorHsv[1],
+        Number(this.hueSlider.value),
+        this.selectedColorHsv[1],
         this.selectedColorHsv[2]);
     this.dispatchEvent(new Event('change'));
   }

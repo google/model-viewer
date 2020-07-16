@@ -132,7 +132,8 @@ type TextureSetter =
  * the texture slot being tested.
  */
 async function testTextureApi(
-    materialJson: GlTfMaterial, getTexture: TextureGetter,
+    materialJson: GlTfMaterial,
+    getTexture: TextureGetter,
     setTexture: TextureSetter) {
   const gltfJson = {
     asset: {'generator': 'FBX2glTF', 'version': '2.0'},
@@ -181,7 +182,8 @@ async function testTextureApi(
 }
 
 class DummyModelViewer {
-  constructor(public src?: string) {}
+  constructor(public src?: string) {
+  }
 }
 
 describe('gltf model test', () => {
@@ -261,7 +263,8 @@ describe('gltf model test', () => {
       images:
           [{uri: 'basecolor.png'}, {uri: 'roughness.png'}, {uri: 'normal.png'}],
       textures: [
-        {source: 0, sampler: 0}, {source: 1, sampler: 0},
+        {source: 0, sampler: 0},
+        {source: 1, sampler: 0},
         {source: 2, sampler: 0}
       ],
       materials: [
@@ -328,14 +331,12 @@ describe('gltf model test', () => {
     await (await model.materials)[0].setAlphaCutoff(0.5);
     expect(await (await model.materials)[0].alphaCutoff).toBe(0.5);
 
-    expect(await (await model.materials)[0].emissiveFactor).toEqual([
-      0.3, 0.4, 0.5
-    ]);
+    expect(await (await model.materials)[0].emissiveFactor)
+        .toEqual([0.3, 0.4, 0.5]);
     expect(await (await model.materials)[1].emissiveFactor).toBeUndefined();
     await (await model.materials)[0].setEmissiveFactor([0.6, 0.7, 0.8]);
-    expect(await (await model.materials)[0].emissiveFactor).toEqual([
-      0.6, 0.7, 0.8
-    ]);
+    expect(await (await model.materials)[0].emissiveFactor)
+        .toEqual([0.6, 0.7, 0.8]);
     await (await model.materials)[1].setEmissiveFactor([0, 0, 0]);
     expect(await (await model.materials)[1].emissiveFactor).toBeUndefined();
 
@@ -434,13 +435,15 @@ describe('gltf model test', () => {
 
   it('implements the normal texture API correctly', async () => {
     await testTextureApi(
-        {normalTexture: {index: 0, texCoord: 0}}, mat => mat.normalTexture,
+        {normalTexture: {index: 0, texCoord: 0}},
+        mat => mat.normalTexture,
         (mat, tex) => mat.setNormalTexture(tex));
   });
 
   it('implements the emissive texture API correctly', async () => {
     await testTextureApi(
-        {emissiveTexture: {index: 0, texCoord: 0}}, mat => mat.emissiveTexture,
+        {emissiveTexture: {index: 0, texCoord: 0}},
+        mat => mat.emissiveTexture,
         (mat, tex) => mat.setEmissiveTexture(tex));
   });
 
@@ -458,7 +461,8 @@ describe('gltf model test', () => {
            (modelViewer as unknown) as ModelViewerElement;
 
        const model = new GltfModel(
-           cloneJson(TEST_GLTF_JSON), EXAMPLE_BIN_AS_ARRAY_BUFFER,
+           cloneJson(TEST_GLTF_JSON),
+           EXAMPLE_BIN_AS_ARRAY_BUFFER,
            downcastedModelViewer);
        expect(modelViewer.src).toEqual('orig.glb');
 

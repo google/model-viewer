@@ -30,10 +30,14 @@ const TEST_GLTF_JSON = {
   asset: {generator: 'FBX2glTF', version: '2.0'},
   samplers: [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
   images: [
-    {uri: 'originalTexture.png'}, {uri: 'metallic.png'}, {uri: 'normal.png'}
+    {uri: 'originalTexture.png'},
+    {uri: 'metallic.png'},
+    {uri: 'normal.png'}
   ],
   textures: [
-    {source: 0, sampler: 0}, {source: 1, sampler: 0}, {source: 2, sampler: 0}
+    {source: 0, sampler: 0},
+    {source: 1, sampler: 0},
+    {source: 2, sampler: 0}
   ],
   materials: [{name: 'no tex'}, {name: 'with tex'}],
 };
@@ -367,9 +371,8 @@ describe('material panel test', () => {
 
     panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
     panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
-    expect(reduxStore.getState().edits.materials[0].emissiveFactor).toEqual([
-      1, 0, 0
-    ]);
+    expect(reduxStore.getState().edits.materials[0].emissiveFactor)
+        .toEqual([1, 0, 0]);
   });
 
   it('applies changes to model textures on alpha mode change', async () => {

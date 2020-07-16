@@ -24,9 +24,9 @@ import '@polymer/paper-item';
 import '@material/mwc-button';
 import '../file_modal/file_modal.js';
 
+import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
-import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../../redux/lighting_dispatchers.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from '../../redux/lighting_state.js';
 import {State} from '../../redux/space_opera_base.js';

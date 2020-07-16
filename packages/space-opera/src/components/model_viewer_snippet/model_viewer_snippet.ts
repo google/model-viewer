@@ -38,7 +38,7 @@ import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 /**
- * Export panel.
+ *
  */
 @customElement('me-export-panel')
 export class ExportPanel extends ConnectedLitElement {
