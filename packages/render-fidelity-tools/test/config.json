@@ -37,8 +37,7 @@
         "radius": 800
       },
       "exclude": [
-        "gltfpt",
-        "babylon"
+        "gltfpt"
       ]
     },
     {
