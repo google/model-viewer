@@ -510,6 +510,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Revert to original metallic roughness texture"
           @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -524,6 +525,7 @@ export class MaterialPanel extends ConnectedLitElement {
         <div class="MRSliderLabel">Metallic factor</div>
         <div class="MRSliderContainer">
           <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
+          title="Revert to original metallic factor"
           @click=${this.revertMetallicFactor}></mwc-icon-button>
           <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
         step="0.01" value="${material.metallicFactor}" @change=${
@@ -534,6 +536,7 @@ export class MaterialPanel extends ConnectedLitElement {
         <div class="MRSliderLabel">Roughness factor</div>
         <div class="MRSliderContainer">
           <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
+          title="Revert to original roughness factor"
           @click=${this.revertRoughnessFactor}></mwc-icon-button>
           <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
           step="0.01" value="${material.roughnessFactor}" @change=${
@@ -561,6 +564,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
+            title="Revert to original base color factor"
             @click=${this.revertBaseColorFactor}></mwc-icon-button>
           <me-color-picker id="base-color-picker"
           selectedColorHex=${selectedColorHex} @change=${
@@ -571,6 +575,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
+          title="Revert to original base color texture"
             @click=${this.revertBaseColorTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -598,6 +603,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
+          title="Revert to original normal map texture"
             @click=${this.revertNormalTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -628,6 +634,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
+          title="Revert to original emissive factor"
           @click=${this.revertEmissiveFactor}></mwc-icon-button>
           <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
@@ -637,6 +644,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
+          title="Revert to original emissive texture"
           @click=${this.revertEmissiveTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -663,6 +671,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+          title="Revert to original occlusion texture"
           @click=${this.revertOcclusionTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -696,6 +705,7 @@ export class MaterialPanel extends ConnectedLitElement {
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
       </me-dropdown>
       <mwc-icon-button id="revert-alpha-mode" icon="undo"
+      title="Revert to original alpha mode"
       @click=${this.revertAlphaMode}</mwc-icon-button>
 
       ${
@@ -707,6 +717,7 @@ export class MaterialPanel extends ConnectedLitElement {
                 0.5  // Alpha cutoff defaults to 0.5 by gltf specification
             }" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
             <mwc-icon-button id="revert-alpha-cutoff" icon="undo"
+            title="Revert to original alpha cutoff"
             @click=${this.revertAlphaCutoff}</mwc-icon-button>` :
             html``}
       `;
@@ -725,6 +736,7 @@ export class MaterialPanel extends ConnectedLitElement {
         label="Double Sided"
         @change=${this.onDoubleSidedChange}></me-checkbox>
         <mwc-icon-button id="revert-double-sided" icon="undo"
+        title="Revert to original double sided"
         @click=${this.revertDoubleSided}</mwc-icon-button>`;
   }
 
