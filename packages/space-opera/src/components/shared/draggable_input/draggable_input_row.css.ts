@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`/* Used for a row of multiple draggable input */
+export const styles: CSSResult =
+    css`/* Used for a row of multiple draggable input */
 
 :host {
   display: flex;

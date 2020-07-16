@@ -18,10 +18,10 @@
 
 import './texture_picker.js';
 
-import {IconButton} from '@material/mwc-icon-button';
-
 import {generatePngBlob} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {IconButton} from '@material/mwc-icon-button';
+
 import {FileModalElement} from '../../file_modal/file_modal.js';
 
 import {TexturePicker} from './texture_picker.js';

@@ -34,7 +34,8 @@ export function generateUniqueHotspotName() {
 /** Dispatch a state mutator to add a hotspot */
 export const dispatchAddHotspot = registerStateMutator(
     'ADD_HOTSPOT', (state: State, config?: HotspotConfig) => {
-      if (!config) return;
+      if (!config)
+        return;
       if (hotspotNameSet.has(config.name)) {
         throw new Error(`Hotspot name duplicate: ${config.name}`);
       }
@@ -45,7 +46,8 @@ export const dispatchAddHotspot = registerStateMutator(
 /** Dispatch a state mutator to update a hotspot */
 export const dispatchUpdateHotspot = registerStateMutator(
     'UPDATE_HOTSPOT', (state: State, config?: HotspotConfig) => {
-      if (!config) return;
+      if (!config)
+        return;
 
       const index = findHotspotIndex(state.hotspots, config.name);
 
@@ -55,7 +57,8 @@ export const dispatchUpdateHotspot = registerStateMutator(
 /** Dispatch a state mutator to clear hotspot configs */
 export const dispatchRemoveHotspot =
     registerStateMutator('REMOVE_HOTSPOT', (state: State, name?: string) => {
-      if (!name) return;
+      if (!name)
+        return;
 
       const index = findHotspotIndex(state.hotspots, name);
       const hotspots = [...state.hotspots];
@@ -76,7 +79,8 @@ export const dispatchClearHotspot =
 /** Dispatch a state mutator to set all hotspots */
 export const dispatchSetHotspots = registerStateMutator(
     'SET_HOTSPOTS', (state: State, hotspots?: HotspotConfig[]) => {
-      if (!hotspots) return;
+      if (!hotspots)
+        return;
       state.hotspots = hotspots;
       hotspotNameSet = new Set(hotspots.map(hotspot => hotspot.name));
       nextHotspotId = 1;

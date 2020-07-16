@@ -37,7 +37,8 @@ export function dwordAlign(byteLength: number) {
 class GltfBufferWriter {
   constructor(
       readonly root: gltfSpec.GlTf, readonly bufferIndex: number,
-      readonly buffer: Uint8Array, private writeOffset: number) {}
+      readonly buffer: Uint8Array, private writeOffset: number) {
+  }
 
   // Returns the index of the corresponding bufferView.
   writeChunk(chunkBuffer: ArrayBuffer): number {
@@ -78,7 +79,8 @@ export async function packGlb(
   const json = cloneJson(root);
 
   let packedBufferId = json.buffers?.findIndex(buf => buf.uri === undefined);
-  if (packedBufferId === -1) packedBufferId = undefined;
+  if (packedBufferId === -1)
+    packedBufferId = undefined;
   if (buffer && packedBufferId === undefined) {
     throw new Error(
         `Given GLTF had a packed buffer but no buffer object with undefined uri!`);
@@ -142,7 +144,8 @@ export async function packGlb(
  * Create GLTF header.
  */
 export function createHeader(
-    glbBuffer: ArrayBuffer, version: number,
+    glbBuffer: ArrayBuffer,
+    version: number,
     headerMagic: string = HEADER_MAGIC): number {
   const headerDataView = new DataView(glbBuffer, 0, HEADER_LENGTH);
   writeStringToDataView(headerDataView, 0, headerMagic);
@@ -155,8 +158,8 @@ export function createHeader(
  * Create GLTF JSON.
  */
 export function createJSON(
-    glbBuffer: ArrayBuffer, json: string,
-    chunkType: string = JSON_CHUNKTYPE): number {
+    glbBuffer: ArrayBuffer, json: string, chunkType: string = JSON_CHUNKTYPE):
+    number {
   const jsonDataView = new DataView(glbBuffer, HEADER_LENGTH);
   const alignedLength = dwordAlign(json.length);
   jsonDataView.setUint32(0, alignedLength, true);
@@ -182,7 +185,8 @@ export function createBinaryBuffer(
   const alignedLength = dwordAlign(gltfBinaryBuffer.byteLength);
   bufferDataView.setUint32(0, alignedLength, true);
   bufferDataView.setUint32(
-      4, 5130562,
+      4,
+      5130562,
       true);  // chunkType, 5130562 = gltfBinaryBuffer + placeholder char at the
               // end
   for (let i = 0; i < gltfBinaryBuffer.byteLength; i++) {

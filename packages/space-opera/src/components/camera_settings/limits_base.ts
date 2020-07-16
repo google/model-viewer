@@ -123,7 +123,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
   }
 
   renderLimits() {
-    if (!this.limitsProperty?.enabled) return html``;
+    if (!this.limitsProperty?.enabled)
+      return html``;
 
     return html`
     <me-section-row label="Minimum">
