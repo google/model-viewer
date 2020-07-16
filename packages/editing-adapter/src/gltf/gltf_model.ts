@@ -19,6 +19,7 @@
  * @fileoverview A wrapper around a gltf model.
  */
 
+import {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
 import {ModelViewerElement} from '@google/model-viewer';
 
 import {createSafeObjectURL, createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../util/create_object_url.js';
@@ -28,7 +29,6 @@ import * as gltfSpec from './gltf_spec.js';
 import {packGlb} from './pack_glb.js';
 import {unpackGlb} from './unpack_glb.js';
 
-import {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
 export {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
 
 const $getUriForImage = Symbol();
@@ -59,7 +59,9 @@ interface TextureProperty {
 }
 
 function replaceBufferRange(
-    buffer: ArrayBuffer, replaceOffset: number, replaceLength: number,
+    buffer: ArrayBuffer,
+    replaceOffset: number,
+    replaceLength: number,
     newBytes: ArrayBuffer) {
   const before = new Uint8Array(buffer, 0, replaceOffset);
   const after = new Uint8Array(buffer, replaceOffset + replaceLength);
@@ -91,7 +93,8 @@ export class PbrMetallicRoughness {
    */
   constructor(
       readonly gltfModel: GltfModel, readonly materialJson: gltfSpec.Material,
-      readonly materialIndex: number) {}
+      readonly materialIndex: number) {
+  }
 
   private getOrCreatePbr(): gltfSpec.MaterialPbrMetallicRoughness {
     return (
@@ -107,7 +110,8 @@ export class PbrMetallicRoughness {
     this.getOrCreatePbr().baseColorFactor = [...factor];
 
     const model = this.gltfModel.modelViewer?.model;
-    model?.materials[this.materialIndex].pbrMetallicRoughness.setBaseColorFactor(factor);
+    model?.materials[this.materialIndex]
+        .pbrMetallicRoughness.setBaseColorFactor(factor);
   }
 
   get baseColorFactor(): Promise<RGBA> {
@@ -130,7 +134,8 @@ export class PbrMetallicRoughness {
     this.getOrCreatePbr().roughnessFactor = factor;
 
     const model = this.gltfModel.modelViewer?.model;
-    model?.materials[this.materialIndex].pbrMetallicRoughness.setRoughnessFactor(factor);
+    model?.materials[this.materialIndex]
+        .pbrMetallicRoughness.setRoughnessFactor(factor);
   }
 
   get metallicFactor(): Promise<number> {
@@ -147,7 +152,8 @@ export class PbrMetallicRoughness {
     this.getOrCreatePbr().metallicFactor = factor;
 
     const model = this.gltfModel.modelViewer?.model;
-    model?.materials[this.materialIndex].pbrMetallicRoughness.setMetallicFactor(factor);
+    model?.materials[this.materialIndex].pbrMetallicRoughness.setMetallicFactor(
+        factor);
   }
 
   get baseColorTexture(): Promise<TextureHandle|null> {
@@ -184,7 +190,8 @@ export class PbrMetallicRoughness {
               this.getOrCreatePbr()[textureProperty] || {index: -1});
     };
 
-    const pbr = this.gltfModel.modelViewer?.model?.materials[this.materialIndex].pbrMetallicRoughness;
+    const pbr = this.gltfModel.modelViewer?.model?.materials[this.materialIndex]
+                    .pbrMetallicRoughness;
     const wasEmpty = !(textureProperty in this.getOrCreatePbr());
 
     if (handle === null) {
@@ -194,19 +201,17 @@ export class PbrMetallicRoughness {
       await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
-      if(wasEmpty) {
+      if (wasEmpty) {
         await this.gltfModel[$onModelViewerDirty]();
-      }
-      else {
+      } else {
         pbr?.[textureProperty]?.texture?.source?.setURI(handle.uri);
       }
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
-      if(wasEmpty) {
+      if (wasEmpty) {
         await this.gltfModel[$onModelViewerDirty]();
-      }
-      else {
+      } else {
         pbr?.[textureProperty]?.texture?.source?.setURI(handle);
       }
     }
@@ -333,7 +338,8 @@ export class Material {
               this.materialJson[textureProperty] || {index: -1});
     };
 
-    const material = this.gltfModel.modelViewer?.model?.materials[this.materialIndex];
+    const material =
+        this.gltfModel.modelViewer?.model?.materials[this.materialIndex];
     const wasEmpty = !(textureProperty in this.materialJson);
 
     if (handle === null) {
@@ -343,19 +349,17 @@ export class Material {
       await this.gltfModel[$onModelViewerDirty]();
     } else if (handle instanceof TextureHandle) {
       getOrCreateTexInfo().index = this.gltfModel[$getTextureIndex](handle);
-      if(wasEmpty) {
+      if (wasEmpty) {
         await this.gltfModel[$onModelViewerDirty]();
-      }
-      else {
+      } else {
         material?.[textureProperty]?.texture?.source?.setURI(handle.uri);
       }
     } else if (typeof handle === 'string') {
       getOrCreateTexInfo().index =
           this.gltfModel[$getOrAddTextureByUri](handle);
-      if(wasEmpty) {
+      if (wasEmpty) {
         await this.gltfModel[$onModelViewerDirty]();
-      }
-      else {
+      } else {
         material?.[textureProperty]?.texture?.source?.setURI(handle);
       }
     }
@@ -364,7 +368,8 @@ export class Material {
 
 /** An object for referencing a texture. */
 export class TextureHandle {
-  constructor(readonly gltfModel: GltfModel) {}
+  constructor(readonly gltfModel: GltfModel) {
+  }
 
   get uri() {
     return this.gltfModel[$getTextureImageUri](this);
@@ -562,7 +567,8 @@ export class GltfModel {
   }
 
   [$getTextureHandle](index?: number): TextureHandle|null {
-    if (index === undefined) return null;
+    if (index === undefined)
+      return null;
     return this.textureInstances[index];
   }
 
