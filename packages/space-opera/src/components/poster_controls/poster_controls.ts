@@ -75,7 +75,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   async onCreatePoster() {
     if (!this.modelViewer)
       return;
-    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob());
+    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
     dispatchSetPoster(posterUrl.unsafeUrl);
   }
 
@@ -92,13 +92,16 @@ export class PosterControlsElement extends ConnectedLitElement {
   }
 
   onDeletePoster() {
+    if(this.poster) {
+      URL.revokeObjectURL(this.poster);
+    }
     dispatchSetPoster(undefined);
   }
 
   async onDownloadPoster() {
-    if (!this.modelViewer)
+    if (!this.modelViewer || !this.poster)
       return;
-    safeDownloadCallback(await this.modelViewer.toBlob(), 'poster.png', '')();
+    safeDownloadCallback(await (await fetch(this.poster)).blob(), 'poster.png', '')();
   }
 }
 
