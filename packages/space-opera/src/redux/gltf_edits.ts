@@ -49,7 +49,8 @@ export const INITIAL_GLTF_EDITS: GltfEdits = {
 export async function applyEdits(
     model: GltfModel, edits: GltfEdits, oldEdits?: GltfEdits) {
   oldEdits = oldEdits ?? await getGltfEdits(model);
-  if (edits === oldEdits) return;
+  if (edits === oldEdits)
+    return;
 
   await applyMaterials(
       model, edits.materials, oldEdits.materials, edits.texturesById);
@@ -69,10 +70,10 @@ export function generateTextureId(): string {
  * Returns a new GltfEdits object that would be a no-op if applied to the given
  * gltf. Meaning, getEditedGltf( gltf, getGltfEdits(gltf) ) ==== gltf
  */
-export async function getGltfEdits(model: GltfModel): Promise<GltfEdits> {
+export function getGltfEdits(model: GltfModel): GltfEdits {
   const texturesById = new Map<string, Texture>();
   const texturesByHandle = new Map<TextureHandle, Texture>();
-  const textures = await model.textures;
+  const textures = model.textures;
   for (const handle of textures) {
     const id = generateTextureId();
     const texture = {uri: handle.uri, id};
@@ -82,6 +83,6 @@ export async function getGltfEdits(model: GltfModel): Promise<GltfEdits> {
 
   return {
     texturesById,
-    materials: await createMaterials(model, texturesByHandle),
+    materials: createMaterials(model, texturesByHandle),
   };
 }
