@@ -54,6 +54,7 @@ export const styles: CSSResult = css`:host {
              rgba(0,0,0,0) calc(50% + 0.8px),
              rgba(0,0,0,0) 100%);
   background-color: white;
+  cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
 }
@@ -70,6 +71,7 @@ export const styles: CSSResult = css`:host {
   background-size: 51%;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
+  cursor: pointer;
 }
 
 .TextureList {
@@ -94,7 +96,6 @@ export const styles: CSSResult = css`:host {
   background-color: white;
   border-radius: 3px;
   border: 1px solid var(--me-swatch-border-color);
-  cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
 }
