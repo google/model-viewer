@@ -31,12 +31,14 @@ export class PopUp extends LitElement {
   private readonly bodyClickHandler =
       this.onDocumentBodyClick.bind(this);  // NOTYPO
 
+  private mousedown = false;
+
   render() {
     return html`
   <div class="PopupLabel" @click="${this.togglePopup}">
     <slot name="label"></slot>
   </div>
-  <div class="PopupContainer" ?open=${this.open}>
+  <div class="PopupContainer" ?open=${this.open} @mousedown=${this.onMousedown}>
     <slot name="content"></slot>
   </div>
   `;
@@ -52,7 +54,18 @@ export class PopUp extends LitElement {
     }
   }
 
+  onMousedown() {
+    this.mousedown = true;
+  }
+
   onDocumentBodyClick(event: Event) {
+    // Don't close the popup if user drag out the popup.
+    if (this.mousedown) {
+      this.mousedown = false;
+      return;
+    }
+    this.mousedown = false;
+
     // If the event target is a descendant of this element, don't close the
     // popup.
     // Note: We check composed path because LitElement retargets event.target
