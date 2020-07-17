@@ -20,7 +20,8 @@ import '../shared/expandable_content/expandable_tab.js';
 import '@material/mwc-button';
 
 import {ModelViewerElement} from '@google/model-viewer';
-import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
+import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
@@ -53,12 +54,19 @@ export class PosterControlsElement extends ConnectedLitElement {
           </div>
           ${
     !!this.poster ? html`
+            <div class="ButtonContainer">
+              <mwc-button unelevated
+                @click="${this.onDownloadPoster}">Download</mwc-button>
+            </div>
+            <div class="ButtonContainer">
+            <mwc-button unelevated
+              @click="${this.onDisplayPoster}">Display Poster</mwc-button>
+          </div>
           <div class="ButtonContainer">
             <mwc-button unelevated
-              @click="${this.onDisplayPoster}"
-              ?disabled="${!this.poster}">Display Poster</mwc-button>
+              @click="${this.onDeletePoster}">Delete Poster</mwc-button>
           </div>` :
-                    html``}
+                    html` `}
         </div>
       </me-expandable-tab>
         `;
@@ -81,6 +89,16 @@ export class PosterControlsElement extends ConnectedLitElement {
     // Force reload the model
     this.modelViewer.src = '';
     this.modelViewer.src = src;
+  }
+
+  onDeletePoster() {
+    dispatchSetPoster(undefined);
+  }
+
+  async onDownloadPoster() {
+    if (!this.modelViewer)
+      return;
+    safeDownloadCallback(await this.modelViewer.toBlob(), 'poster.png', '')();
   }
 }
 
