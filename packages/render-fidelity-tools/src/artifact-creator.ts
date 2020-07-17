@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {Dimensions, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -130,8 +130,12 @@ export class ArtifactCreator {
       const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
       const goldenImage = pngjs.PNG.sync.read(golden).data;
 
+      const imageDimensions = {
+        width: dimensions.width * DEVICE_PIXEL_RATIO,
+        height: dimensions.height * DEVICE_PIXEL_RATIO
+      };
       const comparator =
-          new ImageComparator(screenshotImage, goldenImage, dimensions);
+          new ImageComparator(screenshotImage, goldenImage, imageDimensions);
 
       await fs.writeFile(
           join(outputDirectory, scenarioName, goldenConfig.file), golden);
@@ -152,7 +156,6 @@ export class ArtifactCreator {
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
       outputPath: string = join(this.outputDirectory, 'model-viewer.png')) {
-    const devicePixelRatio = 2;
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
@@ -169,7 +172,7 @@ export class ArtifactCreator {
       defaultViewport: {
         width: scaledWidth,
         height: scaledHeight,
-        deviceScaleFactor: devicePixelRatio
+        deviceScaleFactor: DEVICE_PIXEL_RATIO
       },
       headless: false
     });

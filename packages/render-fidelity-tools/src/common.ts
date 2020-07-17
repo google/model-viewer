@@ -24,6 +24,8 @@ export const COMPONENTS_PER_PIXEL: number = 4;
 // @see http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
 export const MAX_COLOR_DISTANCE: number = 35215;
 
+export const DEVICE_PIXEL_RATIO: number = 2;
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
@@ -126,9 +128,10 @@ export class ImageComparator {
   constructor(
       protected candidateImage: ComparableImage,
       protected goldenImage: ComparableImage, readonly dimensions: Dimensions) {
-    const {width, height} = dimensions;
+    const imageWidth = dimensions.width * DEVICE_PIXEL_RATIO;
+    const imageHeight = dimensions.height * DEVICE_PIXEL_RATIO;
 
-    this.imagePixels = width * height;
+    this.imagePixels = imageWidth * imageHeight;
   }
 
   protected drawPixel(
