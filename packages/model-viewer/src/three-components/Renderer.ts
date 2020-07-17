@@ -309,9 +309,10 @@ export class Renderer extends EventDispatcher {
     let visibleScenes = 0;
     let visibleInput = null;
     for (const scene of this.scenes) {
-      if (scene.element[$sceneIsReady]()) {
+      const {element} = scene;
+      if (element[$sceneIsReady]() && element.modelIsVisible) {
         ++visibleScenes;
-        visibleInput = scene.element[$userInputElement];
+        visibleInput = element[$userInputElement];
       }
     }
     const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
@@ -340,6 +341,23 @@ export class Renderer extends EventDispatcher {
         scene.isDirty = true;
       }
     }
+  }
+
+  /**
+   * Returns an array version of this.scenes where the non-visible ones are
+   * first. This allows eager scenes to be rendered before they are visible,
+   * without needing the multi-canvas render path.
+   */
+  private orderedScenes(): Array<ModelScene> {
+    const scenes = [];
+    for (const visible of [false, true]) {
+      for (const scene of this.scenes) {
+        if (scene.element.modelIsVisible === visible) {
+          scenes.push(scene);
+        }
+      }
+    }
+    return scenes;
   }
 
   get isPresenting(): boolean {
@@ -383,7 +401,7 @@ export class Renderer extends EventDispatcher {
 
     const {dpr, scale} = this;
 
-    for (const scene of this.scenes) {
+    for (const scene of this.orderedScenes()) {
       if (!scene.element[$sceneIsReady]()) {
         continue;
       }
