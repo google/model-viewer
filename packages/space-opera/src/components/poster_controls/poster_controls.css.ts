@@ -23,7 +23,7 @@ export const styles: CSSResult = css`
 }
 
 mwc-button {
-  --mdc-button-disabled-fill-color: #db4437;
+  --mdc-button-disabled-fill-color: #ddd;
   --mdc-button-disabled-ink-color: #fff;
   width: 180px;
 }

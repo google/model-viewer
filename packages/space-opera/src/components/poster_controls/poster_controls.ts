@@ -20,7 +20,8 @@ import '../shared/expandable_content/expandable_tab.js';
 import '@material/mwc-button';
 
 import {ModelViewerElement} from '@google/model-viewer';
-import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
+import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
@@ -51,11 +52,21 @@ export class PosterControlsElement extends ConnectedLitElement {
             <mwc-button unelevated
               @click="${this.onCreatePoster}">Create Poster</mwc-button>
           </div>
+          ${
+    !!this.poster ? html`
+            <div class="ButtonContainer">
+              <mwc-button unelevated
+                @click="${this.onDownloadPoster}">Download</mwc-button>
+            </div>
+            <div class="ButtonContainer">
+            <mwc-button unelevated
+              @click="${this.onDisplayPoster}">Display Poster</mwc-button>
+          </div>
           <div class="ButtonContainer">
             <mwc-button unelevated
-              @click="${this.onDisplayPoster}"
-              ?disabled="${!this.poster}">Display Poster</mwc-button>
-          </div>
+              @click="${this.onDeletePoster}">Delete Poster</mwc-button>
+          </div>` :
+                    html` `}
         </div>
       </me-expandable-tab>
         `;
@@ -64,7 +75,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   async onCreatePoster() {
     if (!this.modelViewer)
       return;
-    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob());
+    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
     dispatchSetPoster(posterUrl.unsafeUrl);
   }
 
@@ -78,6 +89,19 @@ export class PosterControlsElement extends ConnectedLitElement {
     // Force reload the model
     this.modelViewer.src = '';
     this.modelViewer.src = src;
+  }
+
+  onDeletePoster() {
+    if(this.poster) {
+      URL.revokeObjectURL(this.poster);
+    }
+    dispatchSetPoster(undefined);
+  }
+
+  async onDownloadPoster() {
+    if (!this.modelViewer || !this.poster)
+      return;
+    safeDownloadCallback(await (await fetch(this.poster)).blob(), 'poster.png', '')();
   }
 }
 
