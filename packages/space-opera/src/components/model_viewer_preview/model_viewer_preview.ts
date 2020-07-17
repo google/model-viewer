@@ -184,12 +184,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
     };
     applyCameraEdits(editedConfig, this.camera);
 
-    const screenshotButton = html
-    `<mwc-icon-button icon="photo_camera" class="ScreenShotButton" @click=${
-        this.downloadScreenshot}></mwc-icon-button>`;
+    const hasModel = !!editedConfig.src;
+
+    const screenshotButton = !hasModel ? html`` : html
+    `<mwc-icon-button icon="photo_camera" class="ScreenShotButton"
+      title="Take screenshot"
+      @click=${this.downloadScreenshot}>
+    </mwc-icon-button>`;
     const childElements = [...renderHotspots(this.hotspots), screenshotButton];
 
-    const hasModel = !!editedConfig.src;
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
