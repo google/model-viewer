@@ -128,10 +128,9 @@ export class ImageComparator {
   constructor(
       protected candidateImage: ComparableImage,
       protected goldenImage: ComparableImage, readonly dimensions: Dimensions) {
-    const imageWidth = dimensions.width * DEVICE_PIXEL_RATIO;
-    const imageHeight = dimensions.height * DEVICE_PIXEL_RATIO;
+    const {width, height} = dimensions;
 
-    this.imagePixels = imageWidth * imageHeight;
+    this.imagePixels = width * height;
   }
 
   protected drawPixel(
