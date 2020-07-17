@@ -126,14 +126,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
       try {
         this.gltfError = '';
         const glbContents = await downloadContents(url);
+
         const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
         const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-        await dispatchGltfAndEdits(gltf);
+        dispatchGltfAndEdits(gltf);
       } catch (error) {
         this.gltfError = error.message;
       }
     } else {
-      await dispatchGltfAndEdits(undefined);
+      dispatchGltfAndEdits(undefined);
     }
   }
 
@@ -286,7 +287,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   private async downloadScreenshot() {
     if (!this.modelViewer)
       return;
-    await safeDownloadCallback(
+    safeDownloadCallback(
         await this.modelViewer.toBlob(), 'Space Opera Screenshot.png', '')();
   }
 
