@@ -51,11 +51,14 @@ export class PosterControlsElement extends ConnectedLitElement {
             <mwc-button unelevated
               @click="${this.onCreatePoster}">Create Poster</mwc-button>
           </div>
+          ${
+    !!this.poster ? html`
           <div class="ButtonContainer">
             <mwc-button unelevated
               @click="${this.onDisplayPoster}"
               ?disabled="${!this.poster}">Display Poster</mwc-button>
-          </div>
+          </div>` :
+                    html``}
         </div>
       </me-expandable-tab>
         `;
