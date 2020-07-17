@@ -20,18 +20,18 @@ import '../shared/color_picker/color_picker.js';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
-import '../shared/pill_buttons/pill_buttons.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
-
-import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
-import {customElement, html, internalProperty, property, query} from 'lit-element';
+import '@material/mwc-icon-button';
 
 import {ALPHA_BLEND_MODES, checkFinite, DEFAULT_EMISSIVE_FACTOR, RGB, RGBA} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {customElement, html, internalProperty, property, query} from 'lit-element';
+import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
+
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../../redux/edit_dispatchers.js';
 import {TexturesById} from '../../redux/material_state.js';
 import {Material} from '../../redux/material_state.js';
@@ -52,6 +52,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @property({type: Number}) selectedMaterialId?: number;
 
   @internalProperty() materials: Material[] = [];
+  @internalProperty() originalMaterials: Material[] = [];
   @internalProperty() texturesById?: TexturesById;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
@@ -82,6 +83,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.materials = state.edits.materials;
+    this.originalMaterials = state.origEdits.materials;
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
@@ -146,6 +148,13 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
+  get safeSelectedMaterialId() {
+    if (this.selectedMaterialId === undefined) {
+      throw new Error('No material selected');
+    }
+    return this.selectedMaterialId;
+  }
+
   get selectedBaseColor(): RGBA {
     const id = this.selectedMaterialId;
     if (id === undefined) {
@@ -156,7 +165,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255, selectedColor[1] / 255, selectedColor[2] / 255,
+      selectedColor[0] / 255,
+      selectedColor[1] / 255,
+      selectedColor[2] / 255,
       alphaFactor
     ];
   }
@@ -171,7 +182,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255, selectedColor[1] / 255, selectedColor[2] / 255
+      selectedColor[0] / 255,
+      selectedColor[1] / 255,
+      selectedColor[2] / 255
     ];
   }
 
@@ -413,6 +426,78 @@ export class MaterialPanel extends ConnectedLitElement {
     });
   }
 
+  revertMetallicRoughnessTexture() {
+    const id = this.safeSelectedMaterialId;
+    const textureId = this.originalMaterials[id].metallicRoughnessTextureId;
+    dispatchMetallicRoughnessTexture({id, textureId});
+  }
+
+  revertMetallicFactor() {
+    const id = this.safeSelectedMaterialId;
+    const metallicFactor = this.originalMaterials[id].metallicFactor;
+    dispatchMetallicFactor({id, metallicFactor});
+  }
+
+  revertRoughnessFactor() {
+    const id = this.safeSelectedMaterialId;
+    const roughnessFactor = this.originalMaterials[id].roughnessFactor;
+    dispatchRoughnessFactor({id, roughnessFactor});
+  }
+
+  revertBaseColorFactor() {
+    const index = this.safeSelectedMaterialId;
+    const baseColorFactor = this.originalMaterials[index].baseColorFactor;
+    dispatchMaterialBaseColor({index, baseColorFactor});
+  }
+
+  revertBaseColorTexture() {
+    const id = this.safeSelectedMaterialId;
+    const textureId = this.originalMaterials[id].baseColorTextureId;
+    dispatchBaseColorTexture({id, textureId});
+  }
+
+  revertNormalTexture() {
+    const id = this.safeSelectedMaterialId;
+    const textureId = this.originalMaterials[id].normalTextureId;
+    dispatchNormalTexture({id, textureId});
+  }
+
+  revertEmissiveTexture() {
+    const id = this.safeSelectedMaterialId;
+    const textureId = this.originalMaterials[id].emissiveTextureId;
+    dispatchEmissiveTexture({id, textureId});
+  }
+
+  revertEmissiveFactor() {
+    const id = this.safeSelectedMaterialId;
+    const emissiveFactor = this.originalMaterials[id].emissiveFactor;
+    dispatchSetEmissiveFactor({id, emissiveFactor});
+  }
+
+  revertOcclusionTexture() {
+    const id = this.safeSelectedMaterialId;
+    const textureId = this.originalMaterials[id].occlusionTextureId;
+    dispatchOcclusionTexture({id, textureId});
+  }
+
+  revertAlphaCutoff() {
+    const id = this.safeSelectedMaterialId;
+    const alphaCutoff = this.originalMaterials[id].alphaCutoff;
+    dispatchSetAlphaCutoff({id, alphaCutoff});
+  }
+
+  revertAlphaMode() {
+    const id = this.safeSelectedMaterialId;
+    const alphaMode = this.originalMaterials[id].alphaMode;
+    dispatchSetAlphaMode({id, alphaMode});
+  }
+
+  revertDoubleSided() {
+    const id = this.safeSelectedMaterialId;
+    const doubleSided = this.originalMaterials[id].doubleSided;
+    dispatchDoubleSided({id, doubleSided});
+  }
+
   renderMetallicRoughnessTab() {
     if (this.selectedMaterialId === undefined) {
       return `No material selected`;
@@ -423,25 +508,41 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Revert to original metallic roughness texture"
+          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="metallic-roughness-texture-picker" @texture-changed=${
         this.onMetallicRoughnessTextureChange} @texture-uploaded=${
         this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
+          </me-texture-picker>
+        </div>
       </me-section-row>
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
-        <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
+        <div class="MRSliderContainer">
+          <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
+          title="Revert to original metallic factor"
+          @click=${this.revertMetallicFactor}></mwc-icon-button>
+          <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
         step="0.01" value="${material.metallicFactor}" @change=${
         this.onMetallicChange}>
-        </me-slider-with-input>
+          </me-slider-with-input>
+        </div>
+
         <div class="MRSliderLabel">Roughness factor</div>
-        <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
-        step="0.01" value="${material.roughnessFactor}" @change=${
+        <div class="MRSliderContainer">
+          <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
+          title="Revert to original roughness factor"
+          @click=${this.revertRoughnessFactor}></mwc-icon-button>
+          <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
+          step="0.01" value="${material.roughnessFactor}" @change=${
         this.onRoughnessChange}>
-        </me-slider-with-input>
+          </me-slider-with-input>
+        </div>
       </div>
     </div>
   </me-expandable-tab>`;
@@ -461,18 +562,29 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Base Color">
     <div slot="content">
       <me-section-row label="Factor">
-        <me-color-picker id="base-color-picker"
-        selectedColorHex=${selectedColorHex} @change=${this.onBaseColorChange}>
-        </me-color-picker>
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
+            title="Revert to original base color factor"
+            @click=${this.revertBaseColorFactor}></mwc-icon-button>
+          <me-color-picker id="base-color-picker"
+          selectedColorHex=${selectedColorHex} @change=${
+        this.onBaseColorChange}>
+          </me-color-picker>
+        </div>
       </me-section-row>
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
+          title="Revert to original base color texture"
+            @click=${this.revertBaseColorTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="base-color-texture-picker" @texture-changed=${
         this.onBaseColorTextureChange} @texture-uploaded=${
         this.onBaseColorTextureUpload} .images=${
         this.safeTextureUrls}></me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>
@@ -489,13 +601,18 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
+          title="Revert to original normal map texture"
+            @click=${this.revertNormalTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
         this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
+          </me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
@@ -515,18 +632,28 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Emissive">
     <div slot="content">
       <me-section-row label="Factor">
-        <me-color-picker selectedColorHex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
+          title="Revert to original emissive factor"
+          @click=${this.revertEmissiveFactor}></mwc-icon-button>
+          <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
         this.onEmissiveFactorChanged}></me-color-picker>
+        </div>
       </me-section-row>
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
+          title="Revert to original emissive texture"
+          @click=${this.revertEmissiveTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="emissive-texture-picker" @texture-changed=${
         this.onEmissiveTextureChange} @texture-uploaded=${
         this.onEmissiveTextureUpload} .images=${this.safeTextureUrls}>
         </me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
@@ -542,13 +669,18 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
       <me-section-row label="Texture">
-        <me-texture-picker .selectedIndex=${
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+          title="Revert to original occlusion texture"
+          @click=${this.revertOcclusionTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
         this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
+          </me-texture-picker>
+        </div>
       </me-section-row>
     </div>
   </me-expandable-tab>`;
@@ -564,7 +696,11 @@ export class MaterialPanel extends ConnectedLitElement {
     const selectedIndex =
         material.alphaMode ? ALPHA_BLEND_MODES.indexOf(material.alphaMode) : 0;
     return html`
-      <div class="SectionLabel">Alpha Blend Mode:</div>
+    <div class="SectionLabel">Alpha Blend Mode:</div>
+    <div class="DropdownContainer">
+      <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
+        title="Revert to original alpha mode"
+        @click=${this.revertAlphaMode}></mwc-icon-button>
       <me-dropdown id="alpha-mode-picker"
         selectedIndex=${selectedIndex}
         @select=${this.onAlphaModeSelect}>
@@ -572,14 +708,22 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES.map(
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
       </me-dropdown>
+    </div>
       ${
         material.alphaMode === 'MASK' ?
-            html`<div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
-        <me-slider-with-input id="alpha-cutoff" min="0.0" max="1.0"
-        step="0.01" value="${
+            html`
+      <div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
+        <div class="MRSliderContainer">
+          <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
+            title="Revert to original alpha cutoff"
+            @click=${this.revertAlphaCutoff}></mwc-icon-button>
+          <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
+          step="0.01" value="${
                 material.alphaCutoff ??
                 0.5  // Alpha cutoff defaults to 0.5 by gltf specification
-            }" @change=${this.onAlphaCutoffChange}>` :
+            }" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
+        </div>
+      ` :
             html``}
       `;
   }
@@ -591,11 +735,16 @@ export class MaterialPanel extends ConnectedLitElement {
 
     // By default, double sided is false. So if it's undefined, assume false.
     return html`
-      <me-checkbox id="doubleSidedCheckbox"
-        ?checked=${
+      <div class="CheckboxContainer">
+        <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+        title="Revert to original double sidedness"
+        @click=${this.revertDoubleSided}></mwc-icon-button>
+        <me-checkbox id="doubleSidedCheckbox"
+          ?checked=${
     !!this.materials[this.selectedMaterialId].doubleSided}
-        label="Double Sided"
-        @change=${this.onDoubleSidedChange}></me-checkbox>`;
+          label="Double Sided"
+          @change=${this.onDoubleSidedChange}></me-checkbox>
+      </div>`;
   }
 
   renderOtherTab() {
@@ -607,8 +756,8 @@ export class MaterialPanel extends ConnectedLitElement {
         <div slot="content">
         ${this.renderDoubleSidedSection()}
         ${this.renderAlphaBlendModeSection()}
-        </div>
-      </me-expandable-tab>
+        </div><
+        /me-expandable-tab>
     `;
   }
 

@@ -57,8 +57,6 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-html.js \
   node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-css.js \
   node_modules/@google/model-viewer-space-opera/index.html \
-  node_modules/@google/model-viewer-space-opera/node_modules/@google/model-viewer-shared-assets/environments/spruit_sunrise_1k_HDR.hdr \
-  node_modules/@google/model-viewer-space-opera/node_modules/@google/model-viewer-shared-assets/environments/aircraft_workshop_01_1k.hdr \
   node_modules/@google/model-viewer-space-opera/dist/space-opera.js
 )
 

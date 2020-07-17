@@ -15,9 +15,9 @@
  *
  */
 
-import * as Redux from 'redux'; // from //third_party/javascript/redux:redux_closurized
-
+import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
+import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
@@ -29,6 +29,7 @@ import {EnvironmentImage} from './lighting_state.js';
  * Space Opera state.
  */
 export interface State {
+  modelViewer?: ModelViewerElement;
   config: ModelViewerConfig;
   // This should only be modified by actions that load entirely new glTFs.
   gltfUrl?: string;
@@ -38,6 +39,8 @@ export interface State {
   animationNames: string[];
   gltfJsonString: string;
   edits: GltfEdits;
+  // A copy of the original, so we can revert individual properties.
+  origEdits: GltfEdits;
   playAnimation?: boolean;
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
@@ -55,6 +58,7 @@ export interface State {
 const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
+  origEdits: INITIAL_GLTF_EDITS,
   animationNames: [],
   gltfJsonString: '',
   camera: INITIAL_CAMERA,
@@ -142,7 +146,8 @@ export const dispatchGltfUrl =
 class DispatchGltfArgs {
   constructor(
       readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {}
+      readonly animationNames: string[], readonly jsonString: string) {
+  }
 }
 
 const dispatchGltf = registerStateMutator(
@@ -166,6 +171,7 @@ const dispatchGltf = registerStateMutator(
             `Same edits was given! Only call this upon actual change`);
       }
       state.edits = edits;
+      state.origEdits = edits;
       state.animationNames = args.animationNames;
       state.gltfJsonString = args.jsonString;
     });
@@ -173,18 +179,23 @@ const dispatchGltf = registerStateMutator(
 /**
  * Helper async function
  */
-export async function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
+export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
   // NOTE: This encodes a design decision: Whether or not we reset edits
   // upon loading a new GLTF. It may be sensible to not reset edits and just
   // apply previous edits to the same, but updated, GLTF. That could be
   // later exposed as an option, and in that case we would simply apply the
   // existing edits (with null previousEdits) to this new model and not
   // dispatch new edits.
-  const edits = gltf ? await getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
+  const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
   dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (await gltf?.animationNames) ?? [],
-      (await gltf?.jsonString) ?? ''));
+      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
 }
+
+/** Only use in intialization. */
+export const dispatchModelViewer = registerStateMutator(
+    'MODEL_VIEWER', (state: State, modelViewer?: ModelViewerElement) => {
+      state.modelViewer = modelViewer;
+    })
 
 /** Use when the user wants to load a new config (probably from a snippet). */
 export const dispatchConfig = registerStateMutator(
@@ -212,7 +223,8 @@ export const dispatchConfig = registerStateMutator(
  */
 export const dispatchInitialCameraState = registerStateMutator(
     'SET_INITIAL_CAMERA_STATE', (state, initialCamera?: Camera) => {
-      if (!initialCamera) return;
+      if (!initialCamera)
+        return;
       state.initialCamera = {...initialCamera};
     });
 
@@ -222,7 +234,8 @@ export const dispatchInitialCameraState = registerStateMutator(
  */
 export const dispatchCurrentCameraState = registerStateMutator(
     'SET_CURRENT_CAMERA_STATE', (state, currentCamera?: Camera) => {
-      if (!currentCamera) return;
+      if (!currentCamera)
+        return;
       state.currentCamera = {...currentCamera};
     });
 
@@ -231,14 +244,13 @@ export const dispatchCurrentCameraState = registerStateMutator(
  * We consider "staging config" to be properties that are applicable to any
  * model, and thus are sensible to preserve when a new model is loaded.
  */
-export function extractStagingConfig(config: ModelViewerConfig): ModelViewerConfig {
+export function extractStagingConfig(config: ModelViewerConfig):
+    ModelViewerConfig {
   return {
-    environmentImage: config.environmentImage,
-    exposure: config.exposure,
-    useEnvAsSkybox: config.useEnvAsSkybox,
-    shadowIntensity: config.shadowIntensity,
-    shadowSoftness: config.shadowSoftness,
-    cameraControls: config.cameraControls,
-    autoRotate: config.autoRotate,
+    environmentImage: config.environmentImage, exposure: config.exposure,
+        useEnvAsSkybox: config.useEnvAsSkybox,
+        shadowIntensity: config.shadowIntensity,
+        shadowSoftness: config.shadowSoftness,
+        cameraControls: config.cameraControls, autoRotate: config.autoRotate,
   }
 }

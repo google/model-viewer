@@ -15,11 +15,10 @@
  *
  */
 
-import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
+import {clamp} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {customElement, html, LitElement, property} from 'lit-element';
 import {styleMap} from 'lit-html/directives/style-map';
-
-import {clamp} from '@google/model-viewer-editing-adapter/lib/util/math.js'
+import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {styles} from './color_map.css.js';
 
@@ -60,7 +59,8 @@ export class ColorMap extends LitElement {
     this.saturation =
         clamp((event.clientX - clientRect.left) / this.offsetWidth, 0, 1);
     this.value = clamp(
-        255 - (event.clientY - clientRect.top) / this.offsetHeight * 255, 0,
+        255 - (event.clientY - clientRect.top) / this.offsetHeight * 255,
+        0,
         255);
 
     event.preventDefault();

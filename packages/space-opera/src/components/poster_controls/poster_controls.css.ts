@@ -17,20 +17,14 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult =
-    css`/* Used for a row of multiple draggable input */
-
-:host {
-  display: flex;
+export const styles: CSSResult = css`
+.ButtonContainer:not(:first-child) {
+  margin-top: 10px;
 }
 
-me-draggable-input {
-  flex: 1;
-  margin-left: 10px;
+mwc-button {
+  --mdc-button-disabled-fill-color: #db4437;
+  --mdc-button-disabled-ink-color: #fff;
+  width: 180px;
 }
-
-me-draggable-input:first-child {
-  margin-left: 0;
-}
-
 `;

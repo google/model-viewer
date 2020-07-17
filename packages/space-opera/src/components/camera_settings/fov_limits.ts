@@ -31,18 +31,18 @@ export const DEFAULT_MAX_FOV = 90;
 
 /** Dispatch change to maximum FOV */
 export const dispatchFovLimits = registerStateMutator(
-    'SET_CAMERA_FOV_LIMITS', (state, fovLimits?: Limits) => {
-      if (!fovLimits) {
+    'SET_CAMERA_FOV_LIMITS', (state, fovLimitsDeg?: Limits) => {
+      if (!fovLimitsDeg) {
         throw new Error('No valid FOV limit given');
       }
-      if (fovLimits === state.camera.fovLimits) {
+      if (fovLimitsDeg === state.camera.fovLimitsDeg) {
         throw new Error(
-            'Do not edit fovLimits in place. You passed in the same object');
+            'Do not edit fovLimitsDeg in place. You passed in the same object');
       }
 
       state.camera = {
         ...state.camera,
-        fovLimits,
+        fovLimitsDeg,
       };
     });
 
@@ -50,11 +50,11 @@ export const dispatchFovLimits = registerStateMutator(
 /** The Camera Settings panel. */
 @customElement('me-camera-fov-limits')
 export class FovLimits extends LimitsBase {
-  @internalProperty() fovLimits?: Limits;
+  @internalProperty() fovLimitsDeg?: Limits;
   @internalProperty() currentCamera?: Camera;
 
   stateChanged(state: State) {
-    this.fovLimits = state.camera.fovLimits;
+    this.fovLimitsDeg = state.camera.fovLimitsDeg;
     this.currentCamera = state.currentCamera;
   }
 
@@ -75,11 +75,11 @@ export class FovLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    return Math.round(this.currentCamera?.fieldOfView ?? DEFAULT_MIN_FOV);
+    return Math.round(this.currentCamera?.fieldOfViewDeg ?? DEFAULT_MIN_FOV);
   }
 
   get limitsProperty() {
-    return this.fovLimits;
+    return this.fovLimitsDeg;
   }
 }
 

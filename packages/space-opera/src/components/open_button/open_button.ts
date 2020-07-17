@@ -18,17 +18,18 @@
 import '@material/mwc-button';
 import '../file_modal/file_modal.js';
 
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, query} from 'lit-element';
 
-import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
-import {extractStagingConfig, reduxStore, dispatchConfig, dispatchGltfUrl} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore} from '../../redux/space_opera_base.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 
 /**
  * A button to open file resources.
  */
-@customElement('me-open-button') export class OpenButton extends LitElement {
+@customElement('me-open-button')
+export class OpenButton extends LitElement {
   @query('me-file-modal') fileModal!: FileModalElement;
 
   render() {

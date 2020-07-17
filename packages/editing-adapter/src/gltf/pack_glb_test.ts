@@ -265,6 +265,4 @@ describe('utils test', () => {
        expect(gltf1.bufferByteLength!)
            .toEqual(packUtils.dwordAlign(pngBuffer.byteLength));
      });
-
-
 });

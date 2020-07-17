@@ -40,8 +40,7 @@ export class PillButtons extends LitElement {
   render() {
     return html`
         <div class="PillButtons">
-          ${this.buttons.map(button =>
-            this.renderButton(button as PillButton))}
+          ${this.buttons.map(button => this.renderButton(button as PillButton))}
         </div>
 
         <slot
