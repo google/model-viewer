@@ -230,9 +230,11 @@ export class FilamentViewer extends LitElement {
     this[$renderer].setClearOptions(
         {clearColor: [r, g, b, 1], clear: true, discard: true});
     */
+
+    // because of tone mapping, white should be higher than(1,1,1). set to 1000
+    // just to make sure it's white
     this[$view].setClearColor([1000, 1000, 1000, 1]);
 
-    // Wait two rAFs to ensure we rendered at least once:
     requestAnimationFrame(() => {
       this.dispatchEvent(
           new CustomEvent('model-visibility', {detail: {visible: true}}));
