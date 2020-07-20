@@ -59,9 +59,9 @@ export class RenderingScenario extends LitElement {
   }
 
   private metricTemplate(
-      analysisResults: Array<ImageComparisonAnalysis>, goldenName: string) {
+      analysisResults: ImageComparisonAnalysis, goldenName: string) {
     const rmsInDecibel =
-        this.toDecibels(analysisResults[0].rmsDistanceRatio).toFixed(2)
+        this.toDecibels(analysisResults.rmsDistanceRatio).toFixed(2)
     return html` <span>${rmsInDecibel} dB </span>
       <div class="tooltip">
         <span class="question-icon"> </span>

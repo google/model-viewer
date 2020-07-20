@@ -18,7 +18,7 @@ import './images-4-up.js';
 import '@polymer/paper-slider';
 import {html, LitElement, property} from 'lit-element';
 
-import {AnalysisCompletedMessage, Dimensions, ImageComparisonMessage, ImageComparisonResults} from '../common.js';
+import {AnalysisCompletedMessage, Dimensions, ImageComparisonMessage, Visuals} from '../common.js';
 import {ImageAccessor} from '../image-accessor.js';
 
 
@@ -26,7 +26,7 @@ export class AnalysisView extends LitElement {
   @property({type: Object}) leftImage: HTMLImageElement|null = null;
   @property({type: Object}) rightImage: HTMLImageElement|null = null;
 
-  @property({type: Object}) analysisResult: ImageComparisonResults|null = null;
+  @property({type: Object}) visuals: Visuals|null = null;
 
   @property({type: Object})
   protected leftImageAccessor: ImageAccessor|null = null;
@@ -61,7 +61,7 @@ export class AnalysisView extends LitElement {
     switch (type) {
       case 'analysis-completed':
 
-        this.analysisResult = (data as AnalysisCompletedMessage).result;
+        this.visuals = (data as AnalysisCompletedMessage).result;
 
         break;
       default:
@@ -178,9 +178,9 @@ export class AnalysisView extends LitElement {
   async updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
 
-    if (changedProperties.has('analysisResult') &&
-        this.analysisResult != null && this.canCompareImages) {
-      const {imageBuffers} = this.analysisResult;
+    if (changedProperties.has('analysisResult') && this.visuals != null &&
+        this.canCompareImages) {
+      const {imageBuffers} = this.visuals;
       const {width, height} = this.comparisonDimensions;
 
       this.blackWhiteImageAccessor = ImageAccessor.fromArrayBuffer(

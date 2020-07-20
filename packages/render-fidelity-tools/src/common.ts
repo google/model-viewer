@@ -24,20 +24,22 @@ export const COMPONENTS_PER_PIXEL: number = 4;
 // @see http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
 export const MAX_COLOR_DISTANCE: number = 35215;
 
+export const DEVICE_PIXEL_RATIO: number = 2;
+
 export interface ImageComparisonAnalysis {
-  matchingRatio: number;
-  averageDistanceRatio: number;
-  mismatchingAverageDistanceRatio: number;
   rmsDistanceRatio: number;
 }
 
 export interface ImageComparisonResults {
-  analysis: ImageComparisonAnalysis;
+  analysis: ImageComparisonAnalysis
+}
+
+export interface Visuals {
   imageBuffers: {delta: ArrayBuffer|null; blackWhite: ArrayBuffer | null;};
 }
 
 export interface ScenarioRecord {
-  analysisResults: Array<Array<ImageComparisonAnalysis>>;
+  analysisResults: Array<ImageComparisonAnalysis>;
   scenarioConfig: ScenarioConfig;
 }
 
@@ -64,7 +66,7 @@ export interface ThresholdChangedMessage extends ImageComparisonMessage {
 }
 
 export interface AnalysisCompletedMessage extends ImageComparisonMessage {
-  result: ImageComparisonResults
+  result: Visuals
 }
 
 export interface Dimensions {
@@ -92,6 +94,7 @@ export interface ScenarioConfig {
   orbit: {theta: number, phi: number, radius: number};
   verticalFoV: number;
   exclude?: Array<string>;
+  renderSkybox: boolean;
   pt?: {numSamples?: number};
 }
 
@@ -139,26 +142,17 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
-  analyze(threshold: number, options: AnalysisOptions = {
-    generateVisuals: true
-  }): ImageComparisonResults {
+  generateVisuals(threshold: number): Visuals {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
-    const {generateVisuals} = options;
 
-    const blackWhiteImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
-    const deltaImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
+    const blackWhiteImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
+    const deltaImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
 
     const thresholdSquared = threshold * threshold;
 
-    let matched = 0;
-    let sum = 0;
-    let squareSum = 0;
-    let mismatchingSum = 0;
     let maximumDeltaIntensity = 0;
 
     if (candidateImage.length != goldenImage.length) {
@@ -174,80 +168,78 @@ export class ImageComparator {
             colorDelta(candidateImage, goldenImage, position, position);
         const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
 
-        if (exactlyMatched) {
-          matched++;
-        } else {
-          mismatchingSum += delta;
-        }
-
         const thresholdDelta = Math.max(0, delta - thresholdSquared);
 
-        sum += thresholdDelta;
+        const deltaIntensity =
+            Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
+
+        maximumDeltaIntensity = Math.max(deltaIntensity, maximumDeltaIntensity);
+
+        this.drawPixel(
+            blackWhiteImage,
+            position,
+            exactlyMatched,
+            exactlyMatched,
+            exactlyMatched);
+        this.drawPixel(
+            deltaImage,
+            position,
+            255,
+            255 - deltaIntensity,
+            255 - deltaIntensity);
+      }
+    }
+
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        const position = index * COMPONENTS_PER_PIXEL;
+        const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
+        const relativeDeltaIntensity = Math.round(
+            255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
+
+        this.drawPixel(
+            deltaImage,
+            position,
+            255,
+            relativeDeltaIntensity,
+            relativeDeltaIntensity);
+      }
+    }
+
+    return {
+      imageBuffers: {
+        delta: deltaImage ? deltaImage.buffer : null,
+        blackWhite: blackWhiteImage ? blackWhiteImage.buffer : null
+      }
+    };
+  }
+
+  analyze(): ImageComparisonResults {
+    const {candidateImage, goldenImage} = this;
+    const {width, height} = this.dimensions;
+
+    let squareSum = 0;
+
+    if (candidateImage.length != goldenImage.length) {
+      throw new Error(`Image sizes do not match (candidate: ${
+          candidateImage.length}, golden: ${goldenImage.length})`);
+    }
+
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        const position = index * COMPONENTS_PER_PIXEL;
+        const delta =
+            colorDelta(candidateImage, goldenImage, position, position);
+
         squareSum += delta * delta;
-
-        if (generateVisuals) {
-          const deltaIntensity =
-              Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
-
-          maximumDeltaIntensity =
-              Math.max(deltaIntensity, maximumDeltaIntensity);
-
-          this.drawPixel(
-              blackWhiteImage!,
-              position,
-              exactlyMatched,
-              exactlyMatched,
-              exactlyMatched);
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              255 - deltaIntensity,
-              255 - deltaIntensity);
-        }
       }
     }
 
-    if (generateVisuals) {
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
-          const index = y * width + x;
-          const position = index * COMPONENTS_PER_PIXEL;
-          const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
-          const relativeDeltaIntensity = Math.round(
-              255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
-
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              relativeDeltaIntensity,
-              relativeDeltaIntensity);
-        }
-      }
-    }
-
-    const mismatchingPixels = this.imagePixels - matched;
-
-    const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
-        mismatchingSum / mismatchingPixels / MAX_COLOR_DISTANCE :
-        0;
-    const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
     const rmsDistanceRatio =
         Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
 
-    return {
-      analysis: {
-        matchingRatio: matched / this.imagePixels,
-        averageDistanceRatio,
-        mismatchingAverageDistanceRatio,
-        rmsDistanceRatio
-      },
-      imageBuffers: {
-        delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
-        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
-                                      null
-      }
-    };
+    return {analysis: {rmsDistanceRatio}};
   }
 }

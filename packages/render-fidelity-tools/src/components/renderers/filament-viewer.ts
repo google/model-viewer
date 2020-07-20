@@ -201,8 +201,10 @@ export class FilamentViewer extends LitElement {
       this[$ibl] = ibl
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
-      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-      this[$scene].setSkybox(this[$skybox]);
+      if (scenario.renderSkybox) {
+        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+        this[$scene].setSkybox(this[$skybox]);
+      }
     }
 
     const loader = this[$engine].createAssetLoader();
@@ -224,12 +226,18 @@ export class FilamentViewer extends LitElement {
 
     this[$updateSize]();
 
-    // Wait two rAFs to ensure we rendered at least once:
+    /*
+    this[$renderer].setClearOptions(
+        {clearColor: [r, g, b, 1], clear: true, discard: true});
+    */
+
+    // because of tone mapping, white should be higher than(1,1,1). set to 1000
+    // just to make sure it's white
+    this[$view].setClearColor([1000, 1000, 1000, 1]);
+
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.dispatchEvent(
-            new CustomEvent('model-visibility', {detail: {visible: true}}));
-      });
+      this.dispatchEvent(
+          new CustomEvent('model-visibility', {detail: {visible: true}}));
     });
   }
 

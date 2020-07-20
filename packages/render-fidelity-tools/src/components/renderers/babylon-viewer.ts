@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -88,7 +88,10 @@ export class BabylonViewer extends LitElement {
 
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV} = scenario;
+    const {orbit, target, verticalFoV, renderSkybox} = scenario;
+
+    this[$scene].clearColor = new Color4(1, 1, 1, 1);
+
     const alpha = this[$degToRadians](orbit.theta + 90);
     const beta = this[$degToRadians](orbit.phi);
     const camera = new ArcRotateCamera(
@@ -135,10 +138,12 @@ export class BabylonViewer extends LitElement {
     // in other renderers
     environment.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(90)));
-    const skybox =
-        this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
-    skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
-    skybox!.infiniteDistance = true;
+    if (renderSkybox) {
+      const skybox =
+          this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
+      skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
+      skybox!.infiniteDistance = true;
+    }
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();

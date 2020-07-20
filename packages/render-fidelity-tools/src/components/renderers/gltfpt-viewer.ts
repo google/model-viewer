@@ -90,6 +90,11 @@ export class PathtracingViewer extends LitElement {
         this[$updateSize]();
         // console.log(this[$canvas]!.width, this[$canvas]!.height);
         renderer.resize(this[$canvas]!.width, this[$canvas]!.height);
+
+        if (!scenario.renderSkybox) {
+          // when set to false, it will make the background to be white
+          renderer.useBackgroundFromIBL(false);
+        }
         resolve();
       });
     });
@@ -107,12 +112,9 @@ export class PathtracingViewer extends LitElement {
           console.log('frame finished ' + frame);
         },
         () => {
-          // Wait two rAFs to ensure we rendered at least once //TODO: clarify
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              this.dispatchEvent(new CustomEvent(
-                  'model-visibility', {detail: {visible: true}}));
-            });
+            this.dispatchEvent(
+                new CustomEvent('model-visibility', {detail: {visible: true}}));
           });
         });
   }
