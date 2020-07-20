@@ -98,7 +98,10 @@ export class BabylonViewer extends LitElement {
         'Camera',
         alpha,
         beta,
-        orbit.radius,
+        Math.max(
+            orbit.radius,
+            0.0001),  // TODO: babylon doesn't support 0 radius for now, and
+                      // remove this checking when they support it
         new Vector3(
             -target.x,  // babylon use oppsite x coordinate than model-viewer
             target.y,
@@ -135,7 +138,8 @@ export class BabylonViewer extends LitElement {
         scenario.lighting, this[$scene], 256, false, false, false, true);
     this[$scene].environmentTexture = environment;
     // rotate environment for 90 deg, skybox for 270 deg to match the rotation
-    // in other renderers
+    // in other renderers.
+    // TODO: Babylon may fix this in future release
     environment.setReflectionTextureMatrix(
         Matrix.RotationY(Tools.ToRadians(90)));
     if (renderSkybox) {
