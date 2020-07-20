@@ -606,8 +606,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt",
-        "babylon"
+        "gltfpt"
       ]
     },
     {
@@ -710,8 +709,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt",
-        "babylon"
+        "gltfpt"
       ]
     },
     {
