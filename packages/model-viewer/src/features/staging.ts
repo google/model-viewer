@@ -16,7 +16,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$renderer, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$hasTransitioned, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 import {CameraChangeDetails} from './controls.js';
@@ -75,7 +75,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (!this.autoRotate || !this.modelIsVisible ||
+      if (!this.autoRotate || !this[$hasTransitioned]() ||
           this[$renderer].isPresenting) {
         return;
       }

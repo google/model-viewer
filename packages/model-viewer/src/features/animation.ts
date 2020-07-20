@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
@@ -105,7 +105,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](_time: number, delta: number) {
       super[$tick](_time, delta);
 
-      if (this[$paused] || !this.modelIsVisible) {
+      if (this[$paused] || !this[$hasTransitioned]()) {
         return;
       }
 
