@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -66,6 +66,7 @@ const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
 const $lastReportedProgress = Symbol('lastReportedProgress');
+const $transitioned = Symbol('transitioned');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -208,6 +209,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     protected[$modelIsRevealed] = false;
+    protected[$transitioned] = false;
 
     protected[$lastReportedProgress]: number = 0;
 
@@ -389,20 +391,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$showPoster]() {
       const posterContainerElement = this[$posterContainerElement];
       const defaultPosterElement = this[$defaultPosterElement];
-      const posterContainerOpacity =
-          parseFloat(self.getComputedStyle(posterContainerElement).opacity!);
 
       defaultPosterElement.removeAttribute('tabindex');
       defaultPosterElement.removeAttribute('aria-hidden');
       posterContainerElement.classList.add('show');
 
-      if (posterContainerOpacity < 1.0) {
-        posterContainerElement.addEventListener('transitionend', () => {
-          const oldVisibility = this.modelIsVisible;
-          this[$modelIsRevealed] = false;
-          this[$announceModelVisibility](oldVisibility);
-        }, {once: true});
-      }
+      const oldVisibility = this.modelIsVisible;
+      this[$modelIsRevealed] = false;
+      this[$announceModelVisibility](oldVisibility);
+      this[$transitioned] = false;
     }
 
     [$hidePoster]() {
@@ -413,14 +410,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (posterContainerElement.classList.contains('show')) {
         posterContainerElement.classList.remove('show');
 
+        const oldVisibility = this.modelIsVisible;
+        this[$modelIsRevealed] = true;
+        this[$announceModelVisibility](oldVisibility);
+
         // We might need to forward focus to our internal canvas, but that
         // cannot happen until the poster has completely transitioned away
         posterContainerElement.addEventListener('transitionend', () => {
-          const oldVisibility = this.modelIsVisible;
           requestAnimationFrame(() => {
-            this[$modelIsRevealed] = true;
-            this[$announceModelVisibility](oldVisibility);
-
+            this[$transitioned] = true;
             const root = this.getRootNode();
 
             // If the <model-viewer> is still focused, forward the focus to
@@ -441,6 +439,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$getModelIsVisible]() {
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
+    }
+
+    [$hasTransitioned](): boolean {
+      return super[$hasTransitioned]() && this[$transitioned];
     }
 
     async[$updateSource]() {
