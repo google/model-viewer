@@ -117,23 +117,43 @@ document.querySelector('#controls').addEventListener('click', (event) => {
 
 <model-viewer id="sphere" camera-controls interaction-prompt="none" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
   <div id="controls">
-    <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
-    <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+    <div>
+      <p>Metalness: <span id="metalness-value"></span></p>
+      <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
+    </div>
+    <div>
+      <p>Roughness: <span id="roughness-value"></span></p>
+      <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+    </div>
   </div>
 </model-viewer>
 <script>
 const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
-document.querySelector('#metalness').addEventListener('input', (event) => {
-  const [material] = modelViewerParameters.model.materials;
-  console.log(event.target.value);
-  material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
-});
+modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
 
-document.querySelector('#roughness').addEventListener('input', (event) => {
-  const [material] = modelViewerParameters.model.materials;
-  material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
-});
+  let material = modelViewerParameters.model.materials[0];
+
+  let metalnessDisplay = document.querySelector("#metalness-value");
+  let roughnessDisplay = document.querySelector("#roughness-value");
+
+  metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
+  roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
+
+  // Defaults to gold
+  material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
+
+  document.querySelector('#metalness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+    metalnessDisplay.textContent = event.target.value;
+  });
+  
+  document.querySelector('#roughness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+    roughnessDisplay.textContent = event.target.value;
+  });
+})
+
 </script>
           </template>
         </example-snippet>
@@ -146,7 +166,7 @@ document.querySelector('#roughness').addEventListener('input', (event) => {
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Swap textures - Diffuse/Normal/MetallicRoughness</h2>
+          <h2 class="demo-title">Swap textures - Diffuse/MetallicRoughness</h2>
         </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
@@ -155,44 +175,42 @@ document.querySelector('#roughness').addEventListener('input', (event) => {
   <div id="controls">
     <div>
       <p>Diffuse</p>
-      <input id="diffuse" type="file" accept="image/png, image/jpeg"/>
-    </div>
-    <div>
-      <p>Normals</p>
-      <input id="normals" type="file" accept="image/png, image/jpeg"/>
+      <select id="diffuse">
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/Lantern/T_LanternPole_a.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/DamagedHelmet/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/WaterBottle/WaterBottle_BaseColor.png">Water Bottle</option>
+      </select>
     </div>
     <div>
       <p>Metallic-roughness</p>
-      <input id="metallicRoughness" type="file" accept="image/png, image/jpeg"/>
+      <select id="metallicRoughness">
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/Lantern/T_LanternPole_mr.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/DamagedHelmet/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/WaterBottle/WaterBottle_MetalSmooth.png">Water Bottle</option>
+      </select>
     </div>
   </div>
 </model-viewer>
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
-document.querySelector('#diffuse').addEventListener('input', (event) => {
-  const [material] = modelViewerTexture.model.materials;
-  if(event.target.files.length > 0){
-    var url = URL.createObjectURL(event.target.files[0]);
-    material.pbrMetallicRoughness.baseColorTexture.texture.source.setURI(url);
-  }
-});
+modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
 
-document.querySelector('#normals').addEventListener('input', (event) => {
-  const [material] = modelViewerTexture.model.materials;
-  if(event.target.files.length > 0){
-    var url = URL.createObjectURL(event.target.files[0]);
-    material.normalTexture.texture.source.setURI(url);
-  }
-});
+  let material = modelViewerTexture.model.materials[0];
 
-document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-  const [material] = modelViewerTexture.model.materials;
-  if(event.target.files.length > 0){
-    var url = URL.createObjectURL(event.target.files[0]);
-    material.pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(url);
+  let applyPBRTexture = (channel, event) => {
+    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
   }
-});
+  
+  document.querySelector('#diffuse').addEventListener('input', (event) => {
+    applyPBRTexture('baseColorTexture', event);
+  });
+  
+  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+    applyPBRTexture('metallicRoughnessTexture', event);
+  });
+})
+
 </script>
           </template>
         </example-snippet>
@@ -205,7 +223,7 @@ document.querySelector('#metallicRoughness').addEventListener('input', (event) =
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Swap textures - Occlusion/Emission</h2>
+          <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
         </div>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
@@ -213,33 +231,54 @@ document.querySelector('#metallicRoughness').addEventListener('input', (event) =
 <model-viewer id="helmet" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
   <div id="controls">
     <div>
+      <p>Normals</p>
+      <select id="normals">
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/DamagedHelmet/Default_normal.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/Lantern/T_LanternPole_n.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/WaterBottle/WaterBottle_Normal.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
       <p>Occlusion</p>
-      <input id="occlusion" type="file" accept="image/png, image/jpeg"/>
+      <select id="occlusion">
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/DamagedHelmet/Default_AO.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/WaterBottle/WaterBottle_Occlusion.png">Water Bottle</option>
+      </select>
     </div>
     <div>
       <p>Emission</p>
-      <input id="emission" type="file" accept="image/png, image/jpeg"/>
+      <select id="emission">
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/DamagedHelmet/Default_emissive.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/Lantern/T_LanternPole_e.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/sourceModels/WaterBottle/WaterBottle_Emissive.png">Water Bottle</option>
+      </select>
     </div>
   </div>
 </model-viewer>
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
-document.querySelector('#occlusion').addEventListener('input', (event) => {
-  const [material] = modelViewerTexture.model.materials;
-  if(event.target.files.length > 0){
-    var url = URL.createObjectURL(event.target.files[0]);
-    material.occlusionTexture.texture.source.setURI(url);
+modelViewerTexture.addEventListener("scene-graph-ready", () => {
+
+  let material = modelViewerTexture.model.materials[0];
+
+  let applyTexture = (channel, event) => {
+    material[channel].texture.source.setURI(event.target.value);
   }
+
+  document.querySelector('#normals').addEventListener('input', (event) => {
+    applyTexture('normalTexture', event);
+  });
+  
+  document.querySelector('#occlusion').addEventListener('input', (event) => {
+    applyTexture('occlusionTexture', event);
+  });
+  
+  document.querySelector('#emission').addEventListener('input', (event) => {
+    applyTexture('emissiveTexture', event);
+  });
 });
 
-document.querySelector('#emission').addEventListener('input', (event) => {
-  const [material] = modelViewerTexture.model.materials;
-  if(event.target.files.length > 0){
-    var url = URL.createObjectURL(event.target.files[0]);
-    material.emissiveTexture.texture.source.setURI(url);
-  }
-});
 </script>
           </template>
         </example-snippet>
@@ -259,7 +298,11 @@ document.querySelector('#emission').addEventListener('input', (event) => {
         licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
       </li>
       <li class="attribution">
-        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Lantern</a>,
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Lantern">Lantern</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/WaterBottle">Water Bottle</a>,
         licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
       </li>
     </ul>
