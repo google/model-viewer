@@ -176,13 +176,13 @@ export class ImageComparator {
         maximumDeltaIntensity = Math.max(deltaIntensity, maximumDeltaIntensity);
 
         this.drawPixel(
-            blackWhiteImage!,
+            blackWhiteImage,
             position,
             exactlyMatched,
             exactlyMatched,
             exactlyMatched);
         this.drawPixel(
-            deltaImage!,
+            deltaImage,
             position,
             255,
             255 - deltaIntensity,
@@ -199,7 +199,7 @@ export class ImageComparator {
             255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
 
         this.drawPixel(
-            deltaImage!,
+            deltaImage,
             position,
             255,
             relativeDeltaIntensity,
@@ -209,9 +209,8 @@ export class ImageComparator {
 
     return {
       imageBuffers: {
-        delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
-        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
-                                      null
+        delta: deltaImage ? deltaImage.buffer : null,
+        blackWhite: blackWhiteImage ? blackWhiteImage.buffer : null
       }
     };
   }
