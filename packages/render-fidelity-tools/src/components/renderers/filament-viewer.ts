@@ -113,11 +113,13 @@ export class FilamentViewer extends LitElement {
     const engine = Engine.create(this[$canvas]!);
     const view = engine.createView();
 
+    const entityManager = EntityManager.get();
+    const emptyEntity = entityManager.create();
     this[$engine] = engine;
     this[$scene] = engine.createScene();
     this[$swapChain] = engine.createSwapChain();
     this[$renderer] = engine.createRenderer();
-    this[$camera] = engine.createCamera();
+    this[$camera] = engine.createCamera(emptyEntity);
     this[$view] = view;
     view.setCamera(this[$camera]);
     view.setScene(this[$scene]);
@@ -142,10 +144,10 @@ export class FilamentViewer extends LitElement {
 
     if (this[$currentAsset] != null) {
       const entities = this[$currentAsset]!.getEntities();
-      const size = entities.size();
+      const size = entities.length;
 
       for (let i = 0; i < size; ++i) {
-        const entity = entities.get(i);
+        const entity = entities[i];
         this[$scene].remove(entity);
         this[$engine].destroyEntity(entity);
       }
@@ -226,14 +228,10 @@ export class FilamentViewer extends LitElement {
 
     this[$updateSize]();
 
-    /*
-    this[$renderer].setClearOptions(
-        {clearColor: [r, g, b, 1], clear: true, discard: true});
-    */
-
     // because of tone mapping, white should be higher than(1,1,1). set to 1000
     // just to make sure it's white
-    this[$view].setClearColor([1000, 1000, 1000, 1]);
+    this[$renderer].setClearOptions(
+        {clearColor: [1000, 1000, 1000, 1], clear: true, discard: true});
 
     requestAnimationFrame(() => {
       this.dispatchEvent(
