@@ -415,8 +415,10 @@ export class Renderer extends EventDispatcher {
 
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.
-      const width = Math.ceil(scene.width * scale * dpr);
-      const height = Math.ceil(scene.height * scale * dpr);
+      const width =
+          Math.min(Math.ceil(scene.width * scale * dpr), this.canvas3D.width);
+      const height =
+          Math.min(Math.ceil(scene.height * scale * dpr), this.canvas3D.height);
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
