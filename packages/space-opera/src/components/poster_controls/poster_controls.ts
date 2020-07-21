@@ -19,9 +19,9 @@
 import '../shared/expandable_content/expandable_tab.js';
 import '@material/mwc-button';
 
-import {ModelViewerElement} from '@google/model-viewer';
 import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
@@ -75,7 +75,8 @@ export class PosterControlsElement extends ConnectedLitElement {
   async onCreatePoster() {
     if (!this.modelViewer)
       return;
-    const posterUrl = createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
+    const posterUrl =
+        createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
     dispatchSetPoster(posterUrl.unsafeUrl);
   }
 
@@ -92,7 +93,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   }
 
   onDeletePoster() {
-    if(this.poster) {
+    if (this.poster) {
       URL.revokeObjectURL(this.poster);
     }
     dispatchSetPoster(undefined);
@@ -101,7 +102,8 @@ export class PosterControlsElement extends ConnectedLitElement {
   async onDownloadPoster() {
     if (!this.modelViewer || !this.poster)
       return;
-    safeDownloadCallback(await (await fetch(this.poster)).blob(), 'poster.png', '')();
+    safeDownloadCallback(
+        await (await fetch(this.poster)).blob(), 'poster.png', '')();
   }
 }
 

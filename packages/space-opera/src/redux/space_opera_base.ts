@@ -15,8 +15,8 @@
  *
  */
 
-import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';

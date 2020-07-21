@@ -17,7 +17,7 @@
 
 
 
-import {ModelViewerElement} from '@google/model-viewer';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {arrayBufferEqualityTester, createBufferFromString, fetchBufferForUri, generatePngBlob} from '../testing/utils.js';
 import {cloneJson} from '../util/clone_json.js';

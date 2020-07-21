@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ModelViewerElement} from '@google/model-viewer';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {SimpleDropzone} from 'simple-dropzone';
 
 const viewer = document.getElementById('loading-demo') as ModelViewerElement;
