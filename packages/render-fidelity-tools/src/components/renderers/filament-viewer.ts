@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View} from 'filament';
+import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -116,7 +116,7 @@ export class FilamentViewer extends LitElement {
 
   private[$initialize]() {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-    const engine = Engine.create(this[$canvas]!);
+    const engine = Engine.create(this[$canvas]!, {alpha: true});
     const view = engine.createView();
 
     const entityManager = EntityManager.get();
@@ -212,11 +212,13 @@ export class FilamentViewer extends LitElement {
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
-      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-      this[$scene].setSkybox(this[$skybox]);
-      if (!scenario.renderSkybox) {
-        // not sure whty this could be null
-        this[$skybox]!.setColor([255, 255, 255, 1]);
+      if (scenario.renderSkybox) {
+        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+        this[$scene].setSkybox(this[$skybox]);
+      } else {
+        this[$view].setBlendMode(View$BlendMode.TRANSLUCENT);
+        this[$renderer].setClearOptions(
+            {clearColor: [0, 0, 0, 0], clear: true, discard: true});
       }
     }
 
@@ -238,9 +240,6 @@ export class FilamentViewer extends LitElement {
     this[$scene].addEntities(asset.getEntities());
 
     this[$updateSize]();
-
-    // because of tone mapping, white should be higher than(1,1,1). set to 1000
-    // just to make sure it's white
 
     requestAnimationFrame(() => {
       this.dispatchEvent(
