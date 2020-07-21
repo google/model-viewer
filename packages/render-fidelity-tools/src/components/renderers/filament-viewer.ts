@@ -50,6 +50,7 @@ const $updateScenario = Symbol('scenario');
 const $updateSize = Symbol('updateSize');
 const $render = Symbol('render');
 const $rendering = Symbol('rendering');
+const $initPromise = Symbol('initPromise');
 
 @customElement('filament-viewer')
 export class FilamentViewer extends LitElement {
@@ -71,12 +72,18 @@ export class FilamentViewer extends LitElement {
   private[$canvas]: HTMLCanvasElement|null = null;
   private[$boundingBox]: Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
 
+  private[$initPromise]: Promise<void>|null = null;
+
   constructor() {
     super();
 
-    init([], () => {
-      this[$initialize]();
-    });
+    // is it okay to only have a resolve, not reject?
+    this[$initPromise] = new Promise((resolve) => {
+      init([], () => {
+        this[$initialize]();
+        resolve();
+      });
+    })
   }
 
   connectedCallback() {
@@ -129,6 +136,7 @@ export class FilamentViewer extends LitElement {
   }
 
   private async[$updateScenario](scenario: ScenarioConfig) {
+    await this[$initPromise];
     const modelUrl =
         new URL(scenario.model, window.location.toString()).toString();
     const lightingBaseName = (scenario.lighting.split('/').pop() as string)
@@ -231,7 +239,7 @@ export class FilamentViewer extends LitElement {
     // because of tone mapping, white should be higher than(1,1,1). set to 1000
     // just to make sure it's white
     this[$renderer].setClearOptions(
-        {clearColor: [1000, 1000, 1000, 1], clear: true, discard: true});
+        {clearColor: [10000, 10000, 10000, 1], clear: true, discard: true});
 
     requestAnimationFrame(() => {
       this.dispatchEvent(
