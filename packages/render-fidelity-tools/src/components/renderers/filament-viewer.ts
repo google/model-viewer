@@ -77,7 +77,6 @@ export class FilamentViewer extends LitElement {
   constructor() {
     super();
 
-    // is it okay to only have a resolve, not reject?
     this[$initPromise] = new Promise((resolve) => {
       init([], () => {
         this[$initialize]();
@@ -150,6 +149,7 @@ export class FilamentViewer extends LitElement {
     console.log('Scenario:', scenario.name);
     console.log('Lighting:', lightingBaseName);
 
+    // TODO : replace this with destroyAsset() when it's released
     if (this[$currentAsset] != null) {
       const entities = this[$currentAsset]!.getEntities();
       const size = entities.length;
@@ -211,9 +211,12 @@ export class FilamentViewer extends LitElement {
       this[$ibl] = ibl
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
-      if (scenario.renderSkybox) {
-        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-        this[$scene].setSkybox(this[$skybox]);
+
+      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+      this[$scene].setSkybox(this[$skybox]);
+      if (!scenario.renderSkybox) {
+        // not sure whty this could be null
+        this[$skybox]!.setColor([255, 255, 255, 1]);
       }
     }
 
@@ -238,8 +241,6 @@ export class FilamentViewer extends LitElement {
 
     // because of tone mapping, white should be higher than(1,1,1). set to 1000
     // just to make sure it's white
-    this[$renderer].setClearOptions(
-        {clearColor: [10000, 10000, 10000, 1], clear: true, discard: true});
 
     requestAnimationFrame(() => {
       this.dispatchEvent(
