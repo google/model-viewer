@@ -30,7 +30,8 @@
     "Daniel Bauman <dbauman@google.com>",
     "Emma Freeman <efree@google.com>",
     "Steven An <stevenan@google.com>",
-    "James Ma <ziyanma@google.com>"
+    "James Ma <ziyanma@google.com>",
+    "Emmett Lalish <elalish@google.com>"
   ],
   "devDependencies": {
     "@google/model-viewer": "^1.0.0",
