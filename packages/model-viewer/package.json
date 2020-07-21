@@ -14,10 +14,10 @@
   "contributors": [
     "Jordan Santell <jsantell@google.com>",
     "Chris Joel <cdata@google.com>",
-    "Emmett Lalish <elalish@google.com",
+    "Emmett Lalish <elalish@google.com>",
     "Ricardo Cabello <ricardocabello@google.com>",
     "Matt Small <mbsmall@google.com>",
-    "Yuin Chin <yuin@google.com>"
+    "Yuin Chien <yuin@google.com>"
   ],
   "main": "dist/model-viewer.min.js",
   "module": "dist/model-viewer.min.js",

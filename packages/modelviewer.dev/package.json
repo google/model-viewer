@@ -14,10 +14,10 @@
   "contributors": [
     "Jordan Santell <jsantell@google.com>",
     "Chris Joel <cdata@google.com>",
-    "Emmett Lalish <elalish@google.com",
+    "Emmett Lalish <elalish@google.com>",
     "Ricardo Cabello <ricardocabello@google.com>",
     "Matt Small <mbsmall@google.com>",
-    "Yuin Chin <yuin@google.com>"
+    "Yuin Chien <yuin@google.com>"
   ],
   "license": "Apache-2.0",
   "engines": {
