@@ -24,7 +24,6 @@ import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
-import {assertContext} from './WebGLUtils.js';
 
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
@@ -169,7 +168,7 @@ export class ARRenderer extends EventDispatcher {
           }
         });
 
-    const gl = assertContext(this.renderer.context3D);
+    const gl = this.threeRenderer.context;
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
     // loss according to the spec, though current implementations don't do so.
