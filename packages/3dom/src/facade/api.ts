@@ -131,7 +131,7 @@ export interface Model extends ThreeDOMElement {
  *
  * @see ../context.ts
  */
-export interface ModelGraft extends EventTarget {
+export interface ModelGraft {
   /**
    * A flat list of all unique materials found in this scene graph.
    *
