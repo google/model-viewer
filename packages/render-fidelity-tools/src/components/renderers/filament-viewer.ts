@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
+import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$AssetLoader, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -43,6 +43,7 @@ const $view = Symbol('view');
 const $canvas = Symbol('canvas');
 const $boundingBox = Symbol('boundingBox');
 const $currentAsset = Symbol('currentAsset');
+const $assetLoader = Symbol('assetLoader');
 const $directionalLight = Symbol('this[$directionalLight]');
 
 const $initialize = Symbol('initialize');
@@ -67,6 +68,7 @@ export class FilamentViewer extends LitElement {
   private[$ibl]: IndirectLight|null;
   private[$skybox]: Skybox|null;
   private[$currentAsset]: gltfio$FilamentAsset|null;
+  private[$assetLoader]: gltfio$AssetLoader|null;
   private[$directionalLight]: Entity|null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
@@ -149,17 +151,11 @@ export class FilamentViewer extends LitElement {
     console.log('Scenario:', scenario.name);
     console.log('Lighting:', lightingBaseName);
 
-    // TODO : replace this with destroyAsset() when it's released
-    if (this[$currentAsset] != null) {
-      const entities = this[$currentAsset]!.getEntities();
-      const size = entities.length;
-
-      for (let i = 0; i < size; ++i) {
-        const entity = entities[i];
-        this[$scene].remove(entity);
-        this[$engine].destroyEntity(entity);
-      }
-
+    const existingAsset = this[$currentAsset];
+    if (existingAsset != null) {
+      const entities = existingAsset.getEntities();
+      this[$scene].removeEntities(entities);
+      this[$assetLoader]!.destroyAsset(existingAsset);
       this[$currentAsset] = null;
     }
 
@@ -222,7 +218,11 @@ export class FilamentViewer extends LitElement {
       }
     }
 
-    const loader = this[$engine].createAssetLoader();
+    if (!this[$assetLoader]) {
+      this[$assetLoader] = this[$engine].createAssetLoader();
+    }
+    const loader = this[$assetLoader]!;
+
     this[$currentAsset] = IS_BINARY_RE.test(modelUrl) ?
         loader.createAssetFromBinary(modelUrl) :
         loader.createAssetFromJson(modelUrl);
@@ -233,8 +233,6 @@ export class FilamentViewer extends LitElement {
       console.log('Loading resources for', modelUrl);
       asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
     });
-
-    loader.delete();
 
     this[$boundingBox] = asset.getBoundingBox();
     this[$scene].addEntities(asset.getEntities());
