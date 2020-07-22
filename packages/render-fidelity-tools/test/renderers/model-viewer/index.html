@@ -58,7 +58,11 @@
 
       modelViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
-          self.dispatchEvent(new CustomEvent('model-ready'));
+          //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
+          //This will be fixed when the screenshot function is refactored.
+          setTimeout(()=>{
+            self.dispatchEvent(new CustomEvent('model-ready'));
+          }, 300);
         }
       }, { once: true });
       
