@@ -15,7 +15,7 @@
  *
  */
 
-import '@google/model-viewer';
+import '@google/model-viewer/lib/model-viewer';
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {html, TemplateResult} from 'lit-html';

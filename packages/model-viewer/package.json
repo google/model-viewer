@@ -14,18 +14,19 @@
   "contributors": [
     "Jordan Santell <jsantell@google.com>",
     "Chris Joel <cdata@google.com>",
-    "Emmett Lalish <elalish@google.com",
+    "Emmett Lalish <elalish@google.com>",
     "Ricardo Cabello <ricardocabello@google.com>",
     "Matt Small <mbsmall@google.com>",
-    "Yuin Chin <yuin@google.com>"
+    "Yuin Chien <yuin@google.com>"
   ],
-  "main": "./lib/model-viewer.js",
-  "module": "./lib/model-viewer.js",
+  "main": "dist/model-viewer.min.js",
+  "module": "dist/model-viewer.min.js",
   "files": [
     "dist/model-viewer.js",
+    "dist/model-viewer.js.map",
     "dist/model-viewer.min.js",
+    "dist/model-viewer.min.js.map",
     "dist/model-viewer-legacy.js",
-    "dist/unit-tests-legacy.js",
     "POLYFILLS.md"
   ],
   "scripts": {
@@ -68,6 +69,10 @@
     "3d"
   ],
   "devDependencies": {
+    "@google/3dom": "0.0.1-alpha.5",
+    "lit-element": "^2.2.0",
+    "three": "^0.117.1",
+    "@types/resize-observer-browser": "^0.1.2",
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@jsantell/event-target": "^1.1.2",
     "@open-wc/karma-esm": "^2.11.1",
@@ -98,12 +103,6 @@
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-terser": "^5.3.0",
     "typescript": "3.8.2"
-  },
-  "dependencies": {
-    "@google/3dom": "0.0.1-alpha.5",
-    "lit-element": "^2.2.0",
-    "three": "^0.117.1",
-    "@types/resize-observer-browser": "^0.1.2"
   },
   "publishConfig": {
     "access": "public"

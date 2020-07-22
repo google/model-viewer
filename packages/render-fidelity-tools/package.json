@@ -13,7 +13,11 @@
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
     "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
   },
-  "author": "DevXR Contributors",
+  "contributors": [
+    "Chris Joel <cdata@google.com>",
+    "Emmett Lalish <elalish@google.com>",
+    "Jaixin Sun <mrfrog@google.com>"
+  ],
   "license": "Apache-2.0",
   "engines": {
     "node": ">=12.0.0"

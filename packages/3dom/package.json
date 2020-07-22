@@ -11,9 +11,12 @@
   "engines": {
     "node": ">=6.0.0"
   },
-  "author": "DevXR constributors",
-  "main": "./lib/context.js",
-  "module": "./lib/context.js",
+  "contributors": [
+    "Chris Joel <cdata@google.com>",
+    "Emmett Lalish <elalish@google.com>"
+  ],
+  "main": "./lib/api.js",
+  "module": "./lib/api.js",
   "files": [
     "src",
     "lib"

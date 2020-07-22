@@ -22,11 +22,11 @@
 
 import '@material/mwc-icon-button';
 
-import {ModelViewerElement} from '@google/model-viewer';
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';

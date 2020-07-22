@@ -20,7 +20,7 @@
  */
 
 import {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
-import {ModelViewerElement} from '@google/model-viewer';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {createSafeObjectURL, createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../util/create_object_url.js';
 

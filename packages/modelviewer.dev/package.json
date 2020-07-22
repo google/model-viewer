@@ -11,7 +11,14 @@
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
     "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js"
   },
-  "author": "DevXR Contributors",
+  "contributors": [
+    "Jordan Santell <jsantell@google.com>",
+    "Chris Joel <cdata@google.com>",
+    "Emmett Lalish <elalish@google.com>",
+    "Ricardo Cabello <ricardocabello@google.com>",
+    "Matt Small <mbsmall@google.com>",
+    "Yuin Chien <yuin@google.com>"
+  ],
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
