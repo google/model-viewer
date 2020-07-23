@@ -101,27 +101,33 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      // TODO(#1207)
-      // 'Edge (latest)': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Edge',
-      //   browser_version: 'latest',
-      // },
-      'Chrome 83.0': {
+      'Chrome (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Chrome',
-        browser_version: '83.0',
+        browser_version: 'latest',
       },
-      'Edge 83.0': {
+      'Chrome (latest-1)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Chrome',
+        browser_version: 'latest-1',
+      },
+      'Edge (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Edge',
-        browser_version: '83.0',
+        browser_version: 'latest',
+      },
+      'Edge (latest-1)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: 'latest-1',
       },
       'Firefox (latest)': {
         base: 'BrowserStack',
@@ -130,14 +136,13 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      // TODO(#1207)
-      // 'Firefox 76.0': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Firefox',
-      //   browser_version: '76.0',
-      // },
+      'Firefox (latest-1)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Firefox',
+        browser_version: 'latest-1',
+      },
       'Safari (latest)': {
         base: 'BrowserStack',
         os: 'OS X',
