@@ -226,20 +226,26 @@ export class ImageComparator {
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
 
+    let nonTransparentPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
         const position = index * COMPONENTS_PER_PIXEL;
+
+        if (candidateImage[position + 3] == 0) {
+          continue;
+        }
+
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
 
         squareSum += delta * delta;
+        nonTransparentPixelCount++;
       }
     }
 
     const rmsDistanceRatio =
-        Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
-
+        Math.sqrt(squareSum / nonTransparentPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
   }
 }
