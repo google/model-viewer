@@ -229,7 +229,8 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    const screenshot = await page.screenshot({path: outputPath});
+    const screenshot =
+        await page.screenshot({path: outputPath, omitBackground: true});
 
     await browser.close();
 

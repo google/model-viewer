@@ -226,20 +226,31 @@ export class ImageComparator {
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
 
+    let modelPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
+        // image's pixel data is stored in an 1-D array, 1st row sequentialy,
+        // than 2nd row, .. for each pixel, its data is stored by order of r, g,
+        // b, a.  here position is the index for current pixel's r , position+3
+        // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
+
+        if (candidateImage[position + 3] == 0) {
+          continue;
+        }
+
+
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
 
         squareSum += delta * delta;
+        modelPixelCount++;
       }
     }
 
     const rmsDistanceRatio =
-        Math.sqrt(squareSum / this.imagePixels) / MAX_COLOR_DISTANCE;
-
+        Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
   }
 }
