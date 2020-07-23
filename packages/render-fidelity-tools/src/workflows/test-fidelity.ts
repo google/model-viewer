@@ -57,4 +57,7 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
     })
-    .catch((error: any) => console.error(error));
+    .catch((error: any) => {
+      console.error(error);
+      process.exit();
+    });

@@ -56,6 +56,11 @@ export class ArtifactCreator {
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
+      // This is only for testing
+      if (scenarioName == 'khronos-AnimatedMorphCube') {
+        throw new Error('i just want to stop you!');
+      }
+
       const scenario = this[$configReader].scenarioConfig(scenarioName)!;
       const {dimensions} = scenario;
 
