@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import * as core from '@actions/core';
 import HTTPServer from 'http-server';
 import module from 'module';
 import {dirname, join, resolve} from 'path';
@@ -59,5 +60,6 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     })
     .catch((error: any) => {
       console.error(error);
+      core.setFailed(error.message);
       process.exit();
     });
