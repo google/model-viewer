@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$defaultPosterElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
@@ -309,13 +309,19 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           test('when src is reset, poster is dismissable', async () => {
             const posterElement = (element as any)[$defaultPosterElement];
+            const posterContainer = (element as any)[$posterContainerElement];
             const inputElement = element[$userInputElement];
 
             element.reveal = 'interaction';
             element.src = null;
+
+            await timePasses();
+
             element.src = CUBE_GLB_PATH;
 
             await timePasses();
+
+            expect(posterContainer.classList.contains('show')).to.be.true;
 
             posterElement.focus();
 

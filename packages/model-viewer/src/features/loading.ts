@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -447,7 +447,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async[$updateSource]() {
       this[$lastReportedProgress] = 0;
-      this[$showPoster]();
+      if (this[$scene].model.currentGLTF == null || this.src == null) {
+        // Don't show the poster when switching models.
+        this[$showPoster]();
+      }
       await super[$updateSource]();
     }
   }
