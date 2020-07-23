@@ -226,7 +226,7 @@ export class ImageComparator {
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
 
-    let nonTransparentPixelCount = 0;
+    let modelPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -240,12 +240,12 @@ export class ImageComparator {
             colorDelta(candidateImage, goldenImage, position, position);
 
         squareSum += delta * delta;
-        nonTransparentPixelCount++;
+        modelPixelCount++;
       }
     }
 
     const rmsDistanceRatio =
-        Math.sqrt(squareSum / nonTransparentPixelCount) / MAX_COLOR_DISTANCE;
+        Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
   }
 }

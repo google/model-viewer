@@ -229,7 +229,6 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    // TODO: double check wheter this break alpha blending test
     const screenshot =
         await page.screenshot({path: outputPath, omitBackground: true});
 
