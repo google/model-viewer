@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View} from 'filament';
+import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -50,6 +50,7 @@ const $updateScenario = Symbol('scenario');
 const $updateSize = Symbol('updateSize');
 const $render = Symbol('render');
 const $rendering = Symbol('rendering');
+const $initPromise = Symbol('initPromise');
 
 @customElement('filament-viewer')
 export class FilamentViewer extends LitElement {
@@ -71,12 +72,17 @@ export class FilamentViewer extends LitElement {
   private[$canvas]: HTMLCanvasElement|null = null;
   private[$boundingBox]: Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
 
+  private[$initPromise]: Promise<void>|null = null;
+
   constructor() {
     super();
 
-    init([], () => {
-      this[$initialize]();
-    });
+    this[$initPromise] = new Promise((resolve) => {
+      init([], () => {
+        this[$initialize]();
+        resolve();
+      });
+    })
   }
 
   connectedCallback() {
@@ -110,14 +116,16 @@ export class FilamentViewer extends LitElement {
 
   private[$initialize]() {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-    const engine = Engine.create(this[$canvas]!);
+    const engine = Engine.create(this[$canvas]!, {alpha: true});
     const view = engine.createView();
 
+    const entityManager = EntityManager.get();
+    const emptyEntity = entityManager.create();
     this[$engine] = engine;
     this[$scene] = engine.createScene();
     this[$swapChain] = engine.createSwapChain();
     this[$renderer] = engine.createRenderer();
-    this[$camera] = engine.createCamera();
+    this[$camera] = engine.createCamera(emptyEntity);
     this[$view] = view;
     view.setCamera(this[$camera]);
     view.setScene(this[$scene]);
@@ -127,6 +135,7 @@ export class FilamentViewer extends LitElement {
   }
 
   private async[$updateScenario](scenario: ScenarioConfig) {
+    await this[$initPromise];
     const modelUrl =
         new URL(scenario.model, window.location.toString()).toString();
     const lightingBaseName = (scenario.lighting.split('/').pop() as string)
@@ -140,12 +149,13 @@ export class FilamentViewer extends LitElement {
     console.log('Scenario:', scenario.name);
     console.log('Lighting:', lightingBaseName);
 
+    // TODO : replace this with destroyAsset() when it's released
     if (this[$currentAsset] != null) {
       const entities = this[$currentAsset]!.getEntities();
-      const size = entities.size();
+      const size = entities.length;
 
       for (let i = 0; i < size; ++i) {
-        const entity = entities.get(i);
+        const entity = entities[i];
         this[$scene].remove(entity);
         this[$engine].destroyEntity(entity);
       }
@@ -201,9 +211,14 @@ export class FilamentViewer extends LitElement {
       this[$ibl] = ibl
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
+
       if (scenario.renderSkybox) {
         this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
         this[$scene].setSkybox(this[$skybox]);
+      } else {
+        this[$view].setBlendMode(View$BlendMode.TRANSLUCENT);
+        this[$renderer].setClearOptions(
+            {clearColor: [0, 0, 0, 0], clear: true, discard: true});
       }
     }
 
@@ -225,15 +240,6 @@ export class FilamentViewer extends LitElement {
     this[$scene].addEntities(asset.getEntities());
 
     this[$updateSize]();
-
-    /*
-    this[$renderer].setClearOptions(
-        {clearColor: [r, g, b, 1], clear: true, discard: true});
-    */
-
-    // because of tone mapping, white should be higher than(1,1,1). set to 1000
-    // just to make sure it's white
-    this[$view].setClearColor([1000, 1000, 1000, 1]);
 
     requestAnimationFrame(() => {
       this.dispatchEvent(
