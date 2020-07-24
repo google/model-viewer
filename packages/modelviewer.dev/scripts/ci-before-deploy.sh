@@ -36,6 +36,8 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/focus-visible \
   node_modules/intersection-observer \
   node_modules/resize-observer-polyfill \
+  node_modules/js-beautify \
+  node_modules/web-animations-js \
   shared-assets/models/*.glb \
   shared-assets/models/*.gltf \
   shared-assets/models/*.usdz \
@@ -104,11 +106,14 @@ set -x
 
 # Copy the latest fidelity testing results:
 mkdir -p $DEPLOY_ROOT/fidelity
+mkdir -p $DEPLOY_ROOT/editor
 mkdir -p $DEPLOY_ROOT/dist
 
 mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
 cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
+cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
+cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
 
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
