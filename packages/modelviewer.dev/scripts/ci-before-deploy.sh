@@ -52,6 +52,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
+  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
   shared-assets/environments \
   shared-assets/icons \
   node_modules/@google/model-viewer-space-opera/node_modules/web-animations-js/web-animations-next-lite.min.js \
