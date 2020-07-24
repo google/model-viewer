@@ -53,6 +53,8 @@ if (process.argv.length > 3) {
   }
 }
 
+console.log(screenshotCreator);
+/*
 screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
@@ -63,3 +65,15 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
       core.setFailed(error.message);
       process.exit();
     });
+
+*/
+
+async function run(): Promise<void> {
+  try {
+    throw new Error('i just want to fail you !');
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+}
+
+run();
