@@ -102,7 +102,7 @@ export class PathtracingViewer extends LitElement {
     let numSamples = scenario.pt?.numSamples;
 
     if (numSamples == null) {
-      numSamples = 8;
+      numSamples = 1024;
     }
 
     console.log('Rendering ' + numSamples + ' samples');
