@@ -9,9 +9,9 @@
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/gltfpt/",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/dspbr-pt/",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
-    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
+    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
     "Chris Joel <cdata@google.com>",
