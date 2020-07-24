@@ -60,7 +60,7 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/@google/model-viewer-space-opera/node_modules/web-animations-js/web-animations-next-lite.min.js \
   node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-html.js \
   node_modules/@google/model-viewer-space-opera/node_modules/js-beautify/js/lib/beautify-css.js \
-  node_modules/@google/model-viewer-space-opera/index.html \
+  node_modules/@google/model-viewer-space-opera/editor/index.html \
   node_modules/@google/model-viewer-space-opera/dist/space-opera.js
 )
 
