@@ -28,7 +28,7 @@ const $updateSize = Symbol('updateSize');
 
 const $renderer = Symbol('renderer');
 
-@customElement('gltfpt-viewer')
+@customElement('dspbr-pt-viewer')
 export class PathtracingViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
 
@@ -80,22 +80,22 @@ export class PathtracingViewer extends LitElement {
     this[$renderer] = new PathtracingRenderer(this[$canvas]!, enableControls);
 
     const renderer = this[$renderer];
-    renderer.autoScaleOnImport(false);
     renderer.setPixelRatio(0.5);
-    renderer.setMaxBounceDepth(8);
+    renderer.setMaxBounceDepth(4);
 
     await new Promise((resolve) => {
       console.log('Loading resources for', scenario.model);
-      renderer.loadScene(scenario.model, scenario.lighting, () => {
-        this[$updateSize]();
-        // console.log(this[$canvas]!.width, this[$canvas]!.height);
-        renderer.resize(this[$canvas]!.width, this[$canvas]!.height);
+      renderer.loadScene(scenario.model, () => {
+        renderer.loadIBL(scenario.lighting, () => {
+          this[$updateSize]();
+          // console.log(this[$canvas]!.width, this[$canvas]!.height);
+          renderer.resize(this[$canvas]!.width, this[$canvas]!.height);
 
-        if (!scenario.renderSkybox) {
-          // when set to false, it will make the background to be white
-          renderer.useBackgroundFromIBL(false);
-        }
-        resolve();
+          if (!scenario.renderSkybox) {
+            renderer.disableBackground(true);  // transparent background
+          }
+          resolve();
+        });
       });
     });
 

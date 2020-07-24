@@ -31,23 +31,23 @@
 </head>
 <body>
   <renderer-harness id="harness">
-    <span slot="title">gltf-pt</span>
-    <gltfpt-viewer id="gltfptViewer" slot="renderer">
-    </gltfpt-viewer>
+    <span slot="title">dspbr-pt</span>
+    <dspbr-pt-viewer id="dspbrptViewer" slot="renderer">
+    </dspbr-pt-viewer>
   </renderer-harness>
 
   <script src="../../../node_modules/filament/filament.js"></script>
   <script type="module" src="../../../dist/renderer-harness.js"></script>
-  <script type="module" src="../../../dist/gltfpt-viewer.js"></script>
+  <script type="module" src="../../../dist/dspbr-pt-viewer.js"></script>
   <script>
     harness.addEventListener('scenario-change', () => {
-      gltfptViewer.addEventListener('model-visibility', (event) => {
+      dspbrptViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
           self.dispatchEvent(new CustomEvent('model-ready'));
         }
       }, { once: true });
 
-      gltfptViewer.scenario = harness.scenario;
+      dspbrptViewer.scenario = harness.scenario;
     });
   </script>
 </body>

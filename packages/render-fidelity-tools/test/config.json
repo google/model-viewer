@@ -16,8 +16,8 @@
       "description": "Babylon"
     },    
     {
-      "name": "gltfpt",
-      "description": "gltf-pt"
+      "name": "dspbr-pt",
+      "description": "dspbr-pt"
     }
   ],
   "scenarios": [
@@ -32,7 +32,7 @@
         "radius": 800
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -47,10 +47,7 @@
       },
       "orbit": {
         "radius": 6
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-AnimatedCube",
@@ -61,7 +58,7 @@
         "radius": 4.75
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -73,7 +70,7 @@
         "radius": 4.75
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -83,7 +80,7 @@
         "radius": 3
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -97,7 +94,7 @@
         "radius": 1.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -144,10 +141,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
       "orbit": {
         "radius": 0.03
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-BoomBoxWithAxes",
@@ -160,10 +154,7 @@
       },
       "orbit": {
         "radius": 0.05
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-Box",
@@ -174,7 +165,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -184,10 +175,7 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-BoxInterleaved",
@@ -198,7 +186,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -210,7 +198,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -222,7 +210,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -234,7 +222,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -247,7 +235,7 @@
         "radius": 3.6
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -264,7 +252,7 @@
         "radius": 286
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -287,7 +275,7 @@
         "radius": 7.8
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -301,10 +289,7 @@
       },
       "orbit": {
         "radius": 0.095
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-Cube",
@@ -346,7 +331,7 @@
         "radius": 20
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -376,7 +361,7 @@
         "radius": 25
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -387,10 +372,7 @@
       },
       "orbit": {
         "radius": 18.4
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-Lantern",
@@ -431,7 +413,7 @@
         "radius": 12
       },
       "exclude": [
-        "gltfpt",
+        "dspbr-pt",
         "babylon"
       ],
       "renderSkybox": true
@@ -448,7 +430,7 @@
         "radius": 1.2
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -458,7 +440,7 @@
         "radius": 4.25
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -501,7 +483,7 @@
         "radius": 300
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -514,7 +496,7 @@
         "radius": 2
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -528,7 +510,7 @@
         "radius": 13
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -554,7 +536,7 @@
         "radius": 3
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -568,7 +550,7 @@
         "radius": 3.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -582,7 +564,7 @@
         "radius": 9
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -592,7 +574,7 @@
         "radius": 0.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -606,7 +588,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -614,10 +596,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
         "radius": 3
-      },
-      "exclude": [
-        "gltfpt"
-      ]
+      }
     },
     {
       "name": "khronos-TextureCoordinateTest",
@@ -626,7 +605,7 @@
         "radius": 4
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -636,7 +615,7 @@
         "radius": 15
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -646,7 +625,7 @@
         "radius": 4
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -660,7 +639,7 @@
         "radius": 1.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -674,7 +653,7 @@
         "radius": 1.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -685,7 +664,7 @@
         "radius": 3.5
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -695,7 +674,7 @@
         "radius": 7
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -709,7 +688,7 @@
         "radius": 0
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -719,7 +698,7 @@
         "radius": 4
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     },
     {
@@ -746,7 +725,7 @@
         "radius": 10
       },
       "exclude": [
-        "gltfpt",
+        "dspbr-pt",
         "babylon"
       ],
       "renderSkybox": true
@@ -765,7 +744,7 @@
         "radius": 20
       },
       "exclude": [
-        "gltfpt",
+        "dspbr-pt",
         "babylon"
       ],
       "renderSkybox": true
@@ -777,7 +756,7 @@
         "radius": 11
       },
       "exclude": [
-        "gltfpt"
+        "dspbr-pt"
       ]
     }
   ]

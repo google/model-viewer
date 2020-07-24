@@ -9,9 +9,9 @@
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/gltfpt/",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/dspbr-pt/",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
-    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
+    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
     "Chris Joel <cdata@google.com>",
@@ -36,7 +36,7 @@
     "@types/resize-observer-browser": "^0.1.2",
     "@types/rimraf": "^2.0.3",
     "@webcomponents/webcomponentsjs": "~2.1.3",
-    "dspbr-pt": "^0.1.0",
+    "dspbr-pt": "^0.2.0",
     "filament": "^1.8.0",
     "focus-visible": "^5.0.1",
     "http-server": "^0.12.1",
