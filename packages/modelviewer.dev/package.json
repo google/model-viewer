@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "@google/model-viewer-shared-assets": "^0.0.1",
-    "@google/model-viewer-space-opera": "^0.0.1",
     "polymer-build": "^3.1.4",
     "rollup": "^1.29.0",
     "rollup-plugin-node-resolve": "^5.2.0",
