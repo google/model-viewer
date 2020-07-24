@@ -217,6 +217,8 @@ export class ModelScene extends Scene {
       y = this.targetDamperY.update(y, goal.y, delta, radius);
       z = this.targetDamperZ.update(z, goal.z, delta, radius);
       this.model.position.set(x, y, z);
+      this.model.updateMatrixWorld();
+      this.model.setShadowRotation(this.yaw);
       this.isDirty = true;
     }
   }
