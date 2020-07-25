@@ -22,17 +22,32 @@
   ],
   "scenarios": [
     {
-      "name": "khronos-AlphaBlendModeTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
+      "name": "khronos-FlightHelmet",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
       "dimensions": {
-        "width": 1024,
-        "height": 512
+        "width": 512,
+        "height": 1024
       },
       "target": {
-        "y": 1.1
+        "y": 0.32
+      }
+    },
+    {
+      "name": "khronos-SciFiHelmet",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
+      "dimensions": {
+        "height": 1024
       },
       "orbit": {
-        "radius": 6
+        "radius": 4
+      }
+    },
+    {
+      "name": "khronos-DamagedHelmet",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+      "lighting": "../../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
+      "orbit": {
+        "radius": 3
       }
     },
     {
@@ -47,6 +62,33 @@
       },
       "orbit": {
         "radius": 11.2
+      }
+    },
+    {
+      "name": "khronos-Corset",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
+      "dimensions": {
+        "height": 1024
+      },
+      "target": {
+        "y": 0.03
+      },
+      "orbit": {
+        "radius": 0.095
+      }
+    },
+    {
+      "name": "khronos-AlphaBlendModeTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      },
+      "target": {
+        "y": 1.1
+      },
+      "orbit": {
+        "radius": 6
       }
     },
     {
@@ -114,33 +156,12 @@
       }
     },
     {
-      "name": "khronos-Corset",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
-      "dimensions": {
-        "height": 1024
-      },
-      "target": {
-        "y": 0.03
-      },
-      "orbit": {
-        "radius": 0.095
-      }
-    },
-    {
       "name": "khronos-Cube",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf",
       "orbit": {
         "theta": 30,
         "phi": 60,
         "radius": 5
-      }
-    },
-    {
-      "name": "khronos-DamagedHelmet",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
-      "lighting": "../../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
-      "orbit": {
-        "radius": 3
       }
     },
     {
@@ -151,17 +172,6 @@
       },
       "orbit": {
         "radius": 2.7
-      }
-    },
-    {
-      "name": "khronos-FlightHelmet",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
-      "dimensions": {
-        "width": 512,
-        "height": 1024
-      },
-      "target": {
-        "y": 0.32
       }
     },
     {
@@ -239,16 +249,6 @@
         "theta": 30,
         "phi": 60,
         "radius": 23
-      }
-    },
-    {
-      "name": "khronos-SciFiHelmet",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
-      "dimensions": {
-        "height": 1024
-      },
-      "orbit": {
-        "radius": 4
       }
     },
     {
