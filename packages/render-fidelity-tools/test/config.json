@@ -754,10 +754,7 @@
       "model": "../../../shared-assets/models/alpha-blend-litmus.glb",
       "orbit": {
         "radius": 11
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     }
   ]
 }
