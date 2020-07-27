@@ -22,6 +22,13 @@
   ],
   "scenarios": [
     {
+      "name": "khronos-BoomBox",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
+      "orbit": {
+        "radius": 0.03
+      }
+    },
+    {
       "name": "khronos-FlightHelmet",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
       "dimensions": {
@@ -117,26 +124,6 @@
       }
     },
     {
-      "name": "khronos-BoomBox",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
-      "orbit": {
-        "radius": 0.03
-      }
-    },
-    {
-      "name": "khronos-BoomBoxWithAxes",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-      "dimensions": {
-        "height": 1024
-      },
-      "target": {
-        "y": 0.01
-      },
-      "orbit": {
-        "radius": 0.05
-      }
-    },
-    {
       "name": "khronos-BoxAnimated",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb",
       "orbit": {
@@ -197,36 +184,6 @@
       "orbit": {
         "radius": 39
       }
-    },
-    {
-      "name": "khronos-MetalRoughSpheres",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "orbit": {
-        "radius": 12
-      },
-      "renderSkybox": true
-    },
-    {
-      "name": "khronos-MetalRoughSpheres-HDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
-      "orbit": {
-        "radius": 12
-      },
-      "renderSkybox": true
-    },
-    {
-      "name": "khronos-MetalRoughSpheres-LDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
-      "orbit": {
-        "radius": 12
-      },
-      "exclude": [
-        "dspbr-pt",
-        "babylon"
-      ],
-      "renderSkybox": true
     },
     {
       "name": "khronos-NormalTangentMirrorTest",
@@ -758,6 +715,55 @@
       "exclude": [
         "dspbr-pt"
       ]
+    },
+    {
+      "name": "khronos-BoomBoxWithAxes",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+      "dimensions": {
+        "height": 1024
+      },
+      "target": {
+        "y": 0.01
+      },
+      "orbit": {
+        "radius": 0.05
+      }
+    },
+    {
+      "name": "khronos-MetalRoughSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true,
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-HDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true,
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-LDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
+      "orbit": {
+        "radius": 12
+      },
+      "exclude": [
+        "dspbr-pt",
+        "babylon"
+      ],
+      "renderSkybox": true
     }
   ]
 }
