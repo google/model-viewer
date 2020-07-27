@@ -171,9 +171,8 @@ export class ModelViewerSnippet extends LitElement {
 
   render() {
     const exampleLoadableSnippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/RobotExpressive.glb'
-  autoplay animation-name="Wave"
-  shadow-intensity="0.5">
+  src='https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+  shadow-intensity="1">
 </model-viewer>`;
 
     return html`
