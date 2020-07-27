@@ -46,8 +46,8 @@
     "typescript": "3.8.2"
   },
   "dependencies": {
-    "@google/3dom": "0.0.1-alpha.5",
-    "@google/model-viewer": "^1.0.0",
+    "@google/3dom": "0.1.0",
+    "@google/model-viewer": "^1.1.0",
     "ts-closure-library": "^2019.11.1-1.10"
   }
 }
