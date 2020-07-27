@@ -222,6 +222,42 @@
       }
     },
     {
+      "name": "khronos-MetalRoughSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true,
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-HDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true,
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-LDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
+      "orbit": {
+        "radius": 12
+      },
+      "exclude": [
+        "dspbr-pt",
+        "babylon"
+      ],
+      "renderSkybox": true
+    },
+    {
       "name": "khronos-2CylinderEngine",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb",
       "lighting": "../../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
@@ -728,42 +764,6 @@
       "orbit": {
         "radius": 0.05
       }
-    },
-    {
-      "name": "khronos-MetalRoughSpheres",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "orbit": {
-        "radius": 12
-      },
-      "renderSkybox": true,
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-MetalRoughSpheres-HDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
-      "orbit": {
-        "radius": 12
-      },
-      "renderSkybox": true,
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-MetalRoughSpheres-LDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
-      "orbit": {
-        "radius": 12
-      },
-      "exclude": [
-        "dspbr-pt",
-        "babylon"
-      ],
-      "renderSkybox": true
     }
   ]
 }
