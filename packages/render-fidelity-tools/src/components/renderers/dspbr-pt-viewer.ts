@@ -80,7 +80,7 @@ export class PathtracingViewer extends LitElement {
     this[$renderer] = new PathtracingRenderer(this[$canvas]!, enableControls);
 
     const renderer = this[$renderer];
-    renderer.setPixelRatio(0.5);
+    renderer.setPixelRatio(1.0);
     renderer.setMaxBounceDepth(4);
 
     await new Promise((resolve) => {
@@ -102,7 +102,7 @@ export class PathtracingViewer extends LitElement {
     let numSamples = scenario.pt?.numSamples;
 
     if (numSamples == null) {
-      numSamples = 1024;
+      numSamples = 2048;
     }
 
     console.log('Rendering ' + numSamples + ' samples');
