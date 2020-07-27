@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import * as core from '@actions/core';
+
 import HTTPServer from 'http-server';
 import module from 'module';
 import {dirname, join, resolve} from 'path';
 import rimraf from 'rimraf';
 
 const require = module.createRequire(import.meta.url);
+const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
 
@@ -72,6 +73,7 @@ async function run(): Promise<void> {
   try {
     throw new Error('i just want to fail you !');
   } catch (error) {
+    console.log(1);
     core.setFailed(error.message);
   }
 }
