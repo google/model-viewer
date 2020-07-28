@@ -134,18 +134,22 @@ export class BabylonViewer extends LitElement {
     this[$scene].stopAllAnimations();
 
     // For scenarios using these two hdr files, real time filters looks better
-    // than prefilter. Also, when enable real time filter, prefilter should not
-    // be enabled at the same time.
+    // than prefilter.
     const needRealTimeFilter =
         (lightingBaseName == 'spruit_sunrise_1k_HDR' ||
          lightingBaseName == 'spot1Lux');
 
     // the size of cubemap is 256 for all other renderers
-    const environment = needRealTimeFilter ?
-        new HDRCubeTexture(
-            scenario.lighting, this[$scene], 256, false, false, false, false) :
-        new HDRCubeTexture(
-            scenario.lighting, this[$scene], 256, false, false, false, true);
+    // Also, when enable real time filter, prefilter should not be enabled at
+    // the same time.
+    const environment = new HDRCubeTexture(
+        scenario.lighting,
+        this[$scene],
+        256,
+        false,
+        false,
+        false,
+        !needRealTimeFilter);
     this[$scene].environmentTexture = environment;
 
     // rotate environment for 90 deg, skybox for 270 deg to match the rotation
