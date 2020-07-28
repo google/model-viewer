@@ -394,7 +394,8 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true
+      "renderSkybox": true,
+      "realTimeFiltering": true
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
@@ -403,7 +404,8 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true
+      "renderSkybox": true,
+      "realTimeFiltering": true
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",

@@ -88,7 +88,8 @@ export class BabylonViewer extends LitElement {
 
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV, renderSkybox} = scenario;
+    const {orbit, target, verticalFoV, renderSkybox, realTimeFiltering} =
+        scenario;
 
     this[$scene].clearColor = new Color4(0, 0, 0, 0);
 
@@ -146,13 +147,13 @@ export class BabylonViewer extends LitElement {
       skybox!.infiniteDistance = true;
     }
 
-    // TODO: only apply this on certain scenarios
-    this[$scene].materials.forEach((material: Material) => {
-      (material as PBRMaterial).realTimeFiltering = true;
-      (material as PBRMaterial).realTimeFilteringQuality =
-          Constants.TEXTURE_FILTERING_QUALITY_HIGH;
-    });
-
+    if (realTimeFiltering) {
+      this[$scene].materials.forEach((material: Material) => {
+        (material as PBRMaterial).realTimeFiltering = true;
+        (material as PBRMaterial).realTimeFilteringQuality =
+            Constants.TEXTURE_FILTERING_QUALITY_HIGH;
+      });
+    }
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();

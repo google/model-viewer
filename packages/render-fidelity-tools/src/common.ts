@@ -95,6 +95,7 @@ export interface ScenarioConfig {
   verticalFoV: number;
   exclude?: Array<string>;
   renderSkybox: boolean;
+  realTimeFiltering: boolean;
   pt?: {numSamples?: number};
 }
 
