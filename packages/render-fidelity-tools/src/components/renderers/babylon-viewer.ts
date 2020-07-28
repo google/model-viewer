@@ -98,10 +98,7 @@ export class BabylonViewer extends LitElement {
         'Camera',
         alpha,
         beta,
-        Math.max(
-            orbit.radius,
-            0.0001),  // TODO: babylon doesn't support 0 radius for now, and
-                      // remove this checking when they support it
+        orbit.radius,
         new Vector3(
             -target.x,  // babylon use oppsite x coordinate than model-viewer
             target.y,
