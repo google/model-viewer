@@ -394,8 +394,7 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true,
-      "realTimeFiltering": true
+      "renderSkybox": true
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
@@ -404,8 +403,7 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true,
-      "realTimeFiltering": true
+      "renderSkybox": true
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",
@@ -748,8 +746,7 @@
       "exclude": [
         "dspbr-pt"
       ],
-      "renderSkybox": true,
-      "realTimeFiltering":true
+      "renderSkybox": true
     },
     {
       "name": "AlphaBlendLitmusTest",

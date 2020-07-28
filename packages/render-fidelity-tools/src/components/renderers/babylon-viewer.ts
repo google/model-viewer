@@ -88,8 +88,11 @@ export class BabylonViewer extends LitElement {
 
     this[$updateSize]();
 
-    const {orbit, target, verticalFoV, renderSkybox, realTimeFiltering} =
-        scenario;
+    const {orbit, target, verticalFoV, renderSkybox} = scenario;
+    const lightingBaseName = (scenario.lighting.split('/').pop() as string)
+                                 .split('.')
+                                 .slice(0, -1)
+                                 .join('');
 
     this[$scene].clearColor = new Color4(0, 0, 0, 0);
 
@@ -130,10 +133,15 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // apply both realtime filtering and prefiltering makes the result too
-    // light, so only apply one of them the size of cubemap is 256 for all other
-    // renderers
-    const environment = realTimeFiltering ?
+    // For scenarios using these two hdr files, real time filters looks better
+    // than prefilter. Also, when enable real time filter, prefilter should not
+    // be enabled at the same time.
+    const needRealTimeFilter =
+        (lightingBaseName == 'spruit_sunrise_1k_HDR' ||
+         lightingBaseName == 'spot1Lux');
+
+    // the size of cubemap is 256 for all other renderers
+    const environment = needRealTimeFilter ?
         new HDRCubeTexture(
             scenario.lighting, this[$scene], 256, false, false, false, false) :
         new HDRCubeTexture(
@@ -152,7 +160,7 @@ export class BabylonViewer extends LitElement {
       skybox!.infiniteDistance = true;
     }
 
-    if (realTimeFiltering) {
+    if (needRealTimeFilter) {
       this[$scene].materials.forEach((material: Material) => {
         (material as PBRMaterial).realTimeFiltering = true;
         (material as PBRMaterial).realTimeFilteringQuality =

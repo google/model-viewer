@@ -21,8 +21,7 @@ const defaultScenario = {
   target: {x: 0, y: 0, z: 0},
   orbit: {theta: 0, phi: 90, radius: 1},
   verticalFoV: 45,
-  renderSkybox: false,
-  realTimeFiltering: false
+  renderSkybox: false
 };
 
 export class ConfigReader {
