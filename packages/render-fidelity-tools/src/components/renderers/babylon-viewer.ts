@@ -130,11 +130,16 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // load and prefilter HDR texture (the size of cubmap is set to be 256 for
-    // all renderers)
-    const environment = new HDRCubeTexture(
-        scenario.lighting, this[$scene], 256, false, false, false, true);
+    // apply both realtime filtering and prefiltering makes the result too
+    // light, so only apply one of them the size of cubemap is 256 for all other
+    // renderers
+    const environment = realTimeFiltering ?
+        new HDRCubeTexture(
+            scenario.lighting, this[$scene], 256, false, false, false, false) :
+        new HDRCubeTexture(
+            scenario.lighting, this[$scene], 256, false, false, false, true);
     this[$scene].environmentTexture = environment;
+
     // rotate environment for 90 deg, skybox for 270 deg to match the rotation
     // in other renderers.
     // TODO: Babylon may fix this in future release
