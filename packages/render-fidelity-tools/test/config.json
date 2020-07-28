@@ -1,8 +1,23 @@
 {
   "renderers": [
     {
+      "name": "model-viewer",
+      "description": "<model-viewer>"
+    },
+    {
+      "name": "filament",
+      "description": "Filament",
+      "scripts": {
+        "setup": "prepare-ibl.sh"
+      }
+    },
+    {
       "name": "babylon",
       "description": "Babylon"
+    },    
+    {
+      "name": "dspbr-pt",
+      "description": "dspbr-pt"
     }
   ],
   "scenarios": [
