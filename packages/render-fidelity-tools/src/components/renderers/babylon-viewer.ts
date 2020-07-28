@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Color4, Constants, Engine, HDRCubeTexture, ImageProcessingConfiguration, Material, Matrix, PBRMaterial, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -145,6 +145,14 @@ export class BabylonViewer extends LitElement {
       skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
       skybox!.infiniteDistance = true;
     }
+
+    // TODO: only apply this on certain scenarios
+    this[$scene].materials.forEach((material: Material) => {
+      (material as PBRMaterial).realTimeFiltering = true;
+      (material as PBRMaterial).realTimeFilteringQuality =
+          Constants.TEXTURE_FILTERING_QUALITY_HIGH;
+    });
+
 
     this[$engine].runRenderLoop(() => {
       this[$scene].render();
