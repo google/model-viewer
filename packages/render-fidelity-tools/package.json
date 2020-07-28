@@ -23,8 +23,8 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@babylonjs/core": "^4.2.0-alpha.22",
-    "@babylonjs/loaders": "^4.2.0-alpha.22",
+    "@babylonjs/core": "^4.2.0-alpha.26",
+    "@babylonjs/loaders": "^4.2.0-alpha.26",
     "@google/model-viewer": "^1.1.0",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
