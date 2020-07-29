@@ -102,19 +102,6 @@ suite('Renderer', () => {
       expect(otherScene.renderCount).to.be.equal(1);
     });
 
-    test('marks scenes no longer dirty after rendering', () => {
-      scene.isDirty = true;
-
-      renderer.render(performance.now());
-
-      expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.ok;
-
-      renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.ok;
-    });
-
     test('does not render scenes that have not been loaded', () => {
       scene.element[$loaded] = false;
       scene.isDirty = true;
