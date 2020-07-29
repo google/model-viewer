@@ -49,7 +49,8 @@ export class ArtifactCreator {
   }
 
   async captureAndAnalyzeScreenshots(
-      scenarioWhitelist: Set<string>|null = null) {
+      scenarioWhitelist: Set<string>|null = null,
+      rendererWhitelist: Set<string>|null = null) {
     const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
@@ -80,8 +81,8 @@ export class ArtifactCreator {
         continue;
       }
 
-      const analysisResults =
-          await this.analyze(screenshot, goldens, scenario, dimensions);
+      const analysisResults = await this.analyze(
+          screenshot, goldens, scenario, dimensions, rendererWhitelist);
 
       const scenarioRecord = {analysisResults, scenario};
 
@@ -107,8 +108,8 @@ export class ArtifactCreator {
 
   protected async analyze(
       screenshot: Buffer, goldens: Array<GoldenConfig>,
-      scenario: ScenarioConfig,
-      dimensions: Dimensions): Promise<AnalysisResults> {
+      scenario: ScenarioConfig, dimensions: Dimensions,
+      rendererWhitelist: Set<string>|null): Promise<AnalysisResults> {
     const analysisResults: AnalysisResults = [];
     const {rootDirectory, outputDirectory} = this;
     const {name: scenarioName, exclude} = scenario;
@@ -116,7 +117,8 @@ export class ArtifactCreator {
     for (const goldenConfig of goldens) {
       const {name: rendererName} = goldenConfig;
 
-      if (exclude != null && exclude.includes(rendererName)) {
+      if (exclude != null && exclude.includes(rendererName) ||
+          rendererWhitelist != null && !rendererWhitelist.has(rendererName)) {
         continue;
       }
 
