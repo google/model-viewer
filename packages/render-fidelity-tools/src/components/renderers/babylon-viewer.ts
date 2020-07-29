@@ -15,7 +15,7 @@
 
 import '@babylonjs/loaders/glTF';
 
-import {ArcRotateCamera, Axis, Color4, Engine, HDRCubeTexture, ImageProcessingConfiguration, Matrix, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import {ArcRotateCamera, Axis, Color4, Constants, Engine, HDRCubeTexture, ImageProcessingConfiguration, Material, Matrix, PBRMaterial, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -89,6 +89,10 @@ export class BabylonViewer extends LitElement {
     this[$updateSize]();
 
     const {orbit, target, verticalFoV, renderSkybox} = scenario;
+    const lightingBaseName = (scenario.lighting.split('/').pop() as string)
+                                 .split('.')
+                                 .slice(0, -1)
+                                 .join('');
 
     this[$scene].clearColor = new Color4(0, 0, 0, 0);
 
@@ -98,10 +102,7 @@ export class BabylonViewer extends LitElement {
         'Camera',
         alpha,
         beta,
-        Math.max(
-            orbit.radius,
-            0.0001),  // TODO: babylon doesn't support 0 radius for now, and
-                      // remove this checking when they support it
+        orbit.radius,
         new Vector3(
             -target.x,  // babylon use oppsite x coordinate than model-viewer
             target.y,
@@ -132,11 +133,25 @@ export class BabylonViewer extends LitElement {
 
     this[$scene].stopAllAnimations();
 
-    // load and prefilter HDR texture (the size of cubmap is set to be 256 for
-    // all renderers)
+    // For scenarios using these two hdr files, real time filters looks better
+    // than prefilter.
+    const needRealTimeFilter =
+        (lightingBaseName == 'spruit_sunrise_1k_HDR' ||
+         lightingBaseName == 'spot1Lux');
+
+    // the size of cubemap is 256 for all other renderers
+    // Also, when enable real time filter, prefilter should not be enabled at
+    // the same time.
     const environment = new HDRCubeTexture(
-        scenario.lighting, this[$scene], 256, false, false, false, true);
+        scenario.lighting,
+        this[$scene],
+        256,
+        false,
+        false,
+        false,
+        !needRealTimeFilter);
     this[$scene].environmentTexture = environment;
+
     // rotate environment for 90 deg, skybox for 270 deg to match the rotation
     // in other renderers.
     // TODO: Babylon may fix this in future release
@@ -147,6 +162,14 @@ export class BabylonViewer extends LitElement {
           this[$scene].createDefaultSkybox(this[$scene].environmentTexture!);
       skybox!.rotate(Axis.Y, Math.PI * 1.5, Space.WORLD);
       skybox!.infiniteDistance = true;
+    }
+
+    if (needRealTimeFilter) {
+      this[$scene].materials.forEach((material: Material) => {
+        (material as PBRMaterial).realTimeFiltering = true;
+        (material as PBRMaterial).realTimeFilteringQuality =
+            Constants.TEXTURE_FILTERING_QUALITY_HIGH;
+      });
     }
 
     this[$engine].runRenderLoop(() => {

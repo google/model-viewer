@@ -737,8 +737,7 @@
         "radius": 20
       },
       "exclude": [
-        "dspbr-pt",
-        "babylon"
+        "dspbr-pt"
       ],
       "renderSkybox": true
     },
