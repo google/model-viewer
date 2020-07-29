@@ -26,7 +26,6 @@ import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
-import * as WebGLUtils from './WebGLUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
@@ -75,7 +74,6 @@ export class Renderer extends EventDispatcher {
   }
 
   public threeRenderer!: WebGLRenderer;
-  public context3D!: WebGLRenderingContext|null;
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
@@ -99,7 +97,7 @@ export class Renderer extends EventDispatcher {
       this[$onWebGLContextLost](event);
 
   get canRender() {
-    return this.threeRenderer != null && this.context3D != null;
+    return this.threeRenderer != null;
   }
 
   get scaleFactor() {
@@ -108,13 +106,6 @@ export class Renderer extends EventDispatcher {
 
   constructor(options?: RendererOptions) {
     super();
-
-    const webGlOptions = {
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance' as WebGLPowerPreference,
-      preserveDrawingBuffer: true
-    };
 
     this.dpr = resolveDpr();
 
@@ -129,16 +120,12 @@ export class Renderer extends EventDispatcher {
         'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
 
     try {
-      // Need to support both 'webgl' and 'experimental-webgl' (IE11).
-      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
-
-      // Patch the gl context's extension functions before passing
-      // it to three.
-      WebGLUtils.applyExtensionCompatibility(this.context3D);
-
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
-        context: this.context3D,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance' as WebGLPowerPreference,
+        preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = GammaEncoding;
@@ -157,7 +144,6 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
-      this.context3D = null;
       console.warn(error);
     }
 
