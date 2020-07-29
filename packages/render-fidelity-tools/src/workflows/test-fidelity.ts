@@ -43,28 +43,14 @@ try {
 }
 
 let scenarioWhitelist: Set<string>|null = null;
-let rendererWhitelist: Set<string>|null = null;
-const rendererList = new Set(config.renderers.map((renderer: any) => {
-  return renderer.name;
-}));
 
-// default fidelity test command takes 4 arguments. If there's more than 4, user
-// has specify either scenarios or renderers they want to test on
+// default update screenshots command takes 4 arguments. If there's more than 4,
+// user has specified scenarios to test
 if (process.argv.length > 3) {
-  for (let i = 3; i < process.argv.length; i++) {
-    const argName = process.argv[i];
+  scenarioWhitelist = new Set();
 
-    if (rendererList.has(argName)) {
-      if (rendererWhitelist === null) {
-        rendererWhitelist = new Set();
-      }
-      rendererWhitelist.add(argName);
-    } else {
-      if (scenarioWhitelist === null) {
-        scenarioWhitelist = new Set();
-      }
-      scenarioWhitelist.add(argName);
-    }
+  for (let i = 3; i < process.argv.length; i++) {
+    scenarioWhitelist.add(process.argv[i]);
   }
 }
 
