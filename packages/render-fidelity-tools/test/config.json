@@ -85,23 +85,6 @@
       }
     },
     {
-      "name": "khronos-AlphaBlendModeTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
-      "dimensions": {
-        "width": 1024,
-        "height": 512
-      },
-      "target": {
-        "y": 1.1
-      },
-      "orbit": {
-        "radius": 6
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-Avocado",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
       "target": {
@@ -125,18 +108,6 @@
         "theta": -90,
         "radius": 0.4
       }
-    },
-    {
-      "name": "khronos-BoxAnimated",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb",
-      "orbit": {
-        "theta": 30,
-        "phi": 60,
-        "radius": 2.38
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
     },
     {
       "name": "khronos-CesiumMan",
@@ -168,19 +139,6 @@
       }
     },
     {
-      "name": "khronos-InterpolationTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/InterpolationTest/glTF-Binary/InterpolationTest.glb",
-      "target": {
-        "y": 2.9
-      },
-      "orbit": {
-        "radius": 18.4
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-Lantern",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern.gltf",
       "dimensions": {
@@ -193,38 +151,6 @@
       "orbit": {
         "radius": 39
       }
-    },
-    {
-      "name": "khronos-NormalTangentMirrorTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf",
-      "orbit": {
-        "radius": 4.25
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-NormalTangentTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf",
-      "orbit": {
-        "radius": 4.25
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-OrientationTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/OrientationTest/glTF/OrientationTest.gltf",
-      "orbit": {
-        "theta": 30,
-        "phi": 60,
-        "radius": 23
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
     },
     {
       "name": "Astronaut",
@@ -245,6 +171,54 @@
       "orbit": {
         "radius": 3
       }
+    },
+    {
+      "name": "khronos-VC",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/VC/glTF-Binary/VC.glb",
+      "target": {
+        "y": 10
+      },
+      "orbit": {
+        "phi": 70,
+        "radius": 0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-Sponza",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf",
+      "target": {
+        "y": 1
+      },
+      "orbit": {
+        "theta": 90,
+        "radius": 0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "AlphaBlendLitmusTest",
+      "model": "../../../shared-assets/models/alpha-blend-litmus.glb",
+      "orbit": {
+        "radius": 11
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-SpecGlossVsMetalRough",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb",
+      "orbit": {
+        "radius": 0.5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-MetalRoughSpheres",
@@ -283,6 +257,24 @@
       "renderSkybox": true
     },
     {
+      "name": "DirectionalLightTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "lighting": "../../../shared-assets/environments/spot1Lux.hdr",
+      "dimensions": {
+        "width": 1024
+      },
+      "target": {
+        "y": 3.8
+      },
+      "orbit": {
+        "radius": 20
+      },
+      "exclude": [
+        "dspbr-pt"
+      ],
+      "renderSkybox": true
+    },
+    {
       "name": "khronos-2CylinderEngine",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb",
       "lighting": "../../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
@@ -291,6 +283,128 @@
       },
       "orbit": {
         "radius": 800
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-BrainStem",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb",
+      "target": {
+        "y": 0.9
+      },
+      "orbit": {
+        "radius": 3.6
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-Buggy",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
+      "target": {
+        "x": 24,
+        "y": 50,
+        "z": 16
+      },
+      "orbit": {
+        "theta": -60,
+        "phi": 60,
+        "radius": 286
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-CesiumMilkTruck",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+      "target": {
+        "y": 1.3
+      },
+      "orbit": {
+        "radius": 7.8
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-TwoSidedPlane",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TwoSidedPlane/glTF/TwoSidedPlane.gltf",
+      "orbit": {
+        "phi": 60,
+        "radius": 3.5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-EnvironmentTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "dimensions": {
+        "width": 1024
+      },
+      "target": {
+        "y": 3.8
+      },
+      "orbit": {
+        "radius": 20
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-GearboxAssy",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      },
+      "target": {
+        "x": 159,
+        "y": 17,
+        "z": 3.2
+      },
+      "orbit": {
+        "radius": 25
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-ReciprocatingSaw",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
+      },
+      "target": {
+        "x": -110,
+        "z": 44
+      },
+      "orbit": {
+        "theta": 30,
+        "phi": 60,
+        "radius": 300
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-RiggedFigure",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/RiggedFigure/glTF/RiggedFigure.gltf",
+      "target": {
+        "y": 0.75
+      },
+      "orbit": {
+        "radius": 2
       },
       "exclude": [
         "dspbr-pt"
@@ -309,6 +423,31 @@
       ]
     },
     {
+      "name": "khronos-BoxAnimated",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb",
+      "orbit": {
+        "theta": 30,
+        "phi": 60,
+        "radius": 2.38
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-InterpolationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/InterpolationTest/glTF-Binary/InterpolationTest.glb",
+      "target": {
+        "y": 2.9
+      },
+      "orbit": {
+        "radius": 18.4
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-AnimatedMorphCube",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
       "orbit": {
@@ -317,6 +456,38 @@
         "radius": 4.75
       },
       "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-NormalTangentMirrorTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf",
+      "orbit": {
+        "radius": 4.25
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-NormalTangentTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf",
+      "orbit": {
+        "radius": 4.25
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-OrientationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/OrientationTest/glTF/OrientationTest.gltf",
+      "orbit": {
+        "theta": 30,
+        "phi": 60,
+        "radius": 23
+      },
+      "exclude":[
         "dspbr-pt"
       ]
     },
@@ -405,84 +576,6 @@
       ]
     },
     {
-      "name": "khronos-BrainStem",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb",
-      "target": {
-        "y": 0.9
-      },
-      "orbit": {
-        "radius": 3.6
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-Buggy",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
-      "target": {
-        "x": 24,
-        "y": 50,
-        "z": 16
-      },
-      "orbit": {
-        "theta": -60,
-        "phi": 60,
-        "radius": 286
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-CesiumMilkTruck",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-      "target": {
-        "y": 1.3
-      },
-      "orbit": {
-        "radius": 7.8
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-EnvironmentTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "dimensions": {
-        "width": 1024
-      },
-      "target": {
-        "y": 3.8
-      },
-      "orbit": {
-        "radius": 20
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-GearboxAssy",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
-      "dimensions": {
-        "width": 1024,
-        "height": 512
-      },
-      "target": {
-        "x": 159,
-        "y": 17,
-        "z": 3.2
-      },
-      "orbit": {
-        "radius": 25
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-MorphPrimitivesTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphPrimitivesTest/glTF-Binary/MorphPrimitivesTest.glb",
       "dimensions": {
@@ -502,39 +595,6 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MultiUVTest/glTF/MultiUVTest.gltf",
       "orbit": {
         "radius": 4.25
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-ReciprocatingSaw",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb",
-      "dimensions": {
-        "width": 1024,
-        "height": 512
-      },
-      "target": {
-        "x": -110,
-        "z": 44
-      },
-      "orbit": {
-        "theta": 30,
-        "phi": 60,
-        "radius": 300
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-RiggedFigure",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/RiggedFigure/glTF/RiggedFigure.gltf",
-      "target": {
-        "y": 0.75
-      },
-      "orbit": {
-        "radius": 2
       },
       "exclude": [
         "dspbr-pt"
@@ -599,30 +659,6 @@
       ]
     },
     {
-      "name": "khronos-SpecGlossVsMetalRough",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb",
-      "orbit": {
-        "radius": 0.5
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-Sponza",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf",
-      "target": {
-        "y": 1
-      },
-      "orbit": {
-        "theta": 90,
-        "radius": 0
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-TextureCoordinateTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb",
       "orbit": {
@@ -681,35 +717,10 @@
       ]
     },
     {
-      "name": "khronos-TwoSidedPlane",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TwoSidedPlane/glTF/TwoSidedPlane.gltf",
-      "orbit": {
-        "phi": 60,
-        "radius": 3.5
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-UnlitTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/UnlitTest/glTF/UnlitTest.gltf",
       "orbit": {
         "radius": 7
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-VC",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/VC/glTF-Binary/VC.glb",
-      "target": {
-        "y": 10
-      },
-      "orbit": {
-        "phi": 70,
-        "radius": 0
       },
       "exclude": [
         "dspbr-pt"
@@ -742,30 +753,19 @@
       "renderSkybox": true
     },
     {
-      "name": "DirectionalLightTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "lighting": "../../../shared-assets/environments/spot1Lux.hdr",
+      "name": "khronos-AlphaBlendModeTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
       "dimensions": {
-        "width": 1024
+        "width": 1024,
+        "height": 512
       },
       "target": {
-        "y": 3.8
+        "y": 1.1
       },
       "orbit": {
-        "radius": 20
+        "radius": 6
       },
-      "exclude": [
-        "dspbr-pt"
-      ],
-      "renderSkybox": true
-    },
-    {
-      "name": "AlphaBlendLitmusTest",
-      "model": "../../../shared-assets/models/alpha-blend-litmus.glb",
-      "orbit": {
-        "radius": 11
-      },
-      "exclude": [
+      "exclude":[
         "dspbr-pt"
       ]
     },
