@@ -96,7 +96,10 @@
       },
       "orbit": {
         "radius": 6
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-Avocado",
