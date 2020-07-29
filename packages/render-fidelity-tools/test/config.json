@@ -130,7 +130,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 2.38
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-CesiumMan",
@@ -169,7 +172,10 @@
       },
       "orbit": {
         "radius": 18.4
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-Lantern",
@@ -190,14 +196,20 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf",
       "orbit": {
         "radius": 4.25
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-NormalTangentTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/NormalTangentTest/glTF/NormalTangentTest.gltf",
       "orbit": {
         "radius": 4.25
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-OrientationTest",
@@ -206,7 +218,10 @@
         "theta": 30,
         "phi": 60,
         "radius": 23
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     },
     {
       "name": "Astronaut",
@@ -219,6 +234,13 @@
       },
       "orbit": {
         "radius": 2.9
+      }
+    },
+    {
+      "name": "khronos-Suzanne",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
+      "orbit": {
+        "radius": 3
       }
     },
     {
@@ -598,13 +620,6 @@
       ]
     },
     {
-      "name": "khronos-Suzanne",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
-      "orbit": {
-        "radius": 3
-      }
-    },
-    {
       "name": "khronos-TextureCoordinateTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb",
       "orbit": {
@@ -762,7 +777,10 @@
       },
       "orbit": {
         "radius": 0.05
-      }
+      },
+      "exclude":[
+        "dspbr-pt"
+      ]
     }
   ]
 }
