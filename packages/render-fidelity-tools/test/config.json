@@ -14,7 +14,7 @@
     {
       "name": "babylon",
       "description": "Babylon"
-    },    
+    },
     {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
@@ -228,7 +228,7 @@
         "radius": 12
       },
       "renderSkybox": true,
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -240,7 +240,7 @@
         "radius": 12
       },
       "renderSkybox": true,
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
