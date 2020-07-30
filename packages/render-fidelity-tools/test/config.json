@@ -153,19 +153,6 @@
       }
     },
     {
-      "name": "Astronaut",
-      "model": "../../../shared-assets/models/Astronaut.glb",
-      "dimensions": {
-        "height": 1024
-      },
-      "target": {
-        "y": 1
-      },
-      "orbit": {
-        "radius": 2.9
-      }
-    },
-    {
       "name": "khronos-Suzanne",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
