@@ -85,9 +85,10 @@ export class ArtifactCreator {
       const analysisResults =
           await this.analyze(screenshot, goldens, scenario, dimensions);
 
-      const modelViewerRmsInDb = toDecibel(analysisResults[0].rmsDistanceRatio);
+      const modelViewerRmsInDb = toDecibel(analysisResults[1].rmsDistanceRatio);
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
-        const errorMessage = `${scenario.name}, ${modelViewerRmsInDb}`;
+        const errorMessage = `❌ Senarios name: ${
+            scenario.name}, rms distance ratio: ${modelViewerRmsInDb} dB`;
         modelViewerFidelityErrors.push(errorMessage);
       }
 
@@ -111,7 +112,7 @@ export class ArtifactCreator {
         join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
 
     await fs.writeFile(
-        join(outputDirectory, 'modelViewerFidelityError.json'),
+        join(outputDirectory, 'modelViewerFidelityErrors.json'),
         JSON.stringify(modelViewerFidelityErrors));
 
     return scenarios;

@@ -24,6 +24,7 @@ const require = module.createRequire(import.meta.url);
 const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
+import {FIDELITY_TEST_THRESHOLD} from '../common.js';
 
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
@@ -65,15 +66,25 @@ const fidelityTest = async():
               server.close();
 
               const modelViewerErrorPath =
-                  join(outputDirectory, 'modelViewerFidelityError.json');
+                  join(outputDirectory, 'modelViewerFidelityErrors.json');
               const modelViewerFidelityErrors = require(modelViewerErrorPath);
 
+              // TODO: the length is not right.
+              console.log(`Fidelity test on ${
+                  config.scenarios
+                      .length} scenarios finished. Model-Viewer passed ${
+                  config.scenarios.length -
+                  modelViewerFidelityErrors.length} scenarios ✅, failed ${
+                  modelViewerFidelityErrors.length} scenarios ❌. (Uses ${
+                  FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+
               if (modelViewerFidelityErrors.length > 0) {
-                console.log('logging failed scenarios: ');
+                console.log('🔍 Logging failed scenarios: ');
                 for (const error of modelViewerFidelityErrors) {
                   console.log(error);
                 }
-                core.setFailed('model viewer failed the fidelity test!');
+                core.setFailed(
+                    '❌ Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
               }
             })
             // is this catch block still useful?
