@@ -53,6 +53,7 @@ export class ArtifactCreator {
     const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
+    let modelViewerErrors: Array<Error> = [];
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;

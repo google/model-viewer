@@ -19,6 +19,9 @@ import {dirname, join, resolve} from 'path';
 import rimraf from 'rimraf';
 
 const require = module.createRequire(import.meta.url);
+// for some reason, actions/core can only be imported using commonJS's require
+// syntax
+const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
 
@@ -52,9 +55,19 @@ if (process.argv.length > 3) {
   }
 }
 
-screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
-    .then(() => {
-      console.log(`✅ Results recorded to ${outputDirectory}`);
-      server.close();
-    })
-    .catch((error: any) => console.error(error));
+// actions core usually runs asynchronizely.
+const fidelityTest = async():
+    Promise<void> => {
+      try {
+        screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
+            .then(() => {
+              console.log(`✅ Results recorded to ${outputDirectory}`);
+              server.close();
+            })
+            .catch((error: any) => console.error(error));
+      } catch (error) {
+        core.setFailed(error.message);
+      }
+    }
+
+fidelityTest();
