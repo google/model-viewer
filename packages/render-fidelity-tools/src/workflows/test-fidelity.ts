@@ -63,16 +63,17 @@ const fidelityTest = async():
             .then(() => {
               console.log(`✅ Results recorded to ${outputDirectory}`);
               server.close();
-              // Log all model error messages
+
               const modelViewerErrorPath =
                   join(outputDirectory, 'modelViewerFidelityError.json');
               const modelViewerFidelityErrors = require(modelViewerErrorPath);
 
               if (modelViewerFidelityErrors.length > 0) {
+                console.log('logging failed scenarios: ');
                 for (const error of modelViewerFidelityErrors) {
                   console.log(error);
                 }
-                core.setFailed('model viewer diden\'t pass the fidelity test!');
+                core.setFailed('model viewer failed the fidelity test!');
               }
             })
             // is this catch block still useful?
