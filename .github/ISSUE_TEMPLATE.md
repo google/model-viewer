@@ -11,12 +11,18 @@ problem.
 https://glitch.com/edit/#!/model-viewer
 <!-- ...or provide your own repro URL -->
 
+### Version
+<!--
+If you're not sure, paste your script src (like https://unpkg.com/@google/model-viewer) 
+into your browser and it will redirect to a numbered version.
+-->
+- model-viewer: vX.X.X
+
 ### Browser Affected
 <!-- Check all that apply and please include the version tested -->
 - [ ] Chrome
 - [ ] Edge
 - [ ] Firefox
-- [ ] Helios
 - [ ] IE
 - [ ] Safari
 
@@ -27,11 +33,3 @@ https://glitch.com/edit/#!/model-viewer
 - [ ] Linux
 - [ ] MacOS
 - [ ] Windows
-
-### Versions
-<!--
-Include the version of `<model-viewer>`, three.js, along with any polyfills that you're
-using. The output of `npm ls` should include this information (if you're using npm).
--->
-- model-viewer: vX.X.X
-- three.js: rXX
