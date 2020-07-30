@@ -213,10 +213,7 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true,
-      "exclude":[
-        "dspbr-pt"
-      ]
+      "renderSkybox": true
     },
     {
       "name": "khronos-MetalRoughSpheres-HDR",
