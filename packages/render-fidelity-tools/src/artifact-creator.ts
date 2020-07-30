@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -53,7 +53,8 @@ export class ArtifactCreator {
     const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
-    let modelViewerErrors: Array<Error> = [];
+    // TODO: the way to store error may change
+    const modelViewerFidelityErrors: Array<string> = [];
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
@@ -83,6 +84,14 @@ export class ArtifactCreator {
 
       const analysisResults =
           await this.analyze(screenshot, goldens, scenario, dimensions);
+
+      // TODO: 1. replace rms to db, 2, make the 50 as a constant
+      if (toDecibel(analysisResults[0].rmsDistanceRatio) >
+          FIDELITY_TEST_THRESHOLD) {
+        const errorMessage = `${scenario.name}, ${
+            toDecibel(analysisResults[0].rmsDistanceRatio)}`;
+        modelViewerFidelityErrors.push(errorMessage);
+      }
 
       const scenarioRecord = {analysisResults, scenario};
 

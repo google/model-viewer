@@ -26,6 +26,10 @@ export const MAX_COLOR_DISTANCE: number = 35215;
 
 export const DEVICE_PIXEL_RATIO: number = 2;
 
+// using this threshold to do automatic fidelity test for model-viewer. any
+// scenario whose rms value (in dB) is bigger than the threshold will fail.
+export const FIDELITY_TEST_THRESHOLD: number = -100;
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
@@ -253,4 +257,8 @@ export class ImageComparator {
         Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
   }
+}
+
+export function toDecibel(value: number): number {
+  return 10 * Math.log10(value);
 }
