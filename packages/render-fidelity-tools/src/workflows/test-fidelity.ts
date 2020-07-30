@@ -44,7 +44,7 @@ try {
 
 let scenarioWhitelist: Set<string>|null = null;
 
-// default update screenshots command takes 4 arguments. If there's more than 4,
+// default update screenshots command takes 3 arguments. If there's more than 3,
 // user has specified scenarios to test
 if (process.argv.length > 3) {
   scenarioWhitelist = new Set();

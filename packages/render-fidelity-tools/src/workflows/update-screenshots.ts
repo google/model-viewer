@@ -44,7 +44,7 @@ const rendererList = new Set(config.renderers.map((renderer: any) => {
   return renderer.name;
 }));
 
-// default update screenshots command takes 4 arguments. If there's more than 4,
+// default update screenshots command takes 3 arguments. If there's more than 3,
 // user has specify either scenarios or renderers
 if (process.argv.length > 3) {
   for (let i = 3; i < process.argv.length; i++) {
