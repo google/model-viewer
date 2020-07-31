@@ -21,7 +21,7 @@ import {html, LitElement, property} from 'lit-element';
 import {ImageComparisonConfig} from '../common.js';
 
 export class ImageComparisonApp extends LitElement {
-  @property({type: String}) src: string = '';
+  @property({type: String}) configSrc: string = '';
 
   @property({type: Object}) config: ImageComparisonConfig|null = null;
 
@@ -34,8 +34,8 @@ export class ImageComparisonApp extends LitElement {
   }
 
   private async loadConfig() {
-    if (this.src) {
-      this.config = await (await fetch(this.src)).json();
+    if (this.configSrc) {
+      this.config = await (await fetch(this.configSrc)).json();
     } else {
       this.config = null;
     }
@@ -45,7 +45,7 @@ export class ImageComparisonApp extends LitElement {
     const {config} = this;
 
     if (config == null) {
-      return this.src ? html`Loading...` : html`No config specified`;
+      return this.configSrc ? html`Loading...` : html`No config specified`;
     }
 
     const goldens = config.renderers.map(
