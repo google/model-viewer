@@ -24,7 +24,7 @@ import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ALT_BG_IMAGE_URL = assetPath('environments/grey.png');
+const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
 const BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const HDR_BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 const MODEL_URL = assetPath('models/reflective-sphere.gltf');
