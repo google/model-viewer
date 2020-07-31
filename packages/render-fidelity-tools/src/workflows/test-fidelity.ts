@@ -58,42 +58,35 @@ if (process.argv.length > 3) {
   }
 }
 
-// actions core usually runs asynchronizely.
-const fidelityTest = async():
-    Promise<void> => {
-      try {
-        screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
-            .then(() => {
-              console.log(`✅ Results recorded to ${outputDirectory}`);
-              server.close();
+screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
+    .then(() => {
+      console.log(`✅ Results recorded to ${outputDirectory}`);
+      server.close();
 
-              const modelViewerErrorPath =
-                  join(outputDirectory, 'modelViewerFidelityErrors.json');
-              const modelViewerFidelityErrors = require(modelViewerErrorPath);
+      const modelViewerErrorPath =
+          join(outputDirectory, 'modelViewerFidelityErrors.json');
+      const modelViewerFidelityErrors = require(modelViewerErrorPath);
 
-              // TODO: the length is not right.
-              console.log(`Fidelity test on ${
-                  config.scenarios
-                      .length} scenarios finished. Model-Viewer passed ${
-                  config.scenarios.length -
-                  modelViewerFidelityErrors.length} scenarios ✅, failed ${
-                  modelViewerFidelityErrors.length} scenarios ❌. (Uses ${
-                  FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+      // config contains all scenarios, testConfig contains only scenarios that
+      // the test run on.
+      const testConfigPath = join(outputDirectory, 'config.json');
+      const testConfig = require(testConfigPath);
 
-              if (modelViewerFidelityErrors.length > 0) {
-                console.log('🔍 Logging failed scenarios: ');
-                for (const error of modelViewerFidelityErrors) {
-                  console.log(error);
-                }
-                core.setFailed(
-                    '❌ Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
-              }
-            })
-            // is this catch block still useful?
-            .catch((error: any) => console.error(error));
-      } catch (error) {
-        core.setFailed(error.message);
+      console.log(`Fidelity test on ${
+          testConfig.scenarios
+              .length} scenarios finished. Model-Viewer passed ${
+          testConfig.scenarios.length -
+          modelViewerFidelityErrors.length} scenarios ✅, failed ${
+          modelViewerFidelityErrors.length} scenarios ❌. (Uses ${
+          FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+
+      if (modelViewerFidelityErrors.length > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of modelViewerFidelityErrors) {
+          console.log(error);
+        }
+        throw new Error(
+            '❌ Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
       }
-    }
-
-fidelityTest();
+    })
+    .catch((error: any) => core.setFailed(error.message));

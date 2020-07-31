@@ -53,7 +53,6 @@ export class ArtifactCreator {
     const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
-    // TODO: the way to store error may change
     const modelViewerFidelityErrors: Array<string> = [];
 
     for (const scenarioBase of scenarios) {
@@ -87,8 +86,9 @@ export class ArtifactCreator {
 
       const modelViewerRmsInDb = toDecibel(analysisResults[1].rmsDistanceRatio);
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
-        const errorMessage = `❌ Senarios name: ${
-            scenario.name}, rms distance ratio: ${modelViewerRmsInDb} dB`;
+        const errorMessage =
+            `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
+                modelViewerRmsInDb.toFixed(2)} dB`;
         modelViewerFidelityErrors.push(errorMessage);
       }
 
