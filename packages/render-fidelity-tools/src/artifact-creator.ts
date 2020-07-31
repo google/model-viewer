@@ -84,7 +84,8 @@ export class ArtifactCreator {
       const analysisResults =
           await this.analyze(screenshot, goldens, scenario, dimensions);
 
-      const modelViewerRmsInDb = toDecibel(analysisResults[1].rmsDistanceRatio);
+      // model-viewer is in 0 index
+      const modelViewerRmsInDb = toDecibel(analysisResults[0].rmsDistanceRatio);
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
         const errorMessage =
             `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
