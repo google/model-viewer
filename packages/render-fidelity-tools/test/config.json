@@ -723,7 +723,7 @@
     {
       "name": "FurnaceTest",
       "model": "../../../shared-assets/models/pbr-spheres.glb",
-      "lighting": "../../../shared-assets/environments/grey.png",
+      "lighting": "../../../shared-assets/environments/white_furnace.hdr",
       "target": {
         "y": 3
       },
@@ -731,8 +731,7 @@
         "radius": 10
       },
       "exclude": [
-        "dspbr-pt",
-        "babylon"
+        "dspbr-pt"
       ],
       "renderSkybox": true
     },
