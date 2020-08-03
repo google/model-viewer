@@ -37,6 +37,23 @@ export const openIOSARQuickLook = (() => {
       modelUrl.hash = 'allowsContentScaling=0';
     }
     anchor.setAttribute('href', modelUrl.toString());
+    // one option: add directly to event listener here,
+    // make a message handler for model-viewer that can be attached to
+    // unclear: where to add handler, openIOSARQuickLook is export const right
+    // now but events should be on the ARMixin?
+    /*
+    anchor.addEventListener("message", (event: Event) => {
+      if ((<MessageEvent>event).data == "_apple_ar_quicklook_button_tapped") {
+        alert("user tapped on link: " + event.target + ", opening page");
+        console.log("user tapped on link: " + event.target + ", opening page");
+      }
+    }, true);
+    */
+    // another option: correctly configure the a tag
+    // (so that it's clear for which modelviewer this was) and add it to the DOM
+    // unclear: how to add it only once?
+    anchor.setAttribute('class', 'modelviewer-quicklook-button');
+    document.body.appendChild(anchor);
     anchor.click();
   };
 })();
