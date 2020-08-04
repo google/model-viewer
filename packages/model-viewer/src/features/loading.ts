@@ -447,7 +447,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async[$updateSource]() {
       this[$lastReportedProgress] = 0;
-      if (this[$scene].model.currentGLTF == null || this.src == null) {
+      if (this[$scene].model.currentGLTF == null || this.src == null ||
+          !this[$shouldAttemptPreload]()) {
         // Don't show the poster when switching models.
         this[$showPoster]();
       }
