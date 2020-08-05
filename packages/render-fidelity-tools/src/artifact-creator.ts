@@ -70,22 +70,29 @@ export class ArtifactCreator {
 
       mkdirp.sync(scenarioOutputDirectory);
 
-      const screenshot = await this.captureScreenshot(
-          'model-viewer',
-          scenarioName,
-          dimensions,
-          join(scenarioOutputDirectory, 'model-viewer.png'));
+      let screenshot;
+      try {
+        screenshot = await this.captureScreenshot(
+            'model-viewer',
+            scenarioName,
+            dimensions,
+            join(scenarioOutputDirectory, 'model-viewer.png'));
+      } catch (error) {
+        throw new Error(`❌Failed to capture model-viewer's screenshot of ${
+            scenarioName}. Error message: ${error.message}`);
+      }
 
       if (screenshot == null) {
-        console.log(`🚨 Failed to capture screenshot`);
-        continue;
+        throw new Error(`❌Model viewer's screenshot of ${
+            scenarioName} are not capture correctly! (the value is null)`);
       }
 
       const analysisResults =
           await this.analyze(screenshot, goldens, scenario, dimensions);
 
-      // model-viewer is in 0 index
-      const modelViewerRmsInDb = toDecibel(analysisResults[0].rmsDistanceRatio);
+      const modelViewerIndex = 0;
+      const modelViewerRmsInDb =
+          toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
         const errorMessage =
             `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
@@ -139,7 +146,14 @@ export class ArtifactCreator {
 
       const goldenPath =
           join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
-      const golden = await fs.readFile(goldenPath);
+
+      let golden;
+      try {
+        golden = await fs.readFile(goldenPath);
+      } catch (error) {
+        throw new Error(`Failed to read ${rendererName}'s ${
+            scenarioName} golden! Error message: ${error.message}`);
+      }
 
       const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
       const goldenImage = pngjs.PNG.sync.read(golden).data;
@@ -153,7 +167,6 @@ export class ArtifactCreator {
 
       await fs.writeFile(
           join(outputDirectory, scenarioName, goldenConfig.file), golden);
-
 
       const {analysis} = comparator.analyze();
       const {rmsDistanceRatio} = analysis;
