@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WHITE_THRESHOLD} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -78,12 +78,12 @@ export class ArtifactCreator {
             dimensions,
             join(scenarioOutputDirectory, 'model-viewer.png'));
       } catch (error) {
-        throw new Error(`❌Failed to capture model-viewer's screenshot of ${
+        throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
             scenarioName}. Error message: ${error.message}`);
       }
 
       if (screenshot == null) {
-        throw new Error(`❌Model viewer's screenshot of ${
+        throw new Error(`❌ Model viewer's screenshot of ${
             scenarioName} are not capture correctly! (the value is null)`);
       }
 
@@ -94,9 +94,21 @@ export class ArtifactCreator {
       const modelViewerRmsInDb =
           toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
-        const errorMessage =
-            `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
-                modelViewerRmsInDb.toFixed(2)} dB`;
+        let goldenIsWhite = true;
+        for (const result of analysisResults) {
+          if (result.rmsDistanceRatio < WHITE_THRESHOLD) {
+            goldenIsWhite = false;
+            break;
+          }
+        }
+
+        const errorMessage = `❌ Senarios name: ${
+            scenario.name}, rms distance ratio: ${
+            modelViewerRmsInDb.toFixed(2)} dB. ${
+            goldenIsWhite ?
+                `Model-viewer's screnshot may be completely white since all renders' rms are larger than ${
+                    WHITE_THRESHOLD} dB` :
+                ''}`;
         modelViewerFidelityErrors.push(errorMessage);
       }
 
@@ -151,7 +163,7 @@ export class ArtifactCreator {
       try {
         golden = await fs.readFile(goldenPath);
       } catch (error) {
-        throw new Error(`Failed to read ${rendererName}'s ${
+        throw new Error(`❌ Failed to read ${rendererName}'s ${
             scenarioName} golden! Error message: ${error.message}`);
       }
 
