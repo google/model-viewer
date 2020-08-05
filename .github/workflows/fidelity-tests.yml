@@ -38,6 +38,8 @@ jobs:
     - name: Build packages
       run: npm run build
     
+    # TODO: without build legacy support, some scenarios give wrong metrics in fidelity test workflow. 
+    # There's some tricky bug here but we don't know how to solve yet. 
     - name: Generate legacy bundles
       run: npm run build:legacy-support
 

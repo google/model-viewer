@@ -19,8 +19,7 @@ import {dirname, join, resolve} from 'path';
 import rimraf from 'rimraf';
 
 const require = module.createRequire(import.meta.url);
-// for some reason, actions/core can only be imported using commonJS's require
-// syntax
+// actions/core can only be imported using commonJS's require here
 const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
