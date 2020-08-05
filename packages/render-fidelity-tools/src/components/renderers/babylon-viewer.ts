@@ -82,9 +82,11 @@ export class BabylonViewer extends LitElement {
     this[$scene].imageProcessingConfiguration.toneMappingEnabled = true;
     this[$scene].imageProcessingConfiguration.toneMappingType =
         ImageProcessingConfiguration.TONEMAPPING_ACES;
-    // tone mapping makes a shift on explosure, so it should be increased be
-    // some factor
-    this[$scene].imageProcessingConfiguration.exposure = 2.0;
+
+    // in babylonjs, explosure has to be shifted manually when applying ACES
+    // tone mapping. See this link for more info about the 1/0.6 factor:
+    // https://github.com/mrdoob/three.js/pull/19621
+    this[$scene].imageProcessingConfiguration.exposure = 1 / 0.6;
 
     this[$updateSize]();
 
