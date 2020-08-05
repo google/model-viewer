@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WHITE_THRESHOLD} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -97,21 +97,9 @@ export class ArtifactCreator {
       // means the model-viewer screenshot captured in the fidelity
       // test maybe completely white or transparent
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
-        let goldenIsWhite = true;
-        for (const result of analysisResults) {
-          if (toDecibel(result.rmsDistanceRatio) < WHITE_THRESHOLD) {
-            goldenIsWhite = false;
-            break;
-          }
-        }
-
-        const errorMessage = `❌ Senarios name: ${
-            scenario.name}, rms distance ratio: ${
-            modelViewerRmsInDb.toFixed(2)} dB. ${
-            goldenIsWhite ?
-                `Model-viewer's screnshot may be completely white since all renders' rms are larger than ${
-                    WHITE_THRESHOLD} dB` :
-                ''}`;
+        const errorMessage =
+            `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
+                modelViewerRmsInDb.toFixed(2)} dB.`;
         modelViewerFidelityErrors.push(errorMessage);
       }
 
