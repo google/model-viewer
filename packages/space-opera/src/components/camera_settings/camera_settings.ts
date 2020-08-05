@@ -47,7 +47,7 @@ const dispatchCameraControlsEnabled = registerStateMutator(
     });
 
 // Orbit
-const dispatchSaveCameraOrbit =
+export const dispatchSaveCameraOrbit =
     registerStateMutator('SAVE_CAMERA_ORBIT', (state) => {
       if (!state.currentCamera)
         return;
@@ -219,7 +219,7 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onSaveCameraOrbit() {
-    dispatchSaveCameraOrbit(true);
+    dispatchSaveCameraOrbit();
   }
 
   onCameraTargetChange(newValue: Vector3D) {
