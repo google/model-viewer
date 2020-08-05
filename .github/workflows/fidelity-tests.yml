@@ -37,9 +37,10 @@ jobs:
 
     - name: Build packages
       run: |
+       ./node_modules/.bin/lerna run --scope @google/3dom build --stream
+       ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
        ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
-       ./node_modules/.bin/lerna run --scope @google/model-viewer-model-viewer build --stream
-       ./node_modules/.bin/lerna run --scope @google/model-viewer-3dom build --stream
+
     
     # TODO: without build legacy support, some scenarios give wrong metrics in fidelity test workflow. 
     # There's some tricky bug here but we don't know how to solve yet. 
