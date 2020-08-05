@@ -93,6 +93,9 @@ export class ArtifactCreator {
       const modelViewerIndex = 0;
       const modelViewerRmsInDb =
           toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
+      // add additional check on whether all renders give bad metrics. Tha
+      // probably means the model-viewer screenshot captured in the fidelity
+      // test maybe completely white or transparent
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
         let goldenIsWhite = true;
         for (const result of analysisResults) {
