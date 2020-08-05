@@ -83,8 +83,10 @@ export class ArtifactCreator {
       }
 
       if (screenshot == null) {
-        throw new Error(`❌ Model viewer's screenshot of ${
-            scenarioName} are not capture correctly! (the value is null)`);
+        const errorMessage = `❌ Model-viewer's screenshot of ${
+            scenarioName} is not captured correctly(value is null). `;
+        modelViewerFidelityErrors.push(errorMessage);
+        continue;
       }
 
       const analysisResults =
