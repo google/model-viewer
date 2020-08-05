@@ -78,8 +78,11 @@ export class ArtifactCreator {
             dimensions,
             join(scenarioOutputDirectory, 'model-viewer.png'));
       } catch (error) {
-        throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
-            scenarioName}. Error message: ${error.message}`);
+        const errorMessage =
+            `❌ Failed to capture model-viewer's screenshot of ${
+                scenarioName}. Error message: ${error.message}`;
+        modelViewerFidelityErrors.push(errorMessage);
+        continue;
       }
 
       if (screenshot == null) {
