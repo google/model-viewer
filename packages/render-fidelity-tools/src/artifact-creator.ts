@@ -98,9 +98,7 @@ export class ArtifactCreator {
       const modelViewerIndex = 0;
       const modelViewerRmsInDb =
           toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
-      // add additional check on whether all renders give bad metrics. This
-      // means the model-viewer screenshot captured in the fidelity
-      // test maybe completely white or transparent
+
       if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
         const errorMessage =
             `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
