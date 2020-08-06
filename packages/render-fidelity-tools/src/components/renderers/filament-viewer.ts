@@ -132,6 +132,7 @@ export class FilamentViewer extends LitElement {
     view.setCamera(this[$camera]);
     view.setScene(this[$scene]);
     view.setBloomOptions({enabled: false});
+    emptyEntity.delete();
 
     this[$updateSize]();
   }
@@ -157,6 +158,9 @@ export class FilamentViewer extends LitElement {
       this[$scene].removeEntities(entities);
       this[$assetLoader]!.destroyAsset(existingAsset);
       this[$currentAsset] = null;
+      for (const entity of entities) {
+        entity.delete();
+      }
     }
 
     if (this[$ibl] != null) {
@@ -173,6 +177,7 @@ export class FilamentViewer extends LitElement {
     if (this[$directionalLight] != null) {
       this[$scene].remove(this[$directionalLight]!);
       this[$engine].destroyEntity(this[$directionalLight]!);
+      this[$directionalLight]!.delete();
       this[$directionalLight] = null;
     }
 
@@ -235,7 +240,11 @@ export class FilamentViewer extends LitElement {
     });
 
     this[$boundingBox] = asset.getBoundingBox();
-    this[$scene].addEntities(asset.getEntities());
+    const entities = asset.getEntities();
+    this[$scene].addEntities(entities);
+    for (const entity of entities) {
+      entity.delete();
+    }
 
     this[$updateSize]();
 
