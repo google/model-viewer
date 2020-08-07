@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$AssetLoader, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
+import {Aabb, Camera, Camera$Fov, clearAssetCache, Engine, Entity, EntityManager, fetch, gltfio$AssetLoader, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -182,6 +182,8 @@ export class FilamentViewer extends LitElement {
       this[$directionalLight]!.delete();
       this[$directionalLight] = null;
     }
+
+    clearAssetCache();
 
     await fetchFilamentAssets([modelUrl]);
 
