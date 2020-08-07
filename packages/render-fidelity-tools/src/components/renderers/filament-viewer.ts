@@ -171,6 +171,7 @@ export class FilamentViewer extends LitElement {
     }
 
     if (this[$skybox] != null) {
+      this[$scene].setSkybox(null);
       this[$engine].destroyTexture(this[$skybox]!.getTexture());
       this[$engine].destroySkybox(this[$skybox]!);
       this[$skybox] = null;
