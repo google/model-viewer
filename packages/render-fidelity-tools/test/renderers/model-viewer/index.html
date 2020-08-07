@@ -61,7 +61,9 @@
           //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
           //This will be fixed when the screenshot function is refactored.
           setTimeout(()=>{
-            self.dispatchEvent(new CustomEvent('model-ready'));
+            requestAnimationFrame(()=>{
+              self.dispatchEvent(new CustomEvent('model-ready'));
+            })
           }, 1500);
         }
       }, { once: true });
