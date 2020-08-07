@@ -165,11 +165,13 @@ export class FilamentViewer extends LitElement {
 
     if (this[$ibl] != null) {
       this[$scene].setIndirectLight(null);
+      this[$engine].destroyTexture(this[$ibl]!.getReflectionsTexture());
       this[$engine].destroyIndirectLight(this[$ibl]!);
       this[$ibl] = null;
     }
 
     if (this[$skybox] != null) {
+      this[$engine].destroyTexture(this[$skybox]!.getTexture());
       this[$engine].destroySkybox(this[$skybox]!);
       this[$skybox] = null;
     }
