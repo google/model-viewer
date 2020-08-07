@@ -124,7 +124,7 @@ canvas.show {
 }
 
 .slot.poster.show {
-  opacity: 0;
+  opacity: 1;
   transition: none;
 }
 
