@@ -179,6 +179,11 @@ export class ModelScene extends Scene {
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
     this.isDirty = true;
+    const today = new Date();
+    const time =
+        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    console.log(
+        `model-load event fired in ModelScene.ts's onModelLoad :${time}`);
     this.dispatchEvent({type: 'model-load', url: event.url});
   }
 

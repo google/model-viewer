@@ -90,6 +90,10 @@ export default class Model extends Object3D {
     this.clear();
     this.modelContainer.add(model);
     this.updateFraming();
+    const today = new Date();
+    const time =
+        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    console.log(`model-load event fired in Model.ts's setObject :${time}`);
     this.dispatchEvent({type: 'model-load'});
   }
 
@@ -159,6 +163,10 @@ export default class Model extends Object3D {
 
     this.updateFraming();
 
+    const today = new Date();
+    const time =
+        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    console.log(`model-load event fired in Model.ts's setSource :${time}`);
     this.dispatchEvent({type: 'model-load', url});
   }
 

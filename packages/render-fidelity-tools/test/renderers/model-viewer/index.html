@@ -61,17 +61,15 @@
         if (event.detail.visible) {
           //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
           //This will be fixed when the screenshot function is refactored.
-          let today = new Date();
-          let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-          console.log(`waiting for model-ready event : ${time}`);
           setTimeout(()=>{
             requestAnimationFrame(()=>{
-              today = new Date();
-              time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-              console.log(`event ready :${time}`);
+              const today = new Date();
+              const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+              // why this could be called twice? 
+              console.log(`ready to take screenshot :${time}`);
               self.dispatchEvent(new CustomEvent('model-ready'));
             })
-          }, 4000);
+          }, 500);
         }
       }, { once: true });
       
