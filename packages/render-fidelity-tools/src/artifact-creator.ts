@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -53,6 +53,7 @@ export class ArtifactCreator {
     const {scenarios} = this.config;
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
+    const modelViewerFidelityErrors: Array<string> = [];
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
@@ -69,19 +70,41 @@ export class ArtifactCreator {
 
       mkdirp.sync(scenarioOutputDirectory);
 
-      const screenshot = await this.captureScreenshot(
-          'model-viewer',
-          scenarioName,
-          dimensions,
-          join(scenarioOutputDirectory, 'model-viewer.png'));
+      let screenshot;
+      try {
+        screenshot = await this.captureScreenshot(
+            'model-viewer',
+            scenarioName,
+            dimensions,
+            join(scenarioOutputDirectory, 'model-viewer.png'));
+      } catch (error) {
+        const errorMessage =
+            `❌ Failed to capture model-viewer's screenshot of ${
+                scenarioName}. Error message: ${error.message}`;
+        modelViewerFidelityErrors.push(errorMessage);
+        continue;
+      }
 
       if (screenshot == null) {
-        console.log(`🚨 Failed to capture screenshot`);
+        const errorMessage = `❌ Model-viewer's screenshot of ${
+            scenarioName} is not captured correctly(value is null). `;
+        modelViewerFidelityErrors.push(errorMessage);
         continue;
       }
 
       const analysisResults =
           await this.analyze(screenshot, goldens, scenario, dimensions);
+
+      const modelViewerIndex = 0;
+      const modelViewerRmsInDb =
+          toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
+
+      if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
+        const errorMessage =
+            `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
+                modelViewerRmsInDb.toFixed(2)} dB.`;
+        modelViewerFidelityErrors.push(errorMessage);
+      }
 
       const scenarioRecord = {analysisResults, scenario};
 
@@ -101,6 +124,10 @@ export class ArtifactCreator {
 
     await fs.writeFile(
         join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
+
+    await fs.writeFile(
+        join(outputDirectory, 'modelViewerFidelityErrors.json'),
+        JSON.stringify(modelViewerFidelityErrors));
 
     return scenarios;
   }
@@ -125,7 +152,14 @@ export class ArtifactCreator {
 
       const goldenPath =
           join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
-      const golden = await fs.readFile(goldenPath);
+
+      let golden;
+      try {
+        golden = await fs.readFile(goldenPath);
+      } catch (error) {
+        throw new Error(`❌ Failed to read ${rendererName}'s ${
+            scenarioName} golden! Error message: ${error.message}`);
+      }
 
       const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
       const goldenImage = pngjs.PNG.sync.read(golden).data;
@@ -139,7 +173,6 @@ export class ArtifactCreator {
 
       await fs.writeFile(
           join(outputDirectory, scenarioName, goldenConfig.file), golden);
-
 
       const {analysis} = comparator.analyze();
       const {rmsDistanceRatio} = analysis;

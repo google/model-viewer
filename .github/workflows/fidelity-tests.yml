@@ -1,6 +1,6 @@
 name: Fidelity tests
 
-on: [pull_request]
+on: pull_request
 
 jobs:
   compare_renders:
@@ -33,10 +33,16 @@ jobs:
       run: npm run lint
 
     - name: Bootstrap packages
-      run: npm run bootstrap
+      run: |
+       ./node_modules/.bin/lerna bootstrap --scope @google/3dom 
+       ./node_modules/.bin/lerna bootstrap --scope @google/model-viewer 
+       ./node_modules/.bin/lerna bootstrap --scope @google/model-viewer-render-fidelity-tools 
 
     - name: Build packages
-      run: npm run build
+      run: |
+       ./node_modules/.bin/lerna run --scope @google/3dom build --stream
+       ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
+       ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
 
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0

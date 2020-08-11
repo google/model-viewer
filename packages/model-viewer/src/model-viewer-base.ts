@@ -159,6 +159,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$announceModelVisibility] = debounce((oldVisibility: boolean) => {
     const newVisibility = this.modelIsVisible;
     if (newVisibility !== oldVisibility) {
+      const today = new Date();
+      const time = today.getHours() + ':' + today.getMinutes() + ':' +
+          today.getSeconds();
+      console.log(`model-visility fired in model-viewer-base.ts:${time}`);
       this.dispatchEvent(new CustomEvent(
           'model-visibility', {detail: {visible: newVisibility}}));
     }

@@ -14,7 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
-import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord} from '../common.js';
+import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord, toDecibel} from '../common.js';
 
 
 const DEFAULT_DIMENSIONS: Dimensions = {
@@ -49,10 +49,6 @@ export class RenderingScenario extends LitElement {
     }
   }
 
-  private toDecibels(rmsDistanceRatio: number) {
-    return 10 * Math.log10(rmsDistanceRatio);
-  }
-
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
@@ -60,8 +56,7 @@ export class RenderingScenario extends LitElement {
 
   private metricTemplate(
       analysisResults: ImageComparisonAnalysis, goldenName: string) {
-    const rmsInDecibel =
-        this.toDecibels(analysisResults.rmsDistanceRatio).toFixed(2)
+    const rmsInDecibel = toDecibel(analysisResults.rmsDistanceRatio).toFixed(2);
     return html` <span>${rmsInDecibel} dB </span>
       <div class="tooltip">
         <span class="question-icon"> </span>

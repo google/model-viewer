@@ -26,6 +26,10 @@ export const MAX_COLOR_DISTANCE: number = 35215;
 
 export const DEVICE_PIXEL_RATIO: number = 2;
 
+// use this threshold to do automatic fidelity test for model-viewer. any
+// scenario whose rms value (in dB) is bigger than the threshold will fail.
+export const FIDELITY_TEST_THRESHOLD: number = -22;
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
@@ -227,6 +231,8 @@ export class ImageComparator {
     }
 
     let modelPixelCount = 0;
+    let whiteCount = 0;
+    let transparentPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -235,11 +241,23 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
+        if (candidateImage[position + 3] != 255)
+          transparentPixelCount++;
 
         if (candidateImage[position + 3] == 0) {
           continue;
         }
 
+        const white = 255;
+        let isWhite = true;
+        for (let i = 0; i < 4; i++) {
+          if (candidateImage[position + i] != white) {
+            isWhite = false;
+            break;
+          }
+        }
+        if (isWhite)
+          whiteCount++;
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -248,9 +266,19 @@ export class ImageComparator {
         modelPixelCount++;
       }
     }
-
+    const imagePixelCount = width * height;
+    console.log(`transpanrest pixel rate : ${
+        (100 * transparentPixelCount / imagePixelCount).toFixed(2)}%`)
+    console.log(
+        `white rate: ${(100 * whiteCount / imagePixelCount).toFixed(2)}%`);
+    console.log(`model pixel rate: ${
+        (100 * modelPixelCount / imagePixelCount).toFixed(2)}%`);
     const rmsDistanceRatio =
         Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
   }
+}
+
+export function toDecibel(value: number): number {
+  return 10 * Math.log10(value);
 }

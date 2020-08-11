@@ -54,15 +54,20 @@
   </script>
   <script>
     harness.addEventListener('scenario-change', () => {
-      const {scenario} = harness;
-
+      const {scenario} = harness; 
       modelViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
           //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
           //This will be fixed when the screenshot function is refactored.
           setTimeout(()=>{
-            self.dispatchEvent(new CustomEvent('model-ready'));
-          }, 500);
+            requestAnimationFrame(()=>{
+              const today = new Date();
+              const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+              // why this could be called twice? 
+              console.log(`ready to take screenshot :${time}`);
+              self.dispatchEvent(new CustomEvent('model-ready'));
+            })
+          }, 800);
         }
       }, { once: true });
       
