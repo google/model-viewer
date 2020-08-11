@@ -252,7 +252,9 @@ export class ImageComparator {
         modelPixelCount++;
       }
     }
-
+    const imagePixelCount = width * height;
+    console.log(`model pixel rate: ${
+        (100 * modelPixelCount / imagePixelCount).toFixed(2)}%`);
     const rmsDistanceRatio =
         Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
     return {analysis: {rmsDistanceRatio}};
