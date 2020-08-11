@@ -47,7 +47,7 @@ const dispatchCameraControlsEnabled = registerStateMutator(
     });
 
 // Orbit
-const dispatchSaveCameraOrbit =
+export const dispatchSaveCameraOrbit =
     registerStateMutator('SAVE_CAMERA_ORBIT', (state) => {
       if (!state.currentCamera)
         return;
@@ -176,13 +176,13 @@ export class CameraTargetInput extends ConnectedLitElement {
     }
     return html`
         <me-draggable-input value=${this.target.x}
-        id="camera-target-x" min=-9999 max=9999 @change=${
+        id="camera-target-x" min=-9999 max=9999 dragStepSize=0.01 @change=${
         this.onInputChange} innerLabel="X"></me-draggable-input>
-        <me-draggable-input id="camera-target-y" min=-9999 max=9999 value=${
+        <me-draggable-input id="camera-target-y" min=-9999 max=9999 dragStepSize=0.01 value=${
         this.target.y} @change=${
         this.onInputChange} innerLabel="Y"></me-draggable-input>
         <me-draggable-input id="camera-target-z" value=${
-        this.target.z} min=-9999 max=9999 @change=${
+        this.target.z} min=-9999 max=9999 dragStepSize=0.01 @change=${
         this.onInputChange} innerLabel="Z"></me-draggable-input>
         `;
   }
@@ -219,7 +219,7 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onSaveCameraOrbit() {
-    dispatchSaveCameraOrbit(true);
+    dispatchSaveCameraOrbit();
   }
 
   onCameraTargetChange(newValue: Vector3D) {

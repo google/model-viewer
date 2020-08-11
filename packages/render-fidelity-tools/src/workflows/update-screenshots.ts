@@ -39,12 +39,28 @@ const goldensDirectory = join(rootDirectory, 'goldens');
 const renderersDirectory = join(rootDirectory, 'renderers')
 
 let scenarioWhitelist: Set<string>|null = null;
+let rendererWhitelist: Set<string>|null = null;
+const rendererList = new Set(config.renderers.map((renderer: any) => {
+  return renderer.name;
+}));
 
+// default update screenshots command takes 3 arguments. If there's more than 3,
+// user has specify either scenarios or renderers
 if (process.argv.length > 3) {
-  scenarioWhitelist = new Set();
-
   for (let i = 3; i < process.argv.length; i++) {
-    scenarioWhitelist.add(process.argv[i]);
+    const argName = process.argv[i];
+
+    if (rendererList.has(argName)) {
+      if (rendererWhitelist === null) {
+        rendererWhitelist = new Set();
+      }
+      rendererWhitelist.add(argName);
+    } else {
+      if (scenarioWhitelist === null) {
+        scenarioWhitelist = new Set();
+      }
+      scenarioWhitelist.add(argName);
+    }
   }
 }
 
@@ -102,7 +118,8 @@ const updateScreenshots = async (config: ImageComparisonConfig) => {
       const {name: rendererName, description: rendererDescription, scripts} =
           renderer;
 
-      if (exclude != null && exclude.includes(rendererName)) {
+      if (exclude != null && exclude.includes(rendererName) ||
+          rendererWhitelist != null && !rendererWhitelist.has(rendererName)) {
         continue;
       }
 
