@@ -265,7 +265,7 @@ export class ImageComparator {
     }
     const imagePixelCount = width * height;
     console.log(
-        `white rate: ${(100 * whiteCount / imagePixelCount).toFixed(2)}`);
+        `white rate: ${(100 * whiteCount / imagePixelCount).toFixed(2)}%`);
     console.log(`model pixel rate: ${
         (100 * modelPixelCount / imagePixelCount).toFixed(2)}%`);
     const rmsDistanceRatio =
