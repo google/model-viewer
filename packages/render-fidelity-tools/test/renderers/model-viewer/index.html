@@ -55,7 +55,7 @@
   <script>
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
-      modelViewer.addEventListener('poster-dismissed', ()=>{
+      modelViewer.addEventListener('poster-dismissed', () => {
         this.dispatchEvent(new CustomEvent('model-ready'));
       }, {once: true});
       
@@ -66,13 +66,13 @@
 
       modelViewer.src = scenario.model;
 
-      modelViewer.skyboxImage = null;
-      modelViewer.environmentImage = null;
       if (scenario.renderSkybox) {
+        // this set both skyboxImage and environmentImage to scenario.lighting;
         modelViewer.skyboxImage = scenario.lighting;
       }
       else {
         modelViewer.environmentImage = scenario.lighting;
+        modelViewer.skyboxImage = null;
       }
 
       const {theta, phi, radius} = scenario.orbit;
