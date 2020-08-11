@@ -231,6 +231,7 @@ export class ImageComparator {
     }
 
     let modelPixelCount = 0;
+    let whiteCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -244,6 +245,16 @@ export class ImageComparator {
           continue;
         }
 
+        const white = 255;
+        let isWhite = true;
+        for (let i = 0; i < 4; i++) {
+          if (candidateImage[position + i] != white) {
+            isWhite = false;
+            break;
+          }
+        }
+        if (isWhite)
+          whiteCount++;
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -253,6 +264,8 @@ export class ImageComparator {
       }
     }
     const imagePixelCount = width * height;
+    console.log(
+        `white rate: ${(100 * whiteCount / imagePixelCount).toFixed(2)}`);
     console.log(`model pixel rate: ${
         (100 * modelPixelCount / imagePixelCount).toFixed(2)}%`);
     const rmsDistanceRatio =
