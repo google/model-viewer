@@ -232,6 +232,7 @@ export class ImageComparator {
 
     let modelPixelCount = 0;
     let whiteCount = 0;
+    let transparentPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -240,6 +241,8 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
+        if (candidateImage[position + 3] != 255)
+          transparentPixelCount++;
 
         if (candidateImage[position + 3] == 0) {
           continue;
@@ -264,6 +267,8 @@ export class ImageComparator {
       }
     }
     const imagePixelCount = width * height;
+    console.log(`transpanrest pixel rate : ${
+        (100 * transparentPixelCount / imagePixelCount).toFixed(2)}%`)
     console.log(
         `white rate: ${(100 * whiteCount / imagePixelCount).toFixed(2)}%`);
     console.log(`model pixel rate: ${
