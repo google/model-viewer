@@ -17,6 +17,8 @@ const resolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-replace');
 const cleanup = require('rollup-plugin-cleanup');
 const {terser} = require('rollup-plugin-terser');
+const commonjs = require('rollup-plugin-commonjs');
+const polyfill = require('rollup-plugin-polyfill');
 
 const {NODE_ENV} = process.env;
 
@@ -49,6 +51,8 @@ const outputOptions = [{
 if (NODE_ENV !== 'development') {
   const pluginsIE11 = [
     ...plugins,
+    commonjs(),
+    polyfill(['object.values/auto']),
     cleanup({
       // Ideally we'd also clean third_party/three, which saves
       // ~45kb in filesize alone... but takes 2 minutes to build
