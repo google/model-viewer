@@ -54,9 +54,7 @@
   </script>
   <script>
     harness.addEventListener('scenario-change', () => {
-      const {scenario} = harness;
-      var today = new Date();
-      var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      const {scenario} = harness; 
       modelViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
           //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
@@ -69,7 +67,7 @@
               console.log(`ready to take screenshot :${time}`);
               self.dispatchEvent(new CustomEvent('model-ready'));
             })
-          }, 500);
+          }, 800);
         }
       }, { once: true });
       
