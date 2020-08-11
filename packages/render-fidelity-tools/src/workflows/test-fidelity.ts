@@ -19,8 +19,11 @@ import {dirname, join, resolve} from 'path';
 import rimraf from 'rimraf';
 
 const require = module.createRequire(import.meta.url);
+// actions/core can only be imported using commonJS's require here
+const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
+import {FIDELITY_TEST_THRESHOLD} from '../common.js';
 
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
@@ -58,5 +61,32 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
+
+      const modelViewerErrorPath =
+          join(outputDirectory, 'modelViewerFidelityErrors.json');
+      const modelViewerFidelityErrors = require(modelViewerErrorPath);
+
+      // config contains all scenarios, testConfig contains only scenarios that
+      // the test run on.
+      const testConfigPath = join(outputDirectory, 'config.json');
+      const testConfig = require(testConfigPath);
+      const scenarioCount = testConfig.scenarios.length;
+      const failCount = modelViewerFidelityErrors.length;
+      const passCount = scenarioCount - failCount;
+
+      console.log(`Fidelity test on ${
+          scenarioCount} scenarios finished. Model-Viewer passed ${
+          passCount} scenarios ✅, failed ${failCount} scenarios ❌. (Uses ${
+          FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+
+      if (failCount > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of modelViewerFidelityErrors) {
+          console.log(error);
+        }
+
+        core.warning(
+            `Model Viewer failed the fidelity test! Please try to fix the fidelity error before merging to master!`);
+      }
     })
-    .catch((error: any) => console.error(error));
+    .catch((error: any) => core.setFailed(error.message));

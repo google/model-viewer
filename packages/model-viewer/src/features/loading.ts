@@ -432,6 +432,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             // screen readers
             defaultPosterElement.setAttribute('aria-hidden', 'true');
             defaultPosterElement.tabIndex = -1;
+            this.dispatchEvent(new CustomEvent('poster-dismissed'));
           });
         }, {once: true});
       }
