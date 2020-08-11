@@ -66,14 +66,8 @@
 
       modelViewer.src = scenario.model;
 
-      if (scenario.renderSkybox) {
-        // this set both skyboxImage and environmentImage to scenario.lighting;
-        modelViewer.skyboxImage = scenario.lighting;
-      }
-      else {
-        modelViewer.environmentImage = scenario.lighting;
-        modelViewer.skyboxImage = null;
-      }
+      modelViewer.environmentImage = scenario.lighting;
+      modelViewer.skyboxImage = scenario.renderSkybox? scenario.lighting: null;
 
       const {theta, phi, radius} = scenario.orbit;
       modelViewer.minCameraOrbit = `auto auto ${radius}m`;
