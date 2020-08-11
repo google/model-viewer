@@ -55,13 +55,9 @@
   <script>
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
-      modelViewer.addEventListener('model-visibility', (event) => {
-        if (event.detail.visible) {
-          modelViewer.addEventListener('poster-dismissed', ()=>{
-            self.dispatchEvent(new CustomEvent('model-ready'));
-          })
-        }
-      }, { once: true });
+      modelViewer.addEventListener('poster-dismissed', ()=>{
+        this.dispatchEvent(new CustomEvent('model-ready'));
+      }, {once: true});
       
       modelViewer.style.width = `${scenario.dimensions.width}px`;
       modelViewer.style.height = `${scenario.dimensions.height}px`;
