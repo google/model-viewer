@@ -84,8 +84,9 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
         for (const error of modelViewerFidelityErrors) {
           console.log(error);
         }
-        throw new Error(
-            '❌ Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
+
+        core.warning(
+            `Model Viewer failed the fidelity test! Please try to fix the fidelity error before merging to master!`);
       }
     })
     .catch((error: any) => core.setFailed(error.message));

@@ -55,23 +55,11 @@
   <script>
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
-      var today = new Date();
-      var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
       modelViewer.addEventListener('model-visibility', (event) => {
         if (event.detail.visible) {
-          //TODO: this is a temporary workaround for taking screenshots before the model has been loaded
-          //This will be fixed when the screenshot function is refactored.
-          let today = new Date();
-          let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-          console.log(`waiting for model-ready event : ${time}`);
-          setTimeout(()=>{
-            requestAnimationFrame(()=>{
-              today = new Date();
-              time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-              console.log(`event ready :${time}`);
-              self.dispatchEvent(new CustomEvent('model-ready'));
-            })
-          }, 4000);
+          modelViewer.addEventListener('poster-dismissed', ()=>{
+            self.dispatchEvent(new CustomEvent('model-ready'));
+          })
         }
       }, { once: true });
       
@@ -81,6 +69,9 @@
       modelViewer.style.backgroundColor = "rgba(255,255,255,0)";
 
       modelViewer.src = scenario.model;
+
+      modelViewer.skyboxImage = null;
+      modelViewer.environmentImage = null;
       if (scenario.renderSkybox) {
         modelViewer.skyboxImage = scenario.lighting;
       }
