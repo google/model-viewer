@@ -33,18 +33,16 @@ jobs:
       run: npm run lint
 
     - name: Bootstrap packages
-      run: npm run bootstrap
+      run: |
+       ./node_modules/.bin/lerna bootstrap --scope @google/3dom --stream
+       ./node_modules/.bin/lerna bootstrap --scope @google/model-viewer --stream
+       ./node_modules/.bin/lerna bootstrap --scope @google/model-viewer-render-fidelity-tools --stream
 
     - name: Build packages
       run: |
        ./node_modules/.bin/lerna run --scope @google/3dom build --stream
        ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
        ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
-    
-    # TODO: without build legacy support, some scenarios give wrong metrics in fidelity test workflow. 
-    # There's some tricky bug here but we don't know how to solve yet. 
-    - name: Generate legacy bundles
-      run: npm run build:legacy-support
 
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0
