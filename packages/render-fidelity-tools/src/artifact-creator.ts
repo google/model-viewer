@@ -93,8 +93,16 @@ export class ArtifactCreator {
         continue;
       }
 
-      const analysisResults =
-          await this.analyze(screenshot, goldens, scenario, dimensions);
+      let analysisResults;
+      try {
+        analysisResults =
+            await this.analyze(screenshot, goldens, scenario, dimensions);
+      } catch (error) {
+        const errorMessage = `Fail to analyze scenario :${
+            scenarioName}! Error message: ${error.message}`;
+        modelViewerFidelityErrors.push(errorMessage);
+        continue;
+      }
 
       const modelViewerIndex = 0;
       const modelViewerRmsInDb =
