@@ -77,15 +77,11 @@ export const openSceneViewer = (() => {
     if (arScale === 'fixed') {
       intentParams += `&resizable=false`;
     }
-
-    console.log("Intent Params: " + intentParams);
     
     const intent = `intent://arvr.google.com/scene-viewer/1.0${
         intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
-
-    console.log("Full Intent: " + intent);
     
     const undoHashChange = () => {
       if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
