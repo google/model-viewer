@@ -231,6 +231,7 @@ export class ImageComparator {
     }
 
     let modelPixelCount = 0;
+    let whitePixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -244,6 +245,16 @@ export class ImageComparator {
           continue;
         }
 
+        let isWhitePixel = true;
+        for (let i = 0; i < 4; i++) {
+          if (candidateImage[position + i] != 255) {
+            isWhitePixel = false;
+            break;
+          }
+        }
+        if (isWhitePixel) {
+          whitePixelCount++;
+        }
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -251,6 +262,11 @@ export class ImageComparator {
         squareSum += delta * delta;
         modelPixelCount++;
       }
+    }
+
+    const imagePixelCount = width * height;
+    if (whitePixelCount === imagePixelCount) {
+      throw new Error('Candidate image is completely white!')
     }
 
     const rmsDistanceRatio =
