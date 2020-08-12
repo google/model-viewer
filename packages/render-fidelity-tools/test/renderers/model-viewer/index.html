@@ -56,6 +56,9 @@
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
       modelViewer.addEventListener('poster-dismissed', () => {
+        // When the poster-dismissed event fired, one raf has already been requrested. 
+        // Use an additional raf here is to make sure model-ready event fires at the frame that 
+        // the poster has completely faded away. 
         requestAnimationFrame(()=>{
           this.dispatchEvent(new CustomEvent('model-ready'));
         });
