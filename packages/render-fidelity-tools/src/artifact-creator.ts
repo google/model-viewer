@@ -252,23 +252,19 @@ export class ArtifactCreator {
     // your code is correct when it isn't.
     const evaluateError =
         await page.evaluate(async (useMaxTime, maxTimeInSec) => {
-          console.log(maxTimeInSec);
-          console.log(useMaxTime);
-          const modelBecomesReady = (self as any).modelLoaded ?
-              Promise.resolve() :
-              new Promise((resolve, reject) => {
-                let timeout: NodeJS.Timeout;
-                if (useMaxTime) {
-                  timeout = setTimeout(reject, maxTimeInSec * 1000);
-                }
+          const modelBecomesReady = new Promise((resolve, reject) => {
+            let timeout: NodeJS.Timeout;
+            if (useMaxTime) {
+              timeout = setTimeout(reject, maxTimeInSec * 1000);
+            }
 
-                self.addEventListener('model-ready', () => {
-                  if (useMaxTime) {
-                    clearTimeout(timeout);
-                  }
-                  resolve();
-                }, {once: true});
-              });
+            self.addEventListener('model-ready', () => {
+              if (useMaxTime) {
+                clearTimeout(timeout);
+              }
+              resolve();
+            }, {once: true});
+          });
 
           try {
             await modelBecomesReady;
