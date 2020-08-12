@@ -416,25 +416,31 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         // We might need to forward focus to our internal canvas, but that
         // cannot happen until the poster has completely transitioned away
-        posterContainerElement.addEventListener('transitionend', () => {
-          requestAnimationFrame(() => {
-            this[$transitioned] = true;
-            const root = this.getRootNode();
+        posterContainerElement.addEventListener(
+            'transitionend',
+            () => {// use two raf to make sure that everything here happened on
+                   // the the frame when the poster is completed faded away
+                   requestAnimationFrame(() => {
+                     requestAnimationFrame(() => {
+                       this[$transitioned] = true;
+                       const root = this.getRootNode();
 
-            // If the <model-viewer> is still focused, forward the focus to
-            // the canvas that has just been revealed
-            if (root &&
-                (root as Document | ShadowRoot).activeElement === this) {
-              this[$userInputElement].focus();
-            }
+                       // If the <model-viewer> is still focused, forward the
+                       // focus to the canvas that has just been revealed
+                       if (root &&
+                           (root as Document | ShadowRoot).activeElement ===
+                               this) {
+                         this[$userInputElement].focus();
+                       }
 
-            // Ensure that the poster is no longer focusable or visible to
-            // screen readers
-            defaultPosterElement.setAttribute('aria-hidden', 'true');
-            defaultPosterElement.tabIndex = -1;
-            this.dispatchEvent(new CustomEvent('poster-dismissed'));
-          });
-        }, {once: true});
+                       // Ensure that the poster is no longer focusable or
+                       // visible to screen readers
+                       defaultPosterElement.setAttribute('aria-hidden', 'true');
+                       defaultPosterElement.tabIndex = -1;
+                       this.dispatchEvent(new CustomEvent('poster-dismissed'));
+                     });
+                   })},
+            {once: true});
       }
     }
 
