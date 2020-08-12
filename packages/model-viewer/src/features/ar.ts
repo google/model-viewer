@@ -56,6 +56,11 @@ export const openSceneViewer = (() => {
       return;
     }
 
+    // This is necessary because the original URL might have query parameters.
+    // Since we're appending the whole URL as query parameter,
+    // ? needs to be turned into & to not lose any of them.
+    gltfSrc = gltfSrc.replace('?', '&');
+    
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc, location);
@@ -63,19 +68,25 @@ export const openSceneViewer = (() => {
 
     locationUrl.hash = noArViewerSigil;
 
-    let intentParams =
-        `?file=${encodeURIComponent(modelUrl.toString())}&mode=ar_only&link=${
-            location}&title=${encodeURIComponent(title)}`;
+    // modelUrl can contain title/link/sound etc.
+    // These are already URL-encoded, so we shouldn't do that again here.
+    let intentParams =`?file=${modelUrl.toString()}&mode=ar_only`;
+    if(!gltfSrc.includes("&link=")) intentParams += `&link=${location}`;
+    if(!gltfSrc.includes("&title=")) intentParams += `&title=${encodeURIComponent(title)}`;
 
     if (arScale === 'fixed') {
       intentParams += `&resizable=false`;
     }
 
+    console.log("Intent Params: " + intentParams);
+    
     const intent = `intent://arvr.google.com/scene-viewer/1.0${
         intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 
+    console.log("Full Intent: " + intent);
+    
     const undoHashChange = () => {
       if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
         fallbackInvoked = true;
