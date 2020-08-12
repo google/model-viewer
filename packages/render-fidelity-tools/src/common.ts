@@ -232,6 +232,8 @@ export class ImageComparator {
 
     let modelPixelCount = 0;
     let whitePixelCount = 0;
+    let blackPixelCount = 0;
+    let transparentPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -240,21 +242,34 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
+        const alpha = candidateImage[position + 3];
+        if (alpha != 255) {
+          transparentPixelCount++;
+        }
 
-        if (candidateImage[position + 3] == 0) {
+        if (alpha === 0) {
           continue;
         }
 
         let isWhitePixel = true;
+        let isBlackPixel = true;
         for (let i = 0; i < 4; i++) {
-          if (candidateImage[position + i] != 255) {
+          const colorComponent = candidateImage[position + i];
+          if (colorComponent != 255) {
             isWhitePixel = false;
-            break;
+          }
+          if (colorComponent != 255) {
+            isBlackPixel = false;
           }
         }
+
         if (isWhitePixel) {
           whitePixelCount++;
         }
+        if (isBlackPixel) {
+          blackPixelCount++;
+        }
+
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -265,8 +280,10 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    if (whitePixelCount === imagePixelCount) {
-      throw new Error('Candidate image is completely white!')
+    if (whitePixelCount === imagePixelCount ||
+        blackPixelCount === imagePixelCount ||
+        transparentPixelCount === imagePixelCount) {
+      throw new Error('Candidate image is colorless!')
     }
 
     const rmsDistanceRatio =
