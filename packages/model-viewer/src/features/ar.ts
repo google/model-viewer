@@ -138,6 +138,7 @@ const $arAnchor = Symbol('arAnchor');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
+const $onARTap = Symbol('onARTap');
 
 export declare interface ARInterface {
   ar: boolean;
@@ -196,6 +197,12 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     };
 
+    private[$onARTap] = (event: Event) => {
+      if ((event as any).data == '_apple_ar_quicklook_button_tapped') {
+        this.dispatchEvent(new CustomEvent('quick-look-button-tapped'));
+      }
+    };
+
     /**
      * Activates AR. Note that for any mode that is not WebXR-based, this
      * method most likely has to be called synchronous from a user
@@ -239,6 +246,8 @@ configuration or device capabilities');
 
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
+
+      this[$arAnchor].addEventListener('message', this[$onARTap]);
     }
 
     disconnectedCallback() {
@@ -246,6 +255,8 @@ configuration or device capabilities');
 
       this[$renderer].arRenderer.removeEventListener(
           'status', this[$onARStatus]);
+
+      this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
 
     async update(changedProperties: Map<string, any>) {
