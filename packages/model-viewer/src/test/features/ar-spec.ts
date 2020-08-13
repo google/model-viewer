@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_IOS} from '../../constants.js';
+import {IS_IE11, IS_IOS} from '../../constants.js';
 import {ARInterface, ARMixin, openIOSARQuickLook, openSceneViewer} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
@@ -42,10 +42,15 @@ suite('ModelViewerElementBase with ARMixin', () => {
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('AR intents', () => {
+      if (IS_IE11) {
+        return;
+      }
+      let anchor: HTMLAnchorElement;
       let intentUrls: Array<string>;
       let restoreAnchorClick: () => void;
 
       setup(() => {
+        anchor = document.createElement('a');
         intentUrls = [];
         restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
           value: function() {
@@ -63,7 +68,8 @@ suite('ModelViewerElementBase with ARMixin', () => {
           openSceneViewer(
               'https://example.com/model.gltf?token=foo',
               'Example model',
-              'auto');
+              'auto',
+              anchor);
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -73,7 +79,8 @@ suite('ModelViewerElementBase with ARMixin', () => {
         });
 
         test('defaults title and link', () => {
-          openSceneViewer('https://example.com/model.gltf', 'alt', 'auto');
+          openSceneViewer(
+              'https://example.com/model.gltf', 'alt', 'auto', anchor);
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -91,7 +98,8 @@ suite('ModelViewerElementBase with ARMixin', () => {
           openSceneViewer(
               'https://example.com/model.gltf?link=foo&title=bar',
               'alt',
-              'auto');
+              'auto',
+              anchor);
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -110,7 +118,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       suite('openQuickLook', () => {
         test('sets hash for fixed scale', () => {
-          openIOSARQuickLook('https://example.com/model.gltf', 'fixed');
+          openIOSARQuickLook('https://example.com/model.gltf', 'fixed', anchor);
 
           expect(intentUrls.length).to.be.equal(1);
 

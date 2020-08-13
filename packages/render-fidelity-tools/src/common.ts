@@ -231,19 +231,36 @@ export class ImageComparator {
     }
 
     let modelPixelCount = 0;
+    let colorlessPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
         // image's pixel data is stored in an 1-D array, 1st row sequentialy,
-        // than 2nd row, .. for each pixel, its data is stored by order of r, g,
+        // then 2nd row, .. for each pixel, its data is stored by order of r, g,
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
+        const alpha = candidateImage[position + 3];
 
-        if (candidateImage[position + 3] == 0) {
-          continue;
+        let isWhitePixel = true;
+        let isBlackPixel = true;
+        for (let i = 0; i < 3; i++) {
+          const colorComponent = candidateImage[position + i] * alpha;
+          if (colorComponent != 255) {
+            isWhitePixel = false;
+          }
+          if (colorComponent != 0) {
+            isBlackPixel = false;
+          }
         }
 
+        if (isBlackPixel || isWhitePixel) {
+          colorlessPixelCount++;
+        }
+
+        if (alpha === 0) {
+          continue;
+        }
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -251,6 +268,11 @@ export class ImageComparator {
         squareSum += delta * delta;
         modelPixelCount++;
       }
+    }
+
+    const imagePixelCount = width * height;
+    if (colorlessPixelCount === imagePixelCount) {
+      throw new Error('Candidate image is colorless!');
     }
 
     const rmsDistanceRatio =

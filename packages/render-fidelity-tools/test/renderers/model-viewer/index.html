@@ -56,7 +56,13 @@
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
       modelViewer.addEventListener('poster-dismissed', () => {
-        this.dispatchEvent(new CustomEvent('model-ready'));
+        // Use two raf here to make sure model-ready event fires at the frame that 
+        // the poster has completely faded away. 
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>{
+            this.dispatchEvent(new CustomEvent('model-ready'));
+          })
+        });
       }, {once: true});
       
       modelViewer.style.width = `${scenario.dimensions.width}px`;
