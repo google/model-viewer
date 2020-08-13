@@ -242,10 +242,6 @@ export class ImageComparator {
         const position = index * COMPONENTS_PER_PIXEL;
         const alpha = candidateImage[position + 3];
 
-        if (alpha === 0) {
-          continue;
-        }
-
         let isWhitePixel = true;
         let isBlackPixel = true;
         for (let i = 0; i < 4; i++) {
@@ -260,6 +256,10 @@ export class ImageComparator {
 
         if (isBlackPixel || isWhitePixel) {
           colorlessPixelCount++;
+        }
+
+        if (alpha === 0) {
+          continue;
         }
 
         const delta =

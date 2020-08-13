@@ -77,7 +77,7 @@ export class ArtifactCreator {
             scenarioName,
             dimensions,
             join(scenarioOutputDirectory, 'model-viewer.png'),
-            10);
+            60);
       } catch (error) {
         const errorMessage =
             `❌ Failed to capture model-viewer's screenshot of ${
