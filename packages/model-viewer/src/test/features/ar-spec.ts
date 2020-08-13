@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_IOS} from '../../constants.js';
+import {IS_IE11, IS_IOS} from '../../constants.js';
 import {ARInterface, ARMixin, openIOSARQuickLook, openSceneViewer} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
@@ -41,48 +41,86 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-    suite('openSceneViewer', () => {
-      test('preserves query parameters in model URLs', () => {
-        const intentUrls: Array<string> = [];
-        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
+    suite('AR intents', () => {
+      if (IS_IE11) {
+        return;
+      }
+      let intentUrls: Array<string>;
+      let restoreAnchorClick: () => void;
+
+      setup(() => {
+        intentUrls = [];
+        restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
           value: function() {
             intentUrls.push((this as HTMLAnchorElement).href);
           }
         });
+      });
 
-        openSceneViewer(
-            'https://example.com/model.gltf?token=foo',
-            'Example model',
-            'auto');
-
-        expect(intentUrls.length).to.be.equal(1);
-
-        const url = new URL(intentUrls[0]);
-
-        expect(url.search).to.match(/(%3F|%26)token%3Dfoo(%26|&|$)/);
-
+      teardown(() => {
         restoreAnchorClick();
       });
-    });
 
-    suite('openQuickLook', () => {
-      test('sets hash for fixed scale', () => {
-        const intentUrls: Array<string> = [];
-        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
-          value: function() {
-            intentUrls.push((this as HTMLAnchorElement).href);
-          }
+      suite('openSceneViewer', () => {
+        test('preserves query parameters in model URLs', () => {
+          openSceneViewer(
+              'https://example.com/model.gltf?token=foo',
+              'Example model',
+              'auto');
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.search).to.match(/(%3F|%26|&)token=foo(%26|&|$)/);
         });
 
-        openIOSARQuickLook('https://example.com/model.gltf', 'fixed');
+        test('defaults title and link', () => {
+          openSceneViewer('https://example.com/model.gltf', 'alt', 'auto');
 
-        expect(intentUrls.length).to.be.equal(1);
+          expect(intentUrls.length).to.be.equal(1);
 
-        const url = new URL(intentUrls[0]);
+          const url = new URL(intentUrls[0]);
 
-        expect(url.hash).to.equal('#allowsContentScaling=0');
+          expect(url.search).to.match(/(%3F|%26|&)title=alt(%26|&|$)/);
 
-        restoreAnchorClick();
+          const linkRegex =
+              `(%3F|%26|&)link=${self.location.toString()}(%26|&|$)`;
+          linkRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          expect(url.search).to.match(new RegExp(linkRegex));
+        });
+
+        test('keeps title and link when supplied', () => {
+          openSceneViewer(
+              'https://example.com/model.gltf?link=foo&title=bar',
+              'alt',
+              'auto');
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.search).to.match(/(%3F|%26|&)title=bar(%26|&|$)/);
+          expect(url.search).to.not.match(/(%3F|%26|&)title=alt(%26|&|$)/);
+
+          expect(url.search).to.match(/(%3F|%26|&)link=foo(%26|&|$)/);
+          const linkRegex =
+              `(%3F|%26|&)link=${self.location.toString()}(%26|&|$)`;
+          linkRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          expect(url.search).to.not.match(new RegExp(linkRegex));
+        });
+      });
+
+      suite('openQuickLook', () => {
+        test('sets hash for fixed scale', () => {
+          openIOSARQuickLook('https://example.com/model.gltf', 'fixed');
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.hash).to.equal('#allowsContentScaling=0');
+        });
       });
     });
 
