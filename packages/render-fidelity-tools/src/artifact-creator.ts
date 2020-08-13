@@ -77,7 +77,7 @@ export class ArtifactCreator {
             scenarioName,
             dimensions,
             join(scenarioOutputDirectory, 'model-viewer.png'),
-            true);
+            10);
       } catch (error) {
         const errorMessage =
             `❌ Failed to capture model-viewer's screenshot of ${
@@ -199,7 +199,7 @@ export class ArtifactCreator {
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
       outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
-      useMaxTime: boolean = false, maxTimeInSec: number = 60) {
+      maxTimeInSec: number = -1) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
@@ -250,29 +250,30 @@ export class ArtifactCreator {
     // variables are captured in its closure scope. TypeScript compiler
     // currently has no mechanism to detect this and will happily tell you
     // your code is correct when it isn't.
-    const evaluateError =
-        await page.evaluate(async (useMaxTime, maxTimeInSec) => {
-          const modelBecomesReady = new Promise((resolve, reject) => {
-            let timeout: NodeJS.Timeout;
-            if (useMaxTime) {
-              timeout = setTimeout(reject, maxTimeInSec * 1000);
-            }
+    const evaluateError = await page.evaluate(async (maxTimeInSec) => {
+      const modelBecomesReady = new Promise((resolve, reject) => {
+        let timeout: NodeJS.Timeout;
+        if (maxTimeInSec > 0) {
+          timeout = setTimeout(() => {
+            reject(`Stop capturing screenshot after ${maxTimeInSec} seconds`);
+          }, maxTimeInSec * 1000);
+        }
 
-            self.addEventListener('model-ready', () => {
-              if (useMaxTime) {
-                clearTimeout(timeout);
-              }
-              resolve();
-            }, {once: true});
-          });
-
-          try {
-            await modelBecomesReady;
-            return null;
-          } catch (error) {
-            return `Stop capturing screenshot after ${maxTimeInSec} seconds`;
+        self.addEventListener('model-ready', () => {
+          if (maxTimeInSec > 0) {
+            clearTimeout(timeout);
           }
-        }, useMaxTime, maxTimeInSec);
+          resolve();
+        }, {once: true});
+      });
+
+      try {
+        await modelBecomesReady;
+        return null;
+      } catch (error) {
+        return error;
+      }
+    }, maxTimeInSec);
 
     if (evaluateError) {
       console.log(evaluateError);
