@@ -231,9 +231,7 @@ export class ImageComparator {
     }
 
     let modelPixelCount = 0;
-    let whitePixelCount = 0;
-    let blackPixelCount = 0;
-    let transparentPixelCount = 0;
+    let colorlessPixelCount = 0;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -243,9 +241,6 @@ export class ImageComparator {
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
         const alpha = candidateImage[position + 3];
-        if (alpha != 255) {
-          transparentPixelCount++;
-        }
 
         if (alpha === 0) {
           continue;
@@ -254,22 +249,18 @@ export class ImageComparator {
         let isWhitePixel = true;
         let isBlackPixel = true;
         for (let i = 0; i < 4; i++) {
-          const colorComponent = candidateImage[position + i];
+          const colorComponent = candidateImage[position + i] * alpha;
           if (colorComponent != 255) {
             isWhitePixel = false;
           }
-          if (colorComponent != 255) {
+          if (colorComponent != 0) {
             isBlackPixel = false;
           }
         }
 
-        if (isWhitePixel) {
-          whitePixelCount++;
+        if (isBlackPixel || isWhitePixel) {
+          colorlessPixelCount++;
         }
-        if (isBlackPixel) {
-          blackPixelCount++;
-        }
-
 
         const delta =
             colorDelta(candidateImage, goldenImage, position, position);
@@ -280,10 +271,8 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    if (whitePixelCount === imagePixelCount ||
-        blackPixelCount === imagePixelCount ||
-        transparentPixelCount === imagePixelCount) {
-      throw new Error('Candidate image is colorless!')
+    if (colorlessPixelCount === imagePixelCount) {
+      throw new Error('Candidate image is colorless!');
     }
 
     const rmsDistanceRatio =
