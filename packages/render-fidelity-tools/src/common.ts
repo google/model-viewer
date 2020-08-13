@@ -236,7 +236,7 @@ export class ImageComparator {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
         // image's pixel data is stored in an 1-D array, 1st row sequentialy,
-        // than 2nd row, .. for each pixel, its data is stored by order of r, g,
+        // then 2nd row, .. for each pixel, its data is stored by order of r, g,
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
@@ -244,7 +244,7 @@ export class ImageComparator {
 
         let isWhitePixel = true;
         let isBlackPixel = true;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
           const colorComponent = candidateImage[position + i] * alpha;
           if (colorComponent != 255) {
             isWhitePixel = false;

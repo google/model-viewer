@@ -255,7 +255,8 @@ export class ArtifactCreator {
         let timeout: NodeJS.Timeout;
         if (maxTimeInSec > 0) {
           timeout = setTimeout(() => {
-            reject(`Stop capturing screenshot after ${maxTimeInSec} seconds`);
+            reject(new Error(
+                `Stop capturing screenshot after ${maxTimeInSec} seconds`));
           }, maxTimeInSec * 1000);
         }
 
@@ -271,7 +272,7 @@ export class ArtifactCreator {
         await modelBecomesReady;
         return null;
       } catch (error) {
-        return error;
+        return error.message;
       }
     }, maxTimeInSec);
 
