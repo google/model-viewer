@@ -70,9 +70,9 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
       // the test run on.
       const testConfigPath = join(outputDirectory, 'config.json');
       const testConfig = require(testConfigPath);
-      const scenarioCount = testConfig.scenarios.length;
       const failCount = modelViewerFidelityErrors.length;
-      const passCount = scenarioCount - failCount;
+      const passCount = testConfig.scenarios.length;
+      const scenarioCount = failCount + passCount;
 
       console.log(`Fidelity test on ${
           scenarioCount} scenarios finished. Model-Viewer passed ${
@@ -85,8 +85,8 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
           console.log(error);
         }
 
-        core.warning(
-            `Model Viewer failed the fidelity test! Please try to fix the fidelity error before merging to master!`);
+        throw new Error(
+            'Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
       }
     })
     .catch((error: any) => core.setFailed(error.message));

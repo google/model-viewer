@@ -76,7 +76,8 @@ export class ArtifactCreator {
             'model-viewer',
             scenarioName,
             dimensions,
-            join(scenarioOutputDirectory, 'model-viewer.png'));
+            join(scenarioOutputDirectory, 'model-viewer.png'),
+            60);
       } catch (error) {
         const errorMessage =
             `❌ Failed to capture model-viewer's screenshot of ${
@@ -92,8 +93,16 @@ export class ArtifactCreator {
         continue;
       }
 
-      const analysisResults =
-          await this.analyze(screenshot, goldens, scenario, dimensions);
+      let analysisResults;
+      try {
+        analysisResults =
+            await this.analyze(screenshot, goldens, scenario, dimensions);
+      } catch (error) {
+        const errorMessage = `Fail to analyze scenario :${
+            scenarioName}! Error message: ${error.message}`;
+        modelViewerFidelityErrors.push(errorMessage);
+        continue;
+      }
 
       const modelViewerIndex = 0;
       const modelViewerRmsInDb =
@@ -104,6 +113,7 @@ export class ArtifactCreator {
             `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
                 modelViewerRmsInDb.toFixed(2)} dB.`;
         modelViewerFidelityErrors.push(errorMessage);
+        continue;
       }
 
       const scenarioRecord = {analysisResults, scenario};
@@ -188,7 +198,8 @@ export class ArtifactCreator {
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
-      outputPath: string = join(this.outputDirectory, 'model-viewer.png')) {
+      outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
+      maxTimeInSec: number = -1) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
@@ -239,20 +250,37 @@ export class ArtifactCreator {
     // variables are captured in its closure scope. TypeScript compiler
     // currently has no mechanism to detect this and will happily tell you
     // your code is correct when it isn't.
-    await page.evaluate(async () => {
-      const modelBecomesReady = (self as any).modelLoaded ?
-          Promise.resolve() :
-          new Promise((resolve) => {
-            // const timeout = setTimeout(reject, 60000);
+    const evaluateError = await page.evaluate(async (maxTimeInSec) => {
+      const modelBecomesReady = new Promise((resolve, reject) => {
+        let timeout: NodeJS.Timeout;
+        if (maxTimeInSec > 0) {
+          timeout = setTimeout(() => {
+            reject(new Error(
+                `Stop capturing screenshot after ${maxTimeInSec} seconds`));
+          }, maxTimeInSec * 1000);
+        }
 
-            self.addEventListener('model-ready', () => {
-              // clearTimeout(timeout);
-              resolve();
-            }, {once: true});
-          });
+        self.addEventListener('model-ready', () => {
+          if (maxTimeInSec > 0) {
+            clearTimeout(timeout);
+          }
+          resolve();
+        }, {once: true});
+      });
 
-      await modelBecomesReady;
-    });
+      try {
+        await modelBecomesReady;
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }, maxTimeInSec);
+
+    if (evaluateError) {
+      console.log(evaluateError);
+      await browser.close();
+      throw new Error(evaluateError);
+    }
 
     console.log(`🖼  Capturing screenshot`);
 
