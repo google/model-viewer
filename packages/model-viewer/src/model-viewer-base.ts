@@ -15,13 +15,13 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
-import {Event as ThreeEvent, Vector3} from 'three';
+import {Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
+import {Renderer} from './three-components/Renderer.js';
 import {debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
@@ -41,8 +41,6 @@ const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
-const $onContextLost = Symbol('onContextLost');
-const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
@@ -168,9 +166,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$intersectionObserver]: IntersectionObserver|null = null;
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
-
-  protected[$contextLostHandler] = (event: ContextLostEvent) =>
-      this[$onContextLost](event);
 
   /** @export */
   get loaded() {
@@ -308,9 +303,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     const renderer = this[$renderer];
-    renderer.addEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     renderer.registerScene(this[$scene]);
 
@@ -336,9 +328,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     const renderer = this[$renderer];
-    renderer.removeEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
 
     renderer.unregisterScene(this[$scene]);
 
@@ -502,12 +491,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
-  }
-
-  [$onContextLost](event: ContextLostEvent) {
-    this.dispatchEvent(new CustomEvent(
-        'error',
-        {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
   }
 
   /**

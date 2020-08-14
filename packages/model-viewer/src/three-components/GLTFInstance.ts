@@ -15,7 +15,9 @@
 
 import {Group, Mesh, Object3D} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
+
 import {Constructor} from '../utilities.js';
 
 export const $prepared = Symbol('prepared');
@@ -47,7 +49,8 @@ export class GLTFInstance implements GLTF {
    * prepared can safely have this method invoked on it multiple times; it will
    * only be prepared once, including after being cloned.
    */
-  static prepare(source: GLTF): PreparedGLTF {
+  static prepare(source: GLTF, roughnessMipmapper: RoughnessMipmapper):
+      PreparedGLTF {
     if (source.scene == null) {
       throw new Error('Model does not have a scene');
     }
@@ -56,7 +59,8 @@ export class GLTFInstance implements GLTF {
       return source;
     }
 
-    const prepared = this[$prepare](source) as Partial<PreparedGLTF>;
+    const prepared =
+        this[$prepare](source, roughnessMipmapper) as Partial<PreparedGLTF>;
 
     // NOTE: ES5 Symbol polyfill is not compatible with spread operator
     // so {...prepared, [$prepared]: true} does not work
@@ -69,7 +73,8 @@ export class GLTFInstance implements GLTF {
    * Override in an inheriting class to apply specialty one-time preparations
    * for a given input GLTF.
    */
-  protected static[$prepare](source: GLTF): GLTF {
+  protected static[$prepare](
+      source: GLTF, _roughnessMipmapper?: RoughnessMipmapper): GLTF {
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother preparing extra scenes for now:
     const {scene} = source;

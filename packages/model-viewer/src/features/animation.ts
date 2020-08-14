@@ -66,7 +66,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     set currentTime(value: number) {
       this[$scene].model.animationTime = value;
-      this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
+      this[$renderer].lazy!.threeRenderer.shadowMap.needsUpdate = true;
       this[$needsRender]();
     }
 
@@ -76,14 +76,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$paused] = true;
-      this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
+      this[$renderer].lazy!.threeRenderer.shadowMap.autoUpdate = false;
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
     play() {
       if (this[$paused] && this.availableAnimations.length > 0) {
         this[$paused] = false;
-        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
+        this[$renderer].lazy!.threeRenderer.shadowMap.autoUpdate = true;
 
         if (!this[$scene].model.hasActiveAnimation) {
           this[$changeAnimation]();

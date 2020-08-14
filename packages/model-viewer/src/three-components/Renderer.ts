@@ -13,22 +13,16 @@
  * limitations under the License.
  */
 
-import {Event, EventDispatcher} from 'three';
-
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
+import {ARRenderer} from './ARRenderer.js';
 import {Lazy} from './Lazy.js';
 import {ModelScene} from './ModelScene.js';
 
 export interface RendererOptions {
-  debug?: boolean;
-}
-
-export interface ContextLostEvent extends Event {
-  type: 'contextlost';
-  sourceEvent: WebGLContextEvent;
+  debug: boolean;
 }
 
 // Between 0 and 1: larger means the average responds faster and is less smooth.
@@ -50,7 +44,7 @@ const DEFAULT_MIN_SCALE = 0.5;
  * Canvas2DRenderingContext if supported for cheaper transfering of
  * the texture.
  */
-export class Renderer extends EventDispatcher {
+export class Renderer {
   static instance = new Renderer();
 
   static get singleton() {
@@ -65,6 +59,7 @@ export class Renderer extends EventDispatcher {
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public lazy: Lazy|null = null;
+  public arRenderer: ARRenderer|null = null;
   public width = 0;
   public height = 0;
   public dpr = 1;
@@ -78,17 +73,21 @@ export class Renderer extends EventDispatcher {
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
   private onWebGLContextLost = (event: Event) => {
-    this.dispatchEvent(
-        {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
+    for (const scene of this.scenes) {
+      scene.element.dispatchEvent(new CustomEvent(
+          'error', {detail: {type: 'webglcontextlost', sourceError: event}}));
+    }
   };
 
   get scaleFactor() {
     return this.scale;
   }
 
-  constructor() {
-    super();
+  get isPresenting(): boolean {
+    return !!this.arRenderer?.isPresenting;
+  }
 
+  constructor() {
     this.canvasElement = document.createElement('canvas');
     this.canvasElement.id = 'webgl-canvas';
 
@@ -104,6 +103,7 @@ export class Renderer extends EventDispatcher {
 
     try {
       this.lazy = new Lazy(this.canvas3D, {debug: isDebugMode()});
+      this.arRenderer = new ARRenderer(this.lazy.threeRenderer);
     } catch (error) {
       console.warn(error);
     }
@@ -312,7 +312,7 @@ export class Renderer extends EventDispatcher {
     const delta = t - this.lastTick;
     this.lastTick = t;
 
-    if (!this.lazy || this.lazy.arRenderer.isPresenting) {
+    if (this.isPresenting) {
       return;
     }
 
@@ -358,10 +358,10 @@ export class Renderer extends EventDispatcher {
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
-      this.lazy.threeRenderer.setRenderTarget(null);
-      this.lazy.threeRenderer.setViewport(
+      this.lazy!.threeRenderer.setRenderTarget(null);
+      this.lazy!.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
-      this.lazy.threeRenderer.render(scene, scene.getCamera());
+      this.lazy!.threeRenderer.render(scene, scene.getCamera());
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {

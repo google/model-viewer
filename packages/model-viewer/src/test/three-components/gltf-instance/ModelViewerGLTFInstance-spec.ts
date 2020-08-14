@@ -18,16 +18,19 @@ import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ModelViewerGLTFInstance} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {PreparedGLTF} from '../../../three-components/GLTFInstance.js';
+import {Renderer} from '../../../three-components/Renderer.js';
 import {createFakeThreeGLTF} from '../../helpers.js';
 
 
 const expect = chai.expect;
 
 suite('ModelViewerGLTFInstance', () => {
+  let renderer: Renderer;
   let rawGLTF: GLTF;
   let preparedGLTF: PreparedGLTF;
 
   setup(async () => {
+    renderer = Renderer.singleton;
     rawGLTF = createFakeThreeGLTF();
 
     const materialOne = new MeshStandardMaterial();
@@ -42,7 +45,8 @@ suite('ModelViewerGLTFInstance', () => {
 
     rawGLTF.scene.add(meshOne, meshTwo, meshThree);
 
-    preparedGLTF = await ModelViewerGLTFInstance.prepare(rawGLTF);
+    preparedGLTF = await ModelViewerGLTFInstance.prepare(
+        rawGLTF, renderer.lazy!.roughnessMipmapper);
   });
 
   suite('with a prepared GLTF', () => {

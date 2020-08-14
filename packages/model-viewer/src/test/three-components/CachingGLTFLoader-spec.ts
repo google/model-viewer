@@ -16,6 +16,7 @@
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {$evictionPolicy, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
@@ -32,11 +33,14 @@ const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
   suite('when loading a glTF', () => {
+    let renderer: Renderer;
     let loader: CachingGLTFLoader;
     let element: ModelViewerElementBase;
 
     setup(() => {
-      loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+      renderer = Renderer.singleton;
+      loader = new CachingGLTFLoader(
+          ModelViewerGLTFInstance, renderer.lazy!.roughnessMipmapper);
       element = new ModelViewerElement();
     });
 

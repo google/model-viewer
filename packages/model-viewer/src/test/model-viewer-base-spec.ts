@@ -180,7 +180,7 @@ suite('ModelViewerElementBase', () => {
       });
 
       test('dispatches a related error event', async () => {
-        const {threeRenderer} = Renderer.singleton;
+        const {threeRenderer} = Renderer.singleton.lazy!;
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,

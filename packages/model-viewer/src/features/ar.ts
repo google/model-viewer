@@ -60,7 +60,7 @@ export const openSceneViewer = (() => {
     // Since we're appending the whole URL as query parameter,
     // ? needs to be turned into & to not lose any of them.
     gltfSrc = gltfSrc.replace('?', '&');
-    
+
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc, location);
@@ -70,19 +70,21 @@ export const openSceneViewer = (() => {
 
     // modelUrl can contain title/link/sound etc.
     // These are already URL-encoded, so we shouldn't do that again here.
-    let intentParams =`?file=${modelUrl.toString()}&mode=ar_only`;
-    if(!gltfSrc.includes("&link=")) intentParams += `&link=${location}`;
-    if(!gltfSrc.includes("&title=")) intentParams += `&title=${encodeURIComponent(title)}`;
+    let intentParams = `?file=${modelUrl.toString()}&mode=ar_only`;
+    if (!gltfSrc.includes('&link='))
+      intentParams += `&link=${location}`;
+    if (!gltfSrc.includes('&title='))
+      intentParams += `&title=${encodeURIComponent(title)}`;
 
     if (arScale === 'fixed') {
       intentParams += `&resizable=false`;
     }
-    
+
     const intent = `intent://arvr.google.com/scene-viewer/1.0${
         intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
-    
+
     const undoHashChange = () => {
       if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
         fallbackInvoked = true;
@@ -184,7 +186,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$onARStatus] = ({status}: ThreeEvent) => {
       if (status === ARStatus.NOT_PRESENTING ||
-          this[$renderer].arRenderer.presentedScene === this[$scene]) {
+          this[$renderer].arRenderer!.presentedScene === this[$scene]) {
         this.setAttribute('ar-status', status);
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
@@ -220,25 +222,25 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        await this[$renderer].arRenderer.present(this[$scene]);
+        await this[$renderer].arRenderer!.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
-        await this[$renderer].arRenderer.stopPresenting();
+        await this[$renderer].arRenderer!.stopPresenting();
       }
     }
 
     connectedCallback() {
       super.connectedCallback();
 
-      this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
+      this[$renderer].arRenderer!.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$renderer].arRenderer.removeEventListener(
+      this[$renderer].arRenderer!.removeEventListener(
           'status', this[$onARStatus]);
     }
 
@@ -272,7 +274,7 @@ configuration or device capabilities');
 
         for (const value of arModes) {
           if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
-              await this[$renderer].arRenderer.supportsPresentation()) {
+              await this[$renderer].arRenderer!.supportsPresentation()) {
             this[$arMode] = ARMode.WEBXR;
             break;
           } else if (value === 'scene-viewer' && IS_ANDROID) {

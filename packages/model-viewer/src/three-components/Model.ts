@@ -119,8 +119,9 @@ export default class Model extends Object3D {
           async (resolve, reject) => {
             this[$cancelPendingSourceChange] = () => reject();
             try {
-              const result = await element[$renderer].loader.load(
-                  url, element, progressCallback);
+              const result = await element[$renderer].lazy!.loader.load(
+                                 url, element, progressCallback) as
+                  ModelViewerGLTFInstance;
               resolve(result);
             } catch (error) {
               reject(error);

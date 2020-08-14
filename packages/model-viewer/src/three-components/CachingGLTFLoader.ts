@@ -16,6 +16,7 @@
 import {Event as ThreeEvent, EventDispatcher} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
@@ -112,7 +113,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     return !!preloaded.get(url);
   }
 
-  constructor(GLTFInstance: T) {
+  constructor(GLTFInstance: T, private roughnessMipmapper: RoughnessMipmapper) {
     super();
     this[$GLTFInstance] = GLTFInstance;
     this[$loader].setDRACOLoader(dracoLoader);
@@ -141,14 +142,15 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
           });
 
       const GLTFInstance = this[$GLTFInstance];
-      const gltfInstanceLoads = rawGLTFLoads
-                                    .then((rawGLTF) => {
-                                      return GLTFInstance.prepare(rawGLTF);
-                                    })
-                                    .then((preparedGLTF) => {
-                                      progressCallback(0.9);
-                                      return new GLTFInstance(preparedGLTF);
-                                    });
+      const gltfInstanceLoads =
+          rawGLTFLoads
+              .then((rawGLTF) => {
+                return GLTFInstance.prepare(rawGLTF, this.roughnessMipmapper);
+              })
+              .then((preparedGLTF) => {
+                progressCallback(0.9);
+                return new GLTFInstance(preparedGLTF);
+              });
 
       cache.set(url, gltfInstanceLoads);
     }

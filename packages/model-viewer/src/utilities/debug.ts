@@ -29,7 +29,7 @@ export const saveTarget = (target: WebGLRenderTarget, filename: string) => {
 
   const ctx = output.getContext('2d')!;
   const img = ctx.getImageData(0, 0, width, height);
-  Renderer.singleton.threeRenderer.readRenderTargetPixels(
+  Renderer.singleton.lazy!.threeRenderer.readRenderTargetPixels(
       target, 0, 0, width, height, img.data);
   ctx.putImageData(img, 0, 0);
 

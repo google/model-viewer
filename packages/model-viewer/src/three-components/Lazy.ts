@@ -16,7 +16,6 @@
 import {ACESFilmicToneMapping, GammaEncoding, PCFSoftShadowMap, WebGL1Renderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
-import {ARRenderer} from './ARRenderer';
 import {CachingGLTFLoader} from './CachingGLTFLoader';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance';
 import {RendererOptions} from './Renderer';
@@ -25,12 +24,11 @@ import TextureUtils from './TextureUtils';
 export class Lazy {
   public threeRenderer: WebGL1Renderer;
   public textureUtils: TextureUtils;
-  public arRenderer: ARRenderer;
   public roughnessMipmapper: RoughnessMipmapper;
   public loader: CachingGLTFLoader;
 
   constructor(
-      canvas3D: HTMLCanvasElement|OffscreenCanvas, options?: RendererOptions) {
+      canvas3D: HTMLCanvasElement|OffscreenCanvas, options: RendererOptions) {
     this.threeRenderer = new WebGL1Renderer({
       canvas: canvas3D,
       alpha: true,
@@ -46,16 +44,16 @@ export class Lazy {
     this.threeRenderer.shadowMap.enabled = true;
     this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
     this.threeRenderer.shadowMap.autoUpdate = false;
-    this.threeRenderer.debug = {checkShaderErrors: options?.debug};
+    this.threeRenderer.debug = {checkShaderErrors: options.debug};
 
     // ACESFilmicToneMapping appears to be the most "saturated",
     // and similar to Filament's gltf-viewer.
     this.threeRenderer.toneMapping = ACESFilmicToneMapping;
 
-    this.arRenderer = new ARRenderer(this.threeRenderer);
     this.textureUtils = new TextureUtils(this.threeRenderer);
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
-    this.loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+    this.loader =
+        new CachingGLTFLoader(ModelViewerGLTFInstance, this.roughnessMipmapper);
   }
 
   dispose() {

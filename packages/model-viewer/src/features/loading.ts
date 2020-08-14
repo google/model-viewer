@@ -163,7 +163,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * from .ZIP files, drag-and-drop APIs, and Data URIs.
      */
     static mapURLs(callback: (url: string) => string) {
-      Renderer.singleton.loader[$loader].manager.setURLModifier(callback);
+      Renderer.singleton.lazy!.loader[$loader].manager.setURLModifier(callback);
     }
 
     /**

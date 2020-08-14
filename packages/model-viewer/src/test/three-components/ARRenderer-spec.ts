@@ -162,7 +162,7 @@ suite('ARRenderer', () => {
     customElements.define(tagName, ModelViewerElement);
 
     element = new ModelViewerElement();
-    arRenderer = new ARRenderer(element[$renderer]);
+    arRenderer = new ARRenderer(element[$renderer].lazy!.threeRenderer);
   });
 
   teardown(async () => {

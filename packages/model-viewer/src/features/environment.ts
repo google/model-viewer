@@ -71,12 +71,14 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     connectedCallback() {
       super.connectedCallback();
-      this[$renderer].loader.addEventListener('preload', this[$onPreload]);
+      this[$renderer].lazy!.loader.addEventListener(
+          'preload', this[$onPreload]);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      this[$renderer].loader.removeEventListener('preload', this[$onPreload]);
+      this[$renderer].lazy!.loader.removeEventListener(
+          'preload', this[$onPreload]);
     }
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
@@ -120,7 +122,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$cancelEnvironmentUpdate] = null;
       }
 
-      const {textureUtils} = this[$renderer];
+      const {textureUtils} = this[$renderer].lazy!;
 
       if (textureUtils == null) {
         return;
