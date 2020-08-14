@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LoadingMixin} from '../../../features/loading.js';
-import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer} from '../../../features/loading/status-announcer.js';
-import ModelViewerElementBase from '../../../model-viewer-base.js';
-import {assetPath, isInDocumentTree, until, waitForEvent} from '../../helpers.js';
+import {LoadingMixin} from '../../features/loading.js';
+import ModelViewerElementBase from '../../model-viewer-base.js';
+import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer} from '../../three-components/StatusAnnouncer.js';
+import {assetPath, isInDocumentTree, until, waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 

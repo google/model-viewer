@@ -19,6 +19,7 @@ import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 import {CachingGLTFLoader} from './CachingGLTFLoader';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance';
 import {RendererOptions} from './Renderer';
+import {LoadingStatusAnnouncer} from './StatusAnnouncer';
 import TextureUtils from './TextureUtils';
 
 /**
@@ -34,6 +35,7 @@ export class Lazy {
   public textureUtils: TextureUtils;
   public roughnessMipmapper: RoughnessMipmapper;
   public loader: CachingGLTFLoader;
+  public loadingStatusAnnouncer: LoadingStatusAnnouncer;
 
   constructor(
       canvas3D: HTMLCanvasElement|OffscreenCanvas, options: RendererOptions) {
@@ -62,6 +64,7 @@ export class Lazy {
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
     this.loader =
         new CachingGLTFLoader(ModelViewerGLTFInstance, this.roughnessMipmapper);
+    this.loadingStatusAnnouncer = new LoadingStatusAnnouncer();
   }
 
   dispose() {

@@ -20,8 +20,6 @@ import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
 
-import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
-
 export type RevealAttributeValue = 'auto'|'interaction'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 type DismissalSource = 'interaction';
@@ -51,8 +49,6 @@ const LoadingStrategy: {[index: string]: LoadingAttributeValue} = {
 const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
-
-const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
 export const $defaultProgressMaskElement = Symbol('defaultProgressMaskElement');
@@ -295,7 +291,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$progressTracker].addEventListener(
           'progress', this[$progressHandler]);
 
-      loadingStatusAnnouncer.registerInstance(this);
+      Renderer.singleton.lazy!.loadingStatusAnnouncer.registerInstance(this);
     }
 
     disconnectedCallback() {
@@ -308,7 +304,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$progressTracker].removeEventListener(
           'progress', this[$progressHandler]);
 
-      loadingStatusAnnouncer.unregisterInstance(this)
+      Renderer.singleton.lazy!.loadingStatusAnnouncer.unregisterInstance(this)
     }
 
     async updated(changedProperties: Map<string, any>) {

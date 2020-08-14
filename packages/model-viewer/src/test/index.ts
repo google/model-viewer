@@ -42,7 +42,7 @@ import './features/staging-spec.js';
 import './features/controls-spec.js';
 import './features/environment-spec.js';
 import './features/loading-spec.js';
-import './features/loading/status-announcer-spec.js';
+import './three-components/StatusAnnouncer-spec.js';
 import './features/scene-graph-spec.js';
 import './features/ar-spec.js';
 
