@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin} from '../../features/loading.js';
 import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
@@ -192,7 +192,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               element.src = CUBE_GLB_PATH;
 
               await waitForEvent(element, 'load');
-              await timePasses(POSTER_TRANSITION_TIME + 100);
+              await timePasses(800);
 
               const input = element[$userInputElement];
               const picked = pickShadowDescendant(element);

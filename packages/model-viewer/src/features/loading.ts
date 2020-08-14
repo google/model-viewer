@@ -24,7 +24,6 @@ export type RevealAttributeValue = 'auto'|'interaction'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 type DismissalSource = 'interaction';
 
-export const POSTER_TRANSITION_TIME = 300;
 export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
