@@ -232,6 +232,8 @@ export class ImageComparator {
 
     let modelPixelCount = 0;
     let colorlessPixelCount = 0;
+    let transparentPixelCount = 0;
+
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -258,6 +260,10 @@ export class ImageComparator {
           colorlessPixelCount++;
         }
 
+        if (alpha != 255) {
+          transparentPixelCount++;
+        }
+
         if (alpha === 0) {
           continue;
         }
@@ -273,6 +279,11 @@ export class ImageComparator {
     const imagePixelCount = width * height;
     if (colorlessPixelCount === imagePixelCount) {
       throw new Error('Candidate image is colorless!');
+    }
+
+    if (transparentPixelCount === imagePixelCount) {
+      throw new Error(
+          'Candidate image is semi transparent, probably model-veiwer\'s screenshot is taken before its poster faded! ')
     }
 
     const rmsDistanceRatio =

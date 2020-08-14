@@ -60,7 +60,9 @@
         // the poster has completely faded away. 
         requestAnimationFrame(()=>{
           requestAnimationFrame(()=>{
-            this.dispatchEvent(new CustomEvent('model-ready'));
+            requestAnimationFrame(()=>{
+              this.dispatchEvent(new CustomEvent('model-ready'));
+            })
           })
         });
       }, {once: true});
