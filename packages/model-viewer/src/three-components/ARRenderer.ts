@@ -106,8 +106,6 @@ const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
-  public threeRenderer: WebGLRenderer;
-
   public camera: PerspectiveCamera = new PerspectiveCamera();
 
   private[$placementBox]: PlacementBox|null = null;
@@ -147,9 +145,8 @@ export class ARRenderer extends EventDispatcher {
 
   private[$onExitWebXRButtonContainerClick] = () => this.stopPresenting();
 
-  constructor(private renderer: Renderer) {
+  constructor(public threeRenderer: WebGLRenderer) {
     super();
-    this.threeRenderer = renderer.threeRenderer;
     // Turn this off, as the matrix is set directly from webXR rather than using
     // postion, rotation, scale.
     this.camera.matrixAutoUpdate = false;
@@ -354,7 +351,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     // Force the Renderer to update its size
-    this.renderer.height = 0;
+    Renderer.singleton.height = 0;
 
     const exitButton = this[$exitWebXRButtonContainer];
     if (exitButton != null) {
@@ -752,7 +749,7 @@ export class ARRenderer extends EventDispatcher {
 
     const delta = time - this[$lastTick]!;
     this[$moveScene](delta);
-    this.renderer.preRender(scene, time, delta);
+    Renderer.singleton.preRender(scene, time, delta);
     this[$lastTick] = time;
 
     // NOTE: Clearing depth caused issues on Samsung devices

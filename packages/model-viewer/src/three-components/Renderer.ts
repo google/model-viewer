@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGL1Renderer} from 'three';
-import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
+import {Event, EventDispatcher} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
-import {ARRenderer} from './ARRenderer.js';
-import {CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {Debugger} from './Debugger.js';
-import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
+import {Lazy} from './Lazy.js';
 import {ModelScene} from './ModelScene.js';
-import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
@@ -44,12 +39,6 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEP = 0.79;
 const DEFAULT_MIN_SCALE = 0.5;
 
-export const $arRenderer = Symbol('arRenderer');
-
-const $onWebGLContextLost = Symbol('onWebGLContextLost');
-const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
-const $singleton = Symbol('singleton');
-
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
@@ -62,30 +51,25 @@ const $singleton = Symbol('singleton');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  static[$singleton] = new Renderer({debug: isDebugMode()});
+  static instance = new Renderer();
 
   static get singleton() {
-    return this[$singleton];
+    return this.instance;
   }
 
   static resetSingleton() {
-    this[$singleton].dispose();
-    this[$singleton] = new Renderer({debug: isDebugMode()});
+    this.instance.dispose();
+    this.instance = new Renderer();
   }
 
-  public threeRenderer!: WebGL1Renderer;
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
-  public textureUtils: TextureUtils|null;
-  public arRenderer: ARRenderer;
-  public roughnessMipmapper: RoughnessMipmapper;
-  public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+  public lazy: Lazy|null = null;
   public width = 0;
   public height = 0;
   public dpr = 1;
   public minScale = DEFAULT_MIN_SCALE;
 
-  protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
@@ -93,21 +77,17 @@ export class Renderer extends EventDispatcher {
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
-  private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
-      this[$onWebGLContextLost](event);
-
-  get canRender() {
-    return this.threeRenderer != null;
-  }
+  private onWebGLContextLost = (event: Event) => {
+    this.dispatchEvent(
+        {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
+  };
 
   get scaleFactor() {
     return this.scale;
   }
 
-  constructor(options?: RendererOptions) {
+  constructor() {
     super();
-
-    this.dpr = resolveDpr();
 
     this.canvasElement = document.createElement('canvas');
     this.canvasElement.id = 'webgl-canvas';
@@ -116,45 +96,17 @@ export class Renderer extends EventDispatcher {
         this.canvasElement.transferControlToOffscreen() :
         this.canvasElement;
 
-    this.canvas3D.addEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
-
-    try {
-      this.threeRenderer = new WebGL1Renderer({
-        canvas: this.canvas3D,
-        alpha: true,
-        antialias: true,
-        powerPreference: 'high-performance' as WebGLPowerPreference,
-        preserveDrawingBuffer: true
-      });
-      this.threeRenderer.autoClear = true;
-      this.threeRenderer.outputEncoding = GammaEncoding;
-      this.threeRenderer.gammaFactor = 2.2;
-      this.threeRenderer.physicallyCorrectLights = true;
-      this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
-      this.threeRenderer.shadowMap.enabled = true;
-      this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
-      this.threeRenderer.shadowMap.autoUpdate = false;
-
-      this.debugger =
-          options != null && !!options.debug ? new Debugger(this) : null;
-      this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
-
-      // ACESFilmicToneMapping appears to be the most "saturated",
-      // and similar to Filament's gltf-viewer.
-      this.threeRenderer.toneMapping = ACESFilmicToneMapping;
-    } catch (error) {
-      console.warn(error);
-    }
-
-    this.arRenderer = new ARRenderer(this);
-    this.textureUtils =
-        this.canRender ? new TextureUtils(this.threeRenderer) : null;
-    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
-
+    this.dpr = resolveDpr();
     this.updateRendererSize();
     this.lastTick = performance.now();
     this.avgFrameDuration = 0;
+    this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
+
+    try {
+      this.lazy = new Lazy(this.canvas3D, {debug: isDebugMode()});
+    } catch (error) {
+      console.warn(error);
+    }
   }
 
   /**
@@ -188,9 +140,7 @@ export class Renderer extends EventDispatcher {
     this.height = height;
     this.dpr = dpr;
 
-    if (this.canRender) {
-      this.threeRenderer.setSize(width * dpr, height * dpr, false);
-    }
+    this.lazy?.threeRenderer.setSize(width * dpr, height * dpr, false);
 
     // Expand the canvas size to make up for shrinking the viewport.
     const widthCSS = width / this.scale;
@@ -259,24 +209,17 @@ export class Renderer extends EventDispatcher {
     }
     scene.isDirty = true;
 
-    if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
-    }
-
-    if (this.debugger != null) {
-      this.debugger.addScene(scene);
+    if (this.scenes.size > 0) {
+      this.lazy?.threeRenderer.setAnimationLoop(
+          (time: number) => this.render(time));
     }
   }
 
   unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
 
-    if (this.canRender && this.scenes.size === 0) {
-      (this.threeRenderer.setAnimationLoop as any)(null);
-    }
-
-    if (this.debugger != null) {
-      this.debugger.removeScene(scene);
+    if (this.scenes.size === 0) {
+      (this.lazy?.threeRenderer.setAnimationLoop as any)(null);
     }
   }
 
@@ -346,10 +289,6 @@ export class Renderer extends EventDispatcher {
     return scenes;
   }
 
-  get isPresenting(): boolean {
-    return this.arRenderer.isPresenting;
-  }
-
   /**
    * This method takes care of updating the element and renderer state based on
    * the time that has passed since the last rendered frame.
@@ -361,10 +300,11 @@ export class Renderer extends EventDispatcher {
 
     const exposureIsNumber =
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
-    this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+    this.lazy!.threeRenderer.toneMappingExposure =
+        exposureIsNumber ? exposure : 1.0;
 
     if (model.updateShadow()) {
-      this.threeRenderer.shadowMap.needsUpdate = true;
+      this.lazy!.threeRenderer.shadowMap.needsUpdate = true;
     }
   }
 
@@ -372,7 +312,7 @@ export class Renderer extends EventDispatcher {
     const delta = t - this.lastTick;
     this.lastTick = t;
 
-    if (!this.canRender || this.isPresenting) {
+    if (!this.lazy || this.lazy.arRenderer.isPresenting) {
       return;
     }
 
@@ -418,10 +358,10 @@ export class Renderer extends EventDispatcher {
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
-      this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.setViewport(
+      this.lazy.threeRenderer.setRenderTarget(null);
+      this.lazy.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.getCamera());
+      this.lazy.threeRenderer.render(scene, scene.getCamera());
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {
@@ -443,25 +383,12 @@ export class Renderer extends EventDispatcher {
   }
 
   dispose() {
-    if (this.textureUtils != null) {
-      this.textureUtils.dispose();
-    }
-
-    if (this.threeRenderer != null) {
-      this.threeRenderer.dispose();
-    }
-
-    this.textureUtils = null;
-    (this as any).threeRenderer = null;
+    this.lazy?.dispose();
+    this.lazy = null;
 
     this.scenes.clear();
 
     this.canvas3D.removeEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
-  }
-
-  [$onWebGLContextLost](event: WebGLContextEvent) {
-    this.dispatchEvent(
-        {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
+        'webglcontextlost', this.onWebGLContextLost);
   }
 }
