@@ -21,6 +21,14 @@ import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance';
 import {RendererOptions} from './Renderer';
 import TextureUtils from './TextureUtils';
 
+/**
+ * This class is meant to encapsulate the singleton three.js objects to
+ * facilitate lazy loading by dynamically importing this module. This
+ * lazy-loaded bundle will contain all of the three.js library as well as
+ * anthing that does not depend on the model-viewer element. Per-element
+ * three.js functionality is confined to the ModelScene, while global three.js
+ * functionality is accessed here.
+ */
 export class Lazy {
   public threeRenderer: WebGL1Renderer;
   public textureUtils: TextureUtils;

@@ -36,13 +36,9 @@ const DEFAULT_MIN_SCALE = 0.5;
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
- * to the canvases. Creates a fullscreen WebGL canvas that is not added
+ * to the canvases. Creates a WebGL canvas that is not added
  * to the DOM, and on each frame, renders each registered canvas on a portion
  * of the WebGL canvas, and applies the texture on the registered canvas.
- *
- * In the future, can use ImageBitmapRenderingContext instead of
- * Canvas2DRenderingContext if supported for cheaper transfering of
- * the texture.
  */
 export class Renderer {
   static instance = new Renderer();
