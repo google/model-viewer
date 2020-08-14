@@ -283,7 +283,7 @@ export class ImageComparator {
 
     if (transparentPixelCount === imagePixelCount) {
       throw new Error(
-          'Candidate image is semi transparent, probably model-veiwer\'s screenshot is taken before its poster faded! ')
+          'Candidate image is semi transparent, probably the screenshot is taken before its poster faded! ')
     }
 
     const rmsDistanceRatio =
