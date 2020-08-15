@@ -222,7 +222,7 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
-        await this[$renderer].arRenderer!.present(this[$scene]);
+        await this[$renderer].arRenderer!.present(this);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);

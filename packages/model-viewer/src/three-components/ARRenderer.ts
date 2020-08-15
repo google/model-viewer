@@ -17,7 +17,7 @@ import '../types/webxr.js';
 
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
-import {$onResize} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onResize, $scene} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -122,6 +122,7 @@ export class ARRenderer extends EventDispatcher {
   private[$transientHitTestSource]: XRTransientInputHitTestSource|null = null;
   private[$inputSource]: XRInputSource|null = null;
   private[$presentedScene]: ModelScene|null = null;
+  private element: ModelViewerElementBase|null = null;
   private[$resolveCleanup]: ((...args: any[]) => void)|null = null;
   private[$exitWebXRButtonContainer]: HTMLElement|null = null;
 
@@ -152,7 +153,7 @@ export class ARRenderer extends EventDispatcher {
     this.camera.matrixAutoUpdate = false;
   }
 
-  async resolveARSession(scene: ModelScene): Promise<XRSession> {
+  async resolveARSession(element: ModelViewerElementBase): Promise<XRSession> {
     assertIsArCandidate();
 
     const session: XRSession =
@@ -160,8 +161,7 @@ export class ARRenderer extends EventDispatcher {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
           domOverlay: {
-            root: scene.element.shadowRoot!.querySelector(
-                'div.annotation-container')
+            root: element.shadowRoot!.querySelector('div.annotation-container')
           }
         });
 
@@ -181,7 +181,7 @@ export class ARRenderer extends EventDispatcher {
     });
     await waitForXRAnimationFrame;
 
-    scene.element[$onResize](window.screen);
+    element[$onResize](window.screen);
 
     const {framebuffer, framebufferWidth, framebufferHeight} =
         session.renderState.baseLayer!;
@@ -191,7 +191,7 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.setPixelRatio(1);
     this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
 
-    const exitButton = scene.element.shadowRoot!.querySelector(
+    const exitButton = element.shadowRoot!.querySelector(
                            '.slot.exit-webxr-ar-button') as HTMLElement;
     exitButton.classList.add('enabled');
     exitButton.addEventListener(
@@ -224,24 +224,27 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Present a scene in AR
    */
-  async present(scene: ModelScene): Promise<void> {
+  async present(element: ModelViewerElementBase): Promise<void> {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
+
+    this.element = element;
 
     let waitForAnimationFrame = new Promise((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
 
+    const scene = element[$scene];
     scene.model.setHotspotsVisibility(false);
-    scene.isDirty = true;
+    element[$needsRender]();
     // Render a frame to turn off the hotspots
     await waitForAnimationFrame;
 
     // This sets isPresenting to true
     this[$presentedScene] = scene;
 
-    const currentSession = await this.resolveARSession(scene);
+    const currentSession = await this.resolveARSession(element);
     currentSession.addEventListener('end', () => {
       this[$postSessionCleanup]();
     }, {once: true});
@@ -325,7 +328,8 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this[$presentedScene];
     if (scene != null) {
-      const {model, element} = scene;
+      const element = this.element!;
+      const {model} = scene;
       scene.setCamera(scene.camera);
       model.remove(this[$placementBox]!);
 
@@ -749,7 +753,7 @@ export class ARRenderer extends EventDispatcher {
 
     const delta = time - this[$lastTick]!;
     this[$moveScene](delta);
-    Renderer.singleton.preRender(scene, time, delta);
+    Renderer.singleton.preRender(this.element!, time, delta);
     this[$lastTick] = time;
 
     // NOTE: Clearing depth caused issues on Samsung devices

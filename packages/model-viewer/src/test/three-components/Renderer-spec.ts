@@ -14,8 +14,7 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $loaded, $onResize, $scene, $userInputElement} from '../../model-viewer-base.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
+import ModelViewerElementBase, {$canvas, $context, $createContext, $loaded, $needsRender, $onResize, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, waitForEvent} from '../helpers.js';
 
@@ -33,28 +32,28 @@ interface TestScene {
 
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
-async function createScene(): Promise<ModelScene&TestScene> {
-  const element = new ModelViewerElement();
+async function createScene(): Promise<ModelViewerElementBase&TestScene> {
+  const element =
+      new ModelViewerElement() as ModelViewerElementBase & TestScene;
   document.body.insertBefore(element, document.body.firstChild);
   const sourceLoads = waitForEvent(element, 'load');
   element.src = assetPath('models/Astronaut.glb');
   await sourceLoads;
 
-  const scene = element[$scene] as ModelScene & TestScene;
-  scene.renderCount = 0;
+  element.renderCount = 0;
 
-  scene.createContext();
-  const {context} = scene;
+  element[$createContext]();
+  const context = element[$context];
   if (context instanceof CanvasRenderingContext2D) {
     const drawImage = context.drawImage;
     context.drawImage = (...args: any[]) => {
-      scene.renderCount!++;
+      element.renderCount!++;
       (drawImage as any).call(context, ...args);
     };
   } else if (context instanceof ImageBitmapRenderingContext) {
     const transferFromImageBitmap = context.transferFromImageBitmap;
     context.transferFromImageBitmap = (...args: any[]) => {
-      scene.renderCount!++;
+      element.renderCount!++;
       (transferFromImageBitmap as any).call(context, ...args);
     }
   } else {
@@ -62,83 +61,81 @@ async function createScene(): Promise<ModelScene&TestScene> {
         'context is neither a CanvasRenderingContext2D nor an ImageBitmapRenderingContext.');
   }
 
-  return scene;
+  return element;
 }
 
 suite('Renderer', () => {
-  let scene: ModelScene&TestScene;
+  let element: ModelViewerElementBase&TestScene;
   let renderer: Renderer;
 
   setup(async () => {
     renderer = Renderer.singleton;
-    scene = await createScene();
+    element = await createScene();
   });
 
   teardown(() => {
-    renderer.unregisterScene(scene);
+    renderer.unregisterElement(element);
     renderer.render(performance.now());
   });
 
   suite('render', () => {
-    let otherScene: ModelScene&TestScene;
+    let otherElement: ModelViewerElementBase&TestScene;
 
     setup(async () => {
-      otherScene = await createScene();
+      otherElement = await createScene();
     });
 
     teardown(() => {
-      renderer.unregisterScene(otherScene);
+      renderer.unregisterElement(otherElement);
       renderer.render(performance.now());
     });
 
     test('renders only dirty scenes', () => {
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(otherScene.renderCount).to.be.equal(1);
+      expect(element.renderCount).to.be.equal(1);
+      expect(otherElement.renderCount).to.be.equal(1);
 
-      scene.isDirty = true;
+      element[$needsRender]();
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(2);
-      expect(otherScene.renderCount).to.be.equal(1);
+      expect(element.renderCount).to.be.equal(2);
+      expect(otherElement.renderCount).to.be.equal(1);
     });
 
     test('does not render scenes that have not been loaded', () => {
-      scene.element[$loaded] = false;
-      scene.isDirty = true;
+      element[$loaded] = false;
+      element[$needsRender]();
 
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(scene.isDirty).to.be.ok;
+      expect(element.renderCount).to.be.equal(0);
+      expect(element[$scene].isDirty).to.be.ok;
 
-      scene.element[$loaded] = true;
+      element[$loaded] = true;
 
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.ok;
+      expect(element.renderCount).to.be.equal(1);
+      expect(!element[$scene].isDirty).to.be.ok;
     });
 
     test('uses the proper canvas when unregsitering scenes', () => {
       renderer.render(performance.now());
 
       expect(renderer.canvasElement.classList.contains('show')).to.be.eq(false);
-      expect(scene.element[$canvas].classList.contains('show')).to.be.eq(true);
-      expect(otherScene.element[$canvas].classList.contains('show'))
-          .to.be.eq(true);
+      expect(element[$canvas].classList.contains('show')).to.be.eq(true);
+      expect(otherElement[$canvas].classList.contains('show')).to.be.eq(true);
 
-      renderer.unregisterScene(scene);
+      renderer.unregisterElement(element);
       renderer.render(performance.now());
 
       if (USE_OFFSCREEN_CANVAS) {
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(false);
-        expect(otherScene.element[$canvas].classList.contains('show'))
-            .to.be.eq(true);
+        expect(otherElement[$canvas].classList.contains('show')).to.be.eq(true);
       } else {
         expect(renderer.canvasElement.parentElement)
-            .to.be.eq(otherScene.element[$userInputElement]);
+            .to.be.eq(otherElement[$userInputElement]);
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(true);
-        expect(otherScene.element[$canvas].classList.contains('show'))
+        expect(otherElement[$canvas].classList.contains('show'))
             .to.be.eq(false);
       }
     });
@@ -155,9 +152,8 @@ suite('Renderer', () => {
       });
 
       test('updates effective DPR', async () => {
-        const {element} = scene;
         const initialDpr = renderer.dpr;
-        const {width, height} = scene.getSize();
+        const {width, height} = element[$scene].getSize();
 
         element[$onResize]({width, height});
 

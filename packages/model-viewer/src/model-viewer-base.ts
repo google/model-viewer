@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
 import {Vector3} from 'three';
 
-import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER, USE_OFFSCREEN_CANVAS} from './constants.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
@@ -53,9 +53,11 @@ export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
+export const $context = Symbol('context');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
+export const $createContext = Symbol('createContext');
 export const $onModelLoad = Symbol('onModelLoad');
 export const $onResize = Symbol('onResize');
 export const $renderer = Symbol('renderer');
@@ -146,6 +148,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$container]: HTMLDivElement;
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
+  protected[$context]: CanvasRenderingContext2D|ImageBitmapRenderingContext|
+      null = null;
   protected[$defaultAriaLabel]: string;
   protected[$clearModelTimeout]: number|null = null;
 
@@ -225,8 +229,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     // Create the underlying ModelScene.
-    this[$scene] =
-        new ModelScene({canvas: this[$canvas], element: this, width, height});
+    this[$scene] = new ModelScene(width, height, this[$renderer].lazy!.loader);
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
@@ -304,7 +307,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
 
-    renderer.registerScene(this[$scene]);
+    renderer.registerElement(this);
 
     if (this[$clearModelTimeout] != null) {
       self.clearTimeout(this[$clearModelTimeout]!);
@@ -329,7 +332,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
 
-    renderer.unregisterScene(this[$scene]);
+    renderer.unregisterElement(this);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].model.clear();
@@ -358,9 +361,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$renderer]
-        .displayCanvas(this[$scene])
-        .toDataURL(type, encoderOptions);
+    return this[$renderer].displayCanvas(this).toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -394,7 +395,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           blobContext = blobCanvas.getContext('2d');
         }
         blobContext!.drawImage(
-            this[$renderer].displayCanvas(this[$scene]),
+            this[$renderer].displayCanvas(this),
             offsetX,
             offsetY,
             outputWidth,
@@ -428,6 +429,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } finally {
       this[$updateSize]({width, height});
     };
+  }
+
+  /**
+   * Function to create the context lazily, as when there is only one
+   * <model-viewer> element, the renderer's 3D context can be displayed
+   * directly. This extra context is necessary to copy the renderings into when
+   * there are more than one.
+   */
+  [$createContext]() {
+    if (USE_OFFSCREEN_CANVAS) {
+      this[$context] = this[$canvas].getContext('bitmaprenderer')!;
+    } else {
+      this[$context] = this[$canvas].getContext('2d')!;
+    }
   }
 
   get[$ariaLabel]() {
@@ -506,7 +521,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const source = this.src;
     try {
       await this[$scene].setModelSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.8));
+          source,
+          this,
+          (progress: number) => updateSourceProgress(progress * 0.8));
 
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));

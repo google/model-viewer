@@ -15,8 +15,9 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
 
-import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+import ModelViewerElementBase from '../model-viewer-base.js';
 
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
@@ -64,7 +65,7 @@ export default class Model extends Object3D {
   /**
    * Creates a model.
    */
-  constructor() {
+  constructor(private loader: CachingGLTFLoader) {
     super();
 
     this.name = 'Model';
@@ -119,8 +120,8 @@ export default class Model extends Object3D {
           async (resolve, reject) => {
             this[$cancelPendingSourceChange] = () => reject();
             try {
-              const result = await element[$renderer].lazy!.loader.load(
-                                 url, element, progressCallback) as
+              const result =
+                  await this.loader.load(url, element, progressCallback) as
                   ModelViewerGLTFInstance;
               resolve(result);
             } catch (error) {

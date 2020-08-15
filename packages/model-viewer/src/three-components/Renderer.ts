@@ -14,12 +14,11 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $context, $createContext, $needsRender, $scene, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {Lazy} from './Lazy.js';
-import {ModelScene} from './ModelScene.js';
 
 export interface RendererOptions {
   debug: boolean;
@@ -61,7 +60,7 @@ export class Renderer {
   public dpr = 1;
   public minScale = DEFAULT_MIN_SCALE;
 
-  private scenes: Set<ModelScene> = new Set();
+  private elements: Set<ModelViewerElementBase> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
   private scale = 1;
@@ -69,8 +68,8 @@ export class Renderer {
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
   private onWebGLContextLost = (event: Event) => {
-    for (const scene of this.scenes) {
-      scene.element.dispatchEvent(new CustomEvent(
+    for (const element of this.elements) {
+      element.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'webglcontextlost', sourceError: event}}));
     }
   };
@@ -115,8 +114,7 @@ export class Renderer {
       // If the device pixel ratio has changed due to page zoom, elements
       // specified by % width do not fire a resize event even though their CSS
       // pixel dimensions change, so we force them to update their size here.
-      for (const scene of this.scenes) {
-        const {element} = scene;
+      for (const element of this.elements) {
         element[$updateSize](element.getBoundingClientRect());
       }
     }
@@ -124,7 +122,8 @@ export class Renderer {
     // Make the renderer the size of the largest scene
     let width = 0;
     let height = 0;
-    for (const scene of this.scenes) {
+    for (const element of this.elements) {
+      const scene = element[$scene];
       width = Math.max(width, scene.width);
       height = Math.max(height, scene.height);
     }
@@ -149,13 +148,13 @@ export class Renderer {
     // Each scene's canvas must match the renderer size. In general they can be
     // larger than the element that contains them, but the overflow is hidden
     // and only the portion that is shown is copied over.
-    for (const scene of this.scenes) {
-      const {canvas} = scene;
+    for (const element of this.elements) {
+      const canvas = element[$canvas];
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
-      scene.isDirty = true;
+      element[$needsRender]();
     }
   }
 
@@ -182,17 +181,17 @@ export class Renderer {
 
     this.canvasElement.style.width = `${width}px`;
     this.canvasElement.style.height = `${height}px`;
-    for (const scene of this.scenes) {
-      const {style} = scene.canvas;
+    for (const element of this.elements) {
+      const {style} = element[$canvas];
       style.width = `${width}px`;
       style.height = `${height}px`;
-      scene.isDirty = true;
+      element[$needsRender]();
     }
   }
 
-  registerScene(scene: ModelScene) {
-    this.scenes.add(scene);
-    const {canvas} = scene;
+  registerElement(element: ModelViewerElementBase) {
+    this.elements.add(element);
+    const canvas = element[$canvas];
 
     canvas.width = this.width * this.dpr;
     canvas.height = this.height * this.dpr;
@@ -203,25 +202,24 @@ export class Renderer {
     if (this.multipleScenesVisible) {
       canvas.classList.add('show');
     }
-    scene.isDirty = true;
+    element[$needsRender]();
 
-    if (this.scenes.size > 0) {
+    if (this.elements.size > 0) {
       this.lazy?.threeRenderer.setAnimationLoop(
           (time: number) => this.render(time));
     }
   }
 
-  unregisterScene(scene: ModelScene) {
-    this.scenes.delete(scene);
+  unregisterElement(element: ModelViewerElementBase) {
+    this.elements.delete(element);
 
-    if (this.scenes.size === 0) {
+    if (this.elements.size === 0) {
       (this.lazy?.threeRenderer.setAnimationLoop as any)(null);
     }
   }
 
-  displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] :
-                                        this.canvasElement;
+  displayCanvas(element: ModelViewerElementBase): HTMLCanvasElement {
+    return this.multipleScenesVisible ? element[$canvas] : this.canvasElement;
   }
 
   /**
@@ -233,8 +231,7 @@ export class Renderer {
   private selectCanvas() {
     let visibleScenes = 0;
     let visibleInput = null;
-    for (const scene of this.scenes) {
-      const {element} = scene;
+    for (const element of this.elements) {
       if (element.modelIsVisible) {
         ++visibleScenes;
         visibleInput = element[$userInputElement];
@@ -253,44 +250,44 @@ export class Renderer {
     if (multipleScenesVisible) {
       canvasElement.classList.remove('show');
     }
-    for (const scene of this.scenes) {
-      const userInputElement = scene.element[$userInputElement];
-      const canvas = scene.element[$canvas];
+    for (const element of this.elements) {
+      const userInputElement = element[$userInputElement];
+      const canvas = element[$canvas];
       if (multipleScenesVisible) {
         canvas.classList.add('show');
-        scene.isDirty = true;
+        element[$needsRender]();
       } else if (userInputElement === visibleInput) {
         userInputElement.appendChild(canvasElement);
         canvasElement.classList.add('show');
         canvas.classList.remove('show');
-        scene.isDirty = true;
+        element[$needsRender]();
       }
     }
   }
 
   /**
-   * Returns an array version of this.scenes where the non-visible ones are
+   * Returns an array version of this.elements where the non-visible ones are
    * first. This allows eager scenes to be rendered before they are visible,
    * without needing the multi-canvas render path.
    */
-  private orderedScenes(): Array<ModelScene> {
-    const scenes = [];
+  private orderedScenes(): Array<ModelViewerElementBase> {
+    const elements = [];
     for (const visible of [false, true]) {
-      for (const scene of this.scenes) {
-        if (scene.element.modelIsVisible === visible) {
-          scenes.push(scene);
+      for (const element of this.elements) {
+        if (element.modelIsVisible === visible) {
+          elements.push(element);
         }
       }
     }
-    return scenes;
+    return elements;
   }
 
   /**
    * This method takes care of updating the element and renderer state based on
    * the time that has passed since the last rendered frame.
    */
-  preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure, model} = scene;
+  preRender(element: ModelViewerElementBase, t: number, delta: number) {
+    const {exposure, model} = element[$scene];
 
     element[$tick](t, delta);
 
@@ -323,24 +320,25 @@ export class Renderer {
 
     const {dpr, scale} = this;
 
-    for (const scene of this.orderedScenes()) {
-      if (!scene.element[$sceneIsReady]()) {
+    for (const element of this.orderedScenes()) {
+      if (!element[$sceneIsReady]()) {
         continue;
       }
 
-      this.preRender(scene, t, delta);
+      this.preRender(element, t, delta);
+      const scene = element[$scene];
 
       if (!scene.isDirty) {
         continue;
       }
       scene.isDirty = false;
 
-      if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
+      if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
         // visible scene dirty to ensure it overwrites us.
-        for (const scene of this.scenes) {
-          if (scene.element.modelIsVisible) {
-            scene.isDirty = true;
+        for (const element of this.elements) {
+          if (element.modelIsVisible) {
+            element[$needsRender]();
           }
         }
       }
@@ -360,16 +358,17 @@ export class Renderer {
       this.lazy!.threeRenderer.render(scene, scene.getCamera());
 
       if (this.multipleScenesVisible) {
-        if (scene.context == null) {
-          scene.createContext();
+        if (element[$context] == null) {
+          element[$createContext]();
         }
         if (USE_OFFSCREEN_CANVAS) {
-          const contextBitmap = scene.context as ImageBitmapRenderingContext;
+          const contextBitmap =
+              element[$context] as ImageBitmapRenderingContext;
           const bitmap =
               (this.canvas3D as OffscreenCanvas).transferToImageBitmap();
           contextBitmap.transferFromImageBitmap(bitmap);
         } else {
-          const context2D = scene.context as CanvasRenderingContext2D;
+          const context2D = element[$context] as CanvasRenderingContext2D;
           context2D.clearRect(0, 0, width, height);
           context2D.drawImage(
               this.canvas3D, 0, 0, width, height, 0, 0, width, height);
@@ -382,7 +381,7 @@ export class Renderer {
     this.lazy?.dispose();
     this.lazy = null;
 
-    this.scenes.clear();
+    this.elements.clear();
 
     this.canvas3D.removeEventListener(
         'webglcontextlost', this.onWebGLContextLost);

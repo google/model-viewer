@@ -15,21 +15,14 @@
 
 import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
-import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase from '../model-viewer-base.js';
 
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import Model, {DEFAULT_FOV_DEG} from './Model.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
-}
-
-export interface ModelSceneConfig {
-  element: ModelViewerElementBase;
-  canvas: HTMLCanvasElement;
-  width: number;
-  height: number;
 }
 
 export type IlluminationRole = 'primary'|'secondary'
@@ -51,15 +44,11 @@ const vector3 = new Vector3();
  */
 export class ModelScene extends Scene {
   public aspect = 1;
-  public canvas: HTMLCanvasElement;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
   public width = 1;
   public height = 1;
   public isDirty = false;
-  public element: ModelViewerElementBase;
-  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
-      null;
   public exposure = 1;
   public model: Model;
   public canScale = true;
@@ -74,14 +63,11 @@ export class ModelScene extends Scene {
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
 
-  constructor({canvas, element, width, height}: ModelSceneConfig) {
+  constructor(width: number, height: number, loader: CachingGLTFLoader) {
     super();
 
     this.name = 'ModelScene';
-
-    this.element = element;
-    this.canvas = canvas;
-    this.model = new Model();
+    this.model = new Model(loader);
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -99,26 +85,13 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Function to create the context lazily, as when there is only one
-   * <model-viewer> element, the renderer's 3D context can be displayed
-   * directly. This extra context is necessary to copy the renderings into when
-   * there are more than one.
-   */
-  createContext() {
-    if (USE_OFFSCREEN_CANVAS) {
-      this.context = this.canvas.getContext('bitmaprenderer')!;
-    } else {
-      this.context = this.canvas.getContext('2d')!;
-    }
-  }
-
-  /**
    * Sets the model via URL.
    */
   async setModelSource(
-      source: string|null, progressCallback?: (progress: number) => void) {
+      source: string|null, element: ModelViewerElementBase,
+      progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(this.element, source, progressCallback);
+      await this.model.setSource(element, source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);

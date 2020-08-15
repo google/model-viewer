@@ -15,7 +15,7 @@
 
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer} from '../../model-viewer-base.js';
 import {$shadow, DEFAULT_FOV_DEG} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
@@ -46,26 +46,21 @@ suite('ModelScene', () => {
     dummyRadius = 0.5;
     dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
-    scene = new ModelScene({
-      element: element,
-      canvas: element[$canvas],
-      width: 200,
-      height: 100,
-    });
+    scene = new ModelScene(200, 100, element[$renderer].lazy!.loader);
   });
 
   suite('setModelSource', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+      await scene.setModelSource(assetPath('models/Astronaut.glb'), element);
       expect(fired).to.be.ok;
     });
   });
 
   suite('with a model', () => {
     setup(async () => {
-      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+      await scene.setModelSource(assetPath('models/Astronaut.glb'), element);
     });
 
     suite('setShadowIntensity', () => {
