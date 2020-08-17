@@ -16,7 +16,7 @@
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import {IS_IE11} from '../../constants.js';
-import ModelViewerElementBase, {$renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../../model-viewer-base.js';
 import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
@@ -183,7 +183,11 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async () => {
-      modelScene = new ModelScene(200, 100, element[$renderer].lazy!.loader);
+      modelScene = element[$scene];
+      element.style.width = '200px';
+      element.style.height = '100px';
+      document.body.insertBefore(element, document.body.firstChild);
+
       await modelScene.setModelSource(
           assetPath('models/Astronaut.glb'), element);
       stubWebXrInterface(arRenderer);
@@ -204,6 +208,9 @@ suite('ARRenderer', () => {
 
     teardown(() => {
       (window as any).XRRay = oldXRRay;
+      if (element.parentNode != null) {
+        element.parentNode.removeChild(element);
+      }
     });
 
     test('presents the model at its natural scale', () => {
@@ -250,7 +257,7 @@ suite('ARRenderer', () => {
         yaw = modelScene.yaw;
       });
 
-      test.only('places the model oriented to the camera', () => {
+      test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
         const {model, position} = modelScene;
 
