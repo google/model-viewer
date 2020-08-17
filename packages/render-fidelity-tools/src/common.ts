@@ -232,6 +232,8 @@ export class ImageComparator {
 
     let modelPixelCount = 0;
     let colorlessPixelCount = 0;
+    let transparentPixelCount = 0;
+
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const index = y * width + x;
@@ -258,6 +260,10 @@ export class ImageComparator {
           colorlessPixelCount++;
         }
 
+        if (alpha != 255) {
+          transparentPixelCount++;
+        }
+
         if (alpha === 0) {
           continue;
         }
@@ -271,6 +277,11 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
+    if (transparentPixelCount === imagePixelCount) {
+      throw new Error(
+          'Candidate image is transparent or semi-transparent, probably the screenshot is taken before its poster faded!')
+    }
+
     if (colorlessPixelCount === imagePixelCount) {
       throw new Error('Candidate image is colorless!');
     }
