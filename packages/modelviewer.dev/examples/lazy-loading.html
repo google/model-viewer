@@ -38,27 +38,6 @@
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-  <style>
-    #button-load {
-      background-image: url(../assets/ic_get_app_white_24dp.svg);
-      background-repeat: no-repeat;
-      background-size: 24px 24px;
-      background-position: 6% 50%;
-      background-color: #000;
-      color: white;
-      cursor: pointer;
-      border-radius: 6px;
-      display: inline-block;
-      padding: 10px 18px 9px 40px;
-      font-weight: 500;
-      box-shadow: 0 0 8px rgba(0,0,0,.2), 0 0 4px rgba(0,0,0,.25);
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate3d(-50%, -50%, 0);
-      z-index: 100;
-    }
-  </style>
 </head>
 
 <body>
@@ -134,6 +113,25 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+  }
+  #button-load {
+    background-image: url(../assets/ic_get_app_white_24dp.svg);
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    background-position: 6% 50%;
+    background-color: #000;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    display: inline-block;
+    padding: 10px 18px 9px 40px;
+    font-weight: 500;
+    box-shadow: 0 0 8px rgba(0,0,0,.2), 0 0 4px rgba(0,0,0,.25);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 100;
   }
 </style>
 <!-- use unique asset to ensure lazy loading -->
