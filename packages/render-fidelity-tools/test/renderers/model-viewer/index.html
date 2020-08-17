@@ -56,8 +56,9 @@
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
       modelViewer.addEventListener('poster-dismissed', () => {
-        // Use two raf here to make sure model-ready event fires at the frame that 
-        // the poster has completely faded away. 
+        // Sometimes the screenshot is taken when the poster hasn't faded away. 
+        // This is a temporary workaround so that the screenshot is taken two frames after the poster-dismissed event fires.
+        // TODO(sun765): Remove this when the bug is fixed. 
         requestAnimationFrame(()=>{
           requestAnimationFrame(()=>{
             requestAnimationFrame(()=>{

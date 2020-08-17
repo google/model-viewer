@@ -277,13 +277,13 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    if (colorlessPixelCount === imagePixelCount) {
-      throw new Error('Candidate image is colorless!');
-    }
-
     if (transparentPixelCount === imagePixelCount) {
       throw new Error(
-          'Candidate image is semi transparent, probably the screenshot is taken before its poster faded! ')
+          'Candidate image is transparent or semi-transparent, probably the screenshot is taken before its poster faded!')
+    }
+
+    if (colorlessPixelCount === imagePixelCount) {
+      throw new Error('Candidate image is colorless!');
     }
 
     const rmsDistanceRatio =
