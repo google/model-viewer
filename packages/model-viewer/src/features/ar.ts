@@ -27,15 +27,13 @@ import {Constructor} from '../utilities.js';
  * iOS can intent to their AR Quick Look.
  */
 export const openIOSARQuickLook = (() => {
-  const anchor = document.createElement('a');
-  anchor.setAttribute('rel', 'ar');
-  anchor.appendChild(document.createElement('img'));
-
-  return (usdzSrc: string, arScale: string) => {
+  return (usdzSrc: string, arScale: string, anchor: HTMLAnchorElement) => {
     const modelUrl = new URL(usdzSrc, self.location.toString());
     if (arScale === 'fixed') {
       modelUrl.hash = 'allowsContentScaling=0';
     }
+    anchor.setAttribute('rel', 'ar');
+    anchor.appendChild(document.createElement('img'));
     anchor.setAttribute('href', modelUrl.toString());
     anchor.click();
   };
@@ -46,11 +44,13 @@ export const openIOSARQuickLook = (() => {
  * current device.
  */
 export const openSceneViewer = (() => {
-  const anchor = document.createElement('a');
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
   let fallbackInvoked = false;
 
-  return (gltfSrc: string, title: string, arScale: string) => {
+  return (gltfSrc: string,
+          title: string,
+          arScale: string,
+          anchor: HTMLAnchorElement) => {
     // If the fallback has ever been invoked this session, bounce early:
     if (fallbackInvoked) {
       return;
@@ -60,7 +60,6 @@ export const openSceneViewer = (() => {
     // Since we're appending the whole URL as query parameter,
     // ? needs to be turned into & to not lose any of them.
     gltfSrc = gltfSrc.replace('?', '&');
-    
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc, location);
@@ -70,19 +69,22 @@ export const openSceneViewer = (() => {
 
     // modelUrl can contain title/link/sound etc.
     // These are already URL-encoded, so we shouldn't do that again here.
-    let intentParams =`?file=${modelUrl.toString()}&mode=ar_only`;
-    if(!gltfSrc.includes("&link=")) intentParams += `&link=${location}`;
-    if(!gltfSrc.includes("&title=")) intentParams += `&title=${encodeURIComponent(title)}`;
-
+    let intentParams = `?file=${modelUrl.toString()}&mode=ar_only`;
+    if (!gltfSrc.includes('&link=')) {
+      intentParams += `&link=${location}`;
+    }
+    if (!gltfSrc.includes('&title=')) {
+      intentParams += `&title=${encodeURIComponent(title)}`;
+    }
     if (arScale === 'fixed') {
       intentParams += `&resizable=false`;
     }
-    
+
     const intent = `intent://arvr.google.com/scene-viewer/1.0${
         intentParams}#Intent;scheme=${
         scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
-    
+
     const undoHashChange = () => {
       if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
         fallbackInvoked = true;
@@ -132,9 +134,11 @@ const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
+const $arAnchor = Symbol('arAnchor');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
+const $onARTap = Symbol('onARTap');
 
 export declare interface ARInterface {
   ar: boolean;
@@ -172,6 +176,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arButtonContainer]: HTMLElement =
         this.shadowRoot!.querySelector('.ar-button') as HTMLElement;
 
+    protected[$arAnchor] = document.createElement('a');
+
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
 
@@ -191,6 +197,12 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     };
 
+    private[$onARTap] = (event: Event) => {
+      if ((event as any).data == '_apple_ar_quicklook_button_tapped') {
+        this.dispatchEvent(new CustomEvent('quick-look-button-tapped'));
+      }
+    };
+
     /**
      * Activates AR. Note that for any mode that is not WebXR-based, this
      * method most likely has to be called synchronous from a user
@@ -200,13 +212,14 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     async activateAR() {
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          openIOSARQuickLook(this.iosSrc!, this.arScale);
+          openIOSARQuickLook(this.iosSrc!, this.arScale, this[$arAnchor]);
           break;
         case ARMode.WEBXR:
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
-          openSceneViewer(this.src!, this.alt || '', this.arScale);
+          openSceneViewer(
+              this.src!, this.alt || '', this.arScale, this[$arAnchor]);
           break;
         default:
           console.warn(
@@ -233,6 +246,8 @@ configuration or device capabilities');
 
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
+
+      this[$arAnchor].addEventListener('message', this[$onARTap]);
     }
 
     disconnectedCallback() {
@@ -240,6 +255,8 @@ configuration or device capabilities');
 
       this[$renderer].arRenderer.removeEventListener(
           'status', this[$onARStatus]);
+
+      this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
 
     async update(changedProperties: Map<string, any>) {
