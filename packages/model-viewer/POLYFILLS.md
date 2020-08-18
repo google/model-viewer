@@ -17,16 +17,16 @@ These browser features are **required** for `<model-viewer>` to work correctly:
 
 Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
-Custom Elements            |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋ |               ✅
-Shadow DOM                 |     ✅ |     ✅ |        ✅ |         ✅ |   ✋ |   ✋ |               ✅
+Custom Elements            |     ✅ |     ✅ |        ✅ |         ✅ |   ✅ |   ✋ |               ✅
+Shadow DOM                 |     ✅ |     ✅ |        ✅ |         ✅ |   ✅ |   ✋ |               ✅
 
 These browser features are **optional** and are only used if available for
 performance optimization or specific features:
 
 Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
-Resize Observer[¹](1)      |     ✅ |     ✅ |        ✋ |         ✋ |   ✋ |   ✋ |               ✅
-Intersection Observer[²](2)|     ✅ |     ✅ |        ✋ |         ✅ |   ✅ |   ✋ |               ✅
+Resize Observer[¹](1)      |     ✅ |     ✅ |        ✅ |         ✅ |   ✅ |   ✋ |               ✅
+Intersection Observer[²](2)|     ✅ |     ✅ |        ✅ |         ✅ |   ✅ |   ✋ |               ✅
 `:focus-visible`[⁴](4)     |     ✋ |     ✋ |        ✋ |         ✋ |   ✋ |   ✋ |               ✋
 
 These browser features are **optional** and are only needed if you wish to use
@@ -34,8 +34,9 @@ the `webxr` feature:
 
 Feature                    | Chrome | Canary | Safari 12 | Firefox 65 | Edge | IE 11 | Samsung Internet 
 ---------------------------|--------|--------|-----------|------------|------|-------|------------------
-WebXR Device API           |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫 
-WebXR HitTest API          |     🚧 |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
+WebXR Device API           |     ✅ |     ✅ |        🚫 |         🚫 |   ✅ |   🚫 |               ✅ 
+WebXR HitTest API          |     ✅ |     ✅ |        🚫 |         🚫 |   ✅ |   🚫 |               ✅
+WebXR DOM Overlay API      |     ✅ |     ✅ |        🚫 |         🚫 |   🚫 |   🚫 |               🚫
 
 
 [1]: https://github.com/PolymerLabs/model-viewer/blob/master/POLYFILLS.md#regarding-resize-observer
@@ -66,11 +67,12 @@ The following emerging web platform APIs are *optional*, and will be used by
  - [Intersection Observer](https://w3c.github.io/IntersectionObserver/) ([CanIUse](https://caniuse.com/#feat=intersectionobserver), [Chrome Platform Status](https://www.chromestatus.com/features/5695342691483648))
  - [`:focus-visible`]() ([CanIUse](https://caniuse.com/#feat=css-focus-visible), [Chrome Platform Status](https://chromestatus.com/features/5823526732824576))
 
-Additionally, the following _highly experimental and volatile_ APIs are needed
-to enable in-browser AR (currently available in Chrome Canary only):
+Additionally, the following APIs are needed
+to enable in-browser AR:
 
  - [Web XR Device API](https://immersive-web.github.io/webxr/) ([Chrome Platform Status](https://www.chromestatus.com/features/5680169905815552))
- - [Web XR Hit Test API](https://github.com/immersive-web/hit-test/blob/master/explainer.md) ([Chrome Platform Status](https://www.chromestatus.com/features/4755348300759040))
+ - [Web XR Hit Test API](https://immersive-web.github.io/hit-test/) ([Chrome Platform Status](https://www.chromestatus.com/features/4755348300759040))
+ - [Web XR DOM Overlay API](https://immersive-web.github.io/dom-overlays/) ([Chrome Platform Status](https://www.chromestatus.com/features/6048666307526656))
 
 ### Recommended Polyfills
 
@@ -114,7 +116,7 @@ Intersection Observer is optional because it is not strictly required to make
 `<model-viewer>` work. However, if Intersection Observer is not available, the
 general performance characteristics of `<model-viewer>` will be worse overall.
 
-Unlike Resize Observer, there is not fallback for Intersection Observer unles
+Unlike Resize Observer, there is not a fallback for Intersection Observer unles
 you use a polyfill.
 
 ### Regarding `:focus-visible`
@@ -185,7 +187,7 @@ the rest of your application code:
 
 ### Using Unpkg.com CDN
 
-If do not use Node.js/NPM, one option is to use the Unpkg.com CDN to load the
+If you do not use Node.js/NPM, one option is to use the Unpkg.com CDN to load the
 recommended polyfills and `<model-viewer>`:
 
 ```html

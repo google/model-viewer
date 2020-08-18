@@ -16,7 +16,7 @@ Check out the README.md files for specific projects to get more details:
 
 🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
 
-📦 **[3DOM](packages/3dom)** • A generic scene graph API that enables potentially untrusted scripts to operate on 3D models 
+📦 **[3DOM](packages/3dom)** • A generic glTF scene graph API that enables operations on 3D models while abstracting the in-memory representation. 
 
 ## Development
 
@@ -26,11 +26,13 @@ Node.js and npm.
 Then, perform the following steps to get set up for development:
 
 ```sh
-git clone git@github.com:google/model-viewer.git
+git clone --depth=1 git@github.com:google/model-viewer.git
 cd model-viewer
 npm install
 npm run bootstrap
 ```
+
+Note: depth=1 keeps you from downloading our ~3Gb of history, which is dominated by all the versions of our golden render fidelity images.
 
 The following global commands are available:
 

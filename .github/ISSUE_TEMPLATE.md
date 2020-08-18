@@ -1,4 +1,4 @@
-<!-- Instructions For Filing a Bug: https://github.com/google/model-viewer/blob/master/packages/model-viewer/CONTRIBUTING.md#filing-bugs -->
+<!-- Instructions For Filing a Bug: https://github.com/google/model-viewer/blob/master/CONTRIBUTING.md#filing-bugs -->
 ### Description
 
 Please provide a detailed description of the bug, how to reproduce it, and the
