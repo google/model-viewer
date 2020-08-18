@@ -232,7 +232,7 @@ export class ImageComparator {
 
     let modelPixelCount = 0;
     let colorlessPixelCount = 0;
-    let transparentPixelCount = 0;
+    let semiTransparentPixelCount = 0;
 
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
@@ -260,8 +260,11 @@ export class ImageComparator {
           colorlessPixelCount++;
         }
 
-        if (alpha != 255) {
-          transparentPixelCount++;
+        // Sometimes the screenshot is taken when poster has not faded away, and
+        // the model pixels are not transparent while the background pixels are
+        // semi-transparent.
+        if (alpha != 255 && alpha != 0) {
+          semiTransparentPixelCount++;
         }
 
         if (alpha === 0) {
@@ -277,9 +280,10 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    if (transparentPixelCount === imagePixelCount) {
+    const backgroundPixelCount = imagePixelCount - modelPixelCount;
+    if (semiTransparentPixelCount === backgroundPixelCount) {
       throw new Error(
-          'Candidate image is transparent or semi-transparent, probably the screenshot is taken before its poster faded!')
+          'Candidate image is semi-transparent, probably the screenshot is taken before its poster faded!')
     }
 
     if (colorlessPixelCount === imagePixelCount) {
