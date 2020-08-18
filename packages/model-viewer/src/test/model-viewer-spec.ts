@@ -1,18 +1,17 @@
-import {ModelViewerElement} from '../model-viewer';
-import {Constructor} from '../utilities';
+// why do we have to specify the type to be .js? something about mocha?
+import {ModelViewerElement} from '../model-viewer.js';
+import {Constructor} from '../utilities.js';
 
-import {BasicSpecTemplate} from './templates';
+import {assetPath, waitForEvent} from './helpers.js';
+import {BasicSpecTemplate} from './templates.js';
 
-
-// const expect = chai.expect;
-
+const expect = chai.expect;
 
 const DEFAULT_SCENARIO = {
   name: 'khronos-Cube',
-  model:
-      '../../../shared-assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf',
-  lighting: '../../../shared-assets/environments/lightroom_14b.hdr',
-  dimensions: {width: 768, height: 768},
+  model: 'models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf',
+  lighting: 'environments/lightroom_14b.hdr',
+  dimensions: {width: 100, height: 100},
   target: {x: 0, y: 0, z: 0},
   orbit: {theta: 30, phi: 60, radius: 5},
   verticalFoV: 45
@@ -27,10 +26,11 @@ const setupModelViewer =
 
   modelViewer.style.backgroundColor = 'rgba(255,255,255,0)';
 
-  modelViewer.src = config.model;
+  modelViewer.src = assetPath(config.model);
 
-  modelViewer.environmentImage = config.lighting;
-  modelViewer.skyboxImage = config.lighting;
+  const lightingPath = assetPath(config.lighting);
+  modelViewer.environmentImage = lightingPath;
+  modelViewer.skyboxImage = null;
 
   const {theta, phi, radius} = config.orbit;
   modelViewer.minCameraOrbit = `auto auto ${radius}m`;
@@ -39,6 +39,8 @@ const setupModelViewer =
   const {x, y, z} = config.target;
   modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
   modelViewer.fieldOfView = `${config.verticalFoV}deg`;
+
+  await waitForEvent(modelViewer, 'poster-dismissed');
 }
 
 
@@ -79,20 +81,86 @@ const setupModelViewer =
                             })
 
                             // TODO: change this to test all scenarios
-        suite('Check all scenarions', ()=>{
-            setup(async ()=>{
+    suite('Check all scenarions', () => {
+      setup(async () => {
       await setupModelViewer(element, DEFAULT_SCENARIO);
-            })
+      })
 
-            test('test one scenario first', async ()=>{
+    test('test one scenario first', async () => {
       // capture screenshot;
       const blob = await element.toBlob();
-      const image = new Promise(
-          (resolve) => {
 
-          })
+      const image = await new Promise<HTMLImageElement>((resolve) => {
+        const image = new Image();
+        const url = URL.createObjectURL(blob);
+        image.src = url;
+        image.onload = () => {
+          resolve(image);
+        }
+      });
+
+      const fiddleCanvas = document.createElement('canvas');
+      fiddleCanvas.width = image.width;
+      fiddleCanvas.height = image.height;
+      fiddleCanvas.getContext('2d')?.drawImage(
+          image, 0, 0, image.width, image.height);
+
       // ayalysis
-            })
-        })
+      expect(fiddleCanvas.width).to.be.equal(image.width);
+      expect(fiddleCanvas.height).to.be.equal(image.height);
+
+      let whiteCcount = 0;
+      let blackCount = 0;
+      let transparentCount = 0;
+      for (let row = 0; row < image.height; row++) {
+        for (let col = 0; col < image.width; col++) {
+          const pixelData =
+              fiddleCanvas.getContext('2d')?.getImageData(col, row, 1, 1).data;
+          let isWhite = true;
+          let isBlack = true;
+
+          if (pixelData![3] === 0)
+            transparentCount++;
+
+          for (let i = 0; i < 3; i++) {
+            const colorComponent = pixelData![i];
+            if (colorComponent != 255) {
+              isWhite = false;
+            }
+            if (colorComponent != 0) {
+              isBlack = false;
+            }
+          }
+
+          if (isWhite) {
+            whiteCcount++;
+          }
+
+          if (isBlack) {
+            blackCount++;
+          }
+        }
+      }
+
+      const imagePixels = image.width * image.height;
+      console.log('white pixels rate' + (whiteCcount / imagePixels).toFixed(2));
+      console.log('black pixels rate' + (blackCount / imagePixels).toFixed(2));
+      console.log(
+          'transparent pixel rate' +
+          (transparentCount / imagePixels).toFixed(2));
+      expect(whiteCcount).to.be.below(imagePixels);
+      expect(blackCount).to.be.below(imagePixels);
+      expect(transparentCount).to.be.below(imagePixels);
+      // download the image
+      const link = document.createElement('a');
+      link.download = 'golden.png';
+      link.href = fiddleCanvas.toDataURL();
+      link.click();
+    })
+
+      teardown(()=>{
+        // clear all setup for model-viewer
+      })
+    })
                           })
                         })
