@@ -281,7 +281,8 @@ export class ImageComparator {
 
     const imagePixelCount = width * height;
     const backgroundPixelCount = imagePixelCount - modelPixelCount;
-    if (semiTransparentPixelCount === backgroundPixelCount) {
+    if (backgroundPixelCount > 0 &&
+        semiTransparentPixelCount === backgroundPixelCount) {
       throw new Error(
           'Candidate image is semi-transparent, probably the screenshot is taken before its poster faded!')
     }
