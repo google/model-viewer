@@ -21,6 +21,7 @@ import './styles/evaluators-spec.js';
 import './styles/style-effector-spec.js';
 import './decorators-spec.js';
 import './model-viewer-base-spec.js';
+import './model-viewer-spec.js';
 import './three-components/ModelScene-spec.js';
 import './three-components/Renderer-spec.js';
 import './three-components/ARRenderer-spec.js';
