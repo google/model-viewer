@@ -17,10 +17,16 @@ const DEFAULT_SCENARIO = {
   verticalFoV: 45
 }
 
+interface FidelitResult {
+  colorlessPixelCount: number;
+  transparentPixelCount: number;
+}
+
 const setupModelViewer =
     async (
         modelViewer: ModelViewerElement,
-        config: any) => {
+        config:
+            any) => {
   modelViewer.style.width = `${config.dimensions.width}px`;
   modelViewer.style.height = `${config.dimensions.height}px`;
 
@@ -43,44 +49,104 @@ const setupModelViewer =
   await waitForEvent(modelViewer, 'poster-dismissed');
 }
 
+                    async function captureScreenshot(blob: Blob):
+                        Promise<HTMLCanvasElement> {
+                          const image =
+                              await new Promise<HTMLImageElement>((resolve) => {
+                                const image = new Image();
+                                const url = URL.createObjectURL(blob);
+                                image.src = url;
+                                image.onload = () => {
+                                  resolve(image);
+                                }
+                              })
 
-                        suite.only('ModelViewerElement', () => {
-                          // global variable
-                          let nextId: number = 0;
-                          let tagName: string;
-                          let ModelViewer: Constructor<ModelViewerElement>;
+                          const fiddleCanvas = document.createElement('canvas');
+                          fiddleCanvas.width = image.width;
+                          fiddleCanvas.height = image.height;
+                          fiddleCanvas.getContext('2d')?.drawImage(
+                              image, 0, 0, image.width, image.height);
 
-                          setup(() => {
-                            tagName = `model-viewer-${nextId++}`;
-                            ModelViewer = class extends ModelViewerElement {
-                              static get is() {
-                                return tagName;
+                          return Promise.resolve(fiddleCanvas);
+                        }
+
+                    // TODO(sun765): this only test whether the screenshot is
+                    // colorless or not. Replace this with more robust test
+                    // later.
+                    function testFidelity(screenshotCanvas: HTMLCanvasElement):
+                        FidelitResult {
+                          let colorlessPixelCount = 0;
+                          let transparentPixelCount = 0;
+                          for (let row = 0; row < screenshotCanvas.height;
+                               row++) {
+                            for (let col = 0; col < screenshotCanvas.width;
+                                 col++) {
+                              const pixelData =
+                                  screenshotCanvas.getContext('2d')
+                                      ?.getImageData(col, row, 1, 1)
+                                      .data;
+                              let isWhite = true;
+                              let isBlack = true;
+
+                              if (pixelData![3] === 0)
+                                transparentPixelCount++;
+
+                              for (let i = 0; i < 3; i++) {
+                                const colorComponent = pixelData![i];
+                                if (colorComponent != 255) {
+                                  isWhite = false;
+                                }
+                                if (colorComponent != 0) {
+                                  isBlack = false;
+                                }
+                              }
+
+                              if (isWhite || isBlack) {
+                                colorlessPixelCount++;
                               }
                             }
-                            // not sure what does this do
-                            customElements.define(tagName, ModelViewer);
-                          })
+                          }
 
-                          BasicSpecTemplate(() => ModelViewer, () => tagName);
+                          return {colorlessPixelCount, transparentPixelCount};
+                        }
 
-                          suite('Fidelity Test', () => {
-                            let element: ModelViewerElement;
+                    suite.only('ModelViewerElement', () => {
+                      // global variable
+                      let nextId: number = 0;
+                      let tagName: string;
+                      let ModelViewer: Constructor<ModelViewerElement>;
 
-                            setup(() => {
-                              element = new ModelViewerElement();
-                              document.body.insertBefore(
-                                  element, document.body.firstChild);
-                              // read config here
-                            })
+                      setup(() => {
+                        tagName = `model-viewer-${nextId++}`;
+                        ModelViewer = class extends ModelViewerElement {
+                          static get is() {
+                            return tagName;
+                          }
+                        }
+                        // not sure what does this do
+                        customElements.define(tagName, ModelViewer);
+                      })
 
-                            teardown(() => {
-                              // clear whatever in the setup file
-                              if (element.parentNode != null) {
-                                element.parentNode.removeChild(element);
-                              }
-                            })
+                      BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-                            // TODO: change this to test all scenarios
+                      suite('Fidelity Test', () => {
+                        let element: ModelViewerElement;
+
+                        setup(() => {
+                          element = new ModelViewerElement();
+                          document.body.insertBefore(
+                              element, document.body.firstChild);
+                          // read config here
+                        })
+
+                        teardown(() => {
+                          // clear whatever in the setup file
+                          if (element.parentNode != null) {
+                            element.parentNode.removeChild(element);
+                          }
+                        })
+
+                        // TODO: change this to test all scenarios
     suite('Check all scenarions', () => {
       setup(async () => {
       await setupModelViewer(element, DEFAULT_SCENARIO);
@@ -89,78 +155,31 @@ const setupModelViewer =
     test('test one scenario first', async () => {
       // capture screenshot;
       const blob = await element.toBlob();
+      const screenshotCanvas = await captureScreenshot(blob);
+      const testResult = testFidelity(screenshotCanvas);
+      const {colorlessPixelCount, transparentPixelCount} = testResult;
 
-      const image = await new Promise<HTMLImageElement>((resolve) => {
-        const image = new Image();
-        const url = URL.createObjectURL(blob);
-        image.src = url;
-        image.onload = () => {
-          resolve(image);
-        }
-      });
-
-      const fiddleCanvas = document.createElement('canvas');
-      fiddleCanvas.width = image.width;
-      fiddleCanvas.height = image.height;
-      fiddleCanvas.getContext('2d')?.drawImage(
-          image, 0, 0, image.width, image.height);
-
-      // ayalysis
-      expect(fiddleCanvas.width).to.be.equal(image.width);
-      expect(fiddleCanvas.height).to.be.equal(image.height);
-
-      let whiteCcount = 0;
-      let blackCount = 0;
-      let transparentCount = 0;
-      for (let row = 0; row < image.height; row++) {
-        for (let col = 0; col < image.width; col++) {
-          const pixelData =
-              fiddleCanvas.getContext('2d')?.getImageData(col, row, 1, 1).data;
-          let isWhite = true;
-          let isBlack = true;
-
-          if (pixelData![3] === 0)
-            transparentCount++;
-
-          for (let i = 0; i < 3; i++) {
-            const colorComponent = pixelData![i];
-            if (colorComponent != 255) {
-              isWhite = false;
-            }
-            if (colorComponent != 0) {
-              isBlack = false;
-            }
-          }
-
-          if (isWhite) {
-            whiteCcount++;
-          }
-
-          if (isBlack) {
-            blackCount++;
-          }
-        }
-      }
-
-      const imagePixels = image.width * image.height;
-      console.log('white pixels rate' + (whiteCcount / imagePixels).toFixed(2));
-      console.log('black pixels rate' + (blackCount / imagePixels).toFixed(2));
+      const imagePixels = screenshotCanvas.width * screenshotCanvas.height;
+      console.log(
+          'colorless pixels rate' +
+          (colorlessPixelCount / imagePixels).toFixed(2));
       console.log(
           'transparent pixel rate' +
-          (transparentCount / imagePixels).toFixed(2));
-      expect(whiteCcount).to.be.below(imagePixels);
-      expect(blackCount).to.be.below(imagePixels);
-      expect(transparentCount).to.be.below(imagePixels);
+          (transparentPixelCount / imagePixels).toFixed(2));
+      expect(colorlessPixelCount).to.be.below(imagePixels);
+      expect(transparentPixelCount).to.be.below(imagePixels);
       // download the image
+      /*
       const link = document.createElement('a');
       link.download = 'golden.png';
-      link.href = fiddleCanvas.toDataURL();
+      link.href = screenshotCanvas.toDataURL();
       link.click();
+      */
     })
 
-      teardown(()=>{
+      teardown(() => {
         // clear all setup for model-viewer
       })
     })
-                          })
-                        })
+                      })
+                    })
