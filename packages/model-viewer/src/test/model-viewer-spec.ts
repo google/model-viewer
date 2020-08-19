@@ -1,23 +1,20 @@
 // why do we have to specify the type to be .js? something about mocha?
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor} from '../utilities.js';
-
-import {assetPath, waitForEvent} from './helpers.js';
+import {assetPath, CONFIG_PATH, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
 
-const DEFAULT_SCENARIO = {
-  name: 'khronos-Cube',
-  model: 'models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf',
-  lighting: 'environments/lightroom_14b.hdr',
-  dimensions: {width: 100, height: 100},
-  target: {x: 0, y: 0, z: 0},
-  orbit: {theta: 30, phi: 60, radius: 5},
-  verticalFoV: 45
+// where does the base comefrom?
+interface scenarioConfig {
+  name: string, model: string, lighting: string,
+      dimensions: {width: number, height: number},
+      target: {x: number, y: number, z: number},
+      orbit: {theta: number, phi: number, radius: number}, verticalFoV: number
 }
 
-interface FidelitResult {
+interface FidelityResult {
   colorlessPixelCount: number;
   transparentPixelCount: number;
 }
@@ -74,7 +71,7 @@ const setupModelViewer =
                     // colorless or not. Replace this with more robust test
                     // later.
                     function testFidelity(screenshotCanvas: HTMLCanvasElement):
-                        FidelitResult {
+                        FidelityResult {
                           let colorlessPixelCount = 0;
                           let transparentPixelCount = 0;
                           for (let row = 0; row < screenshotCanvas.height;
@@ -131,12 +128,15 @@ const setupModelViewer =
 
                       suite('Fidelity Test', () => {
                         let element: ModelViewerElement;
+                        let scenarios: Array<scenarioConfig>;
 
-                        setup(() => {
+                        setup(async () => {
                           element = new ModelViewerElement();
                           document.body.insertBefore(
                               element, document.body.firstChild);
-                          // read config here
+
+                          scenarios = (await (await fetch(CONFIG_PATH!)).json())
+                                          .scenarios;
                         })
 
                         teardown(() => {
@@ -144,12 +144,15 @@ const setupModelViewer =
                           if (element.parentNode != null) {
                             element.parentNode.removeChild(element);
                           }
+
+                          console.log(scenarios);
                         })
 
                         // TODO: change this to test all scenarios
     suite('Check all scenarions', () => {
+
       setup(async () => {
-      await setupModelViewer(element, DEFAULT_SCENARIO);
+      await setupModelViewer(element, scenarios[0]);
       })
 
     test('test one scenario first', async () => {

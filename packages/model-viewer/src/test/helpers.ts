@@ -123,6 +123,7 @@ export const dispatchSyntheticEvent =
 
 
 export const ASSETS_DIRECTORY = '../base/shared-assets/';
+export const CONFIG_PATH = deserializeUrl('../base/test/config.json');
 
 /**
  * Returns the full path for an asset by name. This is a convenience helper so
