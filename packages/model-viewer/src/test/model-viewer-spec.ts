@@ -1,63 +1,10 @@
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor} from '../utilities.js';
-import {assetPath, waitForEvent} from './helpers.js';
+
+import {assetPath, FidelityResult, SCENARIOS, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
-
-interface scenarioConfig {
-  name: string;
-  model: string;
-  lighting: string;
-  dimensions: {width: number, height: number};
-  target: {x: number, y: number, z: number};
-  orbit: {theta: number, phi: number, radius: number};
-  verticalFoV: number;
-  renderSkybox: boolean;
-}
-;
-
-interface FidelityResult {
-  colorlessPixelCount: number;
-  transparentPixelCount: number;
-}
-;
-
-const SCENARIOS: Array<scenarioConfig> = [
-  {
-    name: 'khronos-MetalRoughSpheres',
-    model:
-        'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf',
-    lighting: 'environments/lightroom_14b.hdr',
-    dimensions: {width: 100, height: 100},
-    target: {x: 0, y: 0, z: 0},
-    orbit: {theta: 0, phi: 90, radius: 12},
-    verticalFoV: 45,
-    renderSkybox: true
-  },
-  {
-    name: 'khronos-MetalRoughSpheres-HDR',
-    model:
-        'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf',
-    lighting: 'environments/spruit_sunrise_1k_HDR.hdr',
-    dimensions: {width: 100, height: 100},
-    target: {x: 0, y: 0, z: 0},
-    orbit: {theta: 0, phi: 90, radius: 12},
-    verticalFoV: 45,
-    renderSkybox: true
-  },
-  {
-    name: 'khronos-MetalRoughSpheres-LDR',
-    model:
-        'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf',
-    lighting: 'environments/spruit_sunrise_1k_LDR.jpg',
-    dimensions: {width: 100, height: 100},
-    target: {x: 0, y: 0, z: 0},
-    orbit: {theta: 0, phi: 90, radius: 12},
-    verticalFoV: 45,
-    renderSkybox: true
-  }
-];
 
 const setupModelViewer =
     async (modelViewer: ModelViewerElement, config: any) => {
