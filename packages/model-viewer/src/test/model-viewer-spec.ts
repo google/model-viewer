@@ -44,7 +44,8 @@ function testFidelity(screenshotContext: WebGLRenderingContext) {
   const height = screenshotContext.drawingBufferHeight;
 
   const pixels = new Uint8Array(width * height * COMPONENTS_PER_PIXEL);
-  // this reads the pixel data from the bottom left corner
+  // this function reads in the bottom-up direction from the coordinate
+  // specified ((0,0) is the bottom-left corner).
   screenshotContext.readPixels(
       0,
       0,
@@ -84,7 +85,7 @@ function testFidelity(screenshotContext: WebGLRenderingContext) {
   expect(colorlessPixelCountCanvas).to.be.below(imagePixelCount);
 };
 
-suite.only('ModelViewerElement', () => {
+suite('ModelViewerElement', () => {
   let nextId: number = 0;
   let tagName: string;
   let ModelViewer: Constructor<ModelViewerElement>;
