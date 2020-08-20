@@ -1,3 +1,4 @@
+import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor} from '../utilities.js';
 
@@ -9,6 +10,8 @@ const expect = chai.expect;
 const LIGHTROOM_PATH = 'environments/lightroom_14b.hdr';
 const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
 const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
+
+const COMPONENTS_PER_PIXEL = 4;
 
 const setupModelViewer =
     async (modelViewer: ModelViewerElement, lighting: string) => {
@@ -33,43 +36,36 @@ const setupModelViewer =
   await waitForEvent(modelViewer, 'poster-dismissed');
 };
 
-async function captureScreenshot(blob: Blob): Promise<HTMLCanvasElement> {
-  const image = await new Promise<HTMLImageElement>((resolve) => {
-    const image = new Image();
-    const url = URL.createObjectURL(blob);
-    image.src = url;
-    image.onload = () => {
-      resolve(image);
-    }
-  });
-
-  const fiddleCanvas = document.createElement('canvas');
-  fiddleCanvas.width = image.width;
-  fiddleCanvas.height = image.height;
-  fiddleCanvas.getContext('2d')?.drawImage(
-      image, 0, 0, image.width, image.height);
-
-  return Promise.resolve(fiddleCanvas);
-};
-
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
 // test in later pr.
-function testFidelity(screenshotCanvas: HTMLCanvasElement) {
-  let colorlessPixelCount = 0;
-  const width = screenshotCanvas.width;
-  const height = screenshotCanvas.height;
+function testFidelity(screenshotContext: WebGLRenderingContext) {
+  const width = screenshotContext.drawingBufferWidth;
+  const height = screenshotContext.drawingBufferHeight;
+
+  const pixels = new Uint8Array(width * height * COMPONENTS_PER_PIXEL);
+  // this reads the pixel data from the bottom left corner
+  screenshotContext.readPixels(
+      0,
+      0,
+      width,
+      height,
+      screenshotContext.RGBA,
+      screenshotContext.UNSIGNED_BYTE,
+      pixels);
+
+  let colorlessPixelCountCanvas = 0;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      const pixelData =
-          screenshotCanvas.getContext('2d')?.getImageData(col, row, 1, 1).data;
       let isWhite = true;
       let isBlack = true;
 
-      const alpha = pixelData![3];
+      // read pixel data from top left corner
+      const index = (height - row - 1) * width + col;
+      const position = index * COMPONENTS_PER_PIXEL;
 
       for (let i = 0; i < 3; i++) {
-        const colorComponent = pixelData![i] * alpha;
+        const colorComponent = pixels[position + i];
         if (colorComponent != 255) {
           isWhite = false;
         }
@@ -79,21 +75,14 @@ function testFidelity(screenshotCanvas: HTMLCanvasElement) {
       }
 
       if (isWhite || isBlack) {
-        colorlessPixelCount++;
+        colorlessPixelCountCanvas++;
       }
     }
   }
 
   const imagePixelCount = width * height;
-  expect(colorlessPixelCount).to.be.below(imagePixelCount);
+  expect(colorlessPixelCountCanvas).to.be.below(imagePixelCount);
 };
-
-function download(canvas: HTMLCanvasElement) {
-  const link = document.createElement('a');
-  link.download = 'golden.png';
-  link.href = canvas.toDataURL();
-  link.click();
-}
 
 suite.only('ModelViewerElement', () => {
   let nextId: number = 0;
@@ -129,10 +118,8 @@ suite.only('ModelViewerElement', () => {
       });
 
       test('Is model-viewer colorless', async () => {
-        const blob = await element.toBlob();
-        const screenshotCanvas = await captureScreenshot(blob);
-        testFidelity(screenshotCanvas);
-        download(screenshotCanvas);
+        const screenshotContext = element[$renderer].threeRenderer.context;
+        testFidelity(screenshotContext);
       });
     });
 
@@ -152,10 +139,8 @@ suite.only('ModelViewerElement', () => {
       });
 
       test('Is model-viewer colorless', async () => {
-        const blob = await element.toBlob();
-        const screenshotCanvas = await captureScreenshot(blob);
-        testFidelity(screenshotCanvas);
-        download(screenshotCanvas);
+        const screenshotContext = element[$renderer].threeRenderer.context;
+        testFidelity(screenshotContext);
       });
     });
 
@@ -175,10 +160,8 @@ suite.only('ModelViewerElement', () => {
       });
 
       test('Model-viewer is not colorless', async () => {
-        const blob = await element.toBlob();
-        const screenshotCanvas = await captureScreenshot(blob);
-        testFidelity(screenshotCanvas);
-        download(screenshotCanvas);
+        const screenshotContext = element[$renderer].threeRenderer.context;
+        testFidelity(screenshotContext);
       });
     });
   });
