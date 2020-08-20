@@ -233,6 +233,7 @@ export class ImageComparator {
     let modelPixelCount = 0;
     let colorlessPixelCount = 0;
     let semiTransparentPixelCount = 0;
+    let backgroundPixelCount = 0;
 
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
@@ -242,12 +243,13 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
-        const alpha = candidateImage[position + 3];
+        const candidateAlpha = candidateImage[position + 3];
+        const goldenAlpha = goldenImage[position + 3];
 
         let isWhitePixel = true;
         let isBlackPixel = true;
         for (let i = 0; i < 3; i++) {
-          const colorComponent = candidateImage[position + i] * alpha;
+          const colorComponent = candidateImage[position + i] * candidateAlpha;
           if (colorComponent != 255) {
             isWhitePixel = false;
           }
@@ -263,11 +265,12 @@ export class ImageComparator {
         // Sometimes the screenshot is taken when poster has not faded away, and
         // the model pixels are not transparent while the background pixels are
         // semi-transparent.
-        if (alpha != 255 && alpha != 0) {
+        if (candidateAlpha != 255 && candidateAlpha != 0) {
           semiTransparentPixelCount++;
         }
 
-        if (alpha === 0) {
+        if (goldenAlpha === 0) {
+          backgroundPixelCount++;
           continue;
         }
 
@@ -280,7 +283,7 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    const backgroundPixelCount = imagePixelCount - modelPixelCount;
+
     if (backgroundPixelCount > 0 &&
         semiTransparentPixelCount === backgroundPixelCount) {
       throw new Error(
