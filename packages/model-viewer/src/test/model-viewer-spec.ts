@@ -1,4 +1,3 @@
-// why do we have to specify the type to be .js? something about mocha?
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor} from '../utilities.js';
 import {assetPath, waitForEvent} from './helpers.js';
@@ -7,11 +6,14 @@ import {BasicSpecTemplate} from './templates.js';
 const expect = chai.expect;
 
 interface scenarioConfig {
-  name: string, model: string, lighting: string,
-      dimensions: {width: number, height: number},
-      target: {x: number, y: number, z: number},
-      orbit: {theta: number, phi: number, radius: number}, verticalFoV: number,
-      renderSkybox: boolean
+  name: string;
+  model: string;
+  lighting: string;
+  dimensions: {width: number, height: number};
+  target: {x: number, y: number, z: number};
+  orbit: {theta: number, phi: number, radius: number};
+  verticalFoV: number;
+  renderSkybox: boolean;
 }
 ;
 
@@ -103,7 +105,7 @@ async function captureScreenshot(blob: Blob): Promise<HTMLCanvasElement> {
 
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
-// test later.
+// test in later pr.
 function testFidelity(screenshotCanvas: HTMLCanvasElement): FidelityResult {
   let colorlessPixelCount = 0;
   let transparentPixelCount = 0;
@@ -136,7 +138,7 @@ function testFidelity(screenshotCanvas: HTMLCanvasElement): FidelityResult {
   return {colorlessPixelCount, transparentPixelCount};
 };
 
-suite.only('ModelViewerElement', () => {
+suite('ModelViewerElement', () => {
   let nextId: number = 0;
   let tagName: string;
   let ModelViewer: Constructor<ModelViewerElement>;
