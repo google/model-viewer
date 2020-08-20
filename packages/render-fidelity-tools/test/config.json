@@ -14,7 +14,7 @@
     {
       "name": "babylon",
       "description": "Babylon"
-    },    
+    },
     {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
@@ -160,6 +160,55 @@
       }
     },
     {
+      "name": "khronos-MetalRoughSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-HDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
+      "orbit": {
+        "radius": 12
+      },
+      "renderSkybox": true,
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheres-LDR",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
+      "orbit": {
+        "radius": 12
+      },
+      "exclude": [
+        "dspbr-pt",
+        "babylon"
+      ],
+      "renderSkybox": true
+    },
+    {
+      "name": "khronos-EnvironmentTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "dimensions": {
+        "width": 1024
+      },
+      "target": {
+        "y": 3.8
+      },
+      "orbit": {
+        "radius": 20
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-VC",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/VC/glTF-Binary/VC.glb",
       "target": {
@@ -208,55 +257,37 @@
       ]
     },
     {
-      "name": "khronos-MetalRoughSpheres",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "orbit": {
-        "radius": 12
+      "name": "khronos-AlphaBlendModeTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
+      "dimensions": {
+        "width": 1024,
+        "height": 512
       },
-      "renderSkybox": true
-    },
-    {
-      "name": "khronos-MetalRoughSpheres-HDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
-      "orbit": {
-        "radius": 12
+      "target": {
+        "y": 1.1
       },
-      "renderSkybox": true,
-      "exclude":[
+      "orbit": {
+        "radius": 6
+      },
+      "exclude": [
         "dspbr-pt"
       ]
     },
     {
-      "name": "khronos-MetalRoughSpheres-LDR",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
-      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg",
-      "orbit": {
-        "radius": 12
-      },
-      "exclude": [
-        "dspbr-pt",
-        "babylon"
-      ],
-      "renderSkybox": true
-    },
-    {
-      "name": "DirectionalLightTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "lighting": "../../../shared-assets/environments/spot1Lux.hdr",
+      "name": "khronos-BoomBoxWithAxes",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
       "dimensions": {
-        "width": 1024
+        "height": 1024
       },
       "target": {
-        "y": 3.8
+        "y": 0.01
       },
       "orbit": {
-        "radius": 20
+        "radius": 0.05
       },
       "exclude": [
         "dspbr-pt"
-      ],
-      "renderSkybox": true
+      ]
     },
     {
       "name": "khronos-2CylinderEngine",
@@ -321,22 +352,6 @@
       "orbit": {
         "phi": 60,
         "radius": 3.5
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-EnvironmentTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
-      "dimensions": {
-        "width": 1024
-      },
-      "target": {
-        "y": 3.8
-      },
-      "orbit": {
-        "radius": 20
       },
       "exclude": [
         "dspbr-pt"
@@ -414,7 +429,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -427,7 +442,7 @@
       "orbit": {
         "radius": 18.4
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -449,7 +464,7 @@
       "orbit": {
         "radius": 4.25
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -459,7 +474,7 @@
       "orbit": {
         "radius": 4.25
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -471,7 +486,7 @@
         "phi": 60,
         "radius": 23
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
       ]
     },
@@ -736,37 +751,22 @@
       "renderSkybox": true
     },
     {
-      "name": "khronos-AlphaBlendModeTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb",
+      "name": "DirectionalLightTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
+      "lighting": "../../../shared-assets/environments/spot1Lux.hdr",
       "dimensions": {
-        "width": 1024,
-        "height": 512
+        "width": 1024
       },
       "target": {
-        "y": 1.1
+        "y": 3.8
       },
       "orbit": {
-        "radius": 6
+        "radius": 20
       },
-      "exclude":[
+      "exclude": [
         "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-BoomBoxWithAxes",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-      "dimensions": {
-        "height": 1024
-      },
-      "target": {
-        "y": 0.01
-      },
-      "orbit": {
-        "radius": 0.05
-      },
-      "exclude":[
-        "dspbr-pt"
-      ]
+      ],
+      "renderSkybox": true
     }
   ]
 }
