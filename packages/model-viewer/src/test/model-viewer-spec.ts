@@ -1,32 +1,34 @@
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor} from '../utilities.js';
 
-import {assetPath, FidelityResult, SCENARIOS, waitForEvent} from './helpers.js';
+import {assetPath, waitForEvent} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
 
+const LIGHTROOM_PATH = 'environments/lightroom_14b.hdr';
+const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
+const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
+
 const setupModelViewer =
-    async (modelViewer: ModelViewerElement, config: any) => {
-  modelViewer.style.width = `${config.dimensions.width}px`;
-  modelViewer.style.height = `${config.dimensions.height}px`;
+    async (modelViewer: ModelViewerElement, lighting: string) => {
+  modelViewer.style.width = '100px';
+  modelViewer.style.height = '100px';
 
   modelViewer.style.backgroundColor = 'rgba(255,255,255,0)';
 
-  const {model, lighting, orbit, renderSkybox} = config;
-  modelViewer.src = assetPath(model);
+  modelViewer.src = assetPath(
+      'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf');
 
   const lightingPath = assetPath(lighting);
   modelViewer.environmentImage = lightingPath;
-  modelViewer.skyboxImage = renderSkybox ? lightingPath : null;
+  modelViewer.skyboxImage = lightingPath;
 
-  const {theta, phi, radius} = orbit;
-  modelViewer.minCameraOrbit = `auto auto ${radius}m`;
-  modelViewer.maxCameraOrbit = `auto auto ${radius}m`;
-  modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
-  const {x, y, z} = config.target;
-  modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
-  modelViewer.fieldOfView = `${config.verticalFoV}deg`;
+  modelViewer.minCameraOrbit = 'auto auto 12m';
+  modelViewer.maxCameraOrbit = 'auto auto 12m';
+  modelViewer.cameraOrbit = '0deg 90deg 12m';
+  modelViewer.cameraTarget = '0m 0m 0m';
+  modelViewer.fieldOfView = '45deg';
 
   await waitForEvent(modelViewer, 'poster-dismissed');
 };
@@ -53,21 +55,21 @@ async function captureScreenshot(blob: Blob): Promise<HTMLCanvasElement> {
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
 // test in later pr.
-function testFidelity(screenshotCanvas: HTMLCanvasElement): FidelityResult {
+function testFidelity(screenshotCanvas: HTMLCanvasElement) {
   let colorlessPixelCount = 0;
-  let transparentPixelCount = 0;
-  for (let row = 0; row < screenshotCanvas.height; row++) {
-    for (let col = 0; col < screenshotCanvas.width; col++) {
+  const width = screenshotCanvas.width;
+  const height = screenshotCanvas.height;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
       const pixelData =
           screenshotCanvas.getContext('2d')?.getImageData(col, row, 1, 1).data;
       let isWhite = true;
       let isBlack = true;
 
-      if (pixelData![3] === 0)
-        transparentPixelCount++;
+      const alpha = pixelData![3];
 
       for (let i = 0; i < 3; i++) {
-        const colorComponent = pixelData![i];
+        const colorComponent = pixelData![i] * alpha;
         if (colorComponent != 255) {
           isWhite = false;
         }
@@ -82,10 +84,18 @@ function testFidelity(screenshotCanvas: HTMLCanvasElement): FidelityResult {
     }
   }
 
-  return {colorlessPixelCount, transparentPixelCount};
+  const imagePixelCount = width * height;
+  expect(colorlessPixelCount).to.be.below(imagePixelCount);
 };
 
-suite('ModelViewerElement', () => {
+function download(canvas: HTMLCanvasElement) {
+  const link = document.createElement('a');
+  link.download = 'golden.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+suite.only('ModelViewerElement', () => {
   let nextId: number = 0;
   let tagName: string;
   let ModelViewer: Constructor<ModelViewerElement>;
@@ -103,33 +113,72 @@ suite('ModelViewerElement', () => {
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
   suite('Fidelity Test', () => {
-    SCENARIOS.forEach((scenario) => {
-      suite(`test ${scenario.name}`, () => {
-        let element: ModelViewerElement;
+    suite('Metal roughness spheres', () => {
+      let element: ModelViewerElement;
 
-        setup(async () => {
-          element = new ModelViewerElement();
-          document.body.insertBefore(element, document.body.firstChild);
-          await setupModelViewer(element, scenario);
-        });
+      setup(async () => {
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
+        await setupModelViewer(element, LIGHTROOM_PATH);
+      });
 
-        teardown(() => {
-          if (element.parentNode != null) {
-            element.parentNode.removeChild(element);
-          }
-        });
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
 
-        test(scenario.name, async () => {
-          const blob = await element.toBlob();
-          const screenshotCanvas = await captureScreenshot(blob);
-          const result = testFidelity(screenshotCanvas);
-          const {transparentPixelCount, colorlessPixelCount} = result;
-          const imagePixelCount =
-              screenshotCanvas.width * screenshotCanvas.height;
+      test('Is model-viewer colorless', async () => {
+        const blob = await element.toBlob();
+        const screenshotCanvas = await captureScreenshot(blob);
+        testFidelity(screenshotCanvas);
+        download(screenshotCanvas);
+      });
+    });
 
-          expect(transparentPixelCount).to.be.below(imagePixelCount);
-          expect(colorlessPixelCount).to.be.below(imagePixelCount);
-        });
+    suite('Metal roughness spheres HDR', () => {
+      let element: ModelViewerElement;
+
+      setup(async () => {
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
+        await setupModelViewer(element, SUNRISE_HDR_PATH);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test('Is model-viewer colorless', async () => {
+        const blob = await element.toBlob();
+        const screenshotCanvas = await captureScreenshot(blob);
+        testFidelity(screenshotCanvas);
+        download(screenshotCanvas);
+      });
+    });
+
+    suite('Metal roughness spheres LDR', () => {
+      let element: ModelViewerElement;
+
+      setup(async () => {
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
+        await setupModelViewer(element, SUNRISE_LDR_PATH);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test('Model-viewer is not colorless', async () => {
+        const blob = await element.toBlob();
+        const screenshotCanvas = await captureScreenshot(blob);
+        testFidelity(screenshotCanvas);
+        download(screenshotCanvas);
       });
     });
   });
