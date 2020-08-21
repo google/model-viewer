@@ -22,6 +22,9 @@ import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor} from '../utilities.js';
 
+let isWebXRBlocked = false;
+let isSceneViewerBlocked = false;
+
 /**
  * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
  * iOS can intent to their AR Quick Look.
@@ -45,17 +48,11 @@ export const openIOSARQuickLook = (() => {
  */
 export const openSceneViewer = (() => {
   const noArViewerSigil = '#model-viewer-no-ar-fallback';
-  let fallbackInvoked = false;
 
   return (gltfSrc: string,
           title: string,
           arScale: string,
           anchor: HTMLAnchorElement) => {
-    // If the fallback has ever been invoked this session, bounce early:
-    if (fallbackInvoked) {
-      return;
-    }
-
     // This is necessary because the original URL might have query parameters.
     // Since we're appending the whole URL as query parameter,
     // ? needs to be turned into & to not lose any of them.
@@ -63,7 +60,6 @@ export const openSceneViewer = (() => {
     const location = self.location.toString();
     const locationUrl = new URL(location);
     const modelUrl = new URL(gltfSrc, location);
-    const scheme = modelUrl.protocol.replace(':', '');
 
     locationUrl.hash = noArViewerSigil;
 
@@ -81,13 +77,12 @@ export const openSceneViewer = (() => {
     }
 
     const intent = `intent://arvr.google.com/scene-viewer/1.0${
-        intentParams}#Intent;scheme=${
-        scheme};package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+        intentParams}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
         encodeURIComponent(locationUrl.toString())};end;`;
 
     const undoHashChange = () => {
-      if (self.location.hash === noArViewerSigil && !fallbackInvoked) {
-        fallbackInvoked = true;
+      if (self.location.hash === noArViewerSigil && !isSceneViewerBlocked) {
+        isSceneViewerBlocked = true;
         // The new history will be the current URL with a new hash.
         // Go back one step so that we reset to the expected URL.
         // NOTE(cdata): this should not invoke any browser-level navigation
@@ -139,6 +134,7 @@ const $arAnchor = Symbol('arAnchor');
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
 const $onARTap = Symbol('onARTap');
+const $selectARMode = Symbol('selectARMode');
 
 export declare interface ARInterface {
   ar: boolean;
@@ -238,6 +234,9 @@ configuration or device capabilities');
         console.warn('Error while trying to present to AR');
         console.error(error);
         await this[$renderer].arRenderer.stopPresenting();
+        isWebXRBlocked = true;
+        this[$selectARMode]();
+        this.activateAR();
       }
     }
 
@@ -280,6 +279,10 @@ configuration or device capabilities');
         this[$scene].canScale = this.arScale !== 'fixed';
       }
 
+      this[$selectARMode]();
+    }
+
+    async[$selectARMode]() {
       this[$arMode] = ARMode.NONE;
       if (this.ar) {
         const arModes: ARMode[] = [];
@@ -288,11 +291,12 @@ configuration or device capabilities');
         });
 
         for (const value of arModes) {
-          if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE &&
+          if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
               await this[$renderer].arRenderer.supportsPresentation()) {
             this[$arMode] = ARMode.WEBXR;
             break;
-          } else if (value === 'scene-viewer' && IS_ANDROID) {
+          } else if (
+              value === 'scene-viewer' && IS_ANDROID && !isSceneViewerBlocked) {
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
           } else if (
