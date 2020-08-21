@@ -45,7 +45,7 @@
     "lit-element": "^2.2.1",
     "mkdirp": "^0.5.1",
     "pngjs": "^3.3.3",
-    "puppeteer": "^4.0.0",
+    "puppeteer": "^5.2.1",
     "resize-observer-polyfill": "^1.5.0",
     "rimraf": "^2.6.2"
   },
