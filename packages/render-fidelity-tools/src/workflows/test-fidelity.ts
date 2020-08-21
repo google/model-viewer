@@ -76,17 +76,17 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
       const testConfig = require(testConfigPath);
 
       const failCount = modelViewerFidelityErrors.length;
-      const waringCount = modelViewerFidelityWarnings.length;
+      const warningCount = modelViewerFidelityWarnings.length;
       const passCount = testConfig.scenarios.length;
-      const scenarioCount = failCount + waringCount + passCount;
+      const scenarioCount = failCount + warningCount + passCount;
 
       console.log(`Fidelity test on ${
           scenarioCount} scenarios finished. Model-Viewer passed ${
           passCount} scenarios ✅, failed ${failCount} scenarios ❌, ${
-          waringCount} senarios passed with warings❗️. (Uses ${
+          warningCount} senarios passed with warings❗️. (Uses ${
           FIDELITY_TEST_THRESHOLD} dB as threshold)`);
 
-      if (waringCount > 0) {
+      if (warningCount > 0) {
         console.log('🔍 Logging warning scenarios: ');
         for (const warning of modelViewerFidelityWarnings) {
           console.log(warning);

@@ -239,7 +239,7 @@ export class ImageComparator {
     // definitely that case
     const candidateTopLeftAlpha = candidateImage[3];
     const goldenTopLeftAlpha = goldenImage[3];
-    if (goldenTopLeftAlpha === 0 && candidateTopLeftAlpha != 0) {
+    if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
       throw new Error(WARNING_MESSAGE);
     }
 
