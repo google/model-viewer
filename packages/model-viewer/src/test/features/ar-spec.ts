@@ -14,7 +14,7 @@
  */
 
 import {IS_IE11, IS_IOS} from '../../constants.js';
-import {ARInterface, ARMixin, openIOSARQuickLook, openSceneViewer} from '../../features/ar.js';
+import {$openIOSARQuickLook, $openSceneViewer, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor} from '../../utilities.js';
 import {assetPath, spy, timePasses, waitForEvent} from '../helpers.js';
@@ -45,12 +45,13 @@ suite('ModelViewerElementBase with ARMixin', () => {
       if (IS_IE11) {
         return;
       }
-      let anchor: HTMLAnchorElement;
+      let element: ModelViewerElementBase&ARInterface;
       let intentUrls: Array<string>;
       let restoreAnchorClick: () => void;
 
       setup(() => {
-        anchor = document.createElement('a');
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
         intentUrls = [];
         restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
           value: function() {
@@ -60,16 +61,17 @@ suite('ModelViewerElementBase with ARMixin', () => {
       });
 
       teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
         restoreAnchorClick();
       });
 
       suite('openSceneViewer', () => {
         test('preserves query parameters in model URLs', () => {
-          openSceneViewer(
-              'https://example.com/model.gltf?token=foo',
-              'Example model',
-              'auto',
-              anchor);
+          element.src = 'https://example.com/model.gltf?token=foo';
+          element.alt = 'Example model';
+          (element as any)[$openSceneViewer]();
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -79,8 +81,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
         });
 
         test('defaults title and link', () => {
-          openSceneViewer(
-              'https://example.com/model.gltf', 'alt', 'auto', anchor);
+          element.src = 'https://example.com/model.gltf';
+          element.alt = 'alt';
+          (element as any)[$openSceneViewer]();
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -95,11 +98,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
         });
 
         test('keeps title and link when supplied', () => {
-          openSceneViewer(
-              'https://example.com/model.gltf?link=foo&title=bar',
-              'alt',
-              'auto',
-              anchor);
+          element.src = 'https://example.com/model.gltf?link=foo&title=bar';
+          element.alt = 'alt';
+          (element as any)[$openSceneViewer]();
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -118,7 +119,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
       suite('openQuickLook', () => {
         test('sets hash for fixed scale', () => {
-          openIOSARQuickLook('https://example.com/model.gltf', 'fixed', anchor);
+          element.src = 'https://example.com/model.gltf';
+          element.arScale = 'fixed';
+          (element as any)[$openIOSARQuickLook]();
 
           expect(intentUrls.length).to.be.equal(1);
 
