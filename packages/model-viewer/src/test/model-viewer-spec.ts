@@ -104,71 +104,37 @@ suite('ModelViewerElement', () => {
 
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-  suite('Fidelity Test', () => {
-    suite('Metal roughness spheres', () => {
-      let element: ModelViewerElement;
+  suite.only('Fidelity Test', () => {
+    let element: ModelViewerElement;
 
-      setup(async () => {
-        element = new ModelViewerElement();
-        setupModelViewer(element);
-        document.body.insertBefore(element, document.body.firstChild);
-      });
-
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
-      test('Model-viewer is not colorless', async () => {
-        await setupLighting(element, LIGHTROOM_PATH);
-        const screenshotContext = element[$renderer].threeRenderer.context;
-        testFidelity(screenshotContext);
-      });
+    setup(async () => {
+      element = new ModelViewerElement();
+      setupModelViewer(element);
+      document.body.insertBefore(element, document.body.firstChild);
     });
 
-    suite('Metal roughness spheres HDR', () => {
-      let element: ModelViewerElement;
-
-      setup(async () => {
-        element = new ModelViewerElement();
-        setupModelViewer(element);
-        document.body.insertBefore(element, document.body.firstChild);
-      });
-
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
-      test('Model-viewer is not colorless', async () => {
-        await setupLighting(element, SUNRISE_HDR_PATH);
-        const screenshotContext = element[$renderer].threeRenderer.context;
-        testFidelity(screenshotContext);
-      });
+    teardown(() => {
+      if (element.parentNode != null) {
+        element.parentNode.removeChild(element);
+      }
     });
 
-    suite('Metal roughness spheres LDR', () => {
-      let element: ModelViewerElement;
+    test('Metal roughness sphere', async () => {
+      await setupLighting(element, LIGHTROOM_PATH);
+      const screenshotContext = element[$renderer].threeRenderer.context;
+      testFidelity(screenshotContext);
+    });
 
-      setup(async () => {
-        element = new ModelViewerElement();
-        setupModelViewer(element);
-        document.body.insertBefore(element, document.body.firstChild);
-      });
+    test('Metal roughness sphere HDR', async () => {
+      await setupLighting(element, SUNRISE_HDR_PATH);
+      const screenshotContext = element[$renderer].threeRenderer.context;
+      testFidelity(screenshotContext);
+    });
 
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
-      test('Model-viewer is not colorless', async () => {
-        await setupLighting(element, SUNRISE_LDR_PATH);
-        const screenshotContext = element[$renderer].threeRenderer.context;
-        testFidelity(screenshotContext);
-      });
+    test('Metal roughness sphere LDR', async () => {
+      await setupLighting(element, SUNRISE_LDR_PATH);
+      const screenshotContext = element[$renderer].threeRenderer.context;
+      testFidelity(screenshotContext);
     });
   });
 })
