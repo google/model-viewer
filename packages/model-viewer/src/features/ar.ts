@@ -225,10 +225,16 @@ configuration or device capabilities');
         this[$arButtonContainer].classList.add('enabled');
         this[$arButtonContainer].addEventListener(
             'click', this[$onARButtonContainerClick]);
-      } else {
+      } else if (this[$arButtonContainer].classList.contains('enabled')) {
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
         this[$arButtonContainer].classList.remove('enabled');
+
+        // If AR went from working to not, notify the element.
+        const status = ARStatus.FAILED;
+        this.setAttribute('ar-status', status);
+        this.dispatchEvent(
+            new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
       }
     }
 
@@ -252,7 +258,7 @@ configuration or device capabilities');
         console.error(error);
         await this[$renderer].arRenderer.stopPresenting();
         isWebXRBlocked = true;
-        this[$selectARMode]();
+        await this[$selectARMode]();
         this.activateAR();
       }
     }
@@ -290,7 +296,7 @@ configuration or device capabilities');
           encodeURIComponent(locationUrl.toString())};end;`;
 
       const undoHashChange = () => {
-        if (self.location.hash === noArViewerSigil && !isSceneViewerBlocked) {
+        if (self.location.hash === noArViewerSigil) {
           isSceneViewerBlocked = true;
           // The new history will be the current URL with a new hash.
           // Go back one step so that we reset to the expected URL.
@@ -299,7 +305,8 @@ configuration or device capabilities');
           // navigating:
           self.history.back();
           this[$selectARMode]();
-          this.activateAR();
+          // Would be nice to activateAR() here, but webXR fails due to not
+          // seeing a user activation.
         }
       };
 
