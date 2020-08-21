@@ -50,7 +50,7 @@ suite('ModelViewerElementBase', () => {
     let ModelViewerElement: Constructor<ModelViewerElementBase>;
 
     setup(() => {
-      tagName = `model-viewer-${nextId++}`;
+      tagName = `model-viewer-base-${nextId++}`;
       ModelViewerElement = class extends ModelViewerElementBase {
         static get is() {
           return tagName;
