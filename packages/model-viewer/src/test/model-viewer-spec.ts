@@ -13,8 +13,7 @@ const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
 
 const COMPONENTS_PER_PIXEL = 4;
 
-const setupModelViewer =
-    async (modelViewer: ModelViewerElement, lighting: string) => {
+const setupModelViewer = async (modelViewer: ModelViewerElement) => {
   modelViewer.style.width = '100px';
   modelViewer.style.height = '100px';
 
@@ -23,18 +22,21 @@ const setupModelViewer =
   modelViewer.src = assetPath(
       'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf');
 
-  const lightingPath = assetPath(lighting);
-  modelViewer.environmentImage = lightingPath;
-  modelViewer.skyboxImage = lightingPath;
-
   modelViewer.minCameraOrbit = 'auto auto 12m';
   modelViewer.maxCameraOrbit = 'auto auto 12m';
   modelViewer.cameraOrbit = '0deg 90deg 12m';
   modelViewer.cameraTarget = '0m 0m 0m';
   modelViewer.fieldOfView = '45deg';
+};
+
+const setupLighting =
+    async (modelViewer: ModelViewerElement, lighting: string) => {
+  const lightingPath = assetPath(lighting);
+  modelViewer.environmentImage = lightingPath;
+  modelViewer.skyboxImage = lightingPath;
 
   await waitForEvent(modelViewer, 'poster-dismissed');
-};
+}
 
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
@@ -108,8 +110,8 @@ suite('ModelViewerElement', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
+        setupModelViewer(element);
         document.body.insertBefore(element, document.body.firstChild);
-        await setupModelViewer(element, LIGHTROOM_PATH);
       });
 
       teardown(() => {
@@ -118,7 +120,8 @@ suite('ModelViewerElement', () => {
         }
       });
 
-      test('Is model-viewer colorless', async () => {
+      test('Model-viewer is not colorless', async () => {
+        await setupLighting(element, LIGHTROOM_PATH);
         const screenshotContext = element[$renderer].threeRenderer.context;
         testFidelity(screenshotContext);
       });
@@ -129,8 +132,8 @@ suite('ModelViewerElement', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
+        setupModelViewer(element);
         document.body.insertBefore(element, document.body.firstChild);
-        await setupModelViewer(element, SUNRISE_HDR_PATH);
       });
 
       teardown(() => {
@@ -139,7 +142,8 @@ suite('ModelViewerElement', () => {
         }
       });
 
-      test('Is model-viewer colorless', async () => {
+      test('Model-viewer is not colorless', async () => {
+        await setupLighting(element, SUNRISE_HDR_PATH);
         const screenshotContext = element[$renderer].threeRenderer.context;
         testFidelity(screenshotContext);
       });
@@ -150,8 +154,8 @@ suite('ModelViewerElement', () => {
 
       setup(async () => {
         element = new ModelViewerElement();
+        setupModelViewer(element);
         document.body.insertBefore(element, document.body.firstChild);
-        await setupModelViewer(element, SUNRISE_LDR_PATH);
       });
 
       teardown(() => {
@@ -161,6 +165,7 @@ suite('ModelViewerElement', () => {
       });
 
       test('Model-viewer is not colorless', async () => {
+        await setupLighting(element, SUNRISE_LDR_PATH);
         const screenshotContext = element[$renderer].threeRenderer.context;
         testFidelity(screenshotContext);
       });
