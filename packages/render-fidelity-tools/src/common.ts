@@ -233,7 +233,10 @@ export class ImageComparator {
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
 
-    // Sometimes the screenshot is taken when poster has not faded away
+    // Sometimes the screenshot is taken when poster has not faded away, and
+    // when the golden image's background (use top left pixel to represent) is
+    // transparent while the candidate(mode-viewer) image is not, it's
+    // definitely that case
     const candidateTopLeftAlpha = candidateImage[3];
     const goldenTopLeftAlpha = goldenImage[3];
     if (goldenTopLeftAlpha === 0 && candidateTopLeftAlpha != 0) {
@@ -251,12 +254,13 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
-        const alpha = candidateImage[position + 3];
+        // alpha is in range 0~255 here, map it to 0~1
+        const alpha = candidateImage[position + 3] / 255;
 
         let isWhitePixel = true;
         let isBlackPixel = true;
         for (let i = 0; i < 3; i++) {
-          const colorComponent = candidateImage[position + i];
+          const colorComponent = candidateImage[position + i] * alpha;
           if (colorComponent != 255) {
             isWhitePixel = false;
           }
