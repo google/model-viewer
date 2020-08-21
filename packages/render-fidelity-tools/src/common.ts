@@ -30,6 +30,9 @@ export const DEVICE_PIXEL_RATIO: number = 2;
 // scenario whose rms value (in dB) is bigger than the threshold will fail.
 export const FIDELITY_TEST_THRESHOLD: number = -22;
 
+export const WARNING_MESSAGE: string =
+    'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!';
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
@@ -234,8 +237,7 @@ export class ImageComparator {
     const candidateTopLeftAlpha = candidateImage[3];
     const goldenTopLeftAlpha = goldenImage[3];
     if (goldenTopLeftAlpha === 0 && candidateTopLeftAlpha != 0) {
-      throw new Error(
-          'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!');
+      throw new Error(WARNING_MESSAGE);
     }
 
     let modelPixelCount = 0;

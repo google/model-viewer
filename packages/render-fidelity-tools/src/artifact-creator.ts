@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -54,6 +54,7 @@ export class ArtifactCreator {
     const analyzedScenarios: Array<ScenarioConfig> = [];
     const {goldens, outputDirectory} = this;
     const modelViewerFidelityErrors: Array<string> = [];
+    const modelViewerFidelityWarnings: Array<string> = [];
 
     for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
@@ -98,9 +99,15 @@ export class ArtifactCreator {
         analysisResults =
             await this.analyze(screenshot, goldens, scenario, dimensions);
       } catch (error) {
-        const errorMessage = `Fail to analyze scenario :${
+        const message = `Fail to analyze scenario :${
             scenarioName}! Error message: ${error.message}`;
-        modelViewerFidelityErrors.push(errorMessage);
+
+        if (error.message === WARNING_MESSAGE) {
+          modelViewerFidelityWarnings.push(message);
+        } else {
+          modelViewerFidelityErrors.push(message);
+        }
+
         continue;
       }
 
@@ -138,6 +145,10 @@ export class ArtifactCreator {
     await fs.writeFile(
         join(outputDirectory, 'modelViewerFidelityErrors.json'),
         JSON.stringify(modelViewerFidelityErrors));
+
+    await fs.writeFile(
+        join(outputDirectory, 'modelViewerFidelityWarnings.json'),
+        JSON.stringify(modelViewerFidelityWarnings));
 
     return scenarios;
   }
