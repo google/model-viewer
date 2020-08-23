@@ -30,6 +30,9 @@ export const DEVICE_PIXEL_RATIO: number = 2;
 // scenario whose rms value (in dB) is bigger than the threshold will fail.
 export const FIDELITY_TEST_THRESHOLD: number = -22;
 
+export const WARNING_MESSAGE: string =
+    'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!';
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
@@ -230,9 +233,18 @@ export class ImageComparator {
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
 
+    // Sometimes the screenshot is taken when poster has not faded away, and
+    // when the golden image's background (use top left pixel to represent) is
+    // transparent while the candidate(mode-viewer) image is not, it's
+    // definitely that case
+    const candidateTopLeftAlpha = candidateImage[3];
+    const goldenTopLeftAlpha = goldenImage[3];
+    if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
+      throw new Error(WARNING_MESSAGE);
+    }
+
     let modelPixelCount = 0;
     let colorlessPixelCount = 0;
-    let transparentPixelCount = 0;
 
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
@@ -242,7 +254,8 @@ export class ImageComparator {
         // b, a.  here position is the index for current pixel's r , position+3
         // is index for its alpha
         const position = index * COMPONENTS_PER_PIXEL;
-        const alpha = candidateImage[position + 3];
+        // alpha is in range 0~255 here, map it to 0~1
+        const alpha = candidateImage[position + 3] / 255;
 
         let isWhitePixel = true;
         let isBlackPixel = true;
@@ -260,10 +273,6 @@ export class ImageComparator {
           colorlessPixelCount++;
         }
 
-        if (alpha != 255) {
-          transparentPixelCount++;
-        }
-
         if (alpha === 0) {
           continue;
         }
@@ -277,10 +286,6 @@ export class ImageComparator {
     }
 
     const imagePixelCount = width * height;
-    if (transparentPixelCount === imagePixelCount) {
-      throw new Error(
-          'Candidate image is transparent or semi-transparent, probably the screenshot is taken before its poster faded!')
-    }
 
     if (colorlessPixelCount === imagePixelCount) {
       throw new Error('Candidate image is colorless!');
