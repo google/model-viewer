@@ -57,7 +57,7 @@ if (process.argv.length > 3) {
   }
 }
 
-screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
+screenshotCreator.fidelityTest(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();

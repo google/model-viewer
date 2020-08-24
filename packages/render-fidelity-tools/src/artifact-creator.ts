@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+import {FollowCamera} from '@babylonjs/core';
 import {promises as fs} from 'fs';
 import mkdirp from 'mkdirp';
 import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
+import {AutoTestResult, AutoTestResults, DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -48,6 +49,7 @@ export class ArtifactCreator {
         renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
   }
 
+  /*
   async captureAndAnalyzeScreenshots(
       scenarioWhitelist: Set<string>|null = null) {
     const {scenarios} = this.config;
@@ -152,60 +154,170 @@ export class ArtifactCreator {
 
     return scenarios;
   }
-
-  protected async analyze(
-      screenshot: Buffer, goldens: Array<GoldenConfig>,
-      scenario: ScenarioConfig,
-      dimensions: Dimensions): Promise<AnalysisResults> {
+*/
+  async compareRenderers(scenario: ScenarioConfig, dimensions: Dimensions) {
     const analysisResults: AnalysisResults = [];
-    const {rootDirectory, outputDirectory} = this;
+    const {rootDirectory, outputDirectory, goldens} = this;
     const {name: scenarioName, exclude} = scenario;
 
-    for (const goldenConfig of goldens) {
-      const {name: rendererName} = goldenConfig;
+    const modelViewerIndex = 0;
+    const modelViewerGoldenPath = join(
+        rootDirectory, 'goldens', scenarioName, goldens[modelViewerIndex].file);
+    let modelViewerGolden;
+    try {
+      modelViewerGolden = await fs.readFile(modelViewerGoldenPath);
+    } catch (error) {
+      throw new Error(`❌ Failed to read model-viewer's ${
+          scenarioName} golden! Error message: ${error.message}`);
+    }
 
-      if (exclude != null && exclude.includes(rendererName)) {
+    const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
+
+    for (let golden of goldens) {
+      if (golden.name === 'model-viewer' ||
+          (exclude != null && exclude.includes(golden.name))) {
         continue;
       }
 
-      console.log(
-          `\n🔍 Comparing <model-viewer> to ${goldenConfig.description}`);
+      console.log(`\n🔍 Comparing <model-viewer> to ${golden.description}`);
 
-      const goldenPath =
-          join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
-
-      let golden;
+      const candidateGoldenPath =
+          join(rootDirectory, 'goldens', scenarioName, golden.file);
+      let candidateGolden;
       try {
-        golden = await fs.readFile(goldenPath);
+        candidateGolden = await fs.readFile(candidateGoldenPath);
       } catch (error) {
-        throw new Error(`❌ Failed to read ${rendererName}'s ${
+        throw new Error(`❌ Failed to read ${golden.name}'s ${
             scenarioName} golden! Error message: ${error.message}`);
       }
 
-      const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
-      const goldenImage = pngjs.PNG.sync.read(golden).data;
-
-      const imageDimensions = {
-        width: dimensions.width * DEVICE_PIXEL_RATIO,
-        height: dimensions.height * DEVICE_PIXEL_RATIO
-      };
-      const comparator =
-          new ImageComparator(screenshotImage, goldenImage, imageDimensions);
-
-      await fs.writeFile(
-          join(outputDirectory, scenarioName, goldenConfig.file), golden);
-
-      const {analysis} = comparator.analyze();
-      const {rmsDistanceRatio} = analysis;
-      console.log(
-          `\n  📊 Decibels of root mean square color distance (without threshold): ${
-              (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
-
-      analysisResults.push(analysis);
+      const candidateGoldenImage = pngjs.PNG.sync.read(candidateGolden).data;
+      try {
+        const analysisResult = await this.analyze(
+            modelViewerGoldenImage, candidateGoldenImage, dimensions);
+        analysisResults.push(analysisResult);
+      } catch (error) {
+        if (error.message === WARNING_MESSAGE) {
+          continue;
+        }
+      }
     }
 
-    return analysisResults;
+    console.log(`\n💾 Recording analysis`);
+    await fs.writeFile(
+        join(outputDirectory, scenarioName, 'analysis.json'),
+        JSON.stringify(analysisResults));
   }
+
+  // TODO implement this later
+  async autoTest() {
+  }
+
+  async fidelityTest(scenarioWhitelist: Set<string>|null = null) {
+    const {scenarios} = this.config;
+    const {outputDirectory} = this;
+    // const analyzedScenarios: Array<ScenarioConfig> = [];
+
+    // const autoTestResults: AutoTestResults;
+
+    for (let scenarioBase of scenarios) {
+      const scenarioName = scenarioBase.name;
+      const scenario = this[$configReader].scenarioConfig(scenarioName)!;
+      const {dimensions} = scenario;
+
+      if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
+        continue;
+      }
+
+      console.log(`\n🎨 Scenario: ${scenarioName}`);
+
+      const scenarioOutputDirectory = join(outputDirectory, scenarioName);
+      mkdirp.sync(scenarioOutputDirectory);
+
+      // TODO try and catch errors
+      await this.compareRenderers(scenario, dimensions);
+
+      // const autoTestResult = await this.autoTest();
+    }
+
+    // write autoTest Results
+    // write fidelityTestResults
+  }
+
+  protected async analyze(
+      candidateImage: Buffer, goldenImage: Buffer,
+      dimensions: Dimensions): Promise<ImageComparisonAnalysis> {
+    const imageDimensions = {
+      width: dimensions.width * DEVICE_PIXEL_RATIO,
+      height: dimensions.height * DEVICE_PIXEL_RATIO
+    };
+    const comparator =
+        new ImageComparator(candidateImage, goldenImage, imageDimensions);
+
+    const {analysis} = comparator.analyze();
+    const {rmsDistanceRatio} = analysis;
+    console.log(
+        `\n  📊 Decibels of root mean square color distance (without threshold): ${
+            (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
+
+    return analysis;
+  }
+
+  /*
+    protected async analyze(
+        screenshot: Buffer, goldens: Array<GoldenConfig>,
+        scenario: ScenarioConfig,
+        dimensions: Dimensions): Promise<AnalysisResults> {
+      const analysisResults: AnalysisResults = [];
+      const {rootDirectory, outputDirectory} = this;
+      const {name: scenarioName, exclude} = scenario;
+
+      for (const goldenConfig of goldens) {
+        const {name: rendererName} = goldenConfig;
+
+        if (exclude != null && exclude.includes(rendererName)) {
+          continue;
+        }
+
+        console.log(
+            `\n🔍 Comparing <model-viewer> to ${goldenConfig.description}`);
+
+        const goldenPath =
+            join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
+
+        let golden;
+        try {
+          golden = await fs.readFile(goldenPath);
+        } catch (error) {
+          throw new Error(`❌ Failed to read ${rendererName}'s ${
+              scenarioName} golden! Error message: ${error.message}`);
+        }
+
+        const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
+        const goldenImage = pngjs.PNG.sync.read(golden).data;
+
+        const imageDimensions = {
+          width: dimensions.width * DEVICE_PIXEL_RATIO,
+          height: dimensions.height * DEVICE_PIXEL_RATIO
+        };
+        const comparator =
+            new ImageComparator(screenshotImage, goldenImage, imageDimensions);
+
+        await fs.writeFile(
+            join(outputDirectory, scenarioName, goldenConfig.file), golden);
+
+        const {analysis} = comparator.analyze();
+        const {rmsDistanceRatio} = analysis;
+        console.log(
+            `\n  📊 Decibels of root mean square color distance (without
+    threshold): ${ (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
+
+        analysisResults.push(analysis);
+      }
+
+      return analysisResults;
+    }
+    */
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,

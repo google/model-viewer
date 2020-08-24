@@ -33,6 +33,18 @@ export const FIDELITY_TEST_THRESHOLD: number = -22;
 export const WARNING_MESSAGE: string =
     'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!';
 
+export interface AutoTestResult {
+  result: ImageComparisonAnalysis|null;
+  warning: string|null;
+  error: string|null;
+}
+
+export interface AutoTestResults {
+  results: Array<ImageComparisonAnalysis>;
+  warnings: Array<string>;
+  errors: Array<string>;
+}
+
 export interface ImageComparisonAnalysis {
   rmsDistanceRatio: number;
 }
