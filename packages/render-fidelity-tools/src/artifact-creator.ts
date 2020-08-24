@@ -155,10 +155,13 @@ export class ArtifactCreator {
     return scenarios;
   }
 */
-  async compareRenderers(scenario: ScenarioConfig, dimensions: Dimensions) {
+  async compareRenderers(scenario: ScenarioConfig) {
     const analysisResults: AnalysisResults = [];
     const {rootDirectory, outputDirectory, goldens} = this;
-    const {name: scenarioName, exclude} = scenario;
+    const {name: scenarioName, exclude, dimensions} = scenario;
+
+    console.log(
+        `Start to compare model-viewer's golden with other renderers' goldens:`);
 
     const modelViewerIndex = 0;
     const modelViewerGoldenPath = join(
@@ -209,16 +212,56 @@ export class ArtifactCreator {
         JSON.stringify(analysisResults));
   }
 
-  // TODO implement this later
-  async autoTest() {
+  async autoTest(scenario: ScenarioConfig): Promise<ImageComparisonAnalysis> {
+    const {rootDirectory, outputDirectory, goldens} = this;
+    const {name: scenarioName, dimensions} = scenario;
+    const scenarioOutputDirectory = join(outputDirectory, scenarioName)
+
+    console.log(
+        `start compare model-viewer's golden with model-viewer's screenshot generated from fidelity test:`);
+
+    let screenshot;
+    try {
+      screenshot = await this.captureScreenshot(
+          'model-viewer',
+          scenarioName,
+          dimensions,
+          join(scenarioOutputDirectory, 'model-viewer.png'),
+          60);
+    } catch (error) {
+      throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
+          scenarioName}. Error message: ${error.message}`);
+    }
+
+    if (screenshot == null) {
+      throw new Error(`❌ Model-viewer's screenshot of ${
+          scenarioName} is not captured correctly(value is null).`);
+    }
+    const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
+
+    const modelViewerIndex = 0;
+    const modelViewerGoldenPath = join(
+        rootDirectory, 'goldens', scenarioName, goldens[modelViewerIndex].file);
+    let modelViewerGolden;
+    try {
+      modelViewerGolden = await fs.readFile(modelViewerGoldenPath);
+    } catch (error) {
+      throw new Error(`❌ Failed to read model-viewer's ${
+          scenarioName} golden! Error message: ${error.message}`);
+    }
+    const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
+
+    const result =
+        await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
+    return result;
   }
 
   async fidelityTest(scenarioWhitelist: Set<string>|null = null) {
     const {scenarios} = this.config;
     const {outputDirectory} = this;
-    // const analyzedScenarios: Array<ScenarioConfig> = [];
-
-    // const autoTestResults: AutoTestResults;
+    const analyzedScenarios: Array<ScenarioConfig> = [];
+    const autoTestResults:
+        AutoTestResults = {results: [], errors: [], warnings: []};
 
     for (let scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
@@ -235,13 +278,37 @@ export class ArtifactCreator {
       mkdirp.sync(scenarioOutputDirectory);
 
       // TODO try and catch errors
-      await this.compareRenderers(scenario, dimensions);
+      await this.compareRenderers(scenario);
 
-      // const autoTestResult = await this.autoTest();
+      // TODO try and catch
+      try {
+        const autoTestResult = await this.autoTest(scenario);
+        autoTestResults.results.push(autoTestResult);
+      } catch (error) {
+        const message = `Fail to analyze scenario :${
+            scenarioName}! Error message: ${error.message}`;
+
+        if (error.message === WARNING_MESSAGE) {
+          autoTestResults.warnings.push(message);
+        } else {
+          autoTestResults.errors.push(message);
+        }
+      }
+
+      analyzedScenarios.push(scenario);
     }
 
-    // write autoTest Results
-    // write fidelityTestResults
+    console.log('💾 Recording configuration');
+
+    const finalConfig: ImageComparisonConfig =
+        Object.assign({}, this.config, {scenarios: analyzedScenarios});
+
+    await fs.writeFile(
+        join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
+
+    await fs.writeFile(
+        join(outputDirectory, 'autoTestResults.json'),
+        JSON.stringify(autoTestResults));
   }
 
   protected async analyze(
