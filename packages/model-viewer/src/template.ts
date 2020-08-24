@@ -168,7 +168,6 @@ canvas.show {
   width: 100%;
   height: 100%;
   background: var(--progress-mask, #fff);
-  transition: opacity 0.3s;
   opacity: 0.2;
 }
 
@@ -178,7 +177,6 @@ canvas.show {
   left: 0;
   width: 100%;
   height: var(--progress-bar-height, 5px);
-  transition: transform 0.09s;
   transform-origin: top left;
   transform: scaleX(0);
   overflow: hidden;
