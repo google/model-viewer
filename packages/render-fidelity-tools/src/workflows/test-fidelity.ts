@@ -62,29 +62,30 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
 
-      const autoTestResultsPath = join(outputDirectory, 'autoTestResults.json');
+      const fidelityRegressionPath =
+          join(outputDirectory, 'fidelityRegressionResults.json');
       const {
-        results: autoTestresults,
-        errors: autoTestErrors,
-        warnings: autoTestWarnings
-      } = require(autoTestResultsPath);
+        results: fidelityRegressionResults,
+        errors: fidelityRegressionErrors,
+        warnings: fidelityRegressionWarnings
+      } = require(fidelityRegressionPath);
 
-      const autoTestPassedCount = autoTestresults.length;
-      const autoTestErrorCount = autoTestErrors.length;
-      const autoTestWarningCount = autoTestWarnings.length;
-      const scenarioCount =
-          autoTestPassedCount + autoTestErrorCount + autoTestWarningCount
+      const fidelityRegressionPassedCount = fidelityRegressionResults.length;
+      const fidelityRegressionErrorCount = fidelityRegressionErrors.length;
+      const fidelityRegressionWarningCount = fidelityRegressionWarnings.length;
+      const scenarioCount = fidelityRegressionPassedCount +
+          fidelityRegressionErrorCount + fidelityRegressionWarningCount
 
-      console.log(`Auto test on ${
+      console.log(`Fidelity regression test on ${
           scenarioCount} scenarios finished. Model-Viewer passed ${
-          autoTestPassedCount} scenarios ✅, failed ${
-          autoTestErrorCount} scenarios ❌, ${
-          autoTestWarningCount} senarios passed with warings❗️. (Uses ${
+          fidelityRegressionPassedCount} scenarios ✅, failed ${
+          fidelityRegressionErrorCount} scenarios ❌, ${
+          fidelityRegressionWarningCount} senarios passed with warings❗️. (Uses ${
           FIDELITY_TEST_THRESHOLD} dB as threshold)`);
 
-      if (autoTestWarningCount > 0) {
+      if (fidelityRegressionWarningCount > 0) {
         console.log('🔍 Logging warning scenarios: ');
-        for (const warning of autoTestWarnings) {
+        for (const warning of fidelityRegressionWarnings) {
           console.log(warning);
         }
 
@@ -92,9 +93,9 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
             '❗️Fidelity test detected some warnings! Please try to fix them');
       }
 
-      if (autoTestErrorCount > 0) {
+      if (fidelityRegressionErrorCount > 0) {
         console.log('🔍 Logging failed scenarios: ');
-        for (const error of autoTestErrors) {
+        for (const error of fidelityRegressionErrors) {
           console.log(error);
         }
       }
@@ -116,9 +117,9 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
         }
       }
 
-      if (autoTestErrorCount > 0 || compareRendererErrorCount > 0) {
+      if (fidelityRegressionErrorCount > 0 || compareRendererErrorCount > 0) {
         throw new Error(
-            ' ❌ Fidelity test failed! Please fix the errors list above before mering this pr!');
+            ' ❌ Fidelity test failed! Please fix the errors listed above before mering this pr!');
       }
     })
     .catch((error: any) => core.setFailed(error.message));

@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {AutoTestResults, DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults as FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -67,13 +67,15 @@ export class ArtifactCreator {
           scenarioName} golden! Error message: ${error.message}`);
     }
 
+    // save goldens images to result folder which will be used to show in the
+    // result-viewer page.
     await fs.writeFile(
         join(outputDirectory, scenarioName, goldens[modelViewerIndex].file),
         modelViewerGolden);
 
     const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
 
-    for (let golden of goldens) {
+    for (const golden of goldens) {
       if (golden.name === 'model-viewer' ||
           (exclude != null && exclude.includes(golden.name))) {
         continue;
@@ -91,6 +93,8 @@ export class ArtifactCreator {
             scenarioName} golden! Error message: ${error.message}`);
       }
 
+      // save goldens images to result folder which will be used to show in the
+      // result-viewer page.
       await fs.writeFile(
           join(outputDirectory, scenarioName, golden.file), candidateGolden);
 
@@ -107,7 +111,8 @@ export class ArtifactCreator {
         JSON.stringify(scenarioRecord));
   }
 
-  async autoTest(scenario: ScenarioConfig): Promise<ImageComparisonAnalysis> {
+  async captureAndAnalyzeScreenshot(scenario: ScenarioConfig):
+      Promise<ImageComparisonAnalysis> {
     const {rootDirectory, goldens} = this;
     const {name: scenarioName, dimensions} = scenario;
 
@@ -116,8 +121,10 @@ export class ArtifactCreator {
 
     let screenshot;
     try {
+      // set the output path to an empty string to tell puppeteer to not save
+      // the screenshot image
       screenshot = await this.captureScreenshot(
-          'model-viewer', scenarioName, dimensions, null, 60);
+          'model-viewer', scenarioName, dimensions, '', 60);
     } catch (error) {
       throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
           scenarioName}. Error message: ${error.message}`);
@@ -146,6 +153,8 @@ export class ArtifactCreator {
 
     const rmsInDb = toDecibel(result.rmsDistanceRatio);
 
+    // the rmsInDb is negative, and the less negative means the less closer the
+    // two images are
     if (rmsInDb > FIDELITY_TEST_THRESHOLD) {
       throw new Error(`❌ Senarios name: ${scenario.name}, rms distance ratio: ${
           rmsInDb.toFixed(2)} dB.`);
@@ -158,12 +167,12 @@ export class ArtifactCreator {
     const {scenarios} = this.config;
     const {outputDirectory} = this;
     const analyzedScenarios: Array<ScenarioConfig> = [];
-    const autoTestResults:
-        AutoTestResults = {results: [], errors: [], warnings: []};
+    const fidelityRegressionResults:
+        FidelityRegressionResults = {results: [], errors: [], warnings: []};
 
     const compareRenderersErrors: Array<string> = [];
 
-    for (let scenarioBase of scenarios) {
+    for (const scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
       const scenario = this[$configReader].scenarioConfig(scenarioName)!;
 
@@ -186,16 +195,16 @@ export class ArtifactCreator {
       }
 
       try {
-        const autoTestResult = await this.autoTest(scenario);
-        autoTestResults.results.push(autoTestResult);
+        const autoTestResult = await this.captureAndAnalyzeScreenshot(scenario);
+        fidelityRegressionResults.results.push(autoTestResult);
       } catch (error) {
         const message = `❌Fail to analyze scenario :${
             scenarioName}! Error message: ${error.message}`;
 
         if (error.message === WARNING_MESSAGE) {
-          autoTestResults.warnings.push(message);
+          fidelityRegressionResults.warnings.push(message);
         } else {
-          autoTestResults.errors.push(message);
+          fidelityRegressionResults.errors.push(message);
         }
       }
 
@@ -213,8 +222,8 @@ export class ArtifactCreator {
         join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
 
     await fs.writeFile(
-        join(outputDirectory, 'autoTestResults.json'),
-        JSON.stringify(autoTestResults));
+        join(outputDirectory, 'fidelityRegressionResults.json'),
+        JSON.stringify(fidelityRegressionResults));
   }
 
   protected async analyze(
@@ -238,7 +247,7 @@ export class ArtifactCreator {
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
-      outputPath: string|null = join(this.outputDirectory, 'model-viewer.png'),
+      outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
       maxTimeInSec: number = -1) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
@@ -330,9 +339,8 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    const screenshot = outputPath ?
-        await page.screenshot({path: outputPath, omitBackground: true}) :
-        await page.screenshot({omitBackground: true});
+    const screenshot =
+        await page.screenshot({path: outputPath, omitBackground: true});
 
     await browser.close();
 
