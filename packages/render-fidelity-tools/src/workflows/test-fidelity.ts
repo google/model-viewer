@@ -62,22 +62,17 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
 
-      const modelViewerErrorPath =
-          join(outputDirectory, 'modelViewerFidelityErrors.json');
-      const modelViewerFidelityErrors = require(modelViewerErrorPath);
-
-      const modelViewerWarningPath =
-          join(outputDirectory, 'modelViewerFidelityWarnings.json');
-      const modelViewerFidelityWarnings = require(modelViewerWarningPath);
+      const autoTestResultsPath = join(outputDirectory, 'autoTestResults.json');
+      const {results, errors, warnings} = require(autoTestResultsPath);
 
       // config contains all scenarios, testConfig contains only scenarios that
       // the test run on.
       const testConfigPath = join(outputDirectory, 'config.json');
       const testConfig = require(testConfigPath);
 
-      const failCount = modelViewerFidelityErrors.length;
-      const warningCount = modelViewerFidelityWarnings.length;
-      const passCount = testConfig.scenarios.length;
+      const failCount = errors.length;
+      const warningCount = warnings.length;
+      const passCount = results.length;
       const scenarioCount = failCount + warningCount + passCount;
 
       console.log(`Fidelity test on ${
@@ -88,7 +83,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
 
       if (warningCount > 0) {
         console.log('🔍 Logging warning scenarios: ');
-        for (const warning of modelViewerFidelityWarnings) {
+        for (const warning of warnings) {
           console.log(warning);
         }
 
@@ -98,7 +93,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
 
       if (failCount > 0) {
         console.log('🔍 Logging failed scenarios: ');
-        for (const error of modelViewerFidelityErrors) {
+        for (const error of errors) {
           console.log(error);
         }
 
