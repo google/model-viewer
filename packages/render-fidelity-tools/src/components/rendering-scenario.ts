@@ -73,14 +73,10 @@ export class RenderingScenario extends LitElement {
     const {basePath} = this;
     const {width} = this.dimensions;
 
-    const images = [{
-                     name: 'model-viewer',
-                     description: '<model-viewer> (this version)',
-                     file: 'model-viewer.png'
-                   }].concat(this.goldens)
-                       .filter(golden => !this.exclude.includes(golden.name))
-                       .map(
-                           (golden, index) => html`
+    const images =
+        this.goldens.filter(golden => !this.exclude.includes(golden.name))
+            .map(
+                (golden, index) => html`
               <div class="screenshot">
                 <header>
                   <h2>${golden.description}</h2>
@@ -90,11 +86,11 @@ export class RenderingScenario extends LitElement {
                     style="width:${width}px" src="${basePath}/${golden.file}">
                   <div class = "metrics">
                     ${
-                               index == 0 || this.analysis == null ?
-                                   html`<span>---</span>` :
-                                   this.metricTemplate(
-                                       this.analysis.analysisResults[index - 1],
-                                       golden.name)}
+                    index == 0 || this.analysis == null ?
+                        html`<span>---</span>` :
+                        this.metricTemplate(
+                            this.analysis.analysisResults[index - 1],
+                            golden.name)}
                   </div>
               </div>`);
 

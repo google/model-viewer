@@ -173,6 +173,10 @@ export class ArtifactCreator {
           scenarioName} golden! Error message: ${error.message}`);
     }
 
+    await fs.writeFile(
+        join(outputDirectory, scenarioName, goldens[modelViewerIndex].file),
+        modelViewerGolden);
+
     const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
 
     for (let golden of goldens) {
@@ -193,15 +197,18 @@ export class ArtifactCreator {
             scenarioName} golden! Error message: ${error.message}`);
       }
 
+      await fs.writeFile(
+          join(outputDirectory, scenarioName, golden.file), candidateGolden);
+
       const candidateGoldenImage = pngjs.PNG.sync.read(candidateGolden).data;
       try {
         const analysisResult = await this.analyze(
             modelViewerGoldenImage, candidateGoldenImage, dimensions);
         analysisResults.push(analysisResult);
       } catch (error) {
-        if (error.message === WARNING_MESSAGE) {
-          continue;
-        }
+        // all errors occured in compare renderers should also be covered in
+        // auto test, so don't handle them here
+        continue;
       }
     }
 
@@ -212,9 +219,8 @@ export class ArtifactCreator {
   }
 
   async autoTest(scenario: ScenarioConfig): Promise<ImageComparisonAnalysis> {
-    const {rootDirectory, outputDirectory, goldens} = this;
+    const {rootDirectory, goldens} = this;
     const {name: scenarioName, dimensions} = scenario;
-    const scenarioOutputDirectory = join(outputDirectory, scenarioName)
 
     console.log(
         `start compare model-viewer's golden with model-viewer's screenshot generated from fidelity test:`);
@@ -222,11 +228,7 @@ export class ArtifactCreator {
     let screenshot;
     try {
       screenshot = await this.captureScreenshot(
-          'model-viewer',
-          scenarioName,
-          dimensions,
-          join(scenarioOutputDirectory, 'model-viewer.png'),
-          60);
+          'model-viewer', scenarioName, dimensions, null, 60);
     } catch (error) {
       throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
           scenarioName}. Error message: ${error.message}`);
@@ -394,7 +396,7 @@ export class ArtifactCreator {
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
-      outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
+      outputPath: string|null = join(this.outputDirectory, 'model-viewer.png'),
       maxTimeInSec: number = -1) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
@@ -486,8 +488,9 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    const screenshot =
-        await page.screenshot({path: outputPath, omitBackground: true});
+    const screenshot = outputPath ?
+        await page.screenshot({path: outputPath, omitBackground: true}) :
+        await page.screenshot({omitBackground: true});
 
     await browser.close();
 
