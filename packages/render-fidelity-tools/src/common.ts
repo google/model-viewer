@@ -228,7 +228,7 @@ export class ImageComparator {
     };
   }
 
-  analyze(): ImageComparisonResults {
+  analyze(checkSemiTransparent: boolean = true): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
 
@@ -243,10 +243,12 @@ export class ImageComparator {
     // when the golden image's background (use top left pixel to represent) is
     // transparent while the candidate(mode-viewer) image is not, it's
     // definitely that case
-    const candidateTopLeftAlpha = candidateImage[3];
-    const goldenTopLeftAlpha = goldenImage[3];
-    if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
-      throw new Error(WARNING_MESSAGE);
+    if (checkSemiTransparent) {
+      const candidateTopLeftAlpha = candidateImage[3];
+      const goldenTopLeftAlpha = goldenImage[3];
+      if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
+        throw new Error(WARNING_MESSAGE);
+      }
     }
 
     let modelPixelCount = 0;

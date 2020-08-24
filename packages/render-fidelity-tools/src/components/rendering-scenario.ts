@@ -52,6 +52,7 @@ export class RenderingScenario extends LitElement {
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
+    console.log(this.analysis);
   }
 
   private metricTemplate(
@@ -61,9 +62,8 @@ export class RenderingScenario extends LitElement {
       <div class="tooltip">
         <span class="question-icon"> </span>
         <span class="tooltiptext">
-          Root mean square(RMS) color distance between ${goldenName} 
-          and current version of model-viewer on rendering ${
-        this.name} in decibels.
+          Root mean square(RMS) color distance between ${goldenName}'s golden
+          and model-viewer's on rendering ${this.name} in decibels.
           The decibel is given by: 10 * log(RMS). More negative means a closer match.
         </span>
       </div>`

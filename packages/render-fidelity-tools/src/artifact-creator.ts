@@ -48,112 +48,6 @@ export class ArtifactCreator {
         renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
   }
 
-  /*
-  async captureAndAnalyzeScreenshots(
-      scenarioWhitelist: Set<string>|null = null) {
-    const {scenarios} = this.config;
-    const analyzedScenarios: Array<ScenarioConfig> = [];
-    const {goldens, outputDirectory} = this;
-    const modelViewerFidelityErrors: Array<string> = [];
-    const modelViewerFidelityWarnings: Array<string> = [];
-
-    for (const scenarioBase of scenarios) {
-      const scenarioName = scenarioBase.name;
-      const scenario = this[$configReader].scenarioConfig(scenarioName)!;
-      const {dimensions} = scenario;
-
-      if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
-        continue;
-      }
-
-      console.log(`\n🎨 Scenario: ${scenarioName}`);
-
-      const scenarioOutputDirectory = join(outputDirectory, scenarioName);
-
-      mkdirp.sync(scenarioOutputDirectory);
-
-      let screenshot;
-      try {
-        screenshot = await this.captureScreenshot(
-            'model-viewer',
-            scenarioName,
-            dimensions,
-            join(scenarioOutputDirectory, 'model-viewer.png'),
-            60);
-      } catch (error) {
-        const errorMessage =
-            `❌ Failed to capture model-viewer's screenshot of ${
-                scenarioName}. Error message: ${error.message}`;
-        modelViewerFidelityErrors.push(errorMessage);
-        continue;
-      }
-
-      if (screenshot == null) {
-        const errorMessage = `❌ Model-viewer's screenshot of ${
-            scenarioName} is not captured correctly(value is null). `;
-        modelViewerFidelityErrors.push(errorMessage);
-        continue;
-      }
-
-      let analysisResults;
-      try {
-        analysisResults =
-            await this.analyze(screenshot, goldens, scenario, dimensions);
-      } catch (error) {
-        const message = `Fail to analyze scenario :${
-            scenarioName}! Error message: ${error.message}`;
-
-        if (error.message === WARNING_MESSAGE) {
-          modelViewerFidelityWarnings.push(message);
-        } else {
-          modelViewerFidelityErrors.push(message);
-        }
-
-        continue;
-      }
-
-      const modelViewerIndex = 0;
-      const modelViewerRmsInDb =
-          toDecibel(analysisResults[modelViewerIndex].rmsDistanceRatio);
-
-      if (modelViewerRmsInDb > FIDELITY_TEST_THRESHOLD) {
-        const errorMessage =
-            `❌ Senarios name: ${scenario.name}, rms distance ratio: ${
-                modelViewerRmsInDb.toFixed(2)} dB.`;
-        modelViewerFidelityErrors.push(errorMessage);
-        continue;
-      }
-
-      const scenarioRecord = {analysisResults, scenario};
-
-      console.log(`\n💾 Recording analysis`);
-
-      await fs.writeFile(
-          join(outputDirectory, scenarioName, 'analysis.json'),
-          JSON.stringify(scenarioRecord));
-
-      analyzedScenarios.push(scenario);
-    }
-
-    console.log('💾 Recording configuration');
-
-    const finalConfig: ImageComparisonConfig =
-        Object.assign({}, this.config, {scenarios: analyzedScenarios});
-
-    await fs.writeFile(
-        join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));
-
-    await fs.writeFile(
-        join(outputDirectory, 'modelViewerFidelityErrors.json'),
-        JSON.stringify(modelViewerFidelityErrors));
-
-    await fs.writeFile(
-        join(outputDirectory, 'modelViewerFidelityWarnings.json'),
-        JSON.stringify(modelViewerFidelityWarnings));
-
-    return scenarios;
-  }
-*/
   async compareRenderers(scenario: ScenarioConfig) {
     const analysisResults: AnalysisResults = [];
     const {rootDirectory, outputDirectory, goldens} = this;
@@ -203,7 +97,7 @@ export class ArtifactCreator {
       const candidateGoldenImage = pngjs.PNG.sync.read(candidateGolden).data;
       try {
         const analysisResult = await this.analyze(
-            modelViewerGoldenImage, candidateGoldenImage, dimensions);
+            modelViewerGoldenImage, candidateGoldenImage, dimensions, false);
         analysisResults.push(analysisResult);
       } catch (error) {
         // all errors occured in compare renderers should also be covered in
@@ -211,11 +105,12 @@ export class ArtifactCreator {
         continue;
       }
     }
+    const scenarioRecord = {analysisResults, scenario};
 
     console.log(`\n💾 Recording analysis`);
     await fs.writeFile(
         join(outputDirectory, scenarioName, 'analysis.json'),
-        JSON.stringify(analysisResults));
+        JSON.stringify(scenarioRecord));
   }
 
   async autoTest(scenario: ScenarioConfig): Promise<ImageComparisonAnalysis> {
@@ -285,10 +180,9 @@ export class ArtifactCreator {
       const scenarioOutputDirectory = join(outputDirectory, scenarioName);
       mkdirp.sync(scenarioOutputDirectory);
 
-      // TODO try and catch errors
+      // TODO: try catch
       await this.compareRenderers(scenario);
 
-      // TODO try and catch
       try {
         const autoTestResult = await this.autoTest(scenario);
         autoTestResults.results.push(autoTestResult);
@@ -320,8 +214,8 @@ export class ArtifactCreator {
   }
 
   protected async analyze(
-      candidateImage: Buffer, goldenImage: Buffer,
-      dimensions: Dimensions): Promise<ImageComparisonAnalysis> {
+      candidateImage: Buffer, goldenImage: Buffer, dimensions: Dimensions,
+      semiTransparentCheck: boolean = true): Promise<ImageComparisonAnalysis> {
     const imageDimensions = {
       width: dimensions.width * DEVICE_PIXEL_RATIO,
       height: dimensions.height * DEVICE_PIXEL_RATIO
@@ -329,7 +223,7 @@ export class ArtifactCreator {
     const comparator =
         new ImageComparator(candidateImage, goldenImage, imageDimensions);
 
-    const {analysis} = comparator.analyze();
+    const {analysis} = comparator.analyze(semiTransparentCheck);
     const {rmsDistanceRatio} = analysis;
     console.log(
         `\n  📊 Decibels of root mean square color distance (without threshold): ${
@@ -337,62 +231,6 @@ export class ArtifactCreator {
 
     return analysis;
   }
-
-  /*
-    protected async analyze(
-        screenshot: Buffer, goldens: Array<GoldenConfig>,
-        scenario: ScenarioConfig,
-        dimensions: Dimensions): Promise<AnalysisResults> {
-      const analysisResults: AnalysisResults = [];
-      const {rootDirectory, outputDirectory} = this;
-      const {name: scenarioName, exclude} = scenario;
-
-      for (const goldenConfig of goldens) {
-        const {name: rendererName} = goldenConfig;
-
-        if (exclude != null && exclude.includes(rendererName)) {
-          continue;
-        }
-
-        console.log(
-            `\n🔍 Comparing <model-viewer> to ${goldenConfig.description}`);
-
-        const goldenPath =
-            join(rootDirectory, 'goldens', scenarioName, goldenConfig.file)
-
-        let golden;
-        try {
-          golden = await fs.readFile(goldenPath);
-        } catch (error) {
-          throw new Error(`❌ Failed to read ${rendererName}'s ${
-              scenarioName} golden! Error message: ${error.message}`);
-        }
-
-        const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
-        const goldenImage = pngjs.PNG.sync.read(golden).data;
-
-        const imageDimensions = {
-          width: dimensions.width * DEVICE_PIXEL_RATIO,
-          height: dimensions.height * DEVICE_PIXEL_RATIO
-        };
-        const comparator =
-            new ImageComparator(screenshotImage, goldenImage, imageDimensions);
-
-        await fs.writeFile(
-            join(outputDirectory, scenarioName, goldenConfig.file), golden);
-
-        const {analysis} = comparator.analyze();
-        const {rmsDistanceRatio} = analysis;
-        console.log(
-            `\n  📊 Decibels of root mean square color distance (without
-    threshold): ${ (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
-
-        analysisResults.push(analysis);
-      }
-
-      return analysisResults;
-    }
-    */
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
