@@ -40,12 +40,14 @@ const INTRO_DAMPER_RATE = 0.4;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
-export type ARStatus = 'not-presenting'|'session-started'|'object-placed';
+export type ARStatus =
+    'not-presenting'|'session-started'|'object-placed'|'failed';
 
 export const ARStatus: {[index: string]: ARStatus} = {
   NOT_PRESENTING: 'not-presenting',
   SESSION_STARTED: 'session-started',
-  OBJECT_PLACED: 'object-placed'
+  OBJECT_PLACED: 'object-placed',
+  FAILED: 'failed'
 };
 
 export interface ARStatusEvent extends ThreeEvent {
