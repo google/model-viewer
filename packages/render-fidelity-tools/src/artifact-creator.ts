@@ -161,6 +161,8 @@ export class ArtifactCreator {
     const autoTestResults:
         AutoTestResults = {results: [], errors: [], warnings: []};
 
+    const compareRenderersErrors: Array<string> = [];
+
     for (let scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
       const scenario = this[$configReader].scenarioConfig(scenarioName)!;
@@ -174,13 +176,20 @@ export class ArtifactCreator {
       const scenarioOutputDirectory = join(outputDirectory, scenarioName);
       mkdirp.sync(scenarioOutputDirectory);
 
-      await this.compareRenderers(scenario);
+      try {
+        await this.compareRenderers(scenario);
+      } catch (error) {
+        const errorMessage =
+            `❌Fail to compare model-viewer with other renderers of scenario ${
+                scenarioName}. Error message: ${error.message}`;
+        compareRenderersErrors.push(errorMessage);
+      }
 
       try {
         const autoTestResult = await this.autoTest(scenario);
         autoTestResults.results.push(autoTestResult);
       } catch (error) {
-        const message = `Fail to analyze scenario :${
+        const message = `❌Fail to analyze scenario :${
             scenarioName}! Error message: ${error.message}`;
 
         if (error.message === WARNING_MESSAGE) {
@@ -195,8 +204,10 @@ export class ArtifactCreator {
 
     console.log('💾 Recording configuration');
 
-    const finalConfig: ImageComparisonConfig =
-        Object.assign({}, this.config, {scenarios: analyzedScenarios});
+    const finalConfig: ImageComparisonConfig = Object.assign(
+        {},
+        this.config,
+        {scenarios: analyzedScenarios, errors: compareRenderersErrors});
 
     await fs.writeFile(
         join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));

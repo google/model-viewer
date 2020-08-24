@@ -63,22 +63,28 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       server.close();
 
       const autoTestResultsPath = join(outputDirectory, 'autoTestResults.json');
-      const {results, errors, warnings} = require(autoTestResultsPath);
+      const {
+        results: autoTestresults,
+        errors: autoTestErrors,
+        warnings: autoTestWarnings
+      } = require(autoTestResultsPath);
 
-      const failCount = errors.length;
-      const warningCount = warnings.length;
-      const passCount = results.length;
-      const scenarioCount = failCount + warningCount + passCount;
+      const autoTestPassedCount = autoTestresults.length;
+      const autoTestErrorCount = autoTestErrors.length;
+      const autoTestWarningCount = autoTestWarnings.length;
+      const scenarioCount =
+          autoTestPassedCount + autoTestErrorCount + autoTestWarningCount
 
-      console.log(`Fidelity test on ${
+      console.log(`Auto test on ${
           scenarioCount} scenarios finished. Model-Viewer passed ${
-          passCount} scenarios ✅, failed ${failCount} scenarios ❌, ${
-          warningCount} senarios passed with warings❗️. (Uses ${
+          autoTestPassedCount} scenarios ✅, failed ${
+          autoTestErrorCount} scenarios ❌, ${
+          autoTestWarningCount} senarios passed with warings❗️. (Uses ${
           FIDELITY_TEST_THRESHOLD} dB as threshold)`);
 
-      if (warningCount > 0) {
+      if (autoTestWarningCount > 0) {
         console.log('🔍 Logging warning scenarios: ');
-        for (const warning of warnings) {
+        for (const warning of autoTestWarnings) {
           console.log(warning);
         }
 
@@ -86,14 +92,33 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
             '❗️Fidelity test detected some warnings! Please try to fix them');
       }
 
-      if (failCount > 0) {
+      if (autoTestErrorCount > 0) {
         console.log('🔍 Logging failed scenarios: ');
-        for (const error of errors) {
+        for (const error of autoTestErrors) {
           console.log(error);
         }
+      }
 
+      const compareRendererResultPath = join(outputDirectory, 'config.json');
+      const {scenarios: comparedRenderResult, errors: compareRendererErrors} =
+          require(compareRendererResultPath);
+      const compareRendererPassCount = comparedRenderResult.length;
+      const compareRendererErrorCount = compareRendererErrors.length;
+
+      console.log(`Compare Renderers on ${scenarioCount} scenarios finished. ${
+          compareRendererPassCount} scenarios passed ✅, ${
+          compareRendererErrorCount} scenarios failed ❌`);
+
+      if (compareRendererErrorCount > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of compareRendererErrors) {
+          console.log(error);
+        }
+      }
+
+      if (autoTestErrorCount > 0 || compareRendererErrorCount > 0) {
         throw new Error(
-            'Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
+            ' ❌ Fidelity test failed! Please fix the errors list above before mering this pr!');
       }
     })
     .catch((error: any) => core.setFailed(error.message));
