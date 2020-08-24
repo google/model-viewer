@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {FollowCamera} from '@babylonjs/core';
 import {promises as fs} from 'fs';
 import mkdirp from 'mkdirp';
 import {join, resolve} from 'path';
@@ -253,6 +252,14 @@ export class ArtifactCreator {
 
     const result =
         await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
+
+    const rmsInDb = toDecibel(result.rmsDistanceRatio);
+
+    if (rmsInDb > FIDELITY_TEST_THRESHOLD) {
+      throw new Error(`❌ Senarios name: ${scenario.name}, rms distance ratio: ${
+          rmsInDb.toFixed(2)} dB.`);
+    }
+
     return result;
   }
 
@@ -266,7 +273,6 @@ export class ArtifactCreator {
     for (let scenarioBase of scenarios) {
       const scenarioName = scenarioBase.name;
       const scenario = this[$configReader].scenarioConfig(scenarioName)!;
-      const {dimensions} = scenario;
 
       if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
         continue;

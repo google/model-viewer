@@ -65,11 +65,6 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       const autoTestResultsPath = join(outputDirectory, 'autoTestResults.json');
       const {results, errors, warnings} = require(autoTestResultsPath);
 
-      // config contains all scenarios, testConfig contains only scenarios that
-      // the test run on.
-      const testConfigPath = join(outputDirectory, 'config.json');
-      const testConfig = require(testConfigPath);
-
       const failCount = errors.length;
       const warningCount = warnings.length;
       const passCount = results.length;
