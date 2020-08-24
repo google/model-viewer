@@ -52,7 +52,6 @@ export class RenderingScenario extends LitElement {
   private async loadAnalysis() {
     const analysisPath = `${this.basePath}/analysis.json`;
     this.analysis = await (await fetch(analysisPath)).json();
-    console.log(this.analysis);
   }
 
   private metricTemplate(

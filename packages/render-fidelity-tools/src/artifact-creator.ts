@@ -95,15 +95,9 @@ export class ArtifactCreator {
           join(outputDirectory, scenarioName, golden.file), candidateGolden);
 
       const candidateGoldenImage = pngjs.PNG.sync.read(candidateGolden).data;
-      try {
-        const analysisResult = await this.analyze(
-            modelViewerGoldenImage, candidateGoldenImage, dimensions, false);
-        analysisResults.push(analysisResult);
-      } catch (error) {
-        // all errors occured in compare renderers should also be covered in
-        // auto test, so don't handle them here
-        continue;
-      }
+      const analysisResult = await this.analyze(
+          modelViewerGoldenImage, candidateGoldenImage, dimensions, false);
+      analysisResults.push(analysisResult);
     }
     const scenarioRecord = {analysisResults, scenario};
 
@@ -131,7 +125,7 @@ export class ArtifactCreator {
 
     if (screenshot == null) {
       throw new Error(`❌ Model-viewer's screenshot of ${
-          scenarioName} is not captured correctly(value is null).`);
+          scenarioName} is not captured correctly (value is null).`);
     }
     const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
 
@@ -180,7 +174,6 @@ export class ArtifactCreator {
       const scenarioOutputDirectory = join(outputDirectory, scenarioName);
       mkdirp.sync(scenarioOutputDirectory);
 
-      // TODO: try catch
       await this.compareRenderers(scenario);
 
       try {
