@@ -252,6 +252,8 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       try {
+        this[$arButtonContainer].removeEventListener(
+            'click', this[$onARButtonContainerClick]);
         await this[$renderer].arRenderer.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
@@ -260,6 +262,8 @@ configuration or device capabilities');
         isWebXRBlocked = true;
         await this[$selectARMode]();
         this.activateAR();
+      } finally {
+        this[$selectARMode]();
       }
     }
 
