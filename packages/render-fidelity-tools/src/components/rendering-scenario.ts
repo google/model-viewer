@@ -61,9 +61,8 @@ export class RenderingScenario extends LitElement {
       <div class="tooltip">
         <span class="question-icon"> </span>
         <span class="tooltiptext">
-          Root mean square(RMS) color distance between ${goldenName} 
-          and current version of model-viewer on rendering ${
-        this.name} in decibels.
+          Root mean square(RMS) color distance between ${goldenName}'s golden
+          and model-viewer's on rendering ${this.name} in decibels.
           The decibel is given by: 10 * log(RMS). More negative means a closer match.
         </span>
       </div>`
@@ -73,14 +72,10 @@ export class RenderingScenario extends LitElement {
     const {basePath} = this;
     const {width} = this.dimensions;
 
-    const images = [{
-                     name: 'model-viewer',
-                     description: '<model-viewer> (this version)',
-                     file: 'model-viewer.png'
-                   }].concat(this.goldens)
-                       .filter(golden => !this.exclude.includes(golden.name))
-                       .map(
-                           (golden, index) => html`
+    const images =
+        this.goldens.filter(golden => !this.exclude.includes(golden.name))
+            .map(
+                (golden, index) => html`
               <div class="screenshot">
                 <header>
                   <h2>${golden.description}</h2>
@@ -90,11 +85,11 @@ export class RenderingScenario extends LitElement {
                     style="width:${width}px" src="${basePath}/${golden.file}">
                   <div class = "metrics">
                     ${
-                               index == 0 || this.analysis == null ?
-                                   html`<span>---</span>` :
-                                   this.metricTemplate(
-                                       this.analysis.analysisResults[index - 1],
-                                       golden.name)}
+                    index == 0 || this.analysis == null ?
+                        html`<span>---</span>` :
+                        this.metricTemplate(
+                            this.analysis.analysisResults[index - 1],
+                            golden.name)}
                   </div>
               </div>`);
 

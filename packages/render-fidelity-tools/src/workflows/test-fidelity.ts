@@ -57,38 +57,35 @@ if (process.argv.length > 3) {
   }
 }
 
-screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
+screenshotCreator.fidelityTest(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
 
-      const modelViewerErrorPath =
-          join(outputDirectory, 'modelViewerFidelityErrors.json');
-      const modelViewerFidelityErrors = require(modelViewerErrorPath);
+      const fidelityRegressionPath =
+          join(outputDirectory, 'fidelityRegressionResults.json');
+      const {
+        results: fidelityRegressionResults,
+        errors: fidelityRegressionErrors,
+        warnings: fidelityRegressionWarnings
+      } = require(fidelityRegressionPath);
 
-      const modelViewerWarningPath =
-          join(outputDirectory, 'modelViewerFidelityWarnings.json');
-      const modelViewerFidelityWarnings = require(modelViewerWarningPath);
+      const fidelityRegressionPassedCount = fidelityRegressionResults.length;
+      const fidelityRegressionErrorCount = fidelityRegressionErrors.length;
+      const fidelityRegressionWarningCount = fidelityRegressionWarnings.length;
+      const scenarioCount = fidelityRegressionPassedCount +
+          fidelityRegressionErrorCount + fidelityRegressionWarningCount
 
-      // config contains all scenarios, testConfig contains only scenarios that
-      // the test run on.
-      const testConfigPath = join(outputDirectory, 'config.json');
-      const testConfig = require(testConfigPath);
-
-      const failCount = modelViewerFidelityErrors.length;
-      const warningCount = modelViewerFidelityWarnings.length;
-      const passCount = testConfig.scenarios.length;
-      const scenarioCount = failCount + warningCount + passCount;
-
-      console.log(`Fidelity test on ${
+      console.log(`Fidelity regression test on ${
           scenarioCount} scenarios finished. Model-Viewer passed ${
-          passCount} scenarios ✅, failed ${failCount} scenarios ❌, ${
-          warningCount} senarios passed with warings❗️. (Uses ${
+          fidelityRegressionPassedCount} scenarios ✅, failed ${
+          fidelityRegressionErrorCount} scenarios ❌, ${
+          fidelityRegressionWarningCount} senarios passed with warings❗️. (Uses ${
           FIDELITY_TEST_THRESHOLD} dB as threshold)`);
 
-      if (warningCount > 0) {
+      if (fidelityRegressionWarningCount > 0) {
         console.log('🔍 Logging warning scenarios: ');
-        for (const warning of modelViewerFidelityWarnings) {
+        for (const warning of fidelityRegressionWarnings) {
           console.log(warning);
         }
 
@@ -96,14 +93,33 @@ screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
             '❗️Fidelity test detected some warnings! Please try to fix them');
       }
 
-      if (failCount > 0) {
+      if (fidelityRegressionErrorCount > 0) {
         console.log('🔍 Logging failed scenarios: ');
-        for (const error of modelViewerFidelityErrors) {
+        for (const error of fidelityRegressionErrors) {
           console.log(error);
         }
+      }
 
+      const compareRendererResultPath = join(outputDirectory, 'config.json');
+      const {scenarios: comparedRenderResult, errors: compareRendererErrors} =
+          require(compareRendererResultPath);
+      const compareRendererPassCount = comparedRenderResult.length;
+      const compareRendererErrorCount = compareRendererErrors.length;
+
+      console.log(`Compare Renderers on ${scenarioCount} scenarios finished. ${
+          compareRendererPassCount} scenarios passed ✅, ${
+          compareRendererErrorCount} scenarios failed ❌`);
+
+      if (compareRendererErrorCount > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of compareRendererErrors) {
+          console.log(error);
+        }
+      }
+
+      if (fidelityRegressionErrorCount > 0 || compareRendererErrorCount > 0) {
         throw new Error(
-            'Model Viewer failed the fidelity test! Please fix the fidelity error before merging to master!');
+            ' ❌ Fidelity test failed! Please fix the errors listed above before mering this pr!');
       }
     })
     .catch((error: any) => core.setFailed(error.message));
