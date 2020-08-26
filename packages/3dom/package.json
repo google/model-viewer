@@ -70,7 +70,7 @@
     "typescript": "3.8.2"
   },
   "dependencies": {
-    "three": "^0.119.0"
+    "three": "^0.120.0"
   },
   "publishConfig": {
     "access": "public"
