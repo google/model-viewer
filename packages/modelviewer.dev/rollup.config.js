@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-const resolve = require('rollup-plugin-node-resolve');
-const replace = require('rollup-plugin-replace');
+const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
+const replace = require('@rollup/plugin-replace');
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:

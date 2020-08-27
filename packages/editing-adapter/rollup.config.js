@@ -30,22 +30,20 @@
  * limitations under the License.
  */
 
-const resolve = require('rollup-plugin-node-resolve');
+const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
 
 const watchFiles = ['lib/**', '../3dom/lib/**', '../model-viewer/lib/**'];
 const plugins = [resolve()];
 
-export default [
-  {
-    input: './lib/gltf/gltf_model.js',
-    output: {
-      file: './dist/editing-adapter.js',
-      format: 'esm',
-      name: 'Editing Adapter'
-    },
-    plugins,
-    watch: {
-      include: watchFiles,
-    },
-  }
-];
+export default [{
+  input: './lib/gltf/gltf_model.js',
+  output: {
+    file: './dist/editing-adapter.js',
+    format: 'esm',
+    name: 'Editing Adapter'
+  },
+  plugins,
+  watch: {
+    include: watchFiles,
+  },
+}];
