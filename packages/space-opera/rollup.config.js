@@ -15,11 +15,13 @@
  *
  */
 
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
 
 const watchFiles = [
-  'lib/**', '../3dom/lib/**', '../model-viewer/lib/**',
+  'lib/**',
+  '../3dom/lib/**',
+  '../model-viewer/lib/**',
   '../editing-adapter/lib/**'
 ];
 
@@ -32,7 +34,7 @@ const plugins = [
       return null;
     },
   },
-  resolve(),
+  resolve({dedupe: ['three']}),
   commonjs()
 ];
 
