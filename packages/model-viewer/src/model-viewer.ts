@@ -34,6 +34,8 @@ export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
+export {RGB, RGBA} from '@google/3dom/src/gltf-2.0';
+
 customElements.define('model-viewer', ModelViewerElement);
 
 declare global {

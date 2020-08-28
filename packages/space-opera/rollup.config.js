@@ -34,7 +34,7 @@ const plugins = [
       return null;
     },
   },
-  resolve({dedupe: ['three']}),
+  resolve({dedupe: ['@google/model-viewer']}),
   commonjs()
 ];
 

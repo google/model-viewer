@@ -19,8 +19,7 @@
  * @fileoverview A wrapper around a gltf model.
  */
 
-import {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {ModelViewerElement, RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {createSafeObjectURL, createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../util/create_object_url.js';
 
@@ -28,8 +27,6 @@ import {DEFAULT_BASE_COLOR_FACTOR, DEFAULT_EMISSIVE_FACTOR, DEFAULT_METALLIC_FAC
 import * as gltfSpec from './gltf_spec.js';
 import {packGlb} from './pack_glb.js';
 import {unpackGlb} from './unpack_glb.js';
-
-export {RGB, RGBA} from '@google/3dom/lib/gltf-2.0.js';
 
 const $getUriForImage = Symbol();
 const $onModelViewerDirty = Symbol();
