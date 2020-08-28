@@ -21,7 +21,7 @@ export type Constructor<T = object, U = object> = {
 }&U;
 
 export const deserializeUrl = (url: string|null): string|null =>
-    (url != null && url !== 'null') ? toFullUrl(url) : null;
+    (!!url && url !== 'null') ? toFullUrl(url) : null;
 
 
 export const assertIsArCandidate = () => {

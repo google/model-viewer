@@ -220,7 +220,6 @@ export default class TextureUtils extends EventDispatcher {
       const defaultScene = new EnvironmentScene;
       this[$generatedEnvironmentMap] =
           this[$PMREMGenerator].fromScene(defaultScene, GENERATED_SIGMA);
-      defaultScene.dispose();
     }
 
     return Promise.resolve(this[$generatedEnvironmentMap]!);

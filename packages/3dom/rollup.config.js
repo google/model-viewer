@@ -25,6 +25,12 @@ const onwarn = (warning, warn) => {
 };
 
 const plugins = [
+  {
+    load(id) {
+      console.log('RESOLVED PATH:', id);
+      return null
+    }
+  },
   resolve(),
   replace({
     'Reflect.decorate': 'undefined',

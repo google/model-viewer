@@ -104,7 +104,7 @@ suite('ModelViewerElement', () => {
 
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-  suite.only('Fidelity Test', () => {
+  suite('Fidelity Test', () => {
     let element: ModelViewerElement;
 
     setup(async () => {

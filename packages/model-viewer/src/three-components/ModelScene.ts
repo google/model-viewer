@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -284,6 +284,9 @@ export class ModelScene extends Scene {
     if (hit.face == null) {
       return null;
     }
+
+    hit.face.normal.applyNormalMatrix(
+        new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
     return {position: hit.point, normal: hit.face.normal};
   }

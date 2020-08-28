@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-const resolve = require('rollup-plugin-node-resolve');
-const replace = require('rollup-plugin-replace');
+const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
+const replace = require('@rollup/plugin-replace');
 const externalGlobals = require('rollup-plugin-external-globals');
 const {basename} = require('path');
 
@@ -28,9 +28,7 @@ const onwarn = (warning, warn) => {
 const plugins = [
   resolve({preferBuiltins: true}),
   replace({'Reflect.decorate': 'undefined'}),
-  externalGlobals({
-    filament: 'Filament'
-  })
+  externalGlobals({filament: 'Filament'})
 ];
 
 const buildTarget = (input, outputFormat) => ({
