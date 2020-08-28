@@ -15,7 +15,7 @@
  *
  */
 
-import {RGB, RGBA} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {generateTextureId} from './gltf_edits.js';
 import {Material} from './material_state.js';
