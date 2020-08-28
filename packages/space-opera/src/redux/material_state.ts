@@ -15,7 +15,8 @@
  *
  */
 
-import {GltfModel, Material as GltfMaterial, RGB, RGBA, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {GltfModel, Material as GltfMaterial, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
 /**
  * A texture that can be used in materials.

@@ -27,8 +27,9 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '@material/mwc-icon-button';
 
-import {ALPHA_BLEND_MODES, checkFinite, DEFAULT_EMISSIVE_FACTOR, RGB, RGBA} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {ALPHA_BLEND_MODES, checkFinite, DEFAULT_EMISSIVE_FACTOR} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 

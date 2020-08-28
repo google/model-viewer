@@ -22,7 +22,7 @@
 
 export {checkFinite} from './check.js';
 export {ALPHA_BLEND_MODES, DEFAULT_EMISSIVE_FACTOR, IMAGE_MIME_TYPES} from './gltf/gltf_constants.js';
-export {GltfModel, Material, RGB, RGBA, TextureHandle} from './gltf/gltf_model.js';
+export {GltfModel, Material, TextureHandle} from './gltf/gltf_model.js';
 export {GlTf} from './gltf/gltf_spec.js';
 export {packGlb} from './gltf/pack_glb.js';
 export {unpackGlb} from './gltf/unpack_glb.js';
