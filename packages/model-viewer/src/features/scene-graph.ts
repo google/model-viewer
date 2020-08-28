@@ -23,6 +23,7 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {$shadow} from '../three-components/Model.js';
 import {Constructor} from '../utilities.js';
 
 const $updateThreeSide = Symbol('updateThreeSide');
@@ -234,14 +235,26 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         opts.animations = model.animations;
         opts.truncateDrawRange = true;
 
+        const shadow = model[$shadow];
+        let visible = false;
+        // Remove shadow from export
+        if (shadow != null) {
+          visible = shadow.visible;
+          shadow.visible = false;
+        }
+
         const exporter = new GLTFExporter();
-        exporter.parse(model, (gltf) => {
+        exporter.parse(model.modelContainer, (gltf) => {
           return resolve(
               new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                 type: opts.binary ? 'application/octet-stream' :
                                     'application/json'
               }));
         }, opts);
+
+        if (shadow != null) {
+          shadow.visible = visible;
+        }
       });
     }
   }

@@ -286,6 +286,79 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
     </div>
   </div>
 
+  <div class="sample">
+    <div id="demo-container-5" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <div class="heading">
+          <h2 class="demo-title">Exporter</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <template>
+<model-viewer id="static-model" src="../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
+  <div id="controls">
+    <button onclick="exportGLB()">Export GLB</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportGLB(){
+    let modelViewer = document.getElementById("static-model");
+    const glTF = await modelViewer.exportScene();
+    var file = new File([glTF], "export.glb");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-6" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Exporter with options</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <template>
+<model-viewer id="animated-model" src="../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
+  <div id="controls">
+    <button onclick="exportScene(true)">Export GLB</button>
+    <button onclick="exportScene(false)">Export GLTF</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportScene(binary){
+    let options = {
+      binary: binary,
+      trs: true,
+      onlyVisible: true,
+      maxTextureSize: 256,
+      forcePowerOfTwoTextures: true,
+      includeCustomExtensions: false,
+      embedImages: true
+    };
+    let modelViewer = document.getElementById("animated-model");
+    const glTF = await modelViewer.exportScene(options);
+    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
 
   <div class="footer">
     <ul>
@@ -304,6 +377,10 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
       <li class="attribution">
         <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/WaterBottle">Water Bottle</a>,
         licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Horse</a> by <a href="https://github.com/dataarts">Google Data Arts Team</a>,
+        licensed under <a href="https://github.com/dataarts/3-dreams-of-black/blob/master/deploy/files/models/soup/LICENSE.txt">Creative Commons Attribution-NonCommercial-ShareAlike</a>.
       </li>
     </ul>
     <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
