@@ -19,13 +19,15 @@
     "Matt Small <mbsmall@google.com>",
     "Yuin Chien <yuin@google.com>"
   ],
-  "main": "dist/model-viewer.min.js",
+  "main": "dist/model-viewer-umd.js",
   "module": "dist/model-viewer.min.js",
   "files": [
     "dist/model-viewer.js",
     "dist/model-viewer.js.map",
     "dist/model-viewer.min.js",
     "dist/model-viewer.min.js.map",
+    "dist/model-viewer-umd.js",
+    "dist/model-viewer-umd.js.map",
     "dist/model-viewer-legacy.js",
     "POLYFILLS.md"
   ],
