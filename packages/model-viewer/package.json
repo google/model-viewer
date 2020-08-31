@@ -73,7 +73,7 @@
   "devDependencies": {
     "@google/3dom": "0.1.0",
     "lit-element": "^2.4.0",
-    "three": "^0.120.0",
+    "three": "^0.120.1",
     "@types/resize-observer-browser": "^0.1.2",
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@jsantell/event-target": "^1.1.2",
