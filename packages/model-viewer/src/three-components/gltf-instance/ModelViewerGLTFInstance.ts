@@ -77,10 +77,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
             transparent = true;
             material.side = FrontSide;
           }
-          if (!(material as any).isGLTFSpecularGlossinessMaterial) {
-            Renderer.singleton.roughnessMipmapper.generateMipmaps(
-                material as MeshStandardMaterial);
-          }
+          Renderer.singleton.roughnessMipmapper.generateMipmaps(
+              material as MeshStandardMaterial);
         }
       });
 

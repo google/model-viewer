@@ -34,7 +34,7 @@ const plugins = [
       return null;
     },
   },
-  resolve(),
+  resolve({dedupe: ['three']}),
   commonjs()
 ];
 
