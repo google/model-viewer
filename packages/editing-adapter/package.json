@@ -46,7 +46,7 @@
     "typescript": "3.8.2"
   },
   "dependencies": {
-    "@google/model-viewer": "^1.1.0",
+    "@google/model-viewer": "^1.2.0",
     "ts-closure-library": "^2019.11.1-1.10"
   }
 }
