@@ -120,6 +120,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
       suite('openQuickLook', () => {
         test('sets hash for fixed scale', () => {
           element.src = 'https://example.com/model.gltf';
+          element.iosSrc = 'https://example.com/model.usdz';
           element.arScale = 'fixed';
           (element as any)[$openIOSARQuickLook]();
 
@@ -127,6 +128,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           const url = new URL(intentUrls[0]);
 
+          expect(url.pathname).equal('/model.usdz');
           expect(url.hash).to.equal('#allowsContentScaling=0');
         });
       });
