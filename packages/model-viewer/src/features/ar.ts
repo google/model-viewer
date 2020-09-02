@@ -325,15 +325,17 @@ configuration or device capabilities');
      * iOS can intent to their AR Quick Look.
      */
     [$openIOSARQuickLook]() {
-      const modelUrl = new URL(this.src!, self.location.toString());
+      const modelUrl = new URL(this.iosSrc!, self.location.toString());
       if (this.arScale === 'fixed') {
         modelUrl.hash = 'allowsContentScaling=0';
       }
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');
-      anchor.appendChild(document.createElement('img'));
+      const img = document.createElement('img');
+      anchor.appendChild(img);
       anchor.setAttribute('href', modelUrl.toString());
       anchor.click();
+      anchor.removeChild(img);
     }
   }
 
