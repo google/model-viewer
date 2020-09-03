@@ -165,6 +165,8 @@ export interface PointerChangeEvent extends ThreeEvent {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher {
+  public sensitivity = 1;
+
   private[$interactionEnabled]: boolean = false;
 
   private[$options]: SmoothControlsOptions;
@@ -517,7 +519,8 @@ export class SmoothControls extends EventDispatcher {
 
   private[$userAdjustOrbit](
       deltaTheta: number, deltaPhi: number, deltaZoom: number): boolean {
-    const handled = this.adjustOrbit(deltaTheta, deltaPhi, deltaZoom);
+    const handled = this.adjustOrbit(
+        deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
     this[$isUserChange] = true;
     // Always make sure that an initial event is triggered in case there is
