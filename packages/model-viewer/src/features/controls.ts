@@ -326,6 +326,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'interaction-policy'})
     interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
+    @property({type: Number, attribute: 'orbit-sensitivity'})
+    orbitSensitivity: number = 1;
+
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
@@ -456,6 +459,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
         controls.applyOptions({interactionPolicy});
+      }
+
+      if (changedProperties.has('orbitSensitivity')) {
+        this[$controls].sensitivity = this.orbitSensitivity;
       }
 
       if (this[$jumpCamera] === true) {
