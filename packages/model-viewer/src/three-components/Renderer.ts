@@ -205,8 +205,8 @@ export class Renderer extends EventDispatcher {
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
       scene.isDirty = true;
@@ -248,8 +248,8 @@ export class Renderer extends EventDispatcher {
     this.scenes.add(scene);
     const {canvas} = scene;
 
-    canvas.width = this.width * this.dpr;
-    canvas.height = this.height * this.dpr;
+    canvas.width = Math.round(this.width * this.dpr);
+    canvas.height = Math.round(this.height * this.dpr);
 
     canvas.style.width = `${this.width / this.scale}px`;
     canvas.style.height = `${this.height / this.scale}px`;
