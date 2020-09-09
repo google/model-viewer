@@ -164,10 +164,8 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          domOverlay: {
-            root: scene.element.shadowRoot!.querySelector(
-                'div.annotation-container')
-          }
+          domOverlay:
+              {root: scene.element.shadowRoot!.querySelector('div.default')}
         });
 
     const gl = this.threeRenderer.context;

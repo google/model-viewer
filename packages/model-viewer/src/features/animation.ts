@@ -94,6 +94,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onModelLoad]() {
+      super[$onModelLoad]();
+
       this[$paused] = true;
 
       if (this.autoplay) {

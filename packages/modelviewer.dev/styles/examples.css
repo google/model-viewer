@@ -283,7 +283,6 @@ model-viewer:focus {
   height: 100vh;
   flex: 1;
   display: flex;
-  align-items: center;
   justify-content: center;
   border: 0px solid #555;
   box-sizing: border-box;

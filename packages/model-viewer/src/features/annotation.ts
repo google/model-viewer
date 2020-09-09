@@ -72,11 +72,13 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     constructor(...args: Array<any>) {
       super(...args);
 
-      const shadowRoot = this.shadowRoot!;
       const {domElement} = this[$annotationRenderer];
-      domElement.classList.add('annotation-container');
-      shadowRoot.querySelector('.container')!.appendChild(domElement);
-      domElement.appendChild(shadowRoot.querySelector('.default')!);
+      const {style} = domElement;
+      style.display = 'none';
+      style.pointerEvents = 'none';
+      style.position = 'absolute';
+      style.top = '0';
+      this.shadowRoot!.querySelector('.default')!.appendChild(domElement);
     }
 
     connectedCallback() {
@@ -163,6 +165,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (scene.isDirty) {
         scene.model.updateHotspots(camera.position);
+        this[$annotationRenderer].domElement.style.display = '';
         this[$annotationRenderer].render(scene, camera);
       }
     }
