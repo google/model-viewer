@@ -25,7 +25,7 @@
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
-  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
   <style>
     html {
       height:100%;
@@ -44,7 +44,7 @@
     }
 
     p {
-      max-width: 800px;
+      max-width: 700px;
       text-align: left;
     }
 
@@ -125,7 +125,11 @@
 <body>
   <div align="center" style="height:100%;">
   <!-- First Example -->
+
+    <h2>Setting up &lt;model-viewer&gt; for good Lighthouse scores</h2>
+  
     <model-viewer
+        id="first"
         src="../assets/ShopifyModels/Chair.glb"
         poster="../assets/ShopifyModels/ChairPoster.png"
         camera-orbit="1.2195rad 1.362rad auto"
@@ -145,8 +149,6 @@
       </div>
     </model-viewer>
 
-    <h2>Setting up &lt;model-viewer&gt; for good Lighthouse scores</h2>
-  
     <p>The rest of the <a href="https://modelviewer.dev/"
     target="_blank">modelviewer.dev</a> pages are optimized for code
     readability, but not necessarily for best page loading performance. This
@@ -154,7 +156,24 @@
     optimize your <a href="https://developers.google.com/web/tools/lighthouse"
     target="_blank">Lighthouse</a> score when using &lt;model-viewer&gt;.</p>
 
-    <br><br><br><br><br><br><br><br><br><br><br><br>
+    <p>Note the example visible on the top of the page uses <code>reveal =
+    "interaction"</code>, which shows the poster image but does not begin to
+    download the model until the user interacts. This keeps the large 3D model
+    download from affecting your page load scores. This is not necessary on the
+    second example that is "below the fold" as &lt;model-viewer&gt; lazy-loads
+    by default.</p>
+
+    <p>You can inspect our best practices recommendations by "viewing source" on
+    this page. Note the event listeners that cause the first interaction with
+    the page to call <code>dismissPoster()</code>, which causes the 3D model to
+    load.</p>
+
+    <p>This page is also designed as a way for both our users and our developers
+    to track &lt;model-viewer&gt;'s progress in startup performance. From
+    Chrome, simply open dev tools, go to the lighthouse tab and click "generate
+    report". Currently we're seeing scores of roughly 88 for desktop and 80 for
+    mobile (with some variability), but the goal is to continuously improve
+    these.</p>
 
     <!-- Second Example -->
     <model-viewer
@@ -176,5 +195,15 @@
       </div>
     </model-viewer>
   </div>
+
+  <script type="module">
+    const body = document.querySelector('body');
+
+    const onInteraction = () => {document.querySelector('#first').dismissPoster()};
+
+    body.addEventListener('mouseover', onInteraction, {once:true});
+    body.addEventListener('scroll', onInteraction, {once:true});
+    body.addEventListener('keydown', onInteraction, {once:true});
+  </script>
 </body>
 </html>
