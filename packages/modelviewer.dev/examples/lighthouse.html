@@ -19,8 +19,8 @@
 <head>
   <title>&lt;model-viewer&gt; Lighthouse Example</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -149,12 +149,12 @@
       </div>
     </model-viewer>
 
-    <p>The rest of the <a href="https://modelviewer.dev/"
-    target="_blank">modelviewer.dev</a> pages are optimized for code
-    readability, but not necessarily for best page loading performance. This
-    page, on the other hand, is designed to demonstrate best practices to
-    optimize your <a href="https://developers.google.com/web/tools/lighthouse"
-    target="_blank">Lighthouse</a> score when using &lt;model-viewer&gt;.</p>
+    <p>The rest of the <a href="https://modelviewer.dev/" target="_blank"
+    rel="noopener">modelviewer.dev</a> pages are optimized for code readability,
+    but not necessarily for best page loading performance. This page, on the
+    other hand, is designed to demonstrate best practices to optimize your <a
+    href="https://developers.google.com/web/tools/lighthouse" target="_blank"
+    rel="noopener">Lighthouse</a> score when using &lt;model-viewer&gt;.</p>
 
     <p>Note the example visible on the top of the page sets the attribute 
     <code>reveal="interaction"</code>, which shows the poster image but does not
@@ -171,9 +171,9 @@
     <p>This page is also designed as a way for both our users and our developers
     to track &lt;model-viewer&gt;'s progress in startup performance. From
     Chrome, simply open dev tools, go to the lighthouse tab and click "generate
-    report". Currently we're seeing scores of roughly 88 for desktop and 80 for
-    mobile (with some variability), but the goal is to continuously improve
-    these.</p>
+    report". Currently we're seeing performance scores of roughly 97 for desktop
+    and 92 for mobile (with some variability), but the goal is to continuously
+    improve these.</p>
 
     <!-- Second Example -->
     <model-viewer

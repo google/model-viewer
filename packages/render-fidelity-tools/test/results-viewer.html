@@ -19,8 +19,7 @@
 <head>
   <title>&lt;model-viewer&gt; - Fidelity Test Results</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../shared-assets/icons/favicon.png"/>
 
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
@@ -49,26 +48,26 @@
     <h2>Render Fidelity Comparison Results</h2>
   
     <p>The purpose of <a href="https://www.khronos.org/gltf/"
-    target="_blank">glTF</a> is to standardize Physically-Based Rendering (PBR)
+    target="_blank" rel="noopener">glTF</a> is to standardize Physically-Based Rendering (PBR)
     materials such that you can be confident your model will appear as intended
     in any lighting environment in any renderer. This is a very ambitious goal,
     as real-time rendering at this level of quality is still very much an area
     of active research with improvements being made constantly. This site
     demonstrates where we are on that path to convergence and highlights areas
     that could still use improvement. We are comparing the most popular web
-    renderers: <a href="https://threejs.org/" target="_blank">three.js</a>
+    renderers: <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
     (represented by &lt;model-viewer&gt;), <a
     href="https://google.github.io/filament/webgl/"
-    target="_blank">filament.js</a>, and <a href="https://www.babylonjs.com/"
-    target="_blank">babylon.js</a>. If any other renderers would like to be
+    target="_blank" rel="noopener">filament.js</a>, and <a href="https://www.babylonjs.com/"
+    target="_blank" rel="noopener">babylon.js</a>. If any other renderers would like to be
     included, please open a PR adding them to the <a
     href="https://github.com/google/model-viewer/tree/master/packages/render-fidelity-tools/src/components/renderers"
-    target="_blank">render-fidelity-tools</a>
+    target="_blank" rel="noopener">render-fidelity-tools</a>
     package.</p>
 
     <p>In addition, we are showing a ground-truth render provided by <a
     href="https://github.com/DassaultSystemes-Technology/dspbr-pt"
-    target="_blank">dspbr-pt</a>, which is a very slow path-tracing renderer
+    target="_blank" rel="noopener">dspbr-pt</a>, which is a very slow path-tracing renderer
     based on three.js. The advantage it provides is simplicity: without the
     speed requirement it can be made clear and readable and as it runs with more
     and more samples it approaches the physical result with far fewer

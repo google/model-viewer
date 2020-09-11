@@ -166,7 +166,8 @@ export class SmoothControls extends EventDispatcher {
       element.addEventListener('mousedown', this.onPointerDown);
       element.addEventListener('wheel', this.onWheel);
       element.addEventListener('keydown', this.onKeyDown);
-      element.addEventListener('touchstart', this.onPointerDown);
+      element.addEventListener(
+          'touchstart', this.onPointerDown, {passive: true});
       element.addEventListener('touchmove', this.onPointerMove);
 
       self.addEventListener('mouseup', this.onPointerUp);
