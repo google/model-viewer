@@ -62,7 +62,7 @@
       display: none;
     }
     
-    #ar-button {
+    .ar-button {
       background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
       background-repeat: no-repeat;
       background-size: 20px 20px;
@@ -83,15 +83,15 @@
       border: 1px solid #DADCE0;
     }
 
-    #ar-button:active {
+    .ar-button:active {
       background-color: #E8EAED;
     }
 
-    #ar-button:focus {
+    .ar-button:focus {
       outline: none;
     }
 
-    #ar-button:focus-visible {
+    .ar-button:focus-visible {
       outline: 1px solid #4285f4;
     }
 
@@ -105,7 +105,7 @@
       to   { transform: translateX(-100px); }
     }
 
-    model-viewer > #ar-prompt {
+    model-viewer > .ar-prompt {
       position: absolute;
       left: 50%;
       bottom: 175px;
@@ -113,11 +113,11 @@
       display: none;
     }
 
-    model-viewer[ar-status="session-started"] > #ar-prompt {
+    model-viewer[ar-status="session-started"] > .ar-prompt {
       display: block;
     }
 
-    model-viewer > #ar-prompt > img {
+    model-viewer > .ar-prompt > img {
       animation: circle 4s linear infinite;
     }
   </style>
@@ -140,11 +140,11 @@
         alt="3D model of a chair with footrest"
       >
 
-      <button slot="ar-button" id="ar-button">
+      <button slot="ar-button" class="ar-button">
         View in your space
       </button>
     
-      <div id="ar-prompt">
+      <div class="ar-prompt">
         <img src="../assets/hand.png">
       </div>
     </model-viewer>
@@ -186,14 +186,24 @@
       alt="3D model of a countertop mixer"
     >
 
-      <button slot="ar-button" id="ar-button">
+      <button slot="ar-button" class="ar-button">
         View in your space
       </button>
 
-      <div id="ar-prompt">
+      <div class="ar-prompt">
         <img src="../assets/hand.png">
       </div>
     </model-viewer>
+
+    <p>Chair, Mixer ©Copyright 2020 <a href="https://www.shopify.com/">Shopify
+    Inc.</a>, licensed under <a
+    href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.</p>
+
+    <p>©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</p>
+    <p><a href="https://github.com/google/model-viewer">Github</a>
+    ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a
+    href="https://github.com/google/model-viewer/issues">Bug
+    report</a></p>
   </div>
 
   <script type="module">
@@ -202,6 +212,7 @@
     const onInteraction = () => {document.querySelector('#first').dismissPoster()};
 
     body.addEventListener('mouseover', onInteraction, {once:true});
+    body.addEventListener('touchmove', onInteraction, {once:true});
     body.addEventListener('scroll', onInteraction, {once:true});
     body.addEventListener('keydown', onInteraction, {once:true});
   </script>
