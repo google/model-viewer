@@ -22,10 +22,6 @@
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
-  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
-  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
   <style>
     html {
       height:100%;
@@ -49,6 +45,7 @@
     }
 
     model-viewer {
+      display: block;
       width: 80%;
       height: 80%;
       max-width: 600px;
@@ -57,9 +54,27 @@
       --poster-color: #eee;
     }
 
-    /* This keeps child nodes hidden while the element loads */
-    :not(:defined) > * {
+    /* This keeps child nodes hidden while the element loads, except the poster */
+    :not(:defined) > :not(.lazy-poster) {
       display: none;
+    }
+
+    /* This smooths the poster's transition by matching the default */
+    :not(:defined) > .lazy-poster {
+      opacity: 0.8;
+    }
+
+    /* This CSS should always be used at minimum for any slotted poster */
+    .lazy-poster {
+      display: block;
+      height: 100%;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
     }
     
     .ar-button {
@@ -131,14 +146,14 @@
     <model-viewer
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.png"
         camera-orbit="1.2195rad 1.362rad auto"
         shadow-intensity="1"
         ar
         camera-controls
-        reveal="interaction"
         alt="3D model of a chair with footrest"
       >
+
+      <div class="lazy-poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -156,35 +171,30 @@
     href="https://developers.google.com/web/tools/lighthouse" target="_blank"
     rel="noopener">Lighthouse</a> score when using &lt;model-viewer&gt;.</p>
 
-    <p>Note the example visible on the top of the page sets the attribute 
-    <code>reveal="interaction"</code>, which shows the poster image but does not
-    begin to download the model until the user interacts. This keeps the large
-    3D model download from affecting your page load scores. This is not
-    necessary on the second example that is "below the fold" as
-    &lt;model-viewer&gt; lazy-loads by default.</p>
-
     <p>You can inspect our best practices recommendations by "viewing source" on
-    this page. Note the event listeners that cause the first interaction with
-    the page to call <code>dismissPoster()</code>, which causes the 3D model to
-    load without the user having to click on it.</p>
+    this page. Note this example lazy-loads <code>model-viewer.min.js</code> as
+    soon as the user interacts with the page, but this keeps it out of the
+    lighthouse score. Of course you could easily choose any convenient time to
+    kick off this process. By using a custom slotted poster, we ensure the
+    poster is visible and seamless even before our script has loaded.</p>
 
     <p>This page is also designed as a way for both our users and our developers
-    to track &lt;model-viewer&gt;'s progress in startup performance. From
-    Chrome, simply open dev tools, go to the lighthouse tab and click "generate
-    report". Currently we're seeing performance scores of roughly 97 for desktop
-    and 92 for mobile (with some variability), but the goal is to continuously
-    improve these.</p>
+    to verify &lt;model-viewer&gt;'s performance. From Chrome, simply open dev
+    tools, go to the lighthouse tab and click "generate report". We're seeing
+    scores of 100 across the board for both desktop and mobile, which we intend
+    to maintain henceforth.</p>
 
     <!-- Second Example -->
     <model-viewer
       src="../assets/ShopifyModels/Mixer.glb"
-      poster="../assets/ShopifyModels/MixerPoster.png"
       camera-orbit="0.9677rad 1.2427rad auto"
       shadow-intensity="1"
       ar
       camera-controls
       alt="3D model of a countertop mixer"
     >
+
+      <div class="lazy-poster" slot="poster" style="background-image: url(../assets/ShopifyModels/MixerPoster.png);"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -209,7 +219,16 @@
   <script type="module">
     const body = document.querySelector('body');
 
-    const onInteraction = () => {document.querySelector('#first').dismissPoster()};
+    const onInteraction = () => {
+      const modelViewer = document.createElement('script'); 
+      modelViewer.type = 'module';
+      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
+      document.body.appendChild(modelViewer);
+
+      const focusVisible = document.createElement('script');
+      focusVisible.src = '../node_modules/focus-visible/dist/focus-visible.js'; 
+      document.body.appendChild(focusVisible);
+    };
 
     body.addEventListener('mouseover', onInteraction, {once:true});
     body.addEventListener('touchmove', onInteraction, {once:true});
