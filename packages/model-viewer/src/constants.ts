@@ -63,7 +63,7 @@ export const IS_ANDROID = /android/i.test(navigator.userAgent);
 // multi-touch displays.
 // @see https://stackoverflow.com/questions/57765958/how-to-detect-ipad-and-ipad-os-version-in-ios-13-and-up
 // @see https://forums.developer.apple.com/thread/119186
-// @see https://github.com/GoogleWebComponents/model-viewer/issues/758
+// @see https://github.com/google/model-viewer/issues/758
 export const IS_IOS =
     (/iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

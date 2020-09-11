@@ -31,7 +31,7 @@ import {timeline} from '../utilities/animation.js';
 // NOTE(cdata): The following "animation" timing functions are deliberately
 // being used in favor of CSS animations. In Safari 12.1 and 13, CSS animations
 // would cause the interaction prompt to glitch unexpectedly
-// @see https://github.com/GoogleWebComponents/model-viewer/issues/839
+// @see https://github.com/google/model-viewer/issues/839
 const PROMPT_ANIMATION_TIME = 5000;
 
 // For timing purposes, a "frame" is a timing agnostic relative unit of time

@@ -56,7 +56,7 @@ canvas {
   /* NOTE(cdata): Chrome 76 and below apparently have a bug
    * that causes our canvas not to display pixels unless it is
    * on its own render layer
-   * @see https://github.com/GoogleWebComponents/model-viewer/pull/755#issuecomment-536597893
+   * @see https://github.com/google/model-viewer/pull/755#issuecomment-536597893
    */
   transform: translateZ(0);
 }
