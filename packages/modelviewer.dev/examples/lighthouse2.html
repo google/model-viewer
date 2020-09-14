@@ -22,6 +22,9 @@
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
   <style>
     html {
       height:100%;
@@ -59,24 +62,6 @@
       display: none;
     }
 
-    /* This smooths the poster's transition by matching the default */
-    :not(:defined) > .poster {
-      opacity: 0.8;
-    }
-
-    /* This CSS should always be used at minimum for any slotted poster */
-    .poster {
-      display: block;
-      height: 100%;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
-    
     .ar-button {
       background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
       background-repeat: no-repeat;
@@ -146,14 +131,14 @@
     <model-viewer
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.png"
+        reveal="interaction"
         camera-orbit="1.2195rad 1.362rad auto"
         shadow-intensity="1"
         ar
         camera-controls
         alt="3D model of a chair with footrest"
       >
-
-      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -164,48 +149,35 @@
       </div>
     </model-viewer>
 
-    <p>The rest of the <a href="https://modelviewer.dev/">modelviewer.dev</a>
-    pages are optimized for code readability, but not necessarily for best page
-    loading performance. This page, on the other hand, is designed to
-    demonstrate best practices to optimize your <a
-    href="https://developers.google.com/web/tools/lighthouse" target="_blank"
-    rel="noopener">Lighthouse</a> score when using
-    <code>&lt;model-viewer&gt;</code>.</p>
+    <p>Unlike the <a href="lighthouse.html">previous example</a>, this page
+    loads <code>model-viewer.min.js</code> immediately, which results in poorer
+    lighthouse performance scores, as this bundle of JavaScript takes time to
+    parse. We still make a strong effort to keep this bundle size down as much
+    as possible to ensure this simple type of loading still gets decent
+    performance.</p>
 
-    <p>You can inspect our best practices recommendations by "viewing source" on
-    this page. Note this example lazy-loads <code>model-viewer.min.js</code> as
-    soon as the user interacts with the page, but this keeps it out of the
-    lighthouse score. Of course you could easily choose any convenient time to
-    kick off this process. By using a custom slotted poster, we ensure the
-    poster is visible and seamless even before our script has loaded.</p>
-
-    <p>This page is also designed as a way for both our users and our developers
-    to verify <code>&lt;model-viewer&gt;</code>'s performance. From Chrome,
-    simply open dev tools, go to the lighthouse tab and click "generate report".
-    We're seeing scores of 100 across the board for both desktop and mobile
-    (shown below), which we intend to maintain henceforth.</p>
+    <p>It is still important to delay the loading of the 3D model, as including
+    its load time in the lighthouse scores will tend to destroy them. As such
+    the first <code>&lt;model-viewer&gt;</code> uses
+    <code>reveal="interaction"</code> and calls <code>dismissPoster()</code> to
+    cause loading to proceed. The second <code>&lt;model-viewer&gt;</code> does
+    not require this as it lazy-loads by default since it is below the fold.</p>
 
     <img src="../assets/lighthouse.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
 
-    <p>Note these scores are variable and the goal is to continue to reduce the
-    performance metrics even if the overall score is 100, since that will leave
-    more headroom for complicated sites to add <code>&lt;model-viewer&gt;</code>
-    without hurting their scores. To see the advantage of lazy-loading the whole
-    model-viewer library, see
-    <a href="lighthouse2.html">this example</a>, which lazy-loads only the 3D
-    models.</p>
+    <p>Note the performance is worse than before, at only 97 for desktop and 92
+    for mobile (shown above).</p>  
 
     <!-- Second Example -->
     <model-viewer
       src="../assets/ShopifyModels/Mixer.glb"
+      poster="../assets/ShopifyModels/MixerPoster.png"
       camera-orbit="0.9677rad 1.2427rad auto"
       shadow-intensity="1"
       ar
       camera-controls
       alt="3D model of a countertop mixer"
     >
-
-      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/MixerPoster.png);"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -227,25 +199,12 @@
     report</a></p>
   </div>
 
+  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
+
   <script type="module">
     const body = document.body;
-    let loaded = false;
 
-    const onInteraction = () => {
-      if (loaded === true) {
-        return;
-      }
-      loaded = true;
-
-      const modelViewer = document.createElement('script'); 
-      modelViewer.type = 'module';
-      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
-      body.appendChild(modelViewer);
-
-      const focusVisible = document.createElement('script');
-      focusVisible.src = '../node_modules/focus-visible/dist/focus-visible.js'; 
-      body.appendChild(focusVisible);
-    };
+    const onInteraction = () => {document.querySelector('#first').dismissPoster();};
 
     body.addEventListener('mouseover', onInteraction, {once:true});
     body.addEventListener('touchmove', onInteraction, {once:true});
