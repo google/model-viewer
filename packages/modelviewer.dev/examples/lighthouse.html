@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; Lighthouse Example</title>
+  <title><code>&lt;model-viewer&gt;</code> Lighthouse Example</title>
   <meta charset="utf-8">
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -141,7 +141,7 @@
   <div align="center" style="height:100%;">
   <!-- First Example -->
 
-    <h2>Setting up &lt;model-viewer&gt; for good Lighthouse scores</h2>
+    <h2>Setting up <code>&lt;model-viewer&gt;</code> for good Lighthouse scores</h2>
   
     <model-viewer
         id="first"
@@ -169,7 +169,7 @@
     but not necessarily for best page loading performance. This page, on the
     other hand, is designed to demonstrate best practices to optimize your <a
     href="https://developers.google.com/web/tools/lighthouse" target="_blank"
-    rel="noopener">Lighthouse</a> score when using &lt;model-viewer&gt;.</p>
+    rel="noopener">Lighthouse</a> score when using <code>&lt;model-viewer&gt;</code>.</p>
 
     <p>You can inspect our best practices recommendations by "viewing source" on
     this page. Note this example lazy-loads <code>model-viewer.min.js</code> as
@@ -179,10 +179,17 @@
     poster is visible and seamless even before our script has loaded.</p>
 
     <p>This page is also designed as a way for both our users and our developers
-    to verify &lt;model-viewer&gt;'s performance. From Chrome, simply open dev
-    tools, go to the lighthouse tab and click "generate report". We're seeing
-    scores of 100 across the board for both desktop and mobile, which we intend
-    to maintain henceforth.</p>
+    to verify <code>&lt;model-viewer&gt;</code>'s performance. From Chrome,
+    simply open dev tools, go to the lighthouse tab and click "generate report".
+    We're seeing scores of 100 across the board for both desktop and mobile
+    (shown below), which we intend to maintain henceforth.</p>
+
+    <img src="../assets/lighthouse.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
+
+    <p>Note these scores are variable and the goal is to continue to reduce the
+    performance metrics even if the overall score is 100, since that will leave
+    more headroom for complicated sites to add <code>&lt;model-viewer&gt;</code>
+    without hurting their scores.</p>
 
     <!-- Second Example -->
     <model-viewer
@@ -218,8 +225,14 @@
 
   <script type="module">
     const body = document.querySelector('body');
+    let loaded = false;
 
     const onInteraction = () => {
+      if (loaded === true) {
+        return;
+      }
+      loaded = true;
+
       const modelViewer = document.createElement('script'); 
       modelViewer.type = 'module';
       modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
