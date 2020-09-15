@@ -188,8 +188,11 @@ export class Renderer extends EventDispatcher {
     this.height = height;
     this.dpr = dpr;
 
+    const pixelWidth = Math.round(width * dpr);
+    const pixelHeight = Math.round(height * dpr);
+
     if (this.canRender) {
-      this.threeRenderer.setSize(width * dpr, height * dpr, false);
+      this.threeRenderer.setSize(pixelWidth, pixelHeight, false);
     }
 
     // Expand the canvas size to make up for shrinking the viewport.
@@ -205,8 +208,8 @@ export class Renderer extends EventDispatcher {
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
       scene.isDirty = true;
