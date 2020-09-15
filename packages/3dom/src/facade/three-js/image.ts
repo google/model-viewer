@@ -49,7 +49,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     }
   }
 
-  async mutate(property: 'uri', value: string|null) {
+  async mutate(property: 'uri', value: string|null): Promise<void> {
     let image: HTMLImageElement|null = null;
 
     if (property !== 'uri') {

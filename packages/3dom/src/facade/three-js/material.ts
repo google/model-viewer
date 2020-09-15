@@ -93,19 +93,19 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
   }
 
-  get pbrMetallicRoughness() {
+  get pbrMetallicRoughness(): PBRMetallicRoughness|null {
     return this[$pbrMetallicRoughness];
   }
 
-  get normalTexture() {
+  get normalTexture(): TextureInfo|null {
     return this[$normalTexture];
   }
 
-  get occlusionTexture() {
+  get occlusionTexture(): TextureInfo|null {
     return this[$occlusionTexture];
   }
 
-  get emissiveTexture() {
+  get emissiveTexture(): TextureInfo|null {
     return this[$emissiveTexture];
   }
 

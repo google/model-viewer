@@ -186,14 +186,14 @@ export class CorrelatedSceneGraph {
   /**
    * The source Three.js GLTF result given to us by a Three.js GLTFLoader.
    */
-  get threeGLTF() {
+  get threeGLTF(): ThreeGLTF {
     return this[$threeGLTF];
   }
 
   /**
    * The in-memory deserialized source glTF.
    */
-  get gltf() {
+  get gltf(): GLTF {
     return this[$gltf];
   }
 
@@ -203,7 +203,7 @@ export class CorrelatedSceneGraph {
    * cases where more than one Three.js object corresponds to a single glTF
    * element.
    */
-  get gltfElementMap() {
+  get gltfElementMap(): GLTFElementToThreeObjectMap {
     return this[$gltfElementMap];
   }
 
@@ -211,7 +211,7 @@ export class CorrelatedSceneGraph {
    * A map of individual Three.js objects to corresponding elements in the
    * source glTF.
    */
-  get threeObjectMap() {
+  get threeObjectMap(): ThreeObjectToGLTFElementHandleMap {
     return this[$threeObjectMap];
   }
 

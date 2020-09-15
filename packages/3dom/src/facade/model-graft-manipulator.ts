@@ -20,7 +20,6 @@ import {ModelGraft} from './api.js';
 const $modelGraft = Symbol('modelGraft');
 const $port = Symbol('port');
 
-const $messageEventHandler = Symbol('messageEventHandler');
 const $onMessageEvent = Symbol('onMessageEvent');
 
 /**
@@ -33,13 +32,10 @@ export class ModelGraftManipulator {
   protected[$port]: MessagePort;
   protected[$modelGraft]: ModelGraft;
 
-  protected[$messageEventHandler] = (event: MessageEvent) =>
-      this[$onMessageEvent](event);
-
   constructor(modelGraft: ModelGraft, port: MessagePort) {
     this[$modelGraft] = modelGraft;
     this[$port] = port;
-    this[$port].addEventListener('message', this[$messageEventHandler]);
+    this[$port].addEventListener('message', this[$onMessageEvent]);
     this[$port].start();
   }
 
@@ -47,12 +43,12 @@ export class ModelGraftManipulator {
    * Clean up internal state so that the ModelGraftManipulator can be properly
    * garbage collected.
    */
-  dispose() {
-    this[$port].removeEventListener('message', this[$messageEventHandler]);
+  dispose(): void {
+    this[$port].removeEventListener('message', this[$onMessageEvent]);
     this[$port].close();
   }
 
-  async[$onMessageEvent](event: MessageEvent) {
+  [$onMessageEvent] = async(event: MessageEvent): Promise<void> => {
     const {data} = event;
     if (data && data.type) {
       if (data.type === ThreeDOMMessageType.MUTATE) {
@@ -67,5 +63,5 @@ export class ModelGraftManipulator {
         }
       }
     }
-  }
+  };
 }
