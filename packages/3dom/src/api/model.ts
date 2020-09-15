@@ -48,14 +48,14 @@ export class Model extends ThreeDOMElement implements ModelInterface {
    *
    * TODO(#1002): This value needs to be sensitive to scene graph order
    */
-  get materials() {
+  get materials(): Readonly<Material[]> {
     return this[$kernel].getElementsByType('material');
   }
 
   /**
    * A Model has no owner model; it owns itself.
    */
-  get ownerModel() {
+  get ownerModel(): Model {
     return this;
   }
 }

@@ -36,14 +36,16 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   private[$wrapS]: WrapMode;
   private[$wrapT]: WrapMode;
 
-  private[$name]?: string;
+  private[$name]: string;
 
   constructor(kernel: ModelKernelInterface, serialized: SerializedSampler) {
     super(kernel);
 
     this[$kernel] = kernel;
 
-    this[$name] = serialized.name;
+    if (serialized.name != null) {
+      this[$name] = serialized.name;
+    }
 
     this[$minFilter] = serialized.minFilter || null;
     this[$magFilter] = serialized.magFilter || null;
@@ -51,23 +53,23 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     this[$wrapT] = serialized.wrapT || 10497;
   }
 
-  get name() {
+  get name(): string {
     return this[$name];
   }
 
-  get minFilter() {
+  get minFilter(): MinFilter|null {
     return this[$minFilter];
   }
 
-  get magFilter() {
+  get magFilter(): MagFilter|null {
     return this[$magFilter];
   }
 
-  get wrapS() {
+  get wrapS(): WrapMode {
     return this[$wrapS];
   }
 
-  get wrapT() {
+  get wrapT(): WrapMode {
     return this[$wrapT];
   }
 

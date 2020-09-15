@@ -28,7 +28,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   private[$uri]: string|null;
 
-  private[$name]?: string;
+  private[$name]: string;
 
   constructor(kernel: ModelKernelInterface, serialized: SerializedImage) {
     super(kernel);
@@ -36,18 +36,20 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     this[$kernel] = kernel;
 
     this[$uri] = serialized.uri || null;
-    this[$name] = serialized.name;
+    if (serialized.name != null) {
+      this[$name] = serialized.name;
+    }
   }
 
-  get name() {
+  get name(): string|undefined {
     return this[$name];
   }
 
-  get type() {
+  get type(): 'embedded'|'external' {
     return this.uri != null ? 'external' : 'embedded';
   }
 
-  get uri() {
+  get uri(): string|null {
     return this[$uri];
   }
 

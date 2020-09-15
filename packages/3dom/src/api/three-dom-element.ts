@@ -40,7 +40,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * The Model of provenance for this scene graph element, or undefined if
    * element is itself a Model.
    */
-  get ownerModel() {
+  get ownerModel(): Model {
     return this[$ownerModel];
   }
 }

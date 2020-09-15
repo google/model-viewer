@@ -30,7 +30,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$source]: Image|null = null;
   private[$sampler]: Sampler|null = null;
 
-  private[$name]?: string;
+  private[$name]: string;
 
   constructor(kernel: ModelKernelInterface, serialized: SerializedTexture) {
     super(kernel);
@@ -39,7 +39,9 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
 
     const {sampler, source, name} = serialized;
 
-    this[$name] = name;
+    if (name != null) {
+      this[$name] = name;
+    }
 
     if (sampler != null) {
       this[$sampler] = kernel.deserialize('sampler', sampler);
@@ -50,15 +52,15 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     }
   }
 
-  get name() {
+  get name(): string {
     return this[$name];
   }
 
-  get sampler() {
+  get sampler(): Sampler|null {
     return this[$sampler];
   }
 
-  get source() {
+  get source(): Image|null {
     return this[$source];
   }
 

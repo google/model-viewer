@@ -56,7 +56,6 @@ interface Deferred {
 }
 
 const $onMessageEvent = Symbol('onMessageEvent');
-const $messageEventHandler = Symbol('messageEventHandler');
 const $port = Symbol('port');
 const $model = Symbol('model');
 
@@ -86,8 +85,6 @@ export class ModelKernel implements ModelKernelInterface {
 
   protected[$elementsByType]: ElementsByType = new Map();
 
-  protected[$messageEventHandler] = (event: MessageEvent) =>
-      this[$onMessageEvent](event);
   protected[$port]: MessagePort;
 
   protected[$model]: ModelAPI;
@@ -111,7 +108,7 @@ export class ModelKernel implements ModelKernelInterface {
     }
 
     this[$port] = port;
-    this[$port].addEventListener('message', this[$messageEventHandler]);
+    this[$port].addEventListener('message', this[$onMessageEvent]);
     this[$port].start();
 
     this[$model] = this.deserialize('model', serialized);
@@ -121,7 +118,7 @@ export class ModelKernel implements ModelKernelInterface {
    * The root scene graph element, a Model, that is the entrypoint for the
    * entire scene graph that is backed by this kernel.
    */
-  get model() {
+  get model(): ModelAPI {
     return this[$model];
   }
 
@@ -225,12 +222,12 @@ export class ModelKernel implements ModelKernelInterface {
    * The ModelKernel should be deactivated before it is disposed of, or else
    * it will leak in memory.
    */
-  deactivate() {
+  deactivate(): void {
     this[$port].close();
-    this[$port].removeEventListener('message', this[$messageEventHandler]);
+    this[$port].removeEventListener('message', this[$onMessageEvent]);
   }
 
-  protected[$onMessageEvent](event: MessageEvent) {
+  protected[$onMessageEvent] = (event: MessageEvent): void => {
     const {data} = event;
 
     switch (data && data.type) {
@@ -247,5 +244,5 @@ export class ModelKernel implements ModelKernelInterface {
         break;
       }
     }
-  }
+  };
 }

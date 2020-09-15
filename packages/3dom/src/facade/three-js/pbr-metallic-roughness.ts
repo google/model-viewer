@@ -87,11 +87,11 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     return (this.sourceObject as PBRMetallicRoughness).roughnessFactor || 0;
   }
 
-  get baseColorTexture() {
+  get baseColorTexture(): TextureInfo|null {
     return this[$baseColorTexture];
   }
 
-  get metallicRoughnessTexture() {
+  get metallicRoughnessTexture(): TextureInfo|null {
     return this[$metallicRoughnessTexture];
   }
 

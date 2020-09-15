@@ -85,11 +85,11 @@ export class ModelGraft implements EventTarget, ModelGraftInterface {
     this[$model] = new Model(this, modelUri, correlatedSceneGraph);
   }
 
-  get correlatedSceneGraph() {
+  get correlatedSceneGraph(): CorrelatedSceneGraph {
     return this[$correlatedSceneGraph];
   }
 
-  get model() {
+  get model(): Model {
     return this[$model];
   }
 
@@ -103,11 +103,11 @@ export class ModelGraft implements EventTarget, ModelGraftInterface {
     return element;
   }
 
-  adopt(element: ThreeDOMElement) {
+  adopt(element: ThreeDOMElement): void {
     this[$elementsByInternalId].set(element.internalID, element);
   }
 
-  async mutate(id: number, property: string, value: unknown) {
+  async mutate(id: number, property: string, value: unknown): Promise<void> {
     const element = this.getElementByInternalId(id);
 
     await element!.mutate(property, value);

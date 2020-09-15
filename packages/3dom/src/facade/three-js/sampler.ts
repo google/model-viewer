@@ -86,7 +86,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   async mutate<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
-      property: P, value: MinFilter|MagFilter|WrapMode|null) {
+      property: P, value: MinFilter|MagFilter|WrapMode|null): Promise<void> {
     const sampler = this.sourceObject as GLTFSampler;
 
     if (value != null) {

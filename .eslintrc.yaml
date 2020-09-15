@@ -31,6 +31,9 @@ rules:
   # Remove if we switch away from clang-format:
   keyword-spacing: off
 
+  # clang-format wants async(foo) => {} without a space
+  space-before-function-paren: off
+
   "@typescript-eslint/explicit-member-accessibility": [error, {"accessibility": "no-public"}]
 
   no-new: warn

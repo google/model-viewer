@@ -49,7 +49,7 @@ export class TextureInfo extends ThreeDOMElement implements
     }
   }
 
-  get texture() {
+  get texture(): Texture|null {
     return this[$texture];
   }
 

@@ -78,18 +78,18 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   /**
    * The PBR properties that are assigned to this material, if any.
    */
-  get pbrMetallicRoughness() {
+  get pbrMetallicRoughness(): PBRMetallicRoughness {
     return this[$pbrMetallicRoughness];
   }
 
-  get normalTexture() {
+  get normalTexture(): TextureInfo|null {
     return this[$normalTexture];
   }
 
-  get occlusionTexture() {
+  get occlusionTexture(): TextureInfo|null {
     return this[$occlusionTexture];
   }
-  get emissiveTexture() {
+  get emissiveTexture(): TextureInfo|null {
     return this[$emissiveTexture];
   }
 
@@ -97,7 +97,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
    * The name of the material. Note that names are optional and not
    * guaranteed to be unique.
    */
-  get name() {
+  get name(): string {
     return this[$name];
   }
 }

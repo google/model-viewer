@@ -60,11 +60,11 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     }
   }
 
-  get sampler() {
+  get sampler(): Sampler|null {
     return this[$sampler];
   }
 
-  get source() {
+  get source(): Image|null {
     return this[$source];
   }
 

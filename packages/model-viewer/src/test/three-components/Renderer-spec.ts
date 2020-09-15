@@ -93,13 +93,13 @@ suite('Renderer', () => {
 
     test('renders only dirty scenes', () => {
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(otherScene.renderCount).to.be.equal(1);
+      expect(scene.renderCount).to.be.equal(1, 'scene first render');
+      expect(otherScene.renderCount).to.be.equal(1, 'otherScene first render');
 
       scene.isDirty = true;
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(2);
-      expect(otherScene.renderCount).to.be.equal(1);
+      expect(scene.renderCount).to.be.equal(2, 'scene second render');
+      expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
     });
 
     test('does not render scenes that have not been loaded', () => {
