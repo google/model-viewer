@@ -117,7 +117,7 @@ export class GLTFTreeVisitor {
    * Sparse traversal can also be specified, in which case elements that
    * re-appear multiple times in the scene graph will only be visited once.
    */
-  visit(gltf: GLTF, options: VisitOptions = {}) {
+  visit(gltf: GLTF, options: VisitOptions = {}): void {
     const allScenes = !!options.allScenes;
     const sparse = !!options.sparse;
     const scenes = allScenes ?

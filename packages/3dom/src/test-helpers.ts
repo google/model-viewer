@@ -37,19 +37,19 @@ export class FakePBRMetallicRoughness implements PBRMetallicRoughness {
           FakePBRMetallicRoughness.count++}`) {
   }
 
-  get ownerModel() {
+  get ownerModel(): Model {
     return this.kernel.model;
   }
 
-  setBaseColorFactor(_value: RGBA) {
+  setBaseColorFactor(_value: RGBA): Promise<void> {
     return Promise.resolve();
   }
 
-  setMetallicFactor(_value: number) {
+  setMetallicFactor(_value: number): Promise<void> {
     return Promise.resolve();
   }
 
-  setRoughnessFactor(_value: number) {
+  setRoughnessFactor(_value: number): Promise<void> {
     return Promise.resolve();
   }
 }
@@ -73,7 +73,7 @@ export class FakeMaterial extends FakeThreeDOMElement implements Material {
     super();
   }
 
-  get ownerModel() {
+  get ownerModel(): Model {
     return this.kernel.model;
   }
 }
@@ -98,7 +98,7 @@ export class FakeImage extends FakeThreeDOMElement implements Image {
   private static count = 0;
   uri: string|null = null;
 
-  get type() {
+  get type(): 'external'|'embedded' {
     return this.uri ? 'external' : 'embedded';
   }
 
@@ -202,7 +202,8 @@ export class FakeModelKernel implements ModelKernelInterface {
   }
 }
 
-export const assetPath = (asset: string) => `./base/shared-assets/${asset}`;
+export const assetPath = (asset: string): string =>
+    `./base/shared-assets/${asset}`;
 
 export const loadThreeGLTF = (url: string): Promise<ThreeGLTF> => {
   const loader = new GLTFLoader();
@@ -211,7 +212,7 @@ export const loadThreeGLTF = (url: string): Promise<ThreeGLTF> => {
   });
 };
 
-export const createFakeThreeGLTF = () => {
+export const createFakeThreeGLTF = (): ThreeGLTF => {
   const scene = new Group();
 
   return {

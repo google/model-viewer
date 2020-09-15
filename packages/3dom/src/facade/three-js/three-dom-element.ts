@@ -18,7 +18,7 @@ import {Material, Object3D, Texture} from 'three';
 import {GLTF, GLTFElement} from '../../gltf-2.0.js';
 import {SerializedThreeDOMElement} from '../../protocol.js';
 import {getLocallyUniqueId} from '../../utilities.js';
-import {ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
+import {Model, ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
 
 import {ModelGraft} from './model-graft.js';
 
@@ -57,7 +57,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
   /**
    * The Model of provenance for this scene graph element.
    */
-  get ownerModel() {
+  get ownerModel(): Model {
     return this[$graft].model;
   }
 
@@ -66,7 +66,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * considered unique to the element in the context of its scene graph. These
    * IDs are not guaranteed to be stable across script executions.
    */
-  get internalID() {
+  get internalID(): number {
     return this[$id];
   }
 
@@ -76,21 +76,21 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * We only want to expose a name that is set in the source glTF, so Three.js
    * generated names are ignored.
    */
-  get name() {
+  get name(): string|null {
     return (this[$sourceObject] as unknown as {name?: string}).name || null;
   }
 
   /**
    * The backing Three.js scene graph construct for this element.
    */
-  get correlatedObjects() {
+  get correlatedObjects(): CorrelatedObjects|null {
     return this[$correlatedObjects];
   }
 
   /**
    * The canonical GLTF or GLTFElement represented by this facade.
    */
-  get sourceObject() {
+  get sourceObject(): GLTFElement|GLTF {
     return this[$sourceObject];
   }
 
