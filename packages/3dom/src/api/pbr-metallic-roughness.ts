@@ -64,29 +64,29 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   /**
    * The base color factor of the material in RGBA format.
    */
-  get baseColorFactor() {
+  get baseColorFactor(): Readonly<RGBA> {
     return this[$baseColorFactor];
   }
 
   /**
    * The metalness factor of the material in range [0,1].
    */
-  get metallicFactor() {
+  get metallicFactor(): number {
     return this[$metallicFactor];
   }
 
   /**
    * The roughness factor of the material in range [0,1].
    */
-  get roughnessFactor() {
+  get roughnessFactor(): number {
     return this[$roughnessFactor];
   }
 
-  get baseColorTexture() {
+  get baseColorTexture(): TextureInfo|null {
     return this[$baseColorTexture];
   }
 
-  get metallicRoughnessTexture() {
+  get metallicRoughnessTexture(): TextureInfo|null {
     return this[$metallicRoughnessTexture];
   }
 
@@ -95,7 +95,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
    *
    * @see ../api.ts
    */
-  async setBaseColorFactor(color: RGBA) {
+  async setBaseColorFactor(color: RGBA): Promise<void> {
     await this[$kernel].mutate(this, 'baseColorFactor', color);
     this[$baseColorFactor] = Object.freeze(color) as RGBA;
   }
@@ -105,7 +105,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
    *
    * @see ../api.ts
    */
-  async setMetallicFactor(factor: number) {
+  async setMetallicFactor(factor: number): Promise<void> {
     await this[$kernel].mutate(this, 'metallicFactor', factor);
     this[$metallicFactor] = factor;
   }
@@ -115,7 +115,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
    *
    * @see ../api.ts
    */
-  async setRoughnessFactor(factor: number) {
+  async setRoughnessFactor(factor: number): Promise<void> {
     await this[$kernel].mutate(this, 'roughnessFactor', factor);
     this[$roughnessFactor] = factor;
   }
