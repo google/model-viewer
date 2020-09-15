@@ -126,7 +126,7 @@
   <div align="center" style="height:100%;">
   <!-- First Example -->
 
-    <h2>Setting up <code>&lt;model-viewer&gt;</code> for good Lighthouse scores</h2>
+    <h2>Setting up <code>&lt;model-viewer&gt;</code> for decent Lighthouse scores</h2>
   
     <model-viewer
         id="first"
@@ -153,8 +153,8 @@
     loads <code>model-viewer.min.js</code> immediately, which results in poorer
     lighthouse performance scores, as this bundle of JavaScript takes time to
     parse. We still make a strong effort to keep this bundle size down as much
-    as possible to ensure this simple type of loading still gets decent
-    performance.</p>
+    as possible to ensure this simpler type of loading still gets decent
+    performance, as this method does not require custom posters and such.</p>
 
     <p>It is still important to delay the loading of the 3D model, as including
     its load time in the lighthouse scores will tend to destroy them. As such
@@ -163,10 +163,10 @@
     cause loading to proceed. The second <code>&lt;model-viewer&gt;</code> does
     not require this as it lazy-loads by default since it is below the fold.</p>
 
-    <img src="../assets/lighthouse.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
+    <img src="../assets/lighthouse2.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
 
-    <p>Note the performance is worse than before, at only 97 for desktop and 92
-    for mobile (shown above).</p>  
+    <p>Note the performance is worse than before, at only 93
+    for mobile (shown above), though still 100 on desktop.</p>  
 
     <!-- Second Example -->
     <model-viewer
