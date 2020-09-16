@@ -27,6 +27,9 @@ const ModelViewerElement = class extends ModelViewerElementBase {
   }
 };
 
+// Ensure tests are not rescaling
+ModelViewerElement.minimumRenderScale = 1;
+
 interface TestScene {
   renderCount?: number;
 }
