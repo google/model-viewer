@@ -47,7 +47,7 @@ export declare interface StagingInterface {
   autoRotate: boolean;
   autoRotateDelay: number;
   readonly turntableRotation: number;
-  resetTurntableRotation(): void;
+  resetTurntableRotation(theta?: number): void;
 }
 
 export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -126,8 +126,8 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$scene].yaw;
     }
 
-    resetTurntableRotation() {
-      this[$scene].yaw = 0;
+    resetTurntableRotation(theta = 0) {
+      this[$scene].yaw = theta;
     }
   }
 

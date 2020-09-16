@@ -596,11 +596,12 @@
               currentTime property to 0.</p>
             </li>
             <li>
-              <div>resetTurntableRotation()</div>
-              <p>Resets the turntable that rotates the model when auto-rotate
-              is enabled. The new value of the turntable rotation will be 0 after
-              this method is invoked, but the model may not update until the next
-              render frame.</p>
+              <div>resetTurntableRotation(theta)</div>
+              <p>Resets the turntable that rotates the model when auto-rotate is
+              enabled. The new value of the turntable rotation will be theta
+              radians after this method is invoked, but the model may not update
+              until the next render frame. If no argument is supplied, theta
+              defaults to zero.</p>
             </li>
             <li>
               <div>resetInteractionPrompt()</div>
