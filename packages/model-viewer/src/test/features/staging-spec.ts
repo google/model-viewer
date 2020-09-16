@@ -60,6 +60,14 @@ suite('ModelViewerElementBase with StagingMixin', () => {
       document.body.removeChild(element);
     });
 
+    test('can manually rotate turntable', () => {
+      element.resetTurntableRotation(3);
+      expect(element.turntableRotation).to.be.equal(3);
+
+      element.resetTurntableRotation();
+      expect(element.turntableRotation).to.be.equal(0);
+    });
+
     suite('auto-rotate', () => {
       setup(async () => {
         element.autoRotate = true;
