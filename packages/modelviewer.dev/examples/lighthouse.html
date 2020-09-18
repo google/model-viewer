@@ -76,6 +76,21 @@
       background-repeat: no-repeat;
       background-position: center;
     }
+
+    .progress-bar {
+      display: block;
+      width: 50%;
+      height: 10%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      background-color: #888888;
+    }
+
+    .progress-bar.hide {
+      display: none;
+    }
     
     .ar-button {
       background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
@@ -154,6 +169,8 @@
       >
 
       <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);"></div>
+
+      <div class="progress-bar" slot="progress-bar"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -251,6 +268,16 @@
     body.addEventListener('touchmove', onInteraction, {once:true});
     body.addEventListener('scroll', onInteraction, {once:true});
     body.addEventListener('keydown', onInteraction, {once:true});
+
+    const first = document.querySelector('#first');
+    const firstBar = first.querySelector('.progress-bar');
+    first.addEventListener('progress',(event)=>{
+      if(event.detail.totalProgress == 1){
+        firstBar.classList.add('hide');
+      }else{
+        firstBar.style.width=`${event.detail.totalProgress*50}%`;
+      }
+    });
   </script>
 </body>
 </html>
