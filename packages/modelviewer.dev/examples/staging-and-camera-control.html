@@ -130,6 +130,63 @@
   </div>
 
   <div class="sample">
+    <div id="demo-container-4.5" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Add other interactions like pan</h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="demo-container-4.5" highlight-as="html">
+          <template>
+<model-viewer id="pan-demo" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#pan-demo');
+  let panning = false;
+  let panX, panY;
+  let lastPointer;
+  const gain=0.003;
+
+  modelViewer.addEventListener('mousedown', (event)=>{
+    panning = event.button === 2 || event.ctrlKey || event.metaKey || event.shiftKey;
+    if(!panning) return;
+    
+    const orbit = modelViewer.getCameraOrbit();
+    const {theta, phi} = orbit;
+    panX=[-Math.cos(theta), 0, Math.sin(theta)];
+    panY=[-Math.cos(phi)*Math.sin(theta), Math.sin(phi),-Math.cos(phi)*Math.cos(theta)];
+    lastPointer=event;
+    event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('mouseup', (event)=>{
+    panning = false;
+  }, true);
+
+  modelViewer.addEventListener('mousemove', (event)=>{
+    if(!panning) return;
+    
+    const target=modelViewer.getCameraTarget();
+    const dx=(event.clientX-lastPointer.clientX)*gain;
+    const dy=(event.clientY-lastPointer.clientY)*gain;
+    lastPointer=event;
+    
+    target.x+=dx*panX[0]+dy*panY[0];
+    target.y+=dx*panX[1]+dy*panY[1];
+    target.z+=dx*panX[2]+dy*panY[2];
+    modelViewer.cameraTarget=target.toString();
+    event.stopPropagation();
+  }, true);
+})();
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
     <div id="demo-container-5" class="demo"></div>
     <div class="content">
       <div class="wrapper">
