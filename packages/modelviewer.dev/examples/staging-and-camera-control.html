@@ -169,7 +169,16 @@
       <div class="wrapper">
         <div class="heading">
           <h2 class="demo-title">Add other interactions like pan</h2>
-          <h4></h4>
+          <h4>Event listeners can cooperate with camera-controls</h4>
+          <p>By using capture on your event listeners you can make sure the
+          events are also passed in as usual to the built in camera controls.
+          This can be selectively disabled by calling stopPropagation() on the
+          event.</p>
+          <p>This is one of many possible implementations of panning around a
+          model, including the ability to set the target by clicking. It is left
+          as an example here as there are too many possible variations to make a
+          reasonable API around. It also tends to be confusing to users in cases
+          where it is not necessary.</p>
         </div>
         <example-snippet stamp-to="demo-container-7" highlight-as="html">
           <template>
@@ -182,12 +191,12 @@
   let panX, panY;
   let firstX, firstY;
   let lastX, lastY;
-  let gain;
+  let metersPerPixel;
 
   const startPan = () => {
     const orbit = modelViewer.getCameraOrbit();
     const {theta, phi, radius} = orbit;
-    gain = 0.75 * radius / modelViewer.getBoundingClientRect().height;
+    metersPerPixel = 0.75 * radius / modelViewer.getBoundingClientRect().height;
     panX = [-Math.cos(theta), 0, Math.sin(theta)];
     panY = [
       -Math.cos(phi) * Math.sin(theta),
@@ -198,8 +207,8 @@
   };
 
   const movePan = (thisX, thisY) => {
-    const dx = (thisX - lastX) * gain;
-    const dy = (thisY - lastY) * gain;
+    const dx = (thisX - lastX) * metersPerPixel;
+    const dy = (thisY - lastY) * metersPerPixel;
     lastX = thisX;
     lastY = thisY;
 
