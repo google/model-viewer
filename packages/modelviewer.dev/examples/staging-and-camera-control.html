@@ -177,7 +177,7 @@
 <script>
 (() => {
   const modelViewer = document.querySelector('#pan-demo');
-  const tapDistance = 0.1;
+  const tapDistance = 2;
   let panning = false;
   let panX, panY;
   let firstX, firstY;
@@ -208,8 +208,6 @@
 
   const recenter=(pointer)=>{
     panning = false;
-    console.log(startX);
-    console.log(pointer.clientX-startX, pointer.clientY-startY);
     if(Math.abs(pointer.clientX-startX)>tapDistance||Math.abs(pointer.clientY-startY)>tapDistance)return;
     const rect = modelViewer.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -243,14 +241,14 @@
     if(!panning) return;
 
     const {touches} = event;
-    const lastX=0.5*(touches[0].clientX+touches[1].clientX);
-    const lastY=0.5*(touches[0].clientY+touches[1].clientY);
+    lastX=0.5*(touches[0].clientX+touches[1].clientX);
+    lastY=0.5*(touches[0].clientY+touches[1].clientY);
     startPan();
   }, true);
 
   modelViewer.addEventListener('mousemove', (event)=>{
     if(!panning) return;
-    
+
     movePan(event.clientX,event.clientY);
     event.stopPropagation();
   }, true);
