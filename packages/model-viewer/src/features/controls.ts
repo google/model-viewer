@@ -37,21 +37,19 @@ const PROMPT_ANIMATION_TIME = 5000;
 // For timing purposes, a "frame" is a timing agnostic relative unit of time
 // and a "value" is a target value for the keyframe.
 const wiggle = timeline(0, [
-  {frames: 6, value: 0},
   {frames: 5, value: -1},
   {frames: 1, value: -1},
   {frames: 8, value: 1},
   {frames: 1, value: 1},
   {frames: 5, value: 0},
-  {frames: 12, value: 0}
+  {frames: 18, value: 0}
 ]);
 
 const fade = timeline(0, [
-  {frames: 2, value: 0},
   {frames: 1, value: 1},
   {frames: 5, value: 1},
   {frames: 1, value: 0},
-  {frames: 4, value: 0}
+  {frames: 6, value: 0}
 ]);
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
