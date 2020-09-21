@@ -320,7 +320,6 @@
 	  
 				  const updateOrbit = () => {
 				    const orbit = modelViewer.getCameraOrbit();
-					modelViewer.resetTurntableRotation(-1 * orbit.theta);
 				    modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
 				    modelViewer.jumpCameraToGoal();
 					requestAnimationFrame(() => updateOrbit());
