@@ -299,7 +299,53 @@
       </div>
     </div>
   </div>
+  <div class="sample">
+    <div id="demo-container-8" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Add other interactions like rotating environment map</h2>
+          <h4>Use parameters with rest turntable to rotate only the environment light</h4>
+          <p>By using shift key plus left click mouse or touch pad drag, one can rotate
+			  the environment map to see how the environment background would cast light
+			  onto the object from different angles when it is rotated. Updating orbit to 
+			  new theta value and then reseting the theta value to stop turntable from 
+		  rotating. </p>
+        </div>
+        <example-snippet stamp-to="demo-container-8" highlight-as="html">
+          <template>
+			  <model-viewer id="pan-demo" camera-controls src="../shared-assets/models/Astronaut.glb" environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" 				alt="A 3D model of an astronaut"></model-viewer>
+			  <script>
+				  const modelViewer = document.querySelector("model-viewer");
+	  
+				  const updateOrbit = () => {
+				    const orbit = modelViewer.getCameraOrbit();
+					modelViewer.resetTurntableRotation(-1 * orbit.theta);
+				    modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
+				    modelViewer.jumpCameraToGoal();
+					requestAnimationFrame(() => updateOrbit());
+			  	    var isMouseDown = false;
+			  	    document.onmousedown = function() { isMouseDown = true  };
+			  	    document.onmouseup   = function() { isMouseDown = false };
+			  	    document.onmousemove = function(e) { 
+			  		  if(isMouseDown) { 
+			  	  	    if (e.shiftKey && e.which == 1) {
 
+			  				modelViewer.resetTurntableRotation(-1 * orbit.theta);
+			  	  	    }
+	  	    
+			  	  	  } 
+			    	  };
+	    
+				  };
+	  
+				  updateOrbit();
+			  </script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>	
   <div class="footer">
     <ul>
       <li class="attribution">
