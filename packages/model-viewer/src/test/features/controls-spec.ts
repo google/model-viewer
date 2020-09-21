@@ -201,7 +201,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        expect(element.getCameraTarget()).to.be.eql(target);
+        expect(element.getCameraTarget().toString())
+            .to.be.equal(target.toString());
       });
 
       test('causes the camera to look at the target', () => {
@@ -226,8 +227,10 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults FOV limits correctly', async () => {
-        expect(element.getMinimumFieldOfView()).to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
-        expect(element.getMaximumFieldOfView()).to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
+        expect(element.getMinimumFieldOfView())
+            .to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
+        expect(element.getMaximumFieldOfView())
+            .to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {
