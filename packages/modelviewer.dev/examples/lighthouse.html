@@ -59,11 +59,6 @@
       display: none;
     }
 
-    /* This smooths the poster's transition by matching the default */
-    :not(:defined) > .poster {
-      opacity: 0.8;
-    }
-
     /* This CSS should always be used at minimum for any slotted poster */
     .poster {
       display: block;
@@ -79,7 +74,7 @@
 
     .progress-bar {
       display: block;
-      width: 50%;
+      width: 0%;
       height: 10%;
       position: absolute;
       left: 50%;
@@ -214,6 +209,7 @@
 
     <!-- Second Example -->
     <model-viewer
+      id="second"
       src="../assets/ShopifyModels/Mixer.glb"
       camera-orbit="0.9677rad 1.2427rad auto"
       shadow-intensity="1"
@@ -223,6 +219,8 @@
     >
 
       <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/MixerPoster.png);"></div>
+
+      <div class="progress-bar" slot="progress-bar"></div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -269,15 +267,17 @@
     body.addEventListener('scroll', onInteraction, {once:true});
     body.addEventListener('keydown', onInteraction, {once:true});
 
-    const first = document.querySelector('#first');
-    const firstBar = first.querySelector('.progress-bar');
-    first.addEventListener('progress',(event)=>{
+    const onProgress = (event) => {
+      const firstBar = event.target.querySelector('.progress-bar');
       if(event.detail.totalProgress == 1){
         firstBar.classList.add('hide');
       }else{
         firstBar.style.width=`${event.detail.totalProgress*50}%`;
       }
-    });
+    };
+
+    document.querySelector('#first').addEventListener('progress', onProgress);
+    document.querySelector('#second').addEventListener('progress', onProgress);
   </script>
 </body>
 </html>
