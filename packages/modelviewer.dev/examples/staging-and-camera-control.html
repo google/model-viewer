@@ -314,32 +314,27 @@
         </div>
         <example-snippet stamp-to="demo-container-8" highlight-as="html">
           <template>
-			  <model-viewer id="pan-demo" camera-controls src="../shared-assets/models/Astronaut.glb" environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" 				alt="A 3D model of an astronaut"></model-viewer>
-			  <script>
-				  const modelViewer = document.querySelector("model-viewer");
+<model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/Astronaut.glb" environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+  const modelViewer = document.querySelector("model-viewer#envlight-demo");
 	  
-				  const updateOrbit = () => {
-				    const orbit = modelViewer.getCameraOrbit();
-				    modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
-				    modelViewer.jumpCameraToGoal();
-					requestAnimationFrame(() => updateOrbit());
-			  	    var isMouseDown = false;
-			  	    document.onmousedown = function() { isMouseDown = true  };
-			  	    document.onmouseup   = function() { isMouseDown = false };
-			  	    document.onmousemove = function(e) { 
-			  		  if(isMouseDown) { 
-			  	  	    if (e.shiftKey && e.which == 1) {
-
-			  				modelViewer.resetTurntableRotation(-1 * orbit.theta);
-			  	  	    }
-	  	    
-			  	  	  } 
-			    	  };
-	    
-				  };
-	  
-				  updateOrbit();
-			  </script>
+  const updateOrbit = () => {
+  const orbit = modelViewer.getCameraOrbit();
+  modelViewer.jumpCameraToGoal();
+  requestAnimationFrame(() => updateOrbit());
+  var isMouseDown = false;
+  document.onmousedown = function() { isMouseDown = true  };
+  document.onmouseup   = function() { isMouseDown = false };
+  document.onmousemove = function(e) { 
+  if(isMouseDown) { 
+    if (e.shiftKey && e.which == 1) {
+	  modelViewer.resetTurntableRotation(-1 * orbit.theta);
+	}
+  } 
+  };
+  };
+  updateOrbit();
+</script>
           </template>
         </example-snippet>
       </div>
