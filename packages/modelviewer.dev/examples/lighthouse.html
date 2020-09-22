@@ -92,7 +92,7 @@
     }
  
     .update-bar {
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(255, 0, 0, 0.9);
       width: 0%;
       height: 100%;
       border-radius: 25px;
@@ -287,12 +287,10 @@
     const onProgress = (event) => {
       const progressBar = event.target.querySelector('.progress-bar');
       const updatingBar = event.target.querySelector('.update-bar');
+      updatingBar.style.width=`${event.detail.totalProgress*100}%`;
       if (event.detail.totalProgress == 1) {
-        updatingBar.style.width=`${event.detail.totalProgress*100}%`;
         progressBar.classList.add('hide');
-      } else {
-        updatingBar.style.width=`${event.detail.totalProgress*100}%`;
-      }
+      } 
     };
 
     document.querySelector('#first').addEventListener('progress', onProgress);
