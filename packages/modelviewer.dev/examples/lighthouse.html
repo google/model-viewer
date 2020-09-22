@@ -92,7 +92,7 @@
     }
  
     .update-bar {
-      background-color: rgba(255, 0, 0, 0.9);
+      background-color: rgba(255, 255, 255, 0.9);
       width: 0%;
       height: 100%;
       border-radius: 25px;
@@ -290,7 +290,7 @@
       updatingBar.style.width=`${event.detail.totalProgress*100}%`;
       if (event.detail.totalProgress == 1) {
         progressBar.classList.add('hide');
-      } 
+      }
     };
 
     document.querySelector('#first').addEventListener('progress', onProgress);
