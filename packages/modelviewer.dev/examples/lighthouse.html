@@ -74,19 +74,32 @@
 
     .progress-bar {
       display: block;
-      width: 0%;
+      width: 33%;
       height: 10%;
+      max-height: 2%;
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate3d(-50%, -50%, 0);
-      background-color: #888888;
+      border-radius: 25px;
+      box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+ 
+    .progress-bar.hide {
+      visibility: hidden;
+      transition: visibility 0.3s;
+    }
+ 
+    .update-bar {
+      background-color: rgba(255, 255, 255, 0.9);
+      width: 0%;
+      height: 100%;
+      border-radius: 25px;
+      float: left;
+      transition: width 0.3s;
     }
 
-    .progress-bar.hide {
-      display: none;
-    }
-    
     .ar-button {
       background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
       background-repeat: no-repeat;
@@ -165,7 +178,9 @@
 
       <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);"></div>
 
-      <div class="progress-bar" slot="progress-bar"></div>
+      <div class="progress-bar" slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -220,7 +235,9 @@
 
       <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/MixerPoster.png);"></div>
 
-      <div class="progress-bar" slot="progress-bar"></div>
+      <div class="progress-bar" slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
 
       <button slot="ar-button" class="ar-button">
         View in your space
@@ -268,11 +285,13 @@
     body.addEventListener('keydown', onInteraction, {once:true});
 
     const onProgress = (event) => {
-      const firstBar = event.target.querySelector('.progress-bar');
-      if(event.detail.totalProgress == 1){
-        firstBar.classList.add('hide');
-      }else{
-        firstBar.style.width=`${event.detail.totalProgress*50}%`;
+      const progressBar = event.target.querySelector('.progress-bar');
+      const updatingBar = event.target.querySelector('.update-bar');
+      if (event.detail.totalProgress == 1) {
+        updatingBar.style.width=`${event.detail.totalProgress*100}%`;
+        progressBar.classList.add('hide');
+      } else {
+        updatingBar.style.width=`${event.detail.totalProgress*100}%`;
       }
     };
 
