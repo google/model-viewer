@@ -185,7 +185,9 @@
 <model-viewer id="pan-demo" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
 (() => {
+  
   const modelViewer = document.querySelector('#pan-demo');
+  modelViewer.addEventListener('contextmenu', event => event.preventDefault());
   const tapDistance = 2;
   let panning = false;
   let panX, panY;
@@ -242,6 +244,7 @@
   };
 
   modelViewer.addEventListener('mousedown', (event) => {
+	console.log("mousedown");
     startX = event.clientX;
     startY = event.clientY;
     panning = event.button === 2 || event.ctrlKey || event.metaKey ||
@@ -314,26 +317,41 @@
         </div>
         <example-snippet stamp-to="demo-container-8" highlight-as="html">
           <template>
-<model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/Astronaut.glb" environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
-<script>
-  const modelViewer = document.querySelector("model-viewer#envlight-demo");
+<model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
+<script type="module">
+  const modelViewer = document.querySelector("#envlight-demo");
 	  
   const updateOrbit = () => {
-  const orbit = modelViewer.getCameraOrbit();
+  const orbit = modelViewer.getCameraOrbit(); 
   modelViewer.jumpCameraToGoal();
   requestAnimationFrame(() => updateOrbit());
-  var isMouseDown = false;
-  document.onmousedown = function() { isMouseDown = true  };
-  document.onmouseup   = function() { isMouseDown = false };
-  document.onmousemove = function(e) { 
-  if(isMouseDown) { 
-    if (e.shiftKey && e.which == 1) {
+  var isLightChanging = false;
+  // Add the event listeners for mousedown, mousemove, and mouseup
+  modelViewer.addEventListener('mousedown', (event) => {
+    isLightChanging = true;
+	console.log("mouse down");
+  }, true);
+
+  modelViewer.addEventListener('mousemove', (event) => {
+	  
+  if (isLightChanging === true) {
+    if (event.shiftKey && event.which == 1) {
+      console.log("shift move");
+	  modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
 	  modelViewer.resetTurntableRotation(-1 * orbit.theta);
-	}
-  } 
-  };
+    }
+  }
+  }, true);
+
+  modelViewer.addEventListener('mouseup', (event) => {
+    if (isLightChanging === true) {
+      isLightChanging = false;
+    }
+  }, true);
+  
   };
   updateOrbit();
+  
 </script>
           </template>
         </example-snippet>
@@ -350,8 +368,6 @@
     <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
     <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
-
-  
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"
