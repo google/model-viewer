@@ -62,19 +62,17 @@
       display: none;
     }
 
-    .center {
+    .center-pre-prompt {
       display: flex;
       justify-content: center;
       align-items: center; 
       height: 100%;
-      left: 0;
-      right: 0;
       top: 0;
-      bottom: 0;
+      left: 0;
       pointer-events: none;
     }
 
-    .center.hide {
+    .center-pre-prompt.hide {
       display: none;
     }
 
@@ -204,7 +202,7 @@
         alt="3D model of a chair with footrest"
       >
 
-      <div class="center">
+      <div class="center-pre-prompt">
         <img class="pre-prompt" src="../assets/prompt.svg">
       </div>
 
@@ -298,7 +296,7 @@
       } else {
         progressBar.classList.remove('hide');
         if (event.detail.totalProgress === 0) {
-          event.target.querySelector('.center')?.classList.add('hide');
+          event.target.querySelector('.center-pre-prompt')?.classList.add('hide');
         }
       }
     };
