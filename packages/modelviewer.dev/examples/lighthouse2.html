@@ -62,6 +62,41 @@
       display: none;
     }
 
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      height: 100%;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .center.hide {
+      display: none;
+    }
+
+    @keyframes wiggle {	
+      10%, 12% { transform: translateX(-25px); }	 
+      30%, 32% { transform: translateX(25px); }	
+      0%, 45%, 100% { transform: translateX(0%); }
+    }	
+    
+    @keyframes fade {	
+      5%, 40% {	opacity: 1; }	
+      0%, 45%, 100% {	opacity: 0; }	 
+    }
+
+    .pre-prompt {
+      pointer-events: none;
+      animation-name: wiggle, fade;
+      animation-duration: 5s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+
     .progress-bar {
       display: block;
       width: 33%;
@@ -162,11 +197,16 @@
         poster="../assets/ShopifyModels/ChairPoster.png"
         reveal="interaction"
         camera-orbit="1.2195rad 1.362rad auto"
+        interaction-prompt-threshold="0"
         shadow-intensity="1"
         ar
         camera-controls
         alt="3D model of a chair with footrest"
       >
+
+      <div class="center">
+        <img class="pre-prompt" src="../assets/prompt.svg">
+      </div>
 
       <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
@@ -206,6 +246,7 @@
       src="../assets/ShopifyModels/Mixer.glb"
       poster="../assets/ShopifyModels/MixerPoster.png"
       camera-orbit="0.9677rad 1.2427rad auto"
+      interaction-prompt-threshold="0"
       shadow-intensity="1"
       ar
       camera-controls
@@ -252,10 +293,13 @@
       const progressBar = event.target.querySelector('.progress-bar');
       const updatingBar = event.target.querySelector('.update-bar');
       updatingBar.style.width = `${event.detail.totalProgress*100}%`;
-      if (event.detail.totalProgress == 1) {
+      if (event.detail.totalProgress === 1) {
         progressBar.classList.add('hide');
       } else {
         progressBar.classList.remove('hide');
+        if (event.detail.totalProgress === 0) {
+          event.target.querySelector('.center')?.classList.add('hide');
+        }
       }
     };
 
