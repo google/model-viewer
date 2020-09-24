@@ -59,9 +59,15 @@
       display: none;
     }
 
+    :defined > .poster > .pre-prompt {
+      display: none;
+    }
+
     /* This CSS should always be used at minimum for any slotted poster */
     .poster {
-      display: block;
+      display: flex;
+      justify-content: center;
+      align-items: center; 
       height: 100%;
       left: 0;
       right: 0;
@@ -70,6 +76,25 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
+    }
+
+    @keyframes wiggle {	
+      10%, 12% { transform: translateX(-25px); }	 
+      30%, 32% { transform: translateX(25px); }	
+      0%, 45%, 100% { transform: translateX(0%); }
+    }	
+    
+    @keyframes fade {	
+      5%, 40% {	opacity: 1; }	
+      0%, 45%, 100% {	opacity: 0; }	 
+    }
+
+    .pre-prompt {
+      pointer-events: none;
+      animation-name: wiggle, fade;
+      animation-duration: 5s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
     }
 
     .progress-bar {
@@ -177,7 +202,9 @@
         alt="3D model of a chair with footrest"
       >
 
-      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);"></div>
+      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.png);">
+        <img class="pre-prompt" src="../assets/prompt.svg">
+      </div>
 
       <div class="progress-bar" slot="progress-bar">
         <div class="update-bar"></div>
