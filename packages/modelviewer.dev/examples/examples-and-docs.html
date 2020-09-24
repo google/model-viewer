@@ -16,13 +16,14 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>&lt;model-viewer&gt; Examples and Documentation</title>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; examples and documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
-  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png" />
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- The following libraries and polyfills are recommended to maximize browser support -->
@@ -38,42 +39,477 @@
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+  <style>
+    /* 1. Enable smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
 
+    .sidebar {
+      margin: 0;
+      padding: 0;
+      width: 300px;
+      background-color: #f6f6f6;
+      position: fixed;
+      height: 100%;
+      overflow: auto;
+      border: 1px solid #BDBDBD;
+    }
+
+    .outer-content {
+      margin-left: 300px;
+    }
+
+    .inner-content {
+      padding: 10px 40px;
+    }
+
+    p {
+      display: inline;
+    }
+
+    .attribute-name {
+      padding: 10px 20px 10px 20px;
+      margin: 10px 0 20px 0;
+      background-color: #ececec;
+    }
+
+    .attribute-definition {
+      margin: 0 0 20px 0;
+    }
+
+    .category-container {
+      padding-bottom: 20px;
+    }
+
+    .attribute-container {
+      padding-bottom: 20px;
+    }
+
+    .value-table {
+      margin: 0 0 30px 0;
+      width: 50%;
+    }
+
+    table,
+    td,
+    th {
+      border: 1px solid #ececec;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    td:hover {
+      background-color: #ececec;
+    }
+
+    ul.links {
+      margin-top: 5px;
+    }
+
+    hr.solid {
+      border-top: 3px solid #f6f6f6;
+    }
+
+    .header {
+      background-color: #f6f6f6;
+      padding: 10px 20px 10px 40px;
+      width: 100%;
+      position: sticky;
+      top: 0;
+      border-top: 1px solid #BDBDBD;
+      border-bottom: 1px solid #BDBDBD;
+    }
+  </style>
 </head>
+
 <body>
-  
-  <div>
-    Hello World!
+  <div class="sidebar">
+    <ol>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#loading">Loading</a></li>
+      <li><a href="#animation">Animation</a></li>
+      <li><a href="#lighting-and-environment">Lighting &amp; Environment</a></li>
+      <li><a href="#model-formats">Model Formats</a></li>
+      <li><a href="#staging-and-camera-controls">Staging &amp; Camera Controls</a></li>
+      <li><a href="#augmented-reality">Augmented Reality</a></li>
+    </ol>
+  </div>
+
+  <!-- Start of all documentation -->
+  <div class="outer-content">
+
+    <!-- Start of Loading -->
+    <div>
+      <div class="header">
+        <h1 id="loading">Loading</h1>
+      </div>
+
+      <div class="category-container">
+        <div class=inner-content>
+          <div class="attributes-container">
+            <h3>Attributes</h3>
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End of Loading -->
+      </div>
+    </div>
+
+    <!-- Start of Animation -->
+    <div>
+      <div class="header">
+        <h1 id="animation">Animation</h1>
+      </div>
+      <div class="category-container">
+        <div class=inner-content>
+          <div class="attributes-container">
+            <h3>Attributes</h3>
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="attribute-container">
+              <div class="attribute-name">
+                <h4>src</h4>
+              </div>
+              <div class="attribute-definition">
+                <p>
+                  The URL to the 3D model. This parameter is required for <span
+                    class="attribute">&lt;model-viewer&gt;</span>
+                  to display. Only <a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
+                    href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
+                  models are supported, see <a href="https://github.com/google/model-viewer#supported-formats">Supported
+                    Formats</a>.
+                </p>
+              </div>
+              <table class="value-table">
+                <tr>
+                  <th>Default value</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+                <tr>
+                  <td>empty string</td>
+                  <td>String</td>
+                  <td>any legal filepath</td>
+                </tr>
+              </table>
+              <div class="relevant-links">
+                <h4 class="relevant-links">Relevant Links</h4>
+                <ul class="links">
+                  <li><a href="tbd">Example</a> 1</li>
+                  <li><a href="tbd">Example</a> 2</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End of Animation -->
+      </div>
+    </div>
+
+    <!-- End of all documentation -->
   </div>
 
 
-  <div class="footer">
-    <ul>
-      <li class="attribution">
-        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
-      </li>
-    </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
-  </div>
+
+  <script>
+    window.onscroll = function () { myFunction() };
+
+    var header = document.getElementById("loading");
+    var sticky = header.offsetTop;
+
+    function myFunction() {
+      if (window.pageYOffset > sticky) {
+        header.classList.add("sticky");
+      } else {
+        header.classList.remove("sticky");
+      }
+    }
+    // window.addEventListener('DOMContentLoaded', () => {
+    //   const observer = new IntersectionObserver(entries => {
+    //     // TODO: Modify to only show most recent later.
+    //     entries.forEach(entry => {
+    //       const id = entry.target.getAttribute('id');
+    //       if (entry.intersectionRatio > 0) {
+    //         document.querySelector(`nav li a[href="#${id}"]`).parentElement.classList.add('active');
+    //       } else {
+    //         document.querySelector(`nav li a[href="#${id}"]`).parentElement.classList.remove('active');
+    //       }
+    //     });
+    //   });
+
+    //   // Track all sections that have an `id` applied
+    //   document.querySelectorAll('section[id]').forEach((section) => {
+    //     observer.observe(section);
+    //   });
+    // });
+  </script>
 
   <!-- Documentation-specific dependencies: -->
-  <script type="module"
-      src="./built/dependencies.js">
+  <script type="module" src="./built/dependencies.js">
   </script>
-  <script nomodule
-      src="./built/dependencies-legacy.js">
+  <script nomodule src="./built/dependencies-legacy.js">
   </script>
 
   <!-- Loads <model-viewer> only on modern browsers: -->
-  <script type="module"
-      src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js">
   </script>
 
   <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  <script nomodule src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
+
 </html>
