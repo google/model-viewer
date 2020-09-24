@@ -532,7 +532,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } finally {
       updateSourceProgress(0.9);
       requestAnimationFrame(() => {
-        updateSourceProgress(1.0);
+        requestAnimationFrame(() => {
+          updateSourceProgress(1.0);
+        });
       });
     }
   }
