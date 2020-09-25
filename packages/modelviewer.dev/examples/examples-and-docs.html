@@ -40,14 +40,6 @@
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script>
-    $(function () {
-      $("#loading-docs").load("./docs/loading-docs.html");
-      $("#animation-docs").load("./docs/animation-docs.html");
-    });
-  </script>
-
   <style>
     html {
       scroll-behavior: smooth;
@@ -154,18 +146,38 @@
   </div>
 
   <script>
+    async function fetchHtmlAsText(url) {
+      const response = await fetch(url);
+      return await response.text();
+    }
+
+    async function load() {
+      const contentDivLoading = document.getElementById("loading-docs");
+      contentDivLoading.innerHTML = await fetchHtmlAsText("./docs/loading-docs.html");
+
+      const contentDivAnimation = document.getElementById("animation-docs");
+      contentDivAnimation.innerHTML = await fetchHtmlAsText("./docs/animation-docs.html");
+    }
+
+    load()
+  </script>
+
+  <script>
     window.onscroll = function () { myFunction() };
 
-    var header = document.getElementById("loading");
-    var sticky = header.offsetTop;
-
     function myFunction() {
-      if (window.pageYOffset > sticky) {
-        header.classList.add("sticky");
-      } else {
-        header.classList.remove("sticky");
+      var headers = document.getElementsByClassName("header");
+      for (var i = 0; i < headers.length; i++) {
+        var header = headers[i];
+        var sticky = header.offsetTop;
+        if (window.pageYOffset > sticky) {
+          header.classList.add("sticky");
+        } else {
+          header.classList.remove("sticky");
+        }
       }
     }
+
     // window.addEventListener('DOMContentLoaded', () => {
     //   const observer = new IntersectionObserver(entries => {
     //     // TODO: Modify to only show most recent later.
