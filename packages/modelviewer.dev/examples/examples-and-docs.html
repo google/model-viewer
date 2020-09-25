@@ -123,20 +123,65 @@
       border-top: 1px solid #BDBDBD;
       border-bottom: 1px solid #BDBDBD;
     }
+
+    .categories {
+      padding: 10px;
+    }
+
+    .category {
+      padding-left: 10px;
+      padding-right: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    .subcategory {
+      padding-left: 10px;
+    }
+
+    .subcategory-header {
+      font-weight: normal;
+    }
+
+    .active {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .element {
+      font-weight: normal;
+    }
   </style>
 </head>
 
 <body>
   <div class="sidebar">
-    <ol>
-      <li><a href="#introduction">Introduction</a></li>
-      <li><a href="#loading">Loading</a></li>
-      <li><a href="#animation">Animation</a></li>
-      <li><a href="#lighting-and-environment">Lighting &amp; Environment</a></li>
-      <li><a href="#model-formats">Model Formats</a></li>
-      <li><a href="#staging-and-camera-controls">Staging &amp; Camera Controls</a></li>
-      <li><a href="#augmented-reality">Augmented Reality</a></li>
-    </ol>
+    <div class="categories">
+      <div class="category">
+        <h4 id="loading-sidebar"><a href="#loading">Loading</a></h4>
+        <div class="subcategory">
+          <h5 class="subcategory-header" id="loading-attributes-sidebar"><a href="#loading-attributes">Attributes</a>
+          </h5>
+          <div class="element" id="loading-attributes-src">
+            src
+          </div>
+          <div class="element" id="loading-attributes-alt">
+            alt
+          </div>
+          <div class="element" id="loading-attributes-elmo">
+            elmo
+          </div>
+          <h5 class="subcategory-header">Methods</h5>
+        </div>
+      </div>
+      <div class="category">
+        <h4><a href="#animation">Animation</a></h4>
+        <div class="subcategory">
+          <h5 class="subcategory-header"><a href="#animation-attributes">Attributes</a></h5>
+          <h5 class="subcategory-header">Methods</h5>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Start of all documentation -->
@@ -146,26 +191,174 @@
   </div>
 
   <script>
+
+    function loadJSON(filePath, callback) {
+      var xobj = new XMLHttpRequest();
+      xobj.overrideMimeType("application/json");
+      xobj.open('GET', filePath, true); // Replace 'my_data' with the path to your file
+      xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+          // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+          callback(xobj.responseText);
+        }
+      };
+      xobj.send(null);
+    }
+
+    function addHeader(header) {
+      var para = document.createElement("div");
+      para.classList.add('header');
+      var node = document.createElement("H1");
+      node.id = header.toLowerCase();
+      node.innerText = header;
+      para.appendChild(node);
+      var element = document.getElementById("loading-docs");
+      element.appendChild(para);
+    }
+
+    function convertJSONToHTML(json) {
+      var obj = json[0];
+      for (var key in obj) {
+        if (key === 'Title') {
+          addHeader(obj[key]);
+        }
+        console.log(key, obj[key])
+      }
+    }
+
+    function init() {
+      loadJSON('./data/loading.json', function (response) {
+        // Parse JSON string into object
+        var actual_JSON = JSON.parse(response);
+        convertJSONToHTML(actual_JSON)
+      });
+    }
+
+    init()
+  </script>
+
+  <script>
     async function fetchHtmlAsText(url) {
       const response = await fetch(url);
       return await response.text();
     }
 
     async function load() {
-      const contentDivLoading = document.getElementById("loading-docs");
-      contentDivLoading.innerHTML = await fetchHtmlAsText("./docs/loading-docs.html");
+      // const contentDivLoading = document.getElementById("loading-docs");
+      // contentDivLoading.innerHTML = await fetchHtmlAsText("./docs/loading-docs.html");
 
-      const contentDivAnimation = document.getElementById("animation-docs");
-      contentDivAnimation.innerHTML = await fetchHtmlAsText("./docs/animation-docs.html");
+      // const contentDivAnimation = document.getElementById("animation-docs");
+      // contentDivAnimation.innerHTML = await fetchHtmlAsText("./docs/animation-docs.html");
     }
 
-    load()
-  </script>
+    var globalCurrentView = [];
+    var previouslyActive = '';
+    var toRemove = '';
+    var globalOrdering = [];
 
-  <script>
-    window.onscroll = function () { myFunction() };
+    function updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, option) {
+      if (option === 'add') {
+        document.querySelector(`div[id=${sidebarName}]`).classList.add('active');
+        document.querySelector(`h5[id=${sidebarSubcategory}]`).classList.add('active');
+        document.querySelector(`h4[id=${sidebarCategory}]`).classList.add('active');
+      } else {
+        document.querySelector(`div[id=${sidebarName}]`).classList.remove('active');
+        document.querySelector(`h5[id=${sidebarSubcategory}]`).classList.remove('active');
+        document.querySelector(`h4[id=${sidebarCategory}]`).classList.remove('active');
+      }
+    };
 
-    function myFunction() {
+    function getSideBarIds(startName, isId) {
+      const sb = "sidebar";
+      if (isId) {
+        var sidebarName = startName.split("-").slice(1, 10).join('-');
+        var sidebarSub = startName.split("-").slice(1, 3);
+        var sidebarCat = startName.split("-").slice(1, 2);
+      } else {
+        var sidebarName = startName;
+        var sidebarSub = sidebarName.split("-").slice(0, 2);
+        var sidebarCat = sidebarName.split("-").slice(0, 1);
+      }
+      sidebarSub.push(sb);
+      const sidebarSubcategory = sidebarSub.join('-');
+      sidebarCat.push(sb);
+      const sidebarCategory = sidebarCat.join('-');
+      return [sidebarName, sidebarSubcategory, sidebarCategory];
+    }
+
+    async function startUp() {
+
+      await load();
+
+      // observer needs to wait for loaded divs
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          var id = entry.target.getAttribute('id');
+          var [sidebarName, sidebarSubcategory, sidebarCategory] = getSideBarIds(id, true);
+
+          if (entry.intersectionRatio > 0) {
+            // if you are within a long section so the header left view
+            if (toRemove.length > 0) {
+              var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(previouslyActive, false);
+              updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'remove');
+              updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'add');
+              toRemove = '';
+            }
+
+            // if there isn't anything in globalCurrentView
+            else if (globalCurrentView.length === 0) {
+              updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'add');
+              previouslyActive = sidebarName;
+              globalCurrentView.push(sidebarName);
+
+              // sidebarName index lesser means it appears above the currently active view
+            } else if (globalOrdering.indexOf(previouslyActive) > globalOrdering.indexOf(sidebarName)) {
+              var newSidebarName = globalCurrentView[0]
+              var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(newSidebarName, false);
+
+              updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'remove');
+              updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'add');
+
+              globalCurrentView.unshift(sidebarName);
+              previouslyActive = sidebarName;
+
+            } else {
+              globalCurrentView.push(sidebarName);
+            }
+            // this is saying that the intersection was updated and its now out of view, but still within a property
+          } else if (globalCurrentView.length === 1) {
+            toRemove = previouslyActive;
+            // this is saying that the intersection was updated and its now out of view
+          } else {
+            // if the thing being removed from view was currently active
+            if (previouslyActive === sidebarName) {
+              updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'remove');
+              if (globalCurrentView.length >= 2) {
+                newSidebarName = globalCurrentView[1];
+                [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(newSidebarName, false);
+                updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'add');
+                previouslyActive = newSidebarName;
+              }
+            }
+            globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
+          }
+        });
+      });
+
+      document.querySelectorAll('div[id*="docs"]').forEach((section) => {
+        // Only track attributes and properties, etc.
+        if (section.getAttribute('id').split('-').length === 4) {
+          globalOrdering.push(section.getAttribute('id').split("-").slice(1, 10).join('-'));
+          observer.observe(section);
+        }
+      });
+    };
+
+    startUp();
+
+    window.onscroll = function () { stickyHeader() };
+
+    function stickyHeader() {
       var headers = document.getElementsByClassName("header");
       for (var i = 0; i < headers.length; i++) {
         var header = headers[i];
@@ -178,24 +371,6 @@
       }
     }
 
-    // window.addEventListener('DOMContentLoaded', () => {
-    //   const observer = new IntersectionObserver(entries => {
-    //     // TODO: Modify to only show most recent later.
-    //     entries.forEach(entry => {
-    //       const id = entry.target.getAttribute('id');
-    //       if (entry.intersectionRatio > 0) {
-    //         document.querySelector(`nav li a[href="#${id}"]`).parentElement.classList.add('active');
-    //       } else {
-    //         document.querySelector(`nav li a[href="#${id}"]`).parentElement.classList.remove('active');
-    //       }
-    //     });
-    //   });
-
-    //   // Track all sections that have an `id` applied
-    //   document.querySelectorAll('section[id]').forEach((section) => {
-    //     observer.observe(section);
-    //   });
-    // });
   </script>
 
   <!-- Documentation-specific dependencies: -->
