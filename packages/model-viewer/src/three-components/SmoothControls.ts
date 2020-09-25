@@ -495,7 +495,11 @@ export class SmoothControls extends EventDispatcher {
             const {clientX, clientY} = touches[0];
             const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
             const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
-            if (dy > dx) {
+            // If motion is mostly vertical, assume scrolling is the intent,
+            // unless scrolling is not possible. Use window.innerHeight instead
+            // of body.clientHeight so that a full-screen element will still
+            // scroll the URL bar out of the way before locking.
+            if (dy > dx && document.body.scrollHeight > window.innerHeight) {
               this.touchMode = 'scroll';
               return;
             }
