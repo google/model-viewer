@@ -206,21 +206,57 @@
     }
 
     function addHeader(header) {
+      var lowerHeader = header.toLowerCase();
+
       var para = document.createElement("div");
       para.classList.add('header');
       var node = document.createElement("H1");
-      node.id = header.toLowerCase();
+      node.id = lowerHeader;
       node.innerText = header;
       para.appendChild(node);
-      var element = document.getElementById("loading-docs");
+      var element = document.getElementById(lowerHeader.concat("-docs"));
       element.appendChild(para);
+    }
+
+    function addAttributes(attributeArray, header) {
+      var lowerHeader = header.toLowerCase();
+      var element = document.getElementById(lowerHeader.concat("-docs"));
+
+      var outer = document.createElement("div");
+      outer.classList.add('category-container');
+
+      var middle = document.createElement("div");
+      middle.classList.add("inner-content");
+
+      var container = document.createElement("div");
+      container.classList.add('attributes-container');
+      container.id = "docs-".concat(lowerHeader, "-attributes");
+
+      var headerNode = document.createElement("H3");
+      headerNode.id = lowerHeader;
+      headerNode.innerText = "Attributes";
+      
+      outer.appendChild(middle);
+      middle.appendChild(container);
+      container.appendChild(headerNode);
+      element.appendChild(outer);
+
+      // attributeArray.forEach(function(attribute) {
+      //   <h3 id="loading-attributes">Attributes</h3>
+
+      //   container.appendChild(para);
+      // });
     }
 
     function convertJSONToHTML(json) {
       var obj = json[0];
+      var header = '';
       for (var key in obj) {
         if (key === 'Title') {
+          header = obj[key];
           addHeader(obj[key]);
+        } else if (key === 'Attributes') {
+          addAttributes(obj[key], header);
         }
         console.log(key, obj[key])
       }
