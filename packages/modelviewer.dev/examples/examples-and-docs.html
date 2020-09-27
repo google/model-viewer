@@ -68,13 +68,23 @@
       display: inline;
     }
 
-    .attribute-name {
+    .attribute-name,
+    .cssPropertie-name,
+    .propertie-name,
+    .method-name,
+    .event-name,
+    .slot-name {
       padding: 10px 20px 10px 20px;
       margin: 10px 0 20px 0;
       background-color: #ececec;
     }
 
-    .attribute-definition {
+    .attribute-definition,
+    .cssPropertie-definition,
+    .propertie-definition,
+    .method-definition,
+    .event-definition,
+    .slot-definition {
       margin: 0 0 20px 0;
     }
 
@@ -82,7 +92,12 @@
       padding-bottom: 20px;
     }
 
-    .attribute-container {
+    .attribute-container,
+    .cssPropertie-container,
+    .propertie-container,
+    .method-container,
+    .event-container,
+    .slot-container {
       padding-bottom: 20px;
     }
 
@@ -146,6 +161,13 @@
     .active {
       font-weight: bold;
       text-decoration: underline;
+      visibility: visible;
+    }
+
+    .de-active {
+      font-weight: normal;
+      text-decoration: none;
+      display: none;
     }
 
     .element {
@@ -156,31 +178,7 @@
 
 <body>
   <div class="sidebar">
-    <div class="categories">
-      <div class="category">
-        <h4 id="loading-sidebar"><a href="#loading">Loading</a></h4>
-        <div class="subcategory">
-          <h5 class="subcategory-header" id="loading-attributes-sidebar"><a href="#loading-attributes">Attributes</a>
-          </h5>
-          <div class="element" id="loading-attributes-src">
-            src
-          </div>
-          <div class="element" id="loading-attributes-alt">
-            alt
-          </div>
-          <div class="element" id="loading-attributes-elmo">
-            elmo
-          </div>
-          <h5 class="subcategory-header">Methods</h5>
-        </div>
-      </div>
-      <div class="category">
-        <h4><a href="#animation">Animation</a></h4>
-        <div class="subcategory">
-          <h5 class="subcategory-header"><a href="#animation-attributes">Attributes</a></h5>
-          <h5 class="subcategory-header">Methods</h5>
-        </div>
-      </div>
+    <div class="categories" id="sidebar-category-container">
     </div>
   </div>
 
@@ -191,6 +189,59 @@
   </div>
 
   <script>
+    // CSS Custom Properties --> cssProperties
+    function makeSidebar(category) {
+      var container = document.getElementById('sidebar-category-container');
+      var titleLower = category.Title.toLowerCase();
+
+      var categoryDiv = document.createElement("div");
+      categoryDiv.classList.add("category");
+
+      var categoryHeader = document.createElement("H4");
+      categoryHeader.id = titleLower.concat("-sidebar");
+
+      var categoryLink = document.createElement("a");
+      categoryLink.setAttribute("href", "#".concat(titleLower))
+      categoryLink.innerText = category.Title;
+
+      categoryHeader.appendChild(categoryLink);
+      categoryDiv.append(categoryHeader);
+
+      for (key in category) {
+        if (key !== "Title") {
+          var subCategory = document.createElement("div");
+          subCategory.classList.add("subCategory");
+
+          var subCategoryLink = document.createElement("a");
+          if (key === "CSS Custom Properties") {
+            var keyLower = "cssProperties";
+          } else {
+            var keyLower = key.toLowerCase();
+          }
+
+          var subCategoryHeader = document.createElement("H5");
+          subCategoryHeader.id = titleLower.concat("-", keyLower, "-sidebar");
+          subCategoryHeader.classList.add("subcategory-header");
+
+          subCategoryLink.setAttribute("href", "#".concat(titleLower, "-", keyLower))
+          subCategoryLink.innerText = key;
+
+          subCategoryHeader.appendChild(subCategoryLink);
+          subCategory.append(subCategoryHeader);
+
+          category[key].forEach(function (element) {
+            var ele = document.createElement("div");
+            ele.classList.add("element");
+            ele.classList.add("de-active");
+            ele.id = titleLower.concat("-", keyLower, "-", element.htmlName);
+            ele.innerText = element.name;
+            subCategory.append(ele);
+          });
+          categoryDiv.appendChild(subCategory);
+        }
+      }
+      container.appendChild(categoryDiv);
+    }
 
     function loadJSON(filePath, callback) {
       var xobj = new XMLHttpRequest();
@@ -218,73 +269,135 @@
       element.appendChild(para);
     }
 
-    function addAttributes(attributeArray, header) {
+    // {name:src      //loading   //attribute
+    function makeElement(attribute, lowerHeader, pluralCategoryLower, categoryLower) {
+      var attributeContainer = document.createElement("div");
+      attributeContainer.classList.add(categoryLower.concat('-container'));
+
+      // Creating the header
+      var headerContainer = document.createElement("div");
+      headerContainer.classList.add(categoryLower.concat('-name'));
+      headerContainer.id = ['docs', lowerHeader, pluralCategoryLower, attribute.htmlName].join('-');
+
+      var header = document.createElement("H4");
+      header.innerText = attribute.name;
+
+      headerContainer.appendChild(header);
+      attributeContainer.appendChild(headerContainer);
+
+      // Creating the description 
+      var descriptionContainer = document.createElement("div");
+      descriptionContainer.classList.add(categoryLower.concat('-definition'));
+
+      var description = document.createElement("p");
+      description.innerHTML = attribute.description;
+
+      descriptionContainer.appendChild(description);
+      attributeContainer.appendChild(descriptionContainer);
+
+      if ('default' in attribute) {
+        if (categoryLower === 'attribute' || categoryLower == "cssPropertie") {
+          var table = document.createElement("TABLE");
+          table.classList.add("value-table");
+
+          var tr1 = document.createElement("TR");
+          var th1 = document.createElement("TH");
+          th1.innerText = "Default value";
+          var th2 = document.createElement("TH");
+          th2.innerText = "Type";
+          var th3 = document.createElement("TH");
+          th3.innerText = "Options";
+          tr1.appendChild(th1);
+          tr1.appendChild(th2);
+          tr1.appendChild(th3);
+          table.appendChild(tr1);
+
+          var tr2 = document.createElement("TR");
+          var td1 = document.createElement("TD");
+          td1.innerText = attribute.default[0];
+          var td2 = document.createElement("TD");
+          td2.innerText = attribute.default[1];
+          var td3 = document.createElement("TD");
+          td3.innerText = attribute.default[2];
+          tr2.appendChild(td1);
+          tr2.appendChild(td2);
+          tr2.appendChild(td3);
+          table.appendChild(tr2);
+
+          attributeContainer.appendChild(table);
+        }
+      }
+
+      // Creating the links for an attribute
+      if ('links' in attribute) {
+        var linksContainer = document.createElement("div");
+
+        var header = document.createElement("H4");
+        header.innerText = "Relevant Links";
+
+        var ul = document.createElement("UL");
+        ul.classList.add("links");
+
+        attribute.links.forEach(function (link) {
+          var li = document.createElement("LI");
+          li.innerHTML = link;
+          ul.appendChild(li);
+        });
+        attributeContainer.appendChild(ul);
+      }
+
+      return attributeContainer;
+    }
+
+    function addAttributes(attributeArray, header, category, categoryLower) {
       var lowerHeader = header.toLowerCase();
+
       var element = document.getElementById(lowerHeader.concat("-docs"));
 
       var outer = document.createElement("div");
-      outer.classList.add('category-container');
+      outer.classList.add(categoryLower.concat('-container'));
 
       var middle = document.createElement("div");
       middle.classList.add("inner-content");
 
       var container = document.createElement("div");
-      container.classList.add('attributes-container');
-      container.id = "docs-".concat(lowerHeader, "-attributes");
+      container.id = "docs-".concat(lowerHeader, "-", categoryLower);
 
       var headerNode = document.createElement("H3");
-      headerNode.id = lowerHeader;
-      headerNode.innerText = "Attributes";
-      
+      headerNode.id = lowerHeader.concat("-", categoryLower);
+      headerNode.innerText = category;
+
       outer.appendChild(middle);
       middle.appendChild(container);
       container.appendChild(headerNode);
       element.appendChild(outer);
 
-      // attributeArray.forEach(function(attribute) {
-      //   <h3 id="loading-attributes">Attributes</h3>
-
-      //   container.appendChild(para);
-      // });
-    }
-
-    function convertJSONToHTML(json) {
-      var obj = json[0];
-      var header = '';
-      for (var key in obj) {
-        if (key === 'Title') {
-          header = obj[key];
-          addHeader(obj[key]);
-        } else if (key === 'Attributes') {
-          addAttributes(obj[key], header);
-        }
-        console.log(key, obj[key])
-      }
-    }
-
-    function init() {
-      loadJSON('./data/loading.json', function (response) {
-        // Parse JSON string into object
-        var actual_JSON = JSON.parse(response);
-        convertJSONToHTML(actual_JSON)
+      attributeArray.forEach(function (attribute) {
+        var attr = makeElement(attribute, lowerHeader, categoryLower, categoryLower.slice(0, -1));
+        container.appendChild(attr);
       });
     }
 
-    init()
-  </script>
-
-  <script>
-    async function fetchHtmlAsText(url) {
-      const response = await fetch(url);
-      return await response.text();
-    }
-
-    async function load() {
-      // const contentDivLoading = document.getElementById("loading-docs");
-      // contentDivLoading.innerHTML = await fetchHtmlAsText("./docs/loading-docs.html");
-
-      // const contentDivAnimation = document.getElementById("animation-docs");
-      // contentDivAnimation.innerHTML = await fetchHtmlAsText("./docs/animation-docs.html");
+    function convertJSONToHTML(json) {
+      var obj = json;
+      var header = '';
+      obj.forEach(function (category) {
+        // Make body content
+        for (var key in category) {
+          if (key === 'Title') {
+            header = category[key];
+            addHeader(category[key]);
+          } else if (key !== "Title") {
+            if (key === "CSS Custom Properties") {
+              var keyLower = "cssProperties";
+            } else {
+              var keyLower = key.toLowerCase();
+            }
+            addAttributes(category[key], header, key, keyLower);
+          }
+        }
+        makeSidebar(category);
+      });
     }
 
     var globalCurrentView = [];
@@ -304,6 +417,14 @@
       }
     };
 
+    function addDeactive(sidebarName) {
+      document.querySelector(`div[id=${sidebarName}]`).classList.add('de-active');
+    }
+
+    function removeDeactive (sidebarName) {
+      document.querySelector(`div[id=${sidebarName}]`).classList.remove('de-active');
+    }
+
     function getSideBarIds(startName, isId) {
       const sb = "sidebar";
       if (isId) {
@@ -322,9 +443,25 @@
       return [sidebarName, sidebarSubcategory, sidebarCategory];
     }
 
-    async function startUp() {
 
-      await load();
+    var firstOpen = true;
+    var everyEntry = [];
+
+    function updateSidebarView(previouslyActive, prevSidebarSubcategory, sidebarName, sidebarSubcategory) {
+      if (prevSidebarSubcategory !== sidebarSubcategory) {
+        everyEntry.forEach(entry => {
+          var id = entry.target.getAttribute('id');
+          var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(id, true);
+          if (newSidebarSubcategory !== sidebarSubcategory) {
+            addDeactive(newSidebarName);
+          } else {
+            removeDeactive(newSidebarName);
+          }
+        });
+      }
+    }
+
+    function startUp() {
 
       // observer needs to wait for loaded divs
       const observer = new IntersectionObserver(entries => {
@@ -338,6 +475,7 @@
               var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(previouslyActive, false);
               updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'remove');
               updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'add');
+              updateSidebarView(previouslyActive, newSidebarSubcategory, sidebarName, sidebarSubcategory);
               toRemove = '';
             }
 
@@ -354,6 +492,7 @@
 
               updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'remove');
               updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, 'add');
+              updateSidebarView(previouslyActive, newSidebarSubcategory, sidebarName, sidebarSubcategory);
 
               globalCurrentView.unshift(sidebarName);
               previouslyActive = sidebarName;
@@ -373,12 +512,28 @@
                 newSidebarName = globalCurrentView[1];
                 [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(newSidebarName, false);
                 updateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory, 'add');
+                updateSidebarView(previouslyActive, sidebarSubcategory, sidebarName, newSidebarSubcategory);
                 previouslyActive = newSidebarName;
               }
             }
             globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
           }
         });
+        // on initialization hide all other categories
+        if (firstOpen) {
+          firstOpen = false;
+          everyEntry = entries;
+          var [sidebarName, sidebarSubcategory, sidebarCategory] = getSideBarIds(previouslyActive, false);
+          entries.forEach(entry => {
+            var id = entry.target.getAttribute('id');
+            var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(id, true);
+            if (newSidebarSubcategory !== sidebarSubcategory) {
+              addDeactive(newSidebarName);
+            } else {
+              removeDeactive(newSidebarName);
+            }
+          });
+        }
       });
 
       document.querySelectorAll('div[id*="docs"]').forEach((section) => {
@@ -390,7 +545,16 @@
       });
     };
 
-    startUp();
+    function init() {
+      loadJSON('./data/loading.json', function (response) {
+        // Parse JSON string into object
+        var actual_JSON = JSON.parse(response);
+        convertJSONToHTML(actual_JSON);
+        startUp();
+      });
+    }
+
+    init();
 
     window.onscroll = function () { stickyHeader() };
 
