@@ -1,0 +1,276 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>&lt;model-viewer&gt; Examples and Documentation</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; examples and documentation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png" />
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 75px;
+      ;
+    }
+
+    .sidebar {
+      margin: 0;
+      padding: 0;
+      width: 300px;
+      background-color: #f6f6f6;
+      position: fixed;
+      height: 100%;
+      overflow: auto;
+      border: 1px solid #BDBDBD;
+    }
+
+    .outer-content {
+      margin-left: 300px;
+    }
+
+    .inner-content {
+      padding: 10px 40px;
+    }
+
+    p {
+      display: inline;
+    }
+
+    .attribute-name,
+    .cssPropertie-name,
+    .propertie-name,
+    .method-name,
+    .event-name,
+    .slot-name {
+      padding: 10px 20px 10px 20px;
+      margin: 10px 0 20px 0;
+      background-color: #ececec;
+    }
+
+    .attribute-definition,
+    .cssPropertie-definition,
+    .propertie-definition,
+    .method-definition,
+    .event-definition,
+    .slot-definition {
+      margin: 0 0 20px 0;
+    }
+
+    .category-container {
+      padding-bottom: 20px;
+    }
+
+    .attribute-container,
+    .cssPropertie-container,
+    .propertie-container,
+    .method-container,
+    .event-container,
+    .slot-container {
+      padding-bottom: 20px;
+    }
+
+    .value-table {
+      margin: 0 0 30px 0;
+      width: 50%;
+    }
+
+    table,
+    td,
+    th {
+      border: 1px solid #ececec;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    td:hover {
+      background-color: #ececec;
+    }
+
+    ul.links {
+      margin-top: 5px;
+    }
+
+    hr.solid {
+      border-top: 3px solid #f6f6f6;
+    }
+
+    .header {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px 10px 40px;
+      width: 100%;
+      position: sticky;
+      top: 0;
+    }
+
+    .categories {
+      padding: 20px;
+    }
+
+    .category {
+      padding-right: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    .subcategory {
+      padding-left: 10px;
+    }
+
+    .subcategory-header {
+      font-weight: normal;
+      margin-block-start: 0em;
+      margin-block-end: 0em;
+    }
+
+    .active {
+      text-decoration: underline;
+    }
+
+    .de-active {
+      font-weight: normal;
+      text-decoration: none;
+      display: none;
+    }
+
+    .element {
+      font-weight: normal;
+      padding-left: 10px;
+    }
+
+    .sidebar-mv {
+      color: #000;
+    }
+
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+
+    .sidebar-hr {
+      border: 1px solid #BDBDBD;
+      margin-left: 20px;
+      margin-right: 20px;
+      text-align: center;
+    }
+
+    .subCategory {
+      padding-left: 10px;
+    }
+
+    .flipper {
+      padding-left: 20px;
+      padding-right: 20px;
+      font-size: 1vw;
+      overflow: auto;
+      white-space: nowrap;
+    }
+
+    .inner-flipper {
+      display: inline-block;
+    }
+
+    .inner-home {
+      display: flex;
+      align-items: center;
+    }
+
+    .darken {
+      color: #000;
+    }
+
+    .darken:hover {
+      border: 1px solid #000;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .inactive-doc-example {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <div class="home lockup">
+      <a href="../" class="sidebar-mv inner-home">
+        <div class="icon-button icon-modelviewer-black inner-home"></div>
+        <h1 class="inner-home">model-viewer</h1>
+      </a>
+    </div>
+    <hr class="sidebar-hr">
+    <div class="flipper">
+      <div class="inner-flipper" id="examples-flipper" onclick="doClick('examples', 'examples')">
+        <a class="darken">EXAMPLES</a>
+      </div>
+      <div class="inner-flipper">|</div>
+      <div class="inner-flipper" id="documentation-flipper" onclick="doClick('examples', 'docs')">
+        <a class="darken">DOCUMENTATION</a>
+      </div>
+    </div>
+    <div class="categories" id="sidebar-category-container">
+    </div>
+  </div>
+
+  <!-- Start of all documentation -->
+  <div class="outer-content">
+    <div id="loading-examples-header"></div>
+    <div id="loading-examples"></div>
+  </div>
+
+  <script type="module" src="../examples/built/init-examples.js">
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module" src="../examples/built/dependencies.js">
+  </script>
+  <script nomodule src="../examples/built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+
+</html>

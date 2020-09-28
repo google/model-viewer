@@ -237,11 +237,11 @@
     </div>
     <hr class="sidebar-hr">
     <div class="flipper">
-      <div class="inner-flipper" id="examples-flipper" onclick="doClick('examples')">
+      <div class="inner-flipper" id="examples-flipper" onclick="doClick('docs', 'examples')">
         <a class="darken">EXAMPLES</a>
       </div>
       <div class="inner-flipper">|</div>
-      <div class="inner-flipper" id="documentation-flipper" onclick="doClick('docs')">
+      <div class="inner-flipper" id="documentation-flipper" onclick="doClick('docs', 'docs')">
         <a class="darken">DOCUMENTATION</a>
       </div>
     </div>
@@ -252,15 +252,15 @@
   <!-- Start of all documentation -->
   <div class="outer-content">
     <div id="loading-docs"></div>
-    <div id="loading-examples"></div>
   </div>
 
-  <script type="module" src="./built/documentation-main.js"></script>
+  <script type="module" src="../examples/built/init-docs.js">
+  </script>
 
   <!-- Documentation-specific dependencies: -->
-  <script type="module" src="./built/dependencies.js">
+  <script type="module" src="../examples/built/dependencies.js">
   </script>
-  <script nomodule src="./built/dependencies-legacy.js">
+  <script nomodule src="../examples/built/dependencies-legacy.js">
   </script>
 
   <!-- Loads <model-viewer> only on modern browsers: -->

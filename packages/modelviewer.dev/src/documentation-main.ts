@@ -17,19 +17,16 @@
 import {convertJSONToHTML} from './create-html';
 import {getSidebarIds, sidebarObserver} from './sidebar';
 
-export function doClick(newType: string) {
-  let allIds = getSidebarIds('', false, true);
-  let newSidebarCategory = allIds[2];
-  let example = document.getElementById(
-      newSidebarCategory.split('-')[0].concat('-examples'));
-  let doc =
-      document.getElementById(newSidebarCategory.split('-')[0].concat('-docs'));
-  if (newType === 'docs') {
-    doc!.classList.remove('inactive-doc-example');
-    example!.classList.add('inactive-doc-example');
-  } else {
-    doc!.classList.add('inactive-doc-example');
-    example!.classList.remove('inactive-doc-example');
+export function doClick(oldType: string, newType: string) {
+  if (oldType !== newType) {
+    // TODO: Handle going from examples back to docs, possibly include a
+    // previous state to revert to in URI
+    let allIds = getSidebarIds('', false, true);
+    let newSidebarCategory = allIds[2].split('-')[0];
+    const newURI = '../'.concat(newType, '/#', newSidebarCategory);
+    let d = document.createElement('a');
+    d.setAttribute('href', newURI);
+    window.location.href = d.href;
   }
 }
 
@@ -55,9 +52,10 @@ async function fetchHtmlAsText(url: string) {
   return await response.text();
 }
 
-async function loadExamples() {
+export async function loadExamples() {
   const loadingExample = document.getElementById('loading-examples');
-  loadingExample!.innerHTML = await fetchHtmlAsText('lazy-loading.html');
+  loadingExample!.innerHTML =
+      await fetchHtmlAsText('../examples/lazy-loading.html');
 }
 
 interface JSONCallback {
@@ -80,16 +78,18 @@ function loadJSON(filePath: string, callback: JSONCallback) {
 
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
+ * docsOrExamples: 'docs' or 'examples'
  */
-function init() {
-  loadJSON('./data/loading.json', function(response: string) {
+export function init(docsOrExamples: string) {
+  console.log(docsOrExamples);
+  loadJSON('../data/loading.json', function(response: string) {
     let actualJSON = JSON.parse(response);
-    convertJSONToHTML(actualJSON);
-    sidebarObserver();
+    convertJSONToHTML(actualJSON, docsOrExamples);
+    if (docsOrExamples === 'examples') {
+      loadExamples();
+    }
+    sidebarObserver(docsOrExamples);
   });
 }
-
-loadExamples();
-init();
 
 (self as any).doClick = doClick;

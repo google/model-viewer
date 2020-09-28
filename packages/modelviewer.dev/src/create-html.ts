@@ -34,7 +34,7 @@ const CategoryCon: Category =
       Slots: [],
     }
 
-function makeSidebar(category: Category) {
+function makeSidebar(category: Category, docsOrExamples: string) {
   let container = document.getElementById('sidebar-category-container');
   let titleLower = category.Title.toLowerCase();
 
@@ -51,6 +51,11 @@ function makeSidebar(category: Category) {
 
   categoryHeader.appendChild(categoryLink);
   categoryDiv.append(categoryHeader);
+  console.log(docsOrExamples, docsOrExamples === 'examples');
+  if (docsOrExamples === 'examples') {
+    container!.appendChild(categoryDiv);
+    return;
+  }
 
   Object.keys(category).forEach((key) => {
     const innerKey = key as keyof typeof CategoryCon;
@@ -95,8 +100,9 @@ function makeSidebar(category: Category) {
   container!.appendChild(categoryDiv);
 }
 
-function addHeader(header: string) {
+function addHeader(header: string, docsOrExamples: string) {
   let lowerHeader = header.toLowerCase();
+  let element: HTMLElement;
 
   let para = document.createElement('div');
   para.classList.add('header');
@@ -104,7 +110,11 @@ function addHeader(header: string) {
   node.id = lowerHeader;
   node.innerText = header;
   para.appendChild(node);
-  let element = document.getElementById(lowerHeader.concat('-docs'));
+  if (docsOrExamples === 'docs') {
+    element = document.getElementById(lowerHeader.concat('-docs'))!;
+  } else {
+    element = document.getElementById(lowerHeader.concat('-examples-header'))!;
+  }
   element!.appendChild(para);
 }
 
@@ -233,19 +243,18 @@ function getLowerCaseKey(key: string) {
   }
 }
 
-export function convertJSONToHTML(json: any[]) {
+export function convertJSONToHTML(json: any[], docsOrExamples: string) {
   let header = '';
   json.forEach(function(category) {
-    // Make body content
     for (let key in category) {
       if (key === 'Title') {
         header = category[key];
-        addHeader(category[key]);
-      } else {
+        addHeader(category[key], docsOrExamples);
+      } else if (docsOrExamples === 'docs') {
         let lowerCaseKey = getLowerCaseKey(key);
         addAttributes(category[key], header, key, lowerCaseKey);
       }
     }
-    makeSidebar(category);
+    makeSidebar(category, docsOrExamples);
   });
 }

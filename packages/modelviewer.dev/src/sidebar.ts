@@ -129,94 +129,102 @@ function updateSidebarViewFirstTime(entries: any[]) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const id = entry.target.getAttribute('id')!;
-      const [sidebarName, sidebarSubcategory, sidebarCategory] =
-          getSidebarIds(id, true, false);
+export function sidebarObserver(docsOrExamples: string) {
+  if (docsOrExamples === 'docs') {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const id = entry.target.getAttribute('id')!;
+        const [sidebarName, sidebarSubcategory, sidebarCategory] =
+            getSidebarIds(id, true, false);
 
-      if (entry.intersectionRatio > 0) {
-        // If you are within a long section so the header left view
-        if (toRemove.length > 0) {
-          let [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-              getSidebarIds(previouslyActive, false, false);
-          updateSidebarActive(
-              newSidebarName, newSidebarSubcategory, newSidebarCategory, false);
-          updateSidebarActive(
-              sidebarName, sidebarSubcategory, sidebarCategory, true);
-          updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
-          toRemove = '';
-        }
-        // If there isn't anything in globalCurrentView
-        else if (globalCurrentView.length === 0) {
-          updateSidebarActive(
-              sidebarName, sidebarSubcategory, sidebarCategory, true);
-          previouslyActive = sidebarName;
-          globalCurrentView.push(sidebarName);
-
-          // sidebarName index lesser means it appears above the currently
-          // active view
-        } else if (
-            globalOrdering.indexOf(previouslyActive) >
-            globalOrdering.indexOf(sidebarName)) {
-          var newSidebarName = globalCurrentView[0];
-          var [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-              getSidebarIds(newSidebarName, false, false);
-
-          updateSidebarActive(
-              newSidebarName, newSidebarSubcategory, newSidebarCategory, false);
-          updateSidebarActive(
-              sidebarName, sidebarSubcategory, sidebarCategory, true);
-          updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
-
-          globalCurrentView.unshift(sidebarName);
-          previouslyActive = sidebarName;
-
-        } else {
-          globalCurrentView.push(sidebarName);
-        }
-        // the intersection was updated and its now out of view, but still
-        // within a property
-      } else if (globalCurrentView.length === 1) {
-        toRemove = previouslyActive;
-        // the intersection was updated and its now out of view
-      } else {
-        // if the thing being removed from view was currently active
-        if (previouslyActive === sidebarName) {
-          updateSidebarActive(
-              sidebarName, sidebarSubcategory, sidebarCategory, false);
-          if (globalCurrentView.length >= 2) {
-            newSidebarName = globalCurrentView[1];
-            [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-                getSidebarIds(newSidebarName, false, false);
+        if (entry.intersectionRatio > 0) {
+          // If you are within a long section so the header left view
+          if (toRemove.length > 0) {
+            let [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+                getSidebarIds(previouslyActive, false, false);
             updateSidebarActive(
                 newSidebarName,
                 newSidebarSubcategory,
                 newSidebarCategory,
-                true);
-            updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
-            previouslyActive = newSidebarName;
+                false);
+            updateSidebarActive(
+                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
+            toRemove = '';
           }
+          // If there isn't anything in globalCurrentView
+          else if (globalCurrentView.length === 0) {
+            updateSidebarActive(
+                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            previouslyActive = sidebarName;
+            globalCurrentView.push(sidebarName);
+
+            // sidebarName index lesser means it appears above the currently
+            // active view
+          } else if (
+              globalOrdering.indexOf(previouslyActive) >
+              globalOrdering.indexOf(sidebarName)) {
+            var newSidebarName = globalCurrentView[0];
+            var [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+                getSidebarIds(newSidebarName, false, false);
+
+            updateSidebarActive(
+                newSidebarName,
+                newSidebarSubcategory,
+                newSidebarCategory,
+                false);
+            updateSidebarActive(
+                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
+
+            globalCurrentView.unshift(sidebarName);
+            previouslyActive = sidebarName;
+
+          } else {
+            globalCurrentView.push(sidebarName);
+          }
+          // the intersection was updated and its now out of view, but still
+          // within a property
+        } else if (globalCurrentView.length === 1) {
+          toRemove = previouslyActive;
+          // the intersection was updated and its now out of view
+        } else {
+          // if the thing being removed from view was currently active
+          if (previouslyActive === sidebarName) {
+            updateSidebarActive(
+                sidebarName, sidebarSubcategory, sidebarCategory, false);
+            if (globalCurrentView.length >= 2) {
+              newSidebarName = globalCurrentView[1];
+              [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+                  getSidebarIds(newSidebarName, false, false);
+              updateSidebarActive(
+                  newSidebarName,
+                  newSidebarSubcategory,
+                  newSidebarCategory,
+                  true);
+              updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
+              previouslyActive = newSidebarName;
+            }
+          }
+          globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
         }
-        globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
+      });
+
+      // This is true the first time all of the observers are set.
+      // entries will be every possible entry on the whole page.
+      if (isFirstOpen) {
+        updateSidebarViewFirstTime(entries);
       }
     });
 
-    // This is true the first time all of the observers are set.
-    // entries will be every possible entry on the whole page.
-    if (isFirstOpen) {
-      updateSidebarViewFirstTime(entries);
-    }
-  });
-
-  // Fill the observer with the necessary divs to observe: attributes,
-  // properties, etc.
-  document.querySelectorAll('div[id*="docs"]').forEach((section) => {
-    let idSplitList = section.getAttribute('id')!.split('-');
-    if (idSplitList.length === 4) {
-      globalOrdering.push(idSplitList.slice(1, 10).join('-'));
-      observer.observe(section);
-    }
-  });
+    // Fill the observer with the necessary divs to observe: attributes,
+    // properties, etc.
+    document.querySelectorAll('div[id*="docs"]').forEach((section) => {
+      let idSplitList = section.getAttribute('id')!.split('-');
+      if (idSplitList.length === 4) {
+        globalOrdering.push(idSplitList.slice(1, 10).join('-'));
+        observer.observe(section);
+      }
+    });
+  }
 };
