@@ -72,6 +72,30 @@ const outputOptions = [
     plugins,
     onwarn,
   },
+  {
+    input: './lib/chris-example.js',
+    output: {
+      file: './examples/built/chris-example.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'Chris-Example'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/chris-example.js',
+    output:
+        {file: './examples/built/chris-example-umd.js', format: 'umd', name: 'Chris-Example'},
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  },
 ];
 
 export default outputOptions;
