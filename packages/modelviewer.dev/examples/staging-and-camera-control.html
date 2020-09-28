@@ -336,7 +336,6 @@
 	  
   if (isLightChanging === true) {
     if (event.shiftKey && event.which == 1) {
-      console.log("shift move");
 	  modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
 	  modelViewer.resetTurntableRotation(-1 * orbit.theta);
     }
