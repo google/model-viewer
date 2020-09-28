@@ -43,6 +43,8 @@
   <style>
     html {
       scroll-behavior: smooth;
+      scroll-padding-top: 75px;
+      ;
     }
 
     .sidebar {
@@ -140,11 +142,11 @@
     }
 
     .categories {
-      padding: 10px;
+      padding: 20px;
     }
 
     .category {
-      padding-left: 10px;
+      /* padding-left: 10px; */
       padding-right: 10px;
       padding-top: 5px;
       padding-bottom: 5px;
@@ -156,12 +158,12 @@
 
     .subcategory-header {
       font-weight: normal;
+      margin-block-start: 0em;
+      margin-block-end: 0em;
     }
 
     .active {
-      font-weight: bold;
       text-decoration: underline;
-      visibility: visible;
     }
 
     .de-active {
@@ -172,12 +174,80 @@
 
     .element {
       font-weight: normal;
+      padding-left: 10px;
+    }
+
+    .sidebar-mv {
+      color: #000;
+    }
+
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+
+    .sidebar-hr {
+      border: 1px solid #BDBDBD;
+      margin-left: 20px;
+      margin-right: 20px;
+      text-align: center;
+    }
+
+    .subCategory {
+      padding-left: 10px;
+    }
+
+    .flipper {
+      padding-left: 20px;
+      padding-right: 20px;
+      font-size: 1vw;
+      overflow: auto;
+      white-space: nowrap;
+    }
+
+    .inner-flipper {
+      display: inline-block;
+    }
+
+    .inner-home {
+      display: flex;
+      align-items: center;
+    }
+
+    .darken {
+      color: #000;
+    }
+
+    .darken:hover {
+      border: 1px solid #000;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .inactive-doc-example {
+      display: none;
     }
   </style>
 </head>
 
 <body>
   <div class="sidebar">
+    <div class="home lockup">
+      <a href="../" class="sidebar-mv inner-home">
+        <div class="icon-button icon-modelviewer-black inner-home"></div>
+        <h1 class="inner-home">model-viewer</h1>
+      </a>
+    </div>
+    <hr class="sidebar-hr">
+    <div class="flipper">
+      <div class="inner-flipper" id="examples-flipper" onclick="doClick('examples')">
+        <a class="darken">EXAMPLES</a>
+      </div>
+      <div class="inner-flipper">|</div>
+      <div class="inner-flipper" id="documentation-flipper" onclick="doClick('docs')">
+        <a class="darken">DOCUMENTATION</a>
+      </div>
+    </div>
     <div class="categories" id="sidebar-category-container">
     </div>
   </div>
@@ -185,11 +255,40 @@
   <!-- Start of all documentation -->
   <div class="outer-content">
     <div id="loading-docs"></div>
-    <div id="animation-docs"></div>
+    <div id="loading-examples"></div>
   </div>
 
   <script>
-    // CSS Custom Properties --> cssProperties
+
+    var docsVisible = true;
+
+    async function fetchHtmlAsText(url) {
+      const response = await fetch(url);
+      return await response.text();
+    }
+
+    async function loadExamples() {
+      const loadingExample = document.getElementById("loading-examples");
+      loadingExample.innerHTML = await fetchHtmlAsText("lazy-loading.html");
+    }
+
+    loadExamples();
+
+    function doClick(newType) {
+      var [newSidebarName, newSidebarSubcategory, newSidebarCategory] = getSideBarIds(previouslyActive, false);
+      var example = document.getElementById(newSidebarCategory.split('-')[0].concat("-examples"));
+      var doc = document.getElementById(newSidebarCategory.split('-')[0].concat("-docs"));
+      if (newType === "docs") {
+        doc.classList.remove('inactive-doc-example');
+        example.classList.add('inactive-doc-example');
+        docsVisible = true;
+      } else {
+        doc.classList.add('inactive-doc-example');
+        example.classList.remove('inactive-doc-example');
+        docsVisible = false;
+      }
+    }
+
     function makeSidebar(category) {
       var container = document.getElementById('sidebar-category-container');
       var titleLower = category.Title.toLowerCase();
@@ -197,11 +296,12 @@
       var categoryDiv = document.createElement("div");
       categoryDiv.classList.add("category");
 
-      var categoryHeader = document.createElement("H4");
+      var categoryHeader = document.createElement("H3");
       categoryHeader.id = titleLower.concat("-sidebar");
 
       var categoryLink = document.createElement("a");
       categoryLink.setAttribute("href", "#".concat(titleLower))
+      categoryLink.classList.add('darken');
       categoryLink.innerText = category.Title;
 
       categoryHeader.appendChild(categoryLink);
@@ -219,11 +319,12 @@
             var keyLower = key.toLowerCase();
           }
 
-          var subCategoryHeader = document.createElement("H5");
+          var subCategoryHeader = document.createElement("H4");
           subCategoryHeader.id = titleLower.concat("-", keyLower, "-sidebar");
           subCategoryHeader.classList.add("subcategory-header");
 
-          subCategoryLink.setAttribute("href", "#".concat(titleLower, "-", keyLower))
+          subCategoryLink.setAttribute("href", "#".concat(titleLower, "-", keyLower));
+          subCategoryLink.classList.add('darken');
           subCategoryLink.innerText = key;
 
           subCategoryHeader.appendChild(subCategoryLink);
@@ -234,7 +335,11 @@
             ele.classList.add("element");
             ele.classList.add("de-active");
             ele.id = titleLower.concat("-", keyLower, "-", element.htmlName);
-            ele.innerText = element.name;
+            var eleLink = document.createElement("a");
+            eleLink.setAttribute("href", "#docs-".concat(titleLower, "-", keyLower, "-", element.htmlName));
+            eleLink.classList.add('darken');
+            eleLink.innerText = element.name;
+            ele.appendChild(eleLink);
             subCategory.append(ele);
           });
           categoryDiv.appendChild(subCategory);
@@ -408,12 +513,12 @@
     function updateSidebar(sidebarName, sidebarSubcategory, sidebarCategory, option) {
       if (option === 'add') {
         document.querySelector(`div[id=${sidebarName}]`).classList.add('active');
-        document.querySelector(`h5[id=${sidebarSubcategory}]`).classList.add('active');
-        document.querySelector(`h4[id=${sidebarCategory}]`).classList.add('active');
+        document.querySelector(`h4[id=${sidebarSubcategory}]`).classList.add('active');
+        document.querySelector(`h3[id=${sidebarCategory}]`).classList.add('active');
       } else {
         document.querySelector(`div[id=${sidebarName}]`).classList.remove('active');
-        document.querySelector(`h5[id=${sidebarSubcategory}]`).classList.remove('active');
-        document.querySelector(`h4[id=${sidebarCategory}]`).classList.remove('active');
+        document.querySelector(`h4[id=${sidebarSubcategory}]`).classList.remove('active');
+        document.querySelector(`h3[id=${sidebarCategory}]`).classList.remove('active');
       }
     };
 
@@ -421,7 +526,7 @@
       document.querySelector(`div[id=${sidebarName}]`).classList.add('de-active');
     }
 
-    function removeDeactive (sidebarName) {
+    function removeDeactive(sidebarName) {
       document.querySelector(`div[id=${sidebarName}]`).classList.remove('de-active');
     }
 
