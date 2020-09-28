@@ -257,8 +257,6 @@
 
   <script>
 
-    var docsVisible = true;
-
     async function fetchHtmlAsText(url) {
       const response = await fetch(url);
       return await response.text();
@@ -278,11 +276,9 @@
       if (newType === "docs") {
         doc.classList.remove('inactive-doc-example');
         example.classList.add('inactive-doc-example');
-        docsVisible = true;
       } else {
         doc.classList.add('inactive-doc-example');
         example.classList.remove('inactive-doc-example');
-        docsVisible = false;
       }
     }
 
@@ -304,24 +300,19 @@
       categoryHeader.appendChild(categoryLink);
       categoryDiv.append(categoryHeader);
 
-      let keyLower = "";
       for (key in category) {
         if (key !== "Title") {
           let subCategory = document.createElement("div");
           subCategory.classList.add("subCategory");
 
           let subCategoryLink = document.createElement("a");
-          if (key === "CSS Custom Properties") {
-            keyLower = "cssProperties";
-          } else {
-            keyLower = key.toLowerCase();
-          }
+          let lowerCaseKey = getLowerCaseKey(key);
 
           let subCategoryHeader = document.createElement("H4");
-          subCategoryHeader.id = titleLower.concat("-", keyLower, "-sidebar");
+          subCategoryHeader.id = titleLower.concat("-", lowerCaseKey, "-sidebar");
           subCategoryHeader.classList.add("subcategory-header");
 
-          subCategoryLink.setAttribute("href", "#".concat(titleLower, "-", keyLower));
+          subCategoryLink.setAttribute("href", "#".concat(titleLower, "-", lowerCaseKey));
           subCategoryLink.classList.add('darken');
           subCategoryLink.innerText = key;
 
@@ -332,9 +323,9 @@
             let ele = document.createElement("div");
             ele.classList.add("element");
             ele.classList.add("de-active");
-            ele.id = titleLower.concat("-", keyLower, "-", element.htmlName);
+            ele.id = titleLower.concat("-", lowerCaseKey, "-", element.htmlName);
             let eleLink = document.createElement("a");
-            eleLink.setAttribute("href", "#docs-".concat(titleLower, "-", keyLower, "-", element.htmlName));
+            eleLink.setAttribute("href", "#docs-".concat(titleLower, "-", lowerCaseKey, "-", element.htmlName));
             eleLink.classList.add('darken');
             eleLink.innerText = element.name;
             ele.appendChild(eleLink);
@@ -391,7 +382,7 @@
       descriptionContainer.classList.add(categoryLower.concat('-definition'));
 
       let description = document.createElement("p");
-      description.innerHTML = attribute.description;
+      description['innerHTML'] = attribute.description;
 
       descriptionContainer.appendChild(description);
       attributeContainer.appendChild(descriptionContainer);
@@ -479,30 +470,35 @@
       });
     }
 
+    function getLowerCaseKey(key) {
+      if (key === "CSS Custom Properties") {
+        return "cssProperties";
+      } else {
+        return key.toLowerCase();
+      }
+    }
+
     function convertJSONToHTML(json) {
-      let obj = json;
       let header = '';
-      let keyLower = '';
-      obj.forEach(function (category) {
+      json.forEach(function (category) {
         // Make body content
         for (let key in category) {
           if (key === 'Title') {
             header = category[key];
             addHeader(category[key]);
-          } else if (key !== "Title") {
-            if (key === "CSS Custom Properties") {
-              keyLower = "cssProperties";
-            } else {
-              keyLower = key.toLowerCase();
-            }
-            addAttributes(category[key], header, key, keyLower);
+          } else {
+            let lowerCaseKey = getLowerCaseKey(key);
+            addAttributes(category[key], header, key, lowerCaseKey);
           }
         }
         makeSidebar(category);
       });
     }
 
-    
+    /*
+     * Add or remove the active class from a sidebarName, sidebarSubcategory and sidebarCategory.
+     * i.e. src, Attribute, Loading
+    */
     function updateSidebarActive(sidebarName, sidebarSubcategory, sidebarCategory, isActive) {
       if (isActive) {
         document.querySelector(`div[id=${sidebarName}]`).classList.add('active');
