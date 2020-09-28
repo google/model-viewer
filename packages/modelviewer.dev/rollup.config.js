@@ -73,12 +73,12 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/chris-example.js',
+    input: './lib/documentation-main.js',
     output: {
-      file: './examples/built/chris-example.js',
+      file: './examples/built/documentation-main.js',
       sourcemap: true,
       format: 'esm',
-      name: 'Chris-Example'
+      name: 'Documentation-Main'
     },
     watch: {
       include: watchFiles,
@@ -87,9 +87,57 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/chris-example.js',
+    input: './lib/documentation-main.js',
     output:
-        {file: './examples/built/chris-example-umd.js', format: 'umd', name: 'Chris-Example'},
+        {file: './examples/built/documentation-main-umd.js', format: 'umd', name: 'Documentation-Main'},
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/create-html.js',
+    output: {
+      file: './examples/built/create-html.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'create-html'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/create-html.js',
+    output:
+        {file: './examples/built/create-html-umd.js', format: 'umd', name: 'create-html'},
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/sidebar.js',
+    output: {
+      file: './examples/built/sidebar.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'sidebar'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/sidebar.js',
+    output:
+        {file: './examples/built/sidebar-umd.js', format: 'umd', name: 'sidebar'},
     watch: {
       include: watchFiles,
     },
