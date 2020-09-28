@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 /* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -185,11 +185,13 @@
 <model-viewer id="pan-demo" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
 (() => {
+  
   const modelViewer = document.querySelector('#pan-demo');
+  modelViewer.addEventListener('contextmenu', event => event.preventDefault());
   const tapDistance = 2;
   let panning = false;
   let panX, panY;
-  let startX, startY;
+  let firstX, firstY;
   let lastX, lastY;
   let metersPerPixel;
 
@@ -242,6 +244,7 @@
   };
 
   modelViewer.addEventListener('mousedown', (event) => {
+	console.log("mousedown");
     startX = event.clientX;
     startY = event.clientY;
     panning = event.button === 2 || event.ctrlKey || event.metaKey ||
@@ -249,8 +252,6 @@
     if (!panning)
       return;
 
-    lastX = startX;
-    lastY = startY;
     startPan();
     event.stopPropagation();
   }, true);
@@ -286,11 +287,10 @@
     movePan(thisX, thisY);
   }, true);
 
-  self.addEventListener('mouseup', (event) => {
+  modelViewer.addEventListener('mouseup', (event) => {
     recenter(event);
   }, true);
-  
-  self.addEventListener('touchend', (event) => {
+  modelViewer.addEventListener('touchend', (event) => {
     if (event.touches.length === 0) {
       recenter(event.changedTouches[0]);
     }
@@ -302,7 +302,60 @@
       </div>
     </div>
   </div>
+  <div class="sample">
+    <div id="demo-container-8" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Add other interactions like rotating environment map</h2>
+          <h4>Use parameters with rest turntable to rotate only the environment light</h4>
+          <p>By using shift key plus left click mouse or touch pad drag, one can rotate
+			  the environment map to see how the environment background would cast light
+			  onto the object from different angles when it is rotated. Updating orbit to 
+			  new theta value and then reseting the theta value to stop turntable from 
+		  rotating. </p>
+        </div>
+        <example-snippet stamp-to="demo-container-8" highlight-as="html">
+          <template>
+<model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
+<script type="module">
+  const modelViewer = document.querySelector("#envlight-demo");
+	  
+  const updateOrbit = () => {
+  const orbit = modelViewer.getCameraOrbit(); 
+  modelViewer.jumpCameraToGoal();
+  requestAnimationFrame(() => updateOrbit());
+  var isLightChanging = false;
+  // Add the event listeners for mousedown, mousemove, and mouseup
+  modelViewer.addEventListener('mousedown', (event) => {
+    isLightChanging = true;
+  }, true);
 
+  modelViewer.addEventListener('mousemove', (event) => {
+	  
+  if (isLightChanging === true) {
+    if (event.shiftKey && event.which == 1) {
+	  modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
+	  modelViewer.resetTurntableRotation(-1 * orbit.theta);
+    }
+  }
+  }, true);
+
+  modelViewer.addEventListener('mouseup', (event) => {
+    if (isLightChanging === true) {
+      isLightChanging = false;
+    }
+  }, true);
+  
+  };
+  updateOrbit();
+  
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>	
   <div class="footer">
     <ul>
       <li class="attribution">
@@ -313,8 +366,6 @@
     <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
     <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
-
-  
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"
