@@ -38,14 +38,6 @@ const HDR_FILE_RE = /\.hdr$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 
-const $environmentMapCache = Symbol('environmentMapCache');
-const $generatedEnvironmentMap = Symbol('generatedEnvironmentMap');
-const $PMREMGenerator = Symbol('PMREMGenerator');
-
-const $addMetadata = Symbol('addMetadata');
-const $loadEnvironmentMapFromUrl = Symbol('loadEnvironmentMapFromUrl');
-const $loadGeneratedEnvironmentMap = Symbol('loadGeneratedEnvironmentMap');
-
 // Attach a `userData` object for arbitrary data on textures that
 // originate from TextureUtils, similar to Object3D's userData,
 // for help debugging, providing metadata for tests, and semantically
@@ -57,25 +49,21 @@ const userData = {
 };
 
 export default class TextureUtils extends EventDispatcher {
-  get pmremGenerator() {
-    return this[$PMREMGenerator];
-  }
+  private generatedEnvironmentMap: WebGLRenderTarget|null = null;
+  private PMREMGenerator: PMREMGenerator;
 
-  private[$generatedEnvironmentMap]: WebGLRenderTarget|null = null;
-  private[$PMREMGenerator]: PMREMGenerator;
-
-  private[$environmentMapCache] = new Map<string, Promise<WebGLRenderTarget>>();
+  private environmentMapCache = new Map<string, Promise<WebGLRenderTarget>>();
 
   constructor(threeRenderer: WebGLRenderer) {
     super();
-    this[$PMREMGenerator] = new PMREMGenerator(threeRenderer);
+    this.PMREMGenerator = new PMREMGenerator(threeRenderer);
   }
 
   async load(
       url: string, progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
     try {
-      this[$PMREMGenerator].compileEquirectangularShader();
+      this.PMREMGenerator.compileEquirectangularShader();
       const isHDR: boolean = HDR_FILE_RE.test(url);
       const loader: DataTextureLoader = isHDR ? hdrLoader : ldrLoader;
       const texture: Texture = await new Promise<Texture>(
@@ -86,7 +74,7 @@ export default class TextureUtils extends EventDispatcher {
 
       progressCallback(1.0);
 
-      this[$addMetadata](texture, url, 'Equirectangular');
+      this.addMetadata(texture, url, 'Equirectangular');
 
       if (isHDR) {
         texture.encoding = RGBEEncoding;
@@ -113,8 +101,8 @@ export default class TextureUtils extends EventDispatcher {
 
     try {
       equirect = await this.load(url, progressCallback);
-      const cubeUV = this[$PMREMGenerator].fromEquirectangular(equirect);
-      this[$addMetadata](cubeUV.texture, url, 'CubeUV');
+      const cubeUV = this.PMREMGenerator.fromEquirectangular(equirect);
+      this.addMetadata(cubeUV.texture, url, 'CubeUV');
       return cubeUV;
     } finally {
       if (equirect != null) {
@@ -143,19 +131,19 @@ export default class TextureUtils extends EventDispatcher {
       // If we have a skybox URL, attempt to load it as a cubemap
       if (!!skyboxUrl) {
         skyboxLoads =
-            this[$loadEnvironmentMapFromUrl](skyboxUrl, progressTracker);
+            this.loadEnvironmentMapFromUrl(skyboxUrl, progressTracker);
       }
 
       if (!!environmentMapUrl) {
         // We have an available environment map URL
-        environmentMapLoads = this[$loadEnvironmentMapFromUrl](
-            environmentMapUrl, progressTracker);
+        environmentMapLoads =
+            this.loadEnvironmentMapFromUrl(environmentMapUrl, progressTracker);
       } else if (!!skyboxUrl) {
         // Fallback to deriving the environment map from an available skybox
         environmentMapLoads = skyboxLoads as Promise<WebGLRenderTarget>;
       } else {
         // Fallback to generating the environment map
-        environmentMapLoads = this[$loadGeneratedEnvironmentMap]();
+        environmentMapLoads = this.loadGeneratedEnvironmentMap();
       }
 
       let [environmentMap, skybox] =
@@ -167,9 +155,9 @@ export default class TextureUtils extends EventDispatcher {
 
       environmentMap = environmentMap!;
 
-      this[$addMetadata](environmentMap.texture, environmentMapUrl, 'PMREM');
+      this.addMetadata(environmentMap.texture, environmentMapUrl, 'PMREM');
       if (skybox != null) {
-        this[$addMetadata](skybox.texture, skyboxUrl, 'PMREM');
+        this.addMetadata(skybox.texture, skyboxUrl, 'PMREM');
       }
 
 
@@ -179,7 +167,7 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  private[$addMetadata](
+  private addMetadata(
       texture: Texture|null, url: string|null, mapping: string) {
     if (texture == null) {
       return;
@@ -197,32 +185,32 @@ export default class TextureUtils extends EventDispatcher {
    * Loads a WebGLRenderTarget from a given URL. The render target in this
    * case will be assumed to be used as an environment map.
    */
-  private[$loadEnvironmentMapFromUrl](
+  private loadEnvironmentMapFromUrl(
       url: string,
       progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
-    if (!this[$environmentMapCache].has(url)) {
+    if (!this.environmentMapCache.has(url)) {
       const progressCallback =
           progressTracker ? progressTracker.beginActivity() : () => {};
       const environmentMapLoads =
           this.loadEquirectAsCubeUV(url, progressCallback);
 
-      this[$environmentMapCache].set(url, environmentMapLoads);
+      this.environmentMapCache.set(url, environmentMapLoads);
     }
 
-    return this[$environmentMapCache].get(url)!;
+    return this.environmentMapCache.get(url)!;
   }
 
   /**
    * Loads a dynamically generated environment map.
    */
-  private[$loadGeneratedEnvironmentMap](): Promise<WebGLRenderTarget> {
-    if (this[$generatedEnvironmentMap] == null) {
+  private loadGeneratedEnvironmentMap(): Promise<WebGLRenderTarget> {
+    if (this.generatedEnvironmentMap == null) {
       const defaultScene = new EnvironmentScene;
-      this[$generatedEnvironmentMap] =
-          this[$PMREMGenerator].fromScene(defaultScene, GENERATED_SIGMA);
+      this.generatedEnvironmentMap =
+          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
     }
 
-    return Promise.resolve(this[$generatedEnvironmentMap]!);
+    return Promise.resolve(this.generatedEnvironmentMap!);
   }
 
   async dispose() {
@@ -232,11 +220,11 @@ export default class TextureUtils extends EventDispatcher {
     // IE11 doesn't have the necessary iterator-returning methods. So,
     // disposal of these render targets is kind of convoluted as a result.
 
-    this[$environmentMapCache].forEach((targetLoads) => {
+    this.environmentMapCache.forEach((targetLoads) => {
       allTargetsLoad.push(targetLoads);
     });
 
-    this[$environmentMapCache].clear();
+    this.environmentMapCache.clear();
 
     for (const targetLoads of allTargetsLoad) {
       try {
@@ -247,9 +235,9 @@ export default class TextureUtils extends EventDispatcher {
       }
     }
 
-    if (this[$generatedEnvironmentMap] != null) {
-      this[$generatedEnvironmentMap]!.dispose();
-      this[$generatedEnvironmentMap] = null;
+    if (this.generatedEnvironmentMap != null) {
+      this.generatedEnvironmentMap!.dispose();
+      this.generatedEnvironmentMap = null;
     }
   }
 }
