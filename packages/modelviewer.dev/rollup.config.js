@@ -73,7 +73,7 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/documentation-main.js',
+    input: './lib/docs-and-examples/documentation-main.js',
     output: {
       file: './examples/built/documentation-main.js',
       sourcemap: true,
@@ -87,7 +87,7 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/documentation-main.js',
+    input: './lib/docs-and-examples/documentation-main.js',
     output:
         {file: './examples/built/documentation-main-umd.js', format: 'umd', name: 'Documentation-Main'},
     watch: {
@@ -97,7 +97,7 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/create-html.js',
+    input: './lib/docs-and-examples/create-html.js',
     output: {
       file: './examples/built/create-html.js',
       sourcemap: true,
@@ -111,7 +111,7 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/create-html.js',
+    input: './lib/docs-and-examples/create-html.js',
     output:
         {file: './examples/built/create-html-umd.js', format: 'umd', name: 'create-html'},
     watch: {
@@ -121,7 +121,7 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/sidebar.js',
+    input: './lib/docs-and-examples/sidebar.js',
     output: {
       file: './examples/built/sidebar.js',
       sourcemap: true,
@@ -135,7 +135,7 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/sidebar.js',
+    input: './lib/docs-and-examples/sidebar.js',
     output:
         {file: './examples/built/sidebar-umd.js', format: 'umd', name: 'sidebar'},
     watch: {
@@ -145,7 +145,7 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/init-examples.js',
+    input: './lib/docs-and-examples/init-examples.js',
     output: {
       file: './examples/built/init-examples.js',
       sourcemap: true,
@@ -159,7 +159,7 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/init-examples.js',
+    input: './lib/docs-and-examples/init-examples.js',
     output:
         {file: './examples/built/init-examples-umd.js', format: 'umd', name: 'init-examples'},
     watch: {
@@ -169,7 +169,7 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/init-docs.js',
+    input: './lib/docs-and-examples/init-docs.js',
     output: {
       file: './examples/built/init-docs.js',
       sourcemap: true,
@@ -183,7 +183,7 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/init-docs.js',
+    input: './lib/docs-and-examples/init-docs.js',
     output:
         {file: './examples/built/init-docs-umd.js', format: 'umd', name: 'init-docs'},
     watch: {
