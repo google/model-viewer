@@ -206,6 +206,9 @@ export function sidebarObserver(docsOrExamples: string) {
       }
     });
 
+    // TODO: update for docs/examples, in examples we may want to use specific
+    // examples or headers.
+
     // Fill the observer with the necessary divs to observe:
     // i.e. attributes, properties, events, methods, slots, custom css.
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
