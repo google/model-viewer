@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-var globalCurrentView: string[] = [];
-var previouslyActive: string = '';
-var toRemove = '';
-var globalOrdering: any[] = [];
+let globalCurrentView: string[] = [];
+let previouslyActive: string = '';
+let toRemove = '';
+let globalOrdering: any[] = [];
 
-var isFirstOpen = true;      // is true on the first observation of all entries
-var everyEntry: any[] = [];  // a list of all attributes/properties etc.
+let isFirstOpen = true;      // is true on the first observation of all entries
+let everyEntry: any[] = [];  // a list of all attributes/properties etc.
 
 /*
  * Add or remove the active class from a sidebarName, sidebarSubcategory and
