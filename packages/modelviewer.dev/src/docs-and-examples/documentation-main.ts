@@ -17,10 +17,10 @@
 import {convertJSONToHTML} from './create-html';
 import {getSidebarIds, sidebarObserver} from './sidebar';
 
-export function doClick(oldType: string, newType: string) {
+export function switchPages(oldType: string, newType: string) {
   if (oldType !== newType) {
-    // TODO: Handle going from examples back to docs, possibly include a
-    // previous state to revert to in URI
+    // TODO: Handle going from examples back to docs (old state), possibly
+    // include a previous state to revert to in URI
     let allIds = getSidebarIds('', false, true);
     let newSidebarCategory = allIds[2].split('-')[0];
     const newURI = '../'.concat(newType, '/#', newSidebarCategory);
@@ -67,8 +67,6 @@ function loadJSON(filePath: string, callback: JSONCallback) {
   xobj.overrideMimeType('application/json');
   xobj.open('GET', filePath, true);
   xobj.onreadystatechange = function() {
-    console.log(xobj.status);
-    console.log(typeof (xobj.status));
     if (xobj.readyState === 4 && xobj.status === 200) {
       callback(xobj.responseText);
     }
@@ -81,7 +79,6 @@ function loadJSON(filePath: string, callback: JSONCallback) {
  * docsOrExamples: 'docs' or 'examples'
  */
 export function init(docsOrExamples: string) {
-  console.log(docsOrExamples);
   loadJSON('../data/loading.json', function(response: string) {
     let actualJSON = JSON.parse(response);
     convertJSONToHTML(actualJSON, docsOrExamples);
@@ -92,4 +89,4 @@ export function init(docsOrExamples: string) {
   });
 }
 
-(self as any).doClick = doClick;
+(self as any).switchPages = switchPages;
