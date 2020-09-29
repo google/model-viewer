@@ -159,28 +159,32 @@ export class FilamentViewer extends LitElement {
       this[$assetLoader]!.destroyAsset(existingAsset);
       this[$currentAsset] = null;
       for (const entity of entities) {
-        entity.delete();
+        entity.delete();  // This deletes the emscripten wrapper, not the entity
+                          // itself.
       }
     }
 
     if (this[$ibl] != null) {
+      const ibl = this[$ibl]!;
       this[$scene].setIndirectLight(null);
-      this[$engine].destroyTexture(this[$ibl]!.getReflectionsTexture());
-      this[$engine].destroyIndirectLight(this[$ibl]!);
+      this[$engine].destroyTexture(ibl.getReflectionsTexture());
+      this[$engine].destroyIndirectLight(ibl);
       this[$ibl] = null;
     }
 
     if (this[$skybox] != null) {
+      const skybox = this[$skybox]!;
       this[$scene].setSkybox(null);
-      this[$engine].destroyTexture(this[$skybox]!.getTexture());
-      this[$engine].destroySkybox(this[$skybox]!);
+      this[$engine].destroyTexture(skybox.getTexture());
+      this[$engine].destroySkybox(skybox);
       this[$skybox] = null;
     }
 
     if (this[$directionalLight] != null) {
-      this[$scene].remove(this[$directionalLight]!);
-      this[$engine].destroyEntity(this[$directionalLight]!);
-      this[$directionalLight]!.delete();
+      const light = this[$directionalLight]!;
+      this[$scene].remove(light);
+      this[$engine].destroyEntity(light);
+      light.delete();
       this[$directionalLight] = null;
     }
 
