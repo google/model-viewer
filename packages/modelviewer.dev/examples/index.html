@@ -44,7 +44,6 @@
     html {
       scroll-behavior: smooth;
       scroll-padding-top: 75px;
-      ;
     }
 
     .sidebar {
@@ -224,6 +223,10 @@
     .inactive-doc-example {
       display: none;
     }
+
+    .bolden {
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -238,7 +241,7 @@
     <hr class="sidebar-hr">
     <div class="flipper">
       <div class="inner-flipper" id="examples-flipper" onclick="doClick('examples', 'examples')">
-        <a class="darken">EXAMPLES</a>
+        <a class="darken bolden">EXAMPLES</a>
       </div>
       <div class="inner-flipper">|</div>
       <div class="inner-flipper" id="documentation-flipper" onclick="doClick('examples', 'docs')">
