@@ -23,7 +23,7 @@ interface Category {
       Properties: Entry[], Methods: Entry[], Events: Entry[], Slots: Entry[],
 }
 
-const CategoryCon: Category =
+const CategoryConstant: Category =
     {
       Title: '',
       Attributes: [],
@@ -34,76 +34,90 @@ const CategoryCon: Category =
       Slots: [],
     }
 
-function makeSidebar(category: Category, docsOrExamples: string) {
-  let container = document.getElementById('sidebar-category-container');
-  let titleLower = category.Title.toLowerCase();
+function createEntrySidebar(
+    lowercaseTitle: string, lowercaseKey: string, entry: Entry) {
+  let entrySidebar = document.createElement('div');
+  entrySidebar.classList.add('element');
+  entrySidebar.classList.add('de-active');
+  entrySidebar.id =
+      lowercaseTitle.concat('-', lowercaseKey, '-', entry.htmlName);
+  let entryLink = document.createElement('a');
+  entryLink.setAttribute(
+      'href',
+      '#docs-'.concat(lowercaseTitle, '-', lowercaseKey, '-', entry.htmlName));
+  entryLink.classList.add('darken');
+  entryLink.innerText = entry.name;
+  entrySidebar.appendChild(entryLink);
+  return entrySidebar
+}
 
-  let categoryDiv = document.createElement('div');
-  categoryDiv.classList.add('category');
+function createSubcategorySidebar(
+    key: string, lowercaseTitle: string, category: Category) {
+  let lowercaseKey = getLowerCaseKey(key);
+
+  // Create subcategory container
+  let subcategorySidebarContainer = document.createElement('div');
+  subcategorySidebarContainer.classList.add('subCategory');
+
+  // Create subcategory header
+  let subcategoryHeader = document.createElement('H4');
+  subcategoryHeader.id = lowercaseTitle.concat('-', lowercaseKey, '-sidebar');
+  subcategoryHeader.classList.add('subcategory-header');
+
+  // Create subcategory link
+  let subcategoryLink = document.createElement('a');
+  subcategoryLink.setAttribute(
+      'href', '#'.concat(lowercaseTitle, '-', lowercaseKey));
+  subcategoryLink.classList.add('darken');
+  subcategoryLink.innerText = key;
+
+  subcategoryHeader.appendChild(subcategoryLink);
+  subcategorySidebarContainer.append(subcategoryHeader);
+
+  const innerKey = key as keyof typeof CategoryConstant;  // hack to use later
+  (<Entry[]>category[innerKey]).forEach(function(entry: Entry) {
+    let entrySidebar = createEntrySidebar(lowercaseTitle, lowercaseKey, entry);
+    subcategorySidebarContainer.append(entrySidebar);
+  });
+  return subcategorySidebarContainer
+}
+
+function createSidebar(category: Category, docsOrExamples: string) {
+  let container = document.getElementById('sidebar-category-container');
+  let lowercaseTitle = category.Title.toLowerCase();
+
+  let categoryContainer = document.createElement('div');
+  categoryContainer.classList.add('category');
 
   let categoryHeader = document.createElement('H3');
-  categoryHeader.id = titleLower.concat('-sidebar');
+  categoryHeader.id = lowercaseTitle.concat('-sidebar');
 
   let categoryLink = document.createElement('a');
-  categoryLink.setAttribute('href', '#'.concat(titleLower))
+  categoryLink.setAttribute('href', '#'.concat(lowercaseTitle))
   categoryLink.classList.add('darken');
   categoryLink.innerText = category.Title;
 
   categoryHeader.appendChild(categoryLink);
-  categoryDiv.append(categoryHeader);
-  console.log(docsOrExamples, docsOrExamples === 'examples');
+  categoryContainer.append(categoryHeader);
+
   if (docsOrExamples === 'examples') {
-    container!.appendChild(categoryDiv);
+    container!.appendChild(categoryContainer);
     return;
   }
 
   Object.keys(category).forEach((key) => {
-    const innerKey = key as keyof typeof CategoryCon;
     if (key !== 'Title') {
-      let subCategory = document.createElement('div');
-      subCategory.classList.add('subCategory');
-
-      let subCategoryLink = document.createElement('a');
-      let lowerCaseKey = getLowerCaseKey(key);
-
-      let subCategoryHeader = document.createElement('H4');
-      subCategoryHeader.id = titleLower.concat('-', lowerCaseKey, '-sidebar');
-      subCategoryHeader.classList.add('subcategory-header');
-
-      subCategoryLink.setAttribute(
-          'href', '#'.concat(titleLower, '-', lowerCaseKey));
-      subCategoryLink.classList.add('darken');
-      subCategoryLink.innerText = key;
-
-      subCategoryHeader.appendChild(subCategoryLink);
-      subCategory.append(subCategoryHeader);
-
-      (<Entry[]>category[innerKey]).forEach(function(element: Entry) {
-        let ele = document.createElement('div');
-        ele.classList.add('element');
-        ele.classList.add('de-active');
-        ele.id = titleLower.concat('-', lowerCaseKey, '-', element.htmlName);
-        let eleLink = document.createElement('a');
-        eleLink.setAttribute(
-            'href',
-            '#docs-'.concat(
-                titleLower, '-', lowerCaseKey, '-', element.htmlName));
-        eleLink.classList.add('darken');
-        eleLink.innerText = element.name;
-        ele.appendChild(eleLink);
-        subCategory.append(ele);
-      });
-
-      categoryDiv.appendChild(subCategory);
+      let subcategorySidebarContainer =
+          createSubcategorySidebar(key, lowercaseTitle, category);
+      categoryContainer.appendChild(subcategorySidebarContainer);
     }
   });
-  container!.appendChild(categoryDiv);
+  container!.appendChild(categoryContainer);
 }
 
-function addHeader(header: string, docsOrExamples: string) {
+function createTitle(header: string, docsOrExamples: string) {
   let lowerHeader = header.toLowerCase();
   let element: HTMLElement;
-
   let para = document.createElement('div');
   para.classList.add('header');
   let node = document.createElement('H1');
@@ -118,123 +132,6 @@ function addHeader(header: string, docsOrExamples: string) {
   element!.appendChild(para);
 }
 
-function makeElement(
-    attribute: Entry,
-    lowerHeader: string,
-    pluralCategoryLower: string,
-    categoryLower: string) {
-  let attributeContainer = document.createElement('div');
-  attributeContainer.classList.add(categoryLower.concat('-container'));
-
-  // Creating the header
-  let headerContainer = document.createElement('div');
-  headerContainer.classList.add(categoryLower.concat('-name'));
-  headerContainer.id =
-      ['docs', lowerHeader, pluralCategoryLower, attribute.htmlName].join('-');
-
-  let header = document.createElement('H4');
-  header.innerText = attribute.name;
-
-  headerContainer.appendChild(header);
-  attributeContainer.appendChild(headerContainer);
-
-  // Creating the description
-  let descriptionContainer = document.createElement('div');
-  descriptionContainer.classList.add(categoryLower.concat('-definition'));
-
-  let description = document.createElement('p');
-  description['innerHTML'] = attribute.description;
-
-  descriptionContainer.appendChild(description);
-  attributeContainer.appendChild(descriptionContainer);
-
-  if ('default' in attribute && attribute.default.length > 0) {
-    if (categoryLower === 'attribute' || categoryLower == 'cssPropertie') {
-      let table = document.createElement('TABLE');
-      table.classList.add('value-table');
-
-      let tr1 = document.createElement('TR');
-      let th1 = document.createElement('TH');
-      th1.innerText = 'Default value';
-      let th2 = document.createElement('TH');
-      th2.innerText = 'Type';
-      let th3 = document.createElement('TH');
-      th3.innerText = 'Options';
-      tr1.appendChild(th1);
-      tr1.appendChild(th2);
-      tr1.appendChild(th3);
-      table.appendChild(tr1);
-
-      let tr2 = document.createElement('TR');
-      let td1 = document.createElement('TD');
-      td1.innerText = attribute.default[0];
-      let td2 = document.createElement('TD');
-      td2.innerText = attribute.default[1];
-      let td3 = document.createElement('TD');
-      td3.innerText = attribute.default[2];
-      tr2.appendChild(td1);
-      tr2.appendChild(td2);
-      tr2.appendChild(td3);
-      table.appendChild(tr2);
-
-      attributeContainer.appendChild(table);
-    }
-  }
-
-  // Creating the links for an attribute
-  if ('links' in attribute && attribute.links.length > 0) {
-    let linksContainer = document.createElement('div');
-
-    let ul = document.createElement('UL');
-    ul.classList.add('links');
-
-    attribute.links.forEach(function(link: string) {
-      let li = document.createElement('LI');
-      li.innerHTML = link;
-      ul.appendChild(li);
-    });
-
-    linksContainer.appendChild(ul)
-    attributeContainer.appendChild(linksContainer);
-  }
-
-  return attributeContainer;
-}
-
-function addAttributes(
-    attributeArray: Entry[],
-    header: string,
-    category: string,
-    categoryLower: string) {
-  let lowerHeader = header.toLowerCase();
-
-  let element = document.getElementById(lowerHeader.concat('-docs'));
-
-  let outer = document.createElement('div');
-  outer.classList.add(categoryLower.concat('-container'));
-
-  let middle = document.createElement('div');
-  middle.classList.add('inner-content');
-
-  let container = document.createElement('div');
-  container.id = 'docs-'.concat(lowerHeader, '-', categoryLower);
-
-  let headerNode = document.createElement('H3');
-  headerNode.id = lowerHeader.concat('-', categoryLower);
-  headerNode.innerText = category;
-
-  outer.appendChild(middle);
-  middle.appendChild(container);
-  container.appendChild(headerNode);
-  element!.appendChild(outer);
-
-  attributeArray.forEach(function(attribute: Entry) {
-    let attr = makeElement(
-        attribute, lowerHeader, categoryLower, categoryLower.slice(0, -1));
-    container.appendChild(attr);
-  });
-}
-
 function getLowerCaseKey(key: string) {
   if (key === 'CSS Custom Properties') {
     return 'cssProperties';
@@ -243,18 +140,136 @@ function getLowerCaseKey(key: string) {
   }
 }
 
+function createHeader(
+    lowercaseCategory: string,
+    pluralLowercaseCategory: string,
+    lowercaseHeader: string,
+    entry: Entry) {
+  let headerContainer = document.createElement('div');
+  headerContainer.classList.add(lowercaseCategory.concat('-name'));
+  headerContainer.id =
+      ['docs', lowercaseHeader, pluralLowercaseCategory, entry.htmlName].join(
+          '-');
+  let header = document.createElement('H4');
+  header.innerText = entry.name;
+  headerContainer.appendChild(header);
+  return headerContainer
+}
+
+function createDescription(lowercaseCategory: string, entry: Entry) {
+  let descriptionContainer = document.createElement('div');
+  descriptionContainer.classList.add(lowercaseCategory.concat('-definition'));
+  let description = document.createElement('p');
+  description.innerHTML = entry.description;
+  descriptionContainer.appendChild(description);
+  return descriptionContainer;
+}
+
+function createDefaultTable(entry: Entry) {
+  let table = document.createElement('TABLE');
+  table.classList.add('value-table');
+  let tableRowHeaders = document.createElement('TR');
+  let tableRowValues = document.createElement('TR');
+  const tableHeaders = ['Default value', 'Type', 'Options'];
+  for (let i = 0; i < tableHeaders.length; i++) {
+    let th = document.createElement('TH');
+    th.innerText = tableHeaders[i];
+    let td = document.createElement('TD');
+    td.innerText = entry.default[i];
+    tableRowHeaders.appendChild(th);
+    tableRowValues.appendChild(td);
+  }
+  table.appendChild(tableRowHeaders);
+  table.appendChild(tableRowValues);
+  return table;
+}
+
+function createLinks(entry: Entry) {
+  let linksContainer = document.createElement('div');
+  let ul = document.createElement('UL');
+  ul.classList.add('links');
+  entry.links.forEach(function(link: string) {
+    let li = document.createElement('LI');
+    li.innerHTML = link;
+    ul.appendChild(li);
+  });
+  linksContainer.appendChild(ul)
+  return linksContainer;
+}
+
+function createEntry(
+    entry: Entry, lowercaseHeader: string, pluralLowercaseCategory: string) {
+  let lowercaseCategory = pluralLowercaseCategory.slice(0, -1);
+
+  let entryContainer = document.createElement('div');
+  entryContainer.classList.add(lowercaseCategory.concat('-container'));
+
+  let headerContainer = createHeader(
+      lowercaseCategory, pluralLowercaseCategory, lowercaseHeader, entry);
+  entryContainer.appendChild(headerContainer);
+
+  let descriptionContainer = createDescription(lowercaseCategory, entry);
+  entryContainer.appendChild(descriptionContainer);
+
+  if ('default' in entry && entry.default.length > 0) {
+    let table = createDefaultTable(entry);
+    entryContainer.appendChild(table);
+  }
+
+  if ('links' in entry && entry.links.length > 0) {
+    let linksContainer = createLinks(entry);
+    entryContainer.appendChild(linksContainer);
+  }
+
+  return entryContainer;
+}
+
+function createSubcategory(
+    subcategoryArray: Entry[],
+    header: string,
+    category: string,
+    categoryLower: string) {
+  let lowercaseHeader = header.toLowerCase();
+
+  let element = document.getElementById(lowercaseHeader.concat('-docs'));
+
+  let subcategoryContainer = document.createElement('div');
+  subcategoryContainer.classList.add(categoryLower.concat('-container'));
+
+  let middleContainer = document.createElement('div');
+  middleContainer.classList.add('inner-content');
+
+  let innerSubcategoryContainer = document.createElement('div');
+  innerSubcategoryContainer.id =
+      'docs-'.concat(lowercaseHeader, '-', categoryLower);
+
+  let headerNode = document.createElement('H3');
+  headerNode.id = lowercaseHeader.concat('-', categoryLower);
+  headerNode.innerText = category;
+
+  innerSubcategoryContainer.appendChild(headerNode);
+  middleContainer.appendChild(innerSubcategoryContainer);
+  subcategoryContainer.appendChild(middleContainer);
+  element!.appendChild(subcategoryContainer);
+
+  subcategoryArray.forEach(function(entry: Entry) {
+    innerSubcategoryContainer.appendChild(
+        createEntry(entry, lowercaseHeader, categoryLower));
+  });
+}
+
 export function convertJSONToHTML(json: any[], docsOrExamples: string) {
   let header = '';
   json.forEach(function(category) {
     for (let key in category) {
       if (key === 'Title') {
         header = category[key];
-        addHeader(category[key], docsOrExamples);
+        createTitle(category[key], docsOrExamples);
       } else if (docsOrExamples === 'docs') {
         let lowerCaseKey = getLowerCaseKey(key);
-        addAttributes(category[key], header, key, lowerCaseKey);
+        createSubcategory(category[key], header, key, lowerCaseKey);
       }
     }
-    makeSidebar(category, docsOrExamples);
+    createSidebar(category, docsOrExamples);
   });
 }
