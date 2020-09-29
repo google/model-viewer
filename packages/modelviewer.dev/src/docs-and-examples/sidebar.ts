@@ -56,14 +56,13 @@ function removeDeactive(sidebarName: string) {
 }
 
 /*
- * name: string of either the id of the attribute in the main view or the
- * sidebarName isId: boolean to determine whether the name is the id or
- * sidebarName
+ * name: either the id of the attribute in the main view or the sidebarName
+ * isId: boolean to determine whether the name is the id or sidebarName
+ * isNewPage: when going to a new page, simply want current state to save
  */
 export function getSidebarIds(name: string, isId: boolean, isNewPage: boolean) {
   if (isNewPage) {
     name = previouslyActive;
-    console.log(name);
   }
 
   const sb = 'sidebar';
@@ -100,7 +99,6 @@ function updateSidebarView(
   if (sidebarSubcategory !== newSidebarSubcategory) {
     everyEntry.forEach(entry => {
       const id = entry.target.getAttribute('id');
-      /* tslint:disable:no-unused-variable */
       const allIds = getSidebarIds(id, true, false);
       const currentSidebarName = allIds[0];
       const currentSidebarSubcategory = allIds[1];
@@ -114,13 +112,11 @@ function updateSidebarView(
 }
 
 /*
- * Hide all of the entries not within the current subcategory, default:
- * Loading->Attributes
+ * Hide all of the entries not within the current subcategory
  */
 function updateSidebarViewFirstTime(entries: any[]) {
   isFirstOpen = false;   // global
   everyEntry = entries;  // Sets global variable for use in updateSidebarView
-  /* tslint:disable:no-unused-variable */
   const allIds = getSidebarIds(previouslyActive, false, false);
   const sidebarSubcategory = allIds[1];
   updateSidebarView('', sidebarSubcategory);
@@ -138,65 +134,57 @@ export function sidebarObserver(docsOrExamples: string) {
             getSidebarIds(id, true, false);
 
         if (entry.intersectionRatio > 0) {
-          // If you are within a long section so the header left view
           if (toRemove.length > 0) {
-            let [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+            let [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
                 getSidebarIds(previouslyActive, false, false);
+            // If you are within a long section so the header left view
             updateSidebarActive(
-                newSidebarName,
-                newSidebarSubcategory,
-                newSidebarCategory,
+                prevSidebarName,
+                prevSidebarSubcategory,
+                prevSidebarCategory,
                 false);
             updateSidebarActive(
                 sidebarName, sidebarSubcategory, sidebarCategory, true);
-            updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
+            updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
             toRemove = '';
-          }
-          // If there isn't anything in globalCurrentView
-          else if (globalCurrentView.length === 0) {
+          } else if (globalCurrentView.length === 0) {
+            // Empty globalCurrentView, add to view
             updateSidebarActive(
                 sidebarName, sidebarSubcategory, sidebarCategory, true);
             previouslyActive = sidebarName;
             globalCurrentView.push(sidebarName);
-
-            // sidebarName index lesser means it appears above the currently
-            // active view
           } else if (
               globalOrdering.indexOf(previouslyActive) >
               globalOrdering.indexOf(sidebarName)) {
-            var newSidebarName = globalCurrentView[0];
-            var [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-                getSidebarIds(newSidebarName, false, false);
-
+            // sidebarName index lesser indicates scrolling up
+            let [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
+                getSidebarIds(globalCurrentView[0], false, false);
             updateSidebarActive(
-                newSidebarName,
-                newSidebarSubcategory,
-                newSidebarCategory,
+                prevSidebarName,
+                prevSidebarSubcategory,
+                prevSidebarCategory,
                 false);
             updateSidebarActive(
                 sidebarName, sidebarSubcategory, sidebarCategory, true);
-            updateSidebarView(newSidebarSubcategory, sidebarSubcategory);
-
+            updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
             globalCurrentView.unshift(sidebarName);
             previouslyActive = sidebarName;
-
           } else {
+            // an entry is in view under the current active entry
             globalCurrentView.push(sidebarName);
           }
-          // the intersection was updated and its now out of view, but still
-          // within a property
         } else if (globalCurrentView.length === 1) {
+          // within a long entry (because there is nothing else in view)
           toRemove = previouslyActive;
-          // the intersection was updated and its now out of view
         } else {
-          // if the thing being removed from view was currently active
+          // entry out of now out of view
           if (previouslyActive === sidebarName) {
+            // entry being removed from view is currently active
             updateSidebarActive(
                 sidebarName, sidebarSubcategory, sidebarCategory, false);
             if (globalCurrentView.length >= 2) {
-              newSidebarName = globalCurrentView[1];
-              [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-                  getSidebarIds(newSidebarName, false, false);
+              let [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+                  getSidebarIds(globalCurrentView[1], false, false);
               updateSidebarActive(
                   newSidebarName,
                   newSidebarSubcategory,
@@ -206,19 +194,20 @@ export function sidebarObserver(docsOrExamples: string) {
               previouslyActive = newSidebarName;
             }
           }
+          // always remove entry when out of view
           globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
         }
       });
 
-      // This is true the first time all of the observers are set.
+      // True the first time all of the observers are set.
       // entries will be every possible entry on the whole page.
       if (isFirstOpen) {
         updateSidebarViewFirstTime(entries);
       }
     });
 
-    // Fill the observer with the necessary divs to observe: attributes,
-    // properties, etc.
+    // Fill the observer with the necessary divs to observe:
+    // i.e. attributes, properties, events, methods, slots, custom css.
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
       let idSplitList = section.getAttribute('id')!.split('-');
       if (idSplitList.length === 4) {
