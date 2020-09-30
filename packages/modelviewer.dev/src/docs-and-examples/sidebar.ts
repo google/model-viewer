@@ -21,6 +21,10 @@ let order: any[] = [];
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
 
+interface SidebarIds {
+  name: string, subcategory: string, category: string
+}
+
 function activateSidebar(
     sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
   document.querySelector(`div[id=${sidebarName}]`)!.classList.add('active');
@@ -51,7 +55,7 @@ export function getSidebarCategoryForNewPage(): string {
   return previouslyActive[0];
 }
 
-function getSidebarIdsFromSidebarName(name: string): string[] {
+function getSidebarIdsFromSidebarName(name: string): SidebarIds {
   const sb = 'sidebar';
   const sidebarName = name;
   let sidebarSub = sidebarName.split('-').slice(0, 2);
@@ -60,10 +64,14 @@ function getSidebarIdsFromSidebarName(name: string): string[] {
   const sidebarSubcategory = sidebarSub.join('-');
   sidebarCat.push(sb);
   const sidebarCategory = sidebarCat.join('-');
-  return [sidebarName, sidebarSubcategory, sidebarCategory];
+  return {
+    name: sidebarName,
+    subcategory: sidebarSubcategory,
+    category: sidebarCategory
+  };
 }
 
-function getSidebarIdsFromId(id: string): string[] {
+function getSidebarIdsFromId(id: string): SidebarIds {
   const sb = 'sidebar';
   const sidebarName = id.split('-').slice(1, 10).join('-');
   let sidebarSub = id.split('-').slice(1, 3);
@@ -72,7 +80,11 @@ function getSidebarIdsFromId(id: string): string[] {
   const sidebarSubcategory = sidebarSub.join('-');
   sidebarCat.push(sb);
   const sidebarCategory = sidebarCat.join('-');
-  return [sidebarName, sidebarSubcategory, sidebarCategory];
+  return {
+    name: sidebarName,
+    subcategory: sidebarSubcategory,
+    category: sidebarCategory
+  };
 }
 
 /*
@@ -87,10 +99,9 @@ function updateSidebarView(
   if (sidebarSubcategory !== newSidebarSubcategory) {
     for (const entry of everyEntry) {
       const id = entry.target.getAttribute('id');
-      const allIds = getSidebarIdsFromId(id);
-      const currentSidebarName = allIds[0];
-      const currentSidebarSubcategory = allIds[1];
-      if (currentSidebarSubcategory !== newSidebarSubcategory) {
+      const sidebarIds = getSidebarIdsFromId(id);
+      const currentSidebarName = sidebarIds.name;
+      if (sidebarIds.subcategory !== newSidebarSubcategory) {
         addDeactive(currentSidebarName);
       } else {
         removeDeactive(currentSidebarName);
@@ -105,9 +116,8 @@ function updateSidebarView(
 function updateSidebarViewFirstTime(entries: any[]) {
   isFirstOpen = false;   // global
   everyEntry = entries;  // Sets global variable for use in updateSidebarView
-  const allIds = getSidebarIdsFromSidebarName(previouslyActive);
-  const sidebarSubcategory = allIds[1];
-  updateSidebarView('', sidebarSubcategory);
+  const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
+  updateSidebarView('', sidebarIds.subcategory);
 }
 
 function updateFromOldToNew(
@@ -115,66 +125,70 @@ function updateFromOldToNew(
     sidebarName: string,
     sidebarSubcategory: string,
     sidebarCategory: string) {
-  const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
-      getSidebarIdsFromSidebarName(prev);
+  const sidebarIds = getSidebarIdsFromSidebarName(prev);
   deactivateSidebar(
-      prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
+      sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
   activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-  updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
+  updateSidebarView(sidebarIds.subcategory, sidebarSubcategory);
 }
 
 function removeActiveEntry(
     sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
   deactivateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
   if (globalCurrentView.length >= 2) {
-    const [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-        getSidebarIdsFromSidebarName(globalCurrentView[1]);
-    activateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory);
-    updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
-    previouslyActive = newSidebarName;
+    const sidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[1]);
+    activateSidebar(
+        sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
+    updateSidebarView(sidebarSubcategory, sidebarIds.subcategory);
+    previouslyActive = sidebarIds.name;
   }
 }
 
 function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
   const id = htmlEntry.target.getAttribute('id')!;
-  const [sidebarName, sidebarSubcategory, sidebarCategory] =
-      getSidebarIdsFromId(id);
+  const sidebarIds = getSidebarIdsFromId(id);
 
   if (htmlEntry.intersectionRatio > 0) {  // entry inside viewing window
     if (toRemove.length > 0) {
       // inside a large div
       updateFromOldToNew(
-          toRemove, sidebarName, sidebarSubcategory, sidebarCategory);
+          toRemove,
+          sidebarIds.name,
+          sidebarIds.subcategory,
+          sidebarIds.category);
       toRemove = '';
     } else if (globalCurrentView.length === 0) {
       // Empty globalCurrentView, add to view
-      activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-      previouslyActive = sidebarName;
-      globalCurrentView.push(sidebarName);
-    } else if (order.indexOf(previouslyActive) > order.indexOf(sidebarName)) {
+      activateSidebar(
+          sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
+      previouslyActive = sidebarIds.name;
+      globalCurrentView.push(sidebarIds.name);
+    } else if (
+        order.indexOf(previouslyActive) > order.indexOf(sidebarIds.name)) {
       // scrolling up
       updateFromOldToNew(
           globalCurrentView[0],
-          sidebarName,
-          sidebarSubcategory,
-          sidebarCategory);
-      globalCurrentView.unshift(sidebarName);
-      previouslyActive = sidebarName;
+          sidebarIds.name,
+          sidebarIds.subcategory,
+          sidebarIds.category);
+      globalCurrentView.unshift(sidebarIds.name);
+      previouslyActive = sidebarIds.name;
     } else {
       // an entry is in view under the current active entry
-      globalCurrentView.push(sidebarName);
+      globalCurrentView.push(sidebarIds.name);
     }
   } else if (globalCurrentView.length === 1) {  // entry outside viewing window,
-                                                // but only element
+    // but only element
     toRemove = previouslyActive;
   } else {  // entry outside viewing window
     // activ entry out of now out of view
-    if (previouslyActive === sidebarName) {
+    if (previouslyActive === sidebarIds.name) {
       // entry being removed from view is currently active
-      removeActiveEntry(sidebarName, sidebarSubcategory, sidebarCategory);
+      removeActiveEntry(
+          sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
     }
     // always remove entry when out of view
-    globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
+    globalCurrentView = globalCurrentView.filter(e => e !== sidebarIds.name);
   }
 }
 
