@@ -45,7 +45,7 @@
     "3d"
   ],
   "devDependencies": {
-    "three": "^0.120.1",
+    "three": "^0.121.1",
     "@google/model-viewer-shared-assets": "*",
     "@open-wc/karma-esm": "^3.0.4",
     "@rollup/plugin-node-resolve": "^9.0.0",
