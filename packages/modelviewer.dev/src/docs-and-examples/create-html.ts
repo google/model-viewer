@@ -36,12 +36,12 @@ const CategoryConstant: Category = {
 function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
     string {
       const lowerCaseKey = getLowerCaseKey(subcategory);
+      const headerId = lowerCaseTitle.concat('-', lowerCaseKey, '-sidebar');
+      const aHref = lowerCaseTitle.concat('-', lowerCaseKey);
       return `
 <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
-  <h4 class="subcategory-header" id=${
-          lowerCaseTitle.concat('-', lowerCaseKey, '-sidebar')}>
-    <a class="darken" href="#${lowerCaseTitle.concat('-', lowerCaseKey)}">${
-          subcategory}</a>
+  <h4 class="subcategory-header" id=${headerId}>
+    <a class="darken" href="#${aHref}">${subcategory}</a>
   <h4>
 </div>`;
     }
@@ -151,6 +151,10 @@ function createEntry(
         entry.htmlName
       ].join('-');
 
+      const links = 'links' in entry ?
+          createLinks(entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
+          '';
+
       const entryContainer = `
 <div class=${lowerCaseSubcategory.concat('-container')}>
   <div class=${lowerCaseSubcategory.concat('-name')} id=${subcategoryNameId}>
@@ -160,11 +164,7 @@ function createEntry(
     <p>${entry.description}</p>
   </div>
   ${'default' in entry ? createDefaultTable(entry) : ''}
-  ${
-                                                     'links' in entry ?
-              createLinks(
-                  entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
-              ''}
+  ${links}
 </div>`;
       return entryContainer;
     }
