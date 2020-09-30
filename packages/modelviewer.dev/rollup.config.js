@@ -72,6 +72,30 @@ const outputOptions = [
     plugins,
     onwarn,
   },
+  {
+    input: './lib/docs-and-examples/docs-and-examples.js',
+    output: {
+      file: './examples/built/docs-and-examples.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'docs-and-examples'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/docs-and-examples/docs-and-examples.js',
+    output:
+        {file: './examples/built/docs-and-examples-umd.js', format: 'umd', name: 'docs-and-examples'},
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  },
 ];
 
 export default outputOptions;
