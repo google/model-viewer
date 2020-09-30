@@ -324,12 +324,15 @@ describe('space opera base test', () => {
   it('loading gltf without pbr works and gets proper default values',
      async () => {
        const NO_PBR_BLOCK_JSON = cloneJson(TEST_GLTF_JSON);
-       delete NO_PBR_BLOCK_JSON.materials[0].pbrMetallicRoughness;
-       delete NO_PBR_BLOCK_JSON.materials[1]
+       delete (NO_PBR_BLOCK_JSON as any).materials[0].pbrMetallicRoughness;
+       delete (NO_PBR_BLOCK_JSON as any)
+           .materials[1]
            .pbrMetallicRoughness.baseColorFactor;
-       delete NO_PBR_BLOCK_JSON.materials[1]
+       delete (NO_PBR_BLOCK_JSON as any)
+           .materials[1]
            .pbrMetallicRoughness.roughnessFactor;
-       delete NO_PBR_BLOCK_JSON.materials[1]
+       delete (NO_PBR_BLOCK_JSON as any)
+           .materials[1]
            .pbrMetallicRoughness.metallicFactor;
        const gltf = new GltfModel(NO_PBR_BLOCK_JSON, null);
        dispatchGltfAndEdits(gltf);
