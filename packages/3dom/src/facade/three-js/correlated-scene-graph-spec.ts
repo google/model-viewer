@@ -44,7 +44,9 @@ suite('facade/three-js/correlated-scene-graph', () => {
   suite('CorrelatedSceneGraph', () => {
     test('maps Three.js materials to glTF elements', async () => {
       const threeGLTF = await loadThreeGLTF(HORSE_GLB_PATH);
+      console.log('got threeGLTF');
       const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
+      console.log('got correlatedSceneGraph');
 
       const threeMaterial =
           ((threeGLTF.scene.children[0] as Mesh).material as
@@ -52,6 +54,7 @@ suite('facade/three-js/correlated-scene-graph', () => {
       const gltfMaterial = threeGLTF.parser.json.materials[0]! as Material;
       const gltfReference =
           correlatedSceneGraph.threeObjectMap.get(threeMaterial);
+      console.log('got gltfReference');
 
       expect(gltfReference).to.be.ok;
 
