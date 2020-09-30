@@ -21,30 +21,22 @@ let globalOrdering: any[] = [];
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
 
-/*
- * Add or remove the active class from a sidebarName, sidebarSubcategory and
- * sidebarCategory. i.e. src, Attribute, Loading
- */
-function updateSidebarActive(
-    sidebarName: string,
-    sidebarSubcategory: string,
-    sidebarCategory: string,
-    isActive: boolean) {
-  if (isActive) {
-    document.querySelector(`div[id=${sidebarName}]`)!.classList.add('active');
-    document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.add(
-        'active');
-    document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.add(
-        'active');
-  } else {
-    document.querySelector(`div[id=${sidebarName}]`)!.classList.remove(
-        'active');
-    document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.remove(
-        'active');
-    document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.remove(
-        'active');
-  }
-};
+function activateSidebar(
+    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
+  document.querySelector(`div[id=${sidebarName}]`)!.classList.add('active');
+  document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.add(
+      'active');
+  document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.add('active');
+}
+
+function deactivateSidebar(
+    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
+  document.querySelector(`div[id=${sidebarName}]`)!.classList.remove('active');
+  document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.remove(
+      'active');
+  document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.remove(
+      'active');
+}
 
 function addDeactive(sidebarName: string) {
   document.querySelector(`div[id=${sidebarName}]`)!.classList.add('de-active');
@@ -55,30 +47,28 @@ function removeDeactive(sidebarName: string) {
       'de-active');
 }
 
-/*
- * name: either the id of the attribute in the main view or the sidebarName
- * isId: boolean to determine whether the name is the id or sidebarName
- * isNewPage: when going to a new page, simply want current state to save
- */
-export function getSidebarIds(name: string, isId: boolean, isNewPage: boolean) {
-  if (isNewPage) {
-    name = previouslyActive;
-  }
+export function getSidebarCategoryForNewPage(): string {
+  console.log(previouslyActive);
+  return previouslyActive[0];
+}
 
+function getSidebarIdsFromSidebarName(name: string): string[] {
   const sb = 'sidebar';
-  let sidebarName: string = '';
-  let sidebarSub: string[];
-  let sidebarCat: string[];
+  const sidebarName = name;
+  let sidebarSub = sidebarName.split('-').slice(0, 2);
+  let sidebarCat = sidebarName.split('-').slice(0, 1);
+  sidebarSub.push(sb);
+  const sidebarSubcategory = sidebarSub.join('-');
+  sidebarCat.push(sb);
+  const sidebarCategory = sidebarCat.join('-');
+  return [sidebarName, sidebarSubcategory, sidebarCategory];
+}
 
-  if (isId) {
-    sidebarName = name.split('-').slice(1, 10).join('-');
-    sidebarSub = name.split('-').slice(1, 3);
-    sidebarCat = name.split('-').slice(1, 2);
-  } else {
-    sidebarName = name;
-    sidebarSub = sidebarName.split('-').slice(0, 2);
-    sidebarCat = sidebarName.split('-').slice(0, 1);
-  }
+function getSidebarIdsFromId(id: string): string[] {
+  const sb = 'sidebar';
+  const sidebarName = id.split('-').slice(1, 10).join('-');
+  let sidebarSub = id.split('-').slice(1, 3);
+  let sidebarCat = id.split('-').slice(1, 2);
   sidebarSub.push(sb);
   const sidebarSubcategory = sidebarSub.join('-');
   sidebarCat.push(sb);
@@ -97,9 +87,9 @@ export function getSidebarIds(name: string, isId: boolean, isNewPage: boolean) {
 function updateSidebarView(
     sidebarSubcategory: string, newSidebarSubcategory: string) {
   if (sidebarSubcategory !== newSidebarSubcategory) {
-    everyEntry.forEach(entry => {
+    for (const entry of everyEntry) {
       const id = entry.target.getAttribute('id');
-      const allIds = getSidebarIds(id, true, false);
+      const allIds = getSidebarIdsFromId(id);
       const currentSidebarName = allIds[0];
       const currentSidebarSubcategory = allIds[1];
       if (currentSidebarSubcategory !== newSidebarSubcategory) {
@@ -107,7 +97,7 @@ function updateSidebarView(
       } else {
         removeDeactive(currentSidebarName);
       }
-    });
+    }
   }
 }
 
@@ -117,7 +107,7 @@ function updateSidebarView(
 function updateSidebarViewFirstTime(entries: any[]) {
   isFirstOpen = false;   // global
   everyEntry = entries;  // Sets global variable for use in updateSidebarView
-  const allIds = getSidebarIds(previouslyActive, false, false);
+  const allIds = getSidebarIdsFromSidebarName(previouslyActive);
   const sidebarSubcategory = allIds[1];
   updateSidebarView('', sidebarSubcategory);
 }
@@ -125,47 +115,38 @@ function updateSidebarViewFirstTime(entries: any[]) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver(docsOrExamples: string) {
+export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
   if (docsOrExamples === 'docs') {
     const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
+      for (const entry of entries) {
         const id = entry.target.getAttribute('id')!;
         const [sidebarName, sidebarSubcategory, sidebarCategory] =
-            getSidebarIds(id, true, false);
+            getSidebarIdsFromId(id);
 
         if (entry.intersectionRatio > 0) {
           if (toRemove.length > 0) {
-            let [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
-                getSidebarIds(previouslyActive, false, false);
+            const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
+                getSidebarIdsFromSidebarName(previouslyActive);
             // If you are within a long section so the header left view
-            updateSidebarActive(
-                prevSidebarName,
-                prevSidebarSubcategory,
-                prevSidebarCategory,
-                false);
-            updateSidebarActive(
-                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            deactivateSidebar(
+                prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
+            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
             updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
             toRemove = '';
           } else if (globalCurrentView.length === 0) {
             // Empty globalCurrentView, add to view
-            updateSidebarActive(
-                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
             previouslyActive = sidebarName;
             globalCurrentView.push(sidebarName);
           } else if (
               globalOrdering.indexOf(previouslyActive) >
               globalOrdering.indexOf(sidebarName)) {
             // sidebarName index lesser indicates scrolling up
-            let [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
-                getSidebarIds(globalCurrentView[0], false, false);
-            updateSidebarActive(
-                prevSidebarName,
-                prevSidebarSubcategory,
-                prevSidebarCategory,
-                false);
-            updateSidebarActive(
-                sidebarName, sidebarSubcategory, sidebarCategory, true);
+            const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
+                getSidebarIdsFromSidebarName(globalCurrentView[0]);
+            deactivateSidebar(
+                prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
+            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
             updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
             globalCurrentView.unshift(sidebarName);
             previouslyActive = sidebarName;
@@ -180,16 +161,12 @@ export function sidebarObserver(docsOrExamples: string) {
           // entry out of now out of view
           if (previouslyActive === sidebarName) {
             // entry being removed from view is currently active
-            updateSidebarActive(
-                sidebarName, sidebarSubcategory, sidebarCategory, false);
+            deactivateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
             if (globalCurrentView.length >= 2) {
-              let [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-                  getSidebarIds(globalCurrentView[1], false, false);
-              updateSidebarActive(
-                  newSidebarName,
-                  newSidebarSubcategory,
-                  newSidebarCategory,
-                  true);
+              const [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+                  getSidebarIdsFromSidebarName(globalCurrentView[1]);
+              activateSidebar(
+                  newSidebarName, newSidebarSubcategory, newSidebarCategory);
               updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
               previouslyActive = newSidebarName;
             }
@@ -197,7 +174,7 @@ export function sidebarObserver(docsOrExamples: string) {
           // always remove entry when out of view
           globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
         }
-      });
+      }
 
       // True the first time all of the observers are set.
       // entries will be every possible entry on the whole page.
@@ -212,7 +189,7 @@ export function sidebarObserver(docsOrExamples: string) {
     // Fill the observer with the necessary divs to observe:
     // i.e. attributes, properties, events, methods, slots, custom css.
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
-      let idSplitList = section.getAttribute('id')!.split('-');
+      const idSplitList = section.getAttribute('id')!.split('-');
       if (idSplitList.length === 4) {
         globalOrdering.push(idSplitList.slice(1, 10).join('-'));
         observer.observe(section);

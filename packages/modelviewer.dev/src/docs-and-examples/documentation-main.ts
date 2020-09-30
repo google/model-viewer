@@ -15,16 +15,15 @@
  */
 
 import {convertJSONToHTML} from './create-html';
-import {getSidebarIds, sidebarObserver} from './sidebar';
+import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
 
 export function switchPages(oldType: string, newType: string) {
   if (oldType !== newType) {
     // TODO: Handle going from examples back to docs (old state), possibly
     // include a previous state to revert to in URI
-    let allIds = getSidebarIds('', false, true);
-    let newSidebarCategory = allIds[2].split('-')[0];
+    const newSidebarCategory = getSidebarCategoryForNewPage();
     const newURI = '../'.concat(newType, '/#', newSidebarCategory);
-    let d = document.createElement('a');
+    const d = document.createElement('a');
     d.setAttribute('href', newURI);
     window.location.href = d.href;
   }
@@ -35,10 +34,10 @@ window.onscroll = function() {
 };
 
 function stickyHeader() {
-  let headers = document.getElementsByClassName('header');
+  const headers = document.getElementsByClassName('header');
   for (let i = 0; i < headers.length; i++) {
-    let header = headers[i] as HTMLElement;
-    let sticky = header.offsetTop;
+    const header = headers[i] as HTMLElement;
+    const sticky = header.offsetTop;
     if (window.pageYOffset > sticky) {
       header.classList.add('sticky');
     } else {
@@ -47,7 +46,7 @@ function stickyHeader() {
   }
 }
 
-async function fetchHtmlAsText(url: string) {
+async function fetchHtmlAsText(url: string): Promise<string> {
   const response = await fetch(url);
   return await response.text();
 }
@@ -63,7 +62,7 @@ interface JSONCallback {
 }
 
 function loadJSON(filePath: string, callback: JSONCallback) {
-  let xobj = new XMLHttpRequest();
+  const xobj = new XMLHttpRequest();
   xobj.overrideMimeType('application/json');
   xobj.open('GET', filePath, true);
   xobj.onreadystatechange = function() {
@@ -78,9 +77,9 @@ function loadJSON(filePath: string, callback: JSONCallback) {
  * documentation in the window.
  * docsOrExamples: 'docs' or 'examples'
  */
-export function init(docsOrExamples: string) {
+export function init(docsOrExamples: 'docs'|'examples') {
   loadJSON('../data/loading.json', function(response: string) {
-    let actualJSON = JSON.parse(response);
+    const actualJSON = JSON.parse(response);
     convertJSONToHTML(actualJSON, docsOrExamples);
     if (docsOrExamples === 'examples') {
       loadExamples();
@@ -90,3 +89,4 @@ export function init(docsOrExamples: string) {
 }
 
 (self as any).switchPages = switchPages;
+(self as any).init = init;

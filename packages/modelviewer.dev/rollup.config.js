@@ -144,54 +144,6 @@ const outputOptions = [
     plugins,
     onwarn,
   },
-  {
-    input: './lib/docs-and-examples/init-examples.js',
-    output: {
-      file: './examples/built/init-examples.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'init-examples'
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn
-  },
-  {
-    input: './lib/docs-and-examples/init-examples.js',
-    output:
-        {file: './examples/built/init-examples-umd.js', format: 'umd', name: 'init-examples'},
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  },
-  {
-    input: './lib/docs-and-examples/init-docs.js',
-    output: {
-      file: './examples/built/init-docs.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'init-docs'
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn
-  },
-  {
-    input: './lib/docs-and-examples/init-docs.js',
-    output:
-        {file: './examples/built/init-docs-umd.js', format: 'umd', name: 'init-docs'},
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  },
 ];
 
 export default outputOptions;

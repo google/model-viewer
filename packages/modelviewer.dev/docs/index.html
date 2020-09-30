@@ -55,8 +55,12 @@
     <div id="loading-docs"></div>
   </div>
 
-  <script type="module" src="../examples/built/init-docs.js">
+  <script type="module" src="../examples/built/documentation-main.js">
   </script>
+  <script type="module">
+    (() => { init('docs'); })();
+  </script>
+
 </body>
 
 </html>
