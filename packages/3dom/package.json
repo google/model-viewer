@@ -68,7 +68,7 @@
     "rollup": "^2.26.6",
     "rollup-plugin-terser": "^7.0.0",
     "simple-dropzone": "^0.7.1",
-    "typescript": "3.8.2"
+    "typescript": "4.0.3"
   },
   "publishConfig": {
     "access": "public"
