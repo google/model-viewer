@@ -16,7 +16,7 @@
 let globalCurrentView: string[] = [];
 let previouslyActive: string = '';
 let toRemove = '';
-let globalOrdering: any[] = [];
+let order: any[] = [];
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
@@ -48,7 +48,6 @@ function removeDeactive(sidebarName: string) {
 }
 
 export function getSidebarCategoryForNewPage(): string {
-  console.log(previouslyActive);
   return previouslyActive[0];
 }
 
@@ -77,7 +76,6 @@ function getSidebarIdsFromId(id: string): string[] {
 }
 
 /*
- * Update the sidebar
  * sidebarSubcategory: string of the old subcategory being replaced
  * newSidebarSubcategory: string of the new subcategory
  * example:
@@ -112,70 +110,84 @@ function updateSidebarViewFirstTime(entries: any[]) {
   updateSidebarView('', sidebarSubcategory);
 }
 
+function updateFromOldToNew(
+    prev: string,
+    sidebarName: string,
+    sidebarSubcategory: string,
+    sidebarCategory: string) {
+  const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
+      getSidebarIdsFromSidebarName(prev);
+  deactivateSidebar(
+      prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
+  activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
+  updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
+}
+
+function removeActiveEntry(
+    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
+  deactivateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
+  if (globalCurrentView.length >= 2) {
+    const [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
+        getSidebarIdsFromSidebarName(globalCurrentView[1]);
+    activateSidebar(newSidebarName, newSidebarSubcategory, newSidebarCategory);
+    updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
+    previouslyActive = newSidebarName;
+  }
+}
+
+function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
+  const id = htmlEntry.target.getAttribute('id')!;
+  const [sidebarName, sidebarSubcategory, sidebarCategory] =
+      getSidebarIdsFromId(id);
+
+  if (htmlEntry.intersectionRatio > 0) {  // entry inside viewing window
+    if (toRemove.length > 0) {
+      // inside a large div
+      updateFromOldToNew(
+          toRemove, sidebarName, sidebarSubcategory, sidebarCategory);
+      toRemove = '';
+    } else if (globalCurrentView.length === 0) {
+      // Empty globalCurrentView, add to view
+      activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
+      previouslyActive = sidebarName;
+      globalCurrentView.push(sidebarName);
+    } else if (order.indexOf(previouslyActive) > order.indexOf(sidebarName)) {
+      // scrolling up
+      updateFromOldToNew(
+          globalCurrentView[0],
+          sidebarName,
+          sidebarSubcategory,
+          sidebarCategory);
+      globalCurrentView.unshift(sidebarName);
+      previouslyActive = sidebarName;
+    } else {
+      // an entry is in view under the current active entry
+      globalCurrentView.push(sidebarName);
+    }
+  } else if (globalCurrentView.length === 1) {  // entry outside viewing window,
+                                                // but only element
+    toRemove = previouslyActive;
+  } else {  // entry outside viewing window
+    // activ entry out of now out of view
+    if (previouslyActive === sidebarName) {
+      // entry being removed from view is currently active
+      removeActiveEntry(sidebarName, sidebarSubcategory, sidebarCategory);
+    }
+    // always remove entry when out of view
+    globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
+  }
+}
+
+
 /*
  * Update the table of contents based on how the page is viewed.
  */
 export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
   if (docsOrExamples === 'docs') {
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        const id = entry.target.getAttribute('id')!;
-        const [sidebarName, sidebarSubcategory, sidebarCategory] =
-            getSidebarIdsFromId(id);
-
-        if (entry.intersectionRatio > 0) {
-          if (toRemove.length > 0) {
-            const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
-                getSidebarIdsFromSidebarName(previouslyActive);
-            // If you are within a long section so the header left view
-            deactivateSidebar(
-                prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
-            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-            updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
-            toRemove = '';
-          } else if (globalCurrentView.length === 0) {
-            // Empty globalCurrentView, add to view
-            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-            previouslyActive = sidebarName;
-            globalCurrentView.push(sidebarName);
-          } else if (
-              globalOrdering.indexOf(previouslyActive) >
-              globalOrdering.indexOf(sidebarName)) {
-            // sidebarName index lesser indicates scrolling up
-            const [prevSidebarName, prevSidebarSubcategory, prevSidebarCategory] =
-                getSidebarIdsFromSidebarName(globalCurrentView[0]);
-            deactivateSidebar(
-                prevSidebarName, prevSidebarSubcategory, prevSidebarCategory);
-            activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-            updateSidebarView(prevSidebarSubcategory, sidebarSubcategory);
-            globalCurrentView.unshift(sidebarName);
-            previouslyActive = sidebarName;
-          } else {
-            // an entry is in view under the current active entry
-            globalCurrentView.push(sidebarName);
-          }
-        } else if (globalCurrentView.length === 1) {
-          // within a long entry (because there is nothing else in view)
-          toRemove = previouslyActive;
-        } else {
-          // entry out of now out of view
-          if (previouslyActive === sidebarName) {
-            // entry being removed from view is currently active
-            deactivateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-            if (globalCurrentView.length >= 2) {
-              const [newSidebarName, newSidebarSubcategory, newSidebarCategory] =
-                  getSidebarIdsFromSidebarName(globalCurrentView[1]);
-              activateSidebar(
-                  newSidebarName, newSidebarSubcategory, newSidebarCategory);
-              updateSidebarView(sidebarSubcategory, newSidebarSubcategory);
-              previouslyActive = newSidebarName;
-            }
-          }
-          // always remove entry when out of view
-          globalCurrentView = globalCurrentView.filter(e => e !== sidebarName);
-        }
+      for (const htmlEntry of entries) {
+        handleHTMLEntry(htmlEntry);
       }
-
       // True the first time all of the observers are set.
       // entries will be every possible entry on the whole page.
       if (isFirstOpen) {
@@ -191,7 +203,7 @@ export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
       if (idSplitList.length === 4) {
-        globalOrdering.push(idSplitList.slice(1, 10).join('-'));
+        order.push(idSplitList.slice(1, 10).join('-'));
         observer.observe(section);
       }
     });
