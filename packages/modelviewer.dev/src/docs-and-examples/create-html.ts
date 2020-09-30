@@ -33,103 +33,78 @@ const CategoryConstant: Category = {
   Slots: [],
 }
 
-function createEntrySidebar(
-    lowerCaseTitle: string, lowerCaseKey: string, entry: Entry):
-    HTMLElement {
-      const entrySidebar = document.createElement('div');
-      entrySidebar.classList.add('element');
-      entrySidebar.classList.add('de-active');
-      entrySidebar.id =
-          lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
-      const entryLink = document.createElement('a');
-      entryLink.setAttribute(
-          'href',
-          '#docs-'.concat(
-              lowerCaseTitle, '-', lowerCaseKey, '-', entry.htmlName));
-      entryLink.classList.add('darken');
-      entryLink.innerText = entry.name;
-      entrySidebar.appendChild(entryLink);
-      return entrySidebar
-    }
-
-function createSubcategorySidebar(
-    key: string, lowerCaseTitle: string, category: Category):
-    HTMLElement {
-      const lowerCaseKey = getLowerCaseKey(key);
-
-      // Create subcategory container
-      const subcategorySidebarContainer = document.createElement('div');
-      subcategorySidebarContainer.classList.add('subCategory');
-
-      // Create subcategory header
-      const subcategoryHeader = document.createElement('H4');
-      subcategoryHeader.id =
-          lowerCaseTitle.concat('-', lowerCaseKey, '-sidebar');
-      subcategoryHeader.classList.add('subcategory-header');
-
-      // Create subcategory link
-      const subcategoryLink = document.createElement('a');
-      subcategoryLink.setAttribute(
-          'href', '#'.concat(lowerCaseTitle, '-', lowerCaseKey));
-      subcategoryLink.classList.add('darken');
-      subcategoryLink.innerText = key;
-
-      subcategoryHeader.appendChild(subcategoryLink);
-      subcategorySidebarContainer.append(subcategoryHeader);
-
-      const innerKey = key as keyof typeof CategoryConstant;
-      const entries = (<Entry[]>category[innerKey]);
-      for (const entry of entries) {
-        const entrySidebar =
-            createEntrySidebar(lowerCaseTitle, lowerCaseKey, entry);
-        subcategorySidebarContainer.append(entrySidebar);
-      }
-      return subcategorySidebarContainer
+function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
+    string {
+      const lowerCaseKey = getLowerCaseKey(subcategory);
+      return `
+    <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
+      <h4 class="subcategory-header" id=${
+          lowerCaseTitle.concat('-', lowerCaseKey, '-sidebar')}>
+        <a class="darken" href="#${lowerCaseTitle.concat('-', lowerCaseKey)}">${
+          subcategory}</a>
+      <h4>
+    </div>
+  `;
     }
 
 function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
+  if (docsOrExamples === 'examples')
+    return;
   const container = document.getElementById('sidebar-category-container');
   const lowerCaseTitle = category.Title.toLowerCase();
+  let subcategories = Object.keys(category);
+  subcategories = subcategories.filter(k => k !== 'Title');
 
-  const categoryContainer = document.createElement('div');
-  categoryContainer.classList.add('category');
+  const categoryContainer = `
+    <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
+      <h3 id=${lowerCaseTitle.concat('-sidebar')}>
+        <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
+      <h3>
+    </div>
+  `;
 
-  const categoryHeader = document.createElement('H3');
-  categoryHeader.id = lowerCaseTitle.concat('-sidebar');
+  container!.innerHTML += categoryContainer;
 
-  const categoryLink = document.createElement('a');
-  categoryLink.setAttribute('href', '#'.concat(lowerCaseTitle))
-  categoryLink.classList.add('darken');
-  categoryLink.innerText = category.Title;
+  const innerCategory =
+      document.getElementById(lowerCaseTitle.concat('aboveHeader'));
+  for (const subcategory of subcategories) {
+    innerCategory!.innerHTML +=
+        createSubcategorySidebar(subcategory, lowerCaseTitle);
 
-  categoryHeader.appendChild(categoryLink);
-  categoryContainer.append(categoryHeader);
-
-  if (docsOrExamples === 'examples') {
-    container!.appendChild(categoryContainer);
-    return;
-  }
-  const keys = Object.keys(category);
-  for (const key of keys) {
-    if (key !== 'Title') {
-      const subcategorySidebarContainer =
-          createSubcategorySidebar(key, lowerCaseTitle, category);
-      categoryContainer.appendChild(subcategorySidebarContainer);
+    const innerSubcategory =
+        document.getElementById(lowerCaseTitle.concat('aboveHeader'));
+    const lowerCaseKey = getLowerCaseKey(subcategory);
+    const entries =
+        (<Entry[]>category[subcategory as keyof typeof CategoryConstant]);
+    for (const entry of entries) {
+      innerSubcategory!.innerHTML += `
+        <div class="element de-active" id=${
+          lowerCaseTitle.concat(
+              '-', lowerCaseKey, '-', entry.htmlName)}>
+          <a class="darken" href=${
+                                                     '#docs-'.concat(
+                                                         lowerCaseTitle,
+                                                         '-',
+                                                         lowerCaseKey,
+                                                         '-',
+                                                         entry.htmlName)}>${
+          entry.name}</a>
+        </div>
+      `;
     }
   }
-  container!.appendChild(categoryContainer);
 }
 
 function createTitle(header: string, docsOrExamples: 'docs'|'examples') {
-  const lowerCaseHeader = header.toLowerCase();
-  const para = document.createElement('div');
-  para.classList.add('header');
-  const node = document.createElement('H1');
-  node.id = lowerCaseHeader;
-  node.innerText = header;
-  para.appendChild(node);
   const name = docsOrExamples === 'docs' ? '-docs' : '-examples-header';
-  document.getElementById(lowerCaseHeader.concat(name))!.appendChild(para);
+  const titleContainer =
+      document.getElementById(header.toLowerCase().concat(name));
+  const title = `
+    <div class="header">
+      <h1 id=${header.toLowerCase()}>${header}<h1>
+    </div>
+  `;
+  titleContainer!.innerHTML += title;
 }
 
 function getLowerCaseKey(key: string):
@@ -141,127 +116,107 @@ function getLowerCaseKey(key: string):
       }
     }
 
-function createHeader(
-    lowerCaseCategory: string,
-    plurallowerCaseCategory: string,
-    lowerCaseHeader: string,
-    entry: Entry):
-    HTMLElement {
-      const headerContainer = document.createElement('div');
-      headerContainer.classList.add(lowerCaseCategory.concat('-name'));
-      headerContainer.id =
-          ['docs', lowerCaseHeader, plurallowerCaseCategory, entry.htmlName]
-              .join('-');
-      const header = document.createElement('H4');
-      header.innerText = entry.name;
-      headerContainer.appendChild(header);
-      return headerContainer
-    }
-
-function createDescription(lowerCaseCategory: string, entry: Entry):
-    HTMLElement {
-      const descriptionContainer = document.createElement('div');
-      descriptionContainer.classList.add(
-          lowerCaseCategory.concat('-definition'));
-      const description = document.createElement('p');
-      description.innerHTML = entry.description;
-      descriptionContainer.appendChild(description);
-      return descriptionContainer;
-    }
-
 function createDefaultTable(entry: Entry):
-    HTMLElement {
-      const table = document.createElement('TABLE');
-      table.classList.add('value-table');
-      const tableRowHeaders = document.createElement('TR');
-      const tableRowValues = document.createElement('TR');
-      const tableHeaders = ['Default value', 'Type', 'Options'];
-      for (const i in tableHeaders) {
-        const th = document.createElement('TH');
-        th.innerText = tableHeaders[i];
-        const td = document.createElement('TD');
-        td.innerText = entry.default[i];
-        tableRowHeaders.appendChild(th);
-        tableRowValues.appendChild(td);
-      }
-      table.appendChild(tableRowHeaders);
-      table.appendChild(tableRowValues);
-      return table;
+    string {
+      return `
+    <table class="value-table">
+      <tr>
+        <th>Default value</th>
+        <th>Type</th>
+        <th>Options</th>
+      </tr>
+      <tr>
+        <td>${entry.default[0]}</td>
+        <td>${entry.default[1]}</td>
+        <td>${entry.default[2]}</td>
+      </tr>
+    </table>
+  `;
     }
 
-function createLinks(entry: Entry):
-    HTMLElement {
-      const linksContainer = document.createElement('div');
-      const ul = document.createElement('UL');
-      ul.classList.add('links');
-      for (const link of entry.links) {
-        const li = document.createElement('LI');
-        li.innerHTML = link;
-        ul.appendChild(li);
-      }
-      linksContainer.appendChild(ul)
-      return linksContainer;
+function createLinks(
+    entry: Entry,
+    pluralLowerCaseSubcategory: string,
+    lowerCaseCategory: string):
+    string {
+      const ulId = 'links'.concat(
+          entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
+      return `
+    <div>
+      <ul class="links" id=${ulId}>
+      </ul>
+    </div>
+  `;
     }
 
 function createEntry(
-    entry: Entry, lowerCaseHeader: string, plurallowerCaseCategory: string):
-    HTMLElement {
-      const lowerCaseCategory = plurallowerCaseCategory.slice(0, -1);
+    entry: Entry,
+    lowerCaseCategory: string,
+    pluralLowerCaseSubcategory: string):
+    string {
+      const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
 
-      const entryContainer = document.createElement('div');
-      entryContainer.classList.add(lowerCaseCategory.concat('-container'));
-
-      const headerContainer = createHeader(
-          lowerCaseCategory, plurallowerCaseCategory, lowerCaseHeader, entry);
-      entryContainer.appendChild(headerContainer);
-
-      const descriptionContainer = createDescription(lowerCaseCategory, entry);
-      entryContainer.appendChild(descriptionContainer);
-
-      if ('default' in entry && entry.default.length > 0) {
-        const table = createDefaultTable(entry);
-        entryContainer.appendChild(table);
-      }
-
-      if ('links' in entry && entry.links.length > 0) {
-        const linksContainer = createLinks(entry);
-        entryContainer.appendChild(linksContainer);
-      }
-
+      const entryContainer = `
+    <div class=${lowerCaseSubcategory.concat('-container')}>
+      <div class=${lowerCaseSubcategory.concat('-name')} id=${
+              ['docs',
+               lowerCaseCategory,
+               pluralLowerCaseSubcategory,
+               entry.htmlName]
+                  .join('-')}>
+        <h4>${entry.name}</h4>
+      </div>
+      <div class=${lowerCaseSubcategory.concat('-definition')}>
+        <p>${entry.description}</p>
+      </div>
+      ${'default' in entry ? createDefaultTable(entry) : ''}
+      ${
+                                                         'links' in entry ?
+              createLinks(
+                  entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
+              ''}
+    </div>
+  `;
       return entryContainer;
     }
 
 function createSubcategory(
     subcategoryArray: Entry[],
-    header: string,
     category: string,
-    categoryLower: string) {
-  const lowerCaseHeader = header.toLowerCase();
+    subcategory: string,
+    pluralLowerCaseSubcategory: string) {
+  const lowerCaseCategory = category.toLowerCase();
 
-  const element = document.getElementById(lowerCaseHeader.concat('-docs'));
+  const element = document.getElementById(lowerCaseCategory.concat('-docs'));
+  const subcategoryContainerId =
+      'docs-'.concat(lowerCaseCategory, '-', pluralLowerCaseSubcategory);
 
-  const subcategoryContainer = document.createElement('div');
-  subcategoryContainer.classList.add(categoryLower.concat('-container'));
+  const subcategoryContainer = `
+      <div class=${pluralLowerCaseSubcategory.concat('-container')}>
+        <div class='inner-content'>
+          <div id=${subcategoryContainerId}>
+            <h3 id=${lowerCaseCategory.concat('-', pluralLowerCaseSubcategory)}>
+              ${subcategory}
+            </h3>
+          </div>
+        </div>
+      </div>
+  `;
+  element!.innerHTML += subcategoryContainer;
 
-  const middleContainer = document.createElement('div');
-  middleContainer.classList.add('inner-content');
-
-  const innerSubcategoryContainer = document.createElement('div');
-  innerSubcategoryContainer.id =
-      'docs-'.concat(lowerCaseHeader, '-', categoryLower);
-
-  const headerNode = document.createElement('H3');
-  headerNode.id = lowerCaseHeader.concat('-', categoryLower);
-  headerNode.innerText = category;
-
-  innerSubcategoryContainer.appendChild(headerNode);
-  middleContainer.appendChild(innerSubcategoryContainer);
-  subcategoryContainer.appendChild(middleContainer);
-  element!.appendChild(subcategoryContainer);
-
+  const innerSubcategoryContainer =
+      document.getElementById(subcategoryContainerId);
   for (const entry of subcategoryArray) {
-    innerSubcategoryContainer.appendChild(
-        createEntry(entry, lowerCaseHeader, categoryLower));
+    innerSubcategoryContainer!.innerHTML +=
+        createEntry(entry, lowerCaseCategory, pluralLowerCaseSubcategory);
+
+    if ('links' in entry) {
+      const ul = document.getElementById('links'.concat(
+          entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory));
+      for (const link of entry.links) {
+        ul!.innerHTML += `<li>${link}</li>`;
+      }
+    }
   }
 }
 
