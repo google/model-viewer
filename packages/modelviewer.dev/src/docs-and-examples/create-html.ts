@@ -37,14 +37,13 @@ function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
     string {
       const lowerCaseKey = getLowerCaseKey(subcategory);
       return `
-    <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
-      <h4 class="subcategory-header" id=${
+<div class="subCategory" id=${'subCategory'.concat(subcategory)}>
+  <h4 class="subcategory-header" id=${
           lowerCaseTitle.concat('-', lowerCaseKey, '-sidebar')}>
-        <a class="darken" href="#${lowerCaseTitle.concat('-', lowerCaseKey)}">${
+    <a class="darken" href="#${lowerCaseTitle.concat('-', lowerCaseKey)}">${
           subcategory}</a>
-      <h4>
-    </div>
-  `;
+  <h4>
+</div>`;
     }
 
 function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
@@ -56,12 +55,11 @@ function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
   subcategories = subcategories.filter(k => k !== 'Title');
 
   const categoryContainer = `
-    <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
-      <h3 id=${lowerCaseTitle.concat('-sidebar')}>
-        <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
-      <h3>
-    </div>
-  `;
+<div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
+  <h3 id=${lowerCaseTitle.concat('-sidebar')}>
+    <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
+  <h3>
+</div>`;
 
   container!.innerHTML += categoryContainer;
 
@@ -77,20 +75,14 @@ function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
     const entries =
         (<Entry[]>category[subcategory as keyof typeof CategoryConstant]);
     for (const entry of entries) {
+      const divId =
+          lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
+      const aId = '#docs-'.concat(
+          lowerCaseTitle, '-', lowerCaseKey, '-', entry.htmlName);
       innerSubcategory!.innerHTML += `
-        <div class="element de-active" id=${
-          lowerCaseTitle.concat(
-              '-', lowerCaseKey, '-', entry.htmlName)}>
-          <a class="darken" href=${
-                                                     '#docs-'.concat(
-                                                         lowerCaseTitle,
-                                                         '-',
-                                                         lowerCaseKey,
-                                                         '-',
-                                                         entry.htmlName)}>${
-          entry.name}</a>
-        </div>
-      `;
+<div class="element de-active" id=${divId}>
+  <a class="darken" href=${aId}>${entry.name}</a>
+</div>`;
     }
   }
 }
@@ -100,10 +92,9 @@ function createTitle(header: string, docsOrExamples: 'docs'|'examples') {
   const titleContainer =
       document.getElementById(header.toLowerCase().concat(name));
   const title = `
-    <div class="header">
-      <h1 id=${header.toLowerCase()}>${header}<h1>
-    </div>
-  `;
+<div class="header">
+  <h1 id=${header.toLowerCase()}>${header}<h1>
+</div>`;
   titleContainer!.innerHTML += title;
 }
 
@@ -119,19 +110,18 @@ function getLowerCaseKey(key: string):
 function createDefaultTable(entry: Entry):
     string {
       return `
-    <table class="value-table">
-      <tr>
-        <th>Default value</th>
-        <th>Type</th>
-        <th>Options</th>
-      </tr>
-      <tr>
-        <td>${entry.default[0]}</td>
-        <td>${entry.default[1]}</td>
-        <td>${entry.default[2]}</td>
-      </tr>
-    </table>
-  `;
+<table class="value-table">
+  <tr>
+    <th>Default value</th>
+    <th>Type</th>
+    <th>Options</th>
+  </tr>
+  <tr>
+    <td>${entry.default[0]}</td>
+    <td>${entry.default[1]}</td>
+    <td>${entry.default[2]}</td>
+  </tr>
+</table>`;
     }
 
 function createLinks(
@@ -142,11 +132,10 @@ function createLinks(
       const ulId = 'links'.concat(
           entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
       return `
-    <div>
-      <ul class="links" id=${ulId}>
-      </ul>
-    </div>
-  `;
+<div>
+  <ul class="links" id=${ulId}>
+  </ul>
+</div>`;
     }
 
 function createEntry(
@@ -155,28 +144,28 @@ function createEntry(
     pluralLowerCaseSubcategory: string):
     string {
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
+      const subcategoryNameId = [
+        'docs',
+        lowerCaseCategory,
+        pluralLowerCaseSubcategory,
+        entry.htmlName
+      ].join('-');
 
       const entryContainer = `
-    <div class=${lowerCaseSubcategory.concat('-container')}>
-      <div class=${lowerCaseSubcategory.concat('-name')} id=${
-              ['docs',
-               lowerCaseCategory,
-               pluralLowerCaseSubcategory,
-               entry.htmlName]
-                  .join('-')}>
-        <h4>${entry.name}</h4>
-      </div>
-      <div class=${lowerCaseSubcategory.concat('-definition')}>
-        <p>${entry.description}</p>
-      </div>
-      ${'default' in entry ? createDefaultTable(entry) : ''}
-      ${
-                                                         'links' in entry ?
+<div class=${lowerCaseSubcategory.concat('-container')}>
+  <div class=${lowerCaseSubcategory.concat('-name')} id=${subcategoryNameId}>
+    <h4>${entry.name}</h4>
+  </div>
+  <div class=${lowerCaseSubcategory.concat('-definition')}>
+    <p>${entry.description}</p>
+  </div>
+  ${'default' in entry ? createDefaultTable(entry) : ''}
+  ${
+                                                     'links' in entry ?
               createLinks(
                   entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
               ''}
-    </div>
-  `;
+</div>`;
       return entryContainer;
     }
 
@@ -192,16 +181,15 @@ function createSubcategory(
       'docs-'.concat(lowerCaseCategory, '-', pluralLowerCaseSubcategory);
 
   const subcategoryContainer = `
-      <div class=${pluralLowerCaseSubcategory.concat('-container')}>
-        <div class='inner-content'>
-          <div id=${subcategoryContainerId}>
-            <h3 id=${lowerCaseCategory.concat('-', pluralLowerCaseSubcategory)}>
-              ${subcategory}
-            </h3>
-          </div>
-        </div>
-      </div>
-  `;
+<div class=${pluralLowerCaseSubcategory.concat('-container')}>
+  <div class='inner-content'>
+    <div id=${subcategoryContainerId}>
+      <h3 id=${lowerCaseCategory.concat('-', pluralLowerCaseSubcategory)}>
+        ${subcategory}
+      </h3>
+    </div>
+  </div>
+</div>`;
   element!.innerHTML += subcategoryContainer;
 
   const innerSubcategoryContainer =
@@ -211,8 +199,9 @@ function createSubcategory(
         createEntry(entry, lowerCaseCategory, pluralLowerCaseSubcategory);
 
     if ('links' in entry) {
-      const ul = document.getElementById('links'.concat(
-          entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory));
+      const ulId = 'links'.concat(
+          entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
+      const ul = document.getElementById(ulId);
       for (const link of entry.links) {
         ul!.innerHTML += `<li>${link}</li>`;
       }

@@ -25,20 +25,20 @@ interface SidebarIds {
   name: string, subcategory: string, category: string
 }
 
-function activateSidebar(
-    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.add('active');
-  document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.add(
+function activateSidebar(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.add('active');
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.add(
       'active');
-  document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.add('active');
+  document.querySelector(`h3[id=${sidebarIds.category}]`)!.classList.add(
+      'active');
 }
 
-function deactivateSidebar(
-    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.remove('active');
-  document.querySelector(`h4[id=${sidebarSubcategory}]`)!.classList.remove(
+function deactivateSidebar(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.remove(
       'active');
-  document.querySelector(`h3[id=${sidebarCategory}]`)!.classList.remove(
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.remove(
+      'active');
+  document.querySelector(`h3[id=${sidebarIds.category}]`)!.classList.remove(
       'active');
 }
 
@@ -120,27 +120,20 @@ function updateSidebarViewFirstTime(entries: any[]) {
   updateSidebarView('', sidebarIds.subcategory);
 }
 
-function updateFromOldToNew(
-    prev: string,
-    sidebarName: string,
-    sidebarSubcategory: string,
-    sidebarCategory: string) {
-  const sidebarIds = getSidebarIdsFromSidebarName(prev);
-  deactivateSidebar(
-      sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
-  activateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
-  updateSidebarView(sidebarIds.subcategory, sidebarSubcategory);
+function updateFromOldToNew(prev: string, sidebarIds: SidebarIds) {
+  const prevSidebarIds = getSidebarIdsFromSidebarName(prev);
+  deactivateSidebar(prevSidebarIds);
+  activateSidebar(sidebarIds);
+  updateSidebarView(prevSidebarIds.subcategory, sidebarIds.subcategory);
 }
 
-function removeActiveEntry(
-    sidebarName: string, sidebarSubcategory: string, sidebarCategory: string) {
-  deactivateSidebar(sidebarName, sidebarSubcategory, sidebarCategory);
+function removeActiveEntry(sidebarIds: SidebarIds) {
+  deactivateSidebar(sidebarIds);
   if (globalCurrentView.length >= 2) {
-    const sidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[1]);
-    activateSidebar(
-        sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
-    updateSidebarView(sidebarSubcategory, sidebarIds.subcategory);
-    previouslyActive = sidebarIds.name;
+    const newSidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[1]);
+    activateSidebar(newSidebarIds);
+    updateSidebarView(sidebarIds.subcategory, newSidebarIds.subcategory);
+    previouslyActive = newSidebarIds.name;
   }
 }
 
@@ -151,26 +144,17 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
   if (htmlEntry.intersectionRatio > 0) {  // entry inside viewing window
     if (toRemove.length > 0) {
       // inside a large div
-      updateFromOldToNew(
-          toRemove,
-          sidebarIds.name,
-          sidebarIds.subcategory,
-          sidebarIds.category);
+      updateFromOldToNew(toRemove, sidebarIds);
       toRemove = '';
     } else if (globalCurrentView.length === 0) {
       // Empty globalCurrentView, add to view
-      activateSidebar(
-          sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
+      activateSidebar(sidebarIds);
       previouslyActive = sidebarIds.name;
       globalCurrentView.push(sidebarIds.name);
     } else if (
         order.indexOf(previouslyActive) > order.indexOf(sidebarIds.name)) {
       // scrolling up
-      updateFromOldToNew(
-          globalCurrentView[0],
-          sidebarIds.name,
-          sidebarIds.subcategory,
-          sidebarIds.category);
+      updateFromOldToNew(globalCurrentView[0], sidebarIds);
       globalCurrentView.unshift(sidebarIds.name);
       previouslyActive = sidebarIds.name;
     } else {
@@ -184,8 +168,7 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
     // activ entry out of now out of view
     if (previouslyActive === sidebarIds.name) {
       // entry being removed from view is currently active
-      removeActiveEntry(
-          sidebarIds.name, sidebarIds.subcategory, sidebarIds.category);
+      removeActiveEntry(sidebarIds);
     }
     // always remove entry when out of view
     globalCurrentView = globalCurrentView.filter(e => e !== sidebarIds.name);

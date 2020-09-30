@@ -73,12 +73,12 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/docs-and-examples/documentation-main.js',
+    input: './lib/docs-and-examples/docs-and-examples.js',
     output: {
-      file: './examples/built/documentation-main.js',
+      file: './examples/built/docs-and-examples.js',
       sourcemap: true,
       format: 'esm',
-      name: 'Documentation-Main'
+      name: 'docs-and-examples'
     },
     watch: {
       include: watchFiles,
@@ -87,57 +87,9 @@ const outputOptions = [
     onwarn
   },
   {
-    input: './lib/docs-and-examples/documentation-main.js',
+    input: './lib/docs-and-examples/docs-and-examples.js',
     output:
-        {file: './examples/built/documentation-main-umd.js', format: 'umd', name: 'Documentation-Main'},
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  },
-  {
-    input: './lib/docs-and-examples/create-html.js',
-    output: {
-      file: './examples/built/create-html.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'create-html'
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn
-  },
-  {
-    input: './lib/docs-and-examples/create-html.js',
-    output:
-        {file: './examples/built/create-html-umd.js', format: 'umd', name: 'create-html'},
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  },
-  {
-    input: './lib/docs-and-examples/sidebar.js',
-    output: {
-      file: './examples/built/sidebar.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'sidebar'
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn
-  },
-  {
-    input: './lib/docs-and-examples/sidebar.js',
-    output:
-        {file: './examples/built/sidebar-umd.js', format: 'umd', name: 'sidebar'},
+        {file: './examples/built/docs-and-examples-umd.js', format: 'umd', name: 'docs-and-examples'},
     watch: {
       include: watchFiles,
     },
