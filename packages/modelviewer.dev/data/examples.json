@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Loading",
+    "htmlName": "loading",
+    "examples": [
+      {
+        "htmlId": "demo-container-1",
+        "name": "Display Poster"
+      },
+      {
+        "htmlId": "demo-container-2",
+        "name": "Preload"
+      },
+      {
+        "htmlId": "demo-container-3",
+        "name": "Customize Loading"
+      },
+      {
+        "htmlId": "demo-container-4",
+        "name": "Poster with invalid model"
+      },
+      {
+        "htmlId": "demo-container-5",
+        "name": "Cycling between posters"
+      }
+    ]
+  },
+  {
+    "name": "Animation",
+    "htmlName": "animation",
+    "examples": [
+      {
+        "htmlId": "demo-container-1",
+        "name": "Autoplay animation"
+      },
+      {
+        "htmlId": "demo-container-2",
+        "name": "Select specific"
+      },
+      {
+        "htmlId": "demo-container-3",
+        "name": "Animation crossfade"
+      },
+      {
+        "htmlId": "demo-container-3",
+        "name": "Paused Model"
+      }
+    ]
+  }
+]

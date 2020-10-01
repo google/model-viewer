@@ -6,33 +6,57 @@
         "name": "src",
         "htmlName": "src",
         "description": "<p>The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.</p>",
-        "default": ["empty string", "String", "any legal filepath"]
+        "default": [
+          "empty string",
+          "String",
+          "any legal filepath"
+        ]
       },
       {
         "name": "alt",
         "htmlName": "alt",
         "description": "<p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>",
-        "default": ["empty string", "String", "any description"]
+        "default": [
+          "empty string",
+          "String",
+          "any description"
+        ]
       },
       {
         "name": "poster",
         "htmlName": "poster",
         "description": "<p>Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a poster with transparency, you may also want to set --poster-color to transparent so that the background shows through.</p>",
-        "links": ["See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."],
-        "default": ["empty string", "String", "link to image"]
+        "links": [
+          "See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."
+        ],
+        "default": [
+          "empty string",
+          "String",
+          "link to image"
+        ]
       },
       {
         "name": "loading",
         "htmlName": "loading",
         "description": "<p>An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal = \"auto\", and when interacted with for reveal = \"interaction\". Eager loads the model immediately.</p>",
-        "links": ["See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."],
-        "default": ["auto", "String", "auto, lazy, eager"]
+        "links": [
+          "See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."
+        ],
+        "default": [
+          "auto",
+          "String",
+          "auto, lazy, eager"
+        ]
       },
       {
         "name": "reveal",
         "htmlName": "reveal",
         "description": "<p>This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.</p>",
-        "default": ["auto", "String", "auto, interaction, manual"]
+        "default": [
+          "auto",
+          "String",
+          "auto, interaction, manual"
+        ]
       }
     ],
     "CSS Custom Properties": [
@@ -40,7 +64,11 @@
         "name": "--poster-color",
         "htmlName": "posterColor",
         "description": "<p>Sets the background-color of the poster. You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of &lt;model-viewer&gt; shows through).</p>",
-        "default": ["#fff", "css background-color", "valid css background-color"]
+        "default": [
+          "#fff",
+          "css background-color",
+          "valid css background-color"
+        ]
       },
       {
         "name": "--poster-image",
@@ -133,6 +161,62 @@
       {
         "name": "progress-bar",
         "htmlName": "progressBar",
+        "description": "12345"
+      }
+    ]
+  },
+  {
+    "Title": "Animation",
+    "Attributes": [
+      {
+        "name": "animation-name",
+        "htmlName": "animationName",
+        "description": "12345"
+      },
+      {
+        "name": "animation-crossfade-duration",
+        "htmlName": "animationCrossfadeDuration",
+        "description": "12345"
+      },
+      {
+        "name": "autoplay",
+        "htmlName": "autoplay",
+        "description": "12345"
+      }
+    ],
+    "Properties": [
+      {
+        "name": "availableAnimations",
+        "htmlName": "availableAnimations",
+        "description": "12345"
+      },
+      {
+        "name": "currentTime",
+        "htmlName": "currentTime",
+        "description": "12345"
+      }
+    ],
+    "Methods": [
+      {
+        "name": "play()",
+        "htmlName": "play",
+        "description": "12345"
+      },
+      {
+        "name": "pause()",
+        "htmlName": "pause",
+        "description": "12345"
+      }
+    ],
+    "Events": [
+      {
+        "name": "play",
+        "htmlName": "play",
+        "description": "12345"
+      },
+      {
+        "name": "pause",
+        "htmlName": "pause",
         "description": "12345"
       }
     ]
