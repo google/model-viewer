@@ -16,7 +16,7 @@
 let globalCurrentView: string[] = [];
 let previouslyActive: string = '';
 let toRemove = '';
-let order: any[] = [];
+let order: any[] = [];  // TODO, switch to dictionary
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
@@ -141,13 +141,14 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
   const id = htmlEntry.target.getAttribute('id')!;
   const sidebarIds = getSidebarIdsFromId(id);
 
-  if (htmlEntry.intersectionRatio > 0) {  // entry inside viewing window
+  // entry inside viewing window
+  if (htmlEntry.intersectionRatio > 0) {
     if (toRemove.length > 0) {
       // inside a large div
       updateFromOldToNew(toRemove, sidebarIds);
       toRemove = '';
     } else if (globalCurrentView.length === 0) {
-      // Empty globalCurrentView, add to view
+      // empty globalCurrentView, add to view
       activateSidebar(sidebarIds);
       previouslyActive = sidebarIds.name;
       globalCurrentView.push(sidebarIds.name);
@@ -161,17 +162,45 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
       // an entry is in view under the current active entry
       globalCurrentView.push(sidebarIds.name);
     }
-  } else if (globalCurrentView.length === 1) {  // entry outside viewing window,
-    // but only element
+  } else if (globalCurrentView.length === 1) {
+    // entry outside viewing window, but entry is the only element
     toRemove = previouslyActive;
-  } else {  // entry outside viewing window
-    // activ entry out of now out of view
+  } else {
+    // entry outside viewing window, active entry now out of view
     if (previouslyActive === sidebarIds.name) {
       // entry being removed from view is currently active
       removeActiveEntry(sidebarIds);
     }
     // always remove entry when out of view
     globalCurrentView = globalCurrentView.filter(e => e !== sidebarIds.name);
+  }
+}
+
+/*
+ * for page jump its just easier to restart, so deactivate everything, clear
+ * the global view, then only update with whats in view
+ */
+function handlePageJump(entries: IntersectionObserverEntry[]) {
+  globalCurrentView = [];
+  toRemove = '';
+  previouslyActive = '';
+  updateSidebarView('', 'null');
+  for (const htmlEntry of entries) {
+    const id = htmlEntry.target.getAttribute('id')!;
+    const sidebarIds = getSidebarIdsFromId(id);
+    deactivateSidebar(sidebarIds);
+  }
+  let isAtTop = true;
+  for (const htmlEntry of entries) {
+    if (htmlEntry.intersectionRatio > 0) {
+      if (isAtTop) {
+        isAtTop = false;
+        const id = htmlEntry.target.getAttribute('id')!;
+        const sidebarIds = getSidebarIdsFromId(id);
+        updateSidebarView('', sidebarIds.subcategory);
+      }
+      handleHTMLEntry(htmlEntry);
+    }
   }
 }
 
@@ -182,11 +211,14 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
 export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
   if (docsOrExamples === 'docs') {
     const observer = new IntersectionObserver(entries => {
-      for (const htmlEntry of entries) {
-        handleHTMLEntry(htmlEntry);
+      if (!isFirstOpen && entries.length > 2) {
+        handlePageJump(entries);
+      } else {
+        for (const htmlEntry of entries) {
+          handleHTMLEntry(htmlEntry);
+        }
       }
-      // True the first time all of the observers are set.
-      // entries will be every possible entry on the whole page.
+      // First time all of the observers are set entries will be every entry.
       if (isFirstOpen) {
         updateSidebarViewFirstTime(entries);
       }
