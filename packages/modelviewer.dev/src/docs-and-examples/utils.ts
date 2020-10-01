@@ -72,6 +72,23 @@ function loadJSON(filePath: string, callback: JSONCallback) {
   xobj.send(null);
 }
 
+/*
+ * On a page load if # is given, jump to section
+ */
+function jumpToSection() {
+  const windowHref = window.location.href;
+  const hashtagIndex = windowHref.indexOf('#');
+  if (hashtagIndex >= 0 && windowHref.length > hashtagIndex) {
+    const jumpToId = windowHref.slice(hashtagIndex + 1);
+    const element = document.getElementById(jumpToId);
+    if (element) {
+      const fakeA = document.createElement('a');
+      fakeA.href = '#'.concat(jumpToId);
+      fakeA.click();
+    }
+  }
+}
+
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
  * docsOrExamples: 'docs' or 'examples'
@@ -84,6 +101,7 @@ export function init(docsOrExamples: 'docs'|'examples') {
       loadExamples();
     }
     sidebarObserver(docsOrExamples);
+    jumpToSection();
   });
 }
 
