@@ -42,7 +42,7 @@ function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
 <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
   <h4 class="subcategory-header" id=${headerId}>
     <a class="darken" href="#${aHref}">${subcategory}</a>
-  <h4>
+  </h4>
 </div>`;
     }
 
@@ -58,7 +58,7 @@ function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
 <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
   <h3 id=${lowerCaseTitle.concat('-sidebar')}>
     <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
-  <h3>
+  </h3>
 </div>`;
 
   container!.innerHTML += categoryContainer;
