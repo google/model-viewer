@@ -19,8 +19,8 @@
 <head>
   <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="Easily display interactive 3D models on the web and in AR">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
@@ -35,18 +35,12 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 </head>
 <body>
 
-  <a id="button-github" class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer"></a>
+  <a id="button-github" class="icon-github icon-button" href="https://github.com/google/model-viewer"></a>
 
   <div class="sample">
 
@@ -71,6 +65,10 @@
           <h3 class="grouping-title border-bottom">Examples</h3>
           <ul id="list-example">
 
+            <li><a href="examples/webxr.html"><h4>WebXR Demo</h4></a></li>
+
+            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
+
             <li><a href="examples/animation.html"><h4>Animation</h4></a></li>
 
             <li><a href="examples/lazy-loading.html"><h4>Lazy Loading</h4></a></li>
@@ -85,9 +83,15 @@
 
             <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
 
-            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
-			
-			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
+            <li><a href="examples/scene-graph.html"><h4>Scene Graph</h4></a></li>
+
+            <li><a href="examples/lighthouse.html"><h4>Performance</h4></a></li>
+
+            <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
+
+            <li><a href="editor"><h4>Model Editor</h4></a></li>
+
+            <li><a href="fidelity"><h4>glTF Fidelity Comparison</h4></a></li>
           </ul>
         </div>
 
@@ -102,7 +106,7 @@
               href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
               href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
               models are supported, see <a
-              href="https://github.com/GoogleWebComponents/model-viewer#supported-formats">Supported
+              href="https://github.com/google/model-viewer#supported-formats">Supported
               Formats</a>.</p>
             </li>
             <li>
@@ -133,14 +137,13 @@
             </li>
             <li>
               <div>ar-modes</div>
-              <p>A prioritized list of the types of AR experiences to enable, if available; see 
-              <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
+              <p>A prioritized list of the types of AR experiences to enable, if available; see
+              <a href="https://github.com/google/model-viewer#augmented-reality">
               Augmented Reality</a>.
               Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
-              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
+              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>
+              app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
+              whitespace. Defaults to "webxr scene-viewer quick-look".
             </li>
             <li>
               <div>ar-scale</div>
@@ -288,17 +291,8 @@
               12+ devices</a> via <a
               href="https://developer.apple.com/videos/play/wwdc2018/603/">AR
               Quick Look</a> on Safari. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
+              href="https://github.com/google/model-viewer#augmented-reality">Augmented
               Reality</a>.</p>
-            </li>
-            <li>
-              <div>magic-leap</div>
-              <p>Enables the ability to view models in AR when viewing content
-              on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a>
-              browser, requires that src is a GLB model, and requires the
-              inclusion of the <a
-              href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
-              library.</p>
             </li>
             <li>
               <div>max-camera-orbit</div>
@@ -326,6 +320,13 @@
                 "10deg". </p>
             </li>
             <li>
+              <div>orbit-sensitivity</div>
+              <p>Adjusts the speed of theta and phi orbit interactions. Can also
+              be set negative to reverse, which is helpful when using zero
+              radius to look around the inside of a cave-like model. The default
+              is 1.</p>
+            </li>
+            <li>
               <div>poster</div>
               <p>Displays an image instead of the model, useful for showing the
                 user something before a model is loaded and ready to render. If
@@ -337,11 +338,11 @@
             <li>
               <div>loading</div>
               <p>An enumerable attribute describing under what conditions the
-              model should be preloaded. The supported values are "auto", "lazy" 
+              model should be preloaded. The supported values are "auto", "lazy"
               and "eager". Auto is equivalent to lazy, which loads the model
               when it is near the viewport for reveal = "auto", and when interacted
-              with for reveal = "interaction". Eager loads the model immediately. 
-              See <a href="./examples/lazy-loading.html">our section on lazy loading</a> 
+              with for reveal = "interaction". Eager loads the model immediately.
+              See <a href="./examples/lazy-loading.html">our section on lazy loading</a>
               for examples. Defaults to "auto".</p>
             </li>
             <li>
@@ -358,8 +359,15 @@
               "interaction", &lt;model-viewer&gt; will wait until the user
               interacts with the poster before loading and revealing the model.
               If set to "auto", the model will be revealed as soon as it is done
-              loading and rendering. If set to "manual", the model will remain hidden 
+              loading and rendering. If set to "manual", the model will remain hidden
               until dismissPoster() is called. Defaults to "auto".</p>
+            </li>
+            <li>
+              <div>rotation-per-second</div>
+              <p>Sets the speed of auto-rotate, when enabled. Accepts values
+              with units in degrees or radians (e.g., "30deg" or "0.5rad"), as
+              well as percent (e.g. "-100%") of the default value of pi/32
+              radians.</p>
             </li>
             <li>
               <div>shadow-intensity</div>
@@ -368,8 +376,8 @@
             </li>
             <li>
               <div>shadow-softness</div>
-              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
-              Softness should not be changed every frame as it incurs a 
+              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows.
+              Softness should not be changed every frame as it incurs a
               performance cost. Softer shadows render faster. Defaults to 1.</p>
             </li>
           </ul>
@@ -391,6 +399,17 @@
               <div>--ar-button-display</div>
               <p>Sets the display property of the AR button. Intended to be used
               to force the button to be hidden. Defaults to block.</p>
+            </li>
+            <li>
+              <div>ar-status</div>
+              <p>This read-only attribute enables DOM content to be styled based
+              on the status of the WebXR AR presentation. Possible values
+              include 'not-presenting', 'session-started', 'object-placed', and
+              'failed'. For instance, a prompt for the user to move their phone
+              until the object is successfully placed in their space can be
+              shown by scoping a CSS rule to
+              model-viewer[ar-status="session-started"]. Setting this attribute
+              has no effect.</p>
             </li>
             <li>
               <div>--interaction-prompt-display</div>
@@ -454,9 +473,9 @@
             </li>
             <li>
               <div>modelIsVisible</div>
-              <p>This property is read-only. It returns true if the element is 
+              <p>This property is read-only. It returns true if the element is
               visible on the page (assuming there is an IntersectionObserver) and the
-              poster has been dismissed.</p>
+              poster has been dismissed. Related to the model-visibility event below.</p>
             </li>
             <li>
               <div>paused</div>
@@ -472,6 +491,12 @@
               loaded from a Google CDN.</p>
             </li>
             <li>
+              <div>ModelViewer.minimumRenderScale</div>
+              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering
+              scale factor as it dynamically changes resolution to maintain framerate. Turn
+              off this effect by setting to 1. Defaults to 0.5.</p>
+            </li>
+            <li>
               <div>ModelViewer.modelCacheSize</div>
               <p>This static, writable property sets &lt;model-viewer&gt;'s internal
               glTF model cache size, controlling number of individual models that should
@@ -480,7 +505,7 @@
               if they are not being used by a &lt;model-viewer&gt; element in the document.
               Note also that the cache size is measured in number of glTF models, not bytes!
               This is important to keep in mind, since any two models may have wildly
-              different byte sizes.</p>
+              different byte sizes. Default is 5.</p>
             </li>
           </ul>
 
@@ -504,12 +529,15 @@
               with the poster via user input.</p>
             </li>
             <li>
-              <div>getCameraOrbit()</div>
-              <p>Returns the realtime orbital position of the camera. Azimuthal
-              (theta) and polar (phi) angles are representred as radians, and the
-              distance (radius) is represented in meters. This value may differ
-              from the value configured with the camera-orbit attribute on account
-              of user interaction or camera interpolation.</p>
+              <div>exportScene(options)</div>
+              <p>Exports the model in glTF or GLB formats. Returns a promise
+              that resolves in a Blob of type "application/octet-stream" or
+              "application/json" depending on the export format.
+              For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'>
+              GLTF exporter</a> documentation, with the exception that all
+              animations are automatically exported and truncateDrawRange
+              defaults to true.
+              </p>
             </li>
             <li>
               <div>getCameraOrbit()</div>
@@ -528,8 +556,8 @@
             </li>
             <li>
               <div>getFieldOfView()</div>
-              <p>Returns the realtime camera vertical field of view in degrees. 
-              This value may differ from the value configured with the field-of-view 
+              <p>Returns the realtime camera vertical field of view in degrees.
+              This value may differ from the value configured with the field-of-view
               attribute on account of user interaction or camera interpolation.</p>
             </li>
             <li>
@@ -543,7 +571,7 @@
             </li>
             <li>
               <div>jumpCameraToGoal()</div>
-              <p>Changes the camera to its last configured goal state immediately on 
+              <p>Changes the camera to its last configured goal state immediately on
               the next update instead of interpolating the motion over time.</p>
             </li>
             <li>
@@ -568,11 +596,12 @@
               currentTime property to 0.</p>
             </li>
             <li>
-              <div>resetTurntableRotation()</div>
-              <p>Resets the turntable that rotates the model when auto-rotate
-              is enabled. The new value of the turntable rotation will be 0 after
-              this method is invoked, but the model may not update until the next
-              render frame.</p>
+              <div>resetTurntableRotation(theta)</div>
+              <p>Resets the turntable that rotates the model when auto-rotate is
+              enabled. The new value of the turntable rotation will be theta
+              radians after this method is invoked, but the model may not update
+              until the next render frame. If no argument is supplied, theta
+              defaults to zero.</p>
             </li>
             <li>
               <div>resetInteractionPrompt()</div>
@@ -624,6 +653,17 @@
 
           <ul class="list-attribute">
             <li>
+              <div>ar-status</div>
+              <p>Fired when the ar-status attribute above fires. The
+              event.detail.status property will be set to the same value as the
+              ar-status attribute, either 'not-presenting', 'session-started',
+              'object-placed', or 'failed'. This event is only enabled for WebXR
+              AR sessions, with the exception of 'failed', which will be fired
+              any time ar was initiated but failed to start all of the given
+              modes.
+              </p>
+            </li>
+            <li>
               <div>camera-change</div>
               <p>Fired when the camera position and/or field of view have
               changed. If the change occurred due to user interaction, the
@@ -657,15 +697,9 @@
             <li>
               <div>model-visibility</div>
               <p>This event is fired when the visibility of the model changes. When the
-              model is loaded, the element is in the viewport (assuming there is an 
-              IntersectionObserver), and the poster has been dismissed, this event will fire 
+              model is loaded, the element is in the viewport (assuming there is an
+              IntersectionObserver), and the poster has been dismissed, this event will fire
               and <span class="attribute">event.detail.visible</span> will be "true".</p>
-            </li>
-            <li>
-              <div>poster-visibility</div>
-              <p>This event is fired when the visiblity of the poster image
-              changes. The current visibility state can be read from the
-              <span class="attribute">event.detail.visible</span> property</p>
             </li>
             <li>
               <div>play</div>
@@ -682,6 +716,19 @@
               <div>preload</div>
               <p>When loading = "eager" this event is fired when preloading is done.</p>
             </li>
+            <li>
+              <div>quick-look-button-tapped</div>
+              <p>If the user has entered a quick-look AR session on iOS, this event is fired 
+              when the action button is tapped, see 
+              <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>.
+              </p>
+            </li>
+            <li>
+              <div>scene-graph-ready</div>
+              <p>Dispatched when scene-graph access is available and after the model has
+                been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a>
+                documentation for more details.</p>
+            </li>
           </ul>
 
         </div>
@@ -690,10 +737,10 @@
           <h3 class="grouping-title border-bottom">Browser Support</h3>
 
           <div id="browser-support-icon-group">
-            <div class="icon-desc"><img class="size-24 icon-check"><div>Natively supported</div></div>
-            <div class="icon-desc"><img class="size-24 icon-warning"><div>Available with polyfill</div></div>
-            <div class="icon-desc"><img class="size-24 icon-flag"><div>Behind a flag, unstable</div></div>
-            <div class="icon-desc"><img class="size-24 icon-na"><div>Not available</div></div>
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
           </div>
 
           <div style="clear:both"></div>
@@ -706,31 +753,31 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Custom Elements</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>Shadow DOM</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
           </table>
 
@@ -742,51 +789,41 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Resize Observer</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>Intersection Observer</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-            </tr>
-            <tr>
-              <td>Fullscreen API</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>:focus-visible</td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
             </tr>
           </table>
 
@@ -798,32 +835,42 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
-            
+
             <tr>
               <td>WebXR Device API</td>
-              <td><img class="icon-flag"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>WebXR HitTest API</td>
-              <td><img class="icon-flag"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR DOM Overlay API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
             </tr>
           </table>
 
@@ -840,8 +887,8 @@
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
 
 

@@ -16,40 +16,47 @@
 import {RGBA} from '../api.js';
 import {FakeModelKernel} from '../test-helpers.js';
 
-import {definePBRMetallicRoughness} from './pbr-metallic-roughness.js';
-import {defineThreeDOMElement} from './three-dom-element.js';
-
-const ThreeDOMElement = defineThreeDOMElement();
+import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 
 suite('api/pbr-metallic-roughness', () => {
   suite('definePBRMetallicRoughness', () => {
     test('yields a valid constructor', () => {
-      const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
-          new FakeModelKernel(), {id: 0, baseColorFactor: [0, 0, 0, 1]});
+      const instance = new PBRMetallicRoughness(new FakeModelKernel(), {
+        id: 0,
+        baseColorFactor: [0, 0, 0, 1],
+        metallicFactor: 0,
+        roughnessFactor: 0
+      });
 
       expect(instance).to.be.ok;
     });
 
     test('produces elements with the correct owner model', () => {
       const kernel = new FakeModelKernel();
-      const GeneratedConstructor = definePBRMetallicRoughness(ThreeDOMElement);
-      const instance = new GeneratedConstructor(
-          kernel, {id: 0, baseColorFactor: [0, 0, 0, 1]});
+      const instance = new PBRMetallicRoughness(kernel, {
+        id: 0,
+        baseColorFactor: [0, 0, 0, 1],
+        metallicFactor: 0,
+        roughnessFactor: 0
+      });
 
       expect(instance.ownerModel).to.be.equal(kernel.model);
     });
 
     suite('PBRMetallicRoughness', () => {
-      test('is configured with the serialized base color factor', () => {
-        const GeneratedConstructor =
-            definePBRMetallicRoughness(ThreeDOMElement);
+      test('is configured with the serialized material parameters', () => {
         const baseColorFactor: RGBA =
             [Math.random(), Math.random(), Math.random(), Math.random()];
-        const instance = new GeneratedConstructor(
-            new FakeModelKernel(), {id: 0, baseColorFactor});
+        const metallicFactor: number = Math.random();
+        const roughnessFactor: number = Math.random();
+
+        const instance = new PBRMetallicRoughness(
+            new FakeModelKernel(),
+            {id: 0, baseColorFactor, metallicFactor, roughnessFactor});
 
         expect(instance.baseColorFactor).to.be.deep.equal(baseColorFactor);
+        expect(instance.metallicFactor).to.be.equal(metallicFactor);
+        expect(instance.roughnessFactor).to.be.equal(roughnessFactor);
       });
     });
   });

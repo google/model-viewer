@@ -14,6 +14,7 @@
  */
 
 import {RGBA} from './api.js';
+import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
 
 /**
  * The protocol between 3DOM execution contexts is strictly defined.
@@ -50,6 +51,8 @@ export const ThreeDOMMessageType = {
   // of the backing host scene graph
   MUTATE: 6
 };
+
+export type ThreeDOMMessageTypeMap = typeof ThreeDOMMessageType;
 
 /**
  * Messages exchanged between a scene graph context and the host context.
@@ -100,6 +103,10 @@ export declare interface SerializedElementMap {
   'model': SerializedModel;
   'material': SerializedMaterial;
   'pbr-metallic-roughness': SerializedPBRMetallicRoughness;
+  'sampler': SerializedSampler;
+  'image': SerializedImage;
+  'texture': SerializedTexture;
+  'texture-info': SerializedTextureInfo;
 }
 
 /**
@@ -118,6 +125,10 @@ export declare interface SerializedThreeDOMElement {
 export declare interface SerializedPBRMetallicRoughness extends
     SerializedThreeDOMElement {
   baseColorFactor: RGBA;
+  metallicFactor: number;
+  roughnessFactor: number;
+  baseColorTexture?: SerializedTextureInfo;
+  metallicRoughnessTexture?: SerializedTextureInfo;
 }
 
 /**
@@ -126,6 +137,30 @@ export declare interface SerializedPBRMetallicRoughness extends
  */
 export declare interface SerializedMaterial extends SerializedThreeDOMElement {
   pbrMetallicRoughness: SerializedPBRMetallicRoughness;
+  normalTexture?: SerializedTextureInfo;
+  occlusionTexture?: SerializedTextureInfo;
+  emissiveTexture?: SerializedTextureInfo;
+}
+
+export declare interface SerializedSampler extends SerializedThreeDOMElement {
+  magFilter?: MagFilter;
+  minFilter?: MinFilter;
+  wrapS?: WrapMode;
+  wrapT?: WrapMode;
+}
+
+export declare interface SerializedImage extends SerializedThreeDOMElement {
+  uri?: string;
+}
+
+export declare interface SerializedTexture extends SerializedThreeDOMElement {
+  sampler?: SerializedSampler;
+  source?: SerializedImage;
+}
+
+export declare interface SerializedTextureInfo extends
+    SerializedThreeDOMElement {
+  texture?: SerializedTexture;
 }
 
 /**

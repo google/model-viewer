@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Vector2} from 'three';
+import {Matrix3, Matrix4, Vector2} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
@@ -31,6 +31,7 @@ const $removeHotspot = Symbol('removeHotspot');
 // Used internally by positionAndNormalFromPoint()
 const pixelPosition = new Vector2();
 const worldToModel = new Matrix4();
+const worldToModelNormal = new Matrix3();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -71,11 +72,13 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     constructor(...args: Array<any>) {
       super(...args);
 
-      const shadowRoot = this.shadowRoot!;
       const {domElement} = this[$annotationRenderer];
-      domElement.classList.add('annotation-container');
-      shadowRoot.querySelector('.container')!.appendChild(domElement);
-      domElement.appendChild(shadowRoot.querySelector('.default')!);
+      const {style} = domElement;
+      style.display = 'none';
+      style.pointerEvents = 'none';
+      style.position = 'absolute';
+      style.top = '0';
+      this.shadowRoot!.querySelector('.default')!.appendChild(domElement);
     }
 
     connectedCallback() {
@@ -147,7 +150,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       worldToModel.getInverse(model.matrixWorld);
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
-      const normal = toVector3D(hit.normal);
+
+      worldToModelNormal.getNormalMatrix(worldToModel);
+      const normal =
+          toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
+
       return {position: position, normal: normal};
     }
 
@@ -158,6 +165,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (scene.isDirty) {
         scene.model.updateHotspots(camera.position);
+        this[$annotationRenderer].domElement.style.display = '';
         this[$annotationRenderer].render(scene, camera);
       }
     }

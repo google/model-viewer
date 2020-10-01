@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase from '../model-viewer-base.js';
@@ -44,23 +44,19 @@ const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
 
-const $paused = Symbol('paused');
-
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
  * constructs a framed scene based off of the canvas dimensions.
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  private[$paused]: boolean = false;
-
   public aspect = 1;
   public canvas: HTMLCanvasElement;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
   public width = 1;
   public height = 1;
-  public isDirty: boolean = false;
+  public isDirty = false;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
@@ -102,18 +98,6 @@ export class ModelScene extends Scene {
         'model-load', (event: any) => this.onModelLoad(event));
   }
 
-  get paused() {
-    return this[$paused];
-  }
-
-  pause() {
-    this[$paused] = true;
-  }
-
-  resume() {
-    this[$paused] = false;
-  }
-
   /**
    * Function to create the context lazily, as when there is only one
    * <model-viewer> element, the renderer's 3D context can be displayed
@@ -134,7 +118,7 @@ export class ModelScene extends Scene {
   async setModelSource(
       source: string|null, progressCallback?: (progress: number) => void) {
     try {
-      await this.model.setSource(source, progressCallback);
+      await this.model.setSource(this.element, source, progressCallback);
     } catch (e) {
       throw new Error(
           `Could not set model source to '${source}': ${e.message}`);
@@ -233,6 +217,8 @@ export class ModelScene extends Scene {
       y = this.targetDamperY.update(y, goal.y, delta, radius);
       z = this.targetDamperZ.update(z, goal.z, delta, radius);
       this.model.position.set(x, y, z);
+      this.model.updateMatrixWorld();
+      this.model.setShadowRotation(this.yaw);
       this.isDirty = true;
     }
   }
@@ -298,6 +284,9 @@ export class ModelScene extends Scene {
     if (hit.face == null) {
       return null;
     }
+
+    hit.face.normal.applyNormalMatrix(
+        new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
     return {position: hit.point, normal: hit.face.normal};
   }

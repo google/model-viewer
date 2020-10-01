@@ -19,8 +19,8 @@
 <head>
   <title>&lt;model-viewer&gt; Animation</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="&lt;model-viewer&gt; animation examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
@@ -36,14 +36,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 </head>
 <body>
@@ -60,7 +54,7 @@
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-  <model-viewer camera-controls autoplay ar ar-modes="webxr scene-viewer quick-look fallback" shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+  <model-viewer camera-controls autoplay ar shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -77,7 +71,7 @@
         </div>
         <example-snippet stamp-to="demo-container-2" highlight-as="html">
           <template>
-  <model-viewer camera-controls autoplay animation-name="Running" ar ar-modes="webxr scene-viewer quick-look fallback" shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+  <model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -94,7 +88,7 @@
         </div>
         <example-snippet stamp-to="demo-container-3" highlight-as="html">
           <template>
-  <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar ar-modes="webxr scene-viewer quick-look fallback" shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+  <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
   <script>
   (() => {
     const modelViewer = document.querySelector('#paused-change-demo');
@@ -121,7 +115,7 @@
         </div>
         <example-snippet stamp-to="demo-container-4" highlight-as="html">
           <template>
-  <model-viewer id="xfade-demo" camera-controls animation-name="Running" ar ar-modes="webxr scene-viewer quick-look fallback" shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+  <model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
   <script>
   (() => {
     const modelViewer = document.querySelector('#xfade-demo');
@@ -146,8 +140,8 @@
         licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
 
   <!-- Documentation-specific dependencies: -->

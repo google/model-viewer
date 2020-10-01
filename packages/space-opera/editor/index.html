@@ -1,0 +1,127 @@
+<!--
+ @license
+ Copyright 2020 Google LLC. All Rights Reserved.
+ Licensed under the Apache License, Version 2.0 (the 'License');
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an 'AS IS' BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; editor">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model Editor</title>
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="../shared-assets/icons/favicon.png"/>
+  <!-- Web animations for paper-dropdown -->
+  <script src="../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-html.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-css.js"></script>
+  <script>
+  // Necessary hack for Redux. See: https://github.com/reduxjs/redux/pull/2910
+  window.process = {
+    env: {
+      NODE_ENV :'production'
+    }
+  };
+  </script>
+  <script type="module" src="../dist/space-opera.js"></script>
+</head>
+<style>
+  body {
+    margin: 0
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .header {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    height: 48px;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+
+  /* Container for renderer (left) and tabs (right). */
+  .editor-body-root {
+    display: flex;
+    flex: auto; /* Grows to fill space under header */
+    height: 0;
+  }
+
+  .mvContainer {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    width: 100%;
+  }
+
+  model-viewer-preview {
+    height: 100%;
+  }
+
+  me-tabs {
+    background-color: #202124;  /* GOOGLE_GREY_900 */
+    padding: 0;
+    width: 360px;
+  }
+
+  me-tabs a {
+    color: #dadcff; /* GOOGLE_GREY_300, but.. bluer */
+  }
+
+  me-tabbed-panel {
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    display: block;
+  }
+</style>
+<body>
+  <model-editor>
+    <div class="app">
+    <div class="editor-body-root">
+      <div class="mvContainer">
+        <model-viewer-preview id="editing_adapter">
+        </model-viewer-preview>
+      </div>
+      <me-tabs>
+        <me-tabbed-panel icon="save">
+          <model-viewer-snippet></model-viewer-snippet>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="create">
+          <me-transformation-controls></me-transformation-controls>
+          <me-ibl-selector></me-ibl-selector>
+          <me-animation-controls></me-animation-controls>
+          <me-hotspot-panel></me-hotspot-panel>
+          <me-poster-controls></me-poster-controls>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="color_lens">
+          <me-materials-panel></me-materials-panel>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="photo_camera">
+          <me-camera-settings></me-camera-settings>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="search">
+          <me-inspector-panel></me-inspector-panel>
+        </me-tabbed-panel>
+      </me-tabs>
+    </div>
+  </div></model-editor>
+</body>

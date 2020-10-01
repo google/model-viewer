@@ -27,5 +27,7 @@ Command                         | Description
 `npm run test`                  | Run a render fidelity check comparing `<model-viewer>` to other renderers
 `npm run update-screenshots`    | Update the "golden" screenshots for all renderers
 
+You can specify the scenarios when running `npm run test` and `npm run update-screenshots` by appending scenarios. (e.g. `npm run update-screenshots khronos-BoomBox khronos-FlightHelmet` will only update screenshots of these two scenarios) For `npm run update-screenshots`, you can further specify which renderers you want to update screenshots for. (e.g. `npm run update-screenshots khronos-BoomBox babylon` means update screenshots for khronos-BoomBox only with babylon)
+
 After running `npm run test`, you can look at the results by starting a local web server
 (e.g. `npx http-server`) in this folder, then opening `test/results-viewer.html` in a browser.

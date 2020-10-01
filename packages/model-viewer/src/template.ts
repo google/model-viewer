@@ -41,16 +41,11 @@ template.innerHTML = `
   position: relative;
 }
 
-.annotation-container {
-  position: absolute;
-  pointer-events: none;
-  top: 0;
-}
-
 .userInput {
   width: 100%;
   height: 100%;
   display: block;
+  position: relative;
   overflow: hidden;
 }
 
@@ -61,7 +56,7 @@ canvas {
   /* NOTE(cdata): Chrome 76 and below apparently have a bug
    * that causes our canvas not to display pixels unless it is
    * on its own render layer
-   * @see https://github.com/GoogleWebComponents/model-viewer/pull/755#issuecomment-536597893
+   * @see https://github.com/google/model-viewer/pull/755#issuecomment-536597893
    */
   transform: translateZ(0);
 }
@@ -116,6 +111,7 @@ canvas.show {
 }
 
 .slot.poster {
+  z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s 0.3s;
   background-color: inherit;
@@ -269,6 +265,7 @@ canvas.show {
 }
 
 .slot.default {
+  z-index: 1001;
   pointer-events: none;
 }
 
@@ -349,7 +346,7 @@ canvas.show {
       <slot name="exit-webxr-ar-button">
         <a id="default-exit-webxr-ar-button"
             tabindex="3"
-            aria-label="Exit fullscreen"
+            aria-label="Exit AR"
             aria-hidden="true">
           ${CloseIcon}
         </a>

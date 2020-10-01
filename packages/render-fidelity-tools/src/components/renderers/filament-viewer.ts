@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Aabb, Camera, Camera$Fov, Engine, Entity, EntityManager, fetch, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View} from 'filament';
+import {Aabb, Camera, Camera$Fov, clearAssetCache, Engine, Entity, EntityManager, fetch, gltfio$AssetLoader, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -43,6 +43,7 @@ const $view = Symbol('view');
 const $canvas = Symbol('canvas');
 const $boundingBox = Symbol('boundingBox');
 const $currentAsset = Symbol('currentAsset');
+const $assetLoader = Symbol('assetLoader');
 const $directionalLight = Symbol('this[$directionalLight]');
 
 const $initialize = Symbol('initialize');
@@ -50,6 +51,7 @@ const $updateScenario = Symbol('scenario');
 const $updateSize = Symbol('updateSize');
 const $render = Symbol('render');
 const $rendering = Symbol('rendering');
+const $initPromise = Symbol('initPromise');
 
 @customElement('filament-viewer')
 export class FilamentViewer extends LitElement {
@@ -66,17 +68,23 @@ export class FilamentViewer extends LitElement {
   private[$ibl]: IndirectLight|null;
   private[$skybox]: Skybox|null;
   private[$currentAsset]: gltfio$FilamentAsset|null;
+  private[$assetLoader]: gltfio$AssetLoader|null;
   private[$directionalLight]: Entity|null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
   private[$boundingBox]: Aabb = {min: [0, 0, 0], max: [0, 0, 0]};
 
+  private[$initPromise]: Promise<void>|null = null;
+
   constructor() {
     super();
 
-    init([], () => {
-      this[$initialize]();
-    });
+    this[$initPromise] = new Promise((resolve) => {
+      init([], () => {
+        this[$initialize]();
+        resolve();
+      });
+    })
   }
 
   connectedCallback() {
@@ -110,23 +118,27 @@ export class FilamentViewer extends LitElement {
 
   private[$initialize]() {
     this[$canvas] = this.shadowRoot!.querySelector('canvas');
-    const engine = Engine.create(this[$canvas]!);
+    const engine = Engine.create(this[$canvas]!, {alpha: true});
     const view = engine.createView();
 
+    const entityManager = EntityManager.get();
+    const emptyEntity = entityManager.create();
     this[$engine] = engine;
     this[$scene] = engine.createScene();
     this[$swapChain] = engine.createSwapChain();
     this[$renderer] = engine.createRenderer();
-    this[$camera] = engine.createCamera();
+    this[$camera] = engine.createCamera(emptyEntity);
     this[$view] = view;
     view.setCamera(this[$camera]);
     view.setScene(this[$scene]);
     view.setBloomOptions({enabled: false});
+    emptyEntity.delete();
 
     this[$updateSize]();
   }
 
   private async[$updateScenario](scenario: ScenarioConfig) {
+    await this[$initPromise];
     const modelUrl =
         new URL(scenario.model, window.location.toString()).toString();
     const lightingBaseName = (scenario.lighting.split('/').pop() as string)
@@ -140,35 +152,43 @@ export class FilamentViewer extends LitElement {
     console.log('Scenario:', scenario.name);
     console.log('Lighting:', lightingBaseName);
 
-    if (this[$currentAsset] != null) {
-      const entities = this[$currentAsset]!.getEntities();
-      const size = entities.size();
-
-      for (let i = 0; i < size; ++i) {
-        const entity = entities.get(i);
-        this[$scene].remove(entity);
-        this[$engine].destroyEntity(entity);
-      }
-
+    const existingAsset = this[$currentAsset];
+    if (existingAsset != null) {
+      const entities = existingAsset.getEntities();
+      this[$scene].removeEntities(entities);
+      this[$assetLoader]!.destroyAsset(existingAsset);
       this[$currentAsset] = null;
+      for (const entity of entities) {
+        entity.delete();  // This deletes the emscripten wrapper, not the entity
+                          // itself.
+      }
     }
 
     if (this[$ibl] != null) {
+      const ibl = this[$ibl]!;
       this[$scene].setIndirectLight(null);
-      this[$engine].destroyIndirectLight(this[$ibl]!);
+      this[$engine].destroyTexture(ibl.getReflectionsTexture());
+      this[$engine].destroyIndirectLight(ibl);
       this[$ibl] = null;
     }
 
     if (this[$skybox] != null) {
-      this[$engine].destroySkybox(this[$skybox]!);
+      const skybox = this[$skybox]!;
+      this[$scene].setSkybox(null);
+      this[$engine].destroyTexture(skybox.getTexture());
+      this[$engine].destroySkybox(skybox);
       this[$skybox] = null;
     }
 
     if (this[$directionalLight] != null) {
-      this[$scene].remove(this[$directionalLight]!);
-      this[$engine].destroyEntity(this[$directionalLight]!);
+      const light = this[$directionalLight]!;
+      this[$scene].remove(light);
+      this[$engine].destroyEntity(light);
+      light.delete();
       this[$directionalLight] = null;
     }
+
+    clearAssetCache();
 
     await fetchFilamentAssets([modelUrl]);
 
@@ -201,11 +221,22 @@ export class FilamentViewer extends LitElement {
       this[$ibl] = ibl
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
-      this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
-      this[$scene].setSkybox(this[$skybox]);
+
+      if (scenario.renderSkybox) {
+        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+        this[$scene].setSkybox(this[$skybox]);
+      } else {
+        this[$view].setBlendMode(View$BlendMode.TRANSLUCENT);
+        this[$renderer].setClearOptions(
+            {clearColor: [0, 0, 0, 0], clear: true, discard: true});
+      }
     }
 
-    const loader = this[$engine].createAssetLoader();
+    if (!this[$assetLoader]) {
+      this[$assetLoader] = this[$engine].createAssetLoader();
+    }
+    const loader = this[$assetLoader]!;
+
     this[$currentAsset] = IS_BINARY_RE.test(modelUrl) ?
         loader.createAssetFromBinary(modelUrl) :
         loader.createAssetFromJson(modelUrl);
@@ -217,19 +248,18 @@ export class FilamentViewer extends LitElement {
       asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
     });
 
-    loader.delete();
-
     this[$boundingBox] = asset.getBoundingBox();
-    this[$scene].addEntities(asset.getEntities());
+    const entities = asset.getEntities();
+    this[$scene].addEntities(entities);
+    for (const entity of entities) {
+      entity.delete();
+    }
 
     this[$updateSize]();
 
-    // Wait two rAFs to ensure we rendered at least once:
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.dispatchEvent(
-            new CustomEvent('model-visibility', {detail: {visible: true}}));
-      });
+      this.dispatchEvent(
+          new CustomEvent('model-visibility', {detail: {visible: true}}));
     });
   }
 

@@ -13,52 +13,34 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Model, ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
+import {Model, ThreeDOMElement as ThreeDOMElementInterface} from '../api.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
 
-export type ThreeDOMElementConstructor = Constructor<ThreeDOMElementInterface>&
-    ConstructedWithArguments<[ModelKernel]>;
+const $ownerModel = Symbol('ownerModel');
 
 /**
- * A constructor factory for a ThreeDOMElement class. The ThreeDOMElement is
- * defined based on a provided implementation for all specified 3DOM scene graph
- * element types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
+ * The basic implementation for all 3DOM scene graph participants.
+ * Scene graph nodes are distinguished by their "owner" Model. All scene
+ * graph nodes have an owner Model associated with them except for the
+ * sole Model in the scene graph, whose ownerModel property is not defined.
  */
-export function defineThreeDOMElement(): ThreeDOMElementConstructor {
-  const $ownerModel = Symbol('ownerModel');
+export class ThreeDOMElement implements ThreeDOMElementInterface {
+  protected[$ownerModel]: Model;
 
-  /**
-   * The basic implementation for all 3DOM scene graph participants.
-   * Scene graph nodes are distinguished by their "owner" Model. All scene
-   * graph nodes have an owner Model associated with them except for the
-   * sole Model in the scene graph, whose ownerModel property is not defined.
-   */
-  class ThreeDOMElement implements ThreeDOMElementInterface {
-    protected[$ownerModel]: Model;
-
-    constructor(kernel: ModelKernel) {
-      if (kernel == null) {
-        throw new Error('Illegal constructor');
-      }
-
-      this[$ownerModel] = kernel.model;
+  constructor(kernel: ModelKernelInterface) {
+    if (kernel == null) {
+      throw new Error('Illegal constructor');
     }
 
-    /**
-     * The Model of provenance for this scene graph element, or undefined if
-     * element is itself a Model.
-     */
-    get ownerModel() {
-      return this[$ownerModel];
-    }
+    this[$ownerModel] = kernel.model;
   }
 
-  return ThreeDOMElement;
+  /**
+   * The Model of provenance for this scene graph element, or undefined if
+   * element is itself a Model.
+   */
+  get ownerModel(): Model {
+    return this[$ownerModel];
+  }
 }

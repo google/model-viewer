@@ -13,67 +13,110 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA, ThreeDOMElement} from '../api.js';
+import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA, TextureInfo} from '../api.js';
 import {SerializedPBRMetallicRoughness} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type PBRMetallicRoughnessConstructor =
-    Constructor<PBRMetallicRoughnessInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedPBRMetallicRoughness]>;
+const $kernel = Symbol('kernel');
+const $baseColorFactor = Symbol('baseColorFactor');
+const $baseColorTexture = Symbol('baseColorTexture');
+const $metallicRoughnessTexture = Symbol('metallicRoughnessTexture');
+const $metallicFactor = Symbol('metallicFactor');
+const $roughnessFactor = Symbol('roughnessFactor');
 
 /**
- * A constructor factory for a PBRMetallicRoughness class. The
- * PBRMetallicRoughness is defined based on a provided implementation for all
- * specified 3DOM scene graph element types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
+ * PBRMetallicRoughness exposes the PBR properties for a given Material.
  */
-export function definePBRMetallicRoughness(
-    ThreeDOMElement: Constructor<ThreeDOMElement>):
-    PBRMetallicRoughnessConstructor {
-  const $kernel = Symbol('kernel');
-  const $baseColorFactor = Symbol('baseColorFactor');
+export class PBRMetallicRoughness extends ThreeDOMElement implements
+    PBRMetallicRoughnessInterface {
+  protected[$kernel]: ModelKernelInterface;
+  protected[$baseColorFactor]: Readonly<RGBA>;
+  protected[$baseColorTexture]: TextureInfo|null = null;
+  protected[$metallicFactor]: number;
+  protected[$roughnessFactor]: number;
+  protected[$metallicRoughnessTexture]: TextureInfo|null = null;
 
-  /**
-   * PBRMetallicRoughness exposes the PBR properties for a given Material.
-   */
-  class PBRMetallicRoughness extends ThreeDOMElement implements
-      PBRMetallicRoughnessInterface {
-    protected[$kernel]: ModelKernel;
-    protected[$baseColorFactor]: Readonly<RGBA>;
+  constructor(
+      kernel: ModelKernelInterface,
+      serialized: SerializedPBRMetallicRoughness) {
+    super(kernel);
 
-    constructor(
-        kernel: ModelKernel, serialized: SerializedPBRMetallicRoughness) {
-      super(kernel, serialized);
+    this[$kernel] = kernel;
+    this[$baseColorFactor] = Object.freeze(serialized.baseColorFactor) as RGBA;
+    this[$metallicFactor] = serialized.metallicFactor;
+    this[$roughnessFactor] = serialized.roughnessFactor;
 
-      this[$kernel] = kernel;
-      this[$baseColorFactor] =
-          Object.freeze(serialized.baseColorFactor) as RGBA;
+    const {baseColorTexture, metallicRoughnessTexture} = serialized;
+
+    if (baseColorTexture != null) {
+      this[$baseColorTexture] =
+          kernel.deserialize('texture-info', baseColorTexture);
     }
 
-    /**
-     * The base color factor of the material in RGBA format.
-     */
-    get baseColorFactor() {
-      return this[$baseColorFactor];
-    }
-
-    /**
-     * Set the base color factor of the material.
-     * Requires the material-properties capability.
-     *
-     * @see ../api.ts
-     */
-    async setBaseColorFactor(color: RGBA) {
-      await this[$kernel].mutate(this, 'baseColorFactor', color);
-      this[$baseColorFactor] = Object.freeze(color) as RGBA;
+    if (metallicRoughnessTexture != null) {
+      this[$metallicRoughnessTexture] =
+          kernel.deserialize('texture-info', metallicRoughnessTexture);
     }
   }
 
-  return PBRMetallicRoughness;
+  /**
+   * The base color factor of the material in RGBA format.
+   */
+  get baseColorFactor(): Readonly<RGBA> {
+    return this[$baseColorFactor];
+  }
+
+  /**
+   * The metalness factor of the material in range [0,1].
+   */
+  get metallicFactor(): number {
+    return this[$metallicFactor];
+  }
+
+  /**
+   * The roughness factor of the material in range [0,1].
+   */
+  get roughnessFactor(): number {
+    return this[$roughnessFactor];
+  }
+
+  get baseColorTexture(): TextureInfo|null {
+    return this[$baseColorTexture];
+  }
+
+  get metallicRoughnessTexture(): TextureInfo|null {
+    return this[$metallicRoughnessTexture];
+  }
+
+  /**
+   * Set the base color factor of the material.
+   *
+   * @see ../api.ts
+   */
+  async setBaseColorFactor(color: RGBA): Promise<void> {
+    await this[$kernel].mutate(this, 'baseColorFactor', color);
+    this[$baseColorFactor] = Object.freeze(color) as RGBA;
+  }
+
+  /**
+   * Set the metallic factor of the material.
+   *
+   * @see ../api.ts
+   */
+  async setMetallicFactor(factor: number): Promise<void> {
+    await this[$kernel].mutate(this, 'metallicFactor', factor);
+    this[$metallicFactor] = factor;
+  }
+
+  /**
+   * Set the roughness factor of the material.
+   *
+   * @see ../api.ts
+   */
+  async setRoughnessFactor(factor: number): Promise<void> {
+    await this[$kernel].mutate(this, 'roughnessFactor', factor);
+    this[$roughnessFactor] = factor;
+  }
 }

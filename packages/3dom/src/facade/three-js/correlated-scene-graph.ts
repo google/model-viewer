@@ -68,8 +68,24 @@ export class CorrelatedSceneGraph {
 
     // NOTE: IE11 does not have Map iterator methods
     associations.forEach((gltfElementReference, threeObject) => {
+      // Note: GLTFLoader creates a "default" material that has no corresponding
+      // glTF element in the case that no materials are specified in the source
+      // glTF. This means that for basic models without any of their own
+      // materials, we might accidentally try to present a configurable glTF
+      // material that doesn't exist. It might be valuable to make this default
+      // material configurable in the future, but for now we ignore it.
+      if (gltfElementReference == null) {
+        return;
+      }
+
       const {type, index} = gltfElementReference;
-      const gltfElement = gltf[type][index] as GLTFElement;
+      const elementArray = gltf[type] || [];
+      const gltfElement = elementArray[index];
+
+      if (gltfElement == null) {
+        // TODO: Maybe throw here...
+        return;
+      }
 
       let threeObjects = gltfElementMap.get(gltfElement);
 
@@ -110,7 +126,7 @@ export class CorrelatedSceneGraph {
 
             if (elementReference != null) {
               const {type, index} = elementReference;
-              const cloneElement = cloneGLTF[type][index];
+              const cloneElement = cloneGLTF[type]![index];
 
               cloneThreeObjectMap.set(cloneObject, {type, index});
 
@@ -170,14 +186,14 @@ export class CorrelatedSceneGraph {
   /**
    * The source Three.js GLTF result given to us by a Three.js GLTFLoader.
    */
-  get threeGLTF() {
+  get threeGLTF(): ThreeGLTF {
     return this[$threeGLTF];
   }
 
   /**
    * The in-memory deserialized source glTF.
    */
-  get gltf() {
+  get gltf(): GLTF {
     return this[$gltf];
   }
 
@@ -187,7 +203,7 @@ export class CorrelatedSceneGraph {
    * cases where more than one Three.js object corresponds to a single glTF
    * element.
    */
-  get gltfElementMap() {
+  get gltfElementMap(): GLTFElementToThreeObjectMap {
     return this[$gltfElementMap];
   }
 
@@ -195,7 +211,7 @@ export class CorrelatedSceneGraph {
    * A map of individual Three.js objects to corresponding elements in the
    * source glTF.
    */
-  get threeObjectMap() {
+  get threeObjectMap(): ThreeObjectToGLTFElementHandleMap {
     return this[$threeObjectMap];
   }
 

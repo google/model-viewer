@@ -27,6 +27,8 @@ import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const DEFAULT_FOV = 45;
+const DEFAULT_MIN_FOV = 25;
+const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
@@ -199,7 +201,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         settleControls(controls);
 
-        expect(element.getCameraTarget()).to.be.eql(target);
+        expect(element.getCameraTarget().toString())
+            .to.be.equal(target.toString());
       });
 
       test('causes the camera to look at the target', () => {
@@ -221,6 +224,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('defaults FOV correctly', async () => {
         expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
+      });
+
+      test('defaults FOV limits correctly', async () => {
+        expect(element.getMinimumFieldOfView())
+            .to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
+        expect(element.getMaximumFieldOfView())
+            .to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {
@@ -373,10 +383,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             }
           });
 
-          test('respects user-configured maxFieldOfView', async () => {
+          test('respects user-configured min/maxFieldOfView', async () => {
             document.body.insertBefore(
                 initiallyUnloadedElement, document.body.firstChild);
 
+            initiallyUnloadedElement.minFieldOfView = '90deg';
             initiallyUnloadedElement.maxFieldOfView = '100deg';
             initiallyUnloadedElement.src = ASTRONAUT_GLB_PATH;
 
@@ -388,6 +399,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             settleControls(controls);
 
             expect(initiallyUnloadedElement.getFieldOfView())
+                .to.be.closeTo(100, 0.001);
+
+            expect(initiallyUnloadedElement.getMinimumFieldOfView())
+                .to.be.closeTo(90, 0.001);
+
+            expect(initiallyUnloadedElement.getMaximumFieldOfView())
                 .to.be.closeTo(100, 0.001);
           });
         });

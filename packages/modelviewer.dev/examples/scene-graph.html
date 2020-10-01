@@ -19,8 +19,8 @@
 <head>
   <title>&lt;model-viewer&gt; Scene Graph Worklet</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="&lt;model-viewer&gt; scene graph examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
@@ -35,9 +35,6 @@
 
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -68,30 +65,15 @@ button {
     <div class="content">
       <div class="wrapper">
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
-        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph using a special kind of &lt;script&gt; tag</h4>
+        <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</h4>
         <div class="heading">
-          <h2 class="demo-title">Scene Graph Worklet</h2>
+          <h2 class="demo-title">Change Material Base Color</h2>
           <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
 
-<model-viewer id="astronaut" camera-controls src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <script type="experimental-scene-graph-worklet" allow="messaging; material-properties">
-self.addEventListener('model-change', (event) => {
-  const {model} = event;
-  const [material] = model.materials;
-
-  self.addEventListener('message', (event) => {
-    switch(event.data.action) {
-      case 'change-color':
-        console.log('Changing color to:', event.data.payload);
-        material.pbrMetallicRoughness.setBaseColorFactor(event.data.payload);
-        break;
-    }
-  });
-});
-  </script>
+<model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <div id="controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
@@ -99,6 +81,8 @@ self.addEventListener('model-change', (event) => {
   </div>
 </model-viewer>
 <script>
+const modelViewer = document.querySelector("model-viewer");
+
 document.querySelector('#controls').addEventListener('click', (event) => {
   const colorString = event.target.dataset.color;
 
@@ -109,11 +93,9 @@ document.querySelector('#controls').addEventListener('click', (event) => {
   const color = colorString.split(',')
       .map(numberString => parseFloat(numberString));
 
-  // Forward interaction details to the <model-viewer> worklet:
-  astronaut.worklet.postMessage({
-    action: 'change-color',
-    payload: color
-  });
+  console.log('Changing color to: ', color);
+  const [material] = modelViewer.model.materials;
+  material.pbrMetallicRoughness.setBaseColorFactor(color);
 });
 </script>
           </template>
@@ -123,15 +105,286 @@ document.querySelector('#controls').addEventListener('click', (event) => {
   </div>
 
 
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Change Material Metalness and Roughness Factors</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+
+<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
+  <div id="controls">
+    <div>
+      <p>Metalness: <span id="metalness-value"></span></p>
+      <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
+    </div>
+    <div>
+      <p>Roughness: <span id="roughness-value"></span></p>
+      <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+    </div>
+  </div>
+</model-viewer>
+<script>
+const modelViewerParameters = document.querySelector("model-viewer#sphere");
+
+modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
+
+  let material = modelViewerParameters.model.materials[0];
+
+  let metalnessDisplay = document.querySelector("#metalness-value");
+  let roughnessDisplay = document.querySelector("#roughness-value");
+
+  metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
+  roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
+
+  // Defaults to gold
+  material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
+
+  document.querySelector('#metalness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+    metalnessDisplay.textContent = event.target.value;
+  });
+  
+  document.querySelector('#roughness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+    roughnessDisplay.textContent = event.target.value;
+  });
+})
+
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-3" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Swap textures - Diffuse/MetallicRoughness</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <template>
+
+<model-viewer id="lantern" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
+  <div id="controls">
+    <div>
+      <p>Diffuse</p>
+      <select id="diffuse">
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Metallic-roughness</p>
+      <select id="metallicRoughness">
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#lantern");
+
+modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
+
+  let material = modelViewerTexture.model.materials[0];
+
+  let applyPBRTexture = (channel, event) => {
+    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
+  }
+  
+  document.querySelector('#diffuse').addEventListener('input', (event) => {
+    applyPBRTexture('baseColorTexture', event);
+  });
+  
+  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+    applyPBRTexture('metallicRoughnessTexture', event);
+  });
+})
+
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-4" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <template>
+
+<model-viewer id="helmet" camera-controls interaction-prompt="none" src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
+  <div id="controls">
+    <div>
+      <p>Normals</p>
+      <select id="normals">
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Occlusion</p>
+      <select id="occlusion">
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Emission</p>
+      <select id="emission">
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
+        <option value="../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#helmet");
+
+modelViewerTexture.addEventListener("scene-graph-ready", () => {
+
+  let material = modelViewerTexture.model.materials[0];
+
+  let applyTexture = (channel, event) => {
+    material[channel].texture.source.setURI(event.target.value);
+  }
+
+  document.querySelector('#normals').addEventListener('input', (event) => {
+    applyTexture('normalTexture', event);
+  });
+  
+  document.querySelector('#occlusion').addEventListener('input', (event) => {
+    applyTexture('occlusionTexture', event);
+  });
+  
+  document.querySelector('#emission').addEventListener('input', (event) => {
+    applyTexture('emissiveTexture', event);
+  });
+});
+
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-5" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+
+        <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+        <div class="heading">
+          <h2 class="demo-title">Exporter</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <template>
+<model-viewer id="static-model" src="../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
+  <div id="controls">
+    <button onclick="exportGLB()">Export GLB</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportGLB(){
+    let modelViewer = document.getElementById("static-model");
+    const glTF = await modelViewer.exportScene();
+    var file = new File([glTF], "export.glb");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-6" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Exporter with options</h2>
+        </div>
+        <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <template>
+<model-viewer id="animated-model" src="../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
+  <div id="controls">
+    <button onclick="exportScene(true)">Export GLB</button>
+    <button onclick="exportScene(false)">Export GLTF</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportScene(binary){
+    let options = {
+      binary: binary,
+      trs: true,
+      onlyVisible: true,
+      maxTextureSize: 256,
+      forcePowerOfTwoTextures: true,
+      includeCustomExtensions: false,
+      embedImages: true
+    };
+    let modelViewer = document.getElementById("animated-model");
+    const glTF = await modelViewer.exportScene(options);
+    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+          </template>
+        </example-snippet>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Lantern">Lantern</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/WaterBottle">Water Bottle</a>,
+        licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+      </li>
+      <li class="attribution">
+        <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Horse</a> by <a href="https://github.com/dataarts">Google Data Arts Team</a>,
+        licensed under <a href="https://github.com/dataarts/3-dreams-of-black/blob/master/deploy/files/models/soup/LICENSE.txt">Creative Commons Attribution-NonCommercial-ShareAlike</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
 
   

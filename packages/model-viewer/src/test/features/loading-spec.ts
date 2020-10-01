@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import {$defaultPosterElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const CUBE_GLB_PATH = assetPath('models/cube.gltf');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('ModelViewerElementBase with LoadingMixin', () => {
@@ -91,7 +91,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
         // two rAFs (empirically observed). Await extra time just in case:
         await timePasses(100);
 
-        element.src = ASTRONAUT_GLB_PATH;
+        element.src = CUBE_GLB_PATH;
 
         await timePasses(500);  // Arbitrary time to allow model to load
 
@@ -105,7 +105,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
       suite('load', () => {
         suite('when a model src changes after loading', () => {
           setup(async () => {
-            element.src = ASTRONAUT_GLB_PATH;
+            element.src = CUBE_GLB_PATH;
             await waitForEvent(element, 'load');
           });
 
@@ -122,7 +122,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
               await waitForEvent(element, 'load');
 
-              element.src = ASTRONAUT_GLB_PATH;
+              element.src = CUBE_GLB_PATH;
 
               await waitForEvent(element, 'load');
 
@@ -142,7 +142,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           test(
               'eventually notifies that current src is preloaded', async () => {
                 element.loading = 'eager';
-                element.src = ASTRONAUT_GLB_PATH;
+                element.src = CUBE_GLB_PATH;
 
                 await timePasses();
 
@@ -158,6 +158,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                 await until(() => element.loaded);
 
+                await timePasses();
+
                 element.removeEventListener<any>('preload', onPreload);
 
                 expect(preloadEvent).to.be.ok;
@@ -169,7 +171,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           suite('auto', () => {
             test('hides poster when element loads', async () => {
               element.loading = 'eager';
-              element.src = ASTRONAUT_GLB_PATH;
+              element.src = CUBE_GLB_PATH;
 
               await waitForEvent(
                   element,
@@ -184,12 +186,12 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           });
 
           suite('interaction', () => {
-            test('retains poster after preloading', async () => {
+            test('retains poster after loading', async () => {
               element.loading = 'eager';
               element.reveal = 'interaction';
-              element.src = ASTRONAUT_GLB_PATH;
+              element.src = CUBE_GLB_PATH;
 
-              await waitForEvent(element, 'preload');
+              await waitForEvent(element, 'load');
               await timePasses(POSTER_TRANSITION_TIME + 100);
 
               const input = element[$userInputElement];
@@ -203,13 +205,13 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   'can hide the poster with keyboard interaction', async () => {
                     element.loading = 'eager';
                     element.reveal = 'interaction';
-                    element.src = ASTRONAUT_GLB_PATH;
+                    element.src = CUBE_GLB_PATH;
 
                     const posterElement =
                         (element as any)[$defaultPosterElement];
                     const inputElement = element[$userInputElement];
 
-                    await waitForEvent(element, 'preload');
+                    await waitForEvent(element, 'load');
 
                     // NOTE(cdata): Currently, Firefox does not forward focus
                     // when delegatesFocus is true but focus is triggered
@@ -233,12 +235,12 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             test('does not hide poster until dismissed', async () => {
               element.loading = 'eager';
               element.reveal = 'manual';
-              element.src = ASTRONAUT_GLB_PATH;
+              element.src = CUBE_GLB_PATH;
 
               const posterElement = (element as any)[$defaultPosterElement];
               const input = element[$userInputElement];
 
-              await waitForEvent(element, 'preload');
+              await waitForEvent(element, 'load');
 
               posterElement.focus();
 
@@ -260,7 +262,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
           test('sets poster to null', async () => {
             // NOTE(cdata): This is less important after we resolve
             // https://github.com/PolymerLabs/model-viewer/issues/76
-            element.setAttribute('poster', ASTRONAUT_GLB_PATH);
+            element.setAttribute('poster', CUBE_GLB_PATH);
             await timePasses();
             element.removeAttribute('poster');
             await timePasses();
@@ -271,7 +273,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
       suite('with loaded model src', () => {
         setup(() => {
-          element.src = ASTRONAUT_GLB_PATH;
+          element.src = CUBE_GLB_PATH;
         });
 
         test('can be hidden imperatively', async () => {
@@ -307,13 +309,19 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
           test('when src is reset, poster is dismissable', async () => {
             const posterElement = (element as any)[$defaultPosterElement];
+            const posterContainer = (element as any)[$posterContainerElement];
             const inputElement = element[$userInputElement];
 
             element.reveal = 'interaction';
             element.src = null;
-            element.src = ASTRONAUT_GLB_PATH;
 
             await timePasses();
+
+            element.src = CUBE_GLB_PATH;
+
+            await timePasses();
+
+            expect(posterContainer.classList.contains('show')).to.be.true;
 
             posterElement.focus();
 
