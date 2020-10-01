@@ -31,7 +31,7 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
