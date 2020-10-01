@@ -123,7 +123,6 @@ function createSidebar(category: Category) {
 }
 
 function createTitle(header: string) {
-  console.log(header);
   const titleContainer =
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `

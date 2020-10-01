@@ -92,16 +92,14 @@ export function init(docsOrExamples: string) {
   const filePath = docsOrExamples === 'docs' ? '../data/docs.json' :
                                                '../../data/examples.json';
   loadJSON(filePath, function(response: string) {
-    const actualJSON = JSON.parse(response);
+    const json = JSON.parse(response);
     if (docsOrExamples === 'docs') {
-      convertJSONToHTML(actualJSON);
-      sidebarObserver(docsOrExamples);
-      jumpToSection();
+      convertJSONToHTML(json);
     } else {
-      createExamplesSidebar(actualJSON);
-      sidebarObserver(docsOrExamples);
-      jumpToSection();
+      createExamplesSidebar(json);
     }
+    sidebarObserver(docsOrExamples);
+    jumpToSection();
   });
 }
 
