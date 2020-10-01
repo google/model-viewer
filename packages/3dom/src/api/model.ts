@@ -13,66 +13,49 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Material, Model as ModelInterface, ThreeDOMElement} from '../api.js';
+import {Material, Model as ModelInterface} from '../api.js';
 import {SerializedModel} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type ModelConstructor = Constructor<ModelInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedModel]>;
+const $materials = Symbol('material');
+const $kernel = Symbol('kernel');
 
 /**
- * A constructor factory for a Model class. The Model is defined based on a
- * provided implementation for all specified 3DOM scene graph element types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
+ * A Model is the root element of a 3DOM scene graph. It is considered the
+ * element of provenance for all other elements that participate in the same
+ * graph. All other elements in the graph can be accessed in from the Model
+ * in some fashion.
  */
-export function defineModel(ThreeDOMElement: Constructor<ThreeDOMElement>):
-    ModelConstructor {
-  const $materials = Symbol('material');
-  const $kernel = Symbol('kernel');
+export class Model extends ThreeDOMElement implements ModelInterface {
+  protected[$kernel]: ModelKernelInterface;
+  protected[$materials]: Readonly<Array<Material>> = Object.freeze([]);
 
-  /**
-   * A Model is the root element of a 3DOM scene graph. It is considered the
-   * element of provenance for all other elements that participate in the same
-   * graph. All other elements in the graph can be accessed in from the Model
-   * in some fashion.
-   */
-  class Model extends ThreeDOMElement implements ModelInterface {
-    protected[$kernel]: ModelKernel;
-    protected[$materials]: Readonly<Array<Material>> = Object.freeze([]);
+  constructor(kernel: ModelKernelInterface, serialized: SerializedModel) {
+    super(kernel);
+    this[$kernel] = kernel;
 
-    constructor(kernel: ModelKernel, serialized: SerializedModel) {
-      super(kernel);
-      this[$kernel] = kernel;
-
-      for (const material of serialized.materials) {
-        this[$kernel].deserialize('material', material);
-      }
-    }
-
-    /**
-     * The set of Material elements in the graph, in sparse traversal order.
-     * Note that this set will include any Materials that are not part of the
-     * currently activate scene.
-     *
-     * TODO(#1002): This value needs to be sensitive to scene graph order
-     */
-    get materials() {
-      return this[$kernel].getElementsByType('material');
-    }
-
-    /**
-     * A Model has no owner model; it owns itself.
-     */
-    get ownerModel() {
-      return undefined;
+    for (const material of serialized.materials) {
+      this[$kernel].deserialize('material', material);
     }
   }
 
-  return Model;
+  /**
+   * The set of Material elements in the graph, in sparse traversal order.
+   * Note that this set will include any Materials that are not part of the
+   * currently activate scene.
+   *
+   * TODO(#1002): This value needs to be sensitive to scene graph order
+   */
+  get materials(): Readonly<Material[]> {
+    return this[$kernel].getElementsByType('material');
+  }
+
+  /**
+   * A Model has no owner model; it owns itself.
+   */
+  get ownerModel(): Model {
+    return this;
+  }
 }

@@ -35,7 +35,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 const blobCanvas = document.createElement('canvas');
 let blobContext: CanvasRenderingContext2D|null = null;
 
-const $loaded = Symbol('loaded');
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
@@ -45,6 +44,7 @@ const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $contextLostHandler = Symbol('contextLostHandler');
 
+export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
@@ -55,7 +55,6 @@ export const $markLoaded = Symbol('markLoaded');
 export const $container = Symbol('container');
 export const $userInputElement = Symbol('input');
 export const $canvas = Symbol('canvas');
-export const $displayCanvas = Symbol('displayCanvas');
 export const $scene = Symbol('scene');
 export const $needsRender = Symbol('needsRender');
 export const $tick = Symbol('tick');
@@ -65,6 +64,9 @@ export const $renderer = Symbol('renderer');
 export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
+export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+export const $sceneIsReady = Symbol('sceneIsReady');
+export const $hasTransitioned = Symbol('hasTransitioned');
 
 export interface Vector3D {
   x: number
@@ -115,6 +117,24 @@ export default class ModelViewerElementBase extends UpdatingElement {
   /** @export */
   static get modelCacheSize(): number {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
+  }
+
+  /** @export */
+  static set minimumRenderScale(value: number) {
+    if (value > 1) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
+    }
+    if (value <= 0) {
+      console.warn(
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+    }
+    Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
+  }
+
+  /** @export */
+  static get minimumRenderScale(): number {
+    return Renderer.singleton.minScale;
   }
 
   @property({type: String}) alt: string|null = null;
@@ -215,7 +235,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$scene].addEventListener('model-load', (event) => {
       this[$markLoaded]();
-      this[$onModelLoad](event);
+      this[$onModelLoad]();
 
       this.dispatchEvent(
           new CustomEvent('load', {detail: {url: (event as any).url}}));
@@ -247,38 +267,31 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
-      const enterRenderTreeProgress = this[$progressTracker].beginActivity();
-
       this[$intersectionObserver] = new IntersectionObserver(entries => {
         for (let entry of entries) {
           if (entry.target === this) {
             const oldVisibility = this.modelIsVisible;
-            const oldValue = this[$isElementInViewport];
-            this[$isElementInViewport] = this[$scene].visible =
-                entry.isIntersecting;
-            this.requestUpdate($isElementInViewport, oldValue);
+            this[$isElementInViewport] = entry.isIntersecting;
             this[$announceModelVisibility](oldVisibility);
-
-            if (this[$isElementInViewport]) {
-              // Wait a microtask to give other properties a chance to respond
-              // to the state change, then resolve progress on entering the
-              // render tree:
-              Promise.resolve().then(() => {
-                enterRenderTreeProgress(1);
-              });
+            if (this[$isElementInViewport] && !this[$sceneIsReady]()) {
+              this[$updateSource]();
             }
           }
         }
       }, {
         root: null,
-        rootMargin: '10px',
+        // We used to have margin here, but it was causing animated models below
+        // the fold to steal the frame budget. Weirder still, it would also
+        // cause input events to be swallowed, sometimes for seconds on the
+        // model above the fold, but only when the animated model was completely
+        // below. Setting this margin to zero fixed it.
+        rootMargin: '0px',
         threshold: 0,
       });
     } else {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
-      this[$isElementInViewport] = this[$scene].visible = true;
-      this.requestUpdate($isElementInViewport, false);
+      this[$isElementInViewport] = true;
     }
   }
 
@@ -356,7 +369,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
-    return this[$displayCanvas].toDataURL(type, encoderOptions);
+    return this[$renderer]
+        .displayCanvas(this[$scene])
+        .toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -366,9 +381,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const idealAspect = options ? options.idealAspect : undefined;
 
     const {width, height, model, aspect} = this[$scene];
-    const {dpr} = this[$renderer];
-    let outputWidth = width * dpr;
-    let outputHeight = height * dpr;
+    const {dpr, scaleFactor} = this[$renderer];
+    let outputWidth = width * scaleFactor * dpr;
+    let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
     let offsetY = 0;
     if (idealAspect === true) {
@@ -390,7 +405,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
           blobContext = blobCanvas.getContext('2d');
         }
         blobContext!.drawImage(
-            this[$displayCanvas],
+            this[$renderer].displayCanvas(this[$scene]),
             offsetX,
             offsetY,
             outputWidth,
@@ -441,12 +456,19 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
-    return this[$isElementInViewport];
+    return this.loaded && this[$isElementInViewport];
   }
 
-  get[$displayCanvas]() {
-    return this[$renderer].hasOnlyOneScene ? this[$renderer].canvasElement :
-                                             this[$canvas];
+  [$hasTransitioned](): boolean {
+    return this.modelIsVisible;
+  }
+
+  [$shouldAttemptPreload](): boolean {
+    return !!this.src && this[$isElementInViewport];
+  }
+
+  [$sceneIsReady](): boolean {
+    return this[$loaded];
   }
 
   /**
@@ -469,16 +491,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     this[$loaded] = true;
     this[$loadedTime] = performance.now();
-    // Asynchronously invoke `update`:
-    this.requestUpdate();
   }
 
   [$needsRender]() {
     this[$scene].isDirty = true;
   }
 
-  [$onModelLoad](_event: any) {
-    this[$needsRender]();
+  [$onModelLoad]() {
   }
 
   [$onResize](e: {width: number, height: number}) {
@@ -497,19 +516,26 @@ export default class ModelViewerElementBase extends UpdatingElement {
    * attribute.
    */
   async[$updateSource]() {
+    if (this.loaded || !this[$shouldAttemptPreload]()) {
+      return;
+    }
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
-
-    const canvas = this[$displayCanvas];
     try {
-      canvas.classList.add('show');
       await this[$scene].setModelSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.9));
+          source, (progress: number) => updateSourceProgress(progress * 0.8));
+
+      const detail = {url: source};
+      this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
-      canvas.classList.remove('show');
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
-      updateSourceProgress(1.0);
+      updateSourceProgress(0.9);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          updateSourceProgress(1.0);
+        });
+      });
     }
   }
 }

@@ -5,11 +5,12 @@ on: [pull_request]
 jobs:
   minimal_test_run:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     if: github.event.pull_request.base.repo.id != github.event.pull_request.head.repo.id
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
@@ -20,7 +21,7 @@ jobs:
         echo "::set-output name=dir::$(npm config get cache)"
 
     - name: Cache npm packages
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}

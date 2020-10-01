@@ -14,7 +14,7 @@
  */
 
 import {IS_IE11} from '../constants.js';
-import ModelViewerElementBase, {$scene, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor} from '../utilities.js';
 
@@ -35,9 +35,8 @@ const expectBlobDimensions =
     img.src = url;
   });
 
-  const dpr = window.devicePixelRatio;
-  expect(img.width).to.be.equal(width * dpr);
-  expect(img.height).to.be.equal(height * dpr);
+  expect(img.width).to.be.equal(Math.round(width));
+  expect(img.height).to.be.equal(Math.round(height));
 };
 
 suite('ModelViewerElementBase', () => {
@@ -51,7 +50,7 @@ suite('ModelViewerElementBase', () => {
     let ModelViewerElement: Constructor<ModelViewerElementBase>;
 
     setup(() => {
-      tagName = `model-viewer-${nextId++}`;
+      tagName = `model-viewer-base-${nextId++}`;
       ModelViewerElement = class extends ModelViewerElementBase {
         static get is() {
           return tagName;
@@ -200,13 +199,17 @@ suite('ModelViewerElementBase', () => {
 
     suite('capturing screenshots', () => {
       let element: ModelViewerElementBase;
+      let width: number;
+      let height: number;
       setup(async () => {
         element = new ModelViewerElement();
 
         // Avoid testing our memory ceiling in CI by limiting the size
         // of the screenshots we produce in these tests:
-        element.style.width = '32px';
-        element.style.height = '64px';
+        width = 32;
+        height = 64;
+        element.style.width = `${width}px`;
+        element.style.height = `${height}px`;
 
         document.body.insertBefore(element, document.body.firstChild);
 
@@ -301,13 +304,15 @@ suite('ModelViewerElementBase', () => {
                   .to.eql(supportedBrowserArrayBuffer);
             });
 
-        test('idealAspect gives the proper blob dimensions', async () => {
+        test.skip('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
-          const idealHeight =
-              Math.round(32 / element[$scene].model.fieldOfViewAspect);
-          await expectBlobDimensions(basicBlob, 32, 64);
-          await expectBlobDimensions(idealBlob, 32, idealHeight);
+          const idealHeight = 32 / element[$scene].model.fieldOfViewAspect;
+
+          const {dpr, scaleFactor} = element[$renderer];
+          const f = dpr * scaleFactor;
+          await expectBlobDimensions(basicBlob, width * f, height * f);
+          await expectBlobDimensions(idealBlob, width * f, idealHeight * f);
         });
       });
     });
@@ -320,16 +325,12 @@ suite('ModelViewerElementBase', () => {
         elements.push(new ModelViewerElement());
         elements.push(new ModelViewerElement());
 
-        const loaded = elements.map(e => waitForEvent(e, 'load'));
-
         for (let element of elements) {
           element.style.position = 'relative';
           element.style.marginBottom = '100vh';
           element.src = assetPath('models/cube.gltf');
           document.body.insertBefore(element, document.body.firstChild);
         }
-
-        await Promise.all(loaded);
       });
 
       teardown(() => {
@@ -340,10 +341,10 @@ suite('ModelViewerElementBase', () => {
 
       test('sets a model within viewport to be visible', async () => {
         await until(() => {
-          return elements[2][$scene].visible;
+          return elements[2].modelIsVisible;
         });
 
-        expect(elements[2][$scene].visible).to.be.true;
+        expect(elements[2].modelIsVisible).to.be.true;
       });
 
       test.skip('only models visible in the viewport', async () => {
@@ -353,14 +354,14 @@ suite('ModelViewerElementBase', () => {
         await until(() => {
           return elements
               .map((element, index) => {
-                return (index === 0) === element[$scene].visible;
+                return (index === 0) === element.modelIsVisible;
               })
               .reduce(((l, r) => l && r), true);
         });
 
-        expect(elements[0][$scene].visible).to.be.ok;
-        expect(elements[1][$scene].visible).to.not.be.ok;
-        expect(elements[2][$scene].visible).to.not.be.ok;
+        expect(elements[0].modelIsVisible).to.be.ok;
+        expect(elements[1].modelIsVisible).to.not.be.ok;
+        expect(elements[2].modelIsVisible).to.not.be.ok;
       });
     });
   });

@@ -16,7 +16,7 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$loaded, $needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
@@ -145,6 +145,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
+          element[$loaded] = true;
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');

@@ -14,14 +14,27 @@
  */
 
 import {RGBA} from '../api.js';
-import {GLTF, GLTFElement} from '../gltf-2.0.js';
-import {SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedThreeDOMElement} from '../protocol.js';
+import {GLTF, GLTFElement, MagFilter, MinFilter, WrapMode} from '../gltf-2.0.js';
+import {SerializedImage, SerializedMaterial, SerializedModel, SerializedPBRMetallicRoughness, SerializedSampler, SerializedTexture, SerializedThreeDOMElement} from '../protocol.js';
 
+/**
+ * Implementation common to all elements in the 3DOM facade domain.
+ */
 export interface ThreeDOMElement {
   readonly ownerModel: Model;
   readonly internalID: number;
   readonly name: string|null;
   readonly sourceObject: GLTF|GLTFElement;
+
+  /**
+   * Mutate a property on the element. Throws for all properties and values that
+   * are not explicitly supported by the implementation.
+   */
+  mutate(property: string, value: unknown): Promise<void>;
+
+  /**
+   * Serialize the element so that it can be transferred to another context.
+   */
   toJSON(): SerializedThreeDOMElement;
 }
 
@@ -32,7 +45,14 @@ export interface ThreeDOMElement {
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#pbrmetallicroughness
  */
 export interface PBRMetallicRoughness extends ThreeDOMElement {
-  baseColorFactor: RGBA;
+  readonly baseColorFactor: RGBA;
+  readonly metallicFactor: number;
+  readonly roughnessFactor: number;
+
+  mutate(property: 'baseColorFactor', value: RGBA): Promise<void>;
+  mutate(property: 'metallicFactor', value: number): Promise<void>;
+  mutate(property: 'roughnessFactor', value: number): Promise<void>;
+
   toJSON(): SerializedPBRMetallicRoughness;
 }
 
@@ -43,7 +63,56 @@ export interface PBRMetallicRoughness extends ThreeDOMElement {
  */
 export interface Material extends ThreeDOMElement {
   readonly pbrMetallicRoughness: PBRMetallicRoughness|null;
+
+  readonly normalTexture: TextureInfo|null;
+  readonly occlusionTexture: TextureInfo|null;
+  readonly emissiveTexture: TextureInfo|null;
+
   toJSON(): SerializedMaterial;
+}
+
+/**
+ * A facade that wraps an underlying renderer's notion of an image
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#image
+ */
+export interface Image {
+  mutate(property: 'uri', value: string): Promise<void>;
+
+  toJSON(): SerializedImage;
+}
+
+/**
+ * A facade that wraps an underlying renderer's notion of a sampler
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#sampler
+ */
+export interface Sampler {
+  mutate(property: 'minFilter', value: MinFilter|null): Promise<void>;
+  mutate(property: 'magFilter', value: MagFilter|null): Promise<void>;
+  mutate(property: 'wrapS'|'wrapT', value: WrapMode|null): Promise<void>;
+
+  toJSON(): SerializedSampler;
+}
+
+/**
+ * A facade that wraps an underlying renderer's notion of a texture
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#texture
+ */
+export interface Texture extends ThreeDOMElement {
+  mutate(property: 'source'|'sampler', value: number|null): Promise<void>;
+
+  toJSON(): SerializedTexture;
+}
+
+/**
+ * A facade that wraps an underlying renderer's notion of a texture
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#texture
+ */
+export interface TextureInfo extends ThreeDOMElement {
+  mutate(property: 'texture', value: number|null): Promise<void>;
 }
 
 /**
@@ -62,7 +131,7 @@ export interface Model extends ThreeDOMElement {
  *
  * @see ../context.ts
  */
-export interface ModelGraft extends EventTarget {
+export interface ModelGraft {
   /**
    * A flat list of all unique materials found in this scene graph.
    *

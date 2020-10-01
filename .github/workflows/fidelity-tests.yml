@@ -1,13 +1,14 @@
 name: Fidelity tests
 
-on: [pull_request]
+on: pull_request
 
 jobs:
   compare_renders:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
@@ -18,7 +19,7 @@ jobs:
         echo "::set-output name=dir::$(npm config get cache)"
 
     - name: Cache npm packages
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -35,7 +36,10 @@ jobs:
       run: npm run bootstrap
 
     - name: Build packages
-      run: npm run build
+      run: |
+       ./node_modules/.bin/lerna run --scope @google/3dom build --stream
+       ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
+       ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
 
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0

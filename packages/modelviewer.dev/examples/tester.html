@@ -26,8 +26,8 @@
   </script>
   <title>&lt;model-viewer&gt; Interactive Example</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="&lt;model-viewer&gt; interactive example">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../shared-assets/models/favicon.png"/>
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
@@ -43,14 +43,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
   <style>
     body, html {
       height: 100%;
@@ -133,10 +127,10 @@
   <div id="container">
     <div id="instructions">
     <h1>
-      <a href="https://github.com/GoogleWebComponents/model-viewer" target="_blank">&lt;model-viewer&gt;</a>
+      <a href="https://github.com/google/model-viewer" target="_blank" rel="noopener">&lt;model-viewer&gt;</a>
     </h1>
-    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank">glTF or GLB</a> for the model =><br/>
-    Drop an <a href="https://hdrihaven.com/" target="_blank">HDR or JPG</a> for the skybox =><br/>
+    Drop a <a href="https://github.com/KhronosGroup/glTF" target="_blank" rel="noopener">glTF or GLB</a> for the model =><br/>
+    Drop an <a href="https://hdrihaven.com/" target="_blank" rel="noopener">HDR or JPG</a> for the skybox =><br/>
     <input type="file" id="input" multiple><br/><br/>
 
     <label for="src">src:</label>
@@ -145,8 +139,8 @@
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb">Boom Box</option>
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb">Brain Stem</option>
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF-Binary/Corset.glb">Corset</option>
-      <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb">Damaged Helmet</option>
-      <option value="../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" selected>Flight Helmet</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" selected>Damaged Helmet</option>
+      <option value="../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf">Flight Helmet</option>
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb">Lantern</option>
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf">Monkey</option>
       <option value="../shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb">Water Bottles</option>
@@ -202,7 +196,7 @@
     
     </div> 
     <model-viewer id="loading-demo" autoplay camera-controls interaction-prompt="none"
-      src="../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf" alt="A 3D model">
+      src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model">
     </model-viewer>
   </div>
 
@@ -233,8 +227,8 @@
         licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
 
   <script type="module" src="./built/tester.js"></script>

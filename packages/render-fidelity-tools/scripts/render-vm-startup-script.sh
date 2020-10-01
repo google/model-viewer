@@ -34,7 +34,7 @@
 # export GITHUB_ACCESS_TOKEN=your-github-access-token-here
 
 # These values may not need to be customized:
-export MODEL_VIEWER_REPOSITORY=https://$GITHUB_USER:$GITHUB_ACCESS_TOKEN@github.com/googlewebcomponents/model-viewer.git
+export MODEL_VIEWER_REPOSITORY=https://$GITHUB_USER:$GITHUB_ACCESS_TOKEN@github.com/google/model-viewer.git
 export MODEL_VIEWER_CHECKOUT_DIRECTORY=$HOME/model-viewer
 export MODEL_VIEWER_BASE_BRANCH=master
 

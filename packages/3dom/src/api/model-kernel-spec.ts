@@ -14,19 +14,12 @@
  */
 
 import {RGBA} from '../api.js';
-import {FakeMaterial, FakeModel, FakePBRMetallicRoughness} from '../test-helpers.js';
 import {getLocallyUniqueId} from '../utilities.js';
 
-import {defineModelKernel, ModelKernel, ModelKernelConstructor} from './model-kernel.js';
+import {ModelKernel} from './model-kernel.js';
 
 suite('api/model-kernel', () => {
   suite('defineModelKernel', () => {
-    let ModelKernel: ModelKernelConstructor;
-    setup(() => {
-      ModelKernel =
-          defineModelKernel(FakeModel, FakeMaterial, FakePBRMetallicRoughness);
-    });
-
     suite('ModelKernel', () => {
       test('deserializes a sparse, serialized model', () => {
         const channel = new MessageChannel();
@@ -42,7 +35,7 @@ suite('api/model-kernel', () => {
         kernel.deactivate();
       });
 
-      suite('with a Model cntaining a Material', () => {
+      suite('with a Model containing a Material', () => {
         let kernel: ModelKernel;
 
         setup(() => {
@@ -53,7 +46,9 @@ suite('api/model-kernel', () => {
               id: getLocallyUniqueId(),
               pbrMetallicRoughness: {
                 id: getLocallyUniqueId(),
-                baseColorFactor: [0, 0, 0, 1] as RGBA
+                baseColorFactor: [0, 0, 0, 1] as RGBA,
+                metallicFactor: 0 as number,
+                roughnessFactor: 0 as number,
               }
             }],
             modelUri: ''

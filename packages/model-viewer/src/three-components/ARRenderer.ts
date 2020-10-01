@@ -15,7 +15,7 @@
 
 import '../types/webxr.js';
 
-import {EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -24,7 +24,6 @@ import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
-import {assertContext} from './WebGLUtils.js';
 
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
@@ -40,6 +39,20 @@ const HIT_ANGLE_DEG = 20;
 const INTRO_DAMPER_RATE = 0.4;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
+
+export type ARStatus =
+    'not-presenting'|'session-started'|'object-placed'|'failed';
+
+export const ARStatus: {[index: string]: ARStatus} = {
+  NOT_PRESENTING: 'not-presenting',
+  SESSION_STARTED: 'session-started',
+  OBJECT_PLACED: 'object-placed',
+  FAILED: 'failed'
+};
+
+export interface ARStatusEvent extends ThreeEvent {
+  status: ARStatus,
+}
 
 const $presentedScene = Symbol('presentedScene');
 const $placementBox = Symbol('placementBox');
@@ -151,13 +164,11 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          domOverlay: {
-            root: scene.element.shadowRoot!.querySelector(
-                'div.annotation-container')
-          }
+          domOverlay:
+              {root: scene.element.shadowRoot!.querySelector('div.default')}
         });
 
-    const gl = assertContext(this.renderer.context3D);
+    const gl = this.threeRenderer.context;
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
     // loss according to the spec, though current implementations don't do so.
@@ -307,12 +318,13 @@ export class ARRenderer extends EventDispatcher {
     // TODO: this method should be added to three.js's exported interface.
     (this.threeRenderer as any).setFramebuffer(null);
 
-    const session = this[$currentSession]!;
-    session.removeEventListener('selectstart', this[$onSelectStart]);
-    session.removeEventListener('selectend', this[$onSelectEnd]);
-
-    this[$currentSession] = null;
-    session.cancelAnimationFrame(this[$rafId]!);
+    const session = this[$currentSession];
+    if (session != null) {
+      session.removeEventListener('selectstart', this[$onSelectStart]);
+      session.removeEventListener('selectend', this[$onSelectEnd]);
+      session.cancelAnimationFrame(this[$rafId]!);
+      this[$currentSession] = null;
+    }
 
     const scene = this[$presentedScene];
     if (scene != null) {
@@ -323,14 +335,26 @@ export class ARRenderer extends EventDispatcher {
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
       model.setShadowScaleAndOffset(1, 0);
-      scene.yaw = this[$turntableRotation]!;
-      scene.setShadowIntensity(this[$oldShadowIntensity]!);
-      scene.background = this[$oldBackground];
+      const yaw = this[$turntableRotation];
+      if (yaw != null) {
+        scene.yaw = yaw;
+      }
+      const intensity = this[$oldShadowIntensity];
+      if (intensity != null) {
+        scene.setShadowIntensity(intensity);
+      }
+      const background = this[$oldBackground];
+      if (background != null) {
+        scene.background = background;
+      }
       scene.removeEventListener('model-load', this[$onUpdateScene]);
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element[$onResize](element.getBoundingClientRect());
     }
+
+    // Force the Renderer to update its size
+    this.renderer.height = 0;
 
     const exitButton = this[$exitWebXRButtonContainer];
     if (exitButton != null) {
@@ -371,6 +395,8 @@ export class ARRenderer extends EventDispatcher {
     if (this[$resolveCleanup] != null) {
       this[$resolveCleanup]!();
     }
+
+    this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
   /**
@@ -428,6 +454,7 @@ export class ARRenderer extends EventDispatcher {
       this[$initialModelToWorld].copy(scene.model.matrixWorld);
       scene.model.setHotspotsVisibility(true);
       this[$initialized] = true;
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     this[$presentedScene]!.model.orientHotspots(
@@ -534,7 +561,7 @@ export class ARRenderer extends EventDispatcher {
     // Ignore the y-coordinate and set on the floor instead.
     goal.y = floor;
 
-    this.dispatchEvent({type: 'modelmove'});
+    this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
   }
 
   [$onSelectStart] = (event: Event) => {

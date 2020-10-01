@@ -26,8 +26,7 @@
   </script>
   <title>&lt;model-viewer&gt; fuzzer test</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
@@ -43,14 +42,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
 
 <style>
 #controls-container {
@@ -78,7 +71,7 @@
         </div>
         <model-viewer id="fuzzee"></model-viewer>
 
-        <a href="https://github.com/GoogleWebComponents/model-viewer/blob/master/examples/fuzzer.html"
+        <a href="https://github.com/google/model-viewer/blob/master/examples/fuzzer.html"
           class="viewSource">View source<a/>
 
         
@@ -130,10 +123,6 @@ const attributes = [{
         'assets/Astronaut.glb',
         'i-do-not-exist.usdz',
     ],
-}, {
-    name: 'magic-leap',
-    probability: 0.2,
-    values: [],
 }, {
     name: 'preload',
     probability: 0.2,

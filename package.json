@@ -14,7 +14,7 @@
     "build": "./node_modules/.bin/lerna run build --stream",
     "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1",
-    "update:package-lock": "./node_modules/.bin/lerna run update:package-lock --stream"
+    "update:package-lock": "rm ./package-lock.json && npm i --only=production && ./node_modules/.bin/lerna run update:package-lock --stream"
   },
   "husky": {
     "hooks": {
@@ -35,16 +35,16 @@
   },
   "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.19.0",
-    "@typescript-eslint/parser": "^2.19.0",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
     "clang-format": "^1.4.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.7.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-wc": "^1.2.0",
     "http-server": "^0.12.1",
     "husky": "^4.2.1",
     "lerna": "^3.20.2",
-    "typescript": "^3.7.5"
+    "typescript": "4.0.3"
   }
 }

@@ -42,8 +42,14 @@ export const IS_MOBILE = (() => {
   return check;
 })();
 
-export const USE_OFFSCREEN_CANVAS = Boolean((self as any).OffscreenCanvas) &&
-    Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap);
+export const IS_CHROMEOS = /\bCrOS\b/.test(navigator.userAgent);
+
+// Disabling offscreen canvas for now because it is slower and has bugs relating
+// to janky updates and out of sync frames.
+export const USE_OFFSCREEN_CANVAS = false;
+// Boolean((self as any).OffscreenCanvas) &&
+//     Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap) &&
+//     !IS_CHROMEOS;  // TODO(elalish): file a bug on inverted renders
 
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
@@ -57,7 +63,7 @@ export const IS_ANDROID = /android/i.test(navigator.userAgent);
 // multi-touch displays.
 // @see https://stackoverflow.com/questions/57765958/how-to-detect-ipad-and-ipad-os-version-in-ios-13-and-up
 // @see https://forums.developer.apple.com/thread/119186
-// @see https://github.com/GoogleWebComponents/model-viewer/issues/758
+// @see https://github.com/google/model-viewer/issues/758
 export const IS_IOS =
     (/iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -117,22 +117,28 @@ export class GLTFTreeVisitor {
    * Sparse traversal can also be specified, in which case elements that
    * re-appear multiple times in the scene graph will only be visited once.
    */
-  visit(gltf: GLTF, options: VisitOptions = {}) {
+  visit(gltf: GLTF, options: VisitOptions = {}): void {
     const allScenes = !!options.allScenes;
     const sparse = !!options.sparse;
-    const scenes = allScenes ? gltf.scenes : [gltf.scenes[gltf.scene]];
+    const scenes = allScenes ?
+        gltf.scenes || [] :
+        (gltf.scenes && gltf.scene != null) ? [gltf.scenes[gltf.scene]] : [];
 
     const state: VisitorTraversalState =
         {hierarchy: [], visited: new Set(), sparse, gltf};
 
     for (const scene of scenes) {
-      this[$visitScene](gltf.scenes.indexOf(scene), state);
+      this[$visitScene](gltf.scenes!.indexOf(scene), state);
     }
   }
 
   private[$visitElement]<T extends GLTFElement>(
-      index: number, elementList: T[], state: VisitorTraversalState,
+      index: number, elementList: T[]|undefined, state: VisitorTraversalState,
       visit?: VisitorCallback<T>, traverse?: (element: T) => void) {
+    if (elementList == null) {
+      return;
+    }
+
     const element = elementList[index];
     const {sparse, hierarchy, visited} = state;
 

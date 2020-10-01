@@ -21,7 +21,9 @@ import {Model} from './model.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
 const $model = Symbol('model');
+const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 const $elementsByInternalId = Symbol('elementsByInternalId');
+const $eventDelegate = Symbol('eventDelegate');
 
 /**
  * ModelGraft
@@ -55,17 +57,39 @@ const $elementsByInternalId = Symbol('elementsByInternalId');
  * the host execution context counterpart to the ModelKernel in the scene graph
  * execution context.
  */
-export class ModelGraft extends EventTarget implements ModelGraftInterface {
+
+export class ModelGraft implements EventTarget, ModelGraftInterface {
+  // NOTE(cdata): This eventDelegate hack is a quick trick to let us get the
+  // EventTarget interface without implementing or requiring a full polyfill. We
+  // should remove this once EventTarget is inheritable everywhere.
+  protected[$eventDelegate]: DocumentFragment =
+      document.createDocumentFragment();
+
+  // NOTE(cdata): We declare each of these methods independently here so that we
+  // can inherit the correct types from EventTarget's interface. Maybe there is
+  // a better way to do this dynamically so that we don't repeat ourselves?
+  addEventListener: typeof EventTarget.prototype.addEventListener = (...args) =>
+      this[$eventDelegate].addEventListener(...args);
+  removeEventListener: typeof EventTarget.prototype.removeEventListener =
+      (...args) => this[$eventDelegate].removeEventListener(...args);
+  dispatchEvent: typeof EventTarget.prototype.dispatchEvent = (...args) =>
+      this[$eventDelegate].dispatchEvent(...args);
+
   private[$model]: Model;
+  private[$correlatedSceneGraph]: CorrelatedSceneGraph;
 
   private[$elementsByInternalId] = new Map<number, ThreeDOMElement>();
 
   constructor(modelUri: string, correlatedSceneGraph: CorrelatedSceneGraph) {
-    super();
+    this[$correlatedSceneGraph] = correlatedSceneGraph;
     this[$model] = new Model(this, modelUri, correlatedSceneGraph);
   }
 
-  get model() {
+  get correlatedSceneGraph(): CorrelatedSceneGraph {
+    return this[$correlatedSceneGraph];
+  }
+
+  get model(): Model {
     return this[$model];
   }
 
@@ -79,21 +103,16 @@ export class ModelGraft extends EventTarget implements ModelGraftInterface {
     return element;
   }
 
-  adopt(element: ThreeDOMElement) {
+  adopt(element: ThreeDOMElement): void {
     this[$elementsByInternalId].set(element.internalID, element);
   }
 
-  async mutate(id: number, property: string, value: unknown) {
-    // TODO(#1005): Manipulations probably need to be validated against
-    // allowed capabilities here. We already do this on the scene graph
-    // execution context side, but it would be safer to do it on both sides
+  async mutate(id: number, property: string, value: unknown): Promise<void> {
     const element = this.getElementByInternalId(id);
 
-    if (element != null && property in element) {
-      (element as unknown as {[index: string]: unknown})[property] = value;
+    await element!.mutate(property, value);
 
-      this.dispatchEvent(
-          new CustomEvent('mutation', {detail: {element: element}}));
-    }
+    this.dispatchEvent(
+        new CustomEvent('mutation', {detail: {element: element}}));
   }
 }

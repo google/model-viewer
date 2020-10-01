@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-const resolve = require('rollup-plugin-node-resolve');
-const replace = require('rollup-plugin-replace');
+const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
+const replace = require('@rollup/plugin-replace');
 const cleanup = require('rollup-plugin-cleanup');
+const {terser} = require('rollup-plugin-terser');
+const commonjs = require('@rollup/plugin-commonjs');
+const polyfill = require('rollup-plugin-polyfill');
+
 const {NODE_ENV} = process.env;
 
 const onwarn = (warning, warn) => {
@@ -25,7 +29,9 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+let plugins =
+    [resolve({dedupe: ['three']}), replace({'Reflect.decorate': 'undefined'})];
+
 const watchFiles = ['lib/**', '../3dom/lib/**'];
 
 const outputOptions = [{
@@ -44,13 +50,20 @@ const outputOptions = [{
 }];
 
 if (NODE_ENV !== 'development') {
-  plugins.unshift(cleanup({
-    // Ideally we'd also clean third_party/three, which saves
-    // ~45kb in filesize alone... but takes 2 minutes to build
-    include: ['lib/**'],
-    comments: 'none',
-  }));
+  const pluginsIE11 = [
+    ...plugins,
+    commonjs(),
+    polyfill(['object.values/auto']),
+    cleanup({
+      // Ideally we'd also clean third_party/three, which saves
+      // ~45kb in filesize alone... but takes 2 minutes to build
+      include: ['lib/**'],
+      comments: 'none',
+    })
+  ];
 
+  // IE11 does not support modules, so they are removed here, as well as in a
+  // dedicated unit test build which is needed for the same reason.
   outputOptions.push(
       {
         input: './lib/model-viewer.js',
@@ -63,7 +76,7 @@ if (NODE_ENV !== 'development') {
         watch: {
           include: watchFiles,
         },
-        plugins,
+        plugins: pluginsIE11,
         onwarn,
       },
       {
@@ -72,6 +85,28 @@ if (NODE_ENV !== 'development') {
           file: './dist/unit-tests-umd.js',
           format: 'umd',
           name: 'ModelViewerElementUnitTests'
+        },
+        watch: {
+          include: watchFiles,
+        },
+        plugins: pluginsIE11,
+        onwarn,
+      },
+  );
+
+  plugins = [
+    ...plugins,
+    terser(),
+  ];
+
+  outputOptions.push(
+      {
+        input: './dist/model-viewer.js',
+        output: {
+          file: './dist/model-viewer.min.js',
+          sourcemap: true,
+          format: 'esm',
+          name: 'ModelViewerElement'
         },
         watch: {
           include: watchFiles,

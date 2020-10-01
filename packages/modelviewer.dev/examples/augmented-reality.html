@@ -26,8 +26,8 @@
   </script>
   <title>&lt;model-viewer&gt; Augmented Reality</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="&lt;model-viewer&gt; AR examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
 
@@ -42,15 +42,8 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="../node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <script src="../node_modules/@magicleap/prismatic/prismatic.min.js"></script>
-
 </head>
 <body>
 
@@ -62,11 +55,11 @@
         <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
         <div class="heading">
           <h2 class="demo-title">Augmented Reality</h2>
-          <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code>, &amp; the accompanying attributes, <code>magic-leap</code>, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
+          <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
         </div>
         <example-snippet stamp-to="demo-container-1" highlight-as="html">
           <template>
-<model-viewer src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look fallback" ar-scale="auto" magic-leap camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../shared-assets/models/Astronaut.usdz"></model-viewer>
           </template>
         </example-snippet>
 
@@ -79,13 +72,12 @@
           <li>
             <div>ar-modes</div>
             <p>A prioritized list of the types of AR experiences to enable, if available; see 
-            <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
+            <a href="https://github.com/google/model-viewer#augmented-reality">
             Augmented Reality</a>.
             Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
             to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-            app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-            experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-            whitespace. Defaults to "webxr scene-viewer quick-look fallback".
+            app, "quick-look", to launch the iOS Quick Look app. You can specify any number of modes separated by
+            whitespace. Defaults to "webxr scene-viewer quick-look".
           </li>
           <li>
             <div>ar-scale</div>
@@ -108,12 +100,55 @@
               "chrome". You can specify any number of browsers separated by
               whitespace, for example: "safari chrome". Defaults to "safari".</p>
           </li>
-          <li>
-            <div>magic-leap</div>
-            <p>Provides augmented reality on Magic Leap's Helio browser. Requires that the primary model be a GLB file, and the <a href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a> library.</p>
-          </li>
         </ul>
 
+      </div>
+    </div>
+  </div>
+
+  <div class="sample">
+    <div id="demo-container-2" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <h2 class="demo-title">Scene Viewer</h2>
+          <h4>Here the Scene Viewer app is given priority, to make it easier to compare with the default WebXR, above.</h4>
+        </div>
+        <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <template>
+<model-viewer id="model-viewer" src="../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+  <div id="error" class="hide">AR is not supported on this device</div>
+</model-viewer>
+<script>
+  document.querySelector("#model-viewer").addEventListener('ar-status', (event) => {
+    if(event.detail.status === 'failed'){
+      const error = document.querySelector("#error");
+      error.classList.remove('hide');
+      error.addEventListener('transitionend',(event) => {
+        error.classList.add('hide');
+      });
+    }
+  });
+</script>
+<style>
+  #error {
+    background-color: #ffffffdd;
+    border-radius: 16px;
+    padding: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    transition: opacity 0.3s;
+  }
+  #error.hide {
+    opacity: 0;
+    visibility: hidden;
+    transition: visibility 2s, opacity 1s 1s;
+  }
+</style>
+          </template>
+        </example-snippet>
       </div>
     </div>
   </div>
@@ -126,8 +161,8 @@
       </li>
     </ul>
 
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
   </div>
 
   <!-- Documentation-specific dependencies: -->

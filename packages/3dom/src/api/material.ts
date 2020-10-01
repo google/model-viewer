@@ -13,67 +13,91 @@
  * limitations under the License.
  */
 
-import {ConstructedWithArguments, Constructor, Material as MaterialInterface, PBRMetallicRoughness, ThreeDOMElement} from '../api.js';
+import {Material as MaterialInterface, PBRMetallicRoughness, TextureInfo} from '../api.js';
 import {SerializedMaterial} from '../protocol.js';
 
-import {ModelKernel} from './model-kernel.js';
+import {ModelKernelInterface} from './model-kernel.js';
+import {ThreeDOMElement} from './three-dom-element.js';
 
-export type MaterialConstructor = Constructor<MaterialInterface>&
-    ConstructedWithArguments<[ModelKernel, SerializedMaterial]>;
+const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
+const $normalTexture = Symbol('normalTexture');
+const $occlusionTexture = Symbol('occlusionTexture');
+const $emissiveTexture = Symbol('emissiveTexture');
+
+const $kernel = Symbol('kernel');
+const $name = Symbol('name');
+
 /**
- * A constructor factory for a Material class. The Material is defined based on
- * a provided implementation for all specified 3DOM scene graph element types.
- *
- * The sole reason for using this factory pattern is to enable sound type
- * checking while also providing for the ability to stringify the factory so
- * that it can be part of a runtime-generated Worker script.
- *
- * @see ../api.ts
+ * A Material represents a live material in the backing scene graph. Its
+ * primary purpose is to give the user write access to discrete properties
+ * (for example, the base color factor) of the backing material.
  */
-export function defineMaterial(ThreeDOMElement: Constructor<ThreeDOMElement>):
-    MaterialConstructor {
-  const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
-  const $kernel = Symbol('kernel');
-  const $name = Symbol('name');
+export class Material extends ThreeDOMElement implements MaterialInterface {
+  protected[$pbrMetallicRoughness]: PBRMetallicRoughness;
+  protected[$normalTexture]: TextureInfo|null = null;
+  protected[$occlusionTexture]: TextureInfo|null = null;
+  protected[$emissiveTexture]: TextureInfo|null = null;
 
-  /**
-   * A Material represents a live material in the backing scene graph. Its
-   * primary purpose is to give the user write access to discrete properties
-   * (for example, the base color factor) of the backing material.
-   */
-  class Material extends ThreeDOMElement implements MaterialInterface {
-    protected[$pbrMetallicRoughness]: PBRMetallicRoughness;
-    protected[$kernel]: ModelKernel;
-    protected[$name]: string;
+  protected[$kernel]: ModelKernelInterface;
+  protected[$name]: string;
 
-    constructor(kernel: ModelKernel, serialized: SerializedMaterial) {
-      super(kernel, serialized);
+  constructor(kernel: ModelKernelInterface, serialized: SerializedMaterial) {
+    super(kernel);
 
-      this[$kernel] = kernel;
+    this[$kernel] = kernel;
 
-      if (serialized.name != null) {
-        this[$name] = serialized.name;
-      }
-
-      this[$pbrMetallicRoughness] = kernel.deserialize(
-          'pbr-metallic-roughness', serialized.pbrMetallicRoughness);
+    if (serialized.name != null) {
+      this[$name] = serialized.name;
     }
 
-    /**
-     * The PBR properties that are assigned to this material, if any.
-     */
-    get pbrMetallicRoughness() {
-      return this[$pbrMetallicRoughness];
+    const {
+      pbrMetallicRoughness,
+      normalTexture,
+      occlusionTexture,
+      emissiveTexture
+    } = serialized;
+
+    this[$pbrMetallicRoughness] =
+        kernel.deserialize('pbr-metallic-roughness', pbrMetallicRoughness);
+
+    if (normalTexture != null) {
+      this[$normalTexture] = kernel.deserialize('texture-info', normalTexture);
     }
 
-    /**
-     * The name of the material. Note that names are optional and not
-     * guaranteed to be unique.
-     */
-    get name() {
-      return this[$name];
+    if (occlusionTexture != null) {
+      this[$occlusionTexture] =
+          kernel.deserialize('texture-info', occlusionTexture);
+    }
+
+    if (emissiveTexture != null) {
+      this[$emissiveTexture] =
+          kernel.deserialize('texture-info', emissiveTexture);
     }
   }
 
-  return Material;
+  /**
+   * The PBR properties that are assigned to this material, if any.
+   */
+  get pbrMetallicRoughness(): PBRMetallicRoughness {
+    return this[$pbrMetallicRoughness];
+  }
+
+  get normalTexture(): TextureInfo|null {
+    return this[$normalTexture];
+  }
+
+  get occlusionTexture(): TextureInfo|null {
+    return this[$occlusionTexture];
+  }
+  get emissiveTexture(): TextureInfo|null {
+    return this[$emissiveTexture];
+  }
+
+  /**
+   * The name of the material. Note that names are optional and not
+   * guaranteed to be unique.
+   */
+  get name(): string {
+    return this[$name];
+  }
 }

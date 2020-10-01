@@ -65,7 +65,7 @@ export class Model extends ThreeDOMElement implements ModelInterface {
    * TODO(#1003): How do we handle non-active scenes?
    * TODO(#1002): Desctibe and enforce traversal order
    */
-  get materials() {
+  get materials(): Array<Material> {
     return this[$materials];
   }
 
