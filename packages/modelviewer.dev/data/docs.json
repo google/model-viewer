@@ -8,8 +8,8 @@
         "description": "<p>The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.</p>",
         "default": [
           "String",
-          "empty string",
-          "any legal filepath"
+          "any legal filepath",
+          "empty string"
         ]
       },
       {
@@ -18,8 +18,8 @@
         "description": "<p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>",
         "default": [
           "String",
-          "empty string",
-          "any description"
+          "any description",
+          "empty string"
         ]
       },
       {
@@ -31,8 +31,8 @@
         ],
         "default": [
           "String",
-          "empty string",
-          "link to image"
+          "link to image",
+          "empty string"
         ]
       },
       {
@@ -44,8 +44,8 @@
         ],
         "default": [
           "String",
-          "auto",
-          "auto, lazy, eager"
+          "auto, lazy, eager",
+          "auto"
         ]
       },
       {
@@ -54,8 +54,8 @@
         "description": "<p>This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.</p>",
         "default": [
           "String",
-          "auto",
-          "auto, interaction, manual"
+          "auto, interaction, manual",
+          "auto"
         ]
       }
     ],

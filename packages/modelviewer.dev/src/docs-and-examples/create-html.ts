@@ -150,8 +150,8 @@ function createDefaultTable(entry: Entry):
 <table class="value-table">
   <tr>
     <th>Type</th>
-    <th>Default Value</th>
     <th>Options</th>
+    <th>Default Value</th>
   </tr>
   <tr>
     <td>${entry.default[0]}</td>
