@@ -52,7 +52,7 @@ function removeDeactive(sidebarName: string) {
 }
 
 export function getSidebarCategoryForNewPage(): string {
-  return previouslyActive[0];
+  return previouslyActive.split('-')[0];
 }
 
 function getSidebarIdsFromSidebarName(name: string): SidebarIds {
@@ -112,6 +112,7 @@ function updateSidebarView(
 
 /*
  * Hide all of the entries not within the current subcategory
+ * entries should be every entry on the page when this is called
  */
 function updateSidebarViewFirstTime(entries: any[]) {
   isFirstOpen = false;   // global
@@ -208,7 +209,7 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
+export function sidebarObserver(docsOrExamples: string) {
   if (docsOrExamples === 'docs') {
     const observer = new IntersectionObserver(entries => {
       if (!isFirstOpen && entries.length > 2) {
@@ -218,14 +219,13 @@ export function sidebarObserver(docsOrExamples: 'docs'|'examples') {
           handleHTMLEntry(htmlEntry);
         }
       }
-      // First time all of the observers are set entries will be every entry.
+
       if (isFirstOpen) {
         updateSidebarViewFirstTime(entries);
       }
     });
 
-    // TODO: update for docs/examples, in examples we may want to use specific
-    // examples or headers.
+    // TODO: Update for examples.
 
     // Fill the observer with the necessary divs to observe:
     // i.e. attributes, properties, events, methods, slots, custom css.

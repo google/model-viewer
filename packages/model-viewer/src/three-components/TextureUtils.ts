@@ -35,7 +35,7 @@ const GENERATED_SIGMA = 0.04;
 // Image objects to decode images fetched over the network.
 Cache.enabled = true;
 
-const HDR_FILE_RE = /\.hdr$/;
+const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 

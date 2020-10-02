@@ -263,7 +263,9 @@ model-viewer:focus {
   font-weight: 500;
 }
 
-
+.examples-container {
+  margin-left: 300px;
+}
 
 .sample {
   display: grid;

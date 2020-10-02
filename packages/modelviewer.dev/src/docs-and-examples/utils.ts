@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-import {convertJSONToHTML} from './create-html';
+import {convertJSONToHTML, createExamplesSidebar} from './create-html';
 import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
 
-export function switchPages(oldType: string, newType: string) {
-  if (oldType !== newType) {
-    // TODO: Handle going from examples back to docs (old state), possibly
-    // include a previous state to revert to in URI
-    const newSidebarCategory = getSidebarCategoryForNewPage();
-    const newURI = '../'.concat(newType, '/#', newSidebarCategory);
+
+// TODO: Handle going from examples back to docs (old state), possibly
+// include a previous state to revert to in URI
+export function switchPages(oldLocation: string, newLocation: string) {
+  if (oldLocation !== newLocation) {
+    let URI = '';
+    if (oldLocation === 'docs') {
+      const category = getSidebarCategoryForNewPage();
+      URI = '../examples/'.concat(category);
+    } else {
+      URI = newLocation;
+    }
     const d = document.createElement('a');
-    d.setAttribute('href', newURI);
+    d.setAttribute('href', URI);
     window.location.href = d.href;
   }
 }
@@ -43,17 +49,6 @@ function stickyHeader() {
       header.classList.remove('sticky');
     }
   }
-}
-
-async function fetchHtmlAsText(url: string): Promise<string> {
-  const response = await fetch(url);
-  return await response.text();
-}
-
-export async function loadExamples() {
-  const loadingExample = document.getElementById('loading-examples');
-  loadingExample!.innerHTML =
-      await fetchHtmlAsText('../examples/lazy-loading.html');
 }
 
 interface JSONCallback {
@@ -91,14 +86,17 @@ function jumpToSection() {
 
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
- * docsOrExamples: 'docs' or 'examples'
+ * docsOrExamples: 'docs' or 'examples/${category}'
  */
-export function init(docsOrExamples: 'docs'|'examples') {
-  loadJSON('../data/loading.json', function(response: string) {
-    const actualJSON = JSON.parse(response);
-    convertJSONToHTML(actualJSON, docsOrExamples);
-    if (docsOrExamples === 'examples') {
-      loadExamples();
+export function init(docsOrExamples: string) {
+  const filePath = docsOrExamples === 'docs' ? '../data/docs.json' :
+                                               '../../data/examples.json';
+  loadJSON(filePath, function(response: string) {
+    const json = JSON.parse(response);
+    if (docsOrExamples === 'docs') {
+      convertJSONToHTML(json);
+    } else {
+      createExamplesSidebar(json);
     }
     sidebarObserver(docsOrExamples);
     jumpToSection();

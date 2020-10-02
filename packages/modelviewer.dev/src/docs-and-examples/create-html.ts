@@ -33,6 +33,43 @@ const CategoryConstant: Category = {
   Slots: [],
 }
 
+function getExamples(category: any):
+    string {
+      const examples = category['examples'];
+      let examplesString = '';
+      for (const example of examples) {
+        examplesString += `
+<h4 class="subcategory-header">
+  <a class="darken" href="#${example.htmlId}">${example.name}</a>
+</h4>`;
+      }
+      return examplesString;
+    }
+
+function createExampleSidebarCategory(category: any) {
+  const htmlName = category['htmlName'];
+  const windowHref = window.location.href;
+  const isActive = windowHref.indexOf(htmlName) >= 0 ? true : false;
+
+  const container = document.getElementById('sidebar-category-container');
+  container!.innerHTML += `
+  <div class="category">
+    <h3 id=${htmlName.concat('-sidebar')}>
+      <a class="darken" href="../${htmlName}">${category['name']}</a>
+    </h3>
+    <div class="subCategory">
+      ${isActive ? getExamples(category) : ''}
+    </div>
+  </div>
+    `;
+}
+
+export function createExamplesSidebar(json: any[]) {
+  for (const category of json) {
+    createExampleSidebarCategory(category);
+  }
+}
+
 function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
     string {
       const lowerCaseKey = getLowerCaseKey(subcategory);
@@ -42,13 +79,11 @@ function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
 <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
   <h4 class="subcategory-header" id=${headerId}>
     <a class="darken" href="#${aHref}">${subcategory}</a>
-  <h4>
+  </h4>
 </div>`;
     }
 
-function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
-  if (docsOrExamples === 'examples')
-    return;
+function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
   const lowerCaseTitle = category.Title.toLowerCase();
   let subcategories = Object.keys(category);
@@ -58,7 +93,7 @@ function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
 <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
   <h3 id=${lowerCaseTitle.concat('-sidebar')}>
     <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
-  <h3>
+  </h3>
 </div>`;
 
   container!.innerHTML += categoryContainer;
@@ -87,10 +122,9 @@ function createSidebar(category: Category, docsOrExamples: 'docs'|'examples') {
   }
 }
 
-function createTitle(header: string, docsOrExamples: 'docs'|'examples') {
-  const name = docsOrExamples === 'docs' ? '-docs' : '-examples-header';
+function createTitle(header: string) {
   const titleContainer =
-      document.getElementById(header.toLowerCase().concat(name));
+      document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
   <h1 id=${header.toLowerCase()}>${header}<h1>
@@ -209,19 +243,18 @@ function createSubcategory(
   }
 }
 
-export function convertJSONToHTML(
-    json: any[], docsOrExamples: 'docs'|'examples') {
+export function convertJSONToHTML(json: any[]) {
   let header = '';
   for (const category of json) {
     for (const key in category) {
       if (key === 'Title') {
         header = category[key];
-        createTitle(category[key], docsOrExamples);
-      } else if (docsOrExamples === 'docs') {
+        createTitle(category[key]);
+      } else {
         const lowerCaseKey = getLowerCaseKey(key);
         createSubcategory(category[key], header, key, lowerCaseKey);
       }
     }
-    createSidebar(category, docsOrExamples);
+    createSidebar(category);
   }
 }
