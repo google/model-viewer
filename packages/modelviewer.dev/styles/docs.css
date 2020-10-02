@@ -29,7 +29,9 @@ p {
 .attribute-name,
 .cssPropertie-name,
 .propertie-name,
+.staticPropertie-name,
 .method-name,
+.staticMethod-name,
 .event-name,
 .slot-name {
   padding: 10px 20px 10px 20px;
@@ -40,7 +42,9 @@ p {
 .attribute-definition,
 .cssPropertie-definition,
 .propertie-definition,
+.staticPropertie-definition,
 .method-definition,
+.staticMethod-definition,
 .event-definition,
 .slot-definition {
   margin: 0 0 20px 20px;
@@ -53,7 +57,9 @@ p {
 .attribute-container,
 .cssPropertie-container,
 .propertie-container,
+.staticPropertie-container,
 .method-container,
+.staticMethod-container,
 .event-container,
 .slot-container {
   padding-bottom: 20px;

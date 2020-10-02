@@ -20,7 +20,8 @@ interface Entry {
 
 interface Category {
   Title: string, Attributes: Entry[], 'CSS Custom Properties': Entry[],
-      Properties: Entry[], Methods: Entry[], Events: Entry[], Slots: Entry[],
+      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
+      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
@@ -28,7 +29,9 @@ const CategoryConstant: Category = {
   Attributes: [],
   'CSS Custom Properties': [],
   Properties: [],
+  'Static Properties': [],
   Methods: [],
+  'Static Methods': [],
   Events: [],
   Slots: [],
 }
@@ -115,8 +118,7 @@ function createSidebar(category: Category) {
     for (const entry of entries) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
-      const aId = '#docs-'.concat(
-          lowerCaseTitle, '-', lowerCaseKey, '-', entry.htmlName);
+      const aId = '#docs-'.concat(divId);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
   <a class="darken" href=${aId}>${entry.name}</a>
@@ -139,6 +141,10 @@ function getLowerCaseKey(key: string):
     string {
       if (key === 'CSS Custom Properties') {
         return 'cssProperties';
+      } else if (key === 'Static Methods') {
+        return 'staticMethods';
+      } else if (key === 'Static Properties') {
+        return 'staticProperties';
       } else {
         return key.toLowerCase();
       }
@@ -180,6 +186,7 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
+      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',

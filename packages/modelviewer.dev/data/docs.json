@@ -101,15 +101,17 @@
         "name": "modelIsVisible",
         "htmlName": "modelIsVisible",
         "description": "12345"
-      },
+      }
+    ],
+    "Static Properties": [
       {
-        "name": "ModelViewer.dracoDecoderLocation",
-        "htmlName": "modelViewerDracoDecoderLocation",
+        "name": "dracoDecoderLocation",
+        "htmlName": "dracoDecoderLocation",
         "description": "12345"
       },
       {
-        "name": "ModelViewer.modelCacheSize",
-        "htmlName": "modelViewerModelCacheSize",
+        "name": "modelCacheSize",
+        "htmlName": "modelCacheSize",
         "description": "12345"
       }
     ],
@@ -118,10 +120,12 @@
         "name": "dismissPoster()",
         "htmlName": "dismissPoster",
         "description": "12345"
-      },
+      }
+    ],
+    "Static Methods": [
       {
-        "name": "ModelViewer.mapURLs(callback)",
-        "htmlName": "modelViewerMapURLs",
+        "name": "mapURLs(callback)",
+        "htmlName": "mapURLs",
         "description": "12345"
       }
     ],
