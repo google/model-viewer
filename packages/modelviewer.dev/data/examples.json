@@ -13,15 +13,15 @@
       },
       {
         "htmlId": "demo-container-3",
-        "name": "Customize Loading"
+        "name": "Customize Load"
       },
       {
         "htmlId": "demo-container-4",
-        "name": "Poster with invalid model"
+        "name": "Invalid Model"
       },
       {
         "htmlId": "demo-container-5",
-        "name": "Cycling between posters"
+        "name": "Cycling Posters"
       }
     ]
   },
@@ -31,19 +31,19 @@
     "examples": [
       {
         "htmlId": "demo-container-1",
-        "name": "Autoplay animation"
+        "name": "Autoplay"
       },
       {
         "htmlId": "demo-container-2",
-        "name": "Select specific"
+        "name": "Selecting Animations"
       },
       {
         "htmlId": "demo-container-3",
-        "name": "Animation crossfade"
+        "name": "Crossfade"
       },
       {
-        "htmlId": "demo-container-3",
-        "name": "Paused Model"
+        "htmlId": "demo-container-4",
+        "name": "Paused"
       }
     ]
   }
