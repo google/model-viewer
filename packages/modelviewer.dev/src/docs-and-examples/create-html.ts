@@ -37,11 +37,13 @@ function getExamples(category: any):
     string {
       const examples = category['examples'];
       let examplesString = '';
+      let i = 1;
       for (const example of examples) {
         examplesString += `
-<h4 class="subcategory-header">
+<h4 class="subcategory-header" id="container-${i}-sidebar">
   <a class="darken" href="#${example.htmlId}">${example.name}</a>
 </h4>`;
+        i += 1;
       }
       return examplesString;
     }
@@ -50,11 +52,13 @@ function createExampleSidebarCategory(category: any) {
   const htmlName = category['htmlName'];
   const windowHref = window.location.href;
   const isActive = windowHref.indexOf(htmlName) >= 0 ? true : false;
+  const id =
+      isActive ? 'active-container-sidebar' : htmlName.concat('-sidebar');
 
   const container = document.getElementById('sidebar-category-container');
   container!.innerHTML += `
   <div class="category">
-    <h3 id=${htmlName.concat('-sidebar')}>
+    <h3 id=${id}>
       <a class="darken" href="../${htmlName}">${category['name']}</a>
     </h3>
     <div class="subCategory">

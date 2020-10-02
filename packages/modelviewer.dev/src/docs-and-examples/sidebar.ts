@@ -204,7 +204,48 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
     }
   }
 }
+let intersectionRatios = new Map<string, number>();
+function handleExamples(entries: IntersectionObserverEntry[]) {
+  if (isFirstOpen) {
+    everyEntry = entries;
+    isFirstOpen = false;
+    document.querySelector(`h3[id="active-container-sidebar"`)!.classList.add(
+        'active');
+  }
 
+  for (const entry of entries) {
+    const id = entry.target.getAttribute('id')!;
+    // const e = document.querySelector(`h4[id=${id}`)!;
+    intersectionRatios.set(id, entry.intersectionRatio);
+  }
+
+  console.log(intersectionRatios);
+  let maxRatio = 0;
+  let maxName = '';
+  for (const name of intersectionRatios.keys()) {
+    if (intersectionRatios.get(name)! > maxRatio) {
+      maxRatio = intersectionRatios.get(name)!;
+      maxName = name;
+    }
+  }
+
+  for (const entry of everyEntry) {
+    const id = entry.target.getAttribute('id')!;
+    const sidebarName = `container-${id.slice(-1)}-sidebar`;
+    if (id === maxName) {
+      document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
+    } else {
+      document.querySelector(`h4[id=${sidebarName}`)!.classList.remove(
+          'active');
+    }
+  }
+}
+
+function handleExampleIntersect(
+    entries: IntersectionObserverEntry[], observer: any) {
+  handleExamples(entries);
+  console.log(observer);
+}
 
 /*
  * Update the table of contents based on how the page is viewed.
@@ -219,15 +260,10 @@ export function sidebarObserver(docsOrExamples: string) {
           handleHTMLEntry(htmlEntry);
         }
       }
-
       if (isFirstOpen) {
         updateSidebarViewFirstTime(entries);
       }
     });
-
-    // TODO: Update for examples.
-
-    // Fill the observer with the necessary divs to observe:
     // i.e. attributes, properties, events, methods, slots, custom css.
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
@@ -236,5 +272,18 @@ export function sidebarObserver(docsOrExamples: string) {
         observer.observe(section);
       }
     });
+  } else {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+    };
+    const observer = new IntersectionObserver(handleExampleIntersect, options);
+    document.querySelectorAll('div[id*="demo-container-"]')
+        .forEach((section) => {
+          const id = section.getAttribute('id');
+          order.push(id);
+          observer.observe(section);
+        });
   }
-};
+}
