@@ -149,8 +149,8 @@ function createDefaultTable(entry: Entry):
       return `
 <table class="value-table">
   <tr>
-    <th>Default value</th>
     <th>Type</th>
+    <th>Default Value</th>
     <th>Options</th>
   </tr>
   <tr>
