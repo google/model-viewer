@@ -215,11 +215,9 @@ function handleExamples(entries: IntersectionObserverEntry[]) {
 
   for (const entry of entries) {
     const id = entry.target.getAttribute('id')!;
-    // const e = document.querySelector(`h4[id=${id}`)!;
     intersectionRatios.set(id, entry.intersectionRatio);
   }
 
-  console.log(intersectionRatios);
   let maxRatio = 0;
   let maxName = '';
   for (const name of intersectionRatios.keys()) {

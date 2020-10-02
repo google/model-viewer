@@ -57,15 +57,14 @@ function createExampleSidebarCategory(category: any) {
 
   const container = document.getElementById('sidebar-category-container');
   container!.innerHTML += `
-  <div class="category">
-    <h3 id=${id}>
-      <a class="darken" href="../${htmlName}">${category['name']}</a>
-    </h3>
-    <div class="subCategory">
-      ${isActive ? getExamples(category) : ''}
-    </div>
+<div class="category">
+  <h3 id=${id}>
+    <a class="darken" href="../${htmlName}">${category['name']}</a>
+  </h3>
+  <div class="subCategory">
+    ${isActive ? getExamples(category) : ''}
   </div>
-    `;
+</div>`;
 }
 
 export function createExamplesSidebar(json: any[]) {
