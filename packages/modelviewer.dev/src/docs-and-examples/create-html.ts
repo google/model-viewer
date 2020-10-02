@@ -172,12 +172,10 @@ function createLinks(
     pluralLowerCaseSubcategory: string,
     lowerCaseCategory: string):
     string {
-      const ulId = 'links'.concat(
+      const id = 'links'.concat(
           entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
       return `
-<div>
-  <ul class="links" id=${ulId}>
-  </ul>
+<div class="links" id=${id}>
 </div>`;
     }
 
@@ -243,11 +241,11 @@ function createSubcategory(
         createEntry(entry, lowerCaseCategory, pluralLowerCaseSubcategory);
 
     if ('links' in entry) {
-      const ulId = 'links'.concat(
+      const linksId = 'links'.concat(
           entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
-      const ul = document.getElementById(ulId);
+      const linksDiv = document.getElementById(linksId);
       for (const link of entry.links) {
-        ul!.innerHTML += `<li>${link}</li>`;
+        linksDiv!.innerHTML += `<div>${link}</div>`;
       }
     }
   }

@@ -27,7 +27,7 @@
         "htmlName": "poster",
         "description": "<p>Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a poster with transparency, you may also want to set --poster-color to transparent so that the background shows through.</p>",
         "links": [
-          "See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."
+          "<a href=\"../examples/loading\">Related Examples</a>"
         ],
         "default": [
           "String",
@@ -40,7 +40,7 @@
         "htmlName": "loading",
         "description": "<p>An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal = \"auto\", and when interacted with for reveal = \"interaction\". Eager loads the model immediately.</p>",
         "links": [
-          "See <a href=\"./examples/lazy-loading.html\">our section on lazy loading</a> for examples."
+          "<a href=\"../examples/loading\">Related Examples</a>"
         ],
         "default": [
           "String",
