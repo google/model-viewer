@@ -204,8 +204,9 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
     }
   }
 }
+
 let intersectionRatios = new Map<string, number>();
-function handleExamples(entries: IntersectionObserverEntry[]) {
+function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   if (isFirstOpen) {
     everyEntry = entries;
     isFirstOpen = false;
@@ -239,12 +240,6 @@ function handleExamples(entries: IntersectionObserverEntry[]) {
   }
 }
 
-function handleExampleIntersect(
-    entries: IntersectionObserverEntry[], observer: any) {
-  handleExamples(entries);
-  console.log(observer);
-}
-
 /*
  * Update the table of contents based on how the page is viewed.
  */
@@ -276,7 +271,7 @@ export function sidebarObserver(docsOrExamples: string) {
       rootMargin: '0px',
       threshold: [0, 0.25, 0.5, 0.75, 1],
     };
-    const observer = new IntersectionObserver(handleExampleIntersect, options);
+    const observer = new IntersectionObserver(handleExamples, options);
     document.querySelectorAll('div[id*="demo-container-"]')
         .forEach((section) => {
           const id = section.getAttribute('id');
