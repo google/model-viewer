@@ -272,11 +272,10 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver(docsOrExamples: string) {
-  if (docsOrExamples === 'docs') {
+export function sidebarObserver(docsOrExample: string) {
+  if (docsOrExample === 'docs') {
     const observer = new IntersectionObserver(entries => {
       if (isSideBarClick) {  // sidebar click
-        console.log(isSideBarClick);
         handlePageJump(entries);
       } else {  // scroll
         for (const htmlEntry of entries) {

@@ -86,20 +86,20 @@ function jumpToSection() {
 
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
- * docsOrExamples: 'docs' or 'examples/${category}'
+ * docsOrExample: 'docs' or 'examples-${category}'
  */
-export function init(docsOrExamples: string) {
-  const filePath = docsOrExamples === 'docs' ? '../data/docs.json' :
-                                               '../../data/examples.json';
+export function init(docsOrExample: string) {
+  const filePath = docsOrExample === 'docs' ? '../data/docs.json' :
+                                              '../../data/examples.json';
   loadJSON(filePath, function(response: string) {
     const json = JSON.parse(response);
-    starterSidebar(docsOrExamples);
-    if (docsOrExamples === 'docs') {
+    starterSidebar(docsOrExample);
+    if (docsOrExample === 'docs') {
       convertJSONToHTML(json);
     } else {
       createExamplesSidebar(json);
     }
-    sidebarObserver(docsOrExamples);
+    sidebarObserver(docsOrExample);
     jumpToSection();
   });
 }

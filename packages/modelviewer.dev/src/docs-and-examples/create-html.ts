@@ -61,6 +61,9 @@ function getCurrentExample(category: string) {
 </div>`;
 }
 
+/*
+ * docsOrExample: 'docs' or 'examples-${category}'
+ */
 export function starterSidebar(docsOrExample: string) {
   const nav = document.getElementById('sidenav')!;
   const inputList = docsOrExample.split('-');
