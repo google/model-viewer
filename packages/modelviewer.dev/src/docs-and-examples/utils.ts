@@ -107,15 +107,10 @@ export function init(docsOrExamples: string) {
 export function toggleSidebar() {
   const root = document.documentElement;
   const nav = document.getElementById('sidenav')!;
-  const zero = 0;
-  const stringZero = zero.toString().concat('px');
-  const threeHundred = 300;
-  const stringThreeHundred = threeHundred.toString().concat('px');
-
   if (nav.offsetWidth > 150) {
-    root.style.setProperty('--sidebar-width', stringZero);
+    root.style.setProperty('--sidebar-width', '0px');
   } else {
-    root.style.setProperty('--sidebar-width', stringThreeHundred);
+    root.style.setProperty('--sidebar-width', '300px');
   }
 }
 
