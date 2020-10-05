@@ -84,7 +84,8 @@ function createSubcategorySidebar(subcategory: string, lowerCaseTitle: string):
       return `
 <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
   <h4 class="subcategory-header" id=${headerId}>
-    <a class="darken" href="#${aHref}">${subcategory}</a>
+    <a class="darken" href="#${aHref}" onclick="sidebarClick()">${
+          subcategory}</a>
   </h4>
 </div>`;
     }
@@ -98,7 +99,8 @@ function createSidebar(category: Category) {
   const categoryContainer = `
 <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
   <h3 id=${lowerCaseTitle.concat('-sidebar')}>
-    <a class="darken" href="#${lowerCaseTitle}">${category.Title}</a>
+    <a class="darken" href="#${lowerCaseTitle}" onclick="sidebarClick()">${
+      category.Title}</a>
   </h3>
 </div>`;
 
@@ -121,7 +123,7 @@ function createSidebar(category: Category) {
       const aId = '#docs-'.concat(divId);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
-  <a class="darken" href=${aId}>${entry.name}</a>
+  <a class="darken" href=${aId} onclick="sidebarClick()">${entry.name}</a>
 </div>`;
     }
   }
@@ -184,7 +186,8 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
-      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
+      // console.log(entry.htmlName, lowerCaseCategory,
+      // pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',

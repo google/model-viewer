@@ -16,7 +16,8 @@
 let globalCurrentView: string[] = [];
 let previouslyActive: string = '';
 let toRemove = '';
-let order: any[] = [];  // TODO, switch to dictionary
+let order = new Map<string, number>();
+let isSideBarClick = false;
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
@@ -153,8 +154,7 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
       activateSidebar(sidebarIds);
       previouslyActive = sidebarIds.name;
       globalCurrentView.push(sidebarIds.name);
-    } else if (
-        order.indexOf(previouslyActive) > order.indexOf(sidebarIds.name)) {
+    } else if (order.get(previouslyActive)! > order.get(sidebarIds.name)!) {
       // scrolling up
       updateFromOldToNew(globalCurrentView[0], sidebarIds);
       globalCurrentView.unshift(sidebarIds.name);
@@ -182,27 +182,43 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
  * the global view, then only update with whats in view
  */
 function handlePageJump(entries: IntersectionObserverEntry[]) {
-  globalCurrentView = [];
+  isSideBarClick = false;
   toRemove = '';
-  previouslyActive = '';
   updateSidebarView('', 'null');
-  for (const htmlEntry of entries) {
-    const id = htmlEntry.target.getAttribute('id')!;
+
+  // deactivate all of the entries
+  for (const entry of everyEntry) {
+    const id = entry.target.getAttribute('id');
     const sidebarIds = getSidebarIdsFromId(id);
     deactivateSidebar(sidebarIds);
   }
-  let isAtTop = true;
-  for (const htmlEntry of entries) {
-    if (htmlEntry.intersectionRatio > 0) {
-      if (isAtTop) {
-        isAtTop = false;
-        const id = htmlEntry.target.getAttribute('id')!;
-        const sidebarIds = getSidebarIdsFromId(id);
-        updateSidebarView('', sidebarIds.subcategory);
-      }
-      handleHTMLEntry(htmlEntry);
+
+  // remove entries not in view, add entries that are in view
+  for (const entry of entries) {
+    const id = entry.target.getAttribute('id')!;
+    const sidebarIds = getSidebarIdsFromId(id);
+    if (!entry.isIntersecting) {
+      globalCurrentView = globalCurrentView.filter(e => e !== sidebarIds.name);
+    } else {
+      globalCurrentView.push(sidebarIds.name);
     }
   }
+
+  // sort current view
+  globalCurrentView.sort(function(nameA, nameB) {
+    if (order.get(nameA)! < order.get(nameB)!) {
+      return -1;
+    } else if (order.get(nameA)! > order.get(nameB)!) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  // update current view based on the current highest view
+  const sidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[0]);
+  updateFromOldToNew(previouslyActive, sidebarIds);
+  previouslyActive = sidebarIds.name;
 }
 
 let intersectionRatios = new Map<string, number>();
@@ -246,22 +262,26 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 export function sidebarObserver(docsOrExamples: string) {
   if (docsOrExamples === 'docs') {
     const observer = new IntersectionObserver(entries => {
-      if (!isFirstOpen && entries.length > 2) {
+      if (isSideBarClick) {  // sidebar click
+        console.log(isSideBarClick);
         handlePageJump(entries);
-      } else {
+      } else {  // scroll
         for (const htmlEntry of entries) {
           handleHTMLEntry(htmlEntry);
         }
       }
-      if (isFirstOpen) {
+      if (isFirstOpen) {  // page load
         updateSidebarViewFirstTime(entries);
       }
     });
     // i.e. attributes, properties, events, methods, slots, custom css.
+    let orderIndex = 0;
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
       if (idSplitList.length === 4) {
-        order.push(idSplitList.slice(1, 10).join('-'));
+        const id = idSplitList.slice(1, 10).join('-');
+        order.set(id, orderIndex);
+        orderIndex += 1;
         observer.observe(section);
       }
     });
@@ -274,9 +294,13 @@ export function sidebarObserver(docsOrExamples: string) {
     const observer = new IntersectionObserver(handleExamples, options);
     document.querySelectorAll('div[id*="demo-container-"]')
         .forEach((section) => {
-          const id = section.getAttribute('id');
-          order.push(id);
           observer.observe(section);
         });
   }
 }
+
+export function sidebarClick() {
+  isSideBarClick = true;
+}
+
+(self as any).sidebarClick = sidebarClick;
