@@ -2,22 +2,6 @@ html {
   scroll-padding-top: 75px;
 }
 
-.sidebar {
-  margin: 0;
-  padding: 0;
-  width: 300px;
-  background-color: #f6f6f6;
-  position: fixed;
-  height: 100%;
-  overflow: auto;
-  border: 1px solid #BDBDBD;
-}
-
-.outer-content {
-  margin-left: 300px;
-  max-width: min(60%, 1100px);
-}
-
 .inner-content {
   padding: 10px 40px;
 }
@@ -94,12 +78,9 @@ hr.solid {
   border-top: 3px solid #f6f6f6;
 }
 
-.header {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px 20px 10px 40px;
-  width: 100%;
-  position: sticky;
-  top: 0;
+.tab {
+  display: flex;
+  align-items: center;
 }
 
 .categories {
@@ -173,6 +154,7 @@ hr.solid {
 .inner-home {
   display: flex;
   align-items: center;
+  font-size: 1.25em;
 }
 
 .darken {
@@ -189,4 +171,36 @@ hr.solid {
 
 .bolden {
   font-weight: bold;
+}
+
+/* Smaller screen/ mobile */
+@media only screen and (max-width: 800px) {
+  :root {
+    --sidebar-width: 0;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+  }
+
+  .outer-content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .value-table {
+    width: 100%;
+    margin: 0 0 30px 0;
+  }
+
+  .attribute-definition,
+  .cssPropertie-definition,
+  .propertie-definition,
+  .staticPropertie-definition,
+  .method-definition,
+  .staticMethod-definition,
+  .event-definition,
+  .slot-definition {
+    margin: 0 0 20px 0;
+  }
 }
