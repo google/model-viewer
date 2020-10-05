@@ -24,16 +24,63 @@ interface Category {
       'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
 }
 
-const CategoryConstant: Category = {
-  Title: '',
-  Attributes: [],
-  'CSS Custom Properties': [],
-  Properties: [],
-  'Static Properties': [],
-  Methods: [],
-  'Static Methods': [],
-  Events: [],
-  Slots: [],
+const CategoryConstant: Category =
+    {
+      Title: '',
+      Attributes: [],
+      'CSS Custom Properties': [],
+      Properties: [],
+      'Static Properties': [],
+      Methods: [],
+      'Static Methods': [],
+      Events: [],
+      Slots: [],
+    }
+
+function
+getCurrentDocs() {
+  return `
+<div class="inner-flipper" id="documentation-flipper">
+  <div class="bolden">DOCUMENTATION</div>
+</div>
+<div class="inner-flipper">|</div>
+<div class="inner-flipper" id="examples-flipper" onclick="switchPages('docs', 'examples')">
+  <a class="darken">EXAMPLES</a>
+</div>
+  `;
+}
+
+function getCurrentExample(category: any) {
+  const click = `onclick="switchPages('examples', '../../docs/#${category}')"`;
+  return `
+<div class="inner-flipper" id="documentation-flipper" ${click}>
+  <a class="darken">DOCUMENTATION</a>
+</div>
+<div class="inner-flipper">|</div>
+<div class="inner-flipper" id="examples-flipper">
+  <div class="bolden">EXAMPLES</div>
+</div>`;
+}
+
+export function starterSidebar(docsOrExample: string) {
+  const nav = document.getElementById('sidenav')!;
+  const category = docsOrExample.split('-');
+  const val = category[category.length - 1];
+  const isDocs = docsOrExample === 'docs';
+  const docsExamples = isDocs ? getCurrentDocs() : getCurrentExample(val);
+  const href = isDocs ? '../' : '../../';
+  nav.innerHTML = `
+<div class="home lockup">
+  <a href=${href} class="sidebar-mv inner-home">
+    <div class="icon-button icon-modelviewer-black inner-home"></div>
+    <h1 class="inner-home darken">&lt;model-viewer&gt;</h1>
+  </a>
+</div>
+<hr class="sidebar-hr">
+<div class="flipper">
+  ${docsExamples}
+</div>
+<div class="categories" id="sidebar-category-container"></div>`;
 }
 
 function getExamples(category: any):

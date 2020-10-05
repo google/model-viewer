@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {convertJSONToHTML, createExamplesSidebar} from './create-html';
+import {convertJSONToHTML, createExamplesSidebar, starterSidebar} from './create-html';
 import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
 
 
@@ -93,6 +93,7 @@ export function init(docsOrExamples: string) {
                                                '../../data/examples.json';
   loadJSON(filePath, function(response: string) {
     const json = JSON.parse(response);
+    starterSidebar(docsOrExamples);
     if (docsOrExamples === 'docs') {
       convertJSONToHTML(json);
     } else {
