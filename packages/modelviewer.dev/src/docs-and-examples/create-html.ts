@@ -186,8 +186,7 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
-      // console.log(entry.htmlName, lowerCaseCategory,
-      // pluralLowerCaseSubcategory)
+      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',
