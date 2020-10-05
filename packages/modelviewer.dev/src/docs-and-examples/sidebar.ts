@@ -139,6 +139,18 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
   }
 }
 
+function updateHeader() {
+  // TODO, update for ids with spaces later
+  const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
+  const subCat = document.querySelector(`h4[id=${
+      sidebarIds.subcategory}]`)!.firstElementChild!.innerHTML;
+  const cat = document.querySelector(`h3[id=${
+      sidebarIds.category}]`)!.firstElementChild!.innerHTML;
+  const outerHeaderId = sidebarIds.category.split('-')[0];
+  const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
+  outerHeader.innerHTML = ' '.concat(cat, ': ', subCat);
+}
+
 function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
   const id = htmlEntry.target.getAttribute('id')!;
   const sidebarIds = getSidebarIdsFromId(id);
@@ -238,8 +250,9 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   let maxRatio = 0;
   let maxName = '';
   for (const name of intersectionRatios.keys()) {
-    if (intersectionRatios.get(name)! > maxRatio) {
-      maxRatio = intersectionRatios.get(name)!;
+    const ratio = intersectionRatios.get(name)!;
+    if (ratio > maxRatio) {
+      maxRatio = ratio;
       maxName = name;
     }
   }
@@ -273,6 +286,7 @@ export function sidebarObserver(docsOrExamples: string) {
       if (isFirstOpen) {  // page load
         updateSidebarViewFirstTime(entries);
       }
+      updateHeader();
     });
     // i.e. attributes, properties, events, methods, slots, custom css.
     let orderIndex = 0;

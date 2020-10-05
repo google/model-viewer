@@ -24,16 +24,64 @@ interface Category {
       'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
 }
 
-const CategoryConstant: Category = {
-  Title: '',
-  Attributes: [],
-  'CSS Custom Properties': [],
-  Properties: [],
-  'Static Properties': [],
-  Methods: [],
-  'Static Methods': [],
-  Events: [],
-  Slots: [],
+const CategoryConstant: Category =
+    {
+      Title: '',
+      Attributes: [],
+      'CSS Custom Properties': [],
+      Properties: [],
+      'Static Properties': [],
+      Methods: [],
+      'Static Methods': [],
+      Events: [],
+      Slots: [],
+    }
+
+function
+getCurrentDocs() {
+  const click = `onclick="switchPages('docs', 'examples')"`;
+  return `
+<div class="inner-flipper" id="documentation-flipper">
+  <div class="bolden">DOCUMENTATION</div>
+</div>
+<div class="inner-flipper">|</div>
+<div class="inner-flipper" id="examples-flipper" ${click}>
+  <a class="darken">EXAMPLES</a>
+</div>
+  `;
+}
+
+function getCurrentExample(category: string) {
+  const click = `onclick="switchPages('examples', '../../docs/#${category}')"`;
+  return `
+<div class="inner-flipper" id="documentation-flipper" ${click}>
+  <a class="darken">DOCUMENTATION</a>
+</div>
+<div class="inner-flipper">|</div>
+<div class="inner-flipper" id="examples-flipper">
+  <div class="bolden">EXAMPLES</div>
+</div>`;
+}
+
+export function starterSidebar(docsOrExample: string) {
+  const nav = document.getElementById('sidenav')!;
+  const inputList = docsOrExample.split('-');
+  const category = inputList[inputList.length - 1];
+  const isDocs = docsOrExample === 'docs';
+  const docsExamples = isDocs ? getCurrentDocs() : getCurrentExample(category);
+  const href = isDocs ? '../' : '../../';
+  nav.innerHTML = `
+<div class="home lockup">
+  <a href=${href} class="sidebar-mv inner-home">
+    <div class="icon-button icon-modelviewer-black inner-home"></div>
+    <h1 class="inner-home darken">&lt;model-viewer&gt;</h1>
+  </a>
+</div>
+<hr class="sidebar-hr">
+<div class="flipper">
+  ${docsExamples}
+</div>
+<div class="categories" id="sidebar-category-container"></div>`;
 }
 
 function getExamples(category: any):
@@ -134,21 +182,29 @@ function createTitle(header: string) {
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
-  <h1 id=${header.toLowerCase()}>${header}<h1>
+ <div class="tab" onclick="toggleSidebar()">
+    <h1 class="tab">&#9776${' '}</h1> 
+    <h1 class="tab" id=${header.toLowerCase()}>${header}</h1>
+  </div>
 </div>`;
   titleContainer!.innerHTML += title;
 }
 
-function getLowerCaseKey(key: string):
+export function getLowerCaseKey(key: string):
     string {
-      if (key === 'CSS Custom Properties') {
-        return 'cssProperties';
-      } else if (key === 'Static Methods') {
-        return 'staticMethods';
-      } else if (key === 'Static Properties') {
-        return 'staticProperties';
-      } else {
-        return key.toLowerCase();
+      switch (key) {
+        case 'CSS Custom Properties': {
+          return 'cssProperties';
+        }
+        case 'Static Methods': {
+          return 'staticMethods';
+        }
+        case 'Static Properties': {
+          return 'staticProperties';
+        }
+        default: {
+          return key.toLowerCase();
+        }
       }
     }
 
@@ -186,7 +242,6 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
-      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',
