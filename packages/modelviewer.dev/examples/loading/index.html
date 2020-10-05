@@ -18,13 +18,6 @@
 <html lang="en">
 
 <head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169901325-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-169901325-1');
-  </script>
   <title>&lt;model-viewer&gt; Lazy Loading</title>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; lazy loading examples">
@@ -60,17 +53,17 @@
     <div class="home lockup">
       <a href="../../" class="sidebar-mv inner-home">
         <div class="icon-button icon-modelviewer-black inner-home"></div>
-        <h1 class="inner-home">model-viewer</h1>
+        <h1 class="inner-home darken">model-viewer</h1>
       </a>
     </div>
     <hr class="sidebar-hr">
     <div class="flipper">
-      <div class="inner-flipper" id="examples-flipper" onclick="switchPages('examples', 'examples')">
-        <a class="darken bolden">EXAMPLES</a>
-      </div>
-      <div class="inner-flipper">|</div>
       <div class="inner-flipper" id="documentation-flipper" onclick="switchPages('examples', '../../docs/#loading')">
         <a class="darken">DOCUMENTATION</a>
+      </div>
+      <div class="inner-flipper">|</div>
+      <div class="inner-flipper" id="examples-flipper">
+        <div class="bolden">EXAMPLES</div>
       </div>
     </div>
     <div class="categories" id="sidebar-category-container">
@@ -82,7 +75,6 @@
       <div id="demo-container-1" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
           <h4 id="intro"><span class="font-medium">Lazy Loading. </span>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the &lt;model-viewer&gt; element using the poster attribute.</h4>
 
           <div class="heading">

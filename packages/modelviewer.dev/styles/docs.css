@@ -15,6 +15,7 @@ html {
 
 .outer-content {
   margin-left: 300px;
+  max-width: min(60%, 1100px);
 }
 
 .inner-content {
@@ -28,7 +29,9 @@ p {
 .attribute-name,
 .cssPropertie-name,
 .propertie-name,
+.staticPropertie-name,
 .method-name,
+.staticMethod-name,
 .event-name,
 .slot-name {
   padding: 10px 20px 10px 20px;
@@ -39,10 +42,12 @@ p {
 .attribute-definition,
 .cssPropertie-definition,
 .propertie-definition,
+.staticPropertie-definition,
 .method-definition,
+.staticMethod-definition,
 .event-definition,
 .slot-definition {
-  margin: 0 0 20px 0;
+  margin: 0 0 20px 20px;
 }
 
 .category-container {
@@ -52,14 +57,16 @@ p {
 .attribute-container,
 .cssPropertie-container,
 .propertie-container,
+.staticPropertie-container,
 .method-container,
+.staticMethod-container,
 .event-container,
 .slot-container {
   padding-bottom: 20px;
 }
 
 .value-table {
-  margin: 0 0 30px 0;
+  margin: 0 0 30px 20px;
   width: 50%;
 }
 
@@ -78,8 +85,9 @@ td:hover {
   background-color: #ececec;
 }
 
-ul.links {
+div.links {
   margin-top: 5px;
+  margin-left: 20px;
 }
 
 hr.solid {
@@ -153,7 +161,7 @@ hr.solid {
 .flipper {
   padding-left: 20px;
   padding-right: 20px;
-  font-size: 1vw;
+  font-size: 1em;
   overflow: auto;
   white-space: nowrap;
 }
@@ -172,8 +180,7 @@ hr.solid {
 }
 
 .darken:hover {
-  border: 1px solid #000;
-  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, .3);
 }
 
 .inactive-doc-example {

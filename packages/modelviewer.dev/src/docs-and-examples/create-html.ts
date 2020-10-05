@@ -20,7 +20,8 @@ interface Entry {
 
 interface Category {
   Title: string, Attributes: Entry[], 'CSS Custom Properties': Entry[],
-      Properties: Entry[], Methods: Entry[], Events: Entry[], Slots: Entry[],
+      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
+      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
@@ -28,7 +29,9 @@ const CategoryConstant: Category = {
   Attributes: [],
   'CSS Custom Properties': [],
   Properties: [],
+  'Static Properties': [],
   Methods: [],
+  'Static Methods': [],
   Events: [],
   Slots: [],
 }
@@ -37,11 +40,13 @@ function getExamples(category: any):
     string {
       const examples = category['examples'];
       let examplesString = '';
+      let i = 1;
       for (const example of examples) {
         examplesString += `
-<h4 class="subcategory-header">
+<h4 class="subcategory-header" id="container-${i}-sidebar">
   <a class="darken" href="#${example.htmlId}">${example.name}</a>
 </h4>`;
+        i += 1;
       }
       return examplesString;
     }
@@ -50,18 +55,19 @@ function createExampleSidebarCategory(category: any) {
   const htmlName = category['htmlName'];
   const windowHref = window.location.href;
   const isActive = windowHref.indexOf(htmlName) >= 0 ? true : false;
+  const id =
+      isActive ? 'active-container-sidebar' : htmlName.concat('-sidebar');
 
   const container = document.getElementById('sidebar-category-container');
   container!.innerHTML += `
-  <div class="category">
-    <h3 id=${htmlName.concat('-sidebar')}>
-      <a class="darken" href="../${htmlName}">${category['name']}</a>
-    </h3>
-    <div class="subCategory">
-      ${isActive ? getExamples(category) : ''}
-    </div>
+<div class="category">
+  <h3 id=${id}>
+    <a class="darken" href="../${htmlName}">${category['name']}</a>
+  </h3>
+  <div class="subCategory">
+    ${isActive ? getExamples(category) : ''}
   </div>
-    `;
+</div>`;
 }
 
 export function createExamplesSidebar(json: any[]) {
@@ -112,8 +118,7 @@ function createSidebar(category: Category) {
     for (const entry of entries) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
-      const aId = '#docs-'.concat(
-          lowerCaseTitle, '-', lowerCaseKey, '-', entry.htmlName);
+      const aId = '#docs-'.concat(divId);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
   <a class="darken" href=${aId}>${entry.name}</a>
@@ -136,6 +141,10 @@ function getLowerCaseKey(key: string):
     string {
       if (key === 'CSS Custom Properties') {
         return 'cssProperties';
+      } else if (key === 'Static Methods') {
+        return 'staticMethods';
+      } else if (key === 'Static Properties') {
+        return 'staticProperties';
       } else {
         return key.toLowerCase();
       }
@@ -146,9 +155,9 @@ function createDefaultTable(entry: Entry):
       return `
 <table class="value-table">
   <tr>
-    <th>Default value</th>
     <th>Type</th>
     <th>Options</th>
+    <th>Default Value</th>
   </tr>
   <tr>
     <td>${entry.default[0]}</td>
@@ -163,12 +172,10 @@ function createLinks(
     pluralLowerCaseSubcategory: string,
     lowerCaseCategory: string):
     string {
-      const ulId = 'links'.concat(
+      const id = 'links'.concat(
           entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
       return `
-<div>
-  <ul class="links" id=${ulId}>
-  </ul>
+<div class="links" id=${id}>
 </div>`;
     }
 
@@ -177,6 +184,7 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
+      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',
@@ -233,11 +241,11 @@ function createSubcategory(
         createEntry(entry, lowerCaseCategory, pluralLowerCaseSubcategory);
 
     if ('links' in entry) {
-      const ulId = 'links'.concat(
+      const linksId = 'links'.concat(
           entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
-      const ul = document.getElementById(ulId);
+      const linksDiv = document.getElementById(linksId);
       for (const link of entry.links) {
-        ul!.innerHTML += `<li>${link}</li>`;
+        linksDiv!.innerHTML += `<div>${link}</div>`;
       }
     }
   }
