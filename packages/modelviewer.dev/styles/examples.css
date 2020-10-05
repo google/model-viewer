@@ -31,7 +31,59 @@
   --button-size: 36px;
   --icon-size: 28px;
   --header-height: 72px;
+
+  --sidebar-width: 300px;
+  --header-visibility: visible;
+  --header-margin-left: 0px;
+  --sidebar-speed: .15s;
 }
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: var(--sidebar-width);
+  background-color: #f6f6f6;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+  border: 1px solid #BDBDBD;
+  transition-property: width;
+  transition: var(--sidebar-speed);
+  transition-timing-function: linear;
+}
+
+.outer-content {
+  margin-left: var(--sidebar-width);
+  max-width: min(60%, 1100px);
+  transition-property: margin-left;
+  transition: var(--sidebar-speed);
+  transition-timing-function: linear;
+}
+
+.examples-container {
+  margin-left: var(--sidebar-width);
+  transition-property: margin-left;
+  transition: var(--sidebar-speed);
+  transition-timing-function: linear;
+}
+
+.header {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px 10px 40px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  overflow: auto;
+  white-space: nowrap;
+  font-size: .8em;
+  visibility: var(--header-visibility);
+  margin-left: var(--header-margin-left);
+  transition-property: margin-left;
+  transition: var(--sidebar-speed);
+  transition-timing-function: linear;
+}
+
+/* TODO make black opacity to go behind sidebar on device */
 
 body {
   font-family: 'Rubik', sans-serif;
@@ -43,6 +95,7 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
+
 * {
   box-sizing: border-box;
 }
@@ -261,10 +314,6 @@ model-viewer:focus {
 }
 #intro div {
   font-weight: 500;
-}
-
-.examples-container {
-  margin-left: 300px;
 }
 
 .sample {
@@ -614,7 +663,15 @@ paper-button {
     --browser-support-desc-margin-top: 20px;
     --browser-support-icons-margin-top: 8px;
     --header-height: 56px;
+
+    --sidebar-width: 0;
+    --overlay-width: 0;
   }
+
+  .examples-container {
+    margin-left: 0;
+  }
+
   body {
     font-size: 14px;
     line-height: 22px;

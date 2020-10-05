@@ -132,7 +132,10 @@ function createTitle(header: string) {
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
-  <h1 id=${header.toLowerCase()}>${header}</h1>
+ <div class="tab" onclick="toggleSidebar()">
+    <h1 class="tab">&#9776${' '}</h1> 
+    <h1 class="tab" id=${header.toLowerCase()}>${header}</h1>
+  </div>
 </div>`;
   titleContainer!.innerHTML += title;
 }
@@ -189,7 +192,6 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string):
     string {
-      console.log(entry.htmlName, lowerCaseCategory, pluralLowerCaseSubcategory)
       const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
       const subcategoryNameId = [
         'docs',

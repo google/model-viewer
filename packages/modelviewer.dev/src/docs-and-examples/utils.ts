@@ -103,5 +103,39 @@ export function init(docsOrExamples: string) {
   });
 }
 
+export function toggleSidebar() {
+  const root = document.documentElement;
+  const nav = document.getElementById('sidenav')!;
+  const zero = 0;
+  const stringZero = zero.toString().concat('px');
+  const threeHundred = 300;
+  const stringThreeHundred = threeHundred.toString().concat('px');
+
+  if (window.innerWidth <= 800 && nav.offsetWidth > 150) {
+    root.style.setProperty('--header-margin-left', stringZero);
+  } else if (window.innerWidth <= 800 && nav.offsetWidth <= 150) {
+    root.style.setProperty('--header-margin-left', stringThreeHundred);
+  }
+
+  if (nav.offsetWidth > 150) {
+    root.style.setProperty('--sidebar-width', stringZero);
+  } else {
+    root.style.setProperty('--sidebar-width', stringThreeHundred);
+  }
+}
+
+(self as any).toggleSidebar = toggleSidebar;
 (self as any).switchPages = switchPages;
 (self as any).init = init;
+
+function handleSideBarClickToggle(event: any) {
+  const nav = document.getElementById('sidenav')!;
+  var mouseClickWidth = event.clientX;
+  // toggle nav when clicking outside of nav on small device
+  if (mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
+      window.innerWidth <= 800) {
+    toggleSidebar();
+  }
+}
+
+document.addEventListener('click', handleSideBarClickToggle);
