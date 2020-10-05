@@ -55,6 +55,7 @@
 .outer-content {
   margin-left: var(--sidebar-width);
   max-width: min(60%, 1100px);
+  overflow: hidden;
   transition-property: margin-left;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
@@ -73,7 +74,7 @@
   width: 100%;
   position: sticky;
   top: 0;
-  overflow: auto;
+  overflow: hidden;
   white-space: nowrap;
   font-size: .8em;
   visibility: var(--header-visibility);

@@ -39,18 +39,19 @@ const CategoryConstant: Category =
 
 function
 getCurrentDocs() {
+  const click = `onclick="switchPages('docs', 'examples')"`;
   return `
 <div class="inner-flipper" id="documentation-flipper">
   <div class="bolden">DOCUMENTATION</div>
 </div>
 <div class="inner-flipper">|</div>
-<div class="inner-flipper" id="examples-flipper" onclick="switchPages('docs', 'examples')">
+<div class="inner-flipper" id="examples-flipper" ${click}>
   <a class="darken">EXAMPLES</a>
 </div>
   `;
 }
 
-function getCurrentExample(category: any) {
+function getCurrentExample(category: string) {
   const click = `onclick="switchPages('examples', '../../docs/#${category}')"`;
   return `
 <div class="inner-flipper" id="documentation-flipper" ${click}>
@@ -64,10 +65,10 @@ function getCurrentExample(category: any) {
 
 export function starterSidebar(docsOrExample: string) {
   const nav = document.getElementById('sidenav')!;
-  const category = docsOrExample.split('-');
-  const val = category[category.length - 1];
+  const inputList = docsOrExample.split('-');
+  const category = inputList[inputList.length - 1];
   const isDocs = docsOrExample === 'docs';
-  const docsExamples = isDocs ? getCurrentDocs() : getCurrentExample(val);
+  const docsExamples = isDocs ? getCurrentDocs() : getCurrentExample(category);
   const href = isDocs ? '../' : '../../';
   nav.innerHTML = `
 <div class="home lockup">
