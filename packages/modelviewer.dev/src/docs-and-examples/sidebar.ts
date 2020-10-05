@@ -147,7 +147,6 @@ function updateHeader() {
       sidebarIds.category}]`)!.firstElementChild!.innerHTML;
   const outerHeaderId = sidebarIds.category.split('-')[0];
   const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
-  console.log(outerHeader, sidebarIds.category);
   outerHeader.innerHTML = cat.concat(': ', subCat);
 }
 
