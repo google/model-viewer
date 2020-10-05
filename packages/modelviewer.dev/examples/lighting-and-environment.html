@@ -124,12 +124,21 @@ window.oscillate = function(min, max, period, time) {
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <h2 class="demo-title">Supports different <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
-          <h4></h4>
+          <h2 class="demo-title">Supports different resolutions of <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
+          <h4>Environment images should be no more than 1k (1024x512) as they
+          are clamped to this resolution internally. If one needs a higher
+          resolution skybox, then two images must be supplied: a high-res JPEG for the
+          <span class="attribute">skybox-image</span> and a matching 1k (or
+          less) HDR for the <span class="attribute">environment-image</span>.
+          Due to compression efficiency, the 4k JPEG and 1k HDR images below are
+          each about 1.5Mb, despite the JPEG having 16 times as many pixels.
+          However, HDR is still recommended for lighting as it yields much more
+          realistic results. 
+          </h4>
         </div>
         <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
-<model-viewer camera-controls skybox-image="../assets/whipple_creek_regional_park_04_1k.hdr" environment-image="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls skybox-image="../assets/spruit_sunrise_4k_LDR.jpg" environment-image="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise" src="../shared-assets/models/reflective-sphere.gltf"></model-viewer>
           </template>
         </example-snippet>
       </div>
@@ -218,14 +227,12 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">An equirectangular LDR <span class="attribute">environment-image</span></h2>
-            <h4>Note we are still specifying an HDR skybox-image. This is not in general necessary, but if you have multiple &lt;model-viewer&gt; elements
-              on a page (as here) there is a performance problem with having different format skyboxes. To avoid it, simply use only HDR or only LDR for your skyboxes.
-            </h4>
+            <h2 class="demo-title">An equirectangular LDR <span class="attribute">skybox-image</span></h2>
+            <h4></h4>
           </div>
           <example-snippet stamp-to="demo-container-2.5" highlight-as="html">
             <template>
-  <model-viewer camera-controls environment-image="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" skybox-image="../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+  <model-viewer camera-controls skybox-image="../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
