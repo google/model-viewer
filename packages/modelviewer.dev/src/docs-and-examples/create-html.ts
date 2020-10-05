@@ -132,21 +132,26 @@ function createTitle(header: string) {
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
-  <h1 id=${header.toLowerCase()}>${header}<h1>
+  <h1 id=${header.toLowerCase()}>${header}</h1>
 </div>`;
   titleContainer!.innerHTML += title;
 }
 
-function getLowerCaseKey(key: string):
+export function getLowerCaseKey(key: string):
     string {
-      if (key === 'CSS Custom Properties') {
-        return 'cssProperties';
-      } else if (key === 'Static Methods') {
-        return 'staticMethods';
-      } else if (key === 'Static Properties') {
-        return 'staticProperties';
-      } else {
-        return key.toLowerCase();
+      switch (key) {
+        case 'CSS Custom Properties': {
+          return 'cssProperties';
+        }
+        case 'Static Methods': {
+          return 'staticMethods';
+        }
+        case 'Static Properties': {
+          return 'staticProperties';
+        }
+        default: {
+          return key.toLowerCase();
+        }
       }
     }
 

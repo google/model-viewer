@@ -173,6 +173,7 @@ hr.solid {
 .inner-home {
   display: flex;
   align-items: center;
+  font-size: 1.25em;
 }
 
 .darken {
