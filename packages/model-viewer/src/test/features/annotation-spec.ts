@@ -86,7 +86,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot = document.createElement('div');
       hotspot.setAttribute('slot', 'hotspot-1');
       hotspot.setAttribute('data-position', '1m 1m 1m');
-      hotspot.setAttribute('data-normal', '0m 0m 1m');
+      hotspot.setAttribute('data-normal', '0m 0m -1m');
       element.appendChild(hotspot);
       await timePasses();
       numSlots = scene.model.children.length;
@@ -116,7 +116,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         const {position, normal} =
             (scene.model.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
-        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
+        expect(normal).to.be.deep.equal(new Vector3(0, 0, -1));
       });
 
       test('updateHotspot does change the data', () => {
@@ -140,7 +140,6 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           await rafPasses();
 
           const hotspotObject2D = scene.model.children[numSlots - 1] as Hotspot;
-          hotspotObject2D.hide();
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
@@ -153,18 +152,18 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           wrapper = hotspotObject2D.element;
         });
 
-        test('the hotspot is visible', async () => {
-          expect(wrapper.classList.contains('hide')).to.be.false;
+        test('the hotspot is hidden', async () => {
+          expect(wrapper.classList.contains('hide')).to.be.true;
         });
 
-        test('the hotspot is hidden after turning', async () => {
+        test('the hotspot is visible after turning', async () => {
           element[$scene].yaw = Math.PI;
           element[$scene].updateMatrixWorld();
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 
-          expect(!!wrapper.classList.contains('hide')).to.be.true;
+          expect(!!wrapper.classList.contains('hide')).to.be.false;
         });
       });
 
