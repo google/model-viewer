@@ -112,12 +112,6 @@ export function toggleSidebar() {
   const threeHundred = 300;
   const stringThreeHundred = threeHundred.toString().concat('px');
 
-  if (window.innerWidth <= 800 && nav.offsetWidth > 150) {
-    root.style.setProperty('--header-margin-left', stringZero);
-  } else if (window.innerWidth <= 800 && nav.offsetWidth <= 150) {
-    root.style.setProperty('--header-margin-left', stringThreeHundred);
-  }
-
   if (nav.offsetWidth > 150) {
     root.style.setProperty('--sidebar-width', stringZero);
   } else {

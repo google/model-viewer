@@ -33,8 +33,6 @@
   --header-height: 72px;
 
   --sidebar-width: 300px;
-  --header-visibility: visible;
-  --header-margin-left: 0px;
   --sidebar-speed: .15s;
 }
 
@@ -50,12 +48,12 @@
   transition-property: width;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
+  z-index: 2;
 }
 
 .outer-content {
   margin-left: var(--sidebar-width);
   max-width: min(60%, 1100px);
-  overflow: hidden;
   transition-property: margin-left;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
@@ -77,11 +75,7 @@
   overflow: hidden;
   white-space: nowrap;
   font-size: .8em;
-  visibility: var(--header-visibility);
-  margin-left: var(--header-margin-left);
-  transition-property: margin-left;
-  transition: var(--sidebar-speed);
-  transition-timing-function: linear;
+  z-index: 1;
 }
 
 /* TODO make black opacity to go behind sidebar on device */
