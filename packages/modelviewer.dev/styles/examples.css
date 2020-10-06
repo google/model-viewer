@@ -667,6 +667,11 @@ paper-button {
     margin-left: 0;
   }
 
+  .header {
+    padding: 10px 20px 10px 10px;
+  }
+  
+
   body {
     font-size: 14px;
     line-height: 22px;
