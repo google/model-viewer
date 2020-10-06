@@ -92,7 +92,8 @@ function getExamples(category: any): string {
   for (const example of examples) {
     examplesString += `
 <h4 class="subcategory-header" id="container-${i}-sidebar">
-  <a class="darken" href="#${example.htmlId}">${example.name}</a>
+  <a class="darken" href="#${example.htmlId}" onclick="sidebarClick()">${
+        example.name}</a>
 </h4>`;
     i += 1;
   }
@@ -110,7 +111,8 @@ function createExampleSidebarCategory(category: any) {
   container!.innerHTML += `
 <div class="category">
   <h3 id=${id}>
-    <a class="darken" href="../${htmlName}">${category['name']}</a>
+    <a class="darken" href="../${htmlName}" onclick="sidebarClick()">${
+      category['name']}</a>
   </h3>
   <div class="subCategory">
     ${isActive ? getExamples(category) : ''}
@@ -182,10 +184,7 @@ function createTitle(header: string) {
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
- <div class="tab" onclick="toggleSidebar()">
-    <h1 class="tab">&#9776${' '}</h1> 
-    <h1 class="tab" id=${header.toLowerCase()}>${header}</h1>
-  </div>
+  <h1 id=${header.toLowerCase()}>${header}</h1>
 </div>`;
   titleContainer!.innerHTML += title;
 }
@@ -297,7 +296,25 @@ function createSubcategory(
   }
 }
 
+export function createExamplesHeader() {
+  const outer = document.getElementById('toggle');
+  outer!.innerHTML += `
+<h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
+<div class="exampleHeader">
+  <h1>Examples</h1>
+</div>
+`;
+}
+
+function createToggle() {
+  const outer = document.getElementById('toggle');
+  outer!.innerHTML += `
+<h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
+`;
+}
+
 export function convertJSONToHTML(json: any[]) {
+  createToggle();
   let header = '';
   for (const category of json) {
     for (const key in category) {

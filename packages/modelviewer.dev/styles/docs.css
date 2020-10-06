@@ -78,12 +78,6 @@ hr.solid {
   border-top: 3px solid #f6f6f6;
 }
 
-.tab {
-  display: flex;
-  align-items: center;
-  padding-right: 10px;
-}
-
 .categories {
   padding: 20px;
 }
