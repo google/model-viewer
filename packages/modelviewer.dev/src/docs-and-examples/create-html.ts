@@ -309,7 +309,7 @@ export function createExamplesHeader() {
 function createToggle() {
   const outer = document.getElementById('toggle');
   outer!.innerHTML += `
-  <h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
+<h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
 `;
 }
 
