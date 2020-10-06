@@ -59,7 +59,7 @@
         ]
       }
     ],
-    "CSS Custom Properties": [
+    "CSS": [
       {
         "name": "--poster-color",
         "htmlName": "posterColor",
@@ -268,7 +268,7 @@
         ]
       }
     ],
-    "CSS Custom Properties": [
+    "CSS": [
       {
         "name": "--ar-button-display",
         "htmlName": "arButtonDisplay",
@@ -471,7 +471,7 @@
         ]
       }
     ],
-    "CSS Custom Properties": [
+    "CSS": [
       {
         "name": "--interaction-prompt-display",
         "htmlName": "interactionPromptDisplay",
@@ -554,7 +554,7 @@
   },
   {
     "Title": "Annotations",
-    "CSS Custom Properties": [
+    "CSS": [
       {
         "name": "--min-hotspot-opacity",
         "htmlName": "minHotspotOpacity",

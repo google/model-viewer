@@ -19,15 +19,15 @@ interface Entry {
 }
 
 interface Category {
-  Title: string, Attributes: Entry[], 'CSS Custom Properties': Entry[],
-      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
-      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
+  Title: string, Attributes: Entry[], CSS: Entry[], Properties: Entry[],
+      'Static Properties': Entry[], Methods: Entry[], 'Static Methods': Entry[],
+      Events: Entry[], Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
   Title: '',
   Attributes: [],
-  'CSS Custom Properties': [],
+  CSS: [],
   Properties: [],
   'Static Properties': [],
   Methods: [],
@@ -191,8 +191,6 @@ function createTitle(title: string) {
 
 export function getLowerCaseKey(key: string): string {
   switch (key) {
-    case 'CSS Custom Properties':
-      return 'cssProperties';
     case 'Static Methods':
       return 'staticMethods';
     case 'Static Properties':
