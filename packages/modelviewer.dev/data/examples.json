@@ -22,6 +22,30 @@
       {
         "htmlId": "demo-container-5",
         "name": "Cycling Posters"
+      },
+      {
+        "htmlId": "demo-container-6",
+        "name": "glTF Model"
+      },
+      {
+        "htmlId": "demo-container-7",
+        "name": "GLB Model"
+      },
+      {
+        "htmlId": "demo-container-8",
+        "name": "DRACO Support"
+      },
+      {
+        "htmlId": "demo-container-9",
+        "name": "USDZ Model"
+      },
+      {
+        "htmlId": "demo-container-10",
+        "name": "No Model"
+      },
+      {
+        "htmlId": "demo-container-11",
+        "name": "Cycling Models"
       }
     ]
   },
