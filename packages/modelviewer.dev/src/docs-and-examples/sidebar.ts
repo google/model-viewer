@@ -148,7 +148,7 @@ function updateHeader() {
       sidebarIds.category}]`)!.firstElementChild!.innerHTML;
   const outerHeaderId = sidebarIds.category.split('-')[0];
   const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
-  outerHeader.innerHTML = ' '.concat(cat, ': ', subCat);
+  outerHeader.innerHTML = cat.concat(': ', subCat);
 }
 
 function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {

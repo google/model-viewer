@@ -32,8 +32,10 @@
   --icon-size: 28px;
   --header-height: 72px;
 
+  --toggle-visibility: hidden;
   --sidebar-width: 300px;
   --sidebar-speed: .15s;
+  --border-style-dark: 1px solid rgba(0,0,0,.5);
 }
 
 .sidebar {
@@ -48,7 +50,7 @@
   transition-property: width;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
-  z-index: 2;
+  z-index: 1010;
 }
 
 .outer-content {
@@ -76,6 +78,32 @@
   white-space: nowrap;
   font-size: .8em;
   z-index: 1;
+}
+
+.exampleHeader {
+  background-color: rgba(246, 246, 246, 0.9);
+  padding: 10px 20px 10px 40px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: nowrap;
+  font-size: .8em;
+  z-index: 1008;
+}
+
+.tab {
+  position: fixed;
+  top: 5px;
+  left: 10px;
+  visibility: hidden;
+  z-index: 1009;
+  align-items: center;
+  border-radius: 3px;
+  border-style: solid;
+  border-width: .5px;
+  border-color: var(--border-style);
 }
 
 /* TODO make black opacity to go behind sidebar on device */
@@ -664,13 +692,21 @@ paper-button {
   }
 
   .examples-container {
-    margin-left: 0;
+    margin-left: 20px;
+    margin-right: 20px;
   }
 
   .header {
-    padding: 10px 20px 10px 10px;
+    padding: 10px 20px 10px 40px;
   }
   
+  .tab {
+    visibility: visible;
+  }
+
+  .exampleHeader {
+    visibility: visible;
+  }
 
   body {
     font-size: 14px;

@@ -182,10 +182,7 @@ function createTitle(header: string) {
       document.getElementById(header.toLowerCase().concat('-docs'));
   const title = `
 <div class="header">
- <div class="tab" onclick="toggleSidebar()">
-    <h1 class="tab">&#9776${' '}</h1> 
-    <h1 class="tab" id=${header.toLowerCase()}>${header}</h1>
-  </div>
+  <h1 id=${header.toLowerCase()}>${header}</h1>
 </div>`;
   titleContainer!.innerHTML += title;
 }
@@ -297,7 +294,25 @@ function createSubcategory(
   }
 }
 
+export function createExamplesHeader() {
+  const outer = document.getElementById('toggle');
+  outer!.innerHTML += `
+<h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
+<div class="exampleHeader">
+  <h1>Examples</h1>
+</div>
+`;
+}
+
+function createToggle() {
+  const outer = document.getElementById('toggle');
+  outer!.innerHTML += `
+  <h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
+`;
+}
+
 export function convertJSONToHTML(json: any[]) {
+  createToggle();
   let header = '';
   for (const category of json) {
     for (const key in category) {
