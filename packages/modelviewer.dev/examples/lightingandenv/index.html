@@ -81,7 +81,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with a lit model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
     <model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
@@ -98,7 +98,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with an unlit model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3.5" highlight-as="html">
+          <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
     <model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
             </template>
@@ -115,7 +115,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">Use environment-image to set environmental lighting without changing the background</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
   <model-viewer camera-controls environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
@@ -132,7 +132,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">Supports different <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
   <model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" environment-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
@@ -149,7 +149,7 @@ window.oscillate = function(min, max, period, time) {
           <h2 class="demo-title">Control render exposure with <span class="attribute">exposure</span></h2>
           <h4></h4>
         </div>
-        <example-snippet stamp-to="demo-container-7" highlight-as="html">
+        <example-snippet stamp-to="demo-container-6" highlight-as="html">
           <template>
   <model-viewer camera-controls id="exposure-demo" exposure="1" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
   <script>
@@ -179,7 +179,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">Control shadow with <span class="attribute">shadow-intensity</span> and <span class="attribute">shadow-softness</span></h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-9" highlight-as="html">
+          <example-snippet stamp-to="demo-container-7" highlight-as="html">
             <template>
   <model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
   <script>
@@ -209,7 +209,7 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="demo-container-8" highlight-as="html">
             <template>
   <model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
             </template>
@@ -228,7 +228,7 @@ window.oscillate = function(min, max, period, time) {
                 on a page (as here) there is a performance problem with having different format skyboxes. To avoid it, simply use only HDR or only LDR for your skyboxes.
               </h4>
             </div>
-            <example-snippet stamp-to="demo-container-2.5" highlight-as="html">
+            <example-snippet stamp-to="demo-container-9" highlight-as="html">
               <template>
     <model-viewer camera-controls environment-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
               </template>

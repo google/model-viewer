@@ -197,15 +197,14 @@
       <div id="demo-container-6" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
           <h4 id="intro"><span class="font-medium">Model Formats. </span>Learn how model formats work on different platforms. This page tests configurations of the model source.</h4>
           <div class="heading">
             <h2 class="demo-title">With a glTF model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="demo-container-6" highlight-as="html">
             <template>
-  <model-viewer camera-controls alt="A 3D model of a sphere" src="../shared-assets/models/reflective-sphere.gltf">
+  <model-viewer camera-controls alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
   </model-viewer>
             </template>
           </example-snippet>
@@ -221,10 +220,10 @@
             <h2 class="demo-title">With a GLB model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="demo-container-7" highlight-as="html">
             <template>
   <model-viewer camera-controls
-      alt="A 3D model of an astronaut" src="../shared-assets/models/Astronaut.glb">
+      alt="A 3D model of an astronaut" src="../../shared-assets/models/Astronaut.glb">
   </model-viewer>
             </template>
           </example-snippet>
@@ -249,9 +248,9 @@
               how to customize this behavior.
             </h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="demo-container-8" highlight-as="html">
             <template>
-  <model-viewer camera-controls alt="A 3D model of an astronaut" src="../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
+  <model-viewer camera-controls alt="A 3D model of an astronaut" src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
   </model-viewer>
             </template>
           </example-snippet>
@@ -317,9 +316,9 @@
             <h2 class="demo-title">With only a USDZ model</h2>
             <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with poster to show a static image and the icon to enter augmented reality mode</h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="demo-container-9" highlight-as="html">
             <template>
-  <model-viewer camera-controls alt="A 3D model of an astronaut" ios-src="../shared-assets/models/Astronaut.usdz">
+  <model-viewer camera-controls alt="A 3D model of an astronaut" ios-src="../../shared-assets/models/Astronaut.usdz">
   </model-viewer>
             </template>
           </example-snippet>
@@ -335,7 +334,7 @@
             <h2 class="demo-title">With no model</h2>
             <h4>There's nothing to show, but also no error.</h4>
           </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <example-snippet stamp-to="demo-container-10" highlight-as="html">
             <template>
   <model-viewer alt="An invalid model" src="i-do-not-exist.glb">
   </model-viewer>
@@ -353,14 +352,14 @@
             <h2 class="demo-title">Cycling between different models</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <example-snippet stamp-to="demo-container-11" highlight-as="html">
             <template>
-  <model-viewer id="toggle-model" src="../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
+  <model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
   <script>
       const models = ['shishkebab.glb', 'Astronaut.glb'];
       const toggleModel = document.querySelector('#toggle-model');
       let i = 0;
-      setInterval(() => toggleModel.setAttribute('src', `../shared-assets/models/${models[i++ % 2]}`), 2000);
+      setInterval(() => toggleModel.setAttribute('src', `../../shared-assets/models/${models[i++ % 2]}`), 2000);
   </script>
             </template>
           </example-snippet>
