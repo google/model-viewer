@@ -142,7 +142,7 @@ function createSubcategorySidebar(
 
 function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
-  const lowerCaseTitle = category.Title.toLowerCase();
+  const lowerCaseTitle = getLowerCaseTitle(category.Title);
   let subcategories = Object.keys(category);
   subcategories = subcategories.filter(k => k !== 'Title');
 
@@ -179,14 +179,14 @@ function createSidebar(category: Category) {
   }
 }
 
-function createTitle(header: string) {
+function createTitle(title: string) {
+  const lowerCaseTitle = getLowerCaseTitle(title);
   const titleContainer =
-      document.getElementById(header.toLowerCase().concat('-docs'));
-  const title = `
+      document.getElementById(lowerCaseTitle.concat('-docs'));
+  titleContainer!.innerHTML += `
 <div class="header">
-  <h1 id=${header.toLowerCase()}>${header}</h1>
+  <h1 id=${lowerCaseTitle}>${title}</h1>
 </div>`;
-  titleContainer!.innerHTML += title;
 }
 
 export function getLowerCaseKey(key: string): string {
@@ -202,13 +202,17 @@ export function getLowerCaseKey(key: string): string {
   }
 }
 
+function getLowerCaseTitle(title: string): string {
+  return title.replace('&', 'and').replace(/\s/g, '').toLowerCase();
+}
+
 function createDefaultTable(entry: Entry): string {
   return `
 <table class="value-table">
   <tr>
     <th>Type</th>
-    <th>Options</th>
     <th>Default Value</th>
+    <th>Options</th>
   </tr>
   <tr>
     <td>${entry.default[0]}</td>
@@ -261,7 +265,7 @@ function createSubcategory(
     category: string,
     subcategory: string,
     pluralLowerCaseSubcategory: string) {
-  const lowerCaseCategory = category.toLowerCase();
+  const lowerCaseCategory = getLowerCaseTitle(category);
 
   const element = document.getElementById(lowerCaseCategory.concat('-docs'));
   const subcategoryContainerId =

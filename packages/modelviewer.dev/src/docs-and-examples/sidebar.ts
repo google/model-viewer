@@ -21,6 +21,7 @@ let isSideBarClick = false;
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
+const SIZE_OF_ENTRY_LIST = 4;
 
 interface SidebarIds {
   name: string, subcategory: string, category: string
@@ -140,7 +141,6 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
 }
 
 function updateHeader() {
-  // TODO, update for ids with spaces later
   const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
   const subCat = document.querySelector(`h4[id=${
       sidebarIds.subcategory}]`)!.firstElementChild!.innerHTML;
@@ -291,7 +291,7 @@ export function sidebarObserver(docsOrExample: string) {
     let orderIndex = 0;
     document.querySelectorAll('div[id*="docs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
-      if (idSplitList.length === 4) {
+      if (idSplitList.length === SIZE_OF_ENTRY_LIST) {
         const id = idSplitList.slice(1, 10).join('-');
         order.set(id, orderIndex);
         orderIndex += 1;
