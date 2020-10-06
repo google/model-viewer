@@ -92,7 +92,8 @@ function getExamples(category: any): string {
   for (const example of examples) {
     examplesString += `
 <h4 class="subcategory-header" id="container-${i}-sidebar">
-  <a class="darken" href="#${example.htmlId}">${example.name}</a>
+  <a class="darken" href="#${example.htmlId}" onclick="sidebarClick()">${
+        example.name}</a>
 </h4>`;
     i += 1;
   }
@@ -110,7 +111,8 @@ function createExampleSidebarCategory(category: any) {
   container!.innerHTML += `
 <div class="category">
   <h3 id=${id}>
-    <a class="darken" href="../${htmlName}">${category['name']}</a>
+    <a class="darken" href="../${htmlName}" onclick="sidebarClick()">${
+      category['name']}</a>
   </h3>
   <div class="subCategory">
     ${isActive ? getExamples(category) : ''}
