@@ -55,11 +55,23 @@
     "examples": [
       {
         "htmlId": "demo-container-1",
-        "name": "Demo"
+        "name": "WebXR"
       },
       {
         "htmlId": "demo-container-2",
-        "name": "Priority"
+        "name": "AR"
+      },
+      {
+        "htmlId": "demo-container-3",
+        "name": "Scene Viewer"
+      },
+      {
+        "htmlId": "demo-container-4",
+        "name": "Custom Button"
+      },
+      {
+        "htmlId": "demo-container-5",
+        "name": "Transparent Background"
       }
     ]
   },
