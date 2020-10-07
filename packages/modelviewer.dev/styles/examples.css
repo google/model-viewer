@@ -33,6 +33,8 @@
   --header-height: 72px;
 
   --toggle-visibility: hidden;
+  --og-sidebar-width: 300px;
+  --neg-sidebar-width: 0px;
   --sidebar-width: 300px;
   --sidebar-speed: .15s;
   --border-style-dark: 1px solid rgba(0,0,0,.5);
@@ -41,13 +43,15 @@
 .sidebar {
   margin: 0;
   padding: 0;
-  width: var(--sidebar-width);
+  width: 300px;
+  margin-left: var(--neg-sidebar-width);
   background-color: #f6f6f6;
   position: fixed;
+  top: 0;
   height: 100%;
   overflow: auto;
   border: 1px solid #BDBDBD;
-  transition-property: width;
+  transition-property: margin-left;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
   z-index: 1010;
