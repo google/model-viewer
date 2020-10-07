@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 
+interface Defaults {
+  type: string, default: string, options: string,
+}
+
 interface Entry {
-  name: string, htmlName: string, description: string, default: string[],
+  name: string, htmlName: string, description: string, default: Defaults,
       links: string[],
 }
 
 interface Category {
-  Title: string, Attributes: Entry[], 'CSS Custom Properties': Entry[],
-      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
-      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
+  Title: string, Attributes: Entry[], CSS: Entry[], Properties: Entry[],
+      'Static Properties': Entry[], Methods: Entry[], 'Static Methods': Entry[],
+      Events: Entry[], Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
   Title: '',
   Attributes: [],
-  'CSS Custom Properties': [],
+  CSS: [],
   Properties: [],
   'Static Properties': [],
   Methods: [],
@@ -142,7 +146,7 @@ function createSubcategorySidebar(
 
 function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
-  const lowerCaseTitle = category.Title.toLowerCase();
+  const lowerCaseTitle = getLowerCaseTitle(category.Title);
   let subcategories = Object.keys(category);
   subcategories = subcategories.filter(k => k !== 'Title');
 
@@ -179,20 +183,18 @@ function createSidebar(category: Category) {
   }
 }
 
-function createTitle(header: string) {
+function createTitle(title: string) {
+  const lowerCaseTitle = getLowerCaseTitle(title);
   const titleContainer =
-      document.getElementById(header.toLowerCase().concat('-docs'));
-  const title = `
+      document.getElementById(lowerCaseTitle.concat('-docs'));
+  titleContainer!.innerHTML += `
 <div class="header">
-  <h1 id=${header.toLowerCase()}>${header}</h1>
+  <h1 id=${lowerCaseTitle}>${title}</h1>
 </div>`;
-  titleContainer!.innerHTML += title;
 }
 
 export function getLowerCaseKey(key: string): string {
   switch (key) {
-    case 'CSS Custom Properties':
-      return 'cssProperties';
     case 'Static Methods':
       return 'staticMethods';
     case 'Static Properties':
@@ -202,18 +204,22 @@ export function getLowerCaseKey(key: string): string {
   }
 }
 
+function getLowerCaseTitle(title: string): string {
+  return title.replace('&', 'and').replace(/\s/g, '').toLowerCase();
+}
+
 function createDefaultTable(entry: Entry): string {
   return `
 <table class="value-table">
   <tr>
     <th>Type</th>
-    <th>Options</th>
     <th>Default Value</th>
+    <th>Options</th>
   </tr>
   <tr>
-    <td>${entry.default[0]}</td>
-    <td>${entry.default[1]}</td>
-    <td>${entry.default[2]}</td>
+    <td>${entry.default.type}</td>
+    <td>${entry.default.default}</td>
+    <td>${entry.default.options}</td>
   </tr>
 </table>`;
 }
@@ -234,9 +240,12 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string): string {
   const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
-  const subcategoryNameId =
-      ['docs', lowerCaseCategory, pluralLowerCaseSubcategory, entry.htmlName]
-          .join('-');
+  const subcategoryNameId = [
+    'entrydocs',
+    lowerCaseCategory,
+    pluralLowerCaseSubcategory,
+    entry.htmlName
+  ].join('-');
 
   const links = 'links' in entry ?
       createLinks(entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
@@ -261,7 +270,7 @@ function createSubcategory(
     category: string,
     subcategory: string,
     pluralLowerCaseSubcategory: string) {
-  const lowerCaseCategory = category.toLowerCase();
+  const lowerCaseCategory = getLowerCaseTitle(category);
 
   const element = document.getElementById(lowerCaseCategory.concat('-docs'));
   const subcategoryContainerId =

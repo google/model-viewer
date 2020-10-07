@@ -110,8 +110,10 @@ export function toggleSidebar() {
   const nav = document.getElementById('sidenav')!;
   if (nav.offsetWidth > 150) {
     root.style.setProperty('--sidebar-width', '0px');
+    root.style.setProperty('--neg-sidebar-width', '-300px');
   } else {
     root.style.setProperty('--sidebar-width', '300px');
+    root.style.setProperty('--neg-sidebar-width', '0px');
   }
 }
 

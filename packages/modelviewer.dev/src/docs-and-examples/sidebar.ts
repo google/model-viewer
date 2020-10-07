@@ -43,12 +43,23 @@ function deactivateSidebar(sidebarIds: SidebarIds) {
       'active');
 }
 
-function addDeactive(sidebarName: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.add('de-active');
+function addDeactive(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.add(
+      'de-active');
 }
 
-function removeDeactive(sidebarName: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.remove(
+function addDeactiveCategory(sidebarIds: SidebarIds) {
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.add(
+      'de-active');
+}
+
+function removeDeactive(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.remove(
+      'de-active');
+}
+
+function removeDeactiveCategory(sidebarIds: SidebarIds) {
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.remove(
       'de-active');
 }
 
@@ -92,20 +103,26 @@ function getSidebarIdsFromId(id: string): SidebarIds {
  * sidebarSubcategory: string of the old subcategory being replaced
  * newSidebarSubcategory: string of the new subcategory
  * example:
- *  sidebarSubcategory = loading-attributes
- *  newSidebarSubcategory = loading-cssProperties
+ *  sidebarSubcategory = loading-attributes-sidebar
+ *  newSidebarSubcategory = loading-cssProperties-sidebar
  */
 function updateSidebarView(
     sidebarSubcategory: string, newSidebarSubcategory: string) {
+  const newCategoryList = newSidebarSubcategory.split('-');
+  const newSidebarCategory = newCategoryList[0].concat('-sidebar');
   if (sidebarSubcategory !== newSidebarSubcategory) {
     for (const entry of everyEntry) {
       const id = entry.target.getAttribute('id');
       const sidebarIds = getSidebarIdsFromId(id);
-      const currentSidebarName = sidebarIds.name;
       if (sidebarIds.subcategory !== newSidebarSubcategory) {
-        addDeactive(currentSidebarName);
+        addDeactive(sidebarIds);
       } else {
-        removeDeactive(currentSidebarName);
+        removeDeactive(sidebarIds);
+      }
+      if (sidebarIds.category !== newSidebarCategory) {
+        addDeactiveCategory(sidebarIds);
+      } else {
+        removeDeactiveCategory(sidebarIds);
       }
     }
   }
@@ -140,7 +157,6 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
 }
 
 function updateHeader() {
-  // TODO, update for ids with spaces later
   const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
   const subCat = document.querySelector(`h4[id=${
       sidebarIds.subcategory}]`)!.firstElementChild!.innerHTML;
@@ -259,7 +275,8 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
-    const sidebarName = `container-${id.slice(-1)}-sidebar`;
+    const idList = id.split('-');
+    const sidebarName = `container-${idList.slice(-1)}-sidebar`;
     if (id === maxName) {
       document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
     } else {
@@ -289,14 +306,12 @@ export function sidebarObserver(docsOrExample: string) {
     });
     // i.e. attributes, properties, events, methods, slots, custom css.
     let orderIndex = 0;
-    document.querySelectorAll('div[id*="docs"]').forEach((section) => {
+    document.querySelectorAll('div[id*="entrydocs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
-      if (idSplitList.length === 4) {
-        const id = idSplitList.slice(1, 10).join('-');
-        order.set(id, orderIndex);
-        orderIndex += 1;
-        observer.observe(section);
-      }
+      const id = idSplitList.slice(1, 10).join('-');
+      order.set(id, orderIndex);
+      orderIndex += 1;
+      observer.observe(section);
     });
   } else {
     const options = {

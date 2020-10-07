@@ -42,11 +42,6 @@
 </head>
 
 <body>
-  <style>
-    html {
-      scroll-padding-top: 0px;
-    }
-  </style>
 
 <div class="examples-page">  
   <div class="sidebar" id="sidenav"></div>
@@ -198,6 +193,180 @@
       </div>
     </div>
 
+    <div class="sample">
+      <div id="demo-container-6" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Model Formats. </span>Learn how model formats work on different platforms. This page tests configurations of the model source.</h4>
+          <div class="heading">
+            <h2 class="demo-title">With a glTF model</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+            <template>
+  <model-viewer camera-controls alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
+  </model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="demo-container-7" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">With a GLB model</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-7" highlight-as="html">
+            <template>
+  <model-viewer camera-controls
+      alt="A 3D model of an astronaut" src="../../shared-assets/models/Astronaut.glb">
+  </model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="demo-container-8" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">DRACO support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md" target="_blank" rel="noopener">the DRACO mesh compression extension</a>.
+            </h4>
+            <h4>
+              In order to load such models, an auxilliary decoder is
+              required and will be loaded on-demand from a Google CDN when
+              a DRACO-compressed model is detected. See below to learn 
+              how to customize this behavior.
+            </h4>
+          </div>
+          <example-snippet stamp-to="demo-container-8" highlight-as="html">
+            <template>
+  <model-viewer camera-controls alt="A 3D model of an astronaut" src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
+  </model-viewer>
+            </template>
+          </example-snippet>
+          <div>
+            <p>
+              By default, the DRACO decoder will be loaded from a Google CDN
+              on-demand. The decoder is open source and distributed for free
+              under the Apache License 2.0.
+            </p>
+            <p>
+              It is possible to customize where the decoder is loaded from by
+              defining a global configuration option like so:
+            </p>
+            <example-snippet inert-script highlight-as="html">
+              <template>
+  <script>
+  ModelViewerElement = self.ModelViewerElement || {};
+  ModelViewerElement.dracoDecoderLocation =
+      'http://example.com/location/of/draco/decoder/files/';
+  </script>
+              </template>
+            </example-snippet>
+            <p>
+              When customizing the decoder location, you must make sure that
+              the configuration is set <strong>before</strong> the first &lt;model-viewer&gt;
+              element is created on the page. &lt;model-viewer&gt; will attempt to
+              load the decoder as soon as it loads a glTF that uses the DRACO
+              extension, so be careful to set the configuration early!
+            </p>
+            <p>
+              Another way to set the decoder location is to look up
+              the constructor for &lt;model-viewer&gt; and configure it directly:
+            </p>
+            <example-snippet inert-script highlight-as="html">
+              <template>
+  <script>
+  const ModelViewerElement = customElements.get('model-viewer');
+  ModelViewerElement.dracoDecoderLocation = 
+      'http://example.com/location/of/draco/decoder/files/';
+  </script>
+              </template>
+            </example-snippet>
+            <p>
+              Note that the direct configuration approach will only work
+              <strong>after</strong> &lt;model-viewer&gt; is defined in the
+              browser (in typical cases, after model-viewer.js has been loaded).
+            </p>
+            <p>
+              Keep in mind that the DRACO decoder is pretty large (more than 100KB),
+              so it is best only to use DRACO compressed models when the file size
+              savings are larger than the size of the decoder.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="demo-container-9" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">With only a USDZ model</h2>
+            <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with poster to show a static image and the icon to enter augmented reality mode</h4>
+          </div>
+          <example-snippet stamp-to="demo-container-9" highlight-as="html">
+            <template>
+  <model-viewer camera-controls alt="A 3D model of an astronaut" ios-src="../../shared-assets/models/Astronaut.usdz">
+  </model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="demo-container-10" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">With no model</h2>
+            <h4>There's nothing to show, but also no error.</h4>
+          </div>
+          <example-snippet stamp-to="demo-container-10" highlight-as="html">
+            <template>
+  <model-viewer alt="An invalid model" src="i-do-not-exist.glb">
+  </model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="demo-container-11" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Cycling between different models</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-11" highlight-as="html">
+            <template>
+  <model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
+  <script>
+      const models = ['shishkebab.glb', 'Astronaut.glb'];
+      const toggleModel = document.querySelector('#toggle-model');
+      let i = 0;
+      setInterval(() => toggleModel.setAttribute('src', `../../shared-assets/models/${models[i++ % 2]}`), 2000);
+  </script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
     <div class="footer">
       <ul>
         <li class="attribution">
@@ -224,11 +393,11 @@
 
 </div>
 
-<script type="module" src="../../examples/built/docs-and-examples.js">
-</script>
-<script type="module">
-  (() => { init('examples-loading'); })();
-</script>
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-loading'); })();
+  </script>
 
   <!-- Documentation-specific dependencies: -->
   <script type="module" src="../built/dependencies.js">

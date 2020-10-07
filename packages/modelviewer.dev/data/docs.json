@@ -5,167 +5,646 @@
       {
         "name": "src",
         "htmlName": "src",
-        "description": "<p>The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.</p>",
-        "default": [
-          "String",
-          "any legal filepath",
-          "empty string"
-        ]
+        "description": "The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "any legal filepath"
+        }
       },
       {
         "name": "alt",
         "htmlName": "alt",
-        "description": "<p>Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.</p>",
-        "default": [
-          "String",
-          "any description",
-          "empty string"
-        ]
+        "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "any description"
+        }
       },
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "<p>Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a poster with transparency, you may also want to set --poster-color to transparent so that the background shows through.</p>",
+        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a poster with transparency, you may also want to set --poster-color to transparent so that the background shows through.",
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
-        "default": [
-          "String",
-          "link to image",
-          "empty string"
-        ]
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "link to image"
+        }
       },
       {
         "name": "loading",
         "htmlName": "loading",
-        "description": "<p>An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal = \"auto\", and when interacted with for reveal = \"interaction\". Eager loads the model immediately.</p>",
+        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal = \"auto\", and when interacted with for reveal = \"interaction\". Eager loads the model immediately.",
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
-        "default": [
-          "String",
-          "auto, lazy, eager",
-          "auto"
-        ]
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, lazy, eager"
+        }
       },
       {
         "name": "reveal",
         "htmlName": "reveal",
-        "description": "<p>This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.</p>",
-        "default": [
-          "String",
-          "auto, interaction, manual",
-          "auto"
-        ]
+        "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.",
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, interaction, manual"
+        }
       }
     ],
-    "CSS Custom Properties": [
+    "CSS": [
       {
         "name": "--poster-color",
         "htmlName": "posterColor",
-        "description": "<p>Sets the background-color of the poster. You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of &lt;model-viewer&gt; shows through).</p>",
-        "default": [
-          "css background-color",
-          "#fff",
-          "valid css background-color"
-        ]
+        "description": "Sets the background-color of the poster. You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of &lt;model-viewer&gt; shows through).",
+        "default": {
+          "type": "css background-color",
+          "default": "#fff",
+          "options": "valid css background-color"
+        }
       },
       {
         "name": "--poster-image",
         "htmlName": "posterImage",
-        "description": "12345"
+        "description": "Sets the background-image of the poster. This is currently overridden by the poster attribute if it is set.",
+        "default": {
+          "type": "css background-image",
+          "default": "none",
+          "options": "valid css background-image"
+        }
       },
       {
         "name": "--progress-bar-color",
         "htmlName": "progressBarColor",
-        "description": "12345"
+        "description": "Sets the background-color of the progress bar.",
+        "default": {
+          "type": "css background-color",
+          "default": "rgba(0, 0, 0, 0.4)",
+          "options": "valid css background-color"
+        }
       },
       {
         "name": "--progress-bar-height",
         "htmlName": "progressBarHeight",
-        "description": "12345"
+        "description": "Sets the height of the progress bar.",
+        "default": {
+          "type": "css height",
+          "default": "5px",
+          "options": "valid css height"
+        }
       },
       {
         "name": "--progress-mask",
         "htmlName": "progressMask",
-        "description": "12345"
+        "description": "Sets the background of the progress mask.",
+        "default": {
+          "type": "css background",
+          "default": "#fff",
+          "options": "valid css background"
+        }
       }
     ],
     "Properties": [
       {
         "name": "loaded",
         "htmlName": "loaded",
-        "description": "12345"
+        "description": "This property is read-only. It returns true if the load event below has fired since the last src change.",
+        "default": {
+          "type": "Boolean",
+          "default": "N/A",
+          "options": "true, false"
+        }
       },
       {
         "name": "modelIsVisible",
         "htmlName": "modelIsVisible",
-        "description": "12345"
+        "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the poster has been dismissed. Related to the model-visibility event.",
+        "default": {
+          "type": "Boolean",
+          "default": "N/A",
+          "options": "true, false"
+        }
       }
     ],
     "Static Properties": [
       {
         "name": "dracoDecoderLocation",
         "htmlName": "dracoDecoderLocation",
-        "description": "12345"
+        "description": "This static, writable property sets &lt;model-viewer&gt;'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN."
+      },
+      {
+        "name": "minimumRenderScale",
+        "htmlName": "minimumRenderScale",
+        "description": "This static, writable property sets &lt;model-viewer&gt;'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1. Defaults to 0.5."
       },
       {
         "name": "modelCacheSize",
         "htmlName": "modelCacheSize",
-        "description": "12345"
+        "description": "This static, writable property sets &lt;model-viewer&gt;'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number just sets the maximum number of models that can be cached even if they are not being used by a &lt;model-viewer&gt; element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
+        "default": {
+          "type": "Number",
+          "default": "5",
+          "options": "any number >= 0"
+        }
       }
     ],
     "Methods": [
       {
         "name": "dismissPoster()",
         "htmlName": "dismissPoster",
-        "description": "12345"
+        "description": "Dismisses the poster, causing the model to load and render if necessary. This is currently effectively the same as interacting with the poster via user input."
       }
     ],
     "Static Methods": [
       {
         "name": "mapURLs(callback)",
         "htmlName": "mapURLs",
-        "description": "12345"
+        "description": "If provided, the callback will be passed each resource URL before a request is sent. The callback may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs. This is a static method."
+      },
+      {
+        "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
+        "htmlName": "toBlob",
+        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting idealAspect to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio."
+      },
+      {
+        "name": "toDataURL(type, encoderOptions)",
+        "htmlName": "toDataURL",
+        "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
       }
     ],
     "Events": [
       {
+        "name": "error",
+        "htmlName": "error",
+        "description": "This event can be triggered for two reasons: a model has failed to load or parse, or the WebGL context was lost. If the model failed to load, event.detail.type will be 'loadfailure'. If the WebGL context was lost, event.detail.type will be 'webglcontextlost'. In both cases, recovery countermeasures are left as an exercise for the user. The element will not make automatic attempts to re-load a model that has failed to load. Nor will the element attempt to restore the GL context after it has been lost. Error events also hold a reference to the originating error event (when there is one) as event.detail.sourceEvent."
+      },
+      {
         "name": "load",
         "htmlName": "load",
-        "description": "12345"
+        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the src attribute is changed."
       },
       {
         "name": "preload",
         "htmlName": "preload",
-        "description": "12345"
+        "description": "When loading = \"eager\" this event is fired when preloading is done."
       },
       {
         "name": "model-visibility",
         "htmlName": "modelVisibility",
-        "description": "12345"
+        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), and the poster has been dismissed, this event will fire and <span class=\"attribute\">event.detail.visible</span> will be \"true\"."
       },
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "12345"
+        "description": "TODO"
       },
       {
         "name": "poster-dismissed",
         "htmlName": "posterDismissed",
-        "description": "12345"
+        "description": "TODO"
       }
     ],
     "Slots": [
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "12345"
+        "description": "TODO"
       },
       {
         "name": "progress-bar",
         "htmlName": "progressBar",
-        "description": "12345"
+        "description": "TODO"
+      }
+    ]
+  },
+  {
+    "Title": "Augmented Reality",
+    "Attributes": [
+      {
+        "name": "ar",
+        "htmlName": "ar",
+        "description": "Enable the ability to launch AR experiences on supported devices."
+      },
+      {
+        "name": "ar-modes",
+        "htmlName": "arModes",
+        "description": "A prioritized list of the types of AR experiences to enable, if available; see <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
+        "default": {
+          "type": "String",
+          "default": "webxr scene-viewer quick-look",
+          "options": "types followed by whitespace: webxr scene-viewer quick-look"
+        }
+      },
+      {
+        "name": "ar-scale",
+        "htmlName": "arScale",
+        "description": "Controls the scaling behavior in AR mode in <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a>. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized.",
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, fixed"
+        }
+      },
+      {
+        "name": "ios-src",
+        "htmlName": "iosSrc",
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a>model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. See <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>."
+      },
+      {
+        "name": "quick-look-browsers",
+        "htmlName": "quickLookBrowsers",
+        "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
+        "default": {
+          "type": "String",
+          "default": "safari",
+          "options": "browsers separated by whitespace: safari chrome"
+        }
+      }
+    ],
+    "CSS": [
+      {
+        "name": "--ar-button-display",
+        "htmlName": "arButtonDisplay",
+        "description": "Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.",
+        "default": {
+          "type": "TODO",
+          "default": "block",
+          "options": "TODO"
+        }
+      },
+      {
+        "name": "ar-status",
+        "htmlName": "arStatus",
+        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. Possible values include 'not-presenting', 'session-started', 'object-placed', and 'failed'. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "activateAR()",
+        "htmlName": "activateAR",
+        "description": "Activates AR. Note that for any mode that is not WebXR-based, this method most likely has to be called synchronous from a user interaction handler. Otherwise, attempts to activate modes that require user interaction will most likely be ignored."
+      }
+    ],
+    "Events": [
+      {
+        "name": "ar-status",
+        "htmlName": "arStatus",
+        "description": "Fired when the ar-status attribute above fires. The event.detail.status property will be set to the same value as the ar-status attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
+      },
+      {
+        "name": "quick-look-button-tapped",
+        "htmlName": "quickLookButtonTapped",
+        "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "ar-button",
+        "htmlName": "arButton",
+        "description": "TODO"
+      },
+      {
+        "name": "exit-webxr-ar-button",
+        "htmlName": "exitWebxrArButton",
+        "description": "TODO"
+      }
+    ]
+  },
+  {
+    "Title": "Staging & Cameras",
+    "Attributes": [
+      {
+        "name": "auto-rotate",
+        "htmlName": "autoRotate",
+        "description": "Enables the auto-rotation of the model."
+      },
+      {
+        "name": "auto-rotate-delay",
+        "htmlName": "autoRotateDelay",
+        "description": "Sets the delay before auto-rotation begins. The format of the value is a number in milliseconds.",
+        "default": {
+          "type": "Number",
+          "default": "3000",
+          "options": "number >= 0"
+        }
+      },
+      {
+        "name": "rotation-per-second",
+        "htmlName": "rotationPerSecond",
+        "description": "Sets the speed of auto-rotate, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
+        "default": {
+          "type": "String of degrees or radians",
+          "default": "pi/32",
+          "options": "String of degrees or radians"
+        }
+      },
+      {
+        "name": "interaction-policy",
+        "htmlName": "interactionPolicy",
+        "description": "Allows you to change whether the viewer requires focus before interacting with it. If set to \"allow-when-focused\", the user must focus on the viewer (click / tap) before being able to control it. If set to \"always-allow\", the user can control it even if the viewer is not the focused element on the page. Defaults to \"always-allow\".",
+        "default": {
+          "type": "String",
+          "default": "always-allow",
+          "options": "allow-when-focused, always-allow"
+        }
+      },
+      {
+        "name": "interaction-prompt",
+        "htmlName": "interactionPrompt",
+        "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the interaction-prompt-threshold (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if camera-controls are enabled.",
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, when-focused, none"
+        }
+      },
+      {
+        "name": "interaction-prompt-style",
+        "htmlName": "interactionPromptStyle",
+        "description": "Configures the presentation style of the interaction-prompt when it is raised. When set to \"wiggle\", the prompt will animate from horizontally and the model will appear to be rotated as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
+        "default": {
+          "type": "String",
+          "default": "wiggle",
+          "options": "wiggle, basic"
+        }
+      },
+      {
+        "name": "interaction-prompt-threshold",
+        "htmlName": "interactionPromptThreshold",
+        "description": "When camera-controls are enabled, &lt;model-viewer&gt; will prompt the user visually (and audibly, for screen readers) to interact if they focus it but don't interact with it for some time. This attribute allows you to set how long &lt;model-viewer&gt; should wait (in milliseconds) before prompting to interact. Defaults to 3000.",
+        "default": {
+          "type": "Number",
+          "default": "3000",
+          "options": "number >= 0"
+        }
+      },
+      {
+        "name": "camera-controls",
+        "htmlName": "cameraControls",
+        "description": "Enables controls via mouse/touch when in flat view."
+      },
+      {
+        "name": "camera-orbit",
+        "htmlName": "cameraOrbit",
+        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the env() function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "0deg 75deg 105%",
+          "options": "Multiple forms described in description"
+        }
+      },
+      {
+        "name": "camera-target",
+        "htmlName": "cameraTarget",
+        "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Defaults to \"auto auto auto\".",
+        "default": {
+          "type": "$X $Y $Z",
+          "default": "auto auto auto",
+          "options": "Multiple forms described in description"
+        }
+      },
+      {
+        "name": "field-of-view",
+        "htmlName": "fieldOfView",
+        "description": "Used to configure the vertical field of view of the camera. Accepts values units in both degrees and radians (e.g., \"30deg\" or \"0.5rad\"). Accepts any value between 10 and 45 degrees. Any time this value changes from its initially configured value, the camera will interpolate from its current value to the new value. Defaults to \"auto\", which sets either the vertical or horizontal field of view to 45 degrees depending on the dimensions of the model and the aspect ratio of the canvas.",
+        "default": {
+          "type": "Degrees or radians",
+          "default": "auto",
+          "options": "Value between 10 and 45 degrees"
+        }
+      },
+      {
+        "name": "max-camera-orbit",
+        "htmlName": "maxCameraOrbit",
+        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support env(). Defaults to \"Infinity 157.5deg Infinity\". Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "Infinity 157.5deg Infinity",
+          "options": "Multiple forms described in description"
+        }
+      },
+      {
+        "name": "max-field-of-view",
+        "htmlName": "maxFieldOfView",
+        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support env().",
+        "default": {
+          "type": "Degrees or radians",
+          "default": "45deg",
+          "options": "Value between 10 and 45 degrees"
+        }
+      },
+      {
+        "name": "min-camera-orbit",
+        "htmlName": "minCameraOrbit",
+        "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "-Infinity 22.5deg 0",
+          "options": "Multiple forms described in description"
+        }
+      },
+      {
+        "name": "min-field-of-view",
+        "htmlName": "minFieldOfView",
+        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support env().",
+        "default": {
+          "type": "Degrees or radians",
+          "default": "10deg",
+          "options": "Value between 10 and 45 degrees"
+        }
+      },
+      {
+        "name": "orbit-sensitivity",
+        "htmlName": "orbitSensitivity",
+        "description": "Adjusts the speed of theta and phi orbit interactions. Can also be set negative to reverse, which is helpful when using zero radius to look around the inside of a cave-like model.",
+        "default": {
+          "type": "Number",
+          "default": "1",
+          "options": "any number"
+        }
+      }
+    ],
+    "CSS": [
+      {
+        "name": "--interaction-prompt-display",
+        "htmlName": "interactionPromptDisplay",
+        "description": "Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden.",
+        "default": {
+          "type": "css display",
+          "default": "flex",
+          "options": "any valid css display"
+        }
+      }
+    ],
+    "Properties": [
+      {
+        "name": "turntableRotation",
+        "htmlName": "turntableRotation",
+        "description": "TODO"
+      }
+    ],
+    "Methods": [
+      {
+        "name": "resetTurntableRotation(theta)",
+        "htmlName": "resetTurntableRotation",
+        "description": "Resets the turntable that rotates the model when auto-rotate is enabled. The new value of the turntable rotation will be theta radians after this method is invoked, but the model may not update until the next render frame. If no argument is supplied, theta defaults to zero."
+      },
+      {
+        "name": "resetInteractionPrompt()",
+        "htmlName": "resetInteractionPrompt",
+        "description": "Typically, the interaction prompt will only display once and then stops displaying after the user interacts with the 3D model for the first time. You can invoke this method in order to reset the interaction prompt after it has already been displayed. Doing so will cause it to display once again when the interaction-prompt display conditions have been met."
+      },
+      {
+        "name": "getCameraOrbit()",
+        "htmlName": "getCameraOrbit",
+        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the camera-orbit attribute on account of user interaction or camera interpolation."
+      },
+      {
+        "name": "getCameraTarget()",
+        "htmlName": "getCameraTarget",
+        "description": "Returns the realtime target position of the camera in meters. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation."
+      },
+      {
+        "name": "getFieldOfView()",
+        "htmlName": "getFieldOfView",
+        "description": "Returns the realtime camera vertical field of view in degrees. This value may differ from the value configured with the field-of-view attribute on account of user interaction or camera interpolation."
+      },
+      {
+        "name": "jumpCameraToGoal()",
+        "htmlName": "jumpCameraToGoal",
+        "description": "Changes the camera to its last configured goal state immediately on the next update instead of interpolating the motion over time."
+      },
+      {
+        "name": "getMinimumFieldOfView()",
+        "htmlName": "getMinimumFieldOfView",
+        "description": "TODO"
+      },
+      {
+        "name": "getMaximumFieldOfView()",
+        "htmlName": "getMaximumFieldOfView",
+        "description": "TODO"
+      }
+    ],
+    "Events": [
+      {
+        "name": "camera-change",
+        "htmlName": "cameraChange",
+        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the \"event.detail.source\" property will be set to \"user-interaction\"."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "interaction-prompt",
+        "htmlName": "interactionPrompt",
+        "description": "TODO"
+      },
+      {
+        "name": "pointer-tumbling",
+        "htmlName": "pointerTumbling",
+        "description": "TODO"
+      }
+    ]
+  },
+  {
+    "Title": "Annotations",
+    "CSS": [
+      {
+        "name": "--min-hotspot-opacity",
+        "htmlName": "minHotspotOpacity",
+        "description": "Sets the opacity of hidden hotspots.",
+        "default": {
+          "type": "Float",
+          "default": "0.25",
+          "options": "any value between 0 and 1"
+        }
+      },
+      {
+        "name": "--max-hotspot-opacity",
+        "htmlName": "maxHotspotOpacity",
+        "description": "Sets the opacity of visible hotspots.",
+        "default": {
+          "type": "Float",
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
+      }
+    ],
+    "Methods": [
+      {
+        "name": "updateHotspot({name, position, normal})",
+        "htmlName": "updateHotspot",
+        "description": "Updates the position and/or normal of the hotspot associated with slot = name. The position and normal are given in the same string format as the hotspot attributes data-position and data-normal, which are also in the same format as the camera-target attribute."
+      },
+      {
+        "name": "positionAndNormalFromPoint(pixelX, pixelY)",
+        "htmlName": "positionAndNormalFromPoint",
+        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's data-position and data-normal attributes. The function returns null if no object is hit."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "hotspot-*",
+        "htmlName": "hotspot",
+        "description": "TODO"
+      }
+    ]
+  },
+  {
+    "Title": "Lighting & Env",
+    "Attributes": [
+      {
+        "name": "skybox-image",
+        "htmlName": "skyboxImage",
+        "description": "Sets the background image of the scene when viewed inline. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images."
+      },
+      {
+        "name": "environment-image",
+        "htmlName": "environmentImage",
+        "description": "Controls the environmental reflection of the model. Normally if skybox-image is set, that image will also be used for the environment-image. Use environment-image to only set the reflection without affecting the background."
+      },
+      {
+        "name": "exposure",
+        "htmlName": "exposure",
+        "description": "Controls the exposure of both the model and skybox, for use primarily with HDR environments.",
+        "default": {
+          "type": "Number",
+          "default": "1",
+          "options": "TODO"
+        }
+      },
+      {
+        "name": "shadow-intensity",
+        "htmlName": "shadowIntensity",
+        "description": "Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely.",
+        "default": {
+          "type": "Float",
+          "default": "0",
+          "options": "any value between 0 and 1"
+        }
+      },
+      {
+        "name": "shadow-softness",
+        "htmlName": "shadowSoftness",
+        "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows. Softness should not be changed every frame as it incurs a performance cost. Softer shadows render faster.",
+        "default": {
+          "type": "Float",
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
+      }
+    ],
+    "Events": [
+      {
+        "name": "environment-change",
+        "htmlName": "environmentChange",
+        "description": "Fired when the environment has changed. If the environment is derived from skybox-image or environment-image, the image will have loaded by the time this event fires."
       }
     ]
   },
@@ -175,53 +654,92 @@
       {
         "name": "animation-name",
         "htmlName": "animationName",
-        "description": "12345"
+        "description": "Selects an animation to play by name. This animation will play when the .play() method is invoked, or when the &lt;model-viewer&gt; is configured to autoplay. If no animation-name is specified, &lt;model-viewer&gt; always picks the first animation it finds in the model."
       },
       {
         "name": "animation-crossfade-duration",
         "htmlName": "animationCrossfadeDuration",
-        "description": "12345"
+        "description": "When the current animation is changed, &lt;model-viewer&gt; automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
+        "default": {
+          "type": "Number",
+          "default": "300",
+          "options": "Any number >= 0"
+        }
       },
       {
         "name": "autoplay",
         "htmlName": "autoplay",
-        "description": "12345"
+        "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no animation-name is specified, plays the first animation.",
+        "default": {
+          "type": "Boolean",
+          "default": "false",
+          "options": "true, false"
+        }
       }
     ],
     "Properties": [
       {
         "name": "availableAnimations",
         "htmlName": "availableAnimations",
-        "description": "12345"
+        "description": "TODO"
       },
       {
         "name": "currentTime",
         "htmlName": "currentTime",
-        "description": "12345"
+        "description": "This property reports the current track time of the currently selected animation. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
+      },
+      {
+        "name": "paused",
+        "htmlName": "paused",
+        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the .play() method is invoked."
       }
     ],
     "Methods": [
       {
         "name": "play()",
         "htmlName": "play",
-        "description": "12345"
+        "description": "Causes animations to be played. Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
       },
       {
         "name": "pause()",
         "htmlName": "pause",
-        "description": "12345"
+        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the currentTime property to 0."
       }
     ],
     "Events": [
       {
         "name": "play",
         "htmlName": "play",
-        "description": "12345"
+        "description": "Dispatched when animations begin to play."
       },
       {
         "name": "pause",
         "htmlName": "pause",
-        "description": "12345"
+        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the pause() method is invoked after animations have begun playing."
+      }
+    ]
+  },
+  {
+    "Title": "Scene Graph",
+    "Properties": [
+      {
+        "name": "model",
+        "htmlName": "model",
+        "description": "TODO."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "exportScene(options)",
+        "htmlName": "exportScene",
+        "description": "Exports the model in glTF or GLB formats. Returns a promise that resolves in a Blob of type \"application/octet-stream\" or \"application/json\" depending on the export format. For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'> GLTF exporter</a> documentation, with the exception that all animations are automatically exported and truncateDrawRange defaults to true."
+      }
+    ],
+    "Events": [
+      {
+        "name": "scene-graph-ready",
+        "htmlName": "sceneGraphReady",
+        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details."
       }
     ]
   }

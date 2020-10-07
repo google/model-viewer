@@ -11,7 +11,7 @@ p {
 }
 
 .attribute-name,
-.cssPropertie-name,
+.cs-name,
 .propertie-name,
 .staticPropertie-name,
 .method-name,
@@ -24,7 +24,7 @@ p {
 }
 
 .attribute-definition,
-.cssPropertie-definition,
+.cs-definition,
 .propertie-definition,
 .staticPropertie-definition,
 .method-definition,
@@ -39,7 +39,7 @@ p {
 }
 
 .attribute-container,
-.cssPropertie-container,
+.cs-container,
 .propertie-container,
 .staticPropertie-container,
 .method-container,
@@ -51,7 +51,8 @@ p {
 
 .value-table {
   margin: 0 0 30px 20px;
-  width: 50%;
+  width: calc(100% - 20px);
+  table-layout: fixed;
 }
 
 table,

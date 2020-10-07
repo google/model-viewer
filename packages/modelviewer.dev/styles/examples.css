@@ -33,6 +33,8 @@
   --header-height: 72px;
 
   --toggle-visibility: hidden;
+  --og-sidebar-width: 300px;
+  --neg-sidebar-width: 0px;
   --sidebar-width: 300px;
   --sidebar-speed: .15s;
   --border-style-dark: 1px solid rgba(0,0,0,.5);
@@ -41,13 +43,15 @@
 .sidebar {
   margin: 0;
   padding: 0;
-  width: var(--sidebar-width);
+  width: 300px;
+  margin-left: var(--neg-sidebar-width);
   background-color: #f6f6f6;
   position: fixed;
+  top: 0;
   height: 100%;
   overflow: auto;
   border: 1px solid #BDBDBD;
-  transition-property: width;
+  transition-property: margin-left;
   transition: var(--sidebar-speed);
   transition-timing-function: linear;
   z-index: 1010;
@@ -87,7 +91,7 @@
   position: fixed;
   top: 0;
   overflow: hidden;
-  visibility: hidden;
+  margin-left: var(--sidebar-width);
   white-space: nowrap;
   font-size: .8em;
   z-index: 1008;
@@ -362,6 +366,26 @@ model-viewer:focus {
   box-sizing: border-box;
 }
 
+.background-demo {
+  grid-area: demo;
+  position: sticky;
+  top: 0;
+  height: 90vh;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  border: 0px solid #555;
+  box-sizing: border-box;
+}
+
+.examples-container > .sample > #demo-container-1 {
+  padding-top: 75px;
+}
+
+.examples-container > .sample > .demo {
+  top: 75px;
+  height: 90vh;
+}
 
 .demo-title {
   padding: var(--demo-title-padding);
@@ -705,7 +729,29 @@ paper-button {
   }
 
   .exampleHeader {
-    visibility: visible;
+    margin-left: 0;
+  }
+
+  .background-demo {
+    grid-area: demo;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    border: 0px solid #555;
+    box-sizing: border-box;
+  }
+  
+  .examples-container > .sample > #demo-container-1 {
+    margin-top: 75px;
+    padding-top: 0px;
+  }
+  
+  .examples-container > .sample > .demo {
+    top: 0;
+    height: 90vh;
   }
 
   body {
