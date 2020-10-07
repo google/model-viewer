@@ -52,6 +52,7 @@ p {
 .value-table {
   margin: 0 0 30px 20px;
   width: calc(100% - 20px);
+  table-layout: fixed;
 }
 
 table,

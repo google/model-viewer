@@ -21,7 +21,6 @@ let isSideBarClick = false;
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
-const SIZE_OF_ENTRY_LIST = 4;
 
 interface SidebarIds {
   name: string, subcategory: string, category: string
@@ -276,7 +275,8 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
-    const sidebarName = `container-${id.slice(-1)}-sidebar`;
+    const idList = id.split('-');
+    const sidebarName = `container-${idList[-1]}-sidebar`;
     if (id === maxName) {
       document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
     } else {
@@ -306,14 +306,12 @@ export function sidebarObserver(docsOrExample: string) {
     });
     // i.e. attributes, properties, events, methods, slots, custom css.
     let orderIndex = 0;
-    document.querySelectorAll('div[id*="docs"]').forEach((section) => {
+    document.querySelectorAll('div[id*="entrydocs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
-      if (idSplitList.length === SIZE_OF_ENTRY_LIST) {
-        const id = idSplitList.slice(1, 10).join('-');
-        order.set(id, orderIndex);
-        orderIndex += 1;
-        observer.observe(section);
-      }
+      const id = idSplitList.slice(1, 10).join('-');
+      order.set(id, orderIndex);
+      orderIndex += 1;
+      observer.observe(section);
     });
   } else {
     const options = {

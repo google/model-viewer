@@ -236,9 +236,12 @@ function createEntry(
     lowerCaseCategory: string,
     pluralLowerCaseSubcategory: string): string {
   const lowerCaseSubcategory = pluralLowerCaseSubcategory.slice(0, -1);
-  const subcategoryNameId =
-      ['docs', lowerCaseCategory, pluralLowerCaseSubcategory, entry.htmlName]
-          .join('-');
+  const subcategoryNameId = [
+    'entrydocs',
+    lowerCaseCategory,
+    pluralLowerCaseSubcategory,
+    entry.htmlName
+  ].join('-');
 
   const links = 'links' in entry ?
       createLinks(entry, pluralLowerCaseSubcategory, lowerCaseCategory) :
