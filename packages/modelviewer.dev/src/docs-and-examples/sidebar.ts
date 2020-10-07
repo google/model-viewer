@@ -276,7 +276,7 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
     const idList = id.split('-');
-    const sidebarName = `container-${idList[-1]}-sidebar`;
+    const sidebarName = `container-${idList.slice(-1)}-sidebar`;
     if (id === maxName) {
       document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
     } else {
