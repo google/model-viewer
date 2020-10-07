@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+interface Defaults {
+  type: string, default: string, options: string,
+}
+
 interface Entry {
-  name: string, htmlName: string, description: string, default: string[],
+  name: string, htmlName: string, description: string, default: Defaults,
       links: string[],
 }
 
@@ -213,9 +217,9 @@ function createDefaultTable(entry: Entry): string {
     <th>Options</th>
   </tr>
   <tr>
-    <td>${entry.default[0]}</td>
-    <td>${entry.default[1]}</td>
-    <td>${entry.default[2]}</td>
+    <td>${entry.default.type}</td>
+    <td>${entry.default.default}</td>
+    <td>${entry.default.options}</td>
   </tr>
 </table>`;
 }

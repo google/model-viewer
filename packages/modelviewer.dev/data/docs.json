@@ -6,21 +6,21 @@
         "name": "src",
         "htmlName": "src",
         "description": "The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
-        "default": [
-          "String",
-          "empty string",
-          "any legal filepath"
-        ]
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "any legal filepath"
+        }
       },
       {
         "name": "alt",
         "htmlName": "alt",
         "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
-        "default": [
-          "String",
-          "empty string",
-          "any description"
-        ]
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "any description"
+        }
       },
       {
         "name": "poster",
@@ -29,11 +29,11 @@
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
-        "default": [
-          "String",
-          "empty string",
-          "link to image"
-        ]
+        "default": {
+          "type": "String",
+          "default": "empty string",
+          "options": "link to image"
+        }
       },
       {
         "name": "loading",
@@ -42,21 +42,21 @@
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
-        "default": [
-          "String",
-          "auto",
-          "auto, lazy, eager"
-        ]
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, lazy, eager"
+        }
       },
       {
         "name": "reveal",
         "htmlName": "reveal",
         "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.",
-        "default": [
-          "String",
-          "auto",
-          "auto, interaction, manual"
-        ]
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, interaction, manual"
+        }
       }
     ],
     "CSS": [
@@ -64,51 +64,51 @@
         "name": "--poster-color",
         "htmlName": "posterColor",
         "description": "Sets the background-color of the poster. You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of &lt;model-viewer&gt; shows through).",
-        "default": [
-          "css background-color",
-          "#fff",
-          "valid css background-color"
-        ]
+        "default": {
+          "type": "css background-color",
+          "default": "#fff",
+          "options": "valid css background-color"
+        }
       },
       {
         "name": "--poster-image",
         "htmlName": "posterImage",
         "description": "Sets the background-image of the poster. This is currently overridden by the poster attribute if it is set.",
-        "default": [
-          "css background-image",
-          "none",
-          "valid css background-image"
-        ]
+        "default": {
+          "type": "css background-image",
+          "default": "none",
+          "options": "valid css background-image"
+        }
       },
       {
         "name": "--progress-bar-color",
         "htmlName": "progressBarColor",
         "description": "Sets the background-color of the progress bar.",
-        "default": [
-          "css background-color",
-          "rgba(0, 0, 0, 0.4)",
-          "valid css background-color"
-        ]
+        "default": {
+          "type": "css background-color",
+          "default": "rgba(0, 0, 0, 0.4)",
+          "options": "valid css background-color"
+        }
       },
       {
         "name": "--progress-bar-height",
         "htmlName": "progressBarHeight",
         "description": "Sets the height of the progress bar.",
-        "default": [
-          "css height",
-          "5px",
-          "valid css height"
-        ]
+        "default": {
+          "type": "css height",
+          "default": "5px",
+          "options": "valid css height"
+        }
       },
       {
         "name": "--progress-mask",
         "htmlName": "progressMask",
         "description": "Sets the background of the progress mask.",
-        "default": [
-          "css background",
-          "#fff",
-          "valid css background"
-        ]
+        "default": {
+          "type": "css background",
+          "default": "#fff",
+          "options": "valid css background"
+        }
       }
     ],
     "Properties": [
@@ -116,21 +116,21 @@
         "name": "loaded",
         "htmlName": "loaded",
         "description": "This property is read-only. It returns true if the load event below has fired since the last src change.",
-        "default": [
-          "Boolean",
-          "N/A",
-          "true, false"
-        ]
+        "default": {
+          "type": "Boolean",
+          "default": "N/A",
+          "options": "true, false"
+        }
       },
       {
         "name": "modelIsVisible",
         "htmlName": "modelIsVisible",
         "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the poster has been dismissed. Related to the model-visibility event.",
-        "default": [
-          "Boolean",
-          "N/A",
-          "true, false"
-        ]
+        "default": {
+          "type": "Boolean",
+          "default": "N/A",
+          "options": "true, false"
+        }
       }
     ],
     "Static Properties": [
@@ -148,11 +148,11 @@
         "name": "modelCacheSize",
         "htmlName": "modelCacheSize",
         "description": "This static, writable property sets &lt;model-viewer&gt;'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number just sets the maximum number of models that can be cached even if they are not being used by a &lt;model-viewer&gt; element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
-        "default": [
-          "Number",
-          "5",
-          "any number >= 0"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "5",
+          "options": "any number >= 0"
+        }
       }
     ],
     "Methods": [
@@ -236,21 +236,21 @@
         "name": "ar-modes",
         "htmlName": "arModes",
         "description": "A prioritized list of the types of AR experiences to enable, if available; see <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
-        "default": [
-          "String",
-          "webxr scene-viewer quick-look",
-          "types followed by whitespace: webxr scene-viewer quick-look"
-        ]
+        "default": {
+          "type": "String",
+          "default": "webxr scene-viewer quick-look",
+          "options": "types followed by whitespace: webxr scene-viewer quick-look"
+        }
       },
       {
         "name": "ar-scale",
         "htmlName": "arScale",
         "description": "Controls the scaling behavior in AR mode in <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a>. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized.",
-        "default": [
-          "String",
-          "auto",
-          "auto, fixed"
-        ]
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, fixed"
+        }
       },
       {
         "name": "ios-src",
@@ -261,11 +261,11 @@
         "name": "quick-look-browsers",
         "htmlName": "quickLookBrowsers",
         "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
-        "default": [
-          "String",
-          "safari",
-          "browsers separated by whitespace: safari chrome"
-        ]
+        "default": {
+          "type": "String",
+          "default": "safari",
+          "options": "browsers separated by whitespace: safari chrome"
+        }
       }
     ],
     "CSS": [
@@ -273,11 +273,11 @@
         "name": "--ar-button-display",
         "htmlName": "arButtonDisplay",
         "description": "Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.",
-        "default": [
-          "TODO",
-          "block",
-          "TODO"
-        ]
+        "default": {
+          "type": "TODO",
+          "default": "block",
+          "options": "TODO"
+        }
       },
       {
         "name": "ar-status",
@@ -329,61 +329,61 @@
         "name": "auto-rotate-delay",
         "htmlName": "autoRotateDelay",
         "description": "Sets the delay before auto-rotation begins. The format of the value is a number in milliseconds.",
-        "default": [
-          "Number",
-          "3000",
-          "number >= 0"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "3000",
+          "options": "number >= 0"
+        }
       },
       {
         "name": "rotation-per-second",
         "htmlName": "rotationPerSecond",
         "description": "Sets the speed of auto-rotate, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
-        "default": [
-          "String of degrees or radians",
-          "pi/32",
-          "String of degrees or radians"
-        ]
+        "default": {
+          "type": "String of degrees or radians",
+          "default": "pi/32",
+          "options": "String of degrees or radians"
+        }
       },
       {
         "name": "interaction-policy",
         "htmlName": "interactionPolicy",
         "description": "Allows you to change whether the viewer requires focus before interacting with it. If set to \"allow-when-focused\", the user must focus on the viewer (click / tap) before being able to control it. If set to \"always-allow\", the user can control it even if the viewer is not the focused element on the page. Defaults to \"always-allow\".",
-        "default": [
-          "String",
-          "always-allow",
-          "allow-when-focused, always-allow"
-        ]
+        "default": {
+          "type": "String",
+          "default": "always-allow",
+          "options": "allow-when-focused, always-allow"
+        }
       },
       {
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
         "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the interaction-prompt-threshold (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if camera-controls are enabled.",
-        "default": [
-          "String",
-          "auto",
-          "auto, when-focused, none"
-        ]
+        "default": {
+          "type": "String",
+          "default": "auto",
+          "options": "auto, when-focused, none"
+        }
       },
       {
         "name": "interaction-prompt-style",
         "htmlName": "interactionPromptStyle",
         "description": "Configures the presentation style of the interaction-prompt when it is raised. When set to \"wiggle\", the prompt will animate from horizontally and the model will appear to be rotated as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
-        "default": [
-          "String",
-          "wiggle",
-          "wiggle, basic"
-        ]
+        "default": {
+          "type": "String",
+          "default": "wiggle",
+          "options": "wiggle, basic"
+        }
       },
       {
         "name": "interaction-prompt-threshold",
         "htmlName": "interactionPromptThreshold",
         "description": "When camera-controls are enabled, &lt;model-viewer&gt; will prompt the user visually (and audibly, for screen readers) to interact if they focus it but don't interact with it for some time. This attribute allows you to set how long &lt;model-viewer&gt; should wait (in milliseconds) before prompting to interact. Defaults to 3000.",
-        "default": [
-          "Number",
-          "3000",
-          "number >= 0"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "3000",
+          "options": "number >= 0"
+        }
       },
       {
         "name": "camera-controls",
@@ -394,81 +394,81 @@
         "name": "camera-orbit",
         "htmlName": "cameraOrbit",
         "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the env() function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
-        "default": [
-          "$angle $angle $distance",
-          "0deg 75deg 105%",
-          "Multiple forms described in description"
-        ]
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "0deg 75deg 105%",
+          "options": "Multiple forms described in description"
+        }
       },
       {
         "name": "camera-target",
         "htmlName": "cameraTarget",
         "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Defaults to \"auto auto auto\".",
-        "default": [
-          "$X $Y $Z",
-          "auto auto auto",
-          "Multiple forms described in description"
-        ]
+        "default": {
+          "type": "$X $Y $Z",
+          "default": "auto auto auto",
+          "options": "Multiple forms described in description"
+        }
       },
       {
         "name": "field-of-view",
         "htmlName": "fieldOfView",
         "description": "Used to configure the vertical field of view of the camera. Accepts values units in both degrees and radians (e.g., \"30deg\" or \"0.5rad\"). Accepts any value between 10 and 45 degrees. Any time this value changes from its initially configured value, the camera will interpolate from its current value to the new value. Defaults to \"auto\", which sets either the vertical or horizontal field of view to 45 degrees depending on the dimensions of the model and the aspect ratio of the canvas.",
-        "default": [
-          "Degrees or radians",
-          "auto",
-          "Value between 10 and 45 degrees"
-        ]
+        "default": {
+          "type": "Degrees or radians",
+          "default": "auto",
+          "options": "Value between 10 and 45 degrees"
+        }
       },
       {
         "name": "max-camera-orbit",
         "htmlName": "maxCameraOrbit",
         "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support env(). Defaults to \"Infinity 157.5deg Infinity\". Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
-        "default": [
-          "$angle $angle $distance",
-          "Infinity 157.5deg Infinity",
-          "Multiple forms described in description"
-        ]
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "Infinity 157.5deg Infinity",
+          "options": "Multiple forms described in description"
+        }
       },
       {
         "name": "max-field-of-view",
         "htmlName": "maxFieldOfView",
         "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support env().",
-        "default": [
-          "Degrees or radians",
-          "45deg",
-          "Value between 10 and 45 degrees"
-        ]
+        "default": {
+          "type": "Degrees or radians",
+          "default": "45deg",
+          "options": "Value between 10 and 45 degrees"
+        }
       },
       {
         "name": "min-camera-orbit",
         "htmlName": "minCameraOrbit",
         "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
-        "default": [
-          "$angle $angle $distance",
-          "-Infinity 22.5deg 0",
-          "Multiple forms described in description"
-        ]
+        "default": {
+          "type": "$angle $angle $distance",
+          "default": "-Infinity 22.5deg 0",
+          "options": "Multiple forms described in description"
+        }
       },
       {
         "name": "min-field-of-view",
         "htmlName": "minFieldOfView",
         "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support env().",
-        "default": [
-          "Degrees or radians",
-          "10deg",
-          "Value between 10 and 45 degrees"
-        ]
+        "default": {
+          "type": "Degrees or radians",
+          "default": "10deg",
+          "options": "Value between 10 and 45 degrees"
+        }
       },
       {
         "name": "orbit-sensitivity",
         "htmlName": "orbitSensitivity",
         "description": "Adjusts the speed of theta and phi orbit interactions. Can also be set negative to reverse, which is helpful when using zero radius to look around the inside of a cave-like model.",
-        "default": [
-          "Number",
-          "1",
-          "any number"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "1",
+          "options": "any number"
+        }
       }
     ],
     "CSS": [
@@ -476,11 +476,11 @@
         "name": "--interaction-prompt-display",
         "htmlName": "interactionPromptDisplay",
         "description": "Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden.",
-        "default": [
-          "css display",
-          "flex",
-          "any valid css display"
-        ]
+        "default": {
+          "type": "css display",
+          "default": "flex",
+          "options": "any valid css display"
+        }
       }
     ],
     "Properties": [
@@ -559,21 +559,21 @@
         "name": "--min-hotspot-opacity",
         "htmlName": "minHotspotOpacity",
         "description": "Sets the opacity of hidden hotspots.",
-        "default": [
-          "Float",
-          "0.25",
-          "any value between 0 and 1"
-        ]
+        "default": {
+          "type": "Float",
+          "default": "0.25",
+          "options": "any value between 0 and 1"
+        }
       },
       {
         "name": "--max-hotspot-opacity",
         "htmlName": "maxHotspotOpacity",
         "description": "Sets the opacity of visible hotspots.",
-        "default": [
-          "Float",
-          "1",
-          "any value between 0 and 1"
-        ]
+        "default": {
+          "type": "Float",
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
       }
     ],
     "Methods": [
@@ -613,31 +613,31 @@
         "name": "exposure",
         "htmlName": "exposure",
         "description": "Controls the exposure of both the model and skybox, for use primarily with HDR environments.",
-        "default": [
-          "Number",
-          "1",
-          "TODO"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "1",
+          "options": "TODO"
+        }
       },
       {
         "name": "shadow-intensity",
         "htmlName": "shadowIntensity",
         "description": "Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely.",
-        "default": [
-          "Float",
-          "0",
-          "any value between 0 and 1"
-        ]
+        "default": {
+          "type": "Float",
+          "default": "0",
+          "options": "any value between 0 and 1"
+        }
       },
       {
         "name": "shadow-softness",
         "htmlName": "shadowSoftness",
         "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows. Softness should not be changed every frame as it incurs a performance cost. Softer shadows render faster.",
-        "default": [
-          "Float",
-          "1",
-          "any value between 0 and 1"
-        ]
+        "default": {
+          "type": "Float",
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
       }
     ],
     "Events": [
@@ -660,21 +660,21 @@
         "name": "animation-crossfade-duration",
         "htmlName": "animationCrossfadeDuration",
         "description": "When the current animation is changed, &lt;model-viewer&gt; automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
-        "default": [
-          "Number",
-          "300",
-          "Any number >= 0"
-        ]
+        "default": {
+          "type": "Number",
+          "default": "300",
+          "options": "Any number >= 0"
+        }
       },
       {
         "name": "autoplay",
         "htmlName": "autoplay",
         "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no animation-name is specified, plays the first animation.",
-        "default": [
-          "Boolean",
-          "false",
-          "true, false"
-        ]
+        "default": {
+          "type": "Boolean",
+          "default": "false",
+          "options": "true, false"
+        }
       }
     ],
     "Properties": [
