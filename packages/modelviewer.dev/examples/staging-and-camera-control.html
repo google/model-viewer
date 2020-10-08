@@ -191,7 +191,7 @@
   const tapDistance = 2;
   let panning = false;
   let panX, panY;
-  let firstX, firstY;
+  let startX, startY;
   let lastX, lastY;
   let metersPerPixel;
 
@@ -252,6 +252,8 @@
     if (!panning)
       return;
 
+    lastX = startX;
+    lastY = startY;
     startPan();
     event.stopPropagation();
   }, true);
@@ -284,13 +286,16 @@
     const {touches} = event;
     const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
     const thisY = 0.5 * (touches[0].clientY + touches[1].clientY);
+	
+	console.log(thisX +" "+thisY);
     movePan(thisX, thisY);
   }, true);
 
-  modelViewer.addEventListener('mouseup', (event) => {
+  self.addEventListener('mouseup', (event) => {
     recenter(event);
   }, true);
-  modelViewer.addEventListener('touchend', (event) => {
+  
+  self.addEventListener('touchend', (event) => {
     if (event.touches.length === 0) {
       recenter(event.changedTouches[0]);
     }
@@ -320,36 +325,42 @@
 <model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
 <script type="module">
   const modelViewer = document.querySelector("#envlight-demo");
-	  
-  const updateOrbit = () => {
-  const orbit = modelViewer.getCameraOrbit(); 
-  modelViewer.jumpCameraToGoal();
-  requestAnimationFrame(() => updateOrbit());
-  var isLightChanging = false;
+  
   // Add the event listeners for mousedown, mousemove, and mouseup
   modelViewer.addEventListener('mousedown', (event) => {
-    isLightChanging = true;
-  }, true);
 
+  	console.log("mouse down");
+  }, true);
+  
   modelViewer.addEventListener('mousemove', (event) => {
+   
+  // Speed and direction on X axis   
+  var speedX = event.movementX;
 	  
-  if (isLightChanging === true) {
-    if (event.shiftKey && event.which == 1) {
-	  modelViewer.cameraOrbit = `${orbit.theta + 0.01}rad ${orbit.phi}rad ${orbit.radius}m`;
-	  modelViewer.resetTurntableRotation(-1 * orbit.theta);
-    }
-  }
+  if (event.shiftKey && event.which == 1) {
+			
+    const updateOrbit = () => {
+    const orbit = modelViewer.getCameraOrbit(); 
+    console.log(speedX);
+    modelViewer.cameraOrbit = `${orbit.theta + 0.001*(-speedX)}rad ${orbit.phi}rad`;
+    modelViewer.jumpCameraToGoal();
+    modelViewer.resetTurntableRotation(orbit.theta - 0.01*(-speedX));
+    requestAnimationFrame(() => updateOrbit()); 
+   };
+   updateOrbit();
+   }
   }, true);
 
   modelViewer.addEventListener('mouseup', (event) => {
-    if (isLightChanging === true) {
-      isLightChanging = false;
-    }
+    const updateOrbit = () => {
+	const orbit = modelViewer.getCameraOrbit(); 
+	modelViewer.jumpCameraToGoal();
+	requestAnimationFrame(() => updateOrbit()); 
+	};
+	updateOrbit();
+
   }, true);
-  
-  };
-  updateOrbit();
-  
+   
 </script>
           </template>
         </example-snippet>
