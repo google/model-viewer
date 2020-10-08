@@ -203,24 +203,19 @@
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "TODO"
-      },
-      {
-        "name": "poster-dismissed",
-        "htmlName": "posterDismissed",
-        "description": "TODO"
+        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: <span class=\"attribute\">event.detail.totalProgress</span>."
       }
     ],
     "Slots": [
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "TODO"
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of --poster-color. This poster is shown until the model is loaded and revealed."
       },
       {
         "name": "progress-bar",
         "htmlName": "progressBar",
-        "description": "TODO"
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"progress-bar\"</span>, this element will replace the default progress bar, which is a thin bar at the top of the element. Use the progress event to update its style."
       }
     ]
   },
@@ -274,9 +269,9 @@
         "htmlName": "arButtonDisplay",
         "description": "Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.",
         "default": {
-          "type": "TODO",
+          "type": "display",
           "default": "block",
-          "options": "TODO"
+          "options": "CSS display value"
         }
       },
       {
@@ -308,12 +303,12 @@
       {
         "name": "ar-button",
         "htmlName": "arButton",
-        "description": "TODO"
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we can't be sure until the user tries)."
       },
       {
         "name": "exit-webxr-ar-button",
         "htmlName": "exitWebxrArButton",
-        "description": "TODO"
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"exit-webxr-ar-button\"</span>, this element will replace the default exit button in WebXR mode only, which is an \"X\" icon in the upper left."
       }
     ]
   },
@@ -487,7 +482,7 @@
       {
         "name": "turntableRotation",
         "htmlName": "turntableRotation",
-        "description": "TODO"
+        "description": "Returns the orientation of the model's turntable, which is turned by the auto-rotate setting, in radians counter-clockwise when looking down from above."
       }
     ],
     "Methods": [
@@ -524,12 +519,12 @@
       {
         "name": "getMinimumFieldOfView()",
         "htmlName": "getMinimumFieldOfView",
-        "description": "TODO"
+        "description": "Returns the minimum camera vertical field of view in degrees."
       },
       {
         "name": "getMaximumFieldOfView()",
         "htmlName": "getMaximumFieldOfView",
-        "description": "TODO"
+        "description": "Returns the maximum camera vertical field of view in degrees."
       }
     ],
     "Events": [
@@ -543,12 +538,7 @@
       {
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
-        "description": "TODO"
-      },
-      {
-        "name": "pointer-tumbling",
-        "htmlName": "pointerTumbling",
-        "description": "TODO"
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"interaction-prompt\"</span>, this element will replace the default hand icon which wiggles back and forth with the model until the user interacts."
       }
     ]
   },
@@ -592,7 +582,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "TODO"
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class=\"attribute\">data-position</span> and <span class=\"attribute\">data-normal</span> attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
       }
     ]
   },
@@ -616,7 +606,7 @@
         "default": {
           "type": "Number",
           "default": "1",
-          "options": "TODO"
+          "options": "any positive value"
         }
       },
       {
@@ -681,7 +671,7 @@
       {
         "name": "availableAnimations",
         "htmlName": "availableAnimations",
-        "description": "TODO"
+        "description": "This property reports an array of strings, corresponding to animations in the loaded model that can be selected with animation-name."
       },
       {
         "name": "currentTime",
@@ -725,7 +715,7 @@
       {
         "name": "model",
         "htmlName": "model",
-        "description": "TODO."
+        "description": "This object contains all the methods for the scene-graph API. See examples for usage."
       }
     ],
     "Methods": [
