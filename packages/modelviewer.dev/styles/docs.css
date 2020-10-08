@@ -10,6 +10,10 @@ p {
   display: inline;
 }
 
+.footerDocumentation {
+  margin-bottom: 700px;
+}
+
 .attribute-name,
 .cs-name,
 .propertie-name,

@@ -73,7 +73,7 @@
 }
 
 .header {
-  background-image: linear-gradient(to right, rgba(246, 246, 246, 0.9) , rgba(255, 255, 255, 0.9));
+  background-image: linear-gradient(to right, #f6f6f6, rgba(255, 255, 255, 0.9));
   padding: 10px 20px 10px 40px;
   width: 100%;
   position: sticky;
