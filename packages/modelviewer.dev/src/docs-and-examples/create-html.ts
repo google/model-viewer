@@ -174,7 +174,7 @@ function createSidebar(category: Category) {
     for (const entry of entries) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
-      const aId = '#docs-'.concat(divId);
+      const aId = '#entrydocs-'.concat(divId);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
   <a class="darken" href=${aId} onclick="sidebarClick()">${entry.name}</a>
