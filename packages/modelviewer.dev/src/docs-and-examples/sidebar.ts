@@ -250,8 +250,6 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
   activateSidebar(sidebarIds);
   updateSidebarView('', sidebarIds.subcategory);
   previouslyActive = sidebarIds.name;
-
-  console.log(previouslyActive);
 }
 
 let intersectionRatios = new Map<string, number>();
