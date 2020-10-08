@@ -245,8 +245,13 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
 
   // update current view based on the current highest view
   const sidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[0]);
-  updateFromOldToNew(previouslyActive, sidebarIds);
+  const prevSidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
+  deactivateSidebar(prevSidebarIds);
+  activateSidebar(sidebarIds);
+  updateSidebarView('', sidebarIds.subcategory);
   previouslyActive = sidebarIds.name;
+
+  console.log(previouslyActive);
 }
 
 let intersectionRatios = new Map<string, number>();
