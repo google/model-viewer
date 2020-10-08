@@ -55,7 +55,9 @@ class MockXRFrame implements XRFrame {
       projectionMatrix: camera.projectionMatrix.elements as unknown as
           Float32Array,
       viewMatrix: {} as Float32Array,
-      transform: transform
+      transform: transform,
+      recommendedViewportScale: null,
+      requestViewportScale: (_scale: number|null) => {}
     };
     const viewerPos: XRViewerPose = {transform: transform, views: [view]};
 
