@@ -69,6 +69,9 @@
         "name": "--poster-color",
         "htmlName": "posterColor",
         "description": "Sets the <span class='attribute'>background-color</span> of the  <span class='attribute'>poster</span> . You may wish to set this to transparent if you are using a seamless  <span class='attribute'>poster</span> with transparency (so that the background color of  <span class='attribute'>&lt;model-viewer&gt;</span> shows through).",
+        "links": [
+          "<a href=\"../examples/loading\">Related Examples</a>"
+        ],
         "default": {
           "default": "#fff",
           "options": "valid css background-color"
@@ -135,7 +138,10 @@
       {
         "name": "dracoDecoderLocation",
         "htmlName": "dracoDecoderLocation",
-        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN."
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#demo-container-8\">Related Examples</a>"
+        ]
       },
       {
         "name": "minimumRenderScale",
@@ -185,7 +191,7 @@
       {
         "name": "load",
         "htmlName": "load",
-        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src attribute is changed."
+        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
       },
       {
         "name": "preload",
@@ -207,7 +213,10 @@
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed."
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
+        "links": [
+          "<a href=\"../examples/loading/#demo-container-3\">Related Examples</a>"
+        ]
       },
       {
         "name": "progress-bar",
@@ -222,7 +231,10 @@
       {
         "name": "ar",
         "htmlName": "ar",
-        "description": "Enable the ability to launch AR experiences on supported devices."
+        "description": "Enable the ability to launch AR experiences on supported devices.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related Examples</a>"
+        ]
       },
       {
         "name": "ar-modes",
