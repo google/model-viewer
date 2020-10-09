@@ -548,7 +548,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class=\"attribute\">data-position</span> and <span class=\"attribute\">data-normal</span> attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its data-position and data-normal attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
       }
     ]
   },
@@ -666,7 +666,7 @@
       {
         "name": "pause",
         "htmlName": "pause",
-        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>pause()</span> method is invoked after animations have begun playing."
+        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>.pause()</span> method is invoked after animations have begun playing."
       }
     ]
   },
