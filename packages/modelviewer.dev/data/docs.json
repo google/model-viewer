@@ -23,7 +23,7 @@
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a poster with transparency, you may also want to set --poster-color to transparent so that the background shows through.",
+        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a <span class='attribute'>poster</span> with transparency, you may also want to set <span class='attribute'>--poster-color</span> to transparent so that the background shows through.",
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
@@ -35,7 +35,7 @@
       {
         "name": "loading",
         "htmlName": "loading",
-        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal = \"auto\", and when interacted with for reveal = \"interaction\". Eager loads the model immediately.",
+        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for <span class='attribute'>reveal=\"auto\"</span>, and when interacted with for <span class='attribute'>reveal=\"interaction\"</span>. Eager loads the model immediately.",
         "links": [
           "<a href=\"../examples/loading\">Related Examples</a>"
         ],
@@ -47,7 +47,7 @@
       {
         "name": "reveal",
         "htmlName": "reveal",
-        "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If reveal is set to \"interaction\", &lt;model-viewer&gt; will wait until the user interacts with the poster before loading and revealing the model. If set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If set to \"manual\", the model will remain hidden until dismissPoster() is called.",
+        "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If <span class='attribute'>reveal</span> is set to \"interaction\", <span class='attribute'>&lt;model-viewer&gt;</span> will wait until the user interacts with the poster before loading and revealing the model. If <span class='attribute'>reveal</span> is set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If <span class='attribute'>reveal</span> is set to \"manual\", the model will remain hidden until <span class='attribute'>dismissPoster()</span> is called.",
         "default": {
           "default": "auto",
           "options": "auto, interaction, manual"
@@ -58,7 +58,7 @@
       {
         "name": "--poster-color",
         "htmlName": "posterColor",
-        "description": "Sets the background-color of the poster. You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of &lt;model-viewer&gt; shows through).",
+        "description": "Sets the <span class='attribute'>background-color</span> of the  <span class='attribute'>poster</span> . You may wish to set this to transparent if you are using a seamless  <span class='attribute'>poster</span> with transparency (so that the background color of  <span class='attribute'>&lt;model-viewer&gt;</span> shows through).",
         "default": {
           "default": "#fff",
           "options": "valid css background-color"
@@ -67,7 +67,7 @@
       {
         "name": "--poster-image",
         "htmlName": "posterImage",
-        "description": "Sets the background-image of the poster. This is currently overridden by the poster attribute if it is set.",
+        "description": "Sets the  <span class='attribute'>background-image</span> of the  <span class='attribute'>poster</span>. This is currently overridden by the  <span class='attribute'>poster</span> attribute if it is set.",
         "default": {
           "default": "none",
           "options": "valid css background-image"
@@ -76,7 +76,7 @@
       {
         "name": "--progress-bar-color",
         "htmlName": "progressBarColor",
-        "description": "Sets the background-color of the progress bar.",
+        "description": "Sets the  <span class='attribute'>background-color</span> of the progress bar.",
         "default": {
           "default": "rgba(0, 0, 0, 0.4)",
           "options": "valid css background-color"
@@ -85,7 +85,7 @@
       {
         "name": "--progress-bar-height",
         "htmlName": "progressBarHeight",
-        "description": "Sets the height of the progress bar.",
+        "description": "Sets the  <span class='attribute'>height</span> of the progress bar.",
         "default": {
           "default": "5px",
           "options": "valid css height"
@@ -94,7 +94,7 @@
       {
         "name": "--progress-mask",
         "htmlName": "progressMask",
-        "description": "Sets the background of the progress mask.",
+        "description": "Sets the  <span class='attribute'>background</span> of the progress mask.",
         "default": {
           "default": "#fff",
           "options": "valid css background"
@@ -105,7 +105,7 @@
       {
         "name": "loaded",
         "htmlName": "loaded",
-        "description": "This property is read-only. It returns true if the load event below has fired since the last src change.",
+        "description": "This property is read-only. It returns true if the  <span class='attribute'>load</span> event below has fired since the last  <span class='attribute'>src</span> change.",
         "default": {
           "default": "N/A",
           "options": "true, false"
@@ -114,7 +114,7 @@
       {
         "name": "modelIsVisible",
         "htmlName": "modelIsVisible",
-        "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the poster has been dismissed. Related to the model-visibility event.",
+        "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the  <span class='attribute'>poster</span> has been dismissed. This property is related to the  <span class='attribute'>model-visibility</span> event.",
         "default": {
           "default": "N/A",
           "options": "true, false"
@@ -125,17 +125,17 @@
       {
         "name": "dracoDecoderLocation",
         "htmlName": "dracoDecoderLocation",
-        "description": "This static, writable property sets &lt;model-viewer&gt;'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN."
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN."
       },
       {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
-        "description": "This static, writable property sets &lt;model-viewer&gt;'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1. Defaults to 0.5."
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1. Defaults to 0.5."
       },
       {
         "name": "modelCacheSize",
         "htmlName": "modelCacheSize",
-        "description": "This static, writable property sets &lt;model-viewer&gt;'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number just sets the maximum number of models that can be cached even if they are not being used by a &lt;model-viewer&gt; element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number sets the maximum number of models that can be cached even if they are not being used by a <span class='attribute'>&lt;model-viewer&gt;</span> element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
         "default": {
           "default": "5",
           "options": "any number >= 0"
@@ -146,19 +146,19 @@
       {
         "name": "dismissPoster()",
         "htmlName": "dismissPoster",
-        "description": "Dismisses the poster, causing the model to load and render if necessary. This is currently effectively the same as interacting with the poster via user input."
+        "description": "Dismisses the <span class='attribute'>poster</span>, causing the model to load and render if necessary. This is currently effectively the same as interacting with the <span class='attribute'>poster</span> via user input."
       }
     ],
     "Static Methods": [
       {
         "name": "mapURLs(callback)",
         "htmlName": "mapURLs",
-        "description": "If provided, the callback will be passed each resource URL before a request is sent. The callback may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs. This is a static method."
+        "description": "If provided, the <span class='attribute'>callback</span> will be passed each resource URL before a request is sent. The <span class='attribute'>callback</span> may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs."
       },
       {
         "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
         "htmlName": "toBlob",
-        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting idealAspect to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio."
+        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting <span class='attribute'>idealAspect</span> to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio."
       },
       {
         "name": "toDataURL(type, encoderOptions)",
@@ -175,29 +175,29 @@
       {
         "name": "load",
         "htmlName": "load",
-        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the src attribute is changed."
+        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src attribute is changed."
       },
       {
         "name": "preload",
         "htmlName": "preload",
-        "description": "When loading = \"eager\" this event is fired when preloading is done."
+        "description": "When <span class='attribute'>loading=\"eager\"</span> this event is fired when preloading is done."
       },
       {
         "name": "model-visibility",
         "htmlName": "modelVisibility",
-        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), and the poster has been dismissed, this event will fire and <span class=\"attribute\">event.detail.visible</span> will be \"true\"."
+        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), and the poster has been dismissed, this event will fire and event.detail.visible will be \"true\"."
       },
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: <span class=\"attribute\">event.detail.totalProgress</span>."
+        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
       }
     ],
     "Slots": [
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of --poster-color. This poster is shown until the model is loaded and revealed."
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed."
       },
       {
         "name": "progress-bar",
@@ -220,7 +220,7 @@
         "description": "A prioritized list of the types of AR experiences to enable, if available; see <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
         "default": {
           "default": "webxr scene-viewer quick-look",
-          "options": "types followed by whitespace: webxr scene-viewer quick-look"
+          "options": "whitespace delineated: webxr scene-viewer quick-look"
         }
       },
       {
@@ -235,7 +235,7 @@
       {
         "name": "ios-src",
         "htmlName": "iosSrc",
-        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a>model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. See <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>."
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. See <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>."
       },
       {
         "name": "quick-look-browsers",
@@ -243,7 +243,7 @@
         "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
         "default": {
           "default": "safari",
-          "options": "browsers separated by whitespace: safari chrome"
+          "options": "whitespace delineated: safari chrome"
         }
       }
     ],
@@ -274,7 +274,7 @@
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "Fired when the ar-status attribute above fires. The event.detail.status property will be set to the same value as the ar-status attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
+        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
       },
       {
         "name": "quick-look-button-tapped",
@@ -315,7 +315,7 @@
       {
         "name": "rotation-per-second",
         "htmlName": "rotationPerSecond",
-        "description": "Sets the speed of auto-rotate, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
+        "description": "Sets the speed of <span class='attribute'>auto-rotate</span>, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
         "default": {
           "default": "pi/32",
           "options": "degrees or radians"
@@ -333,7 +333,7 @@
       {
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
-        "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the interaction-prompt-threshold (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if camera-controls are enabled.",
+        "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
         "default": {
           "default": "auto",
           "options": "auto, when-focused, none"
@@ -342,7 +342,7 @@
       {
         "name": "interaction-prompt-style",
         "htmlName": "interactionPromptStyle",
-        "description": "Configures the presentation style of the interaction-prompt when it is raised. When set to \"wiggle\", the prompt will animate from horizontally and the model will appear to be rotated as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
+        "description": "Configures the presentation style of the <span class='attribute'>interaction-prompt</span> when it is raised. When set to \"wiggle\", the prompt will animate from horizontally and the model will appear to be rotated as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
         "default": {
           "default": "wiggle",
           "options": "wiggle, basic"
@@ -351,7 +351,7 @@
       {
         "name": "interaction-prompt-threshold",
         "htmlName": "interactionPromptThreshold",
-        "description": "When camera-controls are enabled, &lt;model-viewer&gt; will prompt the user visually (and audibly, for screen readers) to interact if they focus it but don't interact with it for some time. This attribute allows you to set how long &lt;model-viewer&gt; should wait (in milliseconds) before prompting to interact. Defaults to 3000.",
+        "description": "When <span class='attribute'>camera-controls</span> are enabled, <span class='attribute'>&lt;model-viewer&gt;</span> will prompt the user visually (and audibly, for screen readers) to interact if they focus it but don't interact with it for some time. This attribute allows you to set how long <span class='attribute'>&lt;model-viewer&gt;</span> should wait (in milliseconds) before prompting to interact. Defaults to 3000.",
         "default": {
           "default": "3000",
           "options": "number >= 0"
@@ -365,7 +365,7 @@
       {
         "name": "camera-orbit",
         "htmlName": "cameraOrbit",
-        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the env() function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
+        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
         "default": {
           "default": "0deg 75deg 105%",
           "options": "$angle $angle $distance"
@@ -392,7 +392,7 @@
       {
         "name": "max-camera-orbit",
         "htmlName": "maxCameraOrbit",
-        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support env(). Defaults to \"Infinity 157.5deg Infinity\". Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
+        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Defaults to \"Infinity 157.5deg Infinity\". Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
         "default": {
           "default": "Infinity 157.5deg Infinity",
           "options": "$angle $angle $distance"
@@ -401,7 +401,7 @@
       {
         "name": "max-field-of-view",
         "htmlName": "maxFieldOfView",
-        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support env().",
+        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>.",
         "default": {
           "default": "45deg",
           "options": "value between 10 and 45 degrees"
@@ -419,7 +419,7 @@
       {
         "name": "min-field-of-view",
         "htmlName": "minFieldOfView",
-        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support env().",
+        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>.",
         "default": {
           "default": "10deg",
           "options": "value between 10 and 45 degrees"
@@ -450,24 +450,24 @@
       {
         "name": "turntableRotation",
         "htmlName": "turntableRotation",
-        "description": "Returns the orientation of the model's turntable, which is turned by the auto-rotate setting, in radians counter-clockwise when looking down from above."
+        "description": "Returns the orientation of the model's turntable, which is turned by the <span class='attribute'>auto-rotate</span> setting, in radians counter-clockwise when looking down from above."
       }
     ],
     "Methods": [
       {
         "name": "resetTurntableRotation(theta)",
         "htmlName": "resetTurntableRotation",
-        "description": "Resets the turntable that rotates the model when auto-rotate is enabled. The new value of the turntable rotation will be theta radians after this method is invoked, but the model may not update until the next render frame. If no argument is supplied, theta defaults to zero."
+        "description": "Resets the turntable that rotates the model when <span class='attribute'>auto-rotate</span> is enabled. The new value of the turntable rotation will be theta radians after this method is invoked, but the model may not update until the next render frame. If no argument is supplied, theta defaults to zero."
       },
       {
         "name": "resetInteractionPrompt()",
         "htmlName": "resetInteractionPrompt",
-        "description": "Typically, the interaction prompt will only display once and then stops displaying after the user interacts with the 3D model for the first time. You can invoke this method in order to reset the interaction prompt after it has already been displayed. Doing so will cause it to display once again when the interaction-prompt display conditions have been met."
+        "description": "Typically, the interaction prompt will only display once and then stops displaying after the user interacts with the 3D model for the first time. You can invoke this method in order to reset the interaction prompt after it has already been displayed. Doing so will cause it to display once again when the <span class='attribute'>interaction-prompt</span> display conditions have been met."
       },
       {
         "name": "getCameraOrbit()",
         "htmlName": "getCameraOrbit",
-        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the camera-orbit attribute on account of user interaction or camera interpolation."
+        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation."
       },
       {
         "name": "getCameraTarget()",
@@ -499,7 +499,7 @@
       {
         "name": "camera-change",
         "htmlName": "cameraChange",
-        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the \"event.detail.source\" property will be set to \"user-interaction\"."
+        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the event.detail.source property will be set to \"user-interaction\"."
       }
     ],
     "Slots": [
@@ -536,7 +536,7 @@
       {
         "name": "updateHotspot({name, position, normal})",
         "htmlName": "updateHotspot",
-        "description": "Updates the position and/or normal of the hotspot associated with slot = name. The position and normal are given in the same string format as the hotspot attributes data-position and data-normal, which are also in the same format as the camera-target attribute."
+        "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes data-position and data-normal, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
       },
       {
         "name": "positionAndNormalFromPoint(pixelX, pixelY)",
@@ -548,7 +548,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class=\"attribute\">data-position</span> and <span class=\"attribute\">data-normal</span> attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its data-position and data-normal attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
       }
     ]
   },
@@ -563,7 +563,7 @@
       {
         "name": "environment-image",
         "htmlName": "environmentImage",
-        "description": "Controls the environmental reflection of the model. Normally if skybox-image is set, that image will also be used for the environment-image. Use environment-image to only set the reflection without affecting the background."
+        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background."
       },
       {
         "name": "exposure",
@@ -597,7 +597,7 @@
       {
         "name": "environment-change",
         "htmlName": "environmentChange",
-        "description": "Fired when the environment has changed. If the environment is derived from skybox-image or environment-image, the image will have loaded by the time this event fires."
+        "description": "Fired when the environment has changed. If the environment is derived from <span class='attribute'>skybox-image</span> or <span class='attribute'>environment-image</span>, the image will have loaded by the time this event fires."
       }
     ]
   },
@@ -607,12 +607,12 @@
       {
         "name": "animation-name",
         "htmlName": "animationName",
-        "description": "Selects an animation to play by name. This animation will play when the .play() method is invoked, or when the &lt;model-viewer&gt; is configured to autoplay. If no animation-name is specified, &lt;model-viewer&gt; always picks the first animation it finds in the model."
+        "description": "Selects an animation to play by name. This animation will play when the <span class='attribute'>.play()</span> method is invoked, or when the <span class='attribute'>&lt;model-viewer&gt;</span> is configured to autoplay. If no <span class='attribute'>animation-name</span> is specified, <span class='attribute'>&lt;model-viewer&gt;</span> always picks the first animation it finds in the model."
       },
       {
         "name": "animation-crossfade-duration",
         "htmlName": "animationCrossfadeDuration",
-        "description": "When the current animation is changed, &lt;model-viewer&gt; automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
+        "description": "When the current animation is changed, <span class='attribute'>&lt;model-viewer&gt;</span> automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
         "default": {
           "default": "300",
           "options": "any number >= 0"
@@ -621,7 +621,7 @@
       {
         "name": "autoplay",
         "htmlName": "autoplay",
-        "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no animation-name is specified, plays the first animation.",
+        "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no <span class='attribute'>animation-name</span> is specified, plays the first animation.",
         "default": {
           "default": "false",
           "options": "true, false"
@@ -632,7 +632,7 @@
       {
         "name": "availableAnimations",
         "htmlName": "availableAnimations",
-        "description": "This property reports an array of strings, corresponding to animations in the loaded model that can be selected with animation-name."
+        "description": "This property reports an array of strings, corresponding to animations in the loaded model that can be selected with <span class='attribute'>animation-name</span>."
       },
       {
         "name": "currentTime",
@@ -642,7 +642,7 @@
       {
         "name": "paused",
         "htmlName": "paused",
-        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the .play() method is invoked."
+        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked."
       }
     ],
     "Methods": [
@@ -654,7 +654,7 @@
       {
         "name": "pause()",
         "htmlName": "pause",
-        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the currentTime property to 0."
+        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
       }
     ],
     "Events": [
@@ -666,7 +666,7 @@
       {
         "name": "pause",
         "htmlName": "pause",
-        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the pause() method is invoked after animations have begun playing."
+        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>.pause()</span> method is invoked after animations have begun playing."
       }
     ]
   },

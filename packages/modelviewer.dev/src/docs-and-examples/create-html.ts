@@ -79,7 +79,7 @@ export function starterSidebar(docsOrExample: string) {
 <div class="home lockup">
   <a href=${href} class="sidebar-mv inner-home">
     <div class="icon-button icon-modelviewer-black inner-home"></div>
-    <h1 class="inner-home darken">&lt;model-viewer&gt;</h1>
+    <div class="inner-home darken"><span class="attribute">&lt;model-viewer&gt;</span></div>
   </a>
 </div>
 <hr class="sidebar-hr">
@@ -138,10 +138,16 @@ function createSubcategorySidebar(
   return `
 <div class="subCategory" id=${'subCategory'.concat(subcategory)}>
   <h4 class="subcategory-header" id=${headerId}>
-    <a class="darken" href="#${aHref}" onclick="sidebarClick()">${
-      subcategory}</a>
+    <a class="darken" href="#${aHref}" onclick="sidebarClick()">
+      ${subcategory}
+    </a>
   </h4>
 </div>`;
+}
+
+function createSidebarName(name: string): string {
+  // strip out contents within parenthesis
+  return name.replace(/ *\([^)]*\) */g, '');
 }
 
 function createSidebar(category: Category) {
@@ -175,9 +181,10 @@ function createSidebar(category: Category) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
       const aId = '#entrydocs-'.concat(divId);
+      const sidebarName = createSidebarName(entry.name);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
-  <a class="darken" href=${aId} onclick="sidebarClick()">${entry.name}</a>
+  <a class="darken" href=${aId} onclick="sidebarClick()">${sidebarName}</a>
 </div>`;
     }
   }
