@@ -135,7 +135,7 @@
       {
         "name": "modelCacheSize",
         "htmlName": "modelCacheSize",
-        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number just sets the maximum number of models that can be cached even if they are not being used by a <span class='attribute'>&lt;model-viewer&gt;</span> element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number sets the maximum number of models that can be cached even if they are not being used by a <span class='attribute'>&lt;model-viewer&gt;</span> element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
         "default": {
           "default": "5",
           "options": "any number >= 0"
