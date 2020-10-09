@@ -114,7 +114,7 @@
       {
         "name": "modelIsVisible",
         "htmlName": "modelIsVisible",
-        "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an  <span class='attribute'>IntersectionObserver</span>) and the  <span class='attribute'>poster</span> has been dismissed. This property is related to the  <span class='attribute'>model-visibility</span> event.",
+        "description": "This property is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the  <span class='attribute'>poster</span> has been dismissed. This property is related to the  <span class='attribute'>model-visibility</span> event.",
         "default": {
           "default": "N/A",
           "options": "true, false"
@@ -170,7 +170,7 @@
       {
         "name": "error",
         "htmlName": "error",
-        "description": "This event can be triggered for two reasons: a model has failed to load or parse, or the WebGL context was lost. If the model failed to load, <span class='attribute'>event.detail.type</span> will be 'loadfailure'. If the WebGL context was lost, <span class='attribute'>event.detail.type</span> will be 'webglcontextlost'. In both cases, recovery countermeasures are left as an exercise for the user. The element will not make automatic attempts to re-load a model that has failed to load. Nor will the element attempt to restore the GL context after it has been lost. Error events also hold a reference to the originating error event (when there is one) as <span class='attribute'>event.detail.sourceEvent</span>."
+        "description": "This event can be triggered for two reasons: a model has failed to load or parse, or the WebGL context was lost. If the model failed to load, event.detail.type will be 'loadfailure'. If the WebGL context was lost, event.detail.type will be 'webglcontextlost'. In both cases, recovery countermeasures are left as an exercise for the user. The element will not make automatic attempts to re-load a model that has failed to load. Nor will the element attempt to restore the GL context after it has been lost. Error events also hold a reference to the originating error event (when there is one) as event.detail.sourceEvent."
       },
       {
         "name": "load",
@@ -185,12 +185,12 @@
       {
         "name": "model-visibility",
         "htmlName": "modelVisibility",
-        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an <span class='attribute'>IntersectionObserver</span>), and the poster has been dismissed, this event will fire and <span class=\"attribute\">event.detail.visible</span> will be \"true\"."
+        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), and the poster has been dismissed, this event will fire and event.detail.visible will be \"true\"."
       },
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: <span class=\"attribute\">event.detail.totalProgress</span>."
+        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
       }
     ],
     "Slots": [
@@ -274,7 +274,7 @@
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The <span class='attribute'>event.detail.status</span> property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
+        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
       },
       {
         "name": "quick-look-button-tapped",
@@ -499,7 +499,7 @@
       {
         "name": "camera-change",
         "htmlName": "cameraChange",
-        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the <span class='attribute'>event.detail.source</span> property will be set to \"user-interaction\"."
+        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the event.detail.source property will be set to \"user-interaction\"."
       }
     ],
     "Slots": [
