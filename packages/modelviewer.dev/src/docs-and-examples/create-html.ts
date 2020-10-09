@@ -144,6 +144,11 @@ function createSubcategorySidebar(
 </div>`;
 }
 
+function createSidebarName(name: string): string {
+  // strip out contents within parenthesis
+  return name.replace(/ *\([^)]*\) */g, '');
+}
+
 function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
   const lowerCaseTitle = getLowerCaseTitle(category.Title);
@@ -175,9 +180,10 @@ function createSidebar(category: Category) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
       const aId = '#entrydocs-'.concat(divId);
+      const sidebarName = createSidebarName(entry.name);
       innerSubcategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
-  <a class="darken" href=${aId} onclick="sidebarClick()">${entry.name}</a>
+  <a class="darken" href=${aId} onclick="sidebarClick()">${sidebarName}</a>
 </div>`;
     }
   }
