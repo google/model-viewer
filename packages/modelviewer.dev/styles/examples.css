@@ -629,7 +629,8 @@ paper-button {
 }
 
 .attribute {
-  white-space:nowrap;
+  white-space: pre-wrap !important;
+  font-family: var(--font-monospace);
 }
 
 .copyright {

@@ -212,12 +212,10 @@ function createDefaultTable(entry: Entry): string {
   return `
 <table class="value-table">
   <tr>
-    <th>Type</th>
     <th>Default Value</th>
     <th>Options</th>
   </tr>
   <tr>
-    <td>${entry.default.type}</td>
     <td>${entry.default.default}</td>
     <td>${entry.default.options}</td>
   </tr>
