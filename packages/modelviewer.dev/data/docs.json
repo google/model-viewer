@@ -578,6 +578,9 @@
         "name": "--min-hotspot-opacity",
         "htmlName": "minHotspotOpacity",
         "description": "Sets the opacity of hidden hotspots.",
+        "links": [
+          "<a href=\"../examples/annotations/\">Related examples</a>"
+        ],
         "default": {
           "default": "0.25",
           "options": "any value between 0 and 1"
@@ -602,7 +605,10 @@
       {
         "name": "positionAndNormalFromPoint(pixelX, pixelY)",
         "htmlName": "positionAndNormalFromPoint",
-        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit."
+        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\">positionAndNormalFromPoint example</a>"
+        ]
       }
     ],
     "Slots": [
@@ -619,17 +625,26 @@
       {
         "name": "skybox-image",
         "htmlName": "skyboxImage",
-        "description": "Sets the background image of the scene when viewed inline. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images."
+        "description": "Sets the background image of the scene when viewed inline. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/\">Related examples</a>"
+        ]
       },
       {
         "name": "environment-image",
         "htmlName": "environmentImage",
-        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background."
+        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#demo-container-4\">Related examples</a>"
+        ]
       },
       {
         "name": "exposure",
         "htmlName": "exposure",
         "description": "Controls the exposure of both the model and skybox, for use primarily with HDR environments.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#demo-container-6\">exposure example</a>"
+        ],
         "default": {
           "default": "1",
           "options": "any positive value"
@@ -639,6 +654,9 @@
         "name": "shadow-intensity",
         "htmlName": "shadowIntensity",
         "description": "Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#demo-container-7\">shadow example</a>"
+        ],
         "default": {
           "default": "0",
           "options": "any value between 0 and 1"
@@ -648,6 +666,9 @@
         "name": "shadow-softness",
         "htmlName": "shadowSoftness",
         "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows. Softness should not be changed every frame as it incurs a performance cost. Softer shadows render faster.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#demo-container-7\">shadow-softness example</a>"
+        ],
         "default": {
           "default": "1",
           "options": "any value between 0 and 1"
