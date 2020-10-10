@@ -7,7 +7,7 @@
         "htmlName": "src",
         "description": "The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
         "links": [
-          "<a href=\"../examples/loading\">Related Examples</a>"
+          "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "empty string",
@@ -19,7 +19,7 @@
         "htmlName": "alt",
         "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
         "links": [
-          "<a href=\"../examples/loading\">Related Examples</a>"
+          "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "empty string",
@@ -31,7 +31,7 @@
         "htmlName": "poster",
         "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a <span class='attribute'>poster</span> with transparency, you may also want to set <span class='attribute'>--poster-color</span> to transparent so that the background shows through.",
         "links": [
-          "<a href=\"../examples/loading\">Related Examples</a>"
+          "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "empty string",
@@ -43,7 +43,7 @@
         "htmlName": "loading",
         "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for <span class='attribute'>reveal=\"auto\"</span>, and when interacted with for <span class='attribute'>reveal=\"interaction\"</span>. Eager loads the model immediately.",
         "links": [
-          "<a href=\"../examples/loading\">Related Examples</a>"
+          "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "auto",
@@ -55,8 +55,8 @@
         "htmlName": "reveal",
         "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If <span class='attribute'>reveal</span> is set to \"interaction\", <span class='attribute'>&lt;model-viewer&gt;</span> will wait until the user interacts with the poster before loading and revealing the model. If <span class='attribute'>reveal</span> is set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If <span class='attribute'>reveal</span> is set to \"manual\", the model will remain hidden until <span class='attribute'>dismissPoster()</span> is called.",
         "links": [
-          "<a href=\"../examples/loading\">Related Example</a>",
-          "<a href=\"../examples/loading/#demo-container-2\">Interaction Example</a>"
+          "<a href=\"../examples/loading\">Related examples</a>",
+          "<a href=\"../examples/loading/#demo-container-2\">reveal=interaction example</a>"
         ],
         "default": {
           "default": "auto",
@@ -70,7 +70,7 @@
         "htmlName": "posterColor",
         "description": "Sets the <span class='attribute'>background-color</span> of the  <span class='attribute'>poster</span> . You may wish to set this to transparent if you are using a seamless  <span class='attribute'>poster</span> with transparency (so that the background color of  <span class='attribute'>&lt;model-viewer&gt;</span> shows through).",
         "links": [
-          "<a href=\"../examples/loading\">Related Examples</a>"
+          "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "#fff",
@@ -140,7 +140,7 @@
         "htmlName": "dracoDecoderLocation",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN.",
         "links": [
-          "<a href=\"../examples/loading/#demo-container-8\">Related Examples</a>"
+          "<a href=\"../examples/loading/#demo-container-8\">dracoDecoderLocation example</a>"
         ]
       },
       {
@@ -215,7 +215,7 @@
         "htmlName": "poster",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
         "links": [
-          "<a href=\"../examples/loading/#demo-container-3\">Related Examples</a>"
+          "<a href=\"../examples/loading/#demo-container-3\">poster example</a>"
         ]
       },
       {
@@ -233,13 +233,16 @@
         "htmlName": "ar",
         "description": "Enable the ability to launch AR experiences on supported devices.",
         "links": [
-          "<a href=\"../examples/augmentedreality/\">Related Examples</a>"
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
         ]
       },
       {
         "name": "ar-modes",
         "htmlName": "arModes",
-        "description": "A prioritized list of the types of AR experiences to enable, if available; see <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
+        "description": "A prioritized list of the types of AR experiences to enable. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
+        ],
         "default": {
           "default": "webxr scene-viewer quick-look",
           "options": "whitespace delineated: webxr scene-viewer quick-look"
@@ -249,6 +252,9 @@
         "name": "ar-scale",
         "htmlName": "arScale",
         "description": "Controls the scaling behavior in AR mode in <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a>. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
+        ],
         "default": {
           "default": "auto",
           "options": "auto, fixed"
@@ -257,7 +263,10 @@
       {
         "name": "ios-src",
         "htmlName": "iosSrc",
-        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. See <a href=\"https://github.com/google/model-viewer#augmented-reality\">Augmented Reality</a>."
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#demo-container-2\">ios-src example</a>"
+        ]
       },
       {
         "name": "quick-look-browsers",
@@ -282,7 +291,10 @@
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. Possible values include 'not-presenting', 'session-started', 'object-placed', and 'failed'. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect."
+        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. Possible values include 'not-presenting', 'session-started', 'object-placed', and 'failed'. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#demo-container-1\">ar-status example</a>"
+        ]
       }
     ],
     "Methods": [
@@ -296,7 +308,10 @@
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes."
+        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#demo-container-3\">ar-status example</a>"
+        ]
       },
       {
         "name": "quick-look-button-tapped",
@@ -308,7 +323,10 @@
       {
         "name": "ar-button",
         "htmlName": "arButton",
-        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we can't be sure until the user tries)."
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we can't be sure until the user tries).",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#demo-container-4\">ar-button example</a>"
+        ]
       },
       {
         "name": "exit-webxr-ar-button",
@@ -323,7 +341,10 @@
       {
         "name": "auto-rotate",
         "htmlName": "autoRotate",
-        "description": "Enables the auto-rotation of the model."
+        "description": "Enables the auto-rotation of the model.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-6\">auto-rotate example</a>"
+        ]
       },
       {
         "name": "auto-rotate-delay",
@@ -356,6 +377,9 @@
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
         "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#demo-container-1\">interaction-prompt=none example</a>"
+        ],
         "default": {
           "default": "auto",
           "options": "auto, when-focused, none"
@@ -382,12 +406,18 @@
       {
         "name": "camera-controls",
         "htmlName": "cameraControls",
-        "description": "Enables controls via mouse/touch when in flat view."
+        "description": "Enables controls via mouse/touch when in flat view.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/\">Related examples</a>"
+        ]
       },
       {
         "name": "camera-orbit",
         "htmlName": "cameraOrbit",
         "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-2\">camera-orbit example</a>"
+        ],
         "default": {
           "default": "0deg 75deg 105%",
           "options": "$angle $angle $distance"
@@ -397,6 +427,9 @@
         "name": "camera-target",
         "htmlName": "cameraTarget",
         "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Defaults to \"auto auto auto\".",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-6\">camera-target example</a>"
+        ],
         "default": {
           "default": "auto auto auto",
           "options": "$X $Y $Z"
@@ -489,12 +522,18 @@
       {
         "name": "getCameraOrbit()",
         "htmlName": "getCameraOrbit",
-        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation."
+        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\">getCameraOrbit() example</a>"
+        ]
       },
       {
         "name": "getCameraTarget()",
         "htmlName": "getCameraTarget",
-        "description": "Returns the realtime target position of the camera in meters. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation."
+        "description": "Returns the realtime target position of the camera in meters. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\">getCameraTarget() example</a>"
+        ]
       },
       {
         "name": "getFieldOfView()",
