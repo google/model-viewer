@@ -56,7 +56,7 @@
         "description": "This attribute controls when the model should be revealed. It currently supports three values: \"auto\", \"interaction\", and \"manual\". If <span class='attribute'>reveal</span> is set to \"interaction\", <span class='attribute'>&lt;model-viewer&gt;</span> will wait until the user interacts with the poster before loading and revealing the model. If <span class='attribute'>reveal</span> is set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If <span class='attribute'>reveal</span> is set to \"manual\", the model will remain hidden until <span class='attribute'>dismissPoster()</span> is called.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>",
-          "<a href=\"../examples/loading/#demo-container-2\">reveal=interaction example</a>"
+          "<a href=\"../examples/loading/#demo-container-2\"><span class='attribute'>reveal=\"interaction\"</span> example</a>"
         ],
         "default": {
           "default": "auto",
@@ -140,7 +140,7 @@
         "htmlName": "dracoDecoderLocation",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN.",
         "links": [
-          "<a href=\"../examples/loading/#demo-container-8\">dracoDecoderLocation example</a>"
+          "<a href=\"../examples/loading/#demo-container-8\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
         ]
       },
       {
@@ -215,7 +215,7 @@
         "htmlName": "poster",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
         "links": [
-          "<a href=\"../examples/loading/#demo-container-3\">poster example</a>"
+          "<a href=\"../examples/loading/#demo-container-3\"><span class='attribute'>poster</span> example</a>"
         ]
       },
       {
@@ -265,7 +265,7 @@
         "htmlName": "iosSrc",
         "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari.",
         "links": [
-          "<a href=\"../examples/augmentedreality/#demo-container-2\">ios-src example</a>"
+          "<a href=\"../examples/augmentedreality/#demo-container-2\"><span class='attribute'>ios-src</span> example</a>"
         ]
       },
       {
@@ -293,7 +293,7 @@
         "htmlName": "arStatus",
         "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. Possible values include 'not-presenting', 'session-started', 'object-placed', and 'failed'. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
         "links": [
-          "<a href=\"../examples/augmentedreality/#demo-container-1\">ar-status example</a>"
+          "<a href=\"../examples/augmentedreality/#demo-container-1\"><span class='attribute'>ar-status</span> example</a>"
         ]
       }
     ],
@@ -310,7 +310,7 @@
         "htmlName": "arStatus",
         "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes.",
         "links": [
-          "<a href=\"../examples/augmentedreality/#demo-container-3\">ar-status example</a>"
+          "<a href=\"../examples/augmentedreality/#demo-container-3\"><span class='attribute'>ar-status</span> example</a>"
         ]
       },
       {
@@ -325,7 +325,7 @@
         "htmlName": "arButton",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we can't be sure until the user tries).",
         "links": [
-          "<a href=\"../examples/augmentedreality/#demo-container-4\">ar-button example</a>"
+          "<a href=\"../examples/augmentedreality/#demo-container-4\"><span class='attribute'>ar-button</span> example</a>"
         ]
       },
       {
@@ -343,7 +343,7 @@
         "htmlName": "autoRotate",
         "description": "Enables the auto-rotation of the model.",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-6\">auto-rotate example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-6\"><span class='attribute'>auto-rotate</span> example</a>"
         ]
       },
       {
@@ -378,7 +378,7 @@
         "htmlName": "interactionPrompt",
         "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
         "links": [
-          "<a href=\"../examples/scenegraph/#demo-container-1\">interaction-prompt=none example</a>"
+          "<a href=\"../examples/scenegraph/#demo-container-1\"><span class='attribute'>interaction-prompt=\"none\"</span> example</a>"
         ],
         "default": {
           "default": "auto",
@@ -416,7 +416,7 @@
         "htmlName": "cameraOrbit",
         "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-2\">camera-orbit example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-2\"><span class='attribute'>camera-orbit</span> example</a>"
         ],
         "default": {
           "default": "0deg 75deg 105%",
@@ -428,7 +428,7 @@
         "htmlName": "cameraTarget",
         "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Defaults to \"auto auto auto\".",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-6\">camera-target example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-6\"><span class='attribute'>camera-target</span> example</a>"
         ],
         "default": {
           "default": "auto auto auto",
@@ -524,7 +524,7 @@
         "htmlName": "getCameraOrbit",
         "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-7\">getCameraOrbit() example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\"><span class='attribute'>getCameraOrbit</span> example</a>"
         ]
       },
       {
@@ -532,7 +532,7 @@
         "htmlName": "getCameraTarget",
         "description": "Returns the realtime target position of the camera in meters. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-7\">getCameraTarget() example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\"><span class='attribute'>getCameraTarget</span> example</a>"
         ]
       },
       {
@@ -607,7 +607,7 @@
         "htmlName": "positionAndNormalFromPoint",
         "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit.",
         "links": [
-          "<a href=\"../examples/stagingandcameras/#demo-container-7\">positionAndNormalFromPoint example</a>"
+          "<a href=\"../examples/stagingandcameras/#demo-container-7\"><span class='attribute'>positionAndNormalFromPoint</span> example</a>"
         ]
       }
     ],
@@ -643,7 +643,7 @@
         "htmlName": "exposure",
         "description": "Controls the exposure of both the model and skybox, for use primarily with HDR environments.",
         "links": [
-          "<a href=\"../examples/lightingandenv/#demo-container-6\">exposure example</a>"
+          "<a href=\"../examples/lightingandenv/#demo-container-6\"><span class='attribute'>exposure</span> example</a>"
         ],
         "default": {
           "default": "1",
@@ -655,7 +655,7 @@
         "htmlName": "shadowIntensity",
         "description": "Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely.",
         "links": [
-          "<a href=\"../examples/lightingandenv/#demo-container-7\">shadow example</a>"
+          "<a href=\"../examples/lightingandenv/#demo-container-7\"><span class='attribute'>shadow</span> example</a>"
         ],
         "default": {
           "default": "0",
@@ -667,7 +667,7 @@
         "htmlName": "shadowSoftness",
         "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows. Softness should not be changed every frame as it incurs a performance cost. Softer shadows render faster.",
         "links": [
-          "<a href=\"../examples/lightingandenv/#demo-container-7\">shadow-softness example</a>"
+          "<a href=\"../examples/lightingandenv/#demo-container-7\"><span class='attribute'>shadow-softness</span> example</a>"
         ],
         "default": {
           "default": "1",
@@ -689,12 +689,18 @@
       {
         "name": "animation-name",
         "htmlName": "animationName",
-        "description": "Selects an animation to play by name. This animation will play when the <span class='attribute'>.play()</span> method is invoked, or when the <span class='attribute'>&lt;model-viewer&gt;</span> is configured to autoplay. If no <span class='attribute'>animation-name</span> is specified, <span class='attribute'>&lt;model-viewer&gt;</span> always picks the first animation it finds in the model."
+        "description": "Selects an animation to play by name. This animation will play when the <span class='attribute'>.play()</span> method is invoked, or when the <span class='attribute'>&lt;model-viewer&gt;</span> is configured to autoplay. If no <span class='attribute'>animation-name</span> is specified, <span class='attribute'>&lt;model-viewer&gt;</span> always picks the first animation it finds in the model.",
+        "links": [
+          "<a href=\"../examples/animation/#demo-container-2\">Related examples</a>"
+        ]
       },
       {
         "name": "animation-crossfade-duration",
         "htmlName": "animationCrossfadeDuration",
         "description": "When the current animation is changed, <span class='attribute'>&lt;model-viewer&gt;</span> automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
+        "links": [
+          "<a href=\"../examples/animation/#demo-container-3\">Default behavior example</a>"
+        ],
         "default": {
           "default": "300",
           "options": "any number >= 0"
@@ -704,6 +710,9 @@
         "name": "autoplay",
         "htmlName": "autoplay",
         "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no <span class='attribute'>animation-name</span> is specified, plays the first animation.",
+        "links": [
+          "<a href=\"../examples/animation/#demo-container-1\"><span class='attribute'>autoplay</span> example</a>"
+        ],
         "default": {
           "default": "false",
           "options": "true, false"
@@ -724,7 +733,10 @@
       {
         "name": "paused",
         "htmlName": "paused",
-        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked."
+        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked.",
+        "links": [
+          "<a href=\"../examples/animation/#demo-container-4\"><span class='attribute'>paused</span> example</a>"
+        ]
       }
     ],
     "Methods": [
@@ -758,21 +770,30 @@
       {
         "name": "model",
         "htmlName": "model",
-        "description": "This object contains all the methods for the scene-graph API. See examples for usage."
+        "description": "This object contains all the methods for the scene-graph API. See examples for usage.",
+        "links": [
+          "<a href=\"../examples/scenegraph/\">Related examples</a>"
+        ]
       }
     ],
     "Methods": [
       {
         "name": "exportScene(options)",
         "htmlName": "exportScene",
-        "description": "Exports the model in glTF or GLB formats. Returns a promise that resolves in a Blob of type \"application/octet-stream\" or \"application/json\" depending on the export format. For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'> GLTF exporter</a> documentation, with the exception that all animations are automatically exported and truncateDrawRange defaults to true."
+        "description": "Exports the model in glTF or GLB formats. Returns a promise that resolves in a Blob of type \"application/octet-stream\" or \"application/json\" depending on the export format. For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'> GLTF exporter</a> documentation, with the exception that all animations are automatically exported and truncateDrawRange defaults to true.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#demo-container-5\">Related examples</a>"
+        ]
       }
     ],
     "Events": [
       {
         "name": "scene-graph-ready",
         "htmlName": "sceneGraphReady",
-        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details."
+        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#demo-container-2\">Related examples</a>"
+        ]
       }
     ]
   }
