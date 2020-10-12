@@ -652,6 +652,11 @@ paper-button {
 .quick-start {
   border-bottom: none;
   padding-bottom: 0;
+  margin-top: 25px;
+}
+
+.slogan {
+  margin-top: 20px;
 }
 
 .border-bottom {
