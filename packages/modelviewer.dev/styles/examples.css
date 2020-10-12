@@ -311,6 +311,11 @@ h1 span {
   margin: var(--snippet-offset);
 }
 
+.content .home example-snippet {
+  display: block;
+  margin: 20px 0;
+}
+
 .footer {
   background: #eee;
   padding: 40px 40px 40px 40px;
@@ -574,6 +579,16 @@ paper-button {
   margin: 0;
 }
 
+.new-list-example {
+  padding-left: 0px;
+  margin-top: 8px;
+  margin-left: 0px;
+  margin-bottom: 16px;
+  grid-template-columns: 1fr;
+  display: grid;
+  list-style-type: none;
+}
+
 
 .list-attribute {
   margin-top: 10px;
@@ -620,8 +635,18 @@ paper-button {
   z-index: 100;
   text-transform: lowercase;
 }
+
+.grouping-title-new {
+  text-transform: none;
+}
+
 .grouping-title.border-bottom {
   padding-bottom: 10px;
+}
+
+.quick-start {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .border-bottom {
