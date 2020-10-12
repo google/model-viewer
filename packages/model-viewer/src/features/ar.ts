@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$loaded, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor} from '../utilities.js';
@@ -167,9 +167,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].canScale = this.arScale !== 'fixed';
       }
 
-      if (this[$loaded]) {
-        this[$selectARMode]();
-      }
+      this[$selectARMode]();
     }
 
     /**
@@ -195,11 +193,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 configuration or device capabilities');
           break;
       }
-    }
-
-    [$onModelLoad]() {
-      super[$onModelLoad]();
-      this[$selectARMode]();
     }
 
     async[$selectARMode]() {
