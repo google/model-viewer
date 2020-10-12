@@ -58,7 +58,7 @@
           </div>
           <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
-    <model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -75,7 +75,7 @@
           </div>
           <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
-    <model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -92,17 +92,17 @@
           </div>
           <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
-    <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
-    <script>
-    (() => {
-      const modelViewer = document.querySelector('#paused-change-demo');
+<model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#paused-change-demo');
 
-      self.setInterval(() => {
-        modelViewer.animationName = modelViewer.animationName === 'Running' ?
-          'Wave' : 'Running';
-      }, 1500.0);
-    })();
-    </script>
+  self.setInterval(() => {
+    modelViewer.animationName = modelViewer.animationName === 'Running' ?
+      'Wave' : 'Running';
+  }, 1500.0);
+})();
+</script>
             </template>
           </example-snippet>
         </div>
@@ -119,17 +119,17 @@
           </div>
           <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
-    <model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
-    <script>
-    (() => {
-      const modelViewer = document.querySelector('#xfade-demo');
+<model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#xfade-demo');
 
-      self.setInterval(() => {
-        modelViewer.animationName = modelViewer.animationName === 'Running' ?
-          'Idle' : 'Running';
-      }, 1500.0);
-    })();
-    </script>
+  self.setInterval(() => {
+    modelViewer.animationName = modelViewer.animationName === 'Running' ?
+      'Idle' : 'Running';
+  }, 1500.0);
+})();
+</script>
             </template>
           </example-snippet>
         </div>
