@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$loaded, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$loaded, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -59,6 +59,7 @@ const $arModes = Symbol('arModes');
 const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
 const $quickLookBrowsers = Symbol('quickLookBrowsers');
 const $arAnchor = Symbol('arAnchor');
+const $preload = Symbol('preload');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
@@ -105,6 +106,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
+    protected[$preload] = false;
 
     protected[$quickLookBrowsers]: Set<QuickLookBrowser> = new Set();
 
@@ -252,8 +254,10 @@ configuration or device capabilities');
       console.log('Attempting to present in AR...');
 
       if (!this[$loaded]) {
-        (this as any).dismissPoster();
+        this[$preload] = true;
+        this[$updateSource]();
         await waitForEvent(this, 'load');
+        this[$preload] = false;
       }
 
       try {
@@ -270,6 +274,10 @@ configuration or device capabilities');
       } finally {
         this[$selectARMode]();
       }
+    }
+
+    [$shouldAttemptPreload](): boolean {
+      return super[$shouldAttemptPreload]() || this[$preload];
     }
 
     /**
