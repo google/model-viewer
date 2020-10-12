@@ -404,7 +404,7 @@ model-viewer:focus {
 }
 
 .sample pre {
-  font-size: 1em;
+  font-size: .8em;
   line-height: 1.6em;
   padding: var(--pre-padding);
   max-width: 960px;
