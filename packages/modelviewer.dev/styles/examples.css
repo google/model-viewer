@@ -313,7 +313,7 @@ h1 span {
 
 .content .home example-snippet {
   display: block;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .footer {
@@ -417,6 +417,11 @@ model-viewer:focus {
   margin-right: auto;
   overflow-x: auto;
 }
+
+.sample .home pre {
+  padding: 10px 15px;
+}
+
 .demo pre {
   position: absolute;
   bottom: 0;
