@@ -18,7 +18,8 @@ import {Mesh, MeshStandardMaterial} from 'three';
 import {IS_IE11} from '../../constants.js';
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;

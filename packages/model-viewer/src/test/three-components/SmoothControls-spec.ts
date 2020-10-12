@@ -16,7 +16,8 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
-import {dispatchSyntheticEvent, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {dispatchSyntheticEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
