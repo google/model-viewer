@@ -17,10 +17,10 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$loaded, $renderer, $scene} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
-import {Constructor} from '../utilities.js';
+import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
 let isSceneViewerBlocked = false;
@@ -250,6 +250,11 @@ configuration or device capabilities');
 
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR...');
+
+      if (!this[$loaded]) {
+        (this as any).dismissPoster();
+        await waitForEvent(this, 'load');
+      }
 
       try {
         this[$arButtonContainer].removeEventListener(

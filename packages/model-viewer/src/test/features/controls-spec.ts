@@ -20,8 +20,8 @@ import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
-import {Constructor, step} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until, waitForEvent} from '../helpers.js';
+import {Constructor, step, waitForEvent} from '../../utilities.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 

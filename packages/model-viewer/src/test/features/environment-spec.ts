@@ -20,7 +20,8 @@ import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {$shadow} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses, textureMatchesMeta, timePasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
