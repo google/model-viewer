@@ -311,7 +311,7 @@ h1 span {
   margin: var(--snippet-offset);
 }
 
-.content .home example-snippet {
+.content .quick-start-example example-snippet {
   display: block;
   margin: 10px 0;
 }
@@ -418,7 +418,7 @@ model-viewer:focus {
   overflow-x: auto;
 }
 
-.sample .home pre {
+.sample .quick-start-example pre {
   padding: 10px 15px;
 }
 
