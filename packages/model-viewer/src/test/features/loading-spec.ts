@@ -135,6 +135,13 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               element.removeEventListener('load', onLoad);
             }
           });
+
+          test('getDimensions() returns correct size', () => {
+            const size = element.getDimensions();
+            expect(size.x).to.be.eq(1);
+            expect(size.y).to.be.eq(1);
+            expect(size.z).to.be.eq(1);
+          });
         });
       });
 

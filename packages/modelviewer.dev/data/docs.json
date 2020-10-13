@@ -163,6 +163,11 @@
         "name": "dismissPoster()",
         "htmlName": "dismissPoster",
         "description": "Dismisses the <span class='attribute'>poster</span>, causing the model to load and render if necessary. This is currently effectively the same as interacting with the <span class='attribute'>poster</span> via user input."
+      },
+      {
+        "name": "getDimensions()",
+        "htmlName": "getDimensions",
+        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The retuned object has x, y, and z properties along with a toString() method."
       }
     ],
     "Static Methods": [
@@ -530,7 +535,7 @@
       {
         "name": "getCameraTarget()",
         "htmlName": "getCameraTarget",
-        "description": "Returns the realtime target position of the camera in meters. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime target position of the camera in meters. The retuned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#demo-container-7\"><span class='attribute'>getCameraTarget</span> example</a>"
         ]
