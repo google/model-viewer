@@ -17,13 +17,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169901325-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-169901325-1');
-  </script>
   <title>&lt;model-viewer&gt; Animation</title>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; animation examples">
@@ -49,40 +42,15 @@
 </head>
 <body>
 
-  <style>
-    html {
-      scroll-padding-top: 0px;
-    }
-  </style>
-
 <div class="examples-page">  
-  <div class="sidebar">
-    <div class="home lockup">
-      <a href="../" class="sidebar-mv inner-home">
-        <div class="icon-button icon-modelviewer-black inner-home"></div>
-        <h1 class="inner-home">model-viewer</h1>
-      </a>
-    </div>
-    <hr class="sidebar-hr">
-    <div class="flipper">
-      <div class="inner-flipper" id="examples-flipper" onclick="switchPages('examples', 'examples')">
-        <a class="darken bolden">EXAMPLES</a>
-      </div>
-      <div class="inner-flipper">|</div>
-      <div class="inner-flipper" id="documentation-flipper" onclick="switchPages('examples', '../../docs/#animation')">
-        <a class="darken">DOCUMENTATION</a>
-      </div>
-    </div>
-    <div class="categories" id="sidebar-category-container">
-    </div>
-  </div>
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
   
   <div class="examples-container">
     <div class="sample">
       <div id="demo-container-1" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <a class="lockup" href="../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
           <h4 id="intro"><span class="font-medium">Animation. </span>Use &lt;model-viewer&gt; to show off your animated models. This page showcases how you can control models with animations</h4>
           <div class="heading">
             <h2 class="demo-title">Automatically play animations with the autoplay attribute</h2>
@@ -90,7 +58,7 @@
           </div>
           <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
-    <model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -107,7 +75,7 @@
           </div>
           <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
-    <model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -124,17 +92,17 @@
           </div>
           <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
-    <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
-    <script>
-    (() => {
-      const modelViewer = document.querySelector('#paused-change-demo');
+<model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#paused-change-demo');
 
-      self.setInterval(() => {
-        modelViewer.animationName = modelViewer.animationName === 'Running' ?
-          'Wave' : 'Running';
-      }, 1500.0);
-    })();
-    </script>
+  self.setInterval(() => {
+    modelViewer.animationName = modelViewer.animationName === 'Running' ?
+      'Wave' : 'Running';
+  }, 1500.0);
+})();
+</script>
             </template>
           </example-snippet>
         </div>
@@ -151,17 +119,17 @@
           </div>
           <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
-    <model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
-    <script>
-    (() => {
-      const modelViewer = document.querySelector('#xfade-demo');
+<model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#xfade-demo');
 
-      self.setInterval(() => {
-        modelViewer.animationName = modelViewer.animationName === 'Running' ?
-          'Idle' : 'Running';
-      }, 1500.0);
-    })();
-    </script>
+  self.setInterval(() => {
+    modelViewer.animationName = modelViewer.animationName === 'Running' ?
+      'Idle' : 'Running';
+  }, 1500.0);
+})();
+</script>
             </template>
           </example-snippet>
         </div>
@@ -185,7 +153,7 @@
 <script type="module" src="../../examples/built/docs-and-examples.js">
 </script>
 <script type="module">
-  (() => { init('examples/animation'); })();
+  (() => { init('examples-animation'); })();
 </script>
 
   <!-- Documentation-specific dependencies: -->

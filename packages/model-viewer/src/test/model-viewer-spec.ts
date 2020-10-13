@@ -1,8 +1,8 @@
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {Constructor} from '../utilities.js';
+import {Constructor, waitForEvent} from '../utilities.js';
 
-import {assetPath, waitForEvent} from './helpers.js';
+import {assetPath} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;

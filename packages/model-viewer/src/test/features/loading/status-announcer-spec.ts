@@ -15,7 +15,8 @@
 import {LoadingMixin} from '../../../features/loading.js';
 import {FINISHED_LOADING_ANNOUNCEMENT, INITIAL_STATUS_ANNOUNCEMENT, LoadingStatusAnnouncer} from '../../../features/loading/status-announcer.js';
 import ModelViewerElementBase from '../../../model-viewer-base.js';
-import {assetPath, isInDocumentTree, until, waitForEvent} from '../../helpers.js';
+import {waitForEvent} from '../../../utilities.js';
+import {assetPath, isInDocumentTree, until} from '../../helpers.js';
 
 const expect = chai.expect;
 

@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventDispatcher, Group} from 'three';
+import {Group} from 'three';
 import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
-import {deserializeUrl} from '../utilities.js';
+import {deserializeUrl, PredicateFunction} from '../utilities.js';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
@@ -41,14 +41,6 @@ export const pickShadowDescendant =
 export const timePasses = (ms: number = 0): Promise<void> =>
     new Promise(resolve => setTimeout(resolve, ms));
 
-export type PredicateFunction<T = void> = (value: T) => boolean;
-
-/**
- * Three.js EventDispatcher and DOM EventTarget use different event patterns,
- * so AnyEvent covers the shape of both event types.
- */
-export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
-
 export const until =
     async (predicate: PredicateFunction) => {
   while (!predicate()) {
@@ -58,25 +50,6 @@ export const until =
 
 export const rafPasses = (): Promise<void> =>
     new Promise(resolve => requestAnimationFrame(() => resolve()));
-
-/**
- * @param {EventTarget|EventDispatcher} target
- * @param {string} eventName
- * @param {?Function} predicate
- */
-export const waitForEvent = <T extends AnyEvent = Event>(
-    target: EventTarget|EventDispatcher,
-    eventName: string,
-    predicate: PredicateFunction<T>|null = null): Promise<T> =>
-    new Promise(resolve => {
-      function handler(event: AnyEvent) {
-        if (!predicate || predicate(event as T)) {
-          resolve(event as T);
-          target.removeEventListener(eventName, handler);
-        }
-      }
-      target.addEventListener(eventName, handler);
-    });
 
 export interface SyntheticEventProperties {
   clientX?: number;

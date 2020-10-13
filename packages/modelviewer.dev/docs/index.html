@@ -29,32 +29,20 @@
 </head>
 
 <body>
-  <div class="sidebar">
-    <div class="home lockup">
-      <a href="../" class="sidebar-mv inner-home">
-        <div class="icon-button icon-modelviewer-black inner-home"></div>
-        <h1 class="inner-home">model-viewer</h1>
-      </a>
-    </div>
-    <hr class="sidebar-hr">
-    <div class="flipper">
-      <div class="inner-flipper" id="examples-flipper" onclick="switchPages('docs', 'examples')">
-        <a class="darken">EXAMPLES</a>
-      </div>
-      <div class="inner-flipper">|</div>
-      <div class="inner-flipper" id="documentation-flipper" onclick="switchPages('docs', 'docs')">
-        <a class="darken bolden">DOCUMENTATION</a>
-      </div>
-    </div>
-    <div class="categories" id="sidebar-category-container">
-    </div>
-  </div>
+  <div class="sidebar" id="sidenav"></div>
 
   <!-- Start of all documentation -->
   <div class="outer-content">
+    <div id="toggle"></div>
     <div id="loading-docs"></div>
+    <div id="augmentedreality-docs"></div>
+    <div id="stagingandcameras-docs"></div>
+    <div id="annotations-docs"></div>
+    <div id="lightingandenv-docs"></div>
     <div id="animation-docs"></div>
+    <div id="scenegraph-docs"></div>
   </div>
+  <div class="footerDocumentation"></div>
 
   <script type="module" src="../examples/built/docs-and-examples.js">
   </script>

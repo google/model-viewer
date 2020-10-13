@@ -2,21 +2,6 @@ html {
   scroll-padding-top: 75px;
 }
 
-.sidebar {
-  margin: 0;
-  padding: 0;
-  width: 300px;
-  background-color: #f6f6f6;
-  position: fixed;
-  height: 100%;
-  overflow: auto;
-  border: 1px solid #BDBDBD;
-}
-
-.outer-content {
-  margin-left: 300px;
-}
-
 .inner-content {
   padding: 10px 40px;
 }
@@ -25,10 +10,16 @@ p {
   display: inline;
 }
 
+.footerDocumentation {
+  margin-bottom: 700px;
+}
+
 .attribute-name,
-.cssPropertie-name,
+.cs-name,
 .propertie-name,
+.staticPropertie-name,
 .method-name,
+.staticMethod-name,
 .event-name,
 .slot-name {
   padding: 10px 20px 10px 20px;
@@ -37,12 +28,14 @@ p {
 }
 
 .attribute-definition,
-.cssPropertie-definition,
+.cs-definition,
 .propertie-definition,
+.staticPropertie-definition,
 .method-definition,
+.staticMethod-definition,
 .event-definition,
 .slot-definition {
-  margin: 0 0 20px 0;
+  margin: 0 0 20px 20px;
 }
 
 .category-container {
@@ -50,17 +43,20 @@ p {
 }
 
 .attribute-container,
-.cssPropertie-container,
+.cs-container,
 .propertie-container,
+.staticPropertie-container,
 .method-container,
+.staticMethod-container,
 .event-container,
 .slot-container {
   padding-bottom: 20px;
 }
 
 .value-table {
-  margin: 0 0 30px 0;
-  width: 50%;
+  margin: 0 0 30px 20px;
+  width: calc(100% - 20px);
+  table-layout: fixed;
 }
 
 table,
@@ -78,20 +74,13 @@ td:hover {
   background-color: #ececec;
 }
 
-ul.links {
+div.links {
   margin-top: 5px;
+  margin-left: 20px;
 }
 
 hr.solid {
   border-top: 3px solid #f6f6f6;
-}
-
-.header {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px 20px 10px 40px;
-  width: 100%;
-  position: sticky;
-  top: 0;
 }
 
 .categories {
@@ -153,7 +142,7 @@ hr.solid {
 .flipper {
   padding-left: 20px;
   padding-right: 20px;
-  font-size: 1vw;
+  font-size: 1em;
   overflow: auto;
   white-space: nowrap;
 }
@@ -165,6 +154,7 @@ hr.solid {
 .inner-home {
   display: flex;
   align-items: center;
+  font-size: 1.1em;
 }
 
 .darken {
@@ -172,8 +162,7 @@ hr.solid {
 }
 
 .darken:hover {
-  border: 1px solid #000;
-  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, .3);
 }
 
 .inactive-doc-example {
@@ -182,4 +171,29 @@ hr.solid {
 
 .bolden {
   font-weight: bold;
+}
+
+/* Smaller screen/ mobile */
+@media only screen and (max-width: 800px) {
+  :root {
+    --sidebar-width: 0;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+  }
+
+  .outer-content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .inner-content {
+    padding: 10px 10px;
+  }
+
+  .value-table {
+    width: calc(100% - 20px);
+    margin: 0 0 30px 20px;
+  }
 }
