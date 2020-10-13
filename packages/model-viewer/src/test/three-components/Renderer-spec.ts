@@ -17,7 +17,8 @@ import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $loaded, $onResize, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {assetPath, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 

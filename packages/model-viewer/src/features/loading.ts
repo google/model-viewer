@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -31,7 +31,7 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
@@ -84,6 +84,7 @@ export declare interface LoadingInterface {
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
+  getDimensions(): Vector3D;
 }
 
 export declare interface LoadingStaticInterface {
@@ -206,6 +207,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
         this[$updateSource]();
       }
+    }
+
+    /**
+     * Returns the model's bounding box dimensions in meters, independent of
+     * turntable rotation.
+     */
+    getDimensions(): Vector3D {
+      return toVector3D(this[$scene].model.size);
     }
 
     protected[$modelIsRevealed] = false;

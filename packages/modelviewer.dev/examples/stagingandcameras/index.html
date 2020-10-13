@@ -1,0 +1,347 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Staging &amp; Camera Control</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; staging &amp; camera control examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+</head>
+<body>
+<div class="examples-page">  
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+  
+  <div class="examples-container">
+    <div class="sample">
+      <div id="demo-container-1" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Staging &amp; Camera Control. </span>Use these features to frame the perfect shot for your model</h4>
+          <div class="heading">
+            <h2 class="demo-title">Use the <span class="attribute">camera-controls</span> attribute to enable user interaction</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+            <template>
+<model-viewer camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-2" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Set the <span class="attribute">camera-orbit</span> change the initial angle and position of the camera</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+            <template>
+<model-viewer camera-controls camera-orbit="45deg 55deg 2.5m" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-3" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Use CSS-like <span class="attribute">calc()</span> to sync camera orbit with scroll position</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+            <template>
+<model-viewer camera-controls camera-orbit="calc(-1.5rad + env(window-scroll-y) * 4rad) calc(0deg + env(window-scroll-y) * 180deg) calc(3m - env(window-scroll-y) * 1.5m)" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-4" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">The camera automatically interpolates between orbits (even when controls are disabled)</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+            <template>
+<model-viewer id="orbit-demo" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#orbit-demo');
+  const orbitCycle = [
+    '45deg 55deg 4m',
+    '-60deg 110deg 2m',
+    modelViewer.cameraOrbit
+  ];
+
+  setInterval(() => {
+    const currentOrbitIndex = orbitCycle.indexOf(modelViewer.cameraOrbit);
+    modelViewer.cameraOrbit =
+        orbitCycle[(currentOrbitIndex + 1) % orbitCycle.length];
+  }, 3000);
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-5" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">By default, the camera targets the center of the model's bounding box</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+            <template>
+<model-viewer camera-controls auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-6" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Use the <span class="attribute">camera-target</span> attribute to orbit a different coordinate</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+            <template>
+<model-viewer camera-controls camera-target="0m 0m 0m" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="demo-container-7" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Add other interactions like pan</h2>
+            <h4>Event listeners can cooperate with camera-controls</h4>
+            <p>By using capture on your event listeners you can make sure the
+            events are also passed in as usual to the built in camera controls.
+            This can be selectively disabled by calling stopPropagation() on the
+            event.</p>
+            <p>This is one of many possible implementations of panning around a
+            model, including the ability to set the target by clicking. It is left
+            as an example here as there are too many possible variations to make a
+            reasonable API around. It also tends to be confusing to users in cases
+            where it is not necessary.</p>
+          </div>
+          <example-snippet stamp-to="demo-container-7" highlight-as="html">
+            <template>
+<model-viewer id="pan-demo" camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#pan-demo');
+  const tapDistance = 2;
+  let panning = false;
+  let panX, panY;
+  let startX, startY;
+  let lastX, lastY;
+  let metersPerPixel;
+
+  const startPan = () => {
+    const orbit = modelViewer.getCameraOrbit();
+    const {theta, phi, radius} = orbit;
+    metersPerPixel = 0.75 * radius / modelViewer.getBoundingClientRect().height;
+    panX = [-Math.cos(theta), 0, Math.sin(theta)];
+    panY = [
+      -Math.cos(phi) * Math.sin(theta),
+      Math.sin(phi),
+      -Math.cos(phi) * Math.cos(theta)
+    ];
+    modelViewer.interactionPrompt = 'none';
+  };
+
+  const movePan = (thisX, thisY) => {
+    const dx = (thisX - lastX) * metersPerPixel;
+    const dy = (thisY - lastY) * metersPerPixel;
+    lastX = thisX;
+    lastY = thisY;
+
+    const target = modelViewer.getCameraTarget();
+    target.x += dx * panX[0] + dy * panY[0];
+    target.y += dx * panX[1] + dy * panY[1];
+    target.z += dx * panX[2] + dy * panY[2];
+    modelViewer.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
+  };
+
+  const recenter = (pointer) => {
+    panning = false;
+    if (Math.abs(pointer.clientX - startX) > tapDistance ||
+        Math.abs(pointer.clientY - startY) > tapDistance)
+      return;
+    const rect = modelViewer.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const hit = modelViewer.positionAndNormalFromPoint(x, y);
+    modelViewer.cameraTarget =
+        hit == null ? 'auto auto auto' : hit.position.toString();
+  };
+
+  const onPointerUp = (event) => {
+    const pointer = event.clientX ? event : event.changedTouches[0];
+    if (Math.abs(pointer.clientX - startX) < tapDistance &&
+        Math.abs(pointer.clientY - startY) < tapDistance) {
+      recenter(pointer);
+    }
+    panning = false;
+  };
+
+  modelViewer.addEventListener('mousedown', (event) => {
+    startX = event.clientX;
+    startY = event.clientY;
+    panning = event.button === 2 || event.ctrlKey || event.metaKey ||
+        event.shiftKey;
+    if (!panning)
+      return;
+
+    lastX = startX;
+    lastY = startY;
+    startPan();
+    event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('touchstart', (event) => {
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+    panning = event.touches.length === 2;
+    if (!panning)
+      return;
+
+    const {touches} = event;
+    lastX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    lastY = 0.5 * (touches[0].clientY + touches[1].clientY);
+    startPan();
+  }, true);
+
+  modelViewer.addEventListener('mousemove', (event) => {
+    if (!panning)
+      return;
+
+    movePan(event.clientX, event.clientY);
+    event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('touchmove', (event) => {
+    if (!panning || event.touches.length !== 2)
+      return;
+
+    const {touches} = event;
+    const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    const thisY = 0.5 * (touches[0].clientY + touches[1].clientY);
+    movePan(thisX, thisY);
+  }, true);
+
+  self.addEventListener('mouseup', (event) => {
+    recenter(event);
+  }, true);
+  
+  self.addEventListener('touchend', (event) => {
+    if (event.touches.length === 0) {
+      recenter(event.changedTouches[0]);
+    }
+  }, true);
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
+    </div>
+    </div>
+ </div>
+
+ <script type="module" src="../../examples/built/docs-and-examples.js">
+ </script>
+ <script type="module">
+   (() => { init('examples-stagingandcameras'); })();
+ </script>
+  
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+  <script nomodule
+      src="../built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+</html>

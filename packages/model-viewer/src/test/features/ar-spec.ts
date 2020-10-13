@@ -16,8 +16,8 @@
 import {IS_IE11, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {Constructor} from '../../utilities.js';
-import {assetPath, spy, timePasses, waitForEvent} from '../helpers.js';
+import {Constructor, waitForEvent} from '../../utilities.js';
+import {assetPath, spy, timePasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;

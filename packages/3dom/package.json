@@ -45,7 +45,7 @@
     "3d"
   ],
   "devDependencies": {
-    "three": "^0.120.1",
+    "three": "^0.121.1",
     "@google/model-viewer-shared-assets": "*",
     "@open-wc/karma-esm": "^3.0.4",
     "@rollup/plugin-node-resolve": "^9.0.0",
@@ -68,7 +68,7 @@
     "rollup": "^2.26.6",
     "rollup-plugin-terser": "^7.0.0",
     "simple-dropzone": "^0.7.1",
-    "typescript": "3.8.2"
+    "typescript": "4.0.3"
   },
   "publishConfig": {
     "access": "public"

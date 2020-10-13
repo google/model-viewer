@@ -23,7 +23,10 @@ pushd $(dirname $0)/..
 
 DEPLOYABLE_STATIC_FILES=( \
   index.html \
+  home.html \
   assets \
+  data \
+  docs \
   examples \
   lib \
   styles \
