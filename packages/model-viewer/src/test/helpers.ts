@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Group, Texture} from 'three';
+import {Group} from 'three';
 import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
@@ -50,22 +50,6 @@ export const until =
 
 export const rafPasses = (): Promise<void> =>
     new Promise(resolve => requestAnimationFrame(() => resolve()));
-
-/**
- * Takes a texture and an object and returns a boolean indicating
- * if whether or not the texture's userData matches the fields
- * defined on the `meta` object.
- *
- * @param {THREE.Texture}
- * @param {Object}
- * @return {boolean}
- */
-export const textureMatchesMeta =
-    (texture: Texture, meta: {[index: string]: any}): boolean =>
-        !!(texture && (texture as any).userData &&
-           Object.keys(meta).reduce((matches, key) => {
-             return matches && meta[key] === (texture as any).userData[key];
-           }, true));
 
 export interface SyntheticEventProperties {
   clientX?: number;

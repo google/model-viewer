@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-import {Texture} from 'three';
-
 import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {$shadow} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses, textureMatchesMeta, timePasses} from '../helpers.js';
+import {assetPath, rafPasses, timePasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -33,18 +31,17 @@ const MULTI_MATERIAL_MODEL_URL = assetPath('models/Triangle.gltf');
 
 const backgroundHasMap =
     (scene: ModelScene, url: string|null) => {
-      return textureMatchesMeta((scene.background as Texture), {url: url});
+      return (scene.background as any).userData.url === url;
     }
 
 const modelUsingEnvMap =
     (scene: ModelScene, url: string|null) => {
-      return textureMatchesMeta((scene.environment as Texture), {url: url});
+      return (scene.environment as any).userData.url === url;
     }
 
 /**
  * Returns a promise that resolves when a given element is loaded
  * and has an environment map set that matches the passed in meta.
- * @see textureMatchesMeta
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   const load = waitForEvent(element, 'load');
