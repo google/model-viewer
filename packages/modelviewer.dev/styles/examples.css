@@ -24,7 +24,6 @@
   --snippet-offset: 20px -20px;
   --pre-padding: 16px 20px;
   --demo-title-padding: 24px 10% 24px 0;
-  --heading-h3-max-width: 480px;
   --heading-h1-margin-top: 40px;
   --browser-support-desc-margin-top: 40px;
   --browser-support-icons-margin-top: 16px;
@@ -535,10 +534,6 @@ code {
 .heading {
   max-width: 760px;
 }
-.heading h3 {
-  max-width: var(--heading-h3-max-width);
-}
-
 
 .modal {
   margin: 0px auto;
@@ -741,7 +736,6 @@ paper-button {
     --grouping-title-margin-top: 20px;
     --demo-title-padding: 8px 12px 24px 0;
     --snippet-offset: 0;
-    --heading-h3-max-width: 320px;
     --heading-h1-margin-top: 0;
     --browser-support-desc-margin-top: 20px;
     --browser-support-icons-margin-top: 8px;
