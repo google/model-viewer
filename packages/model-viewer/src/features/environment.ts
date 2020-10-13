@@ -18,6 +18,7 @@ import {Event as ThreeEvent, Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {PreloadEvent} from '../three-components/CachingGLTFLoader.js';
+import {EnvironmentMapAndSkybox} from '../three-components/TextureUtils.js';
 import {Constructor, deserializeUrl} from '../utilities.js';
 
 export const BASE_OPACITY = 0.1;
@@ -128,17 +129,25 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       try {
         const {environmentMap, skybox} =
-            await new Promise(async (resolve, reject) => {
-              const texturesLoad = textureUtils.generateEnvironmentMapAndSkybox(
-                  deserializeUrl(skyboxImage),
-                  deserializeUrl(environmentImage),
-                  {progressTracker: this[$progressTracker]});
-              this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
-              resolve(await texturesLoad);
-            });
+            await new Promise<EnvironmentMapAndSkybox>(
+                async (resolve, reject) => {
+                  const texturesLoad =
+                      textureUtils.generateEnvironmentMapAndSkybox(
+                          deserializeUrl(skyboxImage),
+                          deserializeUrl(environmentImage),
+                          {progressTracker: this[$progressTracker]});
+                  this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
+                  resolve(await texturesLoad);
+                });
 
+        const environment = environmentMap.texture;
         if (skybox != null) {
-          this[$scene].background = skybox.texture;
+          // When using the same environment and skybox, use the environment as
+          // it gives HDR filtering.
+          this[$scene].background = (skybox as any).userData.url ===
+                  (environment as any).userData.url ?
+              environment :
+              skybox;
         } else {
           this[$scene].background = null;
         }

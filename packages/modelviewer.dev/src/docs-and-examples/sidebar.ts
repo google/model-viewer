@@ -16,7 +16,8 @@
 let globalCurrentView: string[] = [];
 let previouslyActive: string = '';
 let toRemove = '';
-let order: any[] = [];  // TODO, switch to dictionary
+let order = new Map<string, number>();
+let isSideBarClick = false;
 
 let isFirstOpen = true;      // is true on the first observation of all entries
 let everyEntry: any[] = [];  // a list of all attributes/properties etc.
@@ -42,12 +43,23 @@ function deactivateSidebar(sidebarIds: SidebarIds) {
       'active');
 }
 
-function addDeactive(sidebarName: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.add('de-active');
+function addDeactive(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.add(
+      'de-active');
 }
 
-function removeDeactive(sidebarName: string) {
-  document.querySelector(`div[id=${sidebarName}]`)!.classList.remove(
+function addDeactiveCategory(sidebarIds: SidebarIds) {
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.add(
+      'de-active');
+}
+
+function removeDeactive(sidebarIds: SidebarIds) {
+  document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.remove(
+      'de-active');
+}
+
+function removeDeactiveCategory(sidebarIds: SidebarIds) {
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.remove(
       'de-active');
 }
 
@@ -91,20 +103,26 @@ function getSidebarIdsFromId(id: string): SidebarIds {
  * sidebarSubcategory: string of the old subcategory being replaced
  * newSidebarSubcategory: string of the new subcategory
  * example:
- *  sidebarSubcategory = loading-attributes
- *  newSidebarSubcategory = loading-cssProperties
+ *  sidebarSubcategory = loading-attributes-sidebar
+ *  newSidebarSubcategory = loading-cssProperties-sidebar
  */
 function updateSidebarView(
     sidebarSubcategory: string, newSidebarSubcategory: string) {
+  const newCategoryList = newSidebarSubcategory.split('-');
+  const newSidebarCategory = newCategoryList[0].concat('-sidebar');
   if (sidebarSubcategory !== newSidebarSubcategory) {
     for (const entry of everyEntry) {
       const id = entry.target.getAttribute('id');
       const sidebarIds = getSidebarIdsFromId(id);
-      const currentSidebarName = sidebarIds.name;
       if (sidebarIds.subcategory !== newSidebarSubcategory) {
-        addDeactive(currentSidebarName);
+        addDeactive(sidebarIds);
       } else {
-        removeDeactive(currentSidebarName);
+        removeDeactive(sidebarIds);
+      }
+      if (sidebarIds.category !== newSidebarCategory) {
+        addDeactiveCategory(sidebarIds);
+      } else {
+        removeDeactiveCategory(sidebarIds);
       }
     }
   }
@@ -138,6 +156,17 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
   }
 }
 
+function updateHeader() {
+  const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
+  const subCat = document.querySelector(`h4[id=${
+      sidebarIds.subcategory}]`)!.firstElementChild!.innerHTML;
+  const cat = document.querySelector(`h3[id=${
+      sidebarIds.category}]`)!.firstElementChild!.innerHTML;
+  const outerHeaderId = sidebarIds.category.split('-')[0];
+  const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
+  outerHeader.innerHTML = cat.concat(': ', subCat);
+}
+
 function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
   const id = htmlEntry.target.getAttribute('id')!;
   const sidebarIds = getSidebarIdsFromId(id);
@@ -153,8 +182,7 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
       activateSidebar(sidebarIds);
       previouslyActive = sidebarIds.name;
       globalCurrentView.push(sidebarIds.name);
-    } else if (
-        order.indexOf(previouslyActive) > order.indexOf(sidebarIds.name)) {
+    } else if (order.get(previouslyActive)! > order.get(sidebarIds.name)!) {
       // scrolling up
       updateFromOldToNew(globalCurrentView[0], sidebarIds);
       globalCurrentView.unshift(sidebarIds.name);
@@ -182,27 +210,46 @@ function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {
  * the global view, then only update with whats in view
  */
 function handlePageJump(entries: IntersectionObserverEntry[]) {
-  globalCurrentView = [];
+  isSideBarClick = false;
   toRemove = '';
-  previouslyActive = '';
   updateSidebarView('', 'null');
-  for (const htmlEntry of entries) {
-    const id = htmlEntry.target.getAttribute('id')!;
+
+  // deactivate all of the entries
+  for (const entry of everyEntry) {
+    const id = entry.target.getAttribute('id');
     const sidebarIds = getSidebarIdsFromId(id);
     deactivateSidebar(sidebarIds);
   }
-  let isAtTop = true;
-  for (const htmlEntry of entries) {
-    if (htmlEntry.intersectionRatio > 0) {
-      if (isAtTop) {
-        isAtTop = false;
-        const id = htmlEntry.target.getAttribute('id')!;
-        const sidebarIds = getSidebarIdsFromId(id);
-        updateSidebarView('', sidebarIds.subcategory);
-      }
-      handleHTMLEntry(htmlEntry);
+
+  // remove entries not in view, add entries that are in view
+  for (const entry of entries) {
+    const id = entry.target.getAttribute('id')!;
+    const sidebarIds = getSidebarIdsFromId(id);
+    if (!entry.isIntersecting) {
+      globalCurrentView = globalCurrentView.filter(e => e !== sidebarIds.name);
+    } else {
+      globalCurrentView.push(sidebarIds.name);
     }
   }
+
+  // sort current view
+  globalCurrentView.sort(function(nameA, nameB) {
+    if (order.get(nameA)! < order.get(nameB)!) {
+      return -1;
+    } else if (order.get(nameA)! > order.get(nameB)!) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  // update current view based on the current highest view
+  const sidebarIds = getSidebarIdsFromSidebarName(globalCurrentView[0]);
+  const prevSidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
+  deactivateSidebar(prevSidebarIds);
+  activateSidebar(sidebarIds);
+  updateSidebarView('', sidebarIds.subcategory);
+  previouslyActive = sidebarIds.name;
 }
 
 let intersectionRatios = new Map<string, number>();
@@ -222,15 +269,17 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   let maxRatio = 0;
   let maxName = '';
   for (const name of intersectionRatios.keys()) {
-    if (intersectionRatios.get(name)! > maxRatio) {
-      maxRatio = intersectionRatios.get(name)!;
+    const ratio = intersectionRatios.get(name)!;
+    if (ratio > maxRatio) {
+      maxRatio = ratio;
       maxName = name;
     }
   }
 
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
-    const sidebarName = `container-${id.slice(-1)}-sidebar`;
+    const idList = id.split('-');
+    const sidebarName = `container-${idList.slice(-1)}-sidebar`;
     if (id === maxName) {
       document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
     } else {
@@ -243,27 +292,29 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver(docsOrExamples: string) {
-  if (docsOrExamples === 'docs') {
+export function sidebarObserver(docsOrExample: string) {
+  if (docsOrExample === 'docs') {
     const observer = new IntersectionObserver(entries => {
-      if (!isFirstOpen && entries.length > 2) {
+      if (isSideBarClick) {  // sidebar click
         handlePageJump(entries);
-      } else {
+      } else {  // scroll
         for (const htmlEntry of entries) {
           handleHTMLEntry(htmlEntry);
         }
       }
-      if (isFirstOpen) {
+      if (isFirstOpen) {  // page load
         updateSidebarViewFirstTime(entries);
       }
+      updateHeader();
     });
     // i.e. attributes, properties, events, methods, slots, custom css.
-    document.querySelectorAll('div[id*="docs"]').forEach((section) => {
+    let orderIndex = 0;
+    document.querySelectorAll('div[id*="entrydocs"]').forEach((section) => {
       const idSplitList = section.getAttribute('id')!.split('-');
-      if (idSplitList.length === 4) {
-        order.push(idSplitList.slice(1, 10).join('-'));
-        observer.observe(section);
-      }
+      const id = idSplitList.slice(1, 10).join('-');
+      order.set(id, orderIndex);
+      orderIndex += 1;
+      observer.observe(section);
     });
   } else {
     const options = {
@@ -274,9 +325,18 @@ export function sidebarObserver(docsOrExamples: string) {
     const observer = new IntersectionObserver(handleExamples, options);
     document.querySelectorAll('div[id*="demo-container-"]')
         .forEach((section) => {
-          const id = section.getAttribute('id');
-          order.push(id);
           observer.observe(section);
         });
   }
 }
+
+export function sidebarClick() {
+  isSideBarClick = true;
+  // close sidebar if click in sidebar on mobile
+  if (window.innerWidth <= 800) {
+    const root = document.documentElement;
+    root.style.setProperty('--sidebar-width', '0px');
+  }
+}
+
+(self as any).sidebarClick = sidebarClick;

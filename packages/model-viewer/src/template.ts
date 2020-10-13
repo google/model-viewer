@@ -111,7 +111,6 @@ canvas.show {
 }
 
 .slot.poster {
-  z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s 0.3s;
   background-color: inherit;
@@ -265,7 +264,6 @@ canvas.show {
 }
 
 .slot.default {
-  z-index: 1001;
   pointer-events: none;
 }
 

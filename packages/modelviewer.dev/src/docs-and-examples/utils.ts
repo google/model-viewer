@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {convertJSONToHTML, createExamplesSidebar} from './create-html';
+import {convertJSONToHTML, createExamplesHeader, createExamplesSidebar, starterSidebar} from './create-html';
 import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
 
 
@@ -86,22 +86,49 @@ function jumpToSection() {
 
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
- * docsOrExamples: 'docs' or 'examples/${category}'
+ * docsOrExample: 'docs' or 'examples-${category}'
  */
-export function init(docsOrExamples: string) {
-  const filePath = docsOrExamples === 'docs' ? '../data/docs.json' :
-                                               '../../data/examples.json';
+export function init(docsOrExample: string) {
+  const filePath = docsOrExample === 'docs' ? '../data/docs.json' :
+                                              '../../data/examples.json';
   loadJSON(filePath, function(response: string) {
     const json = JSON.parse(response);
-    if (docsOrExamples === 'docs') {
+    starterSidebar(docsOrExample);
+    if (docsOrExample === 'docs') {
       convertJSONToHTML(json);
     } else {
       createExamplesSidebar(json);
+      createExamplesHeader();
     }
-    sidebarObserver(docsOrExamples);
+    sidebarObserver(docsOrExample);
     jumpToSection();
   });
 }
 
+export function toggleSidebar() {
+  const root = document.documentElement;
+  const nav = document.getElementById('sidenav')!;
+  if (nav.offsetWidth > 150) {
+    root.style.setProperty('--sidebar-width', '0px');
+    root.style.setProperty('--neg-sidebar-width', '-300px');
+  } else {
+    root.style.setProperty('--sidebar-width', '300px');
+    root.style.setProperty('--neg-sidebar-width', '0px');
+  }
+}
+
+(self as any).toggleSidebar = toggleSidebar;
 (self as any).switchPages = switchPages;
 (self as any).init = init;
+
+function handleSideBarClickToggle(event: any) {
+  const nav = document.getElementById('sidenav')!;
+  var mouseClickWidth = event.clientX;
+  // toggle nav when clicking outside of nav on small device
+  if (mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
+      window.innerWidth <= 800) {
+    toggleSidebar();
+  }
+}
+
+document.addEventListener('click', handleSideBarClickToggle);
