@@ -20,7 +20,7 @@ import './slider_with_input.js';
 
 import {SliderWithInputElement} from './slider_with_input.js';
 
-describe('slider with input test', () => {
+fdescribe('slider with input test', () => {
   let sliderWithInput: SliderWithInputElement;
 
   beforeEach(async () => {

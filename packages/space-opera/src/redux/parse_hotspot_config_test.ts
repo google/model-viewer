@@ -19,7 +19,7 @@
 
 import {parseHotspotsFromSnippet} from './parse_hotspot_config.js';
 
-describe('parse hotspot config test', () => {
+fdescribe('parse hotspot config test', () => {
   it('returns a list with one hotspot when given a valid config', () => {
     const snippet = `<style></style>
 <model-viewer src='test.glb'>

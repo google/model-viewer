@@ -19,7 +19,7 @@
 import {toVector3D} from '../../../redux/hotspot_config.js';
 import {renderHotspot, renderHotspots} from './render_hotspots.js';
 
-describe('renders hotspot test', () => {
+fdescribe('renders hotspot test', () => {
   it('renders a hotspot when given a valid config', () => {
     const hotspot =
         renderHotspot({name: 'test', position: toVector3D([1, 0, 0])});

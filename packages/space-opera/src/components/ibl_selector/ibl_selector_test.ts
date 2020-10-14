@@ -23,7 +23,7 @@ import {reduxStore} from '../../redux/space_opera_base.js';
 
 import {IblSelector} from './ibl_selector.js';
 
-describe('ibl selector test', () => {
+fdescribe('ibl selector test', () => {
   let iblSelector: IblSelector;
 
   beforeEach(async () => {

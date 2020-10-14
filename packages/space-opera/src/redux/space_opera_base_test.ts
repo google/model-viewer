@@ -25,138 +25,140 @@ import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMeta
 import {applyEdits, generateTextureId, getGltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
 import {dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, reduxStore, registerStateMutator} from './space_opera_base.js';
 
-const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
-const EXAMPLE_BIN_AS_ARRAY_BUFFER =
-    createBufferFromString(EXAMPLE_BIN_AS_STRING);
-const BIN_LENGTH_IN_BYTES = EXAMPLE_BIN_AS_ARRAY_BUFFER.byteLength;
-
-const TEST_GLTF_JSON = {
-  'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
-  'buffers': [{
-    'byteLength': BIN_LENGTH_IN_BYTES,
-  }],
-  'bufferViews':
-      [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
-  'materials': [
-    {
-      'name': 'yellow',
-      'pbrMetallicRoughness': {
-        'baseColorFactor': [0.8, 0.8, 0.2, 1.0],
-        'roughnessFactor': 0.9,
-        'metallicFactor': 0.4,
-      },
-      'emissiveFactor': [0.3, 0.4, 0.5],
-      'alphaMode': 'MASK',
-      'alphaCutoff': 0.25,
-    },
-    {
-      'name': 'purple',
-      'pbrMetallicRoughness': {
-        'baseColorFactor': [0.8, 0.2, 0.8, 1.0],
-        'roughnessFactor': 0.2,
-        'metallicFactor': 0.3,
-      },
-    },
-  ],
-};
-
-const TEST_GLTF_JSON_METALLIC_ROUGHNESS_UNDEFINED = {
-  'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
-  'buffers': [{
-    'byteLength': BIN_LENGTH_IN_BYTES,
-  }],
-  'bufferViews':
-      [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
-  'materials': [
-    {
-      'name': 'yellow',
-      'pbrMetallicRoughness': {
-        'baseColorFactor': [0.8, 0.8, 0.2, 1.0],
-      },
-    },
-  ],
-};
-
-async function createGltfWithTexture() {
-  const pngBuffer0 = await (await generatePngBlob('#fff')).arrayBuffer();
-  const pngBuffer1 = await (await generatePngBlob('#000')).arrayBuffer();
-  const pngBuffer2 = await (await generatePngBlob('#eee')).arrayBuffer();
-  const gltfArray = new Uint8Array(
-      pngBuffer0.byteLength + pngBuffer1.byteLength + pngBuffer2.byteLength);
-  gltfArray.set(new Uint8Array(pngBuffer0), 0);
-  gltfArray.set(new Uint8Array(pngBuffer1), pngBuffer0.byteLength);
-  gltfArray.set(
-      new Uint8Array(pngBuffer2),
-      pngBuffer0.byteLength + pngBuffer1.byteLength);
-  const gltfBuffer = gltfArray.buffer;
-
-  const gltfJson = {
-    asset: {'generator': 'FBX2glTF', 'version': '2.0'},
-    samplers: [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
-    buffers: [{byteLength: gltfBuffer.byteLength}],
-    bufferViews: [
-      {
-        buffer: 0,
-        byteOffset: 0,
-        byteLength: pngBuffer0.byteLength,
-      },
-      {
-        buffer: 0,
-        byteOffset: pngBuffer0.byteLength,
-        byteLength: pngBuffer1.byteLength
-      },
-      {
-        buffer: 0,
-        byteOffset: pngBuffer0.byteLength + pngBuffer1.byteLength,
-        byteLength: pngBuffer2.byteLength
-      },
-    ],
-    images: [
-      {mimeType: 'image/png', bufferView: 0},
-      {mimeType: 'image/png', bufferView: 1},
-      {mimeType: 'image/png', bufferView: 2}
-    ],
-    textures: [
-      {source: 0, sampler: 0},
-      {source: 1, sampler: 0},
-      {source: 2, sampler: 0}
-    ],
-    materials: [
-      {
-        name: 'with tex',
-        pbrMetallicRoughness: {
-          baseColorTexture: {index: 0},
-          metallicRoughnessTexture: {index: 1}
-        },
-        normalTexture: {
-          index: 0,
-        },
-        emissiveTexture: {
-          index: 0,
-        },
-        occlusionTexture: {
-          index: 0,
-        },
-        doubleSided: true,
-      },
-      {
-        name: 'no tex',
-      },
-    ],
-  } as GlTf;
-  return new GltfModel(gltfJson, gltfBuffer);
-}
-
-async function applyEditsToStoredGltf() {
-  const state = reduxStore.getState();
-  if (!state.gltf) {
-    throw new Error(`no GLTF in state to edit!`);
-  }
-  await applyEdits(state.gltf, state.edits);
-  return state.gltf;
-}
-
+// TODO: Add space opera base to tests
 describe('space opera base test', () => {
+  const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
+  const EXAMPLE_BIN_AS_ARRAY_BUFFER =
+      createBufferFromString(EXAMPLE_BIN_AS_STRING);
+  const BIN_LENGTH_IN_BYTES = EXAMPLE_BIN_AS_ARRAY_BUFFER.byteLength;
+
+  const TEST_GLTF_JSON = {
+    'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
+    'buffers': [{
+      'byteLength': BIN_LENGTH_IN_BYTES,
+    }],
+    'bufferViews':
+        [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
+    'materials': [
+      {
+        'name': 'yellow',
+        'pbrMetallicRoughness': {
+          'baseColorFactor': [0.8, 0.8, 0.2, 1.0],
+          'roughnessFactor': 0.9,
+          'metallicFactor': 0.4,
+        },
+        'emissiveFactor': [0.3, 0.4, 0.5],
+        'alphaMode': 'MASK',
+        'alphaCutoff': 0.25,
+      },
+      {
+        'name': 'purple',
+        'pbrMetallicRoughness': {
+          'baseColorFactor': [0.8, 0.2, 0.8, 1.0],
+          'roughnessFactor': 0.2,
+          'metallicFactor': 0.3,
+        },
+      },
+    ],
+  };
+
+  const TEST_GLTF_JSON_METALLIC_ROUGHNESS_UNDEFINED = {
+    'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
+    'buffers': [{
+      'byteLength': BIN_LENGTH_IN_BYTES,
+    }],
+    'bufferViews':
+        [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
+    'materials': [
+      {
+        'name': 'yellow',
+        'pbrMetallicRoughness': {
+          'baseColorFactor': [0.8, 0.8, 0.2, 1.0],
+        },
+      },
+    ],
+  };
+
+  async function createGltfWithTexture() {
+    const pngBuffer0 = await (await generatePngBlob('#fff')).arrayBuffer();
+    const pngBuffer1 = await (await generatePngBlob('#000')).arrayBuffer();
+    const pngBuffer2 = await (await generatePngBlob('#eee')).arrayBuffer();
+    const gltfArray = new Uint8Array(
+        pngBuffer0.byteLength + pngBuffer1.byteLength + pngBuffer2.byteLength);
+    gltfArray.set(new Uint8Array(pngBuffer0), 0);
+    gltfArray.set(new Uint8Array(pngBuffer1), pngBuffer0.byteLength);
+    gltfArray.set(
+        new Uint8Array(pngBuffer2),
+        pngBuffer0.byteLength + pngBuffer1.byteLength);
+    const gltfBuffer = gltfArray.buffer;
+
+    const gltfJson = {
+      asset: {'generator': 'FBX2glTF', 'version': '2.0'},
+      samplers:
+          [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
+      buffers: [{byteLength: gltfBuffer.byteLength}],
+      bufferViews: [
+        {
+          buffer: 0,
+          byteOffset: 0,
+          byteLength: pngBuffer0.byteLength,
+        },
+        {
+          buffer: 0,
+          byteOffset: pngBuffer0.byteLength,
+          byteLength: pngBuffer1.byteLength
+        },
+        {
+          buffer: 0,
+          byteOffset: pngBuffer0.byteLength + pngBuffer1.byteLength,
+          byteLength: pngBuffer2.byteLength
+        },
+      ],
+      images: [
+        {mimeType: 'image/png', bufferView: 0},
+        {mimeType: 'image/png', bufferView: 1},
+        {mimeType: 'image/png', bufferView: 2}
+      ],
+      textures: [
+        {source: 0, sampler: 0},
+        {source: 1, sampler: 0},
+        {source: 2, sampler: 0}
+      ],
+      materials: [
+        {
+          name: 'with tex',
+          pbrMetallicRoughness: {
+            baseColorTexture: {index: 0},
+            metallicRoughnessTexture: {index: 1}
+          },
+          normalTexture: {
+            index: 0,
+          },
+          emissiveTexture: {
+            index: 0,
+          },
+          occlusionTexture: {
+            index: 0,
+          },
+          doubleSided: true,
+        },
+        {
+          name: 'no tex',
+        },
+      ],
+    } as GlTf;
+    return new GltfModel(gltfJson, gltfBuffer);
+  }
+
+  async function applyEditsToStoredGltf() {
+    const state = reduxStore.getState();
+    if (!state.gltf) {
+      throw new Error(`no GLTF in state to edit!`);
+    }
+    await applyEdits(state.gltf, state.edits);
+    return state.gltf;
+  }
+
   beforeEach(async () => {
     jasmine.addCustomEqualityTester(arrayBufferEqualityTester);
     dispatchGltfAndEdits(undefined);

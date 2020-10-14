@@ -24,7 +24,7 @@ import {Vector3D} from '../../redux/state_types.js';
 
 import {CameraSettings, CameraTargetInput, dispatchAutoRotate, dispatchCameraTarget, dispatchInitialOrbit} from './camera_settings.js';
 
-describe('camera constraints test', () => {
+fdescribe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
 
   beforeEach(async () => {

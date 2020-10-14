@@ -24,45 +24,43 @@ import {Dropdown} from '../shared/dropdown/dropdown.js';
 
 import {AnimationControls, dispatchAnimationName, dispatchAutoplayEnabled} from './animation_controls.js';
 
-const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
-const EXAMPLE_BIN_AS_ARRAY_BUFFER =
-    createBufferFromString(EXAMPLE_BIN_AS_STRING);
-const BIN_LENGTH_IN_BYTES = EXAMPLE_BIN_AS_ARRAY_BUFFER.byteLength;
-
-const TEST_GLTF_JSON = {
-  'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
-  'buffers': [{
-    'byteLength': BIN_LENGTH_IN_BYTES,
-  }],
-  'bufferViews':
-      [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
-  'materials': [
-    {
-      'name': 'yellow',
-      'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.8, 0.2]},
-    },
-    {
-      'name': 'purple',
-      'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.2, 0.8]},
-    },
-  ],
-  'animations': [
-    {
-      'name': 'Dance',
-      'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
-      'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
-    },
-    {
-      'name': 'Idle',
-      'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
-      'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
-    }
-  ],
-  'nodes': [{'rotation': [0, 0, 0, 1]}],
-};
-
-describe('animation controls test', () => {
+fdescribe('animation controls test', () => {
   let animationControls: AnimationControls;
+  const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
+  const EXAMPLE_BIN_AS_ARRAY_BUFFER =
+      createBufferFromString(EXAMPLE_BIN_AS_STRING);
+  const BIN_LENGTH_IN_BYTES = EXAMPLE_BIN_AS_ARRAY_BUFFER.byteLength;
+  const TEST_GLTF_JSON = {
+    'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
+    'buffers': [{
+      'byteLength': BIN_LENGTH_IN_BYTES,
+    }],
+    'bufferViews':
+        [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
+    'materials': [
+      {
+        'name': 'yellow',
+        'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.8, 0.2]},
+      },
+      {
+        'name': 'purple',
+        'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.2, 0.8]},
+      },
+    ],
+    'animations': [
+      {
+        'name': 'Dance',
+        'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
+        'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
+      },
+      {
+        'name': 'Idle',
+        'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
+        'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
+      }
+    ],
+    'nodes': [{'rotation': [0, 0, 0, 1]}],
+  };
 
   beforeEach(async () => {
     animationControls = new AnimationControls();

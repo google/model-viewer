@@ -19,7 +19,7 @@
 
 import {immutableArrayUpdate, immutableMapUpdate} from './reducer_utils.js';
 
-describe('reducer utils test', () => {
+fdescribe('reducer utils test', () => {
   it('immutableArrayUpdate returns a copy with the expected update', () => {
     const input = [1, 2, 3];
     const output = immutableArrayUpdate(input, 1, 4);

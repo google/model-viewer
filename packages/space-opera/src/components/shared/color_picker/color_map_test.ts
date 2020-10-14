@@ -20,7 +20,7 @@ import './color_map.js';
 
 import {ColorMap} from './color_map.js';
 
-describe('color map test', () => {
+fdescribe('color map test', () => {
   let colorMap: ColorMap;
 
   beforeEach(async () => {
