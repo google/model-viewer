@@ -47,7 +47,7 @@ module.exports = function(config) {
     browserDisconnectTimeout: 300000,
     browserNoActivityTimeout: 360000,
     captureTimeout: 420000,
-    concurrency: 1,
+    concurrency: 10,
 
     // @see https://github.com/open-wc/open-wc/tree/master/packages/karma-esm#configuration
     esm: {
