@@ -22,7 +22,7 @@ import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_ba
 
 import {DEFAULT_MAX_PITCH, dispatchPitchLimits, PitchLimits} from './pitch_limits.js';
 
-fdescribe('pitch limits editor test', () => {
+describe('pitch limits editor test', () => {
   let pitchLimitsDeg: PitchLimits;
 
   beforeEach(async () => {

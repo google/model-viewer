@@ -23,7 +23,7 @@ import {reduxStore} from '../../redux/space_opera_base.js';
 
 import {HotspotEditorElement} from './hotspot_editor.js';
 
-fdescribe('hotspot editor test', () => {
+describe('hotspot editor test', () => {
   let hotspotEditor: HotspotEditorElement;
 
   beforeEach(async () => {

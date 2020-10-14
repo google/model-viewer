@@ -20,7 +20,7 @@ import './color_picker.js';
 
 import {ColorPicker} from './color_picker.js';
 
-fdescribe('color picker test', () => {
+describe('color picker test', () => {
   let colorPicker: ColorPicker;
 
   beforeEach(async () => {

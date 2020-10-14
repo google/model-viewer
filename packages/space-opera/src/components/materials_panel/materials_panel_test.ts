@@ -26,45 +26,42 @@ import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_in
 
 import {MaterialPanel} from './materials_panel.js';
 
+const TEST_GLTF_JSON = {
+  asset: {generator: 'FBX2glTF', version: '2.0'},
+  samplers: [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
+  images: [
+    {uri: 'originalTexture.png'},
+    {uri: 'metallic.png'},
+    {uri: 'normal.png'}
+  ],
+  textures: [
+    {source: 0, sampler: 0},
+    {source: 1, sampler: 0},
+    {source: 2, sampler: 0}
+  ],
+  materials: [{name: 'no tex'}, {name: 'with tex'}],
+};
 
-fdescribe('material panel test', () => {
+async function createGltfWithTextures() {
+  const model = new GltfModel(TEST_GLTF_JSON, null);
+  const pbrApi0 = (await model.materials)[0].pbrMetallicRoughness;
+  await pbrApi0.setBaseColorFactor([0.8, 0.8, 0.2, 1.0]);
+  await pbrApi0.setRoughnessFactor(0.9);
+  await pbrApi0.setMetallicFactor(0.4);
+
+  const matApi1 = (await model.materials)[1];
+  await matApi1.setNormalTexture('normal.png');
+  await matApi1.pbrMetallicRoughness.setBaseColorTexture('originalTexture.png');
+  await matApi1.pbrMetallicRoughness.setMetallicRoughnessTexture(
+      'metallic.png');
+  await matApi1.setEmissiveTexture('emissive.png');
+  await matApi1.setOcclusionTexture('occlusion.png');
+  return model;
+}
+
+describe('material panel test', () => {
   let panel: MaterialPanel;
   let gltf: GltfModel;
-
-
-  async function createGltfWithTextures(TEST_GLTF_JSON: any) {
-    const model = new GltfModel(TEST_GLTF_JSON, null);
-    const pbrApi0 = (await model.materials)[0].pbrMetallicRoughness;
-    await pbrApi0.setBaseColorFactor([0.8, 0.8, 0.2, 1.0]);
-    await pbrApi0.setRoughnessFactor(0.9);
-    await pbrApi0.setMetallicFactor(0.4);
-
-    const matApi1 = (await model.materials)[1];
-    await matApi1.setNormalTexture('normal.png');
-    await matApi1.pbrMetallicRoughness.setBaseColorTexture(
-        'originalTexture.png');
-    await matApi1.pbrMetallicRoughness.setMetallicRoughnessTexture(
-        'metallic.png');
-    await matApi1.setEmissiveTexture('emissive.png');
-    await matApi1.setOcclusionTexture('occlusion.png');
-    return model;
-  }
-
-  const TEST_GLTF_JSON = {
-    asset: {generator: 'FBX2glTF', version: '2.0'},
-    samplers: [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
-    images: [
-      {uri: 'originalTexture.png'},
-      {uri: 'metallic.png'},
-      {uri: 'normal.png'}
-    ],
-    textures: [
-      {source: 0, sampler: 0},
-      {source: 1, sampler: 0},
-      {source: 2, sampler: 0}
-    ],
-    materials: [{name: 'no tex'}, {name: 'with tex'}],
-  };
 
   beforeEach(async () => {
     panel = new MaterialPanel();
@@ -72,7 +69,7 @@ fdescribe('material panel test', () => {
 
     await panel.updateComplete;
 
-    gltf = await createGltfWithTextures(TEST_GLTF_JSON);
+    gltf = await createGltfWithTextures();
     await dispatchGltfAndEdits(gltf);
   });
 

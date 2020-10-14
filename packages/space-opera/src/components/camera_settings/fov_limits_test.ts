@@ -22,7 +22,7 @@ import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_ba
 
 import {DEFAULT_MAX_FOV, dispatchFovLimits, FovLimits} from './fov_limits.js';
 
-fdescribe('fov limits editor test', () => {
+describe('fov limits editor test', () => {
   let fovLimitsDeg: FovLimits;
 
   beforeEach(async () => {

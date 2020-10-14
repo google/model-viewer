@@ -21,7 +21,7 @@ import {toVector3D} from './hotspot_config.js';
 import {dispatchAddHotspot, dispatchClearHotspot, dispatchRemoveHotspot, dispatchSetHotspots, dispatchUpdateHotspot, generateUniqueHotspotName} from './hotspot_dispatchers.js';
 import {reduxStore} from './space_opera_base.js';
 
-fdescribe('hotspot dispatchers test', () => {
+describe('hotspot dispatchers test', () => {
   afterEach(() => {
     // Redux store is preserved between tests, clear it between tests
     dispatchClearHotspot();

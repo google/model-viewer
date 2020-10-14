@@ -22,7 +22,7 @@ import {html, render} from 'lit-html';
 
 import {Tabs} from './tabs.js';
 
-fdescribe('<tabs>', () => {
+describe('<tabs>', () => {
   let tabs: Tabs;
 
   beforeEach(async () => {

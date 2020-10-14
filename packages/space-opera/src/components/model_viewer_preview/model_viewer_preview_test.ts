@@ -23,7 +23,7 @@ import {until} from '../utils/test_utils.js';
 
 import {ModelViewerPreview} from './model_viewer_preview.js';
 
-fdescribe('ModelViewerPreview', () => {
+describe('ModelViewerPreview', () => {
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
@@ -38,7 +38,7 @@ fdescribe('ModelViewerPreview', () => {
     expect(reduxStore.getState().modelViewer).toBeTruthy();
   });
 
-  it('updates ', async () => {
+  fit('updates ', async () => {
     const gltfJson = {
       asset: {'generator': 'FBX2glTF', 'version': '2.0'},
     } as GlTf;

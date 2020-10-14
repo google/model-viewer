@@ -23,7 +23,7 @@ import {html, render} from 'lit-html';
 
 import {Dropdown} from './dropdown.js';
 
-fdescribe('dropdown test', () => {
+describe('dropdown test', () => {
   let dropdown: Dropdown;
 
   beforeEach(async () => {

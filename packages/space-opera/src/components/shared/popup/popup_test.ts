@@ -21,7 +21,7 @@ import './popup.js';
 import {html, render} from 'lit-html';
 import {PopUp} from './popup.js';
 
-fdescribe('popup test', () => {
+describe('popup test', () => {
   let popup: PopUp;
   let container: HTMLElement;
 

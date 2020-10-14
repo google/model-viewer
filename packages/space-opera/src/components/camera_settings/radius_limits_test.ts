@@ -22,7 +22,7 @@ import {dispatchCurrentCameraState, dispatchInitialCameraState, reduxStore} from
 
 import {DEFAULT_MIN_RADIUS, dispatchRadiusLimits, RadiusLimits} from './radius_limits.js';
 
-fdescribe('radius limits editor test', () => {
+describe('radius limits editor test', () => {
   let radiusLimits: RadiusLimits;
 
   beforeEach(async () => {

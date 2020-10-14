@@ -22,7 +22,7 @@ import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_ba
 
 import {DEFAULT_MAX_YAW, dispatchYawLimits, YawLimits} from './yaw_limits.js';
 
-fdescribe('yaw limits editor test', () => {
+describe('yaw limits editor test', () => {
   let yawLimitsDeg: YawLimits;
 
   beforeEach(async () => {

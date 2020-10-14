@@ -26,7 +26,7 @@ import {FileModalElement} from '../../file_modal/file_modal.js';
 
 import {TexturePicker} from './texture_picker.js';
 
-fdescribe('texture picker test', () => {
+describe('texture picker test', () => {
   let texturePicker: TexturePicker;
 
   beforeEach(async () => {

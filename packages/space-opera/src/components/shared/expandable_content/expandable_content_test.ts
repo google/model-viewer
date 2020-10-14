@@ -31,7 +31,7 @@ function elementIsVisible(e: HTMLElement) {
       rect.width > 0 && rect.height > 0;
 }
 
-fdescribe('<me-expandable-section>', () => {
+describe('<me-expandable-section>', () => {
   let section: ExpandableSection;
 
   beforeEach(async () => {
@@ -66,11 +66,11 @@ fdescribe('<me-expandable-section>', () => {
     section.open = true;
     await section.updateComplete;
 
-    // expect(elementIsVisible(section)).toBe(true);
+    expect(elementIsVisible(section)).toBe(true);
   });
 });
 
-fdescribe('<me-expandable-tab>', () => {
+describe('<me-expandable-tab>', () => {
   let tab: ExpandableTab;
 
   beforeEach(async () => {
@@ -127,6 +127,6 @@ fdescribe('<me-expandable-tab>', () => {
 
     expect(tabContent.open).toBe(true);
     expect(elementIsVisible(tabHeader)).toBe(true);
-    // expect(elementIsVisible(tabContent)).toBe(true);
+    expect(elementIsVisible(tabContent)).toBe(true);
   });
 });
