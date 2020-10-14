@@ -25,16 +25,13 @@ export const styles: CSSResult = css`:host {
   max-height: 0;
   overflow: hidden;
   padding: 0 20px;
-  transition-duration: 300ms;
-  transition-timing-function: ease-out;
 }
 
 .SectionContent[open] {
   background-color: var(--me-theme-container-background);
-  overflow: hidden;
+  overflow: unset;
   max-height: 100vh;
   padding: 20px;
-  transition-duration: 250ms;
-  transition-timing-function: ease-in;
+  transition: max-height 500ms ease-in-out;
 }
 `;
