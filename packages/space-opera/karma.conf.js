@@ -25,11 +25,11 @@ module.exports = function(config) {
     reporters: ['spec'],
     specReporter: {
       maxLogLines: 10,              // limit number of lines logged per test
-      suppressErrorSummary: false,  // do not print error summary
-      suppressFailed: false,   // do not print information about failed tests
-      suppressPassed: false,   // do not print information about passed tests
-      suppressSkipped: false,  // do not print information about skipped tests
-      showSpecTiming: false    // print the time elapsed for each spec
+      suppressErrorSummary: false,  // print error summary
+      suppressFailed: false,        // print information about failed tests
+      suppressPassed: false,        // print information about passed tests
+      suppressSkipped: false,       // print information about skipped tests
+      showSpecTiming: false  // do not print the time elapsed for each spec
     },
     plugins: [
       require.resolve('@open-wc/karma-esm'),
@@ -39,7 +39,7 @@ module.exports = function(config) {
     frameworks: ['esm', 'jasmine'],
     files: [
       './define_process_env.js',
-      {pattern: 'lib/**/*_test.js', watched: false, type: 'module'},
+      {pattern: 'lib/**/*_test.js', watched: true, type: 'module'},
     ],
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,

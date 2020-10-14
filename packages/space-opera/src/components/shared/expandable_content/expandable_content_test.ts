@@ -65,7 +65,7 @@ describe('<me-expandable-section>', () => {
 
     section.open = true;
     await section.updateComplete;
-
+    // TODO: add content visibility test
     // expect(elementIsVisible(section)).toBe(true);
   });
 });
@@ -127,6 +127,8 @@ describe('<me-expandable-tab>', () => {
 
     expect(tabContent.open).toBe(true);
     expect(elementIsVisible(tabHeader)).toBe(true);
+
+    // TODO: add content visibility test
     // expect(elementIsVisible(tabContent)).toBe(true);
   });
 });
