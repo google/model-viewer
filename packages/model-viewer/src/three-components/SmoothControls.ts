@@ -18,7 +18,7 @@ import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
-export type TouchMode = 'rotate'|'scroll'|'zoom';
+export type TouchMode = 'rotate'|'zoom';
 
 export interface Pointer {
   clientX: number, clientY: number,
@@ -139,7 +139,6 @@ export class SmoothControls extends EventDispatcher {
   };
   private lastTouches!: TouchList;
   private touchMode: TouchMode = 'rotate';
-  private touchDecided = false;
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -490,24 +489,8 @@ export class SmoothControls extends EventDispatcher {
 
           break;
         case 'rotate':
-          if (!this.touchDecided) {
-            this.touchDecided = true;
-            const {clientX, clientY} = touches[0];
-            const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
-            const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
-            // If motion is mostly vertical, assume scrolling is the intent,
-            // unless scrolling is not possible. Use window.innerHeight instead
-            // of body.clientHeight so that a full-screen element will still
-            // scroll the URL bar out of the way before locking.
-            if (dy > dx && document.body.scrollHeight > window.innerHeight) {
-              this.touchMode = 'scroll';
-              return;
-            }
-          }
           this.handleSinglePointerMove(touches[0]);
           break;
-        case 'scroll':
-          return;
       }
 
       this.lastTouches = touches;
@@ -544,7 +527,6 @@ export class SmoothControls extends EventDispatcher {
 
     if (TOUCH_EVENT_RE.test(event.type)) {
       const {touches} = event as TouchEvent;
-      this.touchDecided = false;
 
       switch (touches.length) {
         default:
