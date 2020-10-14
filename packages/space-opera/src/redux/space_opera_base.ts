@@ -74,18 +74,8 @@ interface Action extends Redux.Action {
 
 const subReducers = new Map<string, Redux.Reducer<State>>();
 
-const RESET_STATE_ACTION_TYPE = 'RESET_SPACE_OPERA_STATE';
-
-/** Mostly for unit tests. */
-export function dispatchResetState() {
-  reduxStore.dispatch({type: RESET_STATE_ACTION_TYPE});
-}
-
 function makeRootReducer() {
   return (state: State = INITIAL_STATE, action: Action) => {
-    if (action.type === RESET_STATE_ACTION_TYPE) {
-      return INITIAL_STATE;
-    }
     const subReducer = subReducers.get(action.type);
     if (subReducer) {
       return subReducer(state, action);
