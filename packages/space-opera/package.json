@@ -58,6 +58,7 @@
     "karma": "^5.0.2",
     "karma-browserstack-launcher": "^1.5.1",
     "karma-chrome-launcher": "^3.1.0",
+    "karma-spec-reporter": "^0.0.32",
     "karma-jasmine": "^4.0.1",
     "karma-sourcemap-loader": "^0.3.7",
     "lit-element": "^2.4.0",

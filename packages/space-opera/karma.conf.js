@@ -22,9 +22,19 @@
 module.exports = function(config) {
   config.set({
     basePath: '',
+    reporters: ['spec'],
+    specReporter: {
+      maxLogLines: 10,              // limit number of lines logged per test
+      suppressErrorSummary: false,  // print error summary
+      suppressFailed: false,        // print information about failed tests
+      suppressPassed: false,        // print information about passed tests
+      suppressSkipped: false,       // print information about skipped tests
+      showSpecTiming: false  // do not print the time elapsed for each spec
+    },
     plugins: [
       require.resolve('@open-wc/karma-esm'),
       'karma-*',
+      'karma-spec-reporter'
     ],
     frameworks: ['esm', 'jasmine'],
     files: [
