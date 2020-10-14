@@ -34,11 +34,15 @@ describe('ModelViewerPreview', () => {
     await preview.updateComplete;
   });
 
+  afterEach(() => {
+    document.body.removeChild(preview);
+  });
+
   it('registers a model viewer element to state', () => {
     expect(reduxStore.getState().modelViewer).toBeTruthy();
   });
 
-  fit('updates ', async () => {
+  it('updates ', async () => {
     const gltfJson = {
       asset: {'generator': 'FBX2glTF', 'version': '2.0'},
     } as GlTf;
