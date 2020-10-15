@@ -132,12 +132,12 @@ export class SmoothControls extends EventDispatcher {
   private fovDamper = new Damper();
 
   // Pointer state
-  private pointerIsDown = false;
+  private numPointersDown = 0;
   private lastPointerPosition: Pointer = {
     clientX: 0,
     clientY: 0,
   };
-  private lastTouches!: TouchList;
+  private lastPointers!: Array<PointerEvent>;
   private touchMode: TouchMode = 'rotate';
 
   constructor(
@@ -158,16 +158,12 @@ export class SmoothControls extends EventDispatcher {
   enableInteraction() {
     if (this._interactionEnabled === false) {
       const {element} = this;
-      element.addEventListener('mousemove', this.onPointerMove);
-      element.addEventListener('mousedown', this.onPointerDown);
+      element.addEventListener('pointermove', this.onPointerMove);
+      element.addEventListener('pointerdown', this.onPointerDown);
       element.addEventListener('wheel', this.onWheel);
       element.addEventListener('keydown', this.onKeyDown);
-      element.addEventListener(
-          'touchstart', this.onPointerDown, {passive: true});
-      element.addEventListener('touchmove', this.onPointerMove);
 
-      self.addEventListener('mouseup', this.onPointerUp);
-      self.addEventListener('touchend', this.onPointerUp);
+      self.addEventListener('pointerup', this.onPointerUp);
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -178,15 +174,12 @@ export class SmoothControls extends EventDispatcher {
     if (this._interactionEnabled === true) {
       const {element} = this;
 
-      element.removeEventListener('mousemove', this.onPointerMove);
-      element.removeEventListener('mousedown', this.onPointerDown);
+      element.removeEventListener('pointermove', this.onPointerMove);
+      element.removeEventListener('pointerdown', this.onPointerDown);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
-      element.removeEventListener('touchstart', this.onPointerDown);
-      element.removeEventListener('touchmove', this.onPointerMove);
 
-      self.removeEventListener('mouseup', this.onPointerUp);
-      self.removeEventListener('touchend', this.onPointerUp);
+      self.removeEventListener('pointerup', this.onPointerUp);
 
       element.style.cursor = '';
       this._interactionEnabled = false;
@@ -465,8 +458,8 @@ export class SmoothControls extends EventDispatcher {
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
-  private onPointerMove = (event: MouseEvent|TouchEvent) => {
-    if (!this.pointerIsDown || !this.canInteract) {
+  private onPointerMove = (event: PointerEvent) => {
+    if (this.numPointersDown === 0 || !this.canInteract) {
       return;
     }
 
@@ -521,8 +514,8 @@ export class SmoothControls extends EventDispatcher {
     this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
   }
 
-  private onPointerDown = (event: MouseEvent|TouchEvent) => {
-    this.pointerIsDown = true;
+  private onPointerDown = (event: PointerEvent) => {
+    ++this.numPointersDown;
     this.isUserPointing = false;
 
     if (TOUCH_EVENT_RE.test(event.type)) {
@@ -553,7 +546,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerUp = (_event: MouseEvent|TouchEvent) => {
     this.element.style.cursor = 'grab';
-    this.pointerIsDown = false;
+    --this.numPointersDown;
 
     if (this.isUserPointing) {
       this.dispatchEvent(
