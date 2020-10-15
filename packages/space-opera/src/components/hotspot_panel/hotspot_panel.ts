@@ -21,10 +21,11 @@ import '@material/mwc-button';
 
 import {customElement, html, internalProperty} from 'lit-element';
 
-import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchAddHotspotMode} from '../../redux/hotspot_dispatchers.js';
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+
+import {HotspotConfig} from './hotspot_config.js';
+import {dispatchAddHotspotMode} from './reducer.js';
 
 /** Hotspot panel. */
 @customElement('me-hotspot-panel')

@@ -17,9 +17,10 @@
 
 
 
+import {reduxStore} from '../../redux/space_opera_base.js';
+
 import {toVector3D} from './hotspot_config.js';
-import {dispatchAddHotspot, dispatchClearHotspot, dispatchRemoveHotspot, dispatchSetHotspots, dispatchUpdateHotspot, generateUniqueHotspotName} from './hotspot_dispatchers.js';
-import {reduxStore} from './space_opera_base.js';
+import {dispatchAddHotspot, dispatchClearHotspot, dispatchRemoveHotspot, dispatchSetHotspots, dispatchUpdateHotspot, generateUniqueHotspotName} from './reducer.js';
 
 describe('hotspot dispatchers test', () => {
   afterEach(() => {

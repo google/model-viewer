@@ -21,10 +21,10 @@ import '@material/mwc-icon-button';
 
 import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
 
-import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchRemoveHotspot, dispatchUpdateHotspot} from '../../redux/hotspot_dispatchers.js';
+import {HotspotConfig} from './hotspot_config.js';
 
 import {styles} from './hotspot_editor.css.js';
+import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
 
 /** A editor card for a single hotspot */
 @customElement('me-hotspot-editor')

@@ -21,9 +21,9 @@ import '../file_modal/file_modal.js';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, query} from 'lit-element';
 
-import {dispatchSetHotspots} from '../../redux/hotspot_dispatchers.js';
 import {dispatchConfig, dispatchGltfUrl, extractStagingConfig, reduxStore} from '../../redux/space_opera_base.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
+import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
 
 /**
  * A button to open file resources.

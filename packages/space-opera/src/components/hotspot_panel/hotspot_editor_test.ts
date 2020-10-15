@@ -17,11 +17,11 @@
 
 
 
-import {toVector3D} from '../../redux/hotspot_config.js';
-import {dispatchAddHotspot, dispatchClearHotspot} from '../../redux/hotspot_dispatchers.js';
 import {reduxStore} from '../../redux/space_opera_base.js';
 
+import {toVector3D} from './hotspot_config.js';
 import {HotspotEditorElement} from './hotspot_editor.js';
+import {dispatchAddHotspot, dispatchClearHotspot} from './reducer.js';
 
 describe('hotspot editor test', () => {
   let hotspotEditor: HotspotEditorElement;
