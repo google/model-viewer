@@ -16,7 +16,7 @@
  */
 
 
-import {toVector3D} from '../../../redux/hotspot_config.js';
+import {toVector3D} from '../../hotspot_panel/hotspot_config.js';
 import {renderHotspot, renderHotspots} from './render_hotspots.js';
 
 describe('renders hotspot test', () => {

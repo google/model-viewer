@@ -19,12 +19,13 @@
 import './materials_panel.js';
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {dispatchSetAlphaCutoff} from '../../redux/edit_dispatchers.js';
+
 import {dispatchGltfAndEdits, reduxStore} from '../../redux/space_opera_base.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
 import {MaterialPanel} from './materials_panel.js';
+import {dispatchSetAlphaCutoff} from './reducer.js';
 
 const TEST_GLTF_JSON = {
   asset: {generator: 'FBX2glTF', version: '2.0'},

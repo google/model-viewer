@@ -30,16 +30,16 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../../redux/gltf_edits.js';
-import {HotspotConfig} from '../../redux/hotspot_config.js';
-import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../../redux/hotspot_dispatchers.js';
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../../redux/lighting_dispatchers.js';
 import {dispatchConfig, dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, dispatchModelViewer, extractStagingConfig, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
+import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../hotspot_panel/reducer.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../ibl_selector/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
+import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
 import {styles} from './model_viewer_preview_styles.css.js';
 
 const $edits = Symbol('edits');
