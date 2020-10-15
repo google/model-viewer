@@ -32,9 +32,22 @@ export function generateUniqueHotspotName() {
   return name;
 }
 
+/**
+ * Helper function to find the index of hotspot with given name, throws an
+ * Error if not found.
+ */
+function findHotspotIndex(hotspots: HotspotConfig[], name: string) {
+  const index = hotspots.findIndex((hotspot) => hotspot.name === name);
+  if (index === -1) {
+    throw new Error(`Hotspot name doesn't exist: ${name}`);
+  }
+  return index;
+}
+
 /** Dispatch a state mutator to add a hotspot */
+const ADD_HOTSPOT = 'ADD_HOTSPOT';
 export const dispatchAddHotspot = registerStateMutator(
-    'ADD_HOTSPOT', (state: State, config?: HotspotConfig) => {
+    ADD_HOTSPOT, (state: State, config?: HotspotConfig) => {
       if (!config)
         return;
       if (hotspotNameSet.has(config.name)) {
@@ -45,8 +58,9 @@ export const dispatchAddHotspot = registerStateMutator(
     });
 
 /** Dispatch a state mutator to update a hotspot */
+const UPDATE_HOTSPOT = 'UPDATE_HOTSPOT';
 export const dispatchUpdateHotspot = registerStateMutator(
-    'UPDATE_HOTSPOT', (state: State, config?: HotspotConfig) => {
+    UPDATE_HOTSPOT, (state: State, config?: HotspotConfig) => {
       if (!config)
         return;
 
@@ -56,8 +70,9 @@ export const dispatchUpdateHotspot = registerStateMutator(
     });
 
 /** Dispatch a state mutator to clear hotspot configs */
+const REMOVE_HOTSPOT = 'REMOVE_HOTSPOT';
 export const dispatchRemoveHotspot =
-    registerStateMutator('REMOVE_HOTSPOT', (state: State, name?: string) => {
+    registerStateMutator(REMOVE_HOTSPOT, (state: State, name?: string) => {
       if (!name)
         return;
 
@@ -70,16 +85,18 @@ export const dispatchRemoveHotspot =
     });
 
 /** Dispatch a state mutator to clear hotspot configs */
+const CLEAR_HOTSPOTS = 'CLEAR_HOTSPOTS';
 export const dispatchClearHotspot =
-    registerStateMutator('CLEAR_HOTSPOTS', (state: State) => {
+    registerStateMutator(CLEAR_HOTSPOTS, (state: State) => {
       state.hotspots = [];
       hotspotNameSet.clear();
       nextHotspotId = 1;
     });
 
 /** Dispatch a state mutator to set all hotspots */
+const SET_HOTSPOTS = 'SET_HOTSPOTS';
 export const dispatchSetHotspots = registerStateMutator(
-    'SET_HOTSPOTS', (state: State, hotspots?: HotspotConfig[]) => {
+    SET_HOTSPOTS, (state: State, hotspots?: HotspotConfig[]) => {
       if (!hotspots)
         return;
       state.hotspots = hotspots;
@@ -88,20 +105,8 @@ export const dispatchSetHotspots = registerStateMutator(
     });
 
 /** Dispatch a state mutator to enter / exit addHospotMode */
+const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';
 export const dispatchAddHotspotMode = registerStateMutator(
-    'ADD_HOTSPOT_MODE', (state: State, addHotspotMode?: boolean) => {
+    ADD_HOTSPOT_MODE, (state: State, addHotspotMode?: boolean) => {
       state.addHotspotMode = addHotspotMode;
     });
-
-/**
- * Helper function to find the index of hotspot with given name, throws an
- * Error if not found.
- */
-function findHotspotIndex(hotspots: HotspotConfig[], name: string) {
-  const index = hotspots.findIndex((hotspot) => hotspot.name === name);
-
-  if (index === -1) {
-    throw new Error(`Hotspot name doesn't exist: ${name}`);
-  }
-  return index;
-}
