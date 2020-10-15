@@ -17,20 +17,8 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {EnvironmentImage} from './lighting_state.js';
-import {registerStateMutator} from './space_opera_base.js';
-
-/** Dispatch an edit to model viewer environmentImage attribute. */
-export const dispatchEnvrionmentImage =
-    registerStateMutator('UPDATE_IBL', (state, ibl?: string) => {
-      state.config = {...state.config, environmentImage: ibl};
-    });
-
-/** Dispatch an edit to model viewer exposure attribute. */
-export const dispatchExposure =
-    registerStateMutator('UPDATE_EXPOSURE', (state, exposure?: number) => {
-      state.config = {...state.config, exposure};
-    });
+import {EnvironmentImage} from '../../redux/lighting_state.js';
+import {registerStateMutator} from '../../redux/space_opera_base.js';
 
 /**
  * Creates a blob url from an uploaded file, should be used only for
@@ -45,9 +33,24 @@ export async function createBlobUrlFromEnvironmentImage(file: File) {
   return unsafeUrl;
 }
 
+/** Dispatch an edit to model viewer environmentImage attribute. */
+const UPDATE_IBL = 'UPDATE_IBL';
+export const dispatchEnvrionmentImage =
+    registerStateMutator(UPDATE_IBL, (state, ibl?: string) => {
+      state.config = {...state.config, environmentImage: ibl};
+    });
+
+/** Dispatch an edit to model viewer exposure attribute. */
+const UPDATE_EXPOSURE = 'UPDATE_EXPOSURE';
+export const dispatchExposure =
+    registerStateMutator(UPDATE_EXPOSURE, (state, exposure?: number) => {
+      state.config = {...state.config, exposure};
+    });
+
 /** Dispatch an edit to potential environment images to select. */
+const UPLOAD_ENVIRONMENT_IMAGE = 'UPLOAD_ENVIRONMENT_IMAGE';
 export const dispatchAddEnvironmentImage = registerStateMutator(
-    'UPLOAD_ENVIRONMENT_IMAGE', (state, image?: EnvironmentImage) => {
+    UPLOAD_ENVIRONMENT_IMAGE, (state, image?: EnvironmentImage) => {
       if (!image) {
         return;
       }
@@ -55,20 +58,23 @@ export const dispatchAddEnvironmentImage = registerStateMutator(
     });
 
 /** Dispatch an edit to model viewer exposure attribute. */
+const SET_USE_ENV_AS_SKYBOX = 'SET_USE_ENV_AS_SKYBOX';
 export const dispatchUseEnvAsSkybox = registerStateMutator(
-    'SET_USE_ENV_AS_SKYBOX', (state, useEnvAsSkybox?: boolean) => {
+    SET_USE_ENV_AS_SKYBOX, (state, useEnvAsSkybox?: boolean) => {
       state.config = {...state.config, useEnvAsSkybox};
     });
 
 /** Dispatch an edit to model viewer shadow intensity. */
+const UPDATE_SHADOW_INTENSITY = 'UPDATE_SHADOW_INTENSITY';
 export const dispatchShadowIntensity = registerStateMutator(
-    'UPDATE_SHADOW_INTENSITY', (state, shadowIntensity?: number) => {
+    UPDATE_SHADOW_INTENSITY, (state, shadowIntensity?: number) => {
       state.config = {...state.config, shadowIntensity};
     });
 
 
 /** Dispatch an edit to model viewer shadow softness. */
+const UPDATE_SHADOW_SOFTNESS = 'UPDATE_SHADOW_SOFTNESS';
 export const dispatchShadowSoftness = registerStateMutator(
-    'UPDATE_SHADOW_SOFTNESS', (state, shadowSoftness?: number) => {
+    UPDATE_SHADOW_SOFTNESS, (state, shadowSoftness?: number) => {
       state.config = {...state.config, shadowSoftness};
     });

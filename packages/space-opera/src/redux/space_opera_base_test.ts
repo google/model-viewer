@@ -20,8 +20,9 @@ import {arrayBufferEqualityTester, createBufferFromString, generatePngBlob, GlTf
 import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_json.js'
 import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../components/materials_panel/reducer.js';
+
 import {applyCameraEdits, Camera} from './camera_state.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from './edit_dispatchers.js';
 import {applyEdits, generateTextureId, getGltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
 import {dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, reduxStore, registerStateMutator} from './space_opera_base.js';
 
