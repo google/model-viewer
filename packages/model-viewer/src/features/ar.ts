@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
-import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_ANDROID, IS_AR_QUICKLOOK_CANDIDATE, IS_FIREFOX, IS_IOS_CHROME, IS_IOS_SAFARI, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$loaded, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
@@ -211,7 +211,8 @@ configuration or device capabilities');
             this[$arMode] = ARMode.WEBXR;
             break;
           } else if (
-              value === 'scene-viewer' && IS_ANDROID && !isSceneViewerBlocked) {
+              value === 'scene-viewer' && IS_ANDROID && !IS_FIREFOX &&
+              !isSceneViewerBlocked) {
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
           } else if (
