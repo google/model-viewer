@@ -18,7 +18,7 @@ import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
-export type TouchMode = 'rotate'|'zoom';
+export type TouchMode = 'rotate'|'zoom'|'none';
 
 export interface Pointer {
   clientX: number, clientY: number,
@@ -58,7 +58,6 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 });
 
 // Constants
-const TOUCH_EVENT_RE = /^touch(start|end|move)$/;
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
 
@@ -132,13 +131,10 @@ export class SmoothControls extends EventDispatcher {
   private fovDamper = new Damper();
 
   // Pointer state
-  private numPointersDown = 0;
-  private lastPointerPosition: Pointer = {
-    clientX: 0,
-    clientY: 0,
-  };
-  private lastPointers!: Array<PointerEvent>;
-  private touchMode: TouchMode = 'rotate';
+  private primaryPointer!: PointerEvent;
+  private secondaryPointer!: PointerEvent;
+  private lastPointerSeparation = 0;
+  private touchMode: TouchMode = 'none';
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -445,112 +441,90 @@ export class SmoothControls extends EventDispatcher {
     return wrapped * 2 * Math.PI - Math.PI;
   }
 
-  private pixelLengthToSphericalAngle(pixelLength: number): number {
+  private pixelsToRadians(pixelLength: number): number {
     return 2 * Math.PI * pixelLength / this.element.clientHeight;
   }
 
-  private twoTouchDistance(touchOne: Touch, touchTwo: Touch): number {
-    const {clientX: xOne, clientY: yOne} = touchOne;
-    const {clientX: xTwo, clientY: yTwo} = touchTwo;
+  private updatePointerSeparation() {
+    const {clientX: xOne, clientY: yOne} = this.primaryPointer;
+    const {clientX: xTwo, clientY: yTwo} = this.secondaryPointer;
     const xDelta = xTwo - xOne;
     const yDelta = yTwo - yOne;
 
-    return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
+    this.lastPointerSeparation = Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
   private onPointerMove = (event: PointerEvent) => {
-    if (this.numPointersDown === 0 || !this.canInteract) {
+    console.log('move');
+    if (this.touchMode === 'none' || !this.canInteract) {
       return;
     }
 
-    // NOTE(cdata): We test event.type as some browsers do not have a global
-    // TouchEvent contructor.
-    if (TOUCH_EVENT_RE.test(event.type)) {
-      const {touches} = event as TouchEvent;
+    const lastX = this.primaryPointer.clientX;
+    const lastY = this.primaryPointer.clientY;
 
-      switch (this.touchMode) {
-        case 'zoom':
-          if (this.lastTouches.length > 1 && touches.length > 1) {
-            const lastTouchDistance =
-                this.twoTouchDistance(this.lastTouches[0], this.lastTouches[1]);
-            const touchDistance = this.twoTouchDistance(touches[0], touches[1]);
-            const deltaZoom =
-                ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
-
-            this.userAdjustOrbit(0, 0, deltaZoom);
-          }
-
-          break;
-        case 'rotate':
-          this.handleSinglePointerMove(touches[0]);
-          break;
-      }
-
-      this.lastTouches = touches;
+    if (event.isPrimary) {
+      this.primaryPointer = event;
+    } else if (event.pointerId === this.secondaryPointer.pointerId) {
+      this.secondaryPointer = event;
     } else {
-      this.handleSinglePointerMove(event as MouseEvent);
+      return;
     }
 
-    if (event.cancelable) {
-      event.preventDefault();
-    };
+    switch (this.touchMode) {
+      case 'zoom':
+        const lastTouchDistance = this.lastPointerSeparation;
+        this.updatePointerSeparation();
+        const touchDistance = this.lastPointerSeparation;
+        const deltaZoom =
+            ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
+
+        this.userAdjustOrbit(0, 0, deltaZoom);
+        break;
+      case 'rotate':
+        const {clientX, clientY} = this.primaryPointer;
+        const deltaTheta = this.pixelsToRadians(clientX - lastX);
+        const deltaPhi = this.pixelsToRadians(clientY - lastY);
+
+        console.log(deltaPhi);
+
+        this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
+
+        if (this.isUserPointing === false) {
+          this.isUserPointing = true;
+          this.dispatchEvent(
+              {type: 'pointer-change-start', pointer: {...event}});
+        }
+        break;
+    }
+    event.preventDefault();
   };
-
-  private handleSinglePointerMove(pointer: Pointer) {
-    const {clientX, clientY} = pointer;
-    const deltaTheta = this.pixelLengthToSphericalAngle(
-        clientX - this.lastPointerPosition.clientX);
-    const deltaPhi = this.pixelLengthToSphericalAngle(
-        clientY - this.lastPointerPosition.clientY);
-
-    this.lastPointerPosition.clientX = clientX;
-    this.lastPointerPosition.clientY = clientY;
-
-    if (this.isUserPointing === false) {
-      this.isUserPointing = true;
-      this.dispatchEvent({type: 'pointer-change-start', pointer: {...pointer}});
-    }
-
-    this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
-  }
 
   private onPointerDown = (event: PointerEvent) => {
-    ++this.numPointersDown;
+    console.log('down');
     this.isUserPointing = false;
 
-    if (TOUCH_EVENT_RE.test(event.type)) {
-      const {touches} = event as TouchEvent;
-
-      switch (touches.length) {
-        default:
-        case 1:
-          this.touchMode = 'rotate';
-          this.handleSinglePointerDown(touches[0]);
-          break;
-        case 2:
-          this.touchMode = 'zoom';
-          break;
-      }
-
-      this.lastTouches = touches;
+    if (event.isPrimary) {
+      this.touchMode = 'rotate';
+      this.primaryPointer = event;
+      this.element.style.cursor = 'grabbing';
     } else {
-      this.handleSinglePointerDown(event as MouseEvent);
+      this.touchMode = 'zoom';
+      this.secondaryPointer = event;
+      this.updatePointerSeparation();
     }
   };
 
-  private handleSinglePointerDown(pointer: Pointer) {
-    this.lastPointerPosition.clientX = pointer.clientX;
-    this.lastPointerPosition.clientY = pointer.clientY;
-    this.element.style.cursor = 'grabbing';
-  }
-
-  private onPointerUp = (_event: MouseEvent|TouchEvent) => {
+  private onPointerUp = (event: PointerEvent) => {
+    console.log('up');
+    if (event.isPrimary ||
+        event.pointerId === this.secondaryPointer.pointerId) {
+      this.touchMode = 'none';
+    }
     this.element.style.cursor = 'grab';
-    --this.numPointersDown;
 
     if (this.isUserPointing) {
-      this.dispatchEvent(
-          {type: 'pointer-change-end', pointer: {...this.lastPointerPosition}});
+      this.dispatchEvent({type: 'pointer-change-end', pointer: {...event}});
     }
   };
 
