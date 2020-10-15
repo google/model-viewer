@@ -20,9 +20,9 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {HotspotConfig} from '../components/hotspot_panel/hotspot_config.js';
+import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/gltf_edits.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
 import {EnvironmentImage} from './lighting_state.js';
 

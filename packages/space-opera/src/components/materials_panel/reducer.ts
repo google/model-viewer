@@ -17,10 +17,10 @@
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
-import {generateTextureId} from '../../redux/gltf_edits.js';
 import {Material} from '../../redux/material_state.js';
 import {immutableArrayUpdate, immutableMapUpdate} from '../../redux/reducer_utils.js';
 import {registerStateMutator, State} from '../../redux/space_opera_base.js';
+import {generateTextureId} from '../model_viewer_preview/gltf_edits.js';
 
 /** Argument container for dispatchMaterialBaseColor. */
 export interface MaterialBaseColorArgs {
