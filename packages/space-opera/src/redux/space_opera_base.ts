@@ -55,7 +55,7 @@ export interface State {
   environmentImages: EnvironmentImage[];
 }
 
-const INITIAL_STATE: State = {
+export const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,

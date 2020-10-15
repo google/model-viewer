@@ -26,7 +26,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
 import {State} from '../../redux/space_opera_base.js';
-import {dispatchSaveCameraOrbit} from '../camera_settings/camera_settings.js';
+import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
 import {styles} from './poster_controls.css';

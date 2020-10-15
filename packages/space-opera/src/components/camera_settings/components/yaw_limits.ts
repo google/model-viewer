@@ -17,74 +17,76 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {Camera} from '../../redux/camera_state.js';
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
-import {Limits} from '../../redux/state_types.js';
+import {Camera} from '../../../redux/camera_state.js';
+import {registerStateMutator, State} from '../../../redux/space_opera_base.js';
+import {Limits} from '../../../redux/state_types.js';
 
 import {LimitsBase} from './limits_base.js';
 
-/** Default minimum FOV angle (degrees) */
-export const DEFAULT_MIN_FOV = 10;
+// Yaw is degrees from forward.
 
-/** Default maximum FOV angle (degrees) */
-export const DEFAULT_MAX_FOV = 90;
+/** Default minimum yaw angle (degrees) */
+export const DEFAULT_MIN_YAW = -180;
 
-/** Dispatch change to maximum FOV */
-export const dispatchFovLimits = registerStateMutator(
-    'SET_CAMERA_FOV_LIMITS', (state, fovLimitsDeg?: Limits) => {
-      if (!fovLimitsDeg) {
-        throw new Error('No valid FOV limit given');
+/** Default maximum yaw angle (degrees) */
+export const DEFAULT_MAX_YAW = 180;
+
+/** Dispatch change to maximum pitch */
+export const dispatchYawLimits = registerStateMutator(
+    'SET_CAMERA_YAW_LIMITS', (state, yawLimitsDeg?: Limits) => {
+      if (!yawLimitsDeg) {
+        throw new Error('No limits given');
       }
-      if (fovLimitsDeg === state.camera.fovLimitsDeg) {
+      if (yawLimitsDeg === state.camera.yawLimitsDeg) {
         throw new Error(
-            'Do not edit fovLimitsDeg in place. You passed in the same object');
+            'Do not edit yawLimitsDeg in place. You passed in the same object');
       }
 
       state.camera = {
         ...state.camera,
-        fovLimitsDeg,
+        yawLimitsDeg,
       };
     });
 
 
 /** The Camera Settings panel. */
-@customElement('me-camera-fov-limits')
-export class FovLimits extends LimitsBase {
-  @internalProperty() fovLimitsDeg?: Limits;
+@customElement('me-camera-yaw-limits')
+export class YawLimits extends LimitsBase {
+  @internalProperty() yawLimitsDeg?: Limits;
   @internalProperty() currentCamera?: Camera;
 
   stateChanged(state: State) {
-    this.fovLimitsDeg = state.camera.fovLimitsDeg;
+    this.yawLimitsDeg = state.camera.yawLimitsDeg;
     this.currentCamera = state.currentCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchFovLimits(limits);
+    dispatchYawLimits(limits);
   }
 
   get label() {
-    return 'Field of view';
+    return 'Yaw';
   }
 
   get absoluteMinimum() {
-    return DEFAULT_MIN_FOV;
+    return DEFAULT_MIN_YAW;
   }
 
   get absoluteMaximum() {
-    return DEFAULT_MAX_FOV;
+    return DEFAULT_MAX_YAW;
   }
 
   get currentPreviewValue() {
-    return Math.round(this.currentCamera?.fieldOfViewDeg ?? DEFAULT_MIN_FOV);
+    return Math.round(this.currentCamera?.orbit?.thetaDeg ?? 0);
   }
 
   get limitsProperty() {
-    return this.fovLimitsDeg;
+    return this.yawLimitsDeg;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'me-camera-fov-limits': FovLimits;
+    'me-camera-yaw-limits': YawLimits;
   }
 }
