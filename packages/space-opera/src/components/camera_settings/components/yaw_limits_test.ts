@@ -18,7 +18,7 @@
 
 import './yaw_limits.js';
 
-import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_base.js';
+import {dispatchCurrentCameraState, reduxStore} from '../../../redux/space_opera_base.js';
 
 import {DEFAULT_MAX_YAW, dispatchYawLimits, YawLimits} from './yaw_limits.js';
 

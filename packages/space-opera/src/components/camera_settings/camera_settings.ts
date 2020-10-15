@@ -15,10 +15,10 @@
  *
  */
 
-import './radius_limits.js';
-import './pitch_limits.js';
-import './yaw_limits.js';
-import './fov_limits.js';
+import './components/radius_limits.js';
+import './components/pitch_limits.js';
+import './components/yaw_limits.js';
+import './components/fov_limits.js';
 import '../shared/checkbox/checkbox.js';
 import '@material/mwc-button';
 import '../shared/expandable_content/expandable_tab.js';
@@ -30,7 +30,6 @@ import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapt
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
 import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from '../../redux/reducers/camera_settings.js';
 import {State} from '../../redux/space_opera_base.js';
 import {SphericalPositionDeg, Vector3D} from '../../redux/state_types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -39,6 +38,7 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
+import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
 
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends LitElement {

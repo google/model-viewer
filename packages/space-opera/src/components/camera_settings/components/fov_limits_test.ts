@@ -18,7 +18,7 @@
 
 import './fov_limits.js';
 
-import {dispatchCurrentCameraState, reduxStore} from '../../redux/space_opera_base.js';
+import {dispatchCurrentCameraState, reduxStore} from '../../../redux/space_opera_base.js';
 
 import {DEFAULT_MAX_FOV, dispatchFovLimits, FovLimits} from './fov_limits.js';
 
