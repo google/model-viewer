@@ -31,7 +31,7 @@ export const styles: CSSResult = css`:host {
 
 .SectionContent[open] {
   background-color: var(--me-theme-container-background);
-  overflow: hidden;
+  overflow: unset;
   max-height: 100vh;
   padding: 20px;
   transition-duration: 250ms;
