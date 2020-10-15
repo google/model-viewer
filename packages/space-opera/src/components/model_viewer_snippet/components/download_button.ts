@@ -23,8 +23,8 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {State} from '../../redux/space_opera_base.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {State} from '../../../redux/space_opera_base.js';
+import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 
 interface Payload {
   blob: Blob;

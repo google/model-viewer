@@ -23,9 +23,10 @@ import '../../shared/checkbox/checkbox.js';
 
 import {html, query} from 'lit-element';
 
-import {Limits} from '../../../redux/state_types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
+import {Limits} from '../types.js';
+
 import {styles} from './limits_base.css.js';
 
 /** Abstract component that can be extended for editing scalar limits. */

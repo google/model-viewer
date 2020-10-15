@@ -16,7 +16,7 @@
  */
 
 import {registerStateMutator, State} from '../../redux/space_opera_base.js';
-import {SphericalPositionDeg, Vector3D} from '../../redux/state_types.js';
+import {SphericalPositionDeg, Vector3D} from './types.js';
 
 /*
  * Register state mutators and get corresponding dispatchers.
