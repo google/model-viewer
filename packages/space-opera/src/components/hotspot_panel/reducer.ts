@@ -15,8 +15,8 @@
  *
  */
 
-import {immutableArrayUpdate} from '../../reducer_utils.js';
 import {registerStateMutator, State} from '../../space_opera_base.js';
+import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
 import {HotspotConfig} from './hotspot_config.js';
 

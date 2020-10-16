@@ -17,7 +17,7 @@
 
 
 
-import {immutableArrayUpdate, immutableMapUpdate} from '../reducer_utils.js';
+import {immutableArrayUpdate, immutableMapUpdate} from '../components/utils/reducer_utils.js';
 
 describe('reducer utils test', () => {
   it('immutableArrayUpdate returns a copy with the expected update', () => {
