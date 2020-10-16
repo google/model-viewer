@@ -13,6 +13,7 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
+import {$promptElementVisibleTime} from '../features/controls.js';
 
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -119,6 +120,7 @@ export class SmoothControls extends EventDispatcher {
   private _options: SmoothControlsOptions;
   private isUserChange = false;
   private isUserPointing = false;
+  private promptVisibleTime = Infinity;
 
   // Internal orbital position state
   private spherical = new Spherical();
@@ -156,6 +158,7 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.addEventListener('pointermove', this.onPointerMove);
       element.addEventListener('pointerdown', this.onPointerDown);
+      element.addEventListener('pointercancel', this.onPointerCancel);
       self.addEventListener('pointerup', this.onPointerUp);
       element.addEventListener('wheel', this.onWheel);
       element.addEventListener('keydown', this.onKeyDown);
@@ -170,6 +173,7 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerdown', this.onPointerDown);
+      element.removeEventListener('pointercancel', this.onPointerCancel);
       self.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
@@ -495,6 +499,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerDown = (event: PointerEvent) => {
     this.isUserPointing = false;
+    this.promptVisibleTime = (this.element as any)[$promptElementVisibleTime];
 
     if (event.isPrimary) {
       this.touchMode = 'rotate';
@@ -505,6 +510,12 @@ export class SmoothControls extends EventDispatcher {
       this.secondaryPointer = event;
       this.updatePointerSeparation();
     }
+  };
+
+  private onPointerCancel = () => {
+    this.touchMode = 'none';
+    this.dispatchEvent(
+        {type: 'cancel', promptVisibleTime: this.promptVisibleTime});
   };
 
   private onPointerUp = (event: PointerEvent) => {

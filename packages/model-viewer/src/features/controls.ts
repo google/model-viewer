@@ -187,6 +187,7 @@ const TAU = 2.0 * Math.PI;
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
+export const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
@@ -196,11 +197,11 @@ const $updateCameraForRadius = Symbol('updateCameraForRadius');
 const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
+const $onCancel = Symbol('onCancel');
 const $onPointerChange = Symbol('onPointerChange');
 
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userHasInteracted = Symbol('userHasInteracted');
-const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
 
@@ -383,6 +384,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
 
       this[$controls].addEventListener('change', this[$onChange]);
+      this[$controls].addEventListener('cancel', this[$onCancel]);
       this[$controls].addEventListener(
           'pointer-change-start', this[$onPointerChange]);
       this[$controls].addEventListener(
@@ -393,6 +395,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$controls].removeEventListener('change', this[$onChange]);
+      this[$controls].removeEventListener('cancel', this[$onCancel]);
       this[$controls].removeEventListener(
           'pointer-change-start', this[$onPointerChange]);
       this[$controls].removeEventListener(
@@ -706,6 +709,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
           'camera-change', {detail: {source}}));
+    };
+
+    [$onCancel] = (event: Event) => {
+      // TODO: Fix state reset here, it needs work.
+      this[$userHasInteracted] = false;
+      this[$waitingToPromptUser] = false;
+      this[$promptElement].classList.add('visible');
+      this[$promptElementVisibleTime] = event.promptVisibleTime;
     };
 
     [$onPointerChange] = (event: Event) => {
