@@ -91,19 +91,6 @@ function makeRootReducer() {
   };
 }
 
-/** Setup devtools */
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof Redux.compose;
-  }
-}
-const composeEnhancers =
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose
-
-/** Global Redux store. */
-export const reduxStore =
-    Redux.createStore(makeRootReducer(), composeEnhancers());
-
 /**
  * A synchronous mutator of fixed paylod type.
  */
@@ -166,3 +153,16 @@ export function extractStagingConfig(config: ModelViewerConfig):
         cameraControls: config.cameraControls, autoRotate: config.autoRotate,
   }
 }
+
+/** Setup devtools */
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof Redux.compose;
+  }
+}
+const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose
+
+/** Global Redux store. */
+export const reduxStore =
+    Redux.createStore(makeRootReducer(), composeEnhancers());
