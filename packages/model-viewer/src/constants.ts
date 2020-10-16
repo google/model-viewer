@@ -78,7 +78,11 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
 
 // @see https://developer.chrome.com/multidevice/user-agent
 export const IS_SAFARI = /Safari\//.test(navigator.userAgent);
+export const IS_FIREFOX = /firefox/i.test(navigator.userAgent);
+export const IS_OCULUS = /OculusBrowser/.test(navigator.userAgent);
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
 export const IS_IE11 =
     !((window as any).ActiveXObject) && 'ActiveXObject' in window;
+
+export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
