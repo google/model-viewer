@@ -16,8 +16,8 @@
  */
 
 import '@material/mwc-button';
-import '../open_button/open_button.js';
-import '../download_button/download_button.js';
+import './components/open_button.js';
+import './components/download_button.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
@@ -26,16 +26,17 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {parseHotspotsFromSnippet} from '../../redux/parse_hotspot_config.js';
 import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {ExportZipButton} from '../download_button/download_button.js';
 import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
 import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
+
+import {ExportZipButton} from './components/download_button.js';
+import {parseHotspotsFromSnippet} from './parse_hotspot_config.js';
 
 /**
  *

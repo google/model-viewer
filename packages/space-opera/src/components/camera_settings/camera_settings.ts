@@ -31,7 +31,6 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 
 import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {State} from '../../redux/space_opera_base.js';
-import {SphericalPositionDeg, Vector3D} from '../../redux/state_types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
@@ -39,6 +38,7 @@ import {styles as draggableInputRowStyles} from '../shared/draggable_input/dragg
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
+import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends LitElement {
