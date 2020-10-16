@@ -15,10 +15,10 @@
  *
  */
 
-import './radius_limits.js';
-import './pitch_limits.js';
-import './yaw_limits.js';
-import './fov_limits.js';
+import './components/radius_limits.js';
+import './components/pitch_limits.js';
+import './components/yaw_limits.js';
+import './components/fov_limits.js';
 import '../shared/checkbox/checkbox.js';
 import '@material/mwc-button';
 import '../shared/expandable_content/expandable_tab.js';
@@ -30,59 +30,15 @@ import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapt
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
 import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
-import {SphericalPositionDeg, Vector3D} from '../../redux/state_types.js';
+import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
-
-// Register state mutators and get corresponding dispatchers.
-
-const dispatchCameraControlsEnabled = registerStateMutator(
-    'SET_CAMERA_CONTROLS_ENABLED', (state, enabled?: boolean) => {
-      state.config = {...state.config, cameraControls: !!enabled};
-    });
-
-// Orbit
-export const dispatchSaveCameraOrbit =
-    registerStateMutator('SAVE_CAMERA_ORBIT', (state) => {
-      if (!state.currentCamera)
-        return;
-      const currentOrbit = state.currentCamera.orbit;
-      if (!currentOrbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit: {...currentOrbit},
-        fieldOfViewDeg: state.currentCamera.fieldOfViewDeg,
-      };
-    });
-
-/** Event dispatcher for changes to camera-target. */
-export const dispatchCameraTarget =
-    registerStateMutator('SET_CAMERA_TARGET', (state, target?: Vector3D) => {
-      state.camera = {...state.camera, target};
-    });
-
-/** Dispatch initial orbit in camera state */
-export const dispatchInitialOrbit = registerStateMutator(
-    'SET_CAMERA_STATE_INITIAL_ORBIT', (state, orbit?: SphericalPositionDeg) => {
-      if (!orbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit,
-      };
-    });
-
-/** Dispatch changes to auto rotate */
-export const dispatchAutoRotate =
-    registerStateMutator('SET_AUTO_ROTATE', (state, autoRotate?: boolean) => {
-      state.config = {...state.config, autoRotate};
-    });
+import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
+import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends LitElement {

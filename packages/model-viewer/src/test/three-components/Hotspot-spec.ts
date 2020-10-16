@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {Hotspot, HotspotVisibilityDetails} from '../../three-components/Hotspot.js';
-import {waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
 
 const expect = chai.expect;
 

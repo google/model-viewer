@@ -15,81 +15,78 @@
  *
  */
 
-
 import {customElement, internalProperty} from 'lit-element';
 
-import {Camera} from '../../redux/camera_state.js';
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
-import {Limits} from '../../redux/state_types.js';
+import {Camera} from '../../../redux/camera_state.js';
+import {registerStateMutator, State} from '../../../redux/space_opera_base.js';
+import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
 
-// Pitch is degrees from the up-vector.
+// Yaw is degrees from forward.
 
-/** Default minimum pitch angle (degrees) */
-export const DEFAULT_MIN_PITCH = 0;
+/** Default minimum yaw angle (degrees) */
+export const DEFAULT_MIN_YAW = -180;
 
-/** Default maximum pitch angle (degrees) */
-export const DEFAULT_MAX_PITCH = 180;
+/** Default maximum yaw angle (degrees) */
+export const DEFAULT_MAX_YAW = 180;
 
 /** Dispatch change to maximum pitch */
-export const dispatchPitchLimits = registerStateMutator(
-    'SET_CAMERA_PITCH_LIMITS', (state, pitchLimitsDeg?: Limits) => {
-      if (!pitchLimitsDeg) {
-        throw new Error('No valid limits given');
+export const dispatchYawLimits = registerStateMutator(
+    'SET_CAMERA_YAW_LIMITS', (state, yawLimitsDeg?: Limits) => {
+      if (!yawLimitsDeg) {
+        throw new Error('No limits given');
       }
-      if (pitchLimitsDeg === state.camera.pitchLimitsDeg) {
+      if (yawLimitsDeg === state.camera.yawLimitsDeg) {
         throw new Error(
-            'Do not edit pitchLimitsDeg in place. You passed in the same object');
+            'Do not edit yawLimitsDeg in place. You passed in the same object');
       }
 
       state.camera = {
         ...state.camera,
-        pitchLimitsDeg,
+        yawLimitsDeg,
       };
     });
 
 
 /** The Camera Settings panel. */
-@customElement('me-camera-pitch-limits')
-export class PitchLimits extends LimitsBase {
-  @internalProperty() pitchLimitsDeg?: Limits;
+@customElement('me-camera-yaw-limits')
+export class YawLimits extends LimitsBase {
+  @internalProperty() yawLimitsDeg?: Limits;
   @internalProperty() currentCamera?: Camera;
 
   stateChanged(state: State) {
-    this.pitchLimitsDeg = state.camera.pitchLimitsDeg;
+    this.yawLimitsDeg = state.camera.yawLimitsDeg;
     this.currentCamera = state.currentCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchPitchLimits(limits);
+    dispatchYawLimits(limits);
   }
 
   get label() {
-    return 'Pitch';
+    return 'Yaw';
   }
 
   get absoluteMinimum() {
-    return DEFAULT_MIN_PITCH;
+    return DEFAULT_MIN_YAW;
   }
 
   get absoluteMaximum() {
-    return DEFAULT_MAX_PITCH;
+    return DEFAULT_MAX_YAW;
   }
 
   get currentPreviewValue() {
-    if (!this.currentCamera || !this.currentCamera.orbit)
-      return 0;
-    return Math.round(this.currentCamera.orbit.phiDeg);
+    return Math.round(this.currentCamera?.orbit?.thetaDeg ?? 0);
   }
 
   get limitsProperty() {
-    return this.pitchLimitsDeg;
+    return this.yawLimitsDeg;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'me-camera-pitch-limits': PitchLimits;
+    'me-camera-yaw-limits': YawLimits;
   }
 }

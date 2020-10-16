@@ -76,32 +76,31 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
+<model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <div id="controls">
+    <button data-color="1,0,0,1">Red</button>
+    <button data-color="0,1,0,1">Green</button>
+    <button data-color="0,0,1,1">Blue</button>
+  </div>
+</model-viewer>
+<script>
+const modelViewer = document.querySelector("model-viewer");
 
-  <model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-    <div id="controls">
-      <button data-color="1,0,0,1">Red</button>
-      <button data-color="0,1,0,1">Green</button>
-      <button data-color="0,0,1,1">Blue</button>
-    </div>
-  </model-viewer>
-  <script>
-  const modelViewer = document.querySelector("model-viewer");
+document.querySelector('#controls').addEventListener('click', (event) => {
+  const colorString = event.target.dataset.color;
 
-  document.querySelector('#controls').addEventListener('click', (event) => {
-    const colorString = event.target.dataset.color;
+  if (!colorString) {
+    return;
+  }
 
-    if (!colorString) {
-      return;
-    }
+  const color = colorString.split(',')
+      .map(numberString => parseFloat(numberString));
 
-    const color = colorString.split(',')
-        .map(numberString => parseFloat(numberString));
-
-    console.log('Changing color to: ', color);
-    const [material] = modelViewer.model.materials;
-    material.pbrMetallicRoughness.setBaseColorFactor(color);
-  });
-  </script>
+  console.log('Changing color to: ', color);
+  const [material] = modelViewer.model.materials;
+  material.pbrMetallicRoughness.setBaseColorFactor(color);
+});
+</script>
             </template>
           </example-snippet>
         </div>
@@ -118,47 +117,45 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
-
-  <model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
-    <div id="controls">
-      <div>
-        <p>Metalness: <span id="metalness-value"></span></p>
-        <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
-      </div>
-      <div>
-        <p>Roughness: <span id="roughness-value"></span></p>
-        <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
-      </div>
+<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
+  <div id="controls">
+    <div>
+      <p>Metalness: <span id="metalness-value"></span></p>
+      <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
     </div>
-  </model-viewer>
-  <script>
-  const modelViewerParameters = document.querySelector("model-viewer#sphere");
+    <div>
+      <p>Roughness: <span id="roughness-value"></span></p>
+      <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+    </div>
+  </div>
+</model-viewer>
+<script>
+const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
-  modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
+modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
 
-    let material = modelViewerParameters.model.materials[0];
+  let material = modelViewerParameters.model.materials[0];
 
-    let metalnessDisplay = document.querySelector("#metalness-value");
-    let roughnessDisplay = document.querySelector("#roughness-value");
+  let metalnessDisplay = document.querySelector("#metalness-value");
+  let roughnessDisplay = document.querySelector("#roughness-value");
 
-    metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
-    roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
+  metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
+  roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
 
-    // Defaults to gold
-    material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
+  // Defaults to gold
+  material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
 
-    document.querySelector('#metalness').addEventListener('input', (event) => {
-      material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
-      metalnessDisplay.textContent = event.target.value;
-    });
-    
-    document.querySelector('#roughness').addEventListener('input', (event) => {
-      material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
-      roughnessDisplay.textContent = event.target.value;
-    });
-  })
-
-  </script>
+  document.querySelector('#metalness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+    metalnessDisplay.textContent = event.target.value;
+  });
+  
+  document.querySelector('#roughness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+    roughnessDisplay.textContent = event.target.value;
+  });
+})
+</script>
             </template>
           </example-snippet>
         </div>
@@ -174,48 +171,47 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
-
-  <model-viewer id="lantern" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
-    <div id="controls">
-      <div>
-        <p>Diffuse</p>
-        <select id="diffuse">
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
-        </select>
-      </div>
-      <div>
-        <p>Metallic-roughness</p>
-        <select id="metallicRoughness">
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
-        </select>
-      </div>
+<model-viewer id="lantern" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
+  <div id="controls">
+    <div>
+      <p>Diffuse</p>
+      <select id="diffuse">
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
+      </select>
     </div>
-  </model-viewer>
-  <script type="module">
-  const modelViewerTexture = document.querySelector("model-viewer#lantern");
+    <div>
+      <p>Metallic-roughness</p>
+      <select id="metallicRoughness">
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
-  modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
+modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
 
-    let material = modelViewerTexture.model.materials[0];
+  let material = modelViewerTexture.model.materials[0];
 
-    let applyPBRTexture = (channel, event) => {
-      material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
-    }
-    
-    document.querySelector('#diffuse').addEventListener('input', (event) => {
-      applyPBRTexture('baseColorTexture', event);
-    });
-    
-    document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-      applyPBRTexture('metallicRoughnessTexture', event);
-    });
-  })
+  let applyPBRTexture = (channel, event) => {
+    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
+  }
+  
+  document.querySelector('#diffuse').addEventListener('input', (event) => {
+    applyPBRTexture('baseColorTexture', event);
+  });
+  
+  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+    applyPBRTexture('metallicRoughnessTexture', event);
+  });
+})
 
-  </script>
+</script>
             </template>
           </example-snippet>
         </div>
@@ -231,59 +227,58 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
-
-  <model-viewer id="helmet" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
-    <div id="controls">
-      <div>
-        <p>Normals</p>
-        <select id="normals">
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
-        </select>
-      </div>
-      <div>
-        <p>Occlusion</p>
-        <select id="occlusion">
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
-        </select>
-      </div>
-      <div>
-        <p>Emission</p>
-        <select id="emission">
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
-          <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
-        </select>
-      </div>
+<model-viewer id="helmet" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
+  <div id="controls">
+    <div>
+      <p>Normals</p>
+      <select id="normals">
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+      </select>
     </div>
-  </model-viewer>
-  <script type="module">
-  const modelViewerTexture = document.querySelector("model-viewer#helmet");
+    <div>
+      <p>Occlusion</p>
+      <select id="occlusion">
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Emission</p>
+      <select id="emission">
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
-  modelViewerTexture.addEventListener("scene-graph-ready", () => {
+modelViewerTexture.addEventListener("scene-graph-ready", () => {
 
-    let material = modelViewerTexture.model.materials[0];
+  let material = modelViewerTexture.model.materials[0];
 
-    let applyTexture = (channel, event) => {
-      material[channel].texture.source.setURI(event.target.value);
-    }
+  let applyTexture = (channel, event) => {
+    material[channel].texture.source.setURI(event.target.value);
+  }
 
-    document.querySelector('#normals').addEventListener('input', (event) => {
-      applyTexture('normalTexture', event);
-    });
-    
-    document.querySelector('#occlusion').addEventListener('input', (event) => {
-      applyTexture('occlusionTexture', event);
-    });
-    
-    document.querySelector('#emission').addEventListener('input', (event) => {
-      applyTexture('emissiveTexture', event);
-    });
+  document.querySelector('#normals').addEventListener('input', (event) => {
+    applyTexture('normalTexture', event);
   });
+  
+  document.querySelector('#occlusion').addEventListener('input', (event) => {
+    applyTexture('occlusionTexture', event);
+  });
+  
+  document.querySelector('#emission').addEventListener('input', (event) => {
+    applyTexture('emissiveTexture', event);
+  });
+});
 
-  </script>
+</script>
             </template>
           </example-snippet>
         </div>
@@ -301,22 +296,22 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-5" highlight-as="html">
             <template>
-  <model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
-    <div id="controls">
-      <button onclick="exportGLB()">Export GLB</button>
-    </div>
-  </model-viewer>
-  <script>
-    async function exportGLB(){
-      let modelViewer = document.getElementById("static-model");
-      const glTF = await modelViewer.exportScene();
-      var file = new File([glTF], "export.glb");
-      var link = document.createElement("a");
-      link.download =file.name;
-      link.href = URL.createObjectURL(file);
-      link.click();
-    }
-  </script>
+<model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
+  <div id="controls">
+    <button onclick="exportGLB()">Export GLB</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportGLB(){
+    let modelViewer = document.getElementById("static-model");
+    const glTF = await modelViewer.exportScene();
+    var file = new File([glTF], "export.glb");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
             </template>
           </example-snippet>
         </div>
@@ -332,32 +327,32 @@ button {
           </div>
           <example-snippet stamp-to="demo-container-6" highlight-as="html">
             <template>
-  <model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
-    <div id="controls">
-      <button onclick="exportScene(true)">Export GLB</button>
-      <button onclick="exportScene(false)">Export GLTF</button>
-    </div>
-  </model-viewer>
-  <script>
-    async function exportScene(binary){
-      let options = {
-        binary: binary,
-        trs: true,
-        onlyVisible: true,
-        maxTextureSize: 256,
-        forcePowerOfTwoTextures: true,
-        includeCustomExtensions: false,
-        embedImages: true
-      };
-      let modelViewer = document.getElementById("animated-model");
-      const glTF = await modelViewer.exportScene(options);
-      var file = new File([glTF], binary ? "export.glb" : "export.gltf");
-      var link = document.createElement("a");
-      link.download =file.name;
-      link.href = URL.createObjectURL(file);
-      link.click();
-    }
-  </script>
+<model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
+  <div id="controls">
+    <button onclick="exportScene(true)">Export GLB</button>
+    <button onclick="exportScene(false)">Export GLTF</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportScene(binary){
+    let options = {
+      binary: binary,
+      trs: true,
+      onlyVisible: true,
+      maxTextureSize: 256,
+      forcePowerOfTwoTextures: true,
+      includeCustomExtensions: false,
+      embedImages: true
+    };
+    let modelViewer = document.getElementById("animated-model");
+    const glTF = await modelViewer.exportScene(options);
+    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
+    var link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
             </template>
           </example-snippet>
         </div>

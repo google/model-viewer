@@ -24,12 +24,12 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
-import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
 import {State} from '../../redux/space_opera_base.js';
-import {dispatchSaveCameraOrbit} from '../camera_settings/camera_settings.js';
+import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
 import {styles} from './poster_controls.css';
+import {dispatchSetPoster} from './reducer.js';
 
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')

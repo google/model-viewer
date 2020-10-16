@@ -24,7 +24,6 @@
   --snippet-offset: 20px -20px;
   --pre-padding: 16px 20px;
   --demo-title-padding: 24px 10% 24px 0;
-  --heading-h3-max-width: 480px;
   --heading-h1-margin-top: 40px;
   --browser-support-desc-margin-top: 40px;
   --browser-support-icons-margin-top: 16px;
@@ -311,6 +310,11 @@ h1 span {
   margin: var(--snippet-offset);
 }
 
+.content .quick-start-example example-snippet {
+  display: block;
+  margin: 10px 0;
+}
+
 .footer {
   background: #eee;
   padding: 40px 40px 40px 40px;
@@ -404,7 +408,7 @@ model-viewer:focus {
 }
 
 .sample pre {
-  font-size: 1em;
+  font-size: .8em;
   line-height: 1.6em;
   padding: var(--pre-padding);
   max-width: 960px;
@@ -412,6 +416,11 @@ model-viewer:focus {
   margin-right: auto;
   overflow-x: auto;
 }
+
+.sample .quick-start-example pre {
+  padding: 10px 15px;
+}
+
 .demo pre {
   position: absolute;
   bottom: 0;
@@ -525,10 +534,6 @@ code {
 .heading {
   max-width: 760px;
 }
-.heading h3 {
-  max-width: var(--heading-h3-max-width);
-}
-
 
 .modal {
   margin: 0px auto;
@@ -572,6 +577,16 @@ paper-button {
 }
 #list-example a {
   margin: 0;
+}
+
+.new-list-example {
+  padding-left: 0px;
+  margin-top: 8px;
+  margin-left: 0px;
+  margin-bottom: 16px;
+  grid-template-columns: 1fr;
+  display: grid;
+  list-style-type: none;
 }
 
 
@@ -620,8 +635,23 @@ paper-button {
   z-index: 100;
   text-transform: lowercase;
 }
+
+.grouping-title-new {
+  text-transform: none;
+}
+
 .grouping-title.border-bottom {
   padding-bottom: 10px;
+}
+
+.quick-start {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-top: 25px;
+}
+
+.slogan {
+  margin-top: 20px;
 }
 
 .border-bottom {
@@ -629,7 +659,8 @@ paper-button {
 }
 
 .attribute {
-  white-space:nowrap;
+  white-space: pre-wrap !important;
+  font-family: var(--font-monospace);
 }
 
 .copyright {
@@ -705,7 +736,6 @@ paper-button {
     --grouping-title-margin-top: 20px;
     --demo-title-padding: 8px 12px 24px 0;
     --snippet-offset: 0;
-    --heading-h3-max-width: 320px;
     --heading-h1-margin-top: 0;
     --browser-support-desc-margin-top: 20px;
     --browser-support-icons-margin-top: 8px;

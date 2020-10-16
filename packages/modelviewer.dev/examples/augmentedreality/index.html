@@ -77,168 +77,168 @@
           </div>
           <example-snippet stamp-to="demo-container-1" highlight-as="html">
             <template>
-  <model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls alt="A 3D model carousel">
-    
-    <button slot="ar-button" id="ar-button">
-      View in your space
-    </button>
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls alt="A 3D model carousel">
   
-    <div id="ar-prompt">
-      <img src="../../assets/hand.png">
+  <button slot="ar-button" id="ar-button">
+    View in your space
+  </button>
+
+  <div id="ar-prompt">
+    <img src="../../assets/hand.png">
+  </div>
+
+  <div class="slider">
+    <div class="slides">
+      <button class="slide selected" onclick="switchSrc(this, 'Chair')"
+        style="background-image: url('../../assets/ShopifyModels/Chair.png');">
+
+      <button class="slide" onclick="switchSrc(this, 'Mixer')"
+        style="background-image: url('../../assets/ShopifyModels/Mixer.png');">
+
+      <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
+        style="background-image: url('../../assets/ShopifyModels/GeoPlanter.png');">
+      
+      <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
+        style="background-image: url('../../assets/ShopifyModels/ToyTrain.png');">
+      
+      <button class="slide" onclick="switchSrc(this, 'Canoe')"
+        style="background-image: url('../../assets/ShopifyModels/Canoe.png');">    
     </div>
-  
-    <div class="slider">
-      <div class="slides">
-        <button class="slide selected" onclick="switchSrc(this, 'Chair')"
-          style="background-image: url('../../assets/ShopifyModels/Chair.png');">
-  
-        <button class="slide" onclick="switchSrc(this, 'Mixer')"
-          style="background-image: url('../../assets/ShopifyModels/Mixer.png');">
-  
-        <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
-          style="background-image: url('../../assets/ShopifyModels/GeoPlanter.png');">
-        
-        <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
-          style="background-image: url('../../assets/ShopifyModels/ToyTrain.png');">
-        
-        <button class="slide" onclick="switchSrc(this, 'Canoe')"
-          style="background-image: url('../../assets/ShopifyModels/Canoe.png');">    
-      </div>
-    </div>
-  </model-viewer>
-  
-  <script type="module">
-    const modelViewer = document.querySelector("model-viewer");
-  
-    window.switchSrc = (element, name) => {
-      const base = "../../assets/ShopifyModels/" + name;
-      modelViewer.src = base + '.glb';
-      modelViewer.poster = base + '.png';
-      const slides = document.querySelectorAll(".slide");
-      slides.forEach((element) => {element.classList.remove("selected");});
-      element.classList.add("selected");
-    };
-  
-    document.querySelector(".slider").addEventListener('beforexrselect', (ev) => {
-      // Keep slider interactions from affecting the XR scene.
-      ev.preventDefault();
-    });
-  </script>
-  
-  <style>
-    /* This keeps child nodes hidden while the element loads */
-    :not(:defined) > * {
-      display: none;
-    }
-  
-    model-viewer {
-      background-color: #eee;
-      --poster-color: #eee;
-    }
-  
-    #ar-button {
-      background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.png);
-      background-repeat: no-repeat;
-      background-size: 20px 20px;
-      background-position: 12px 50%;
-      background-color: #fff;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      bottom: 132px;
-      padding: 0px 16px 0px 40px;
-      font-family: Roboto Regular, Helvetica Neue, sans-serif;
-      font-size: 14px;
-      color:#4285f4;
-      height: 36px;
-      line-height: 36px;
-      border-radius: 18px;
-      border: 1px solid #DADCE0;
-    }
-  
-    #ar-button:active {
-      background-color: #E8EAED;
-    }
-  
-    #ar-button:focus {
-      outline: none;
-    }
-  
-    #ar-button:focus-visible {
-      outline: 1px solid #4285f4;
-    }
-  
-    @keyframes circle {
-      from { transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg); }
-      to   { transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg); }
-    }
-  
-    @keyframes elongate {
-      from { transform: translateX(100px); }
-      to   { transform: translateX(-100px); }
-    }
-  
-    model-viewer > #ar-prompt {
-      position: absolute;
-      left: 50%;
-      bottom: 175px;
-      animation: elongate 2s infinite ease-in-out alternate;
-      display: none;
-    }
-  
-    model-viewer[ar-status="session-started"] > #ar-prompt {
-      display: block;
-    }
-  
-    model-viewer > #ar-prompt > img {
-      animation: circle 4s linear infinite;
-    }
-  
-    .slider {
-      width: 100%;
-      text-align: center;
-      overflow: hidden;
-      position: absolute;
-      bottom: 16px;
-    }
-  
-    .slides {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-  
-    .slide {
-      scroll-snap-align: start;
-      flex-shrink: 0;
-      width: 100px;
-      height: 100px;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-color: #fff;
-      margin-right: 10px;
-      border-radius: 10px;
-      border: none;
-      display: flex;
-    }
-  
-    .slide.selected {
-      border: 2px solid #4285f4;
-    }
-  
-    .slide:focus {
-      outline: none;
-    }
-  
-    .slide:focus-visible {
-      outline: 1px solid #4285f4;
-    }
-  
-  </style>
+  </div>
+</model-viewer>
+
+<script type="module">
+  const modelViewer = document.querySelector("model-viewer");
+
+  window.switchSrc = (element, name) => {
+    const base = "../../assets/ShopifyModels/" + name;
+    modelViewer.src = base + '.glb';
+    modelViewer.poster = base + '.png';
+    const slides = document.querySelectorAll(".slide");
+    slides.forEach((element) => {element.classList.remove("selected");});
+    element.classList.add("selected");
+  };
+
+  document.querySelector(".slider").addEventListener('beforexrselect', (ev) => {
+    // Keep slider interactions from affecting the XR scene.
+    ev.preventDefault();
+  });
+</script>
+
+<style>
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+
+  model-viewer {
+    background-color: #eee;
+    --poster-color: #eee;
+  }
+
+  #ar-button {
+    background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.png);
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+    background-position: 12px 50%;
+    background-color: #fff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    bottom: 132px;
+    padding: 0px 16px 0px 40px;
+    font-family: Roboto Regular, Helvetica Neue, sans-serif;
+    font-size: 14px;
+    color:#4285f4;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 18px;
+    border: 1px solid #DADCE0;
+  }
+
+  #ar-button:active {
+    background-color: #E8EAED;
+  }
+
+  #ar-button:focus {
+    outline: none;
+  }
+
+  #ar-button:focus-visible {
+    outline: 1px solid #4285f4;
+  }
+
+  @keyframes circle {
+    from { transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg); }
+    to   { transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg); }
+  }
+
+  @keyframes elongate {
+    from { transform: translateX(100px); }
+    to   { transform: translateX(-100px); }
+  }
+
+  model-viewer > #ar-prompt {
+    position: absolute;
+    left: 50%;
+    bottom: 175px;
+    animation: elongate 2s infinite ease-in-out alternate;
+    display: none;
+  }
+
+  model-viewer[ar-status="session-started"] > #ar-prompt {
+    display: block;
+  }
+
+  model-viewer > #ar-prompt > img {
+    animation: circle 4s linear infinite;
+  }
+
+  .slider {
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    position: absolute;
+    bottom: 16px;
+  }
+
+  .slides {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slide {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #fff;
+    margin-right: 10px;
+    border-radius: 10px;
+    border: none;
+    display: flex;
+  }
+
+  .slide.selected {
+    border: 2px solid #4285f4;
+  }
+
+  .slide:focus {
+    outline: none;
+  }
+
+  .slide:focus-visible {
+    outline: 1px solid #4285f4;
+  }
+
+</style>
             </template>
           </example-snippet>
         </div>
@@ -255,7 +255,7 @@
           </div>
           <example-snippet stamp-to="demo-container-2" highlight-as="html">
             <template>
-  <model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
           </example-snippet>
 
@@ -273,37 +273,37 @@
           </div>
           <example-snippet stamp-to="demo-container-3" highlight-as="html">
             <template>
-  <model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
-    <div id="error" class="hide">AR is not supported on this device</div>
-  </model-viewer>
-  <script>
-    document.querySelector("#model-viewer").addEventListener('ar-status', (event) => {
-      if(event.detail.status === 'failed'){
-        const error = document.querySelector("#error");
-        error.classList.remove('hide');
-        error.addEventListener('transitionend',(event) => {
-          error.classList.add('hide');
-        });
-      }
-    });
-  </script>
-  <style>
-    #error {
-      background-color: #ffffffdd;
-      border-radius: 16px;
-      padding: 16px;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate3d(-50%, -50%, 0);
-      transition: opacity 0.3s;
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+  <div id="error" class="hide">AR is not supported on this device</div>
+</model-viewer>
+<script>
+  document.querySelector("#model-viewer").addEventListener('ar-status', (event) => {
+    if(event.detail.status === 'failed'){
+      const error = document.querySelector("#error");
+      error.classList.remove('hide');
+      error.addEventListener('transitionend',(event) => {
+        error.classList.add('hide');
+      });
     }
-    #error.hide {
-      opacity: 0;
-      visibility: hidden;
-      transition: visibility 2s, opacity 1s 1s;
-    }
-  </style>
+  });
+</script>
+<style>
+  #error {
+    background-color: #ffffffdd;
+    border-radius: 16px;
+    padding: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    transition: opacity 0.3s;
+  }
+  #error.hide {
+    opacity: 0;
+    visibility: hidden;
+    transition: visibility 2s, opacity 1s 1s;
+  }
+</style>
             </template>
           </example-snippet>
         </div>
@@ -321,11 +321,11 @@
           </div>
           <example-snippet stamp-to="demo-container-4" highlight-as="html">
             <template>
-    <model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-        <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
-            👋 Activate AR
-        </button>
-    </model-viewer>
+<model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
+      👋 Activate AR
+  </button>
+</model-viewer>
             </template>
           </example-snippet>
   
@@ -349,10 +349,10 @@
             </div>
             <example-snippet stamp-to="demo-container-5" highlight-as="html">
               <template>
-                <div class="background-demo" style="background: linear-gradient(#ffffff, #ada996);">
-                  <span style="position: absolute; text-align: center; font-size: 140px; top:50%;">Background</span>
-                  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
-                </div>
+<div class="background-demo" style="background: linear-gradient(#ffffff, #ada996);">
+  <span style="position: absolute; text-align: center; font-size: 100px; top:50%;">Background</span>
+  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+</div>
               </template>
             </example-snippet>
           </div>

@@ -18,7 +18,7 @@
 
 import './radius_limits.js';
 
-import {dispatchCurrentCameraState, dispatchInitialCameraState, reduxStore} from '../../redux/space_opera_base.js';
+import {dispatchCurrentCameraState, dispatchInitialCameraState, reduxStore} from '../../../redux/space_opera_base.js';
 
 import {DEFAULT_MIN_RADIUS, dispatchRadiusLimits, RadiusLimits} from './radius_limits.js';
 

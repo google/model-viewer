@@ -19,9 +19,10 @@ import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
+import {HotspotConfig} from '../components/hotspot_panel/hotspot_config.js';
+import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/gltf_edits.js';
+
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
-import {HotspotConfig} from './hotspot_config.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
 import {EnvironmentImage} from './lighting_state.js';
 
@@ -55,7 +56,7 @@ export interface State {
   environmentImages: EnvironmentImage[];
 }
 
-const INITIAL_STATE: State = {
+export const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
@@ -97,8 +98,18 @@ function makeRootReducer() {
   };
 }
 
+/** Setup devtools */
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof Redux.compose;
+  }
+}
+const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose
+
 /** Global Redux store. */
-export const reduxStore = Redux.createStore(makeRootReducer());
+export const reduxStore =
+    Redux.createStore(makeRootReducer(), composeEnhancers());
 
 /**
  * A synchronous mutator of fixed paylod type.

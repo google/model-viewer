@@ -1,0 +1,316 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt;</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Easily display interactive 3D models on the web and in AR">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+  <script src="node_modules/intersection-observer/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+  <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
+</head>
+<body>
+
+  <a id="button-github" class="icon-github icon-button" href="https://github.com/google/model-viewer"></a>
+
+  <div class="sample">
+    <div id="demo-container" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <div class="lockup zero-interaction"><div class="icon-button icon-modelviewer-black"></div><h1><span class="attribute">&lt;model-viewer&gt;</span></h1></div>
+          <h3 class="slogan" style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
+        </div>
+
+          <div id="section-quick-start">
+            <h3 class="grouping-title grouping-title-new quick-start">Quick Start</h3>
+            <div class="quick-start-example">
+              <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
+                <template>
+<!-- Import the component -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+<script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+
+<!-- Use it like any other HTML element -->
+<model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
+                </template>
+              </example-snippet>
+            </div>
+          </div>
+
+        <div id="section-documentation">
+          <h3 class="grouping-title grouping-title-new border-bottom">Documentation</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                API <a href="docs/index.html">documentation</a> &amp; <a href="examples/loading/index.html">examples</a>
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-editor">
+          <h3 class="grouping-title grouping-title-new border-bottom">Model Editor</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                Use the <a href="editor">Model Editor</a> to prepare your GLB models for the web
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="examples/tester.html">Interactive Viewer</a> (Legacy)
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-community">
+          <h3 class="grouping-title grouping-title-new border-bottom">Community</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                <a href="https://github.com/google/model-viewer">Github</a> / <a href="https://github.com/google/model-viewer/issues">Bug Reports</a>
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="https://model-viewer.glitch.me/">Glitch</a>  (astronaut example)
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="https://spectrum.chat/model-viewer/general?tab=posts">Spectrum</a>
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="https://twitter.com/modelviewer">Twitter</a> @modelviewer
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-metrics">
+          <h3 class="grouping-title grouping-title-new border-bottom">Metrics</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                <a href="examples/lighthouse.html">Performance</a>
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="fidelity">glTF Fidelity Comparison</a>
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-browser-support">
+          <h3 class="grouping-title grouping-title-new border-bottom">Browser Support</h3>
+
+          <div id="browser-support-icon-group">
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
+          </div>
+
+          <div style="clear:both"></div>
+
+          <p class="browser-support-desc">These browser features are
+          <b>required</b> for <span
+          class="attribute">&lt;model-viewer&gt;</span> to work correctly:</p>
+          <table class="browser-support">
+            <tr>
+              <th>Feature</th>
+              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
+              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
+            </tr>
+            <tr>
+              <td>Custom Elements</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>Shadow DOM</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+          </table>
+
+          <p class="browser-support-desc">These browser features are
+          <b>optional</b> and are only used if available for performance
+          optimization or specific features:</p>
+          <table class="browser-support">
+            <tr>
+              <th>Feature</th>
+              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
+              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
+            </tr>
+            <tr>
+              <td>Resize Observer</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>Intersection Observer</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>:focus-visible</td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+            </tr>
+          </table>
+
+          <p class="browser-support-desc">These browser features are
+          <b>optional</b> and are only needed if you wish to use
+          webxr in ar-modes:</p>
+          <table class="browser-support">
+            <tr>
+              <th>Feature</th>
+              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
+              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
+            </tr>
+
+            <tr>
+              <td>WebXR Device API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR HitTest API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR DOM Overlay API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+            </tr>
+          </table>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <ul>
+      <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
+  </div>
+
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="examples/built/dependencies.js">
+  </script>
+  <script nomodule
+      src="examples/built/dependencies-legacy.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on modern browsers: -->
+  <script type="module"
+      src="node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> only on old browsers like IE11: -->
+  <script nomodule
+      src="node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+</body>
+</html>

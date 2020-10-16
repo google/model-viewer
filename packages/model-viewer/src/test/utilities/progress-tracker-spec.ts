@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import {waitForEvent} from '../../utilities.js';
 import {Activity, ProgressDetails, ProgressTracker} from '../../utilities/progress-tracker.js';
-import {waitForEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
