@@ -47,6 +47,7 @@ template.innerHTML = `
   display: block;
   position: relative;
   overflow: hidden;
+  touch-action: pan-y;
 }
 
 canvas {

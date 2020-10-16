@@ -156,10 +156,9 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.addEventListener('pointermove', this.onPointerMove);
       element.addEventListener('pointerdown', this.onPointerDown);
+      element.addEventListener('pointerup', this.onPointerUp);
       element.addEventListener('wheel', this.onWheel);
       element.addEventListener('keydown', this.onKeyDown);
-
-      self.addEventListener('pointerup', this.onPointerUp);
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -169,13 +168,11 @@ export class SmoothControls extends EventDispatcher {
   disableInteraction() {
     if (this._interactionEnabled === true) {
       const {element} = this;
-
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerdown', this.onPointerDown);
+      element.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
-
-      self.removeEventListener('pointerup', this.onPointerUp);
 
       element.style.cursor = '';
       this._interactionEnabled = false;
@@ -455,7 +452,6 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onPointerMove = (event: PointerEvent) => {
-    console.log('move');
     if (this.touchMode === 'none' || !this.canInteract) {
       return;
     }
@@ -486,8 +482,6 @@ export class SmoothControls extends EventDispatcher {
         const deltaTheta = this.pixelsToRadians(clientX - lastX);
         const deltaPhi = this.pixelsToRadians(clientY - lastY);
 
-        console.log(deltaPhi);
-
         this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
 
         if (this.isUserPointing === false) {
@@ -497,11 +491,10 @@ export class SmoothControls extends EventDispatcher {
         }
         break;
     }
-    event.preventDefault();
   };
 
   private onPointerDown = (event: PointerEvent) => {
-    console.log('down');
+    this.element.setPointerCapture(event.pointerId);
     this.isUserPointing = false;
 
     if (event.isPrimary) {
@@ -516,7 +509,6 @@ export class SmoothControls extends EventDispatcher {
   };
 
   private onPointerUp = (event: PointerEvent) => {
-    console.log('up');
     if (event.isPrimary ||
         event.pointerId === this.secondaryPointer.pointerId) {
       this.touchMode = 'none';
