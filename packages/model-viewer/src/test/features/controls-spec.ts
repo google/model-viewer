@@ -21,7 +21,7 @@ import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} fr
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor, step, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until} from '../helpers.js';
+import {assetPath, interactWith, rafPasses, timePasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
@@ -30,11 +30,6 @@ const DEFAULT_FOV = 45;
 const DEFAULT_MIN_FOV = 25;
 const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
-
-const interactWith = (element: HTMLElement) => {
-  dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
-  dispatchSyntheticEvent(element, 'mousemove', {clientX: 0, clientY: 0});
-};
 
 const expectSphericalsToBeEqual =
     (sphericalOne: SphericalPosition, sphericalTwo: SphericalPosition) => {

@@ -156,7 +156,7 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.addEventListener('pointermove', this.onPointerMove);
       element.addEventListener('pointerdown', this.onPointerDown);
-      element.addEventListener('pointerup', this.onPointerUp);
+      self.addEventListener('pointerup', this.onPointerUp);
       element.addEventListener('wheel', this.onWheel);
       element.addEventListener('keydown', this.onKeyDown);
 
@@ -170,7 +170,7 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerdown', this.onPointerDown);
-      element.removeEventListener('pointerup', this.onPointerUp);
+      self.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
 
@@ -494,7 +494,6 @@ export class SmoothControls extends EventDispatcher {
   };
 
   private onPointerDown = (event: PointerEvent) => {
-    this.element.setPointerCapture(event.pointerId);
     this.isUserPointing = false;
 
     if (event.isPrimary) {

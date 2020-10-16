@@ -78,6 +78,13 @@ export const dispatchSyntheticEvent =
       return event;
     };
 
+export const interactWith = (element: HTMLElement) => {
+  element.dispatchEvent(new PointerEvent(
+      'pointerdown',
+      {clientX: 10, clientY: 0, isPrimary: true, bubbles: true}));
+  element.dispatchEvent(new PointerEvent(
+      'pointermove', {clientX: 0, clientY: 0, isPrimary: true, bubbles: true}));
+};
 
 export const ASSETS_DIRECTORY = '../base/shared-assets/';
 

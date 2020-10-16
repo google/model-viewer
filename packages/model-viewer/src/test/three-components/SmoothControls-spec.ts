@@ -17,7 +17,7 @@ import {PerspectiveCamera, Vector3} from 'three';
 
 import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
-import {dispatchSyntheticEvent} from '../helpers.js';
+import {dispatchSyntheticEvent, interactWith} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -270,14 +270,13 @@ suite('SmoothControls', () => {
           });
 
           test('does not orbit when pointing while blurred', () => {
-            const originalPhi = controls.getCameraSpherical().phi;
+            const originalTheta = controls.getCameraSpherical().theta;
 
-            dispatchSyntheticEvent(
-                element, 'mousedown', {clientX: 0, clientY: 10});
-            dispatchSyntheticEvent(
-                element, 'mousemove', {clientX: 0, clientY: 0});
+            interactWith(element);
+            settleControls(controls);
 
-            expect(controls.getCameraSpherical().phi).to.be.equal(originalPhi);
+            expect(controls.getCameraSpherical().theta)
+                .to.be.equal(originalTheta);
           });
 
           test('does zoom when scrolling while focused', () => {
@@ -302,17 +301,13 @@ suite('SmoothControls', () => {
           });
 
           test('orbits when pointing, even while blurred', () => {
-            const originalPhi = controls.getCameraSpherical().phi;
+            const originalTheta = controls.getCameraSpherical().theta;
 
-            dispatchSyntheticEvent(
-                element, 'mousedown', {clientX: 0, clientY: 10});
-            dispatchSyntheticEvent(
-                element, 'mousemove', {clientX: 0, clientY: 0});
-
+            interactWith(element);
             settleControls(controls);
 
-            expect(controls.getCameraSpherical().phi)
-                .to.be.greaterThan(originalPhi);
+            expect(controls.getCameraSpherical().theta)
+                .to.be.greaterThan(originalTheta);
           });
 
           test('zooms when scrolling, even while blurred', () => {
