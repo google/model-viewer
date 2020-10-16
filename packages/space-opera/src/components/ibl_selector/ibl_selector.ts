@@ -27,7 +27,6 @@ import '../file_modal/file_modal.js';
 import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
-import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from '../../redux/lighting_state.js';
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
@@ -36,6 +35,7 @@ import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
 import {styles} from './ibl_selector.css.js';
+import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './lighting_state.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from './reducer.js';
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';

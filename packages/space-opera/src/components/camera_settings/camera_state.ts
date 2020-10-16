@@ -17,7 +17,7 @@
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {roundToDigits} from '@google/model-viewer-editing-adapter/lib/util/math.js'
-import {Limits, SphericalPositionDeg, Vector3D} from '../components/camera_settings/types.js';
+import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 const DIGITS = 4;
 

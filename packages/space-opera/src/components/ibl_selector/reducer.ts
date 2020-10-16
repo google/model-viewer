@@ -17,8 +17,9 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {EnvironmentImage} from '../../redux/lighting_state.js';
 import {registerStateMutator} from '../../redux/space_opera_base.js';
+
+import {EnvironmentImage} from './lighting_state.js';
 
 /**
  * Creates a blob url from an uploaded file, should be used only for
