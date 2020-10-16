@@ -69,6 +69,8 @@ declare interface XRView {
   readonly projectionMatrix: Float32Array;
   readonly viewMatrix: Float32Array;
   readonly transform: XRRigidTransform;
+  readonly recommendedViewportScale: number|null;
+  requestViewportScale(scale: number|null): void;
 }
 
 declare interface XRViewerPose {
