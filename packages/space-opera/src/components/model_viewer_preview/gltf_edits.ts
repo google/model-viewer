@@ -17,7 +17,7 @@
 
 import {GltfModel, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
 
-import {applyMaterials, createMaterials, Material, Texture, TexturesById} from '../../redux/material_state.js';
+import {applyMaterials, createMaterials, Material, Texture, TexturesById} from '../materials_panel/material_state.js';
 
 /**
  * All the state that the user can edit. It's important to capture all that in a

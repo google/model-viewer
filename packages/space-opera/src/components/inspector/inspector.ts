@@ -22,9 +22,9 @@
 import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, PropertyValues} from 'lit-element';
 
-import {TexturesById} from '../../redux/material_state.js';
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {TexturesById} from '../materials_panel/material_state.js';
 
 const $texturesById = Symbol('texturesById');
 

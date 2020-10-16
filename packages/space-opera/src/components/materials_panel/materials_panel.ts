@@ -33,8 +33,6 @@ import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
-import {TexturesById} from '../../redux/material_state.js';
-import {Material} from '../../redux/material_state.js';
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
@@ -42,6 +40,8 @@ import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
 
+import {TexturesById} from './material_state.js';
+import {Material} from './material_state.js';
 import {styles} from './materials_panel.css.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from './reducer.js';
 

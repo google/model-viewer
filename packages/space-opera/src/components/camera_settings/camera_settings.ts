@@ -29,7 +29,6 @@ import '../shared/checkbox/checkbox.js';
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
-import {Camera, INITIAL_CAMERA} from '../../redux/camera_state.js';
 import {State} from '../../redux/space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -37,6 +36,7 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
+import {Camera, INITIAL_CAMERA} from './camera_state.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
