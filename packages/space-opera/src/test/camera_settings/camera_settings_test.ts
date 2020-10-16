@@ -20,8 +20,8 @@ import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
+import {dispatchCurrentCameraState} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
-import {dispatchCurrentCameraState} from '../../space_opera_base.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('camera constraints test', () => {

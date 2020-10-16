@@ -22,8 +22,9 @@ import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-ad
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/animation_controls/reducer.js';
+import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
-import {dispatchGltfAndEdits, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =

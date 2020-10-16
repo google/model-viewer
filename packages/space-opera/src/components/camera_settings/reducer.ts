@@ -16,11 +16,39 @@
  */
 
 import {registerStateMutator, State} from '../../space_opera_base.js';
+
+import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
 /*
  * Register state mutators and get corresponding dispatchers.
  */
+
+/**
+ * Used to initialize camera state with model-viewer's initial state. This means
+ * we can rely on it to parse things like camera orbit strings, rather than
+ * doing it ourselves.
+ */
+const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
+export const dispatchInitialCameraState = registerStateMutator(
+    SET_INITIAL_CAMERA_STATE, (state, initialCamera?: Camera) => {
+      if (!initialCamera)
+        return;
+      state.initialCamera = {...initialCamera};
+    });
+
+/**
+ * For any component to use when they need to reference the current preview
+ * camera state.
+ */
+const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
+export const dispatchCurrentCameraState = registerStateMutator(
+    SET_CURRENT_CAMERA_STATE, (state, currentCamera?: Camera) => {
+      if (!currentCamera)
+        return;
+      state.currentCamera = {...currentCamera};
+    });
+
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export const dispatchCameraControlsEnabled = registerStateMutator(

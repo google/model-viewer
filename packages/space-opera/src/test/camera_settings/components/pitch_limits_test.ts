@@ -19,7 +19,8 @@
 import '../../../components/camera_settings/components/pitch_limits.js';
 
 import {DEFAULT_MAX_PITCH, dispatchPitchLimits, PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
-import {dispatchCurrentCameraState, reduxStore} from '../../../space_opera_base.js';
+import {dispatchCurrentCameraState} from '../../../components/camera_settings/reducer.js';
+import {reduxStore} from '../../../space_opera_base.js';
 
 describe('pitch limits editor test', () => {
   let pitchLimitsDeg: PitchLimits;

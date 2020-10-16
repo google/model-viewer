@@ -23,7 +23,8 @@ import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.
 import {HotspotConfig} from './components/hotspot_panel/hotspot_config.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
-import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/gltf_edits.js';
+import {GltfEdits, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/gltf_edits.js';
+import {RESET_STATE_ACTION_TYPE} from './components/reset/reducer.js';
 
 /**
  * Space Opera state.
@@ -73,13 +74,6 @@ interface Action extends Redux.Action {
 }
 
 const subReducers = new Map<string, Redux.Reducer<State>>();
-
-const RESET_STATE_ACTION_TYPE = 'RESET_SPACE_OPERA_STATE';
-
-/** Mostly for unit tests. */
-export function dispatchResetState() {
-  reduxStore.dispatch({type: RESET_STATE_ACTION_TYPE});
-}
 
 function makeRootReducer() {
   return (state: State = INITIAL_STATE, action: Action) => {
@@ -156,108 +150,6 @@ export function registerStateMutator<T>(
     reduxStore.dispatch({type: actionType, payload});
   };
 }
-
-/** The user has requested a new GLTF/GLB for editing. */
-export const dispatchGltfUrl =
-    registerStateMutator('SET_GLTF_URL', (state: State, gltfUrl?: string) => {
-      state.gltfUrl = gltfUrl;
-    });
-
-class DispatchGltfArgs {
-  constructor(
-      readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {
-  }
-}
-
-const dispatchGltf = registerStateMutator(
-    'SET_GLTF', (state: State, args?: DispatchGltfArgs) => {
-      if (!args) {
-        throw new Error(`No args given!`);
-      }
-      const gltf = args.gltf;
-      if (gltf !== undefined && state.gltf === gltf) {
-        throw new Error(
-            `Same gltf was given! Only call this upon actual change`);
-      }
-      state.gltf = gltf;
-
-      const edits = args.edits;
-      if (!edits) {
-        throw new Error(`Must give valid edits!`);
-      }
-      if (state.edits === edits) {
-        throw new Error(
-            `Same edits was given! Only call this upon actual change`);
-      }
-      state.edits = edits;
-      state.origEdits = edits;
-      state.animationNames = args.animationNames;
-      state.gltfJsonString = args.jsonString;
-    });
-
-/**
- * Helper async function
- */
-export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
-  // NOTE: This encodes a design decision: Whether or not we reset edits
-  // upon loading a new GLTF. It may be sensible to not reset edits and just
-  // apply previous edits to the same, but updated, GLTF. That could be
-  // later exposed as an option, and in that case we would simply apply the
-  // existing edits (with null previousEdits) to this new model and not
-  // dispatch new edits.
-  const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
-  dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
-}
-
-/** Only use in intialization. */
-export const dispatchModelViewer = registerStateMutator(
-    'MODEL_VIEWER', (state: State, modelViewer?: ModelViewerElement) => {
-      state.modelViewer = modelViewer;
-    })
-
-/** Use when the user wants to load a new config (probably from a snippet). */
-export const dispatchConfig = registerStateMutator(
-    'MODEL_VIEWER_CONFIG', (state: State, config?: ModelViewerConfig) => {
-      if (!config) {
-        throw new Error('No config given!');
-      }
-      if (config === state.config) {
-        throw new Error(`Do not modify state.config in place!`);
-      }
-      state.config = config;
-
-      // Clear camera settings. This is optional!
-      state.camera = INITIAL_CAMERA;
-
-      // Clear initialCamera too, as ModelViewerPreview will update this.
-      state.initialCamera = INITIAL_CAMERA;
-      delete state.currentCamera;
-    });
-
-/**
- * Used to initialize camera state with model-viewer's initial state. This means
- * we can rely on it to parse things like camera orbit strings, rather than
- * doing it ourselves.
- */
-export const dispatchInitialCameraState = registerStateMutator(
-    'SET_INITIAL_CAMERA_STATE', (state, initialCamera?: Camera) => {
-      if (!initialCamera)
-        return;
-      state.initialCamera = {...initialCamera};
-    });
-
-/**
- * For any component to use when they need to reference the current preview
- * camera state.
- */
-export const dispatchCurrentCameraState = registerStateMutator(
-    'SET_CURRENT_CAMERA_STATE', (state, currentCamera?: Camera) => {
-      if (!currentCamera)
-        return;
-      state.currentCamera = {...currentCamera};
-    });
 
 /**
  * Convenience function for components that import GLBs.

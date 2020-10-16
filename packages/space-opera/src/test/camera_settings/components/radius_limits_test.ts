@@ -19,7 +19,9 @@
 import '../../../components/camera_settings/components/radius_limits.js';
 
 import {DEFAULT_MIN_RADIUS, dispatchRadiusLimits, RadiusLimits} from '../../../components/camera_settings/components/radius_limits.js';
-import {dispatchCurrentCameraState, dispatchInitialCameraState, reduxStore} from '../../../space_opera_base.js';
+import {dispatchInitialCameraState} from '../../../components/camera_settings/reducer.js';
+import {dispatchCurrentCameraState} from '../../../components/camera_settings/reducer.js';
+import {reduxStore} from '../../../space_opera_base.js';
 
 describe('radius limits editor test', () => {
   let radiusLimits: RadiusLimits;

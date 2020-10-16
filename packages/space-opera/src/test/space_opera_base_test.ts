@@ -21,10 +21,12 @@ import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_jso
 import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
+import {dispatchInitialCameraState} from '../components/camera_settings/reducer.js';
+import {dispatchCurrentCameraState} from '../components/camera_settings/reducer.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits, INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/gltf_edits.js';
-
-import {dispatchCurrentCameraState, dispatchGltfAndEdits, dispatchGltfUrl, dispatchInitialCameraState, reduxStore, registerStateMutator} from '../space_opera_base.js';
+import {dispatchGltfAndEdits, dispatchGltfUrl} from '../components/model_viewer_preview/reducer.js';
+import {reduxStore, registerStateMutator} from '../space_opera_base.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =
