@@ -1,4 +1,4 @@
-import {registerStateMutator, State} from '../../redux/space_opera_base';
+import {registerStateMutator, State} from '../../space_opera_base';
 
 /** Dispatch a state mutator to set model-viewer poster. */
 const SET_POSTER = 'SET_POSTER';

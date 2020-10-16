@@ -25,7 +25,7 @@ import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adap
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
+import {dispatchConfig, dispatchGltfUrl, State} from '../../space_opera_base.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';

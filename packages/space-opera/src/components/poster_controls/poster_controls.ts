@@ -24,7 +24,7 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
-import {State} from '../../redux/space_opera_base.js';
+import {State} from '../../space_opera_base.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 

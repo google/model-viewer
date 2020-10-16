@@ -17,7 +17,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../redux/space_opera_base.js';
+import {registerStateMutator, State} from '../../../space_opera_base.js';
 import {Camera} from '../camera_state.js';
 import {Limits} from '../types.js';
 

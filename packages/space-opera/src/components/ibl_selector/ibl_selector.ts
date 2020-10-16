@@ -27,7 +27,7 @@ import '../file_modal/file_modal.js';
 import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
-import {State} from '../../redux/space_opera_base.js';
+import {State} from '../../space_opera_base.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
