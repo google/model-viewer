@@ -15,8 +15,9 @@
  *
  */
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {reduxStore, registerStateMutator, State} from '../../space_opera_base.js';
 import {Action} from '../../space_opera_base.js';
+
 
 /** Set auto play enabled or not */
 const SET_AUTOPLAY_ENABLED = 'SET_AUTOPLAY_ENABLED';
@@ -42,14 +43,21 @@ export const dispatchAnimationName = registerStateMutator(
 
 /** Set playAnimation or not */
 const PLAY_ANIMATION = 'PLAY_ANIMATION';
-export const dispatchPlayAnimation = registerStateMutator(
-    PLAY_ANIMATION, (state: State, playAnimation?: boolean) => {
-      // No need to copy state - we're always given a new copy.
-      state.playAnimation = !!playAnimation;
-    });
+export function dispatchPlayAnimation(playAnimation: boolean) {
+  reduxStore.dispatch({type: PLAY_ANIMATION, payload: playAnimation});
+}
 
+interface PlayAnimationState {
+  playAnimation: boolean
+}
 
-
-export function playAnimationReducer(state: State, action: Action) {
-  switch (action.type) {}
+export function playAnimationReducer(
+    state: PlayAnimationState, action: Action) {
+  console.log('Play Animation', state);
+  switch (action.type) {
+    case PLAY_ANIMATION:
+      return !!action.payload;
+    default:
+      return state;
+  }
 }

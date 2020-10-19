@@ -18,7 +18,7 @@
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
-import {registerStateMutator} from '../../space_opera_base.js';
+import {Action, reduxStore, registerStateMutator} from '../../space_opera_base.js';
 import {State} from '../../space_opera_base.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/gltf_edits.js';
 
@@ -77,7 +77,20 @@ export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
 }
 
 /** Only use in intialization. */
-export const dispatchModelViewer = registerStateMutator(
-    'MODEL_VIEWER', (state: State, modelViewer?: ModelViewerElement) => {
-      state.modelViewer = modelViewer;
-    })
+const MODEL_VIEWER = 'MODEL_VIEWER';
+export function dispatchModelViewer(modelViewer?: ModelViewerElement) {
+  reduxStore.dispatch({type: MODEL_VIEWER, paylaod: modelViewer});
+}
+
+interface ModelViewerState {
+  modelViewer: ModelViewerElement;
+}
+
+export function modelViewerReducer(state: ModelViewerState, action: Action) {
+  switch (action.type) {
+    case MODEL_VIEWER:
+      return action.payload;
+    default:
+      return state;
+  }
+}

@@ -17,7 +17,7 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {registerStateMutator} from '../../space_opera_base.js';
+import {Action, reduxStore, registerStateMutator} from '../../space_opera_base.js';
 
 import {EnvironmentImage} from './lighting_state.js';
 
@@ -48,16 +48,6 @@ export const dispatchExposure =
       state.config = {...state.config, exposure};
     });
 
-/** Dispatch an edit to potential environment images to select. */
-const UPLOAD_ENVIRONMENT_IMAGE = 'UPLOAD_ENVIRONMENT_IMAGE';
-export const dispatchAddEnvironmentImage = registerStateMutator(
-    UPLOAD_ENVIRONMENT_IMAGE, (state, image?: EnvironmentImage) => {
-      if (!image) {
-        return;
-      }
-      state.environmentImages = [...state.environmentImages, image];
-    });
-
 /** Dispatch an edit to model viewer exposure attribute. */
 const SET_USE_ENV_AS_SKYBOX = 'SET_USE_ENV_AS_SKYBOX';
 export const dispatchUseEnvAsSkybox = registerStateMutator(
@@ -79,3 +69,34 @@ export const dispatchShadowSoftness = registerStateMutator(
     UPDATE_SHADOW_SOFTNESS, (state, shadowSoftness?: number) => {
       state.config = {...state.config, shadowSoftness};
     });
+
+// EnvironmentImages //////////////////
+
+interface EvironmentImageState {
+  environmentImages: EnvironmentImage[];
+}
+
+/** Dispatch an edit to potential environment images to select. */
+const UPLOAD_ENVIRONMENT_IMAGE = 'UPLOAD_ENVIRONMENT_IMAGE';
+export function dispatchAddEnvironmentImage(image?: EnvironmentImage) {
+  if (!image) {
+    return;
+  }
+  reduxStore.dispatch({type: UPLOAD_ENVIRONMENT_IMAGE, payload: image})
+}
+
+function addEnvironmentImage(
+    state: EvironmentImageState, image: EnvironmentImage) {
+  const environmentImages = [...state.environmentImages, image];
+  return environmentImages;
+}
+
+export function environmentImagesReducer(
+    state: EvironmentImageState, action: Action) {
+  switch (action.type) {
+    case UPLOAD_ENVIRONMENT_IMAGE:
+      return addEnvironmentImage(state, action.payload);
+    default:
+      return state;
+  }
+}
