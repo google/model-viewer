@@ -17,7 +17,7 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {registerStateMutator} from '../../redux/space_opera_base.js';
+import {registerStateMutator} from '../../space_opera_base.js';
 
 import {EnvironmentImage} from './lighting_state.js';
 

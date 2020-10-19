@@ -25,11 +25,12 @@ import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adap
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-import {dispatchConfig, dispatchGltfUrl, State} from '../../redux/space_opera_base.js';
+import {State} from '../../space_opera_base.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
 import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
+import {dispatchGltfUrl} from '../model_viewer_preview/reducer.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -37,6 +38,7 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {ExportZipButton} from './components/download_button.js';
 import {parseHotspotsFromSnippet} from './parse_hotspot_config.js';
+import {dispatchConfig} from './reducer.js';
 
 /**
  *

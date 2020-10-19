@@ -15,7 +15,7 @@
  *
  */
 
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
+import {registerStateMutator, State} from '../../space_opera_base.js';
 
 /** Set auto play enabled or not */
 const SET_AUTOPLAY_ENABLED = 'SET_AUTOPLAY_ENABLED';
