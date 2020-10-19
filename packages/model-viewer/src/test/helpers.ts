@@ -61,10 +61,6 @@ export interface SyntheticEventProperties {
 /**
  * Dispatch a synthetic event on a given element with a given type, and
  * optionally with custom event properties. Returns the dispatched event.
- *
- * @param {HTMLElement} element
- * @param {type} string
- * @param {*} properties
  */
 export const dispatchSyntheticEvent =
     (target: EventTarget, type: string, properties: SyntheticEventProperties = {
@@ -78,21 +74,26 @@ export const dispatchSyntheticEvent =
       return event;
     };
 
+const SyntheticPointerEvent =
+    (type: string, properties: PointerEventInit): PointerEvent => {
+      let event;
+      if (typeof (PointerEvent) === 'function') {
+        properties.cancelable = true;
+        properties.bubbles = true;
+        event = new PointerEvent(type, properties);
+      } else {
+        event = document.createEvent('PointerEvent');
+        event.initEvent(type, true, true);
+        Object.assign(event, properties);
+      }
+      return event;
+    };
+
 export const interactWith = (element: HTMLElement) => {
-  element.dispatchEvent(new PointerEvent('pointerdown', {
-    clientX: 10,
-    clientY: 0,
-    isPrimary: true,
-    cancelable: true,
-    bubbles: true
-  }));
-  element.dispatchEvent(new PointerEvent('pointermove', {
-    clientX: 0,
-    clientY: 0,
-    isPrimary: true,
-    cancelable: true,
-    bubbles: true
-  }));
+  element.dispatchEvent(SyntheticPointerEvent(
+      'pointerdown', {clientX: 10, clientY: 0, isPrimary: true}));
+  element.dispatchEvent(SyntheticPointerEvent(
+      'pointermove', {clientX: 0, clientY: 0, isPrimary: true}));
 };
 
 export const ASSETS_DIRECTORY = '../base/shared-assets/';
@@ -101,9 +102,6 @@ export const ASSETS_DIRECTORY = '../base/shared-assets/';
  * Returns the full path for an asset by name. This is a convenience helper so
  * that we don't need to change paths throughout all test suites if we ever
  * decide to move files around.
- *
- * @param {string} name
- * @return {string}
  */
 export const assetPath = (name: string): string =>
     deserializeUrl(`${ASSETS_DIRECTORY}${name}`)!;
@@ -111,9 +109,6 @@ export const assetPath = (name: string): string =>
 /**
  * Returns true if the given element is in the tree of the document of the
  * current frame.
- *
- * @param {HTMLElement} element
- * @return {boolean}
  */
 export const isInDocumentTree = (node: Node): boolean => {
   let root: Node = node.getRootNode();
