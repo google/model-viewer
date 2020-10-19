@@ -20,26 +20,26 @@ import {combineReducers} from 'redux';
 import {origEdits} from './'
 import {animationNames} from './'
 import {gltfJsonString} from './'
-import {camera} from './'
 import {initialCamera} from './'
 import {gltfUrl} from './'
 import {currentCamera} from './'
 import {gltf} from './'
 import {edits} from './components/';
 import {playAnimationReducer} from './components/animation_controls/reducer.js';
-import {config} from './components/config/reducer.js';
+import {cameraReducer} from './components/camera_settings/reducer.js'
+import {configReducer} from './components/config/reducer.js';
 import {hotspotModeReducer, hotspotsReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
 import {modelViewerReducer} from './components/model_viewer_preview/reducer.js';
 
 
 export const rootReducer = combineReducers({
-  config,
+  config: configReducer,
   edits,
   origEdits,
   animationNames,
   gltfJsonString,
-  camera,
+  camera: cameraReducer,
   initialCamera,
   addHotspotMode: hotspotModeReducer,
   hotspots: hotspotsReducer,

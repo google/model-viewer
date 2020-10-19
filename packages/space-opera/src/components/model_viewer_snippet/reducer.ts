@@ -20,6 +20,8 @@ import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.j
 import {registerStateMutator} from '../../space_opera_base.js';
 import {State} from '../../space_opera_base.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
+import {dispatchSetCamera} from '../camera_settings/reducer.js';
+import {dispatchSetConfig} from '../config/reducer.js';
 
 // TODO: BUGGY! This is mutating the state!
 
@@ -32,10 +34,10 @@ export const dispatchConfig = registerStateMutator(
       if (config === state.config) {
         throw new Error(`Do not modify state.config in place!`);
       }
-      state.config = config;
+      dispatchSetConfig(config);
 
       // Clear camera settings. This is optional!
-      state.camera = INITIAL_CAMERA;
+      dispatchSetCamera(INITIAL_CAMERA);
 
       // Clear initialCamera too, as ModelViewerPreview will update this.
       state.initialCamera = INITIAL_CAMERA;

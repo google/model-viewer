@@ -21,7 +21,7 @@ import '../../components/animation_controls/animation_controls.js';
 import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
-import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/animation_controls/reducer.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/config/reducer.js';
 import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -112,7 +112,8 @@ describe('animation controls test', () => {
   });
 
   it('updates selected value on animationName change', async () => {
-    dispatchAnimationName('Idle');
+    const animationName = 'Idle';
+    dispatchAnimationName(animationName);
     const animationNameSelector =
         animationControls.shadowRoot!.querySelector(
             'me-dropdown#animation-name-selector') as Dropdown;

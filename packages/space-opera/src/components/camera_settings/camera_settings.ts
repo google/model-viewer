@@ -30,6 +30,7 @@ import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapt
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
 import {State} from '../../space_opera_base.js';
+import {dispatchAutoRotate, dispatchCameraControlsEnabled} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
@@ -37,7 +38,7 @@ import {styles as draggableInputRowStyles} from '../shared/draggable_input/dragg
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -152,6 +153,7 @@ export class CameraSettings extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() initialCamera: Camera = INITIAL_CAMERA;
+  @internalProperty() currentCamera: Camera|undefined = INITIAL_CAMERA;
 
   @query('me-camera-orbit-editor') cameraOrbitEditor?: CameraOrbitEditor;
   @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
@@ -168,6 +170,7 @@ export class CameraSettings extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.initialCamera = state.initialCamera;
+    this.currentCamera = state.currentCamera;
   }
 
   onCamControlsCheckboxChange(event: Event) {
@@ -175,7 +178,15 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onSaveCameraOrbit() {
-    dispatchSaveCameraOrbit();
+    if (!this.currentCamera)
+      return;
+    const currentOrbit = this.currentCamera.orbit;
+    if (!currentOrbit)
+      return;
+    const currentFieldOfViewDeg = this.currentCamera.fieldOfViewDeg;
+    if (!currentFieldOfViewDeg)
+      return;
+    dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg);
   }
 
   onCameraTargetChange(newValue: Vector3D) {

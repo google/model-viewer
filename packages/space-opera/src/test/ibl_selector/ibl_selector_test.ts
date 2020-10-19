@@ -18,8 +18,9 @@
 
 import '../../components/ibl_selector/ibl_selector.js';
 
+import {dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../../components/config/reducer.js';
 import {IblSelector} from '../../components/ibl_selector/ibl_selector.js';
-import {dispatchAddEnvironmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../../components/ibl_selector/reducer.js';
+import {dispatchAddEnvironmentImage} from '../../components/ibl_selector/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('ibl selector test', () => {

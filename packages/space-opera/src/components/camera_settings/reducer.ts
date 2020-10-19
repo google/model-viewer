@@ -15,7 +15,7 @@
  *
  */
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, reduxStore, registerStateMutator, State} from '../../space_opera_base.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
@@ -49,52 +49,51 @@ export const dispatchCurrentCameraState = registerStateMutator(
       state.currentCamera = {...currentCamera};
     });
 
-
-const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
-export const dispatchCameraControlsEnabled = registerStateMutator(
-    SET_CAMERA_CONTROLS_ENABLED, (state: State, enabled?: boolean) => {
-      state.config = {...state.config, cameraControls: !!enabled};
-    });
-
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export const dispatchSaveCameraOrbit =
-    registerStateMutator(SAVE_CAMERA_ORBIT, (state: State) => {
-      if (!state.currentCamera)
-        return;
-      const currentOrbit = state.currentCamera.orbit;
-      if (!currentOrbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit: {...currentOrbit},
-        fieldOfViewDeg: state.currentCamera.fieldOfViewDeg,
-      };
-    });
+export function dispatchSaveCameraOrbit(
+    currentOrbit: SphericalPositionDeg, currentFieldOfViewDeg: number) {
+  reduxStore.dispatch({
+    type: SAVE_CAMERA_ORBIT,
+    payload: {orbit: currentOrbit, fieldOfViewDeg: currentFieldOfViewDeg}
+  });
+}
 
 /** Event dispatcher for changes to camera-target. */
 const SET_CAMERA_TARGET = 'SET_CAMERA_TARGET';
-export const dispatchCameraTarget = registerStateMutator(
-    SET_CAMERA_TARGET, (state: State, target?: Vector3D) => {
-      state.camera = {...state.camera, target};
-    });
+export function dispatchCameraTarget(target?: Vector3D) {
+  reduxStore.dispatch({type: SET_CAMERA_TARGET, payload: target})
+}
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export const dispatchInitialOrbit = registerStateMutator(
-    SET_CAMERA_STATE_INITIAL_ORBIT,
-    (state: State, orbit?: SphericalPositionDeg) => {
-      if (!orbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit,
-      };
-    });
+export function dispatchInitialOrbit(orbit?: SphericalPositionDeg) {
+  if (!orbit)
+    return;
+  reduxStore.dispatch({type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit})
+}
 
-/** Dispatch changes to auto rotate */
-const SET_AUTO_ROTATE = 'SET_AUTO_ROTATE';
-export const dispatchAutoRotate =
-    registerStateMutator(SET_AUTO_ROTATE, (state, autoRotate?: boolean) => {
-      state.config = {...state.config, autoRotate};
-    });
+const SET_CAMERA = 'SET_CAMERA';
+export function dispatchSetCamera(camera: Camera) {
+  reduxStore.dispatch({type: SET_CAMERA, payload: camera})
+}
+
+export function cameraReducer(state: Camera, action: Action) {
+  switch (action.type) {
+    case SET_CAMERA:
+      return action.payload;
+    case SET_CAMERA_STATE_INITIAL_ORBIT:
+      return {...state, orbit: action.payload};
+    case SET_CAMERA_TARGET:
+      return {
+        ...state, target: action.payload
+      }
+    case SAVE_CAMERA_ORBIT:
+      return {
+        ...state, orbit: {...action.payload.currentOrbit},
+            fieldOfViewDeg: action.payload.fieldOfViewDeg,
+      }
+    default:
+      return state;
+  }
+}

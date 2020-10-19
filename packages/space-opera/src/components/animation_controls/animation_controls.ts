@@ -23,11 +23,12 @@ import '@polymer/paper-item';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {State} from '../../space_opera_base.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 
-import {dispatchAnimationName, dispatchAutoplayEnabled, dispatchPlayAnimation} from './reducer.js';
+import {dispatchPlayAnimation} from './reducer.js';
 
 interface AnimationControlsInterface {
   autoplay?: boolean;
@@ -105,8 +106,9 @@ export class AnimationControls extends ConnectedLitElement {
     // console throws a warning.
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
-
-    dispatchAnimationName(value);
+    if (!(value && this.animationNames.indexOf(value) === -1)) {
+      dispatchAnimationName(value);
+    }
 
     // Set the bool options values to something sensible
     if (value) {

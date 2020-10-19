@@ -28,6 +28,7 @@ import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {State} from '../../space_opera_base.js';
+import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -36,8 +37,7 @@ import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_in
 
 import {styles} from './ibl_selector.css.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './lighting_state.js';
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from './reducer.js';
-
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from './reducer.js';
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
 /**
