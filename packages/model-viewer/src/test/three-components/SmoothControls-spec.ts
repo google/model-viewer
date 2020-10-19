@@ -43,7 +43,7 @@ suite('SmoothControls', () => {
   let element: HTMLDivElement;
 
   setup(() => {
-    element = document.createElement<'div'>('div');
+    element = document.createElement('div');
     camera = new PerspectiveCamera();
     controls = new SmoothControls(camera, element);
 
