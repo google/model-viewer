@@ -15,4 +15,37 @@
  *
  */
 
-// TODO: Refactor reducers to follow best practices, then combine them all here.
+import {combineReducers} from 'redux';
+
+import {origEdits} from './'
+import {animationNames} from './'
+import {gltfJsonString} from './'
+import {camera} from './'
+import {initialCamera} from './'
+import {hotspots} from './'
+import {environmentImages} from './'
+import {modelViewer} from './'
+import {gltfUrl} from './'
+import {currentCamera} from './'
+import {gltf} from './'
+import {edits} from './components/';
+import {playAnimation} from './components/animation_controls/reducer.js';
+import {config} from './components/config/reducer.js';
+
+
+export const rootReducer = combineReducers({
+  config,
+  edits,
+  origEdits,
+  animationNames,
+  gltfJsonString,
+  camera,
+  initialCamera,
+  hotspots,
+  playAnimation,
+  environmentImages,
+  modelViewer,
+  gltfUrl,
+  currentCamera,
+  gltf
+});

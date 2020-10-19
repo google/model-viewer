@@ -69,8 +69,9 @@ export const INITIAL_STATE: State = {
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
 };
 
-interface Action extends Redux.Action {
+export interface Action extends Redux.Action {
   type: string;
+  payload?: any;
 }
 
 const subReducers = new Map<string, Redux.Reducer<State>>();

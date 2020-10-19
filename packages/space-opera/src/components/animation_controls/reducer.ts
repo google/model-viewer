@@ -16,6 +16,7 @@
  */
 
 import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action} from '../../space_opera_base.js';
 
 /** Set auto play enabled or not */
 const SET_AUTOPLAY_ENABLED = 'SET_AUTOPLAY_ENABLED';
@@ -46,3 +47,9 @@ export const dispatchPlayAnimation = registerStateMutator(
       // No need to copy state - we're always given a new copy.
       state.playAnimation = !!playAnimation;
     });
+
+
+
+export function playAnimationReducer(state: State, action: Action) {
+  switch (action.type) {}
+}
