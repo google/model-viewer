@@ -187,6 +187,8 @@ const TAU = 2.0 * Math.PI;
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
+export const $waitingToPromptUser = Symbol('waitingToPromptUser');
+export const $userHasInteracted = Symbol('userHasInteracted');
 export const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 
@@ -200,8 +202,6 @@ const $onChange = Symbol('onChange');
 const $onCancel = Symbol('onCancel');
 const $onPointerChange = Symbol('onPointerChange');
 
-const $waitingToPromptUser = Symbol('waitingToPromptUser');
-const $userHasInteracted = Symbol('userHasInteracted');
 const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
 
@@ -712,11 +712,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onCancel] = (event: Event) => {
-      // TODO: Fix state reset here, it needs work.
-      this[$userHasInteracted] = false;
-      this[$waitingToPromptUser] = false;
-      this[$promptElement].classList.add('visible');
-      this[$promptElementVisibleTime] = event.promptVisibleTime;
+      this[$userHasInteracted] = event.hasInteracted;
+      this[$waitingToPromptUser] = event.waitingToPrompt;
+      if (Number.isFinite(event.promptVisibleTime)) {
+        this[$promptElementVisibleTime] = event.promptVisibleTime;
+        this[$promptElement].classList.add('visible');
+      }
     };
 
     [$onPointerChange] = (event: Event) => {

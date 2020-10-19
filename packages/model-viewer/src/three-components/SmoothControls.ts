@@ -13,7 +13,7 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
-import {$promptElementVisibleTime} from '../features/controls.js';
+import {$promptElementVisibleTime, $userHasInteracted, $waitingToPromptUser} from '../features/controls.js';
 
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -120,6 +120,8 @@ export class SmoothControls extends EventDispatcher {
   private _options: SmoothControlsOptions;
   private isUserChange = false;
   private isUserPointing = false;
+  private hasInteracted = false;
+  private waitingToPromp = false;
   private promptVisibleTime = Infinity;
 
   // Internal orbital position state
@@ -499,7 +501,11 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerDown = (event: PointerEvent) => {
     this.isUserPointing = false;
-    this.promptVisibleTime = (this.element as any)[$promptElementVisibleTime];
+
+    const element = this.element as any;
+    this.hasInteracted = element[$userHasInteracted];
+    this.waitingToPromp = element[$waitingToPromptUser];
+    this.promptVisibleTime = element[$promptElementVisibleTime];
 
     if (event.isPrimary) {
       this.touchMode = 'rotate';
@@ -514,8 +520,12 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerCancel = () => {
     this.touchMode = 'none';
-    this.dispatchEvent(
-        {type: 'cancel', promptVisibleTime: this.promptVisibleTime});
+    this.dispatchEvent({
+      type: 'cancel',
+      hasInteracted: this.hasInteracted,
+      waitingToPromp: this.waitingToPromp,
+      promptVisibleTime: this.promptVisibleTime
+    });
   };
 
   private onPointerUp = (event: PointerEvent) => {
