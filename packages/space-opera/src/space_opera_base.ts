@@ -25,6 +25,7 @@ import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_envi
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/gltf_edits.js';
 import {RESET_STATE_ACTION_TYPE} from './components/reset/reducer.js';
+import {rootReducer} from './reducers.js';
 
 /**
  * Space Opera state.

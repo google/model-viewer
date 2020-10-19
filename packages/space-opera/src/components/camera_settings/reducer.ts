@@ -15,14 +15,12 @@
  *
  */
 
-import {Action, reduxStore, registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, reduxStore} from '../../space_opera_base.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
-/*
- * Register state mutators and get corresponding dispatchers.
- */
+// INITIAL CAMERA //////////////
 
 /**
  * Used to initialize camera state with model-viewer's initial state. This means
@@ -30,29 +28,57 @@ import {SphericalPositionDeg, Vector3D} from './types.js';
  * doing it ourselves.
  */
 const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
-export const dispatchInitialCameraState = registerStateMutator(
-    SET_INITIAL_CAMERA_STATE, (state, initialCamera?: Camera) => {
-      if (!initialCamera)
-        return;
-      state.initialCamera = {...initialCamera};
-    });
+export function dispatchInitialCameraState(initialCamera?: Camera) {
+  if (!initialCamera)
+    return;
+  reduxStore.dispatch(
+      {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}})
+}
+
+export function initialCameraReducer(state: Camera, action: Action): Camera {
+  switch (action.type) {
+    case SET_INITIAL_CAMERA_STATE:
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
+// CURRENT CAMERA //////////////
 
 /**
  * For any component to use when they need to reference the current preview
  * camera state.
  */
 const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
-export const dispatchCurrentCameraState = registerStateMutator(
-    SET_CURRENT_CAMERA_STATE, (state, currentCamera?: Camera) => {
-      if (!currentCamera)
-        return;
-      state.currentCamera = {...currentCamera};
-    });
+export function dispatchCurrentCameraState(currentCamera?: Camera) {
+  if (!currentCamera)
+    return;
+  reduxStore.dispatch(
+      {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}})
+}
+
+export function currentCameraReducer(state: Camera, action: Action): Camera {
+  switch (action.type) {
+    case SET_CURRENT_CAMERA_STATE:
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
+// CAMERA //////////////
 
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit(
-    currentOrbit: SphericalPositionDeg, currentFieldOfViewDeg: number) {
+export function dispatchSaveCameraOrbit() {
+  if (!reduxStore.getState().currentCamera)
+    return;
+  const currentOrbit = reduxStore.getState().currentCamera.orbit;
+  if (!currentOrbit)
+    return;
+  const currentFieldOfViewDeg =
+      reduxStore.getState().currentCamera.fieldOfViewDeg;
   reduxStore.dispatch({
     type: SAVE_CAMERA_ORBIT,
     payload: {orbit: currentOrbit, fieldOfViewDeg: currentFieldOfViewDeg}
@@ -78,7 +104,7 @@ export function dispatchSetCamera(camera: Camera) {
   reduxStore.dispatch({type: SET_CAMERA, payload: camera})
 }
 
-export function cameraReducer(state: Camera, action: Action) {
+export function cameraReducer(state: Camera, action: Action): Camera {
   switch (action.type) {
     case SET_CAMERA:
       return action.payload;

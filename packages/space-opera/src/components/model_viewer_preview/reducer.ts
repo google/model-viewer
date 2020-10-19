@@ -22,11 +22,40 @@ import {Action, reduxStore, registerStateMutator} from '../../space_opera_base.j
 import {State} from '../../space_opera_base.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/gltf_edits.js';
 
+// ANIMATION NAMES //////////////
+
+const SET_ANIMATION_NAMES = 'SET_ANIMATION_NAMES';
+export function dispatchSetAnimationNames(animationNames: string[]) {
+  reduxStore.dispatch({type: SET_ANIMATION_NAMES, payload: animationNames});
+}
+
+export function animationNamesReducer(state: string[], action: Action) {
+  switch (action.type) {
+    case SET_ANIMATION_NAMES:
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
+// GLTF URL //////////////
+
 /** The user has requested a new GLTF/GLB for editing. */
-export const dispatchGltfUrl =
-    registerStateMutator('SET_GLTF_URL', (state: State, gltfUrl?: string) => {
-      state.gltfUrl = gltfUrl;
-    });
+const SET_GLTF_URL = 'SET_GLTF_URL'
+export function dispatchGltfUrl(gltfUrl?: string) {
+  reduxStore.dispatch({type: SET_GLTF_URL, payload: gltfUrl});
+}
+
+export function
+gltfUrlReducer(state: string, action: Action):
+    string {
+      switch (action.type) {
+        case SET_GLTF_URL:
+          return action.payload;
+        default:
+          return state;
+      }
+    }
 
 class DispatchGltfArgs {
   constructor(
@@ -35,31 +64,77 @@ class DispatchGltfArgs {
   }
 }
 
-const dispatchGltf = registerStateMutator(
-    'SET_GLTF', (state: State, args?: DispatchGltfArgs) => {
-      if (!args) {
-        throw new Error(`No args given!`);
-      }
-      const gltf = args.gltf;
-      if (gltf !== undefined && state.gltf === gltf) {
-        throw new Error(
-            `Same gltf was given! Only call this upon actual change`);
-      }
-      state.gltf = gltf;
+// GLTF //////////////
+const SET_GLTF = 'SET_GLTF'
+export function dispatchSetGltf(gltf: GltfModel|undefined) {
+  reduxStore.dispatch({type: SET_GLTF, payload: gltf});
+}
 
-      const edits = args.edits;
-      if (!edits) {
-        throw new Error(`Must give valid edits!`);
+export function gltfReducer(state: GltfModel|undefined, action: Action):
+    GltfModel|undefined {
+      switch (action.type) {
+        case SET_GLTF:
+          return action.payload;
+        default:
+          return state;
       }
-      if (state.edits === edits) {
-        throw new Error(
-            `Same edits was given! Only call this upon actual change`);
+    }
+
+// GLTF JSON STRING//////////////
+const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
+export function dispatchGltfJsonString(gltfJsonString?: GltfEdits) {
+  reduxStore.dispatch({type: SET_GLTF_JSON_STRING, payload: gltfJsonString});
+}
+
+export function gltfJsonStringReducer(state: string, action: Action):
+    string {
+      switch (action.type) {
+        case SET_GLTF_JSON_STRING:
+          return action.payload;
+        default:
+          return state;
       }
-      state.edits = edits;
-      state.origEdits = edits;
-      state.animationNames = args.animationNames;
-      state.gltfJsonString = args.jsonString;
-    });
+    }
+
+// Orig Edits //////////////
+const SET_ORIG_EDITS = 'SET_ORIG_EDITS'
+export function dispatchSetOrigEdits(origEdits: GltfEdits) {
+  reduxStore.dispatch({type: SET_ORIG_EDITS, payload: origEdits});
+}
+
+export function origEditsReducer(state: GltfEdits, action: Action):
+    GltfEdits {
+      switch (action.type) {
+        case SET_ORIG_EDITS:
+          return action.payload;
+        default:
+          return state;
+      }
+    }
+
+
+function dispatchGltf(args?: DispatchGltfArgs) {
+  if (!args) {
+    throw new Error(`No args given!`);
+  }
+  const gltf = args.gltf;
+  if (gltf !== undefined && reduxStore.getState().gltf === gltf) {
+    throw new Error(`Same gltf was given! Only call this upon actual change`);
+  }
+  dispatchSetGltf(gltf);
+
+  const edits = args.edits;
+  if (!edits) {
+    throw new Error(`Must give valid edits!`);
+  }
+  if (reduxStore.getState().edits === edits) {
+    throw new Error(`Same edits was given! Only call this upon actual change`);
+  }
+  state.edits = edits;
+  state.origEdits = edits;
+  dispatchSetAnimationNames(args.animationNames);
+  dispatchGltfJsonString(args.jsonString);
+}
 
 /**
  * Helper async function

@@ -25,7 +25,6 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {State} from '../../space_opera_base.js';
-import {Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {dispatchSetPoster} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -38,14 +37,12 @@ export class PosterControlsElement extends ConnectedLitElement {
   static styles = styles;
 
   @internalProperty() poster?: string;
-  @internalProperty() currentCamera: Camera|undefined = INITIAL_CAMERA;
 
   private modelViewer?: ModelViewerElement;
 
   stateChanged(state: State) {
     this.modelViewer = state.modelViewer;
     this.poster = state.config.poster;
-    this.currentCamera = state.currentCamera;
   }
 
   render() {
@@ -82,15 +79,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     const posterUrl =
         createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
     dispatchSetPoster(posterUrl.unsafeUrl);
-    if (!this.currentCamera)
-      return;
-    const currentOrbit = this.currentCamera.orbit;
-    if (!currentOrbit)
-      return;
-    const currentFieldOfViewDeg = this.currentCamera.fieldOfViewDeg;
-    if (!currentFieldOfViewDeg)
-      return;
-    dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg);
+    dispatchSaveCameraOrbit();
   }
 
   onDisplayPoster() {

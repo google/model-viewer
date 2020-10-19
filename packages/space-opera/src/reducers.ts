@@ -17,36 +17,29 @@
 
 import {combineReducers} from 'redux';
 
-import {origEdits} from './'
-import {animationNames} from './'
-import {gltfJsonString} from './'
-import {initialCamera} from './'
-import {gltfUrl} from './'
-import {currentCamera} from './'
-import {gltf} from './'
-import {edits} from './components/';
+import {edits} from './';
 import {playAnimationReducer} from './components/animation_controls/reducer.js';
-import {cameraReducer} from './components/camera_settings/reducer.js'
+import {cameraReducer, currentCameraReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotModeReducer, hotspotsReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
+import {animationNamesReducer, gltfJsonStringReducer, gltfReducer, gltfUrlReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
 import {modelViewerReducer} from './components/model_viewer_preview/reducer.js';
-
 
 export const rootReducer = combineReducers({
   config: configReducer,
   edits,
-  origEdits,
-  animationNames,
-  gltfJsonString,
+  origEdits: origEditsReducer,
+  animationNames: animationNamesReducer,
+  gltfJsonString: gltfJsonStringReducer,
   camera: cameraReducer,
-  initialCamera,
+  initialCamera: initialCameraReducer,
   addHotspotMode: hotspotModeReducer,
   hotspots: hotspotsReducer,
   playAnimation: playAnimationReducer,
   environmentImages: environmentImagesReducer,
   modelViewer: modelViewerReducer,
-  gltfUrl,
-  currentCamera,
-  gltf
+  gltfUrl: gltfUrlReducer,
+  currentCamera: currentCameraReducer,
+  gltf: gltfReducer,
 });

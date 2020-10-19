@@ -23,10 +23,11 @@ export function dispatchResetState() {
   reduxStore.dispatch({type: RESET_STATE_ACTION_TYPE});
 }
 
+// TODO: Figure out how this could work exactly...
 export function resetReducer(state: State, action: Action) {
   switch (action.type) {
     case RESET_STATE_ACTION_TYPE:
-      return INITIAL_STATE;  // TODO
+      return INITIAL_STATE;
     default:
       return state;
   }

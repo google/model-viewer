@@ -153,7 +153,6 @@ export class CameraSettings extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() initialCamera: Camera = INITIAL_CAMERA;
-  @internalProperty() currentCamera: Camera|undefined = INITIAL_CAMERA;
 
   @query('me-camera-orbit-editor') cameraOrbitEditor?: CameraOrbitEditor;
   @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
@@ -170,7 +169,6 @@ export class CameraSettings extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.initialCamera = state.initialCamera;
-    this.currentCamera = state.currentCamera;
   }
 
   onCamControlsCheckboxChange(event: Event) {
@@ -178,15 +176,7 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onSaveCameraOrbit() {
-    if (!this.currentCamera)
-      return;
-    const currentOrbit = this.currentCamera.orbit;
-    if (!currentOrbit)
-      return;
-    const currentFieldOfViewDeg = this.currentCamera.fieldOfViewDeg;
-    if (!currentFieldOfViewDeg)
-      return;
-    dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg);
+    dispatchSaveCameraOrbit();
   }
 
   onCameraTargetChange(newValue: Vector3D) {
