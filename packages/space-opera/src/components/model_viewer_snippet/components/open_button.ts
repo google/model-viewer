@@ -21,7 +21,8 @@ import '../../file_modal/file_modal.js';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, query} from 'lit-element';
 
-import {extractStagingConfig, reduxStore} from '../../../space_opera_base.js';
+import {reduxStore} from '../../../space_opera_base.js';
+import {extractStagingConfig} from '../../../types.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchGltfUrl} from '../../model_viewer_preview/reducer.js';

@@ -15,7 +15,8 @@
  *
  */
 
-import {Action, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action} from '../../types.js';
 import {INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';

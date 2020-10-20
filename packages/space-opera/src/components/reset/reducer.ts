@@ -15,7 +15,8 @@
  *
  */
 
-import {Action, INITIAL_STATE, reduxStore, State} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action, INITIAL_STATE, State} from '../../types.js';
 
 /** Mostly for unit tests. */
 export const RESET_STATE_ACTION_TYPE = 'RESET_SPACE_OPERA_STATE';

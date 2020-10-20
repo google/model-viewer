@@ -29,7 +29,7 @@ import '../shared/checkbox/checkbox.js';
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
-import {State} from '../../space_opera_base.js';
+import {State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';

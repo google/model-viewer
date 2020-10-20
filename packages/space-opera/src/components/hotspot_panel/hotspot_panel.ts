@@ -21,7 +21,7 @@ import '@material/mwc-button';
 
 import {customElement, html, internalProperty} from 'lit-element';
 
-import {State} from '../../space_opera_base.js';
+import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
 import {HotspotConfig} from './hotspot_config.js';

@@ -29,7 +29,7 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
-import {extractStagingConfig, State} from '../../space_opera_base.js';
+import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCurrentCameraState} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';

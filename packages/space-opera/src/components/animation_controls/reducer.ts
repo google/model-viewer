@@ -15,7 +15,8 @@
  *
  */
 
-import {Action, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action} from '../../types.js';
 
 /** Set playAnimation or not */
 const PLAY_ANIMATION = 'PLAY_ANIMATION';

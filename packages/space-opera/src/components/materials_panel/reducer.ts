@@ -17,7 +17,8 @@
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
-import {Action, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action} from '../../types.js';
 import {generateTextureId} from '../model_viewer_preview/gltf_edits.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/gltf_edits.js';
 import {immutableArrayUpdate, immutableMapUpdate} from '../utils/reducer_utils.js';

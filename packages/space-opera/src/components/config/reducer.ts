@@ -1,6 +1,7 @@
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 
-import {Action, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action} from '../../types.js';
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {

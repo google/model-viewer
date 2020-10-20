@@ -15,7 +15,8 @@
  *
  */
 
-import {Action, reduxStore} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {Action} from '../../types.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
 import {HotspotConfig} from './hotspot_config.js';

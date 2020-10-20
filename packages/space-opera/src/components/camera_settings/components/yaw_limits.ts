@@ -17,7 +17,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {State} from '../../../space_opera_base.js';
+import {State} from '../../../types.js';
 import {Camera} from '../camera_state.js';
 import {dispatchYawLimits} from '../reducer.js';
 import {Limits} from '../types.js';
