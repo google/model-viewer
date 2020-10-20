@@ -38,5 +38,5 @@ export function dispatchConfig(config?: ModelViewerConfig) {
   // Clear initialCamera too, as ModelViewerPreview will update this.
   reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
 
-  delete reduxStore.getState().currentCamera.currentCamera;
+  // delete reduxStore.getState().currentCamera.currentCamera;
 }
