@@ -33,6 +33,7 @@ import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
@@ -210,7 +211,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const index = this.selectedMaterialId;
     const baseColorFactor = this.selectedBaseColor;
-    dispatchMaterialBaseColor({index, baseColorFactor});
+    reduxStore.dispatch(dispatchMaterialBaseColor(
+        reduxStore.getState().edits.materials, {index, baseColorFactor}));
   }
 
   onRoughnessChange() {
@@ -219,7 +221,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const roughnessFactor = this.selectedRoughnessFactor;
-    dispatchRoughnessFactor({id, roughnessFactor});
+    reduxStore.dispatch(dispatchRoughnessFactor(
+        reduxStore.getState().edits.materials, {id, roughnessFactor}));
   }
 
   onMetallicChange() {
@@ -228,7 +231,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const metallicFactor = this.selectedMetallicFactor;
-    dispatchMetallicFactor({id, metallicFactor});
+    reduxStore.dispatch(dispatchMetallicFactor(
+        reduxStore.getState().edits.materials, {id, metallicFactor}));
   }
 
   onDoubleSidedChange(event: Event) {
@@ -237,7 +241,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const doubleSided = (event.target as HTMLInputElement).checked;
-    dispatchDoubleSided({id, doubleSided});
+    reduxStore.dispatch(dispatchDoubleSided(
+        reduxStore.getState().edits.materials, {id, doubleSided}));
   }
 
   get selectedBaseColorTextureId(): string|undefined {
@@ -296,7 +301,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const textureId = this.selectedBaseColorTextureId;
-    dispatchBaseColorTexture({id, textureId});
+    reduxStore.dispatch(dispatchBaseColorTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   onBaseColorTextureUpload(event: CustomEvent) {
@@ -306,7 +312,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddBaseColorTexture({id, uri});
+    reduxStore.dispatch(dispatchAddBaseColorTexture(
+        reduxStore.getState().edits.materials,
+        reduxStore.getState().edits.texturesById,
+        {id, uri}));
   }
 
   onMetallicRoughnessTextureChange() {
@@ -315,7 +324,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const textureId = this.selectedMetallicRoughnessTextureId;
-    dispatchMetallicRoughnessTexture({id, textureId});
+    reduxStore.dispatch(dispatchMetallicRoughnessTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent) {
@@ -325,7 +335,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddMetallicRoughnessTexture({id, uri});
+    reduxStore.dispatch(dispatchAddMetallicRoughnessTexture(
+        reduxStore.getState().edits.materials,
+        reduxStore.getState().edits.texturesById,
+        {id, uri}));
   }
 
   onNormalTextureChange() {
@@ -335,7 +348,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedNormalTextureId;
-    dispatchNormalTexture({id, textureId});
+    reduxStore.dispatch(dispatchNormalTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   onNormalTextureUpload(event: CustomEvent) {
@@ -345,7 +359,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddNormalTexture({id, uri});
+    reduxStore.dispatch(dispatchAddNormalTexture(
+        reduxStore.getState().edits.materials,
+        reduxStore.getState().edits.texturesById,
+        {id, uri}));
   }
 
   onEmissiveTextureChange() {
@@ -355,7 +372,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedEmissiveTextureId;
-    dispatchEmissiveTexture({id, textureId});
+    reduxStore.dispatch(dispatchEmissiveTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   onEmissiveTextureUpload(event: CustomEvent) {
@@ -365,7 +383,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddEmissiveTexture({id, uri});
+    reduxStore.dispatch(dispatchAddEmissiveTexture(
+        reduxStore.getState().edits.materials,
+        reduxStore.getState().edits.texturesById,
+        {id, uri}));
   }
 
   onEmissiveFactorChanged() {
@@ -375,7 +396,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const emissiveFactor = this.selectedEmissiveFactor;
-    dispatchSetEmissiveFactor({id, emissiveFactor});
+    reduxStore.dispatch(dispatchSetEmissiveFactor(
+        reduxStore.getState().edits.materials, {id, emissiveFactor}));
   }
 
   onOcclusionTextureChange() {
@@ -385,7 +407,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedOcclusionTextureId;
-    dispatchOcclusionTexture({id, textureId});
+    reduxStore.dispatch(dispatchOcclusionTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   onOcclusionTextureUpload(event: CustomEvent) {
@@ -395,7 +418,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddOcclusionTexture({id, uri});
+    reduxStore.dispatch(dispatchAddOcclusionTexture(
+        reduxStore.getState().edits.materials,
+        reduxStore.getState().edits.texturesById,
+        {id, uri}));
   }
 
   onAlphaModeSelect() {
@@ -410,10 +436,11 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
 
-    dispatchSetAlphaMode({
-      id: this.selectedMaterialId,
-      alphaMode: selectedMode,
-    });
+    reduxStore.dispatch(
+        dispatchSetAlphaMode(reduxStore.getState().edits.materials, {
+          id: this.selectedMaterialId,
+          alphaMode: selectedMode,
+        }));
   }
 
   onAlphaCutoffChange() {
@@ -421,82 +448,95 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    dispatchSetAlphaCutoff({
-      id: this.selectedMaterialId,
-      alphaCutoff: this.selectedAlphaCutoff,
-    });
+    reduxStore.dispatch(
+        dispatchSetAlphaCutoff(reduxStore.getState().edits.materials, {
+          id: this.selectedMaterialId,
+          alphaCutoff: this.selectedAlphaCutoff,
+        }));
   }
 
   revertMetallicRoughnessTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].metallicRoughnessTextureId;
-    dispatchMetallicRoughnessTexture({id, textureId});
+    reduxStore.dispatch(dispatchMetallicRoughnessTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   revertMetallicFactor() {
     const id = this.safeSelectedMaterialId;
     const metallicFactor = this.originalMaterials[id].metallicFactor;
-    dispatchMetallicFactor({id, metallicFactor});
+    reduxStore.dispatch(dispatchMetallicFactor(
+        reduxStore.getState().edits.materials, {id, metallicFactor}));
   }
 
   revertRoughnessFactor() {
     const id = this.safeSelectedMaterialId;
     const roughnessFactor = this.originalMaterials[id].roughnessFactor;
-    dispatchRoughnessFactor({id, roughnessFactor});
+    reduxStore.dispatch(dispatchRoughnessFactor(
+        reduxStore.getState().edits.materials, {id, roughnessFactor}));
   }
 
   revertBaseColorFactor() {
     const index = this.safeSelectedMaterialId;
     const baseColorFactor = this.originalMaterials[index].baseColorFactor;
-    dispatchMaterialBaseColor({index, baseColorFactor});
+    reduxStore.dispatch(dispatchMaterialBaseColor(
+        reduxStore.getState().edits.materials, {index, baseColorFactor}));
   }
 
   revertBaseColorTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].baseColorTextureId;
-    dispatchBaseColorTexture({id, textureId});
+    reduxStore.dispatch(dispatchBaseColorTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   revertNormalTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].normalTextureId;
-    dispatchNormalTexture({id, textureId});
+    reduxStore.dispatch(dispatchNormalTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   revertEmissiveTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].emissiveTextureId;
-    dispatchEmissiveTexture({id, textureId});
+    reduxStore.dispatch(dispatchEmissiveTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   revertEmissiveFactor() {
     const id = this.safeSelectedMaterialId;
     const emissiveFactor = this.originalMaterials[id].emissiveFactor;
-    dispatchSetEmissiveFactor({id, emissiveFactor});
+    reduxStore.dispatch(dispatchSetEmissiveFactor(
+        reduxStore.getState().edits.materials, {id, emissiveFactor}));
   }
 
   revertOcclusionTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].occlusionTextureId;
-    dispatchOcclusionTexture({id, textureId});
+    reduxStore.dispatch(dispatchOcclusionTexture(
+        reduxStore.getState().edits.materials, {id, textureId}));
   }
 
   revertAlphaCutoff() {
     const id = this.safeSelectedMaterialId;
     const alphaCutoff = this.originalMaterials[id].alphaCutoff;
-    dispatchSetAlphaCutoff({id, alphaCutoff});
+    reduxStore.dispatch(dispatchSetAlphaCutoff(
+        reduxStore.getState().edits.materials, {id, alphaCutoff}));
   }
 
   revertAlphaMode() {
     const id = this.safeSelectedMaterialId;
     const alphaMode = this.originalMaterials[id].alphaMode;
-    dispatchSetAlphaMode({id, alphaMode});
+    reduxStore.dispatch(dispatchSetAlphaMode(
+        reduxStore.getState().edits.materials, {id, alphaMode}));
   }
 
   revertDoubleSided() {
     const id = this.safeSelectedMaterialId;
     const doubleSided = this.originalMaterials[id].doubleSided;
-    dispatchDoubleSided({id, doubleSided});
+    reduxStore.dispatch(dispatchDoubleSided(
+        reduxStore.getState().edits.materials, {id, doubleSided}));
   }
 
   renderMetallicRoughnessTab() {

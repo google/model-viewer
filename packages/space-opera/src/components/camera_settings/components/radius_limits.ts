@@ -18,6 +18,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {Camera} from '../camera_state.js';
 import {dispatchRadiusLimits} from '../reducer.js';
@@ -37,12 +38,12 @@ export class RadiusLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.radiusLimits = state.camera.radiusLimits;
-    this.currentCamera = state.currentCamera;
+    this.currentCamera = state.currentCamera.currentCamera;
     this.initialCamera = state.initialCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchRadiusLimits(limits);
+    reduxStore.dispatch(dispatchRadiusLimits(limits));
   }
 
   get label() {

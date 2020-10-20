@@ -30,7 +30,7 @@ describe('radius limits editor test', () => {
   beforeEach(async () => {
     radiusLimits = new RadiusLimits();
     document.body.appendChild(radiusLimits);
-    dispatchRadiusLimits({enabled: false, min: 0, max: 0});
+    reduxStore.dispatch(dispatchRadiusLimits({enabled: false, min: 0, max: 0}));
     await radiusLimits.updateComplete;
   });
 
@@ -40,8 +40,10 @@ describe('radius limits editor test', () => {
 
   it('correctly loads radius limits', async () => {
     // Needed to even allow max of 34
-    dispatchInitialCameraState({orbit: {thetaDeg: 0, phiDeg: 0, radius: 10}});
-    dispatchRadiusLimits({enabled: true, min: 12, max: 34});
+    reduxStore.dispatch(dispatchInitialCameraState(
+        {orbit: {thetaDeg: 0, phiDeg: 0, radius: 10}}));
+    reduxStore.dispatch(
+        dispatchRadiusLimits({enabled: true, min: 12, max: 34}));
     await radiusLimits.updateComplete;
     expect(radiusLimits.inputLimits.enabled).toEqual(true);
     expect(radiusLimits.inputLimits.min).toEqual(12);
@@ -50,8 +52,9 @@ describe('radius limits editor test', () => {
 
   it('correctly dispatches when I click set and clear', async () => {
     // Enable to show the buttons
-    dispatchRadiusLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}});
+    reduxStore.dispatch(dispatchRadiusLimits({enabled: true, min: 0, max: 99}));
+    reduxStore.dispatch(dispatchCurrentCameraState(
+        {orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}}));
     await radiusLimits.updateComplete;
 
     (radiusLimits.shadowRoot!.querySelector('#set-min-button')! as

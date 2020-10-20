@@ -30,7 +30,7 @@ describe('hotspot editor test', () => {
       name: 'test',
       position: toVector3D([1, 0, 0]),
     };
-    dispatchAddHotspot(config);
+    reduxStore.dispatch(dispatchAddHotspot(config));
     hotspotEditor = new HotspotEditorElement();
     hotspotEditor.config = config;
     document.body.appendChild(hotspotEditor);
@@ -39,7 +39,7 @@ describe('hotspot editor test', () => {
 
   afterEach(() => {
     document.body.removeChild(hotspotEditor);
-    dispatchClearHotspot();
+    reduxStore.dispatch(dispatchClearHotspot());
   });
 
   it('fires dispatchUpdateHotspot when user updates annotation text', () => {

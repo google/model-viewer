@@ -22,7 +22,7 @@ import {createBufferFromString, generatePngBlob, GltfModel} from '@google/model-
 import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
 import {InspectorPanel} from '../../components/inspector/inspector.js';
-import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 
 // Bin data
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';

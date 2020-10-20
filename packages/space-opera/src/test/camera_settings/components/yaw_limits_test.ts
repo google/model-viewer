@@ -29,7 +29,7 @@ describe('yaw limits editor test', () => {
   beforeEach(async () => {
     yawLimitsDeg = new YawLimits();
     document.body.appendChild(yawLimitsDeg);
-    dispatchYawLimits({enabled: false, min: 0, max: 0});
+    reduxStore.dispatch(dispatchYawLimits({enabled: false, min: 0, max: 0}));
     await yawLimitsDeg.updateComplete;
   });
 
@@ -38,7 +38,7 @@ describe('yaw limits editor test', () => {
   });
 
   it('correctly loads yaw limits', async () => {
-    dispatchYawLimits({enabled: true, min: 12, max: 34});
+    reduxStore.dispatch(dispatchYawLimits({enabled: true, min: 12, max: 34}));
     await yawLimitsDeg.updateComplete;
     expect(yawLimitsDeg.inputLimits.enabled).toEqual(true);
     expect(yawLimitsDeg.inputLimits.min).toEqual(12);
@@ -46,8 +46,9 @@ describe('yaw limits editor test', () => {
   });
 
   it('correctly dispatches when I click set and clear', async () => {
-    dispatchYawLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({orbit: {thetaDeg: 33, radius: 10, phiDeg: 0}});
+    reduxStore.dispatch(dispatchYawLimits({enabled: true, min: 0, max: 99}));
+    reduxStore.dispatch(dispatchCurrentCameraState(
+        {orbit: {thetaDeg: 33, radius: 10, phiDeg: 0}}));
     await yawLimitsDeg.updateComplete;
 
     (yawLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as

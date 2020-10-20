@@ -17,25 +17,12 @@
 
 import {GltfModel, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
 
-import {applyMaterials, createMaterials, Material, Texture, TexturesById} from '../materials_panel/material_state.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {applyMaterials, createMaterials, Texture} from '../materials_panel/material_state.js';
+import {dispatchSetEdits} from '../materials_panel/reducer.js';
 
-/**
- * All the state that the user can edit. It's important to capture all that in a
- * single object so components can easily subscribe to changes on a single
- * object.
- */
-export interface GltfEdits {
-  texturesById: TexturesById;
-  materials: Material[];
-}
-
-/**
- * Use this to initialize references in components.
- */
-export const INITIAL_GLTF_EDITS: GltfEdits = {
-  texturesById: new Map<string, Texture>(),
-  materials: [],
-};
+import {dispatchGltfJsonString, dispatchSetAnimationNames, dispatchSetGltf, dispatchSetOrigEdits} from './reducer.js';
+import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 /**
  * Applies the given edits to the gltf (it is mutated), but only if they differ
@@ -85,4 +72,49 @@ export function getGltfEdits(model: GltfModel): GltfEdits {
     texturesById,
     materials: createMaterials(model, texturesByHandle),
   };
+}
+
+class DispatchGltfArgs {
+  constructor(
+      readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
+      readonly animationNames: string[], readonly jsonString: string) {
+  }
+}
+
+function dispatchGltf(args?: DispatchGltfArgs) {
+  if (!args) {
+    throw new Error(`No args given!`);
+  }
+  const gltf = args.gltf;
+  if (gltf !== undefined && reduxStore.getState().gltfInfo.gltf === gltf) {
+    throw new Error(`Same gltf was given! Only call this upon actual change`);
+  }
+  reduxStore.dispatch(dispatchSetGltf(gltf));
+
+  const edits = args.edits;
+  if (!edits) {
+    throw new Error(`Must give valid edits!`);
+  }
+  if (reduxStore.getState().edits === edits) {
+    throw new Error(`Same edits was given! Only call this upon actual change`);
+  }
+  reduxStore.dispatch(dispatchSetEdits(edits));
+  reduxStore.dispatch(dispatchSetOrigEdits(edits));
+  reduxStore.dispatch(dispatchSetAnimationNames(args.animationNames));
+  reduxStore.dispatch(dispatchGltfJsonString(args.jsonString));
+}
+
+/**
+ * Helper async function
+ */
+export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
+  // NOTE: This encodes a design decision: Whether or not we reset edits
+  // upon loading a new GLTF. It may be sensible to not reset edits and just
+  // apply previous edits to the same, but updated, GLTF. That could be
+  // later exposed as an option, and in that case we would simply apply the
+  // existing edits (with null previousEdits) to this new model and not
+  // dispatch new edits.
+  const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
+  dispatchGltf(new DispatchGltfArgs(
+      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
 }

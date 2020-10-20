@@ -17,6 +17,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {Camera} from '../camera_state.js';
 import {dispatchYawLimits} from '../reducer.js';
@@ -41,11 +42,11 @@ export class YawLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.yawLimitsDeg = state.camera.yawLimitsDeg;
-    this.currentCamera = state.currentCamera;
+    this.currentCamera = state.currentCamera.currentCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchYawLimits(limits);
+    reduxStore.dispatch(dispatchYawLimits(limits));
   }
 
   get label() {

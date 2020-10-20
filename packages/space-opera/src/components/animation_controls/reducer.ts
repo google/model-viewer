@@ -15,17 +15,16 @@
  *
  */
 
-import {reduxStore} from '../../space_opera_base.js';
 import {Action} from '../../types.js';
 
 /** Set playAnimation or not */
 const PLAY_ANIMATION = 'PLAY_ANIMATION';
 export function dispatchPlayAnimation(playAnimation: boolean) {
-  reduxStore.dispatch({type: PLAY_ANIMATION, payload: playAnimation});
+  return {type: PLAY_ANIMATION, payload: playAnimation};
 }
 
 export function playAnimationReducer(
-    state: boolean|undefined, action: Action): boolean|undefined {
+    state: boolean|undefined = false, action: Action): boolean|undefined {
   switch (action.type) {
     case PLAY_ANIMATION:
       return !!action.payload;

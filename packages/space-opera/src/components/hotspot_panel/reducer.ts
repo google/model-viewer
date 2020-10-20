@@ -15,7 +15,6 @@
  *
  */
 
-import {reduxStore} from '../../space_opera_base.js';
 import {Action} from '../../types.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
@@ -36,12 +35,12 @@ export function generateUniqueHotspotName() {
 // HOTSPOT MODE ////////////
 
 const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';
-export function dispatchAddHotspotMode(addHotspotMode?: boolean) {
-  reduxStore.dispatch({type: ADD_HOTSPOT_MODE, payload: addHotspotMode});
+export function dispatchAddHotspotMode(addHotspotMode: boolean) {
+  return {type: ADD_HOTSPOT_MODE, payload: addHotspotMode};
 }
 
 export function hotspotModeReducer(
-    state: boolean|undefined, action: Action): boolean|undefined {
+    state: boolean|undefined = false, action: Action): boolean|undefined {
   switch (action.type) {
     case ADD_HOTSPOT_MODE:
       return action.payload;
@@ -67,9 +66,9 @@ function findHotspotIndex(hotspots: HotspotConfig[], name: string) {
 
 const ADD_HOTSPOT = 'ADD_HOTSPOT';
 export function dispatchAddHotspot(config?: HotspotConfig) {
-  if (!config)
-    return;
-  reduxStore.dispatch({type: ADD_HOTSPOT, payload: config});
+  // if (!config)
+  //   return;
+  return {type: ADD_HOTSPOT, payload: config};
 }
 
 function addHotspot(state: HotspotConfig[], config: HotspotConfig) {
@@ -83,9 +82,9 @@ function addHotspot(state: HotspotConfig[], config: HotspotConfig) {
 
 const UPDATE_HOTSPOT = 'UPDATE_HOTSPOT';
 export function dispatchUpdateHotspot(config?: HotspotConfig) {
-  if (!config)
-    return;
-  reduxStore.dispatch({type: UPDATE_HOTSPOT, payload: config});
+  // if (!config)
+  //   return;
+  return {type: UPDATE_HOTSPOT, payload: config};
 };
 
 function updateHotspot(state: HotspotConfig[], config: HotspotConfig) {
@@ -96,9 +95,9 @@ function updateHotspot(state: HotspotConfig[], config: HotspotConfig) {
 
 const REMOVE_HOTSPOT = 'REMOVE_HOTSPOT';
 export function dispatchRemoveHotspot(name?: string) {
-  if (!name)
-    return;
-  reduxStore.dispatch({type: REMOVE_HOTSPOT, payload: name});
+  // if (!name)
+  //   return;
+  return {type: REMOVE_HOTSPOT, payload: name};
 }
 
 function removeHotspot(state: HotspotConfig[], name: string) {
@@ -113,16 +112,16 @@ const CLEAR_HOTSPOTS = 'CLEAR_HOTSPOTS';
 export function dispatchClearHotspot() {
   hotspotNameSet.clear();
   nextHotspotId = 1;
-  reduxStore.dispatch({type: CLEAR_HOTSPOTS, payload: []});
+  return {type: CLEAR_HOTSPOTS, payload: []};
 }
 
 const SET_HOTSPOTS = 'SET_HOTSPOTS';
-export function dispatchSetHotspots(hotspots?: HotspotConfig[]) {
-  if (!hotspots)
-    return;
+export function dispatchSetHotspots(hotspots: HotspotConfig[]) {
+  // if (!hotspots)
+  //   return;
   hotspotNameSet = new Set(hotspots.map(hotspot => hotspot.name));
   nextHotspotId = 1;
-  reduxStore.dispatch({type: SET_HOTSPOTS, payload: hotspots});
+  return {type: SET_HOTSPOTS, payload: hotspots};
 }
 
 export function hotspotsReducer(

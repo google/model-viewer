@@ -29,7 +29,7 @@ describe('pitch limits editor test', () => {
   beforeEach(async () => {
     pitchLimitsDeg = new PitchLimits();
     document.body.appendChild(pitchLimitsDeg);
-    dispatchPitchLimits({enabled: false, min: 0, max: 0});
+    reduxStore.dispatch(dispatchPitchLimits({enabled: false, min: 0, max: 0}));
     await pitchLimitsDeg.updateComplete;
   });
 
@@ -38,7 +38,7 @@ describe('pitch limits editor test', () => {
   });
 
   it('correctly loads pitch limits', async () => {
-    dispatchPitchLimits({enabled: true, min: 12, max: 34});
+    reduxStore.dispatch(dispatchPitchLimits({enabled: true, min: 12, max: 34}));
     await pitchLimitsDeg.updateComplete;
     expect(pitchLimitsDeg.inputLimits.enabled).toEqual(true);
     expect(pitchLimitsDeg.inputLimits.min).toEqual(12);
@@ -46,8 +46,9 @@ describe('pitch limits editor test', () => {
   });
 
   it('correctly dispatches when I click set and clear', async () => {
-    dispatchPitchLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}});
+    reduxStore.dispatch(dispatchPitchLimits({enabled: true, min: 0, max: 99}));
+    reduxStore.dispatch(dispatchCurrentCameraState(
+        {orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}}));
     await pitchLimitsDeg.updateComplete;
 
     (pitchLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as

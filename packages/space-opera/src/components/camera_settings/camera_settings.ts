@@ -29,6 +29,7 @@ import '../shared/checkbox/checkbox.js';
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -172,19 +173,25 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onCamControlsCheckboxChange(event: Event) {
-    dispatchCameraControlsEnabled((event.target as HTMLInputElement).checked);
+    reduxStore.dispatch(dispatchCameraControlsEnabled(
+        (event.target as HTMLInputElement).checked));
   }
 
   onSaveCameraOrbit() {
-    dispatchSaveCameraOrbit();
+    const currentOrbit =
+        reduxStore.getState().currentCamera.currentCamera!.orbit;
+    const currentFieldOfViewDeg =
+        reduxStore.getState().currentCamera.currentCamera!.fieldOfViewDeg;
+    reduxStore.dispatch(
+        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
   }
 
   onCameraTargetChange(newValue: Vector3D) {
-    dispatchCameraTarget(newValue);
+    reduxStore.dispatch(dispatchCameraTarget(newValue));
   }
 
   onAutoRotateChange() {
-    dispatchAutoRotate(this.autoRotateCheckbox.checked);
+    reduxStore.dispatch(dispatchAutoRotate(this.autoRotateCheckbox.checked));
   }
 
   render() {
@@ -252,7 +259,8 @@ export class CameraSettings extends ConnectedLitElement {
   onCameraOrbitEditorChange() {
     if (!this.cameraOrbitEditor)
       return;
-    dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit);
+    reduxStore.dispatch(
+        dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit));
   }
 }
 

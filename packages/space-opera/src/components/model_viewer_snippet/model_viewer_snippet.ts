@@ -25,6 +25,7 @@ import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adap
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -57,7 +58,7 @@ export class ExportPanel extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspots;
-    this.gltfUrl = state.gltfUrl;
+    this.gltfUrl = state.gltfInfo.gltfUrl;
   }
 
   render() {
@@ -147,12 +148,12 @@ export class ModelViewerSnippet extends LitElement {
         // If we can't fetch the snippet's src, don't even bother using it.
         // But still dispatch the config, hotspots, etc.
         if (config.src && (await fetch(config.src)).ok) {
-          dispatchGltfUrl(undefined);
+          reduxStore.dispatch(dispatchGltfUrl(undefined));
           // Because of update-batching, we need to sleep first to force reload.
           await new Promise(resolve => {
             setTimeout(resolve, 0);
           });
-          dispatchGltfUrl(config.src);
+          reduxStore.dispatch(dispatchGltfUrl(config.src));
         }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
@@ -161,7 +162,7 @@ export class ModelViewerSnippet extends LitElement {
         // anim by name, can't find it because the model is empty, thus
         // triggering a change event selecting none).
         dispatchConfig(config);
-        dispatchSetHotspots(hotspotConfigs);
+        reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${

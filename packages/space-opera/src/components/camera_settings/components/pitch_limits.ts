@@ -18,6 +18,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {Camera} from '../camera_state.js';
 import {dispatchPitchLimits} from '../reducer.js';
@@ -42,11 +43,11 @@ export class PitchLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.pitchLimitsDeg = state.camera.pitchLimitsDeg;
-    this.currentCamera = state.currentCamera;
+    this.currentCamera = state.currentCamera.currentCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchPitchLimits(limits);
+    reduxStore.dispatch(dispatchPitchLimits(limits));
   }
 
   get label() {

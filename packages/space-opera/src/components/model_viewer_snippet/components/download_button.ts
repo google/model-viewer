@@ -111,7 +111,7 @@ export class DownloadButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const {gltf} = state;
+    const {gltf} = state.gltfInfo;
     this.preparePayload = gltf ? () => prepareGlbPayload(gltf) : undefined;
   }
 }
@@ -129,7 +129,8 @@ export class ExportZipButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const {gltf, config} = state;
+    const config = state.config;
+    const gltf = state.gltfInfo.gltf;
     if (!gltf) {
       this.preparePayload = undefined;
       return;

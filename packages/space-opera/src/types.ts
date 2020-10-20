@@ -15,27 +15,26 @@
  *
  */
 
-import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
-import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
+import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/hotspot_config.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
-import {GltfEdits, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/gltf_edits.js';
+import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
 
 /**
  * Space Opera state.
  */
 export interface State {
-  modelViewer?: ModelViewerElement;
+  modelViewerInfo: ModelViewerInfo;
   config: ModelViewerConfig;
   // This should only be modified by actions that load entirely new glTFs.
-  gltfUrl?: string;
+  // gltfUrl?: string;
   // This is just a shared reference, not essential state. The object referenced
   // is NOT immutable, for example.
-  gltf?: GltfModel;
+  gltfInfo: GltfInfo;
   animationNames: string[];
   gltfJsonString: string;
   edits: GltfEdits;
@@ -45,7 +44,7 @@ export interface State {
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
   initialCamera: Camera;
-  currentCamera?: Camera;
+  currentCamera: CurrentCamera;
   // A list of hotspots to render.
   hotspots: HotspotConfig[];
   // On true, a click on Model-viewer tag would add a hotspot to the clicked
@@ -56,11 +55,14 @@ export interface State {
 }
 
 export const INITIAL_STATE: State = {
+  modelViewerInfo: {},
+  currentCamera: {},
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
   animationNames: [],
   gltfJsonString: '',
+  gltfInfo: {},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
   hotspots: [],

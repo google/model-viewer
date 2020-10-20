@@ -29,7 +29,7 @@ describe('fov limits editor test', () => {
   beforeEach(async () => {
     fovLimitsDeg = new FovLimits();
     document.body.appendChild(fovLimitsDeg);
-    dispatchFovLimits({enabled: false, min: 0, max: 0});
+    reduxStore.dispatch(dispatchFovLimits({enabled: false, min: 0, max: 0}));
     await fovLimitsDeg.updateComplete;
   });
 
@@ -38,7 +38,7 @@ describe('fov limits editor test', () => {
   });
 
   it('correctly loads fov limits', async () => {
-    dispatchFovLimits({enabled: true, min: 12, max: 34});
+    reduxStore.dispatch(dispatchFovLimits({enabled: true, min: 12, max: 34}));
     await fovLimitsDeg.updateComplete;
     expect(fovLimitsDeg.inputLimits.enabled).toEqual(true);
     expect(fovLimitsDeg.inputLimits.min).toEqual(12);
@@ -46,8 +46,8 @@ describe('fov limits editor test', () => {
   });
 
   it('correctly dispatches when I click set and clear', async () => {
-    dispatchFovLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({fieldOfViewDeg: 42});
+    reduxStore.dispatch(dispatchFovLimits({enabled: true, min: 0, max: 99}));
+    reduxStore.dispatch(dispatchCurrentCameraState({fieldOfViewDeg: 42}));
     await fovLimitsDeg.updateComplete;
 
     (fovLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as

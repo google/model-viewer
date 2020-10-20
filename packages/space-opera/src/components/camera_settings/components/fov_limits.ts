@@ -17,6 +17,7 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {Camera} from '../camera_state.js';
 import {dispatchFovLimits} from '../reducer.js';
@@ -38,11 +39,11 @@ export class FovLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.fovLimitsDeg = state.camera.fovLimitsDeg;
-    this.currentCamera = state.currentCamera;
+    this.currentCamera = state.currentCamera.currentCamera;
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchFovLimits(limits);
+    reduxStore.dispatch(dispatchFovLimits(limits));
   }
 
   get label() {

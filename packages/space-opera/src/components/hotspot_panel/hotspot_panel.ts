@@ -21,6 +21,7 @@ import '@material/mwc-button';
 
 import {customElement, html, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
@@ -39,7 +40,7 @@ export class HotspotPanel extends ConnectedLitElement {
   }
 
   onAddHotspot() {
-    dispatchAddHotspotMode(true);
+    reduxStore.dispatch(dispatchAddHotspotMode(true));
   }
 
   render() {

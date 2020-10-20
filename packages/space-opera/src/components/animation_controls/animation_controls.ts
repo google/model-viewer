@@ -22,6 +22,7 @@ import '@polymer/paper-item';
 
 import {customElement, html, internalProperty, query} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -98,7 +99,8 @@ export class AnimationControls extends ConnectedLitElement {
   }
 
   onAutoplayChange() {
-    dispatchAutoplayEnabled(this.autoplayCheckbox!.checked);
+    reduxStore.dispatch(
+        dispatchAutoplayEnabled(this.autoplayCheckbox!.checked));
   }
 
   onAnimationNameChange(event: CustomEvent) {
@@ -107,21 +109,21 @@ export class AnimationControls extends ConnectedLitElement {
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
     if (!(value && this.animationNames.indexOf(value) === -1)) {
-      dispatchAnimationName(value);
+      reduxStore.dispatch(dispatchAnimationName(value));
     }
 
     // Set the bool options values to something sensible
     if (value) {
-      dispatchAutoplayEnabled(true);
-      dispatchPlayAnimation(true);
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
+      reduxStore.dispatch(dispatchPlayAnimation(true));
     } else {
-      dispatchAutoplayEnabled(false);
+      reduxStore.dispatch(dispatchAutoplayEnabled(false));
       // Leave "playAnimation" alone. It's just UI state.
     }
   }
 
   onPlayAnimationChange() {
-    dispatchPlayAnimation(this.playCheckbox!.checked);
+    reduxStore.dispatch(dispatchPlayAnimation(this.playCheckbox!.checked));
   }
 }
 

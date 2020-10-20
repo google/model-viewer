@@ -38,8 +38,9 @@ describe('camera constraints test', () => {
     document.body.removeChild(cameraSettings);
   });
 
-  it('dispatches save camera orbit state mutator on click', async () => {
-    dispatchCurrentCameraState({orbit: {thetaDeg: 12, phiDeg: 34, radius: 56}});
+  fit('dispatches save camera orbit state mutator on click', async () => {
+    reduxStore.dispatch(dispatchCurrentCameraState(
+        {orbit: {thetaDeg: 12, phiDeg: 34, radius: 56}}));
 
     await cameraSettings.updateComplete;
     const saveCameraOrbitButton =
@@ -54,7 +55,7 @@ describe('camera constraints test', () => {
   });
 
   it('updates the camera target on camera target change', () => {
-    dispatchCameraTarget({x: 1, y: 2, z: 3});
+    reduxStore.dispatch(dispatchCameraTarget({x: 1, y: 2, z: 3}));
     expect(cameraSettings.camera.target!.x).toEqual(1);
     expect(cameraSettings.camera.target!.y).toEqual(2);
     expect(cameraSettings.camera.target!.z).toEqual(3);
@@ -79,7 +80,7 @@ describe('camera constraints test', () => {
 
   it('reflects the correct camera orbit in its editor UI', async () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    dispatchInitialOrbit(orbit);
+    reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
     await cameraSettings.cameraOrbitEditor!.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
@@ -90,7 +91,7 @@ describe('camera constraints test', () => {
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    dispatchInitialOrbit(orbit);
+    reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
     await cameraSettings.cameraOrbitEditor!.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
@@ -103,7 +104,7 @@ describe('camera constraints test', () => {
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {
-    dispatchAutoRotate(false);
+    reduxStore.dispatch(dispatchAutoRotate(false));
     expect(reduxStore.getState().config.autoRotate).toBe(false);
     await cameraSettings.updateComplete;
     cameraSettings.autoRotateCheckbox.click();
@@ -111,11 +112,11 @@ describe('camera constraints test', () => {
   });
 
   it('updates checkbox state when receiving auto-rotate change', async () => {
-    dispatchAutoRotate(false);
+    reduxStore.dispatch(dispatchAutoRotate(false));
     await cameraSettings.updateComplete;
     expect(cameraSettings.autoRotateCheckbox.checked).toBe(false);
 
-    dispatchAutoRotate(true);
+    reduxStore.dispatch(dispatchAutoRotate(true));
     await cameraSettings.updateComplete;
     expect(cameraSettings.autoRotateCheckbox.checked).toBe(true);
   });

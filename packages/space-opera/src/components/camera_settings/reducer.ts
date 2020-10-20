@@ -15,9 +15,8 @@
  *
  */
 
-import {reduxStore} from '../../space_opera_base.js';
 import {Action} from '../../types.js';
-import {INITIAL_CAMERA} from './camera_state.js';
+import {CurrentCamera, INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
@@ -32,10 +31,9 @@ import {Limits} from './types.js';
  */
 const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
 export function dispatchInitialCameraState(initialCamera?: Camera) {
-  if (!initialCamera)
-    return;
-  reduxStore.dispatch(
-      {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}})
+  // if (!initialCamera)
+  //   return;
+  return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
 }
 
 export function initialCameraReducer(
@@ -56,17 +54,18 @@ export function initialCameraReducer(
  */
 const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
 export function dispatchCurrentCameraState(currentCamera?: Camera) {
-  if (!currentCamera)
-    return;
-  reduxStore.dispatch(
-      {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}})
+  // if (!currentCamera)
+  //   return;
+  return {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}};
 }
 
 export function currentCameraReducer(
-    state: Camera|undefined, action: Action): Camera|undefined {
+    state: CurrentCamera = {}, action: Action): CurrentCamera {
   switch (action.type) {
     case SET_CURRENT_CAMERA_STATE:
-      return action.payload;
+      return {
+        ...state, currentCamera: action.payload
+      }
     default:
       return state;
   }
@@ -80,11 +79,11 @@ export function dispatchYawLimits(yawLimitsDeg?: Limits) {
   if (!yawLimitsDeg) {
     throw new Error('No limits given');
   }
-  if (yawLimitsDeg === reduxStore.getState().camera.yawLimitsDeg) {
-    throw new Error(
-        'Do not edit yawLimitsDeg in place. You passed in the same object');
-  }
-  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: yawLimitsDeg})
+  // if (yawLimitsDeg === reduxStore.getState().camera.yawLimitsDeg) {
+  //   throw new Error(
+  //       'Do not edit yawLimitsDeg in place. You passed in the same object');
+  // }
+  return {type: SET_CAMERA_YAW_LIMITS, payload: yawLimitsDeg};
 }
 
 /** Dispatch change to radius limits */
@@ -93,11 +92,11 @@ export function dispatchRadiusLimits(radiusLimits?: Limits) {
   if (!radiusLimits) {
     throw new Error('No valid limits given');
   }
-  if (radiusLimits === reduxStore.getState().camera.radiusLimits) {
-    throw new Error(
-        'Do not edit radiusLimits in place. You passed in the same object');
-  }
-  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: radiusLimits})
+  // if (radiusLimits === reduxStore.getState().camera.radiusLimits) {
+  //   throw new Error(
+  //       'Do not edit radiusLimits in place. You passed in the same object');
+  // }
+  return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
 }
 
 /** Dispatch change to maximum pitch */
@@ -106,11 +105,12 @@ export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
   if (!pitchLimitsDeg) {
     throw new Error('No valid limits given');
   }
-  if (pitchLimitsDeg === reduxStore.getState().camera.pitchLimitsDeg) {
-    throw new Error(
-        'Do not edit pitchLimitsDeg in place. You passed in the same object');
-  }
-  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg})
+  // if (pitchLimitsDeg === reduxStore.getState().camera.pitchLimitsDeg) {
+  //   throw new Error(
+  //       'Do not edit pitchLimitsDeg in place. You passed in the same
+  //       object');
+  // }
+  return {type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg};
 }
 
 /** Dispatch change to maximum FOV */
@@ -119,46 +119,48 @@ export function dispatchFovLimits(fovLimitsDeg?: Limits) {
   if (!fovLimitsDeg) {
     throw new Error('No valid FOV limit given');
   }
-  if (fovLimitsDeg === reduxStore.getState().camera.fovLimitsDeg) {
-    throw new Error(
-        'Do not edit fovLimitsDeg in place. You passed in the same object');
-  }
-  reduxStore.dispatch({type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg})
+  // if (fovLimitsDeg === reduxStore.getState().camera.fovLimitsDeg) {
+  //   throw new Error(
+  //       'Do not edit fovLimitsDeg in place. You passed in the same object');
+  // }
+  return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
 }
 
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit() {
-  if (!reduxStore.getState().currentCamera)
-    return;
-  const currentOrbit = reduxStore.getState().currentCamera!.orbit;
-  if (!currentOrbit)
-    return;
-  const currentFieldOfViewDeg =
-      reduxStore.getState().currentCamera!.fieldOfViewDeg;
-  reduxStore.dispatch({
+export function dispatchSaveCameraOrbit(
+    currentOrbit: SphericalPositionDeg|undefined,
+    currentFieldOfViewDeg: number|undefined) {
+  // if (!reduxStore.getState().currentCamera)
+  //   return;
+  // const currentOrbit = reduxStore.getState().currentCamera!.orbit;
+  // if (!currentOrbit)
+  //   return;
+  // const currentFieldOfViewDeg =
+  //     reduxStore.getState().currentCamera!.fieldOfViewDeg;
+  return {
     type: SAVE_CAMERA_ORBIT,
     payload: {orbit: currentOrbit, fieldOfViewDeg: currentFieldOfViewDeg}
-  });
+  };
 }
 
 /** Event dispatcher for changes to camera-target. */
 const SET_CAMERA_TARGET = 'SET_CAMERA_TARGET';
 export function dispatchCameraTarget(target?: Vector3D) {
-  reduxStore.dispatch({type: SET_CAMERA_TARGET, payload: target})
+  return {type: SET_CAMERA_TARGET, payload: target};
 }
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
 export function dispatchInitialOrbit(orbit?: SphericalPositionDeg) {
-  if (!orbit)
-    return;
-  reduxStore.dispatch({type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit})
+  // if (!orbit)
+  //   return;
+  return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
 }
 
 const SET_CAMERA = 'SET_CAMERA';
 export function dispatchSetCamera(camera: Camera) {
-  reduxStore.dispatch({type: SET_CAMERA, payload: camera})
+  return {type: SET_CAMERA, payload: camera};
 }
 
 export function cameraReducer(

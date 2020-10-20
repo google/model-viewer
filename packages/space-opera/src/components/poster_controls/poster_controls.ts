@@ -24,6 +24,7 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {dispatchSetPoster} from '../config/reducer.js';
@@ -41,7 +42,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   private modelViewer?: ModelViewerElement;
 
   stateChanged(state: State) {
-    this.modelViewer = state.modelViewer;
+    this.modelViewer = state.modelViewerInfo.modelViewer!;
     this.poster = state.config.poster;
   }
 
@@ -78,8 +79,13 @@ export class PosterControlsElement extends ConnectedLitElement {
       return;
     const posterUrl =
         createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
-    dispatchSetPoster(posterUrl.unsafeUrl);
-    dispatchSaveCameraOrbit();
+    reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
+    const currentOrbit =
+        reduxStore.getState().currentCamera.currentCamera!.orbit;
+    const currentFieldOfViewDeg =
+        reduxStore.getState().currentCamera.currentCamera!.fieldOfViewDeg;
+    reduxStore.dispatch(
+        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
   }
 
   onDisplayPoster() {
@@ -98,7 +104,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     if (this.poster) {
       URL.revokeObjectURL(this.poster);
     }
-    dispatchSetPoster(undefined);
+    reduxStore.dispatch(dispatchSetPoster(undefined));
   }
 
   async onDownloadPoster() {

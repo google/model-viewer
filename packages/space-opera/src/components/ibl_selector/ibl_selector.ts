@@ -27,6 +27,7 @@ import '../file_modal/file_modal.js';
 import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -38,6 +39,7 @@ import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_in
 import {styles} from './ibl_selector.css.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './lighting_state.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from './reducer.js';
+
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
 /**
@@ -82,25 +84,27 @@ export class IblSelector extends ConnectedLitElement {
     if (dropdownElement.selectedItem &&
         dropdownElement.selectedItem.getAttribute('value') !==
             this.config.environmentImage) {
-      dispatchEnvrionmentImage(
-          dropdownElement.selectedItem.getAttribute('value') || undefined);
+      reduxStore.dispatch(dispatchEnvrionmentImage(
+          dropdownElement.selectedItem.getAttribute('value') || undefined));
     }
   }
 
   onExposureChange() {
-    dispatchExposure(this.exposureSlider.value);
+    reduxStore.dispatch(dispatchExposure(this.exposureSlider.value));
   }
 
   onUseEnvAsSkyboxChange() {
-    dispatchUseEnvAsSkybox(this.skyboxCheckbox.checked);
+    reduxStore.dispatch(dispatchUseEnvAsSkybox(this.skyboxCheckbox.checked));
   }
 
   onShadowIntensityChange() {
-    dispatchShadowIntensity(this.shadowIntensitySlider.value);
+    reduxStore.dispatch(
+        dispatchShadowIntensity(this.shadowIntensitySlider.value));
   }
 
   onShadowSoftnessChange() {
-    dispatchShadowSoftness(this.shadowSoftnessSlider.value);
+    reduxStore.dispatch(
+        dispatchShadowSoftness(this.shadowSoftnessSlider.value));
   }
 
   // TODO:: Add test to this.
@@ -114,8 +118,9 @@ export class IblSelector extends ConnectedLitElement {
     const file = files[0] as File;
     const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
-    dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
-    dispatchEnvrionmentImage(unsafeUrl);
+    reduxStore.dispatch(
+        dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+    reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
   }
 
   // TODO: On snippet input if IBL is defined, select the

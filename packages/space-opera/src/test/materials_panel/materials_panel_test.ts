@@ -22,7 +22,7 @@ import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
 import {dispatchSetAlphaCutoff} from '../../components/materials_panel/reducer.js';
-import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -423,7 +423,8 @@ describe('material panel test', () => {
 
     expect(reduxStore.getState().edits.materials[0].alphaCutoff).toEqual(1);
 
-    dispatchSetAlphaCutoff({id: 0, alphaCutoff: 0});
+    reduxStore.dispatch(dispatchSetAlphaCutoff(
+        reduxStore.getState().edits.materials, {id: 0, alphaCutoff: 0}));
     await panel.updateComplete;
 
     expect(alphaCutoffSlider.value).toEqual(0);

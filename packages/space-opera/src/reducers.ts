@@ -23,8 +23,8 @@ import {configReducer} from './components/config/reducer.js';
 import {hotspotModeReducer, hotspotsReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
-import {animationNamesReducer, gltfJsonStringReducer, gltfReducer, gltfUrlReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
-import {modelViewerReducer} from './components/model_viewer_preview/reducer.js';
+import {animationNamesReducer, gltfInfoReducer, gltfJsonStringReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
+import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.js';
 
 export const rootReducer = combineReducers({
   config: configReducer,
@@ -38,10 +38,9 @@ export const rootReducer = combineReducers({
   hotspots: hotspotsReducer,
   playAnimation: playAnimationReducer,
   environmentImages: environmentImagesReducer,
-  modelViewer: modelViewerReducer,
-  gltfUrl: gltfUrlReducer,
+  modelViewerInfo: modelViewerInfoReducer,
   currentCamera: currentCameraReducer,
-  gltf: gltfReducer,
+  gltfInfo: gltfInfoReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>

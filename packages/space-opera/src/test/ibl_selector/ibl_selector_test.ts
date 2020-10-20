@@ -39,13 +39,13 @@ describe('ibl selector test', () => {
   });
 
   it('updates exposure slider when receiving exposure change', async () => {
-    dispatchExposure(2);
+    reduxStore.dispatch(dispatchExposure(2));
     await iblSelector.updateComplete;
     expect(iblSelector.exposureSlider.value).toBe(2);
   });
 
   it('dispatches skybox change when checkbox clicked', async () => {
-    dispatchUseEnvAsSkybox(false);
+    reduxStore.dispatch(dispatchUseEnvAsSkybox(false));
     expect(reduxStore.getState().config.useEnvAsSkybox).toBe(false);
     await iblSelector.updateComplete;
     iblSelector.skyboxCheckbox.click();
@@ -53,17 +53,17 @@ describe('ibl selector test', () => {
   });
 
   it('updates checkbox state when receiving skybox change', async () => {
-    dispatchUseEnvAsSkybox(false);
+    reduxStore.dispatch(dispatchUseEnvAsSkybox(false));
     await iblSelector.updateComplete;
     expect(iblSelector.skyboxCheckbox.checked).toBe(false);
 
-    dispatchUseEnvAsSkybox(true);
+    reduxStore.dispatch(dispatchUseEnvAsSkybox(true));
     await iblSelector.updateComplete;
     expect(iblSelector.skyboxCheckbox.checked).toBe(true);
   });
 
   it('dispatches shadow-intensity change when slider moved', async () => {
-    dispatchShadowIntensity(0.5);
+    reduxStore.dispatch(dispatchShadowIntensity(0.5));
     expect(reduxStore.getState().config.shadowIntensity).toBe(0.5);
     await iblSelector.updateComplete;
     for (const value of [0.5, 0.9, 0, 1]) {
@@ -74,14 +74,14 @@ describe('ibl selector test', () => {
 
   it('updates slider state after shadow-intensity change', async () => {
     for (const value of [0.5, 0.9, 0, 1]) {
-      dispatchShadowIntensity(value);
+      reduxStore.dispatch(dispatchShadowIntensity(value));
       await iblSelector.updateComplete;
       expect(iblSelector.shadowIntensitySlider.value).toBe(value);
     }
   });
 
   it('dispatches shadow-softness change when slider moved', async () => {
-    dispatchShadowSoftness(0.5);
+    reduxStore.dispatch(dispatchShadowSoftness(0.5));
     expect(reduxStore.getState().config.shadowSoftness).toBe(0.5);
     await iblSelector.updateComplete;
     for (const value of [0.5, 0.9, 0, 1]) {
@@ -92,7 +92,7 @@ describe('ibl selector test', () => {
 
   it('updates slider state after shadow-softness change', async () => {
     for (const value of [0.5, 0.9, 0, 1]) {
-      dispatchShadowSoftness(value);
+      reduxStore.dispatch(dispatchShadowSoftness(value));
       await iblSelector.updateComplete;
       expect(iblSelector.shadowSoftnessSlider.value).toBe(value);
     }
@@ -104,8 +104,10 @@ describe('ibl selector test', () => {
     // Initial items are set in space_opera_base, excludes those in tests
     const initialItemsCount = listItems.length;
 
-    dispatchAddEnvironmentImage({uri: 'test-uri-1', name: 'test-name-1'});
-    dispatchAddEnvironmentImage({uri: 'test-uri-2', name: 'test-name-2'});
+    reduxStore.dispatch(
+        dispatchAddEnvironmentImage({uri: 'test-uri-1', name: 'test-name-1'}));
+    reduxStore.dispatch(
+        dispatchAddEnvironmentImage({uri: 'test-uri-2', name: 'test-name-2'}));
     await iblSelector.updateComplete;
 
     listItems = dropdown.querySelectorAll('paper-item');
@@ -118,8 +120,10 @@ describe('ibl selector test', () => {
 
   it('dispatches environmentImage change when selecting an item under dropdown',
      async () => {
-       dispatchAddEnvironmentImage({uri: 'test-uri-1', name: 'test-name-1'});
-       dispatchAddEnvironmentImage({uri: 'test-uri-2', name: 'test-name-2'});
+       reduxStore.dispatch(dispatchAddEnvironmentImage(
+           {uri: 'test-uri-1', name: 'test-name-1'}));
+       reduxStore.dispatch(dispatchAddEnvironmentImage(
+           {uri: 'test-uri-2', name: 'test-name-2'}));
        await iblSelector.updateComplete;
        const dropdown = iblSelector.shadowRoot!.querySelector('me-dropdown')!;
 

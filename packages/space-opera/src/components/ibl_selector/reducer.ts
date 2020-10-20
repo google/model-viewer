@@ -17,7 +17,6 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {reduxStore} from '../../space_opera_base.js';
 import {Action} from '../../types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
 import {EnvironmentImage} from './lighting_state.js';
@@ -40,10 +39,10 @@ export async function createBlobUrlFromEnvironmentImage(file: File) {
 /** Dispatch an edit to potential environment images to select. */
 const UPLOAD_ENVIRONMENT_IMAGE = 'UPLOAD_ENVIRONMENT_IMAGE';
 export function dispatchAddEnvironmentImage(image?: EnvironmentImage) {
-  if (!image) {
-    return;
-  }
-  reduxStore.dispatch({type: UPLOAD_ENVIRONMENT_IMAGE, payload: image})
+  // if (!image) {
+  //   return;
+  // }
+  return {type: UPLOAD_ENVIRONMENT_IMAGE, payload: image};
 }
 
 function addEnvironmentImage(

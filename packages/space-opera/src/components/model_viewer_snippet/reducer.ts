@@ -30,13 +30,13 @@ export function dispatchConfig(config?: ModelViewerConfig) {
   if (config === reduxStore.getState().config) {
     throw new Error(`Do not modify state.config in place!`);
   }
-  dispatchSetConfig(config);
+  reduxStore.dispatch(dispatchSetConfig(config));
 
   // Clear camera settings. This is optional!
-  dispatchSetCamera(INITIAL_CAMERA);
+  reduxStore.dispatch(dispatchSetCamera(INITIAL_CAMERA));
 
   // Clear initialCamera too, as ModelViewerPreview will update this.
-  dispatchInitialCameraState(INITIAL_CAMERA);
+  reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
 
-  delete reduxStore.getState().currentCamera;
+  delete reduxStore.getState().currentCamera.currentCamera;
 }

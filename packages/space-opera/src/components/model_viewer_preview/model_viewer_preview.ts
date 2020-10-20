@@ -29,6 +29,7 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
+import {reduxStore} from '../../space_opera_base.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCurrentCameraState} from '../camera_settings/reducer.js';
@@ -43,9 +44,11 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
+import {applyEdits} from './gltf_edits.js';
+import {dispatchGltfAndEdits} from './gltf_edits.js';
 import {styles} from './model_viewer_preview_styles.css.js';
-import {dispatchGltfAndEdits, dispatchGltfUrl, dispatchModelViewer} from './reducer.js';
+import {dispatchGltfUrl, dispatchModelViewer} from './reducer.js';
+import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
 const $gltfUrl = Symbol('gltfUrl');
@@ -101,15 +104,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.config = state.config;
     this.hotspots = state.hotspots;
     this[$edits] = state.edits;
-    this[$gltf] = state.gltf;
-    this[$gltfUrl] = state.gltfUrl;
+    this[$gltf] = state.gltfInfo.gltf;
+    this[$gltfUrl] = state.gltfInfo.gltfUrl;
     this[$playAnimation] = state.playAnimation;
   }
 
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
-    dispatchModelViewer(this.modelViewer);
+    reduxStore.dispatch(dispatchModelViewer(this.modelViewer));
   }
 
   private async onGltfUrlChanged() {
@@ -248,14 +251,16 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!this.modelViewer || !this.modelViewer.loaded) {
       throw new Error('onModelVisible called before mv was loaded');
     }
-    dispatchInitialCameraState(getCameraState(this.modelViewer));
+    reduxStore.dispatch(
+        dispatchInitialCameraState(getCameraState(this.modelViewer)));
   }
 
   private onCameraChange() {
     if (!this.modelViewer) {
       throw new Error('onCameraChange called before modelViewer defined');
     }
-    dispatchCurrentCameraState(getCameraState(this.modelViewer));
+    reduxStore.dispatch(
+        dispatchCurrentCameraState(getCameraState(this.modelViewer)));
   }
 
   private enforcePlayAnimation() {
@@ -281,12 +286,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!positionAndNormal) {
       throw new Error('invalid click position');
     }
-    dispatchAddHotspot({
+    reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
       position: positionAndNormal.position,
       normal: positionAndNormal.normal,
-    });
-    dispatchAddHotspotMode(false);
+    }));
+    reduxStore.dispatch(dispatchAddHotspotMode(false));
   }
 
   private async downloadScreenshot() {
@@ -315,15 +320,16 @@ export class ModelViewerPreview extends ConnectedLitElement {
       if (file.name.match(/\.(glb)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-        dispatchGltfUrl(url);
+        reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
-        dispatchSetHotspots([]);
+        reduxStore.dispatch(dispatchSetHotspots([]));
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
         const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
-        dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
-        dispatchEnvrionmentImage(unsafeUrl);
+        reduxStore.dispatch(
+            dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+        reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
       }
     }
   }
