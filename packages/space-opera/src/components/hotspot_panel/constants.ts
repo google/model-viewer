@@ -1,0 +1,1 @@
+export const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';

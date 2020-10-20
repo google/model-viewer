@@ -18,8 +18,9 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
+import {State} from '../../../space_opera_base.js';
 import {Camera} from '../camera_state.js';
+import {dispatchPitchLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -31,23 +32,6 @@ export const DEFAULT_MIN_PITCH = 0;
 
 /** Default maximum pitch angle (degrees) */
 export const DEFAULT_MAX_PITCH = 180;
-
-/** Dispatch change to maximum pitch */
-export const dispatchPitchLimits = registerStateMutator(
-    'SET_CAMERA_PITCH_LIMITS', (state, pitchLimitsDeg?: Limits) => {
-      if (!pitchLimitsDeg) {
-        throw new Error('No valid limits given');
-      }
-      if (pitchLimitsDeg === state.camera.pitchLimitsDeg) {
-        throw new Error(
-            'Do not edit pitchLimitsDeg in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        pitchLimitsDeg,
-      };
-    });
 
 
 /** The Camera Settings panel. */

@@ -17,8 +17,9 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
+import {State} from '../../../space_opera_base.js';
 import {Camera} from '../camera_state.js';
+import {dispatchFovLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -28,24 +29,6 @@ export const DEFAULT_MIN_FOV = 10;
 
 /** Default maximum FOV angle (degrees) */
 export const DEFAULT_MAX_FOV = 90;
-
-/** Dispatch change to maximum FOV */
-export const dispatchFovLimits = registerStateMutator(
-    'SET_CAMERA_FOV_LIMITS', (state, fovLimitsDeg?: Limits) => {
-      if (!fovLimitsDeg) {
-        throw new Error('No valid FOV limit given');
-      }
-      if (fovLimitsDeg === state.camera.fovLimitsDeg) {
-        throw new Error(
-            'Do not edit fovLimitsDeg in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        fovLimitsDeg,
-      };
-    });
-
 
 /** The Camera Settings panel. */
 @customElement('me-camera-fov-limits')

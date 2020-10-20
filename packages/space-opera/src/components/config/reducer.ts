@@ -77,52 +77,53 @@ export function dispatchSetConfig(config: ModelViewerConfig) {
   reduxStore.dispatch({type: SET_CONFIG, payload: config})
 }
 
-export function configReducer(state: ModelViewerConfig, action: Action) {
-  switch (action.type) {
-    case SET_CONFIG: {
-      return action.payload;
+export function configReducer(state: ModelViewerConfig = {}, action: Action):
+    ModelViewerConfig {
+      switch (action.type) {
+        case SET_CONFIG: {
+          return action.payload;
+        }
+        case SET_REVEAL:
+          return {...state, reveal: action.payload};
+        case SET_POSTER:
+          return {
+            ...state, poster: action.payload
+          }
+        case UPDATE_SHADOW_SOFTNESS:
+          return {
+            ...state, shadowSoftness: action.payload
+          }
+        case UPDATE_SHADOW_INTENSITY:
+          return {
+            ...state, shadowIntensity: action.payload
+          }
+        case SET_USE_ENV_AS_SKYBOX:
+          return {
+            ...state, useEnvAsSkybox: action.payload
+          }
+        case UPDATE_EXPOSURE:
+          return {
+            ...state, exposure: action.payload
+          }
+        case UPDATE_IBL:
+          return {
+            ...state, environmentImage: action.payload
+          }
+        case SET_AUTOPLAY_ENABLED:
+          return {
+            ...state, autoplay: action.payload
+          }
+        case SET_ANIMATION_NAME:
+          return {...state, animationName: action.payload};
+        case SET_CAMERA_CONTROLS_ENABLED:
+          return {
+            ...state, cameraControls: action.payload
+          }
+        case SET_AUTO_ROTATE:
+          return {
+            ...state, autoRotate: action.payload
+          }
+        default:
+          return state;
+      }
     }
-    case SET_REVEAL:
-      return {...state, reveal: action.payload};
-    case SET_POSTER:
-      return {
-        ...state, poster: action.payload
-      }
-    case UPDATE_SHADOW_SOFTNESS:
-      return {
-        ...state, shadowSoftness: action.payload
-      }
-    case UPDATE_SHADOW_INTENSITY:
-      return {
-        ...state, shadowIntensity: action.payload
-      }
-    case SET_USE_ENV_AS_SKYBOX:
-      return {
-        ...state, useEnvAsSkybox: action.payload
-      }
-    case UPDATE_EXPOSURE:
-      return {
-        ...state, exposure: action.payload
-      }
-    case UPDATE_IBL:
-      return {
-        ...state, environmentImage: action.payload
-      }
-    case SET_AUTOPLAY_ENABLED:
-      return {
-        ...state, autoplay: action.payload
-      }
-    case SET_ANIMATION_NAME:
-      return {...state, animationName: action.payload};
-    case SET_CAMERA_CONTROLS_ENABLED:
-      return {
-        ...state, cameraControls: action.payload
-      }
-    case SET_AUTO_ROTATE:
-      return {
-        ...state, autoRotate: action.payload
-      }
-    default:
-      return state;
-  }
-}

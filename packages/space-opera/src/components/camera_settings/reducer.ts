@@ -16,9 +16,11 @@
  */
 
 import {Action, reduxStore} from '../../space_opera_base.js';
+import {INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
+import {Limits} from './types.js';
 
 // INITIAL CAMERA //////////////
 
@@ -35,7 +37,8 @@ export function dispatchInitialCameraState(initialCamera?: Camera) {
       {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}})
 }
 
-export function initialCameraReducer(state: Camera, action: Action): Camera {
+export function initialCameraReducer(
+    state: Camera = INITIAL_CAMERA, action: Action): Camera {
   switch (action.type) {
     case SET_INITIAL_CAMERA_STATE:
       return action.payload;
@@ -58,7 +61,8 @@ export function dispatchCurrentCameraState(currentCamera?: Camera) {
       {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}})
 }
 
-export function currentCameraReducer(state: Camera, action: Action): Camera {
+export function currentCameraReducer(
+    state: Camera|undefined, action: Action): Camera|undefined {
   switch (action.type) {
     case SET_CURRENT_CAMERA_STATE:
       return action.payload;
@@ -69,16 +73,68 @@ export function currentCameraReducer(state: Camera, action: Action): Camera {
 
 // CAMERA //////////////
 
+/** Dispatch change to maximum pitch */
+const SET_CAMERA_YAW_LIMITS = 'SET_CAMERA_YAW_LIMITS';
+export function dispatchYawLimits(yawLimitsDeg?: Limits) {
+  if (!yawLimitsDeg) {
+    throw new Error('No limits given');
+  }
+  if (yawLimitsDeg === reduxStore.getState().camera.yawLimitsDeg) {
+    throw new Error(
+        'Do not edit yawLimitsDeg in place. You passed in the same object');
+  }
+  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: yawLimitsDeg})
+}
+
+/** Dispatch change to radius limits */
+const SET_CAMERA_RADIUS_LIMITS = 'SET_CAMERA_RADIUS_LIMITS';
+export function dispatchRadiusLimits(radiusLimits?: Limits) {
+  if (!radiusLimits) {
+    throw new Error('No valid limits given');
+  }
+  if (radiusLimits === reduxStore.getState().camera.radiusLimits) {
+    throw new Error(
+        'Do not edit radiusLimits in place. You passed in the same object');
+  }
+  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: radiusLimits})
+}
+
+/** Dispatch change to maximum pitch */
+const SET_CAMERA_PITCH_LIMITS = 'SET_CAMERA_PITCH_LIMITS';
+export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
+  if (!pitchLimitsDeg) {
+    throw new Error('No valid limits given');
+  }
+  if (pitchLimitsDeg === reduxStore.getState().camera.pitchLimitsDeg) {
+    throw new Error(
+        'Do not edit pitchLimitsDeg in place. You passed in the same object');
+  }
+  reduxStore.dispatch({type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg})
+}
+
+/** Dispatch change to maximum FOV */
+const SET_CAMERA_FOV_LIMITS = 'SET_CAMERA_FOV_LIMITS';
+export function dispatchFovLimits(fovLimitsDeg?: Limits) {
+  if (!fovLimitsDeg) {
+    throw new Error('No valid FOV limit given');
+  }
+  if (fovLimitsDeg === reduxStore.getState().camera.fovLimitsDeg) {
+    throw new Error(
+        'Do not edit fovLimitsDeg in place. You passed in the same object');
+  }
+  reduxStore.dispatch({type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg})
+}
+
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
 export function dispatchSaveCameraOrbit() {
   if (!reduxStore.getState().currentCamera)
     return;
-  const currentOrbit = reduxStore.getState().currentCamera.orbit;
+  const currentOrbit = reduxStore.getState().currentCamera!.orbit;
   if (!currentOrbit)
     return;
   const currentFieldOfViewDeg =
-      reduxStore.getState().currentCamera.fieldOfViewDeg;
+      reduxStore.getState().currentCamera!.fieldOfViewDeg;
   reduxStore.dispatch({
     type: SAVE_CAMERA_ORBIT,
     payload: {orbit: currentOrbit, fieldOfViewDeg: currentFieldOfViewDeg}
@@ -104,7 +160,8 @@ export function dispatchSetCamera(camera: Camera) {
   reduxStore.dispatch({type: SET_CAMERA, payload: camera})
 }
 
-export function cameraReducer(state: Camera, action: Action): Camera {
+export function cameraReducer(
+    state: Camera = INITIAL_CAMERA, action: Action): Camera {
   switch (action.type) {
     case SET_CAMERA:
       return action.payload;
@@ -118,6 +175,22 @@ export function cameraReducer(state: Camera, action: Action): Camera {
       return {
         ...state, orbit: {...action.payload.currentOrbit},
             fieldOfViewDeg: action.payload.fieldOfViewDeg,
+      }
+    case SET_CAMERA_FOV_LIMITS:
+      return {
+        ...state, fovLimitsDeg: action.payload
+      }
+    case SET_CAMERA_PITCH_LIMITS:
+      return {
+        ...state, pitchLimitsDeg: action.payload
+      }
+    case SET_CAMERA_RADIUS_LIMITS:
+      return {
+        ...state, radiusLimits: action.payload
+      }
+    case SET_CAMERA_YAW_LIMITS:
+      return {
+        ...state, yawLimitsDeg: action.payload
       }
     default:
       return state;

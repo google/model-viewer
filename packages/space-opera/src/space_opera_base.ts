@@ -24,7 +24,7 @@ import {HotspotConfig} from './components/hotspot_panel/hotspot_config.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/gltf_edits.js';
-import {RESET_STATE_ACTION_TYPE} from './components/reset/reducer.js';
+// import {RESET_STATE_ACTION_TYPE} from './components/reset/reducer.js';
 import {rootReducer} from './reducers.js';
 
 /**
@@ -75,71 +75,6 @@ export interface Action extends Redux.Action {
   payload?: any;
 }
 
-const subReducers = new Map<string, Redux.Reducer<State>>();
-
-function makeRootReducer() {
-  return (state: State = INITIAL_STATE, action: Action) => {
-    if (action.type === RESET_STATE_ACTION_TYPE) {
-      return INITIAL_STATE;
-    }
-    const subReducer = subReducers.get(action.type);
-    if (subReducer) {
-      return subReducer(state, action);
-    } else {
-      // It's fine to not have a reducer for an action. Such as, redux built-in
-      // actions.
-      return state;
-    }
-  };
-}
-
-/**
- * A synchronous mutator of fixed paylod type.
- */
-export type StateMutator<T> = (state: State, payload?: T) => void;
-
-/**
- * For better or worse, a common usecase in our codebase is a single user action
- * which maps to a specific, localized state change. To reduce boilerplate for
- * this case, we provide a mechanism to automatically register a named action
- * along with its accompanying state mutator.
- */
-class TypedAction<T> implements Action {
-  type: string = '';
-  payload?: T;
-}
-
-/**
- * Call this function to register your state mutator. It will return a bound
- * function which you can use to dispatch future payloads to the store, or you
- * can directly construct and dispatch actions through the usual path.
- */
-export function registerStateMutator<T>(
-    actionType: string, stateMutator: StateMutator<T>) {
-  if (subReducers.has(actionType)) {
-    throw new Error(
-        `Duplicate mutator action type: ${actionType} - not allowed.`);
-  }
-
-  const subReducer = (state = INITIAL_STATE, action: TypedAction<T>) => {
-    if (action.type !== actionType) {
-      throw new Error(`Reducer was called for the wrong action type. Expected ${
-          actionType}, got ${action.type}`);
-    }
-    state = {...state};
-    stateMutator(state, action.payload);
-    return state;
-  };
-  subReducers.set(actionType, subReducer);
-
-  // Update the root reducer
-  reduxStore.replaceReducer(makeRootReducer());
-
-  return (payload?: T) => {
-    reduxStore.dispatch({type: actionType, payload});
-  };
-}
-
 /**
  * Convenience function for components that import GLBs.
  * We consider "staging config" to be properties that are applicable to any
@@ -166,5 +101,4 @@ const composeEnhancers =
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose
 
 /** Global Redux store. */
-export const reduxStore =
-    Redux.createStore(makeRootReducer(), composeEnhancers());
+export const reduxStore = Redux.createStore(rootReducer, composeEnhancers());

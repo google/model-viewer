@@ -18,7 +18,8 @@
 
 import '../../../components/camera_settings/components/yaw_limits.js';
 
-import {DEFAULT_MAX_YAW, dispatchYawLimits, YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
+import {DEFAULT_MAX_YAW, YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
+import {dispatchYawLimits} from '../../../components/camera_settings/reducer.js';
 import {dispatchCurrentCameraState} from '../../../components/camera_settings/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 

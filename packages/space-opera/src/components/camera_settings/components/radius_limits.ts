@@ -18,32 +18,15 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
+import {State} from '../../../space_opera_base.js';
 import {Camera} from '../camera_state.js';
+import {dispatchRadiusLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
 
 /** Absolute minimum radius (meters) */
 export const DEFAULT_MIN_RADIUS = 0;
-
-/** Dispatch change to radius limits */
-export const dispatchRadiusLimits = registerStateMutator(
-    'SET_CAMERA_RADIUS_LIMITS', (state, radiusLimits?: Limits) => {
-      if (!radiusLimits) {
-        throw new Error('No valid limits given');
-      }
-      if (radiusLimits === state.camera.radiusLimits) {
-        throw new Error(
-            'Do not edit radiusLimits in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        radiusLimits,
-      };
-    });
-
 
 /** The Camera Settings panel. */
 @customElement('me-camera-radius-limits')

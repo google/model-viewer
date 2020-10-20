@@ -18,8 +18,8 @@
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
-import {Action, reduxStore, registerStateMutator} from '../../space_opera_base.js';
-import {State} from '../../space_opera_base.js';
+import {Action, reduxStore} from '../../space_opera_base.js';
+import {dispatchSetEdits} from '../materials_panel/reducer.js';
 import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/gltf_edits.js';
 
 // ANIMATION NAMES //////////////
@@ -29,7 +29,8 @@ export function dispatchSetAnimationNames(animationNames: string[]) {
   reduxStore.dispatch({type: SET_ANIMATION_NAMES, payload: animationNames});
 }
 
-export function animationNamesReducer(state: string[], action: Action) {
+export function animationNamesReducer(
+    state: string[] = [], action: Action): string[] {
   switch (action.type) {
     case SET_ANIMATION_NAMES:
       return action.payload;
@@ -42,13 +43,13 @@ export function animationNamesReducer(state: string[], action: Action) {
 
 /** The user has requested a new GLTF/GLB for editing. */
 const SET_GLTF_URL = 'SET_GLTF_URL'
-export function dispatchGltfUrl(gltfUrl?: string) {
+export function dispatchGltfUrl(gltfUrl?: string|undefined) {
   reduxStore.dispatch({type: SET_GLTF_URL, payload: gltfUrl});
 }
 
 export function
-gltfUrlReducer(state: string, action: Action):
-    string {
+gltfUrlReducer(state: string|undefined, action: Action):
+    string|undefined {
       switch (action.type) {
         case SET_GLTF_URL:
           return action.payload;
@@ -82,11 +83,11 @@ export function gltfReducer(state: GltfModel|undefined, action: Action):
 
 // GLTF JSON STRING//////////////
 const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
-export function dispatchGltfJsonString(gltfJsonString?: GltfEdits) {
+export function dispatchGltfJsonString(gltfJsonString?: string) {
   reduxStore.dispatch({type: SET_GLTF_JSON_STRING, payload: gltfJsonString});
 }
 
-export function gltfJsonStringReducer(state: string, action: Action):
+export function gltfJsonStringReducer(state: string = '', action: Action):
     string {
       switch (action.type) {
         case SET_GLTF_JSON_STRING:
@@ -102,7 +103,8 @@ export function dispatchSetOrigEdits(origEdits: GltfEdits) {
   reduxStore.dispatch({type: SET_ORIG_EDITS, payload: origEdits});
 }
 
-export function origEditsReducer(state: GltfEdits, action: Action):
+export function origEditsReducer(
+    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action):
     GltfEdits {
       switch (action.type) {
         case SET_ORIG_EDITS:
@@ -130,8 +132,8 @@ function dispatchGltf(args?: DispatchGltfArgs) {
   if (reduxStore.getState().edits === edits) {
     throw new Error(`Same edits was given! Only call this upon actual change`);
   }
-  state.edits = edits;
-  state.origEdits = edits;
+  dispatchSetEdits(edits);
+  dispatchSetOrigEdits(edits);
   dispatchSetAnimationNames(args.animationNames);
   dispatchGltfJsonString(args.jsonString);
 }
@@ -151,17 +153,17 @@ export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
       gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
 }
 
+// MODEL VIEWER //////////////
+
 /** Only use in intialization. */
 const MODEL_VIEWER = 'MODEL_VIEWER';
 export function dispatchModelViewer(modelViewer?: ModelViewerElement) {
   reduxStore.dispatch({type: MODEL_VIEWER, paylaod: modelViewer});
 }
 
-interface ModelViewerState {
-  modelViewer: ModelViewerElement;
-}
-
-export function modelViewerReducer(state: ModelViewerState, action: Action) {
+export function modelViewerReducer(
+    state: ModelViewerElement|undefined, action: Action): ModelViewerElement|
+    undefined {
   switch (action.type) {
     case MODEL_VIEWER:
       return action.payload;

@@ -18,7 +18,8 @@
 
 import '../../../components/camera_settings/components/pitch_limits.js';
 
-import {DEFAULT_MAX_PITCH, dispatchPitchLimits, PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
+import {DEFAULT_MAX_PITCH, PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
+import {dispatchPitchLimits} from '../../../components/camera_settings/reducer.js';
 import {dispatchCurrentCameraState} from '../../../components/camera_settings/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 

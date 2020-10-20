@@ -26,7 +26,7 @@ import {dispatchCurrentCameraState} from '../components/camera_settings/reducer.
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits, INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits, dispatchGltfUrl} from '../components/model_viewer_preview/reducer.js';
-import {reduxStore, registerStateMutator} from '../space_opera_base.js';
+import {reduxStore} from '../space_opera_base.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =
@@ -671,13 +671,14 @@ describe('space opera base test', () => {
     expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
-  it('throws if we try to add duplicate mutator action names', () => {
-    const name = 'SOME_TEST_MUTATOR';
-    registerStateMutator(name, () => {});
-    expect(() => {
-      registerStateMutator(name, () => {});
-    }).toThrow();
-  });
+  // DEPRECATED... No longer using registerStateMutator
+  // it('throws if we try to add duplicate mutator action names', () => {
+  //   const name = 'SOME_TEST_MUTATOR';
+  //   registerStateMutator(name, () => {});
+  //   expect(() => {
+  //     registerStateMutator(name, () => {});
+  //   }).toThrow();
+  // });
 
   it('applies camera edits correctly to a model viewer config', () => {
     const camera = {

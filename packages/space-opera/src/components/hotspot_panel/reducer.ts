@@ -15,7 +15,7 @@
  *
  */
 
-import {Action, reduxStore, registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, reduxStore} from '../../space_opera_base.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
 import {HotspotConfig} from './hotspot_config.js';
@@ -35,16 +35,12 @@ export function generateUniqueHotspotName() {
 // HOTSPOT MODE ////////////
 
 const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';
-export const dispatchAddHotspotMode = registerStateMutator(
-    ADD_HOTSPOT_MODE, (state: State, addHotspotMode?: boolean) => {
-      state.addHotspotMode = addHotspotMode;
-    });
-
-interface HotspotModeState {
-  addHotspotMode: boolean;
+export function dispatchAddHotspotMode(addHotspotMode?: boolean) {
+  reduxStore.dispatch({type: ADD_HOTSPOT_MODE, payload: addHotspotMode});
 }
 
-export function hotspotModeReducer(state: HotspotModeState, action: Action) {
+export function hotspotModeReducer(
+    state: boolean|undefined, action: Action): boolean|undefined {
   switch (action.type) {
     case ADD_HOTSPOT_MODE:
       return action.payload;
@@ -75,12 +71,12 @@ export function dispatchAddHotspot(config?: HotspotConfig) {
   reduxStore.dispatch({type: ADD_HOTSPOT, payload: config});
 }
 
-function addHotspot(state: HotspotState, config: HotspotConfig) {
+function addHotspot(state: HotspotConfig[], config: HotspotConfig) {
   if (hotspotNameSet.has(config.name)) {
     throw new Error(`Hotspot name duplicate: ${config.name}`);
   }
   hotspotNameSet.add(config.name);
-  const hotspots = [...(state.hotspots ?? []), config];
+  const hotspots = [...(state ?? []), config];
   return hotspots;
 }
 
@@ -91,9 +87,9 @@ export function dispatchUpdateHotspot(config?: HotspotConfig) {
   reduxStore.dispatch({type: UPDATE_HOTSPOT, payload: config});
 };
 
-function updateHotspot(state: HotspotState, config: HotspotConfig) {
-  const index = findHotspotIndex(state.hotspots, config.name);
-  const hotspots = immutableArrayUpdate(state.hotspots, index, config);
+function updateHotspot(state: HotspotConfig[], config: HotspotConfig) {
+  const index = findHotspotIndex(state, config.name);
+  const hotspots = immutableArrayUpdate(state, index, config);
   return hotspots;
 }
 
@@ -104,9 +100,9 @@ export function dispatchRemoveHotspot(name?: string) {
   reduxStore.dispatch({type: REMOVE_HOTSPOT, payload: name});
 }
 
-function removeHotspot(state: HotspotState, name: string) {
-  const index = findHotspotIndex(state.hotspots, name);
-  const hotspots = [...state.hotspots];
+function removeHotspot(state: HotspotConfig[], name: string) {
+  const index = findHotspotIndex(state, name);
+  const hotspots = [...state];
   hotspots.splice(index, 1);
   hotspotNameSet.delete(name);
   return hotspots;
@@ -128,11 +124,8 @@ export function dispatchSetHotspots(hotspots?: HotspotConfig[]) {
   reduxStore.dispatch({type: SET_HOTSPOTS, payload: hotspots});
 }
 
-interface HotspotState {
-  hotspots: HotspotConfig[];
-}
-
-export function hotspotsReducer(state: HotspotState, action: Action) {
+export function hotspotsReducer(
+    state: HotspotConfig[] = [], action: Action): HotspotConfig[] {
   switch (action.type) {
     case SET_HOTSPOTS:
       return action.payload;

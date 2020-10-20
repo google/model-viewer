@@ -17,18 +17,18 @@
 
 import {combineReducers} from 'redux';
 
-import {edits} from './';
 import {playAnimationReducer} from './components/animation_controls/reducer.js';
 import {cameraReducer, currentCameraReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotModeReducer, hotspotsReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
+import {editsReducer} from './components/materials_panel/reducer.js';
 import {animationNamesReducer, gltfJsonStringReducer, gltfReducer, gltfUrlReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
 import {modelViewerReducer} from './components/model_viewer_preview/reducer.js';
 
 export const rootReducer = combineReducers({
   config: configReducer,
-  edits,
+  edits: editsReducer,
   origEdits: origEditsReducer,
   animationNames: animationNamesReducer,
   gltfJsonString: gltfJsonStringReducer,
@@ -43,3 +43,5 @@ export const rootReducer = combineReducers({
   currentCamera: currentCameraReducer,
   gltf: gltfReducer,
 });
+
+export type RootState = ReturnType<typeof rootReducer>

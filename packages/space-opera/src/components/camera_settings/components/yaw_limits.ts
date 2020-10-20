@@ -17,8 +17,9 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
+import {State} from '../../../space_opera_base.js';
 import {Camera} from '../camera_state.js';
+import {dispatchYawLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -30,23 +31,6 @@ export const DEFAULT_MIN_YAW = -180;
 
 /** Default maximum yaw angle (degrees) */
 export const DEFAULT_MAX_YAW = 180;
-
-/** Dispatch change to maximum pitch */
-export const dispatchYawLimits = registerStateMutator(
-    'SET_CAMERA_YAW_LIMITS', (state, yawLimitsDeg?: Limits) => {
-      if (!yawLimitsDeg) {
-        throw new Error('No limits given');
-      }
-      if (yawLimitsDeg === state.camera.yawLimitsDeg) {
-        throw new Error(
-            'Do not edit yawLimitsDeg in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        yawLimitsDeg,
-      };
-    });
 
 
 /** The Camera Settings panel. */
