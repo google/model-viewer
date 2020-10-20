@@ -74,26 +74,21 @@ export const dispatchSyntheticEvent =
       return event;
     };
 
-const SyntheticPointerEvent =
-    (type: string, properties: PointerEventInit): PointerEvent => {
-      let event;
-      if (typeof (PointerEvent) === 'function') {
-        properties.cancelable = true;
-        properties.bubbles = true;
-        event = new PointerEvent(type, properties);
-      } else {
-        event = document.createEvent('PointerEvent');
-        event.initEvent(type, true, true);
-        Object.assign(event, properties);
-      }
-      return event;
-    };
-
 export const interactWith = (element: HTMLElement) => {
-  element.dispatchEvent(SyntheticPointerEvent(
-      'pointerdown', {clientX: 10, clientY: 0, isPrimary: true}));
-  element.dispatchEvent(SyntheticPointerEvent(
-      'pointermove', {clientX: 0, clientY: 0, isPrimary: true}));
+  element.dispatchEvent(new PointerEvent('pointerdown', {
+    clientX: 10,
+    clientY: 0,
+    isPrimary: true,
+    cancelable: true,
+    bubbles: true
+  }));
+  element.dispatchEvent(new PointerEvent('pointermove', {
+    clientX: 0,
+    clientY: 0,
+    isPrimary: true,
+    cancelable: true,
+    bubbles: true
+  }));
 };
 
 export const ASSETS_DIRECTORY = '../base/shared-assets/';

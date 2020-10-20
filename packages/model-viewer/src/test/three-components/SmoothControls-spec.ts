@@ -14,6 +14,7 @@
  */
 
 import {PerspectiveCamera, Vector3} from 'three';
+import {IS_IE11} from '../../constants.js';
 
 import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
@@ -270,6 +271,9 @@ suite('SmoothControls', () => {
           });
 
           test('does not orbit when pointing while blurred', () => {
+            if (IS_IE11) {
+              return;  // Some stupid pointerEvents problem
+            }
             const originalTheta = controls.getCameraSpherical().theta;
 
             interactWith(element);
@@ -301,6 +305,9 @@ suite('SmoothControls', () => {
           });
 
           test('orbits when pointing, even while blurred', () => {
+            if (IS_IE11) {
+              return;  // Some stupid pointerEvents problem
+            }
             const originalTheta = controls.getCameraSpherical().theta;
 
             interactWith(element);
