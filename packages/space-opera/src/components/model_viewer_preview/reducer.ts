@@ -107,7 +107,7 @@ export function origEditsReducer(
 /** Only use in intialization. */
 const MODEL_VIEWER = 'MODEL_VIEWER';
 export function dispatchModelViewer(modelViewer?: ModelViewerElement) {
-  return {type: MODEL_VIEWER, paylaod: modelViewer};
+  return {type: MODEL_VIEWER, payload: modelViewer};
 }
 
 export function modelViewerInfoReducer(
