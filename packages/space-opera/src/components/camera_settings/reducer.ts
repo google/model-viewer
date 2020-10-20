@@ -140,7 +140,7 @@ export function dispatchSaveCameraOrbit(
   //     reduxStore.getState().currentCamera!.fieldOfViewDeg;
   return {
     type: SAVE_CAMERA_ORBIT,
-    payload: {orbit: currentOrbit, fieldOfViewDeg: currentFieldOfViewDeg}
+    payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}
   };
 }
 
@@ -176,7 +176,7 @@ export function cameraReducer(
       }
     case SAVE_CAMERA_ORBIT:
       return {
-        ...state, orbit: {...action.payload.currentOrbit},
+        ...state, orbit: {...action.payload.orbit},
             fieldOfViewDeg: action.payload.fieldOfViewDeg,
       }
     case SET_CAMERA_FOV_LIMITS:

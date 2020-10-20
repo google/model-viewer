@@ -38,10 +38,9 @@ describe('camera constraints test', () => {
     document.body.removeChild(cameraSettings);
   });
 
-  fit('dispatches save camera orbit state mutator on click', async () => {
+  it('dispatches save camera orbit state mutator on click', async () => {
     reduxStore.dispatch(dispatchCurrentCameraState(
         {orbit: {thetaDeg: 12, phiDeg: 34, radius: 56}}));
-
     await cameraSettings.updateComplete;
     const saveCameraOrbitButton =
         cameraSettings.shadowRoot!.querySelector(
