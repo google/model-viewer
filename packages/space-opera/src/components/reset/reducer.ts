@@ -15,20 +15,10 @@
  *
  */
 
-import {Action, INITIAL_STATE, State} from '../../types.js';
+// import {Action, INITIAL_STATE, State} from '../../types.js';
 
 /** Mostly for unit tests. */
-export const RESET_STATE_ACTION_TYPE = 'RESET_SPACE_OPERA_STATE';
+export const RESET = 'RESET';
 export function dispatchResetState() {
-  return {type: RESET_STATE_ACTION_TYPE};
-}
-
-// TODO: Figure out how this could work exactly...
-export function resetReducer(state: State, action: Action) {
-  switch (action.type) {
-    case RESET_STATE_ACTION_TYPE:
-      return INITIAL_STATE;
-    default:
-      return state;
-  }
+  return {type: RESET};
 }

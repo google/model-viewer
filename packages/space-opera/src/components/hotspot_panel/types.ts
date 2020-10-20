@@ -26,6 +26,11 @@ export interface HotspotConfig {
   annotation?: string;
 }
 
+export interface HotspotInfoConfig {
+  hotspots: HotspotConfig[];
+  addHotspotMode: boolean;
+}
+
 /** Converts a number array to vector3D */
 export const toVector3D = (v: [number, number, number]) => {
   return {

@@ -23,9 +23,9 @@ import {customElement, html, LitElement, property, PropertyValues, query} from '
 
 import {reduxStore} from '../../space_opera_base.js';
 
-import {HotspotConfig} from './hotspot_config.js';
 import {styles} from './hotspot_editor.css.js';
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
+import {HotspotConfig} from './types.js';
 
 /** A editor card for a single hotspot */
 @customElement('me-hotspot-editor')

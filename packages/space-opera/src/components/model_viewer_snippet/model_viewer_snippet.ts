@@ -29,8 +29,8 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
 import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
 import {dispatchGltfUrl} from '../model_viewer_preview/reducer.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -57,7 +57,7 @@ export class ExportPanel extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = state.config;
     this.camera = state.camera;
-    this.hotspots = state.hotspots;
+    this.hotspots = state.hotspotInfo.hotspots;
     this.gltfUrl = state.gltfInfo.gltfUrl;
   }
 

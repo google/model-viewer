@@ -17,9 +17,9 @@
 
 
 
-import {toVector3D} from '../../components/hotspot_panel/hotspot_config.js';
 import {HotspotEditorElement} from '../../components/hotspot_panel/hotspot_editor.js';
 import {dispatchAddHotspot, dispatchClearHotspot} from '../../components/hotspot_panel/reducer.js';
+import {toVector3D} from '../../components/hotspot_panel/types.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('hotspot editor test', () => {
@@ -49,7 +49,7 @@ describe('hotspot editor test', () => {
     annotationTextArea.value = 'new annotation';
     annotationTextArea.dispatchEvent(new Event('input'));
 
-    const hotspots = reduxStore.getState().hotspots;
+    const hotspots = reduxStore.getState().hotspotInfo.hotspots;
     expect(hotspots.length).toBe(1);
     expect(hotspots[0].annotation).toBe('new annotation');
   });
@@ -58,7 +58,7 @@ describe('hotspot editor test', () => {
     const removeButton = hotspotEditor.shadowRoot!.querySelector(
                              'mwc-icon-button#remove-hotspot') as HTMLElement;
     removeButton.click();
-    const hotspots = reduxStore.getState().hotspots;
+    const hotspots = reduxStore.getState().hotspotInfo.hotspots;
     expect(hotspots.length).toBe(0);
   });
 });

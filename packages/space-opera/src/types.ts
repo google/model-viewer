@@ -19,7 +19,7 @@ import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.j
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
-import {HotspotConfig} from './components/hotspot_panel/hotspot_config.js';
+import {HotspotInfoConfig} from './components/hotspot_panel/types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
 import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
@@ -30,26 +30,20 @@ import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from './compon
 export interface State {
   modelViewerInfo: ModelViewerInfo;
   config: ModelViewerConfig;
-  // This should only be modified by actions that load entirely new glTFs.
-  // gltfUrl?: string;
-  // This is just a shared reference, not essential state. The object referenced
-  // is NOT immutable, for example.
   gltfInfo: GltfInfo;
   animationNames: string[];
   gltfJsonString: string;
   edits: GltfEdits;
   // A copy of the original, so we can revert individual properties.
   origEdits: GltfEdits;
-  playAnimation?: boolean;
+  playAnimation: boolean;
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
   initialCamera: Camera;
   currentCamera: CurrentCamera;
-  // A list of hotspots to render.
-  hotspots: HotspotConfig[];
+  hotspotInfo: HotspotInfoConfig;
   // On true, a click on Model-viewer tag would add a hotspot to the clicked
   // position
-  addHotspotMode?: boolean;
   // A list of user provided environment images to select from
   environmentImages: EnvironmentImage[];
 }
@@ -65,7 +59,7 @@ export const INITIAL_STATE: State = {
   gltfInfo: {},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
-  hotspots: [],
+  hotspotInfo: {hotspots: [], addHotspotMode: false},
   playAnimation: true,
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
 };

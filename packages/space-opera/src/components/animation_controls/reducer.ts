@@ -24,7 +24,7 @@ export function dispatchPlayAnimation(playAnimation: boolean) {
 }
 
 export function playAnimationReducer(
-    state: boolean|undefined = false, action: Action): boolean|undefined {
+    state: boolean|undefined = true, action: Action): boolean|undefined {
   switch (action.type) {
     case PLAY_ANIMATION:
       return !!action.payload;

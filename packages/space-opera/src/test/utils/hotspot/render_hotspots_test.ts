@@ -16,7 +16,7 @@
  */
 
 
-import {toVector3D} from '../../../components/hotspot_panel/hotspot_config.js';
+import {toVector3D} from '../../../components/hotspot_panel/types.js';
 import {renderHotspot, renderHotspots} from '../../../components/utils/hotspot/render_hotspots.js';
 
 describe('renders hotspot test', () => {

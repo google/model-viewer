@@ -36,8 +36,8 @@ import {dispatchCurrentCameraState} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
 import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../hotspot_panel/reducer.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -99,10 +99,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() gltfError: string = '';
 
   stateChanged(state: State) {
-    this.addHotspotMode = state.addHotspotMode || false;
+    this.addHotspotMode = state.hotspotInfo.addHotspotMode || false;
     this.camera = state.camera;
     this.config = state.config;
-    this.hotspots = state.hotspots;
+    this.hotspots = state.hotspotInfo.hotspots;
     this[$edits] = state.edits;
     this[$gltf] = state.gltfInfo.gltf;
     this[$gltfUrl] = state.gltfInfo.gltfUrl;
