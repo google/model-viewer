@@ -79,10 +79,6 @@ export function dispatchYawLimits(yawLimitsDeg?: Limits) {
   if (!yawLimitsDeg) {
     throw new Error('No limits given');
   }
-  // if (yawLimitsDeg === reduxStore.getState().camera.yawLimitsDeg) {
-  //   throw new Error(
-  //       'Do not edit yawLimitsDeg in place. You passed in the same object');
-  // }
   return {type: SET_CAMERA_YAW_LIMITS, payload: yawLimitsDeg};
 }
 
@@ -92,10 +88,6 @@ export function dispatchRadiusLimits(radiusLimits?: Limits) {
   if (!radiusLimits) {
     throw new Error('No valid limits given');
   }
-  // if (radiusLimits === reduxStore.getState().camera.radiusLimits) {
-  //   throw new Error(
-  //       'Do not edit radiusLimits in place. You passed in the same object');
-  // }
   return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
 }
 
@@ -105,11 +97,6 @@ export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
   if (!pitchLimitsDeg) {
     throw new Error('No valid limits given');
   }
-  // if (pitchLimitsDeg === reduxStore.getState().camera.pitchLimitsDeg) {
-  //   throw new Error(
-  //       'Do not edit pitchLimitsDeg in place. You passed in the same
-  //       object');
-  // }
   return {type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg};
 }
 
@@ -119,10 +106,6 @@ export function dispatchFovLimits(fovLimitsDeg?: Limits) {
   if (!fovLimitsDeg) {
     throw new Error('No valid FOV limit given');
   }
-  // if (fovLimitsDeg === reduxStore.getState().camera.fovLimitsDeg) {
-  //   throw new Error(
-  //       'Do not edit fovLimitsDeg in place. You passed in the same object');
-  // }
   return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
 }
 
@@ -133,11 +116,6 @@ export function dispatchSaveCameraOrbit(
     currentFieldOfViewDeg: number|undefined) {
   // if (!reduxStore.getState().currentCamera)
   //   return;
-  // const currentOrbit = reduxStore.getState().currentCamera!.orbit;
-  // if (!currentOrbit)
-  //   return;
-  // const currentFieldOfViewDeg =
-  //     reduxStore.getState().currentCamera!.fieldOfViewDeg;
   return {
     type: SAVE_CAMERA_ORBIT,
     payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}
@@ -152,9 +130,7 @@ export function dispatchCameraTarget(target?: Vector3D) {
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export function dispatchInitialOrbit(orbit?: SphericalPositionDeg) {
-  // if (!orbit)
-  //   return;
+export function dispatchInitialOrbit(orbit: SphericalPositionDeg) {
   return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
 }
 
