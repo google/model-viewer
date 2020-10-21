@@ -13,7 +13,6 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
-import {$promptElementVisibleTime, $userHasInteracted, $waitingToPromptUser} from '../features/controls.js';
 
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -71,25 +70,6 @@ export const KeyCode = {
   DOWN: 40
 };
 
-export type ChangeSource = 'user-interaction'|'none';
-
-export const ChangeSource: {[index: string]: ChangeSource} = {
-  USER_INTERACTION: 'user-interaction',
-  NONE: 'none'
-};
-
-/**
- * ChangEvents are dispatched whenever the camera position or orientation has
- * changed
- */
-export interface ChangeEvent extends ThreeEvent {
-  /**
-   * determines what was the originating reason for the change event eg user or
-   * none
-   */
-  source: ChangeSource,
-}
-
 export interface PointerChangeEvent extends ThreeEvent {
   type: 'pointer-change-start'|'pointer-change-end';
   pointer: Pointer;
@@ -118,11 +98,7 @@ export class SmoothControls extends EventDispatcher {
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
-  private isUserChange = false;
   private isUserPointing = false;
-  private hasInteracted = false;
-  private waitingToPromp = false;
-  private promptVisibleTime = Infinity;
 
   // Internal orbital position state
   private spherical = new Spherical();
@@ -283,8 +259,6 @@ export class SmoothControls extends EventDispatcher {
     this.goalSpherical.radius = nextRadius;
     this.goalSpherical.makeSafe();
 
-    this.isUserChange = false;
-
     return true;
   }
 
@@ -409,10 +383,7 @@ export class SmoothControls extends EventDispatcher {
       this.camera.updateProjectionMatrix();
     }
 
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
-
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchEvent({type: 'move'});
   }
 
   private get canInteract(): boolean {
@@ -429,12 +400,7 @@ export class SmoothControls extends EventDispatcher {
     this.adjustOrbit(
         deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
-    this.isUserChange = true;
-    // Always make sure that an initial event is triggered in case there is
-    // contention between user interaction and imperative changes. This initial
-    // event will give external observers that chance to observe that
-    // interaction occurred at all:
-    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
+    this.dispatchEvent({type: 'change'});
   }
 
   // Wraps to bewteen -pi and pi
@@ -501,12 +467,6 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerDown = (event: PointerEvent) => {
     this.isUserPointing = false;
-
-    const element = this.element as any;
-    this.hasInteracted = element[$userHasInteracted];
-    this.waitingToPromp = element[$waitingToPromptUser];
-    this.promptVisibleTime = element[$promptElementVisibleTime];
-
     if (event.isPrimary) {
       this.touchMode = 'rotate';
       this.primaryPointer = event;
@@ -520,12 +480,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerCancel = () => {
     this.touchMode = 'none';
-    this.dispatchEvent({
-      type: 'cancel',
-      hasInteracted: this.hasInteracted,
-      waitingToPromp: this.waitingToPromp,
-      promptVisibleTime: this.promptVisibleTime
-    });
+    this.dispatchEvent({type: 'cancel'});
   };
 
   private onPointerUp = (event: PointerEvent) => {

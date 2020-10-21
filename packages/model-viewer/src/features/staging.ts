@@ -23,8 +23,6 @@ import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
 import {numberNode, NumberNode} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
 
-import {CameraChangeDetails} from './controls.js';
-
 // How much the model will rotate per
 // second in radians:
 const DEFAULT_ROTATION_SPEED = Math.PI / 32;
@@ -40,7 +38,6 @@ const rotationRateIntrinsics = {
 const $autoRotateStartTime = Symbol('autoRotateStartTime');
 const $radiansPerSecond = Symbol('radiansPerSecond');
 const $syncRotationRate = Symbol('syncRotationRate');
-const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
 
 export declare interface StagingInterface {
@@ -66,20 +63,16 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$autoRotateStartTime] = performance.now();
     private[$radiansPerSecond] = 0;
-    private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
-        this[$onCameraChange](event);
 
     connectedCallback() {
       super.connectedCallback();
-      this.addEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+      this.addEventListener('camera-change', this[$onCameraChange]);
       this[$autoRotateStartTime] = performance.now();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      this.removeEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+      this.removeEventListener('camera-change', this[$onCameraChange]);
       this[$autoRotateStartTime] = performance.now();
     }
 
@@ -112,12 +105,8 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onCameraChange](event: CustomEvent<CameraChangeDetails>) {
-      if (!this.autoRotate) {
-        return;
-      }
-
-      if (event.detail.source === 'user-interaction') {
+    [$onCameraChange]() {
+      if (this.autoRotate) {
         this[$autoRotateStartTime] = performance.now();
       }
     }

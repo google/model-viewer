@@ -22,7 +22,7 @@ import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {SAFE_RADIUS_RATIO} from '../three-components/Model.js';
-import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import {PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
 
@@ -64,10 +64,6 @@ const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT =
     'Use mouse, touch or arrow keys to control the camera!';
-
-export interface CameraChangeDetails {
-  source: ChangeSource;
-}
 
 export interface SphericalPosition {
   theta: number;  // equator angle around the y (up) axis.
@@ -187,9 +183,6 @@ const TAU = 2.0 * Math.PI;
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
-export const $waitingToPromptUser = Symbol('waitingToPromptUser');
-export const $userHasInteracted = Symbol('userHasInteracted');
-export const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
@@ -198,10 +191,17 @@ const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
 const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
+const $onMove = Symbol('onMove');
 const $onChange = Symbol('onChange');
 const $onCancel = Symbol('onCancel');
 const $onPointerChange = Symbol('onPointerChange');
 
+const $waitingToPromptUser = Symbol('waitingToPromptUser');
+const $userHasInteracted = Symbol('userHasInteracted');
+const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
+const $waitingToPromptUserOld = Symbol('waitingToPromptUserOld');
+const $userHasInteractedOld = Symbol('userHasInteractedOld');
+const $promptElementVisibleTimeOld = Symbol('promptElementVisibleTimeOld');
 const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
 
@@ -332,8 +332,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$focusedTime] = Infinity;
     protected[$lastPromptOffset] = 0;
     protected[$promptElementVisibleTime] = Infinity;
+    protected[$promptElementVisibleTimeOld] = Infinity;
     protected[$userHasInteracted] = false;
+    protected[$userHasInteractedOld] = false;
     protected[$waitingToPromptUser] = false;
+    protected[$waitingToPromptUserOld] = false;
 
     protected[$controls] = new SmoothControls(
         this[$scene].camera as PerspectiveCamera, this[$userInputElement]);
@@ -383,6 +386,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
+      this[$controls].addEventListener('move', this[$onMove]);
       this[$controls].addEventListener('change', this[$onChange]);
       this[$controls].addEventListener('cancel', this[$onCancel]);
       this[$controls].addEventListener(
@@ -394,6 +398,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     disconnectedCallback() {
       super.disconnectedCallback();
 
+      this[$controls].removeEventListener('move', this[$onMove]);
       this[$controls].removeEventListener('change', this[$onChange]);
       this[$controls].removeEventListener('cancel', this[$onCancel]);
       this[$controls].removeEventListener(
@@ -697,25 +702,29 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$focusedTime] = Infinity;
     };
 
-    [$onChange] = (event: Event) => {
-      const {source} = event as ChangeEvent;
+    [$onMove] = () => {
       this[$updateAria]();
       this[$needsRender]();
-
-      if (source === ChangeSource.USER_INTERACTION) {
-        this[$userHasInteracted] = true;
-        this[$deferInteractionPrompt]();
-      }
-
-      this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-          'camera-change', {detail: {source}}));
+      this.dispatchEvent(new CustomEvent('camera-change'));
     };
 
-    [$onCancel] = (event: Event) => {
-      this[$userHasInteracted] = event.hasInteracted;
-      this[$waitingToPromptUser] = event.waitingToPrompt;
-      if (Number.isFinite(event.promptVisibleTime)) {
-        this[$promptElementVisibleTime] = event.promptVisibleTime;
+    [$onChange] = () => {
+      if (this[$userHasInteracted]) {
+        return;
+      }
+      this[$userHasInteractedOld] = this[$userHasInteracted];
+      this[$waitingToPromptUserOld] = this[$waitingToPromptUser];
+      this[$promptElementVisibleTimeOld] = this[$promptElementVisibleTime];
+
+      this[$userHasInteracted] = true;
+      this[$deferInteractionPrompt]();
+    };
+
+    [$onCancel] = () => {
+      this[$userHasInteracted] = this[$userHasInteractedOld];
+      this[$waitingToPromptUser] = this[$waitingToPromptUserOld];
+      if (Number.isFinite(this[$promptElementVisibleTimeOld])) {
+        this[$promptElementVisibleTime] = this[$promptElementVisibleTimeOld];
         this[$promptElement].classList.add('visible');
       }
     };
@@ -725,6 +734,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$container].classList.add('pointer-tumbling');
       } else {
         this[$container].classList.remove('pointer-tumbling');
+        this[$userHasInteractedOld] = this[$userHasInteracted];
+        this[$waitingToPromptUserOld] = this[$waitingToPromptUser];
+        this[$promptElementVisibleTimeOld] = this[$promptElementVisibleTime];
       }
     };
   }

@@ -16,8 +16,8 @@
 import {PerspectiveCamera, Vector3} from 'three';
 import {IS_IE11} from '../../constants.js';
 
-import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
-import {waitForEvent} from '../../utilities.js';
+import {DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+// import {waitForEvent} from '../../utilities.js';
 import {dispatchSyntheticEvent, interactWith} from '../helpers.js';
 
 const expect = chai.expect;
@@ -411,17 +411,17 @@ suite('SmoothControls', () => {
             expect(changeSource).to.eql(expectedSources);
           });
 
-          suite('simultaneous user and imperative interaction', () => {
-            test('reports source as user interaction', async () => {
-              const eventDispatches = waitForEvent(controls, 'change');
-              controls.adjustOrbit(1, 1, 1);
-              dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-              settleControls(controls);
+          // suite('simultaneous user and imperative interaction', () => {
+          //   test('reports source as user interaction', async () => {
+          //     const eventDispatches = waitForEvent(controls, 'change');
+          //     controls.adjustOrbit(1, 1, 1);
+          //     dispatchSyntheticEvent(element, 'keydown', {keyCode:
+          //     KeyCode.UP}); settleControls(controls);
 
-              const event: any = await eventDispatches;
-              expect(event.source).to.be.equal(ChangeSource.USER_INTERACTION);
-            });
-          });
+          //     const event: any = await eventDispatches;
+          //     expect(event.source).to.be.equal(ChangeSource.USER_INTERACTION);
+          //   });
+          // });
         });
       });
     });

@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-import {CameraChangeDetails} from '../../features/controls.js';
 import {StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {ChangeSource} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses, timePasses,} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -120,9 +118,9 @@ suite('ModelViewerElementBase with StagingMixin', () => {
         const {turntableRotation: initialTurntableRotation} = element;
         expect(initialTurntableRotation).to.be.greaterThan(turntableRotation);
 
-        element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-            'camera-change',
-            {detail: {source: ChangeSource.USER_INTERACTION}}));
+        // element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+        //     'camera-change',
+        //     {detail: {source: ChangeSource.USER_INTERACTION}}));
         await timePasses();
 
         await rafPasses();
