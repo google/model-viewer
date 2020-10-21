@@ -49,9 +49,9 @@ export class AnimationControls extends ConnectedLitElement {
   @query('me-checkbox#animation-play') playCheckbox?: CheckboxElement;
 
   stateChanged(state: State) {
-    this.animationNames = state.animationNames;
+    this.animationNames = state.animationInfo.animationNames;
     this.config = state.config;
-    this.playAnimation = state.playAnimation;
+    this.playAnimation = state.animationInfo.playAnimation;
   }
 
   // Specifically overriding a super class method.

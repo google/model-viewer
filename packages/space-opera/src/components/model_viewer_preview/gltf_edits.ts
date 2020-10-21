@@ -18,10 +18,11 @@
 import {GltfModel, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {reduxStore} from '../../space_opera_base.js';
+import {dispatchSetAnimationNames} from '../animation_controls/reducer.js';
 import {applyMaterials, createMaterials, Texture} from '../materials_panel/material_state.js';
 import {dispatchSetEdits} from '../materials_panel/reducer.js';
 
-import {dispatchGltfJsonString, dispatchSetAnimationNames, dispatchSetGltf, dispatchSetOrigEdits} from './reducer.js';
+import {dispatchGltfJsonString, dispatchSetGltf, dispatchSetOrigEdits} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 /**

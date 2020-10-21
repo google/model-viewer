@@ -17,6 +17,7 @@
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
+import {AnimationInfo} from './components/animation_controls/types.js';
 
 import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotInfoConfig} from './components/hotspot_panel/types.js';
@@ -31,12 +32,11 @@ export interface State {
   modelViewerInfo: ModelViewerInfo;
   config: ModelViewerConfig;
   gltfInfo: GltfInfo;
-  animationNames: string[];
+  animationInfo: AnimationInfo;
   gltfJsonString: string;
   edits: GltfEdits;
   // A copy of the original, so we can revert individual properties.
   origEdits: GltfEdits;
-  playAnimation: boolean;
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
   initialCamera: Camera;
@@ -54,13 +54,13 @@ export const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
-  animationNames: [],
+  animationInfo: {animationNames: [], playAnimation: true},
   gltfJsonString: '',
   gltfInfo: {},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
   hotspotInfo: {hotspots: [], addHotspotMode: false},
-  playAnimation: true,
+
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
 };
 

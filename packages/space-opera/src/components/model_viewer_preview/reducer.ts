@@ -22,24 +22,7 @@ import {Action} from '../../types.js';
 
 import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from '../model_viewer_preview/types.js';
 
-// ANIMATION NAMES //////////////
-
-const SET_ANIMATION_NAMES = 'SET_ANIMATION_NAMES';
-export function dispatchSetAnimationNames(animationNames: string[]) {
-  return {type: SET_ANIMATION_NAMES, payload: animationNames};
-}
-
-export function animationNamesReducer(
-    state: string[] = [], action: Action): string[] {
-  switch (action.type) {
-    case SET_ANIMATION_NAMES:
-      return action.payload;
-    default:
-      return state;
-  }
-}
-
-// GLTF URL //////////////
+// GLTF INFO //////////////
 
 /** The user has requested a new GLTF/GLB for editing. */
 const SET_GLTF_URL = 'SET_GLTF_URL'
@@ -47,7 +30,6 @@ export function dispatchGltfUrl(gltfUrl?: string|undefined) {
   return {type: SET_GLTF_URL, payload: gltfUrl};
 }
 
-// GLTF //////////////
 const SET_GLTF = 'SET_GLTF'
 export function dispatchSetGltf(gltf: GltfModel|undefined) {
   return {type: SET_GLTF, payload: gltf};

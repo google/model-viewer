@@ -106,7 +106,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$edits] = state.edits;
     this[$gltf] = state.gltfInfo.gltf;
     this[$gltfUrl] = state.gltfInfo.gltfUrl;
-    this[$playAnimation] = state.playAnimation;
+    this[$playAnimation] = state.animationInfo.playAnimation;
   }
 
   firstUpdated() {

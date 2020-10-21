@@ -17,25 +17,24 @@
 
 import {combineReducers} from 'redux';
 
-import {playAnimationReducer} from './components/animation_controls/reducer.js';
+import {animationInfoReducer} from './components/animation_controls/reducer.js';
 import {cameraReducer, currentCameraReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsInfoReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
-import {animationNamesReducer, gltfInfoReducer, gltfJsonStringReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
+import {gltfInfoReducer, gltfJsonStringReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
 import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.js';
 
 export const rootReducer = combineReducers({
   config: configReducer,
   edits: editsReducer,
   origEdits: origEditsReducer,
-  animationNames: animationNamesReducer,
+  animationInfo: animationInfoReducer,
   gltfJsonString: gltfJsonStringReducer,
   camera: cameraReducer,
   initialCamera: initialCameraReducer,
   hotspotInfo: hotspotsInfoReducer,
-  playAnimation: playAnimationReducer,
   environmentImages: environmentImagesReducer,
   modelViewerInfo: modelViewerInfoReducer,
   currentCamera: currentCameraReducer,
