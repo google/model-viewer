@@ -23,7 +23,7 @@ import {configReducer} from './components/config/reducer.js';
 import {hotspotsInfoReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
-import {gltfInfoReducer, gltfJsonStringReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
+import {gltfInfoReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
 import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.js';
 
 export const rootReducer = combineReducers({
@@ -31,7 +31,6 @@ export const rootReducer = combineReducers({
   edits: editsReducer,
   origEdits: origEditsReducer,
   animationInfo: animationInfoReducer,
-  gltfJsonString: gltfJsonStringReducer,
   camera: cameraReducer,
   initialCamera: initialCameraReducer,
   hotspotInfo: hotspotsInfoReducer,

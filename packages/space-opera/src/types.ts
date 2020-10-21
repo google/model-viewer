@@ -33,7 +33,6 @@ export interface State {
   config: ModelViewerConfig;
   gltfInfo: GltfInfo;
   animationInfo: AnimationInfo;
-  gltfJsonString: string;
   edits: GltfEdits;
   // A copy of the original, so we can revert individual properties.
   origEdits: GltfEdits;
@@ -55,8 +54,7 @@ export const INITIAL_STATE: State = {
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
   animationInfo: {animationNames: [], playAnimation: true},
-  gltfJsonString: '',
-  gltfInfo: {},
+  gltfInfo: {gltfJsonString: ''},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
   hotspotInfo: {hotspots: [], addHotspotMode: false},

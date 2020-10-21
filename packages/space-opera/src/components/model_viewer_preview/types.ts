@@ -24,6 +24,7 @@ export const INITIAL_GLTF_EDITS: GltfEdits = {
 export interface GltfInfo {
   gltfUrl?: string;
   gltf?: GltfModel;
+  gltfJsonString: string;
 }
 
 export interface ModelViewerInfo {

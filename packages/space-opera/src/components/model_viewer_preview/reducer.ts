@@ -25,17 +25,26 @@ import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from '../model
 // GLTF INFO //////////////
 
 /** The user has requested a new GLTF/GLB for editing. */
-const SET_GLTF_URL = 'SET_GLTF_URL'
-export function dispatchGltfUrl(gltfUrl?: string|undefined) {
-  return {type: SET_GLTF_URL, payload: gltfUrl};
-}
-
 const SET_GLTF = 'SET_GLTF'
 export function dispatchSetGltf(gltf: GltfModel|undefined) {
   return {type: SET_GLTF, payload: gltf};
 }
 
-export function gltfInfoReducer(state: GltfInfo = {}, action: Action):
+const SET_GLTF_URL = 'SET_GLTF_URL'
+export function dispatchGltfUrl(gltfUrl?: string|undefined) {
+  return {type: SET_GLTF_URL, payload: gltfUrl};
+}
+
+const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
+export function dispatchGltfJsonString(gltfJsonString?: string) {
+  return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
+}
+
+export function gltfInfoReducer(
+    state: GltfInfo = {
+      gltfJsonString: ''
+    },
+    action: Action):
     GltfInfo {
       switch (action.type) {
         case SET_GLTF:
@@ -46,22 +55,10 @@ export function gltfInfoReducer(state: GltfInfo = {}, action: Action):
           return {
             ...state, gltfUrl: action.payload
           }
-        default:
-          return state;
-      }
-    }
-
-// GLTF JSON STRING//////////////
-const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
-export function dispatchGltfJsonString(gltfJsonString?: string) {
-  return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
-}
-
-export function gltfJsonStringReducer(state: string = '', action: Action):
-    string {
-      switch (action.type) {
         case SET_GLTF_JSON_STRING:
-          return action.payload;
+          return {
+            ...state, gltfJsonString: action.payload
+          }
         default:
           return state;
       }
