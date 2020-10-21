@@ -337,6 +337,9 @@ export function sidebarClick() {
     const root = document.documentElement;
     root.style.setProperty('--sidebar-width', '0px');
   }
+  // if (extraScroll) {
+  //   window.scrollTo(window.scrollX, window.scrollY - 100);
+  // }
 }
 
 (self as any).sidebarClick = sidebarClick;
