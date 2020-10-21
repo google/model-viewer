@@ -41,8 +41,6 @@ export interface State {
   initialCamera: Camera;
   currentCamera: CurrentCamera;
   hotspotInfo: HotspotInfoConfig;
-  // On true, a click on Model-viewer tag would add a hotspot to the clicked
-  // position
   // A list of user provided environment images to select from
   environmentImages: EnvironmentImage[];
 }
@@ -58,7 +56,6 @@ export const INITIAL_STATE: State = {
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
   hotspotInfo: {hotspots: [], addHotspotMode: false},
-
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
 };
 
