@@ -94,6 +94,7 @@
   white-space: nowrap;
   font-size: .8em;
   z-index: 1008;
+  visibility: hidden;
 }
 
 .tab {
@@ -382,13 +383,8 @@ model-viewer:focus {
   box-sizing: border-box;
 }
 
-.examples-container > .sample > #demo-container-1 {
-  padding-top: 75px;
-}
-
 .examples-container > .sample > .demo {
-  top: 75px;
-  height: 90vh;
+  height: 100vh;
 }
 
 .demo-title {
@@ -760,6 +756,7 @@ paper-button {
 
   .exampleHeader {
     margin-left: 0;
+    visibility: visible;
   }
 
   .background-demo {
