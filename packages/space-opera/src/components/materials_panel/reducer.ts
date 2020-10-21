@@ -64,12 +64,12 @@ function setMaterialTexture(
     args: SetTextureArgs,
     materials: Material[],
     updateMaterial: (material: Material) => Material) {
-  // if (!args)
-  //   return;
-  // const materials = reduxStore.getState().edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID was out of bounds');
   }
+  // TODO: Add back in, but move reduxStore out of file, so pull textureIds from
+  // actions...
+
   // if (args.textureId !== undefined &&
   //     !reduxStore.getState().edits.texturesById.has(args.textureId)) {
   //   throw new Error(
@@ -97,21 +97,15 @@ function addMaterialTexture(
     materials: Material[],
     texturesById: TexturesById,
     updateMaterial: (material: Material, textureId: string) => Material) {
-  // if (!args)
-  //   return;
-  // const materials = reduxStore.getState().edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID is out of bounds');
   }
-
   const textureId = generateTextureId();
   const texture = {id: textureId, uri: args.uri};
-
   const newMaterial = updateMaterial(materials[args.id], textureId);
   if (newMaterial === materials[args.id]) {
     throw new Error('updateMaterial returns same object');
   }
-  // reduxStore.getState().edits.texturesById
   return {
     type: name,
     payload: {
@@ -127,15 +121,11 @@ function addMaterialTexture(
 const SET_MATERIAL_BASE_COLOR_FACTOR = 'SET_MATERIAL_BASE_COLOR_FACTOR';
 export function dispatchMaterialBaseColor(
     materials: Material[], args: MaterialBaseColorArgs) {
-  // if (!args)
-  //   return;
   const index = args.index;
   const baseColorFactor = args.baseColorFactor;
-  // const materials = reduxStore.getState().edits.materials;
   if (index >= materials.length || index < 0) {
     throw new Error('Given ID is out of bounds');
   }
-
   return {
     type: SET_MATERIAL_BASE_COLOR_FACTOR,
     payload: immutableArrayUpdate(
@@ -149,11 +139,8 @@ export function dispatchMaterialBaseColor(
 const SET_MATERIAL_ROUGHNESS = 'SET_MATERIAL_ROUGHNESS';
 export function dispatchRoughnessFactor(
     materials: Material[], args: RoughnessFactorArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const roughnessFactor = args.roughnessFactor;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID was out of bounds');
   }
@@ -168,11 +155,8 @@ export function dispatchRoughnessFactor(
 const SET_MATERIAL_METALLIC = 'SET_MATERIAL_METALLIC';
 export function dispatchMetallicFactor(
     materials: Material[], args: MetallicFactorArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const metallicFactor = args.metallicFactor;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID was out of bounds');
   }
@@ -187,8 +171,6 @@ export function dispatchMetallicFactor(
 const SET_BASE_COLOR_TEXTURE = 'SET_BASE_COLOR_TEXTURE';
 export function dispatchBaseColorTexture(
     materials: Material[], args: SetTextureArgs) {
-  // if (!args)
-  //   return;
   return setMaterialTexture(
       SET_BASE_COLOR_TEXTURE, args, materials, (material: Material) => {
         return {
@@ -216,8 +198,6 @@ export function dispatchAddBaseColorTexture(
 const SET_METALLIC_ROUGHNESS_TEXTURE = 'SET_METALLIC_ROUGHNESS_TEXTURE';
 export function dispatchMetallicRoughnessTexture(
     materials: Material[], args: SetTextureArgs) {
-  // if (!args)
-  //   return;
   return setMaterialTexture(
       SET_METALLIC_ROUGHNESS_TEXTURE, args, materials, (material: Material) => {
         return {...material, metallicRoughnessTextureId: args.textureId};
@@ -242,8 +222,6 @@ export function dispatchAddMetallicRoughnessTexture(
 const SET_NORMAL_TEXTURE = 'SET_NORMAL_TEXTURE';
 export function dispatchNormalTexture(
     materials: Material[], args: SetTextureArgs) {
-  // if (!args)
-  //   return;
   return setMaterialTexture(
       SET_NORMAL_TEXTURE, args, materials, (material: Material) => {
         return {...material, normalTextureId: args.textureId};
@@ -268,8 +246,6 @@ export function dispatchAddNormalTexture(
 const SET_EMISSIVE_TEXTURE = 'SET_EMISSIVE_TEXTURE';
 export function dispatchEmissiveTexture(
     materials: Material[], args: SetTextureArgs) {
-  // if (!args)
-  //   return;
   return setMaterialTexture(
       SET_EMISSIVE_TEXTURE, args, materials, (material: Material) => {
         return {...material, emissiveTextureId: args.textureId};
@@ -294,8 +270,6 @@ export function dispatchAddEmissiveTexture(
 const SET_OCCLUSION_TEXTURE = 'SET_OCCLUSION_TEXTURE';
 export function dispatchOcclusionTexture(
     materials: Material[], args: SetTextureArgs) {
-  // if (!args)
-  //   return;
   return setMaterialTexture(
       SET_OCCLUSION_TEXTURE, args, materials, (material: Material) => {
         return {...material, occlusionTextureId: args.textureId};
@@ -326,11 +300,8 @@ export interface EmissiveFactorArgs {
 const SET_EMISSIVE_FACTOR = 'SET_EMISSIVE_FACTOR';
 export function dispatchSetEmissiveFactor(
     materials: Material[], args: EmissiveFactorArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const emissiveFactor = args.emissiveFactor;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID is out of bounds');
   }
@@ -351,11 +322,8 @@ export interface DoubleSidedArgs {
 const SET_DOUBLESIDED = 'SET_DOUBLESIDED';
 export function dispatchDoubleSided(
     materials: Material[], args: DoubleSidedArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const doubleSided = args.doubleSided;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID was out of bounds');
   }
@@ -377,11 +345,8 @@ export interface AlphaModeArgs {
 const SET_ALPHA_MODE = 'SET_ALPHA_MODE';
 export function dispatchSetAlphaMode(
     materials: Material[], args: AlphaModeArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const alphaMode = args.alphaMode;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID was out of bounds');
   }
@@ -401,11 +366,8 @@ export interface AlphaCutoffArgs {
 const SET_ALPHA_CUTOFF = 'SET_ALPHA_CUTOFF';
 export function dispatchSetAlphaCutoff(
     materials: Material[], args: AlphaCutoffArgs) {
-  // if (!args)
-  //   return;
   const id = args.id;
   const alphaCutoff = args.alphaCutoff;
-  // const materials = reduxStore.getState().edits.materials;
   if (id >= materials.length || id < 0) {
     throw new Error('Given ID was out of bounds');
   }

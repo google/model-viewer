@@ -17,7 +17,6 @@
 
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 import {rootReducer} from './reducers.js';
-// import {RESET_STATE_ACTION_TYPE} from './components/reset/reducer.js';
 
 /** Setup devtools */
 declare global {
