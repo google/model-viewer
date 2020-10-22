@@ -472,6 +472,9 @@ export class SmoothControls extends EventDispatcher {
       this.primaryPointer = event;
       this.element.style.cursor = 'grabbing';
     } else {
+      if (this.touchMode === 'none') {
+        return;
+      }
       this.touchMode = 'zoom';
       this.secondaryPointer = event;
       this.updatePointerSeparation();

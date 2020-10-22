@@ -26,6 +26,7 @@ template.innerHTML = `
   contain: strict;
   width: 300px;
   height: 150px;
+  touch-action: pan-y;
 }
 
 /* NOTE: This ruleset is our integration surface area with the
@@ -47,7 +48,6 @@ template.innerHTML = `
   display: block;
   position: relative;
   overflow: hidden;
-  touch-action: var(--touch-action, pan-y);
 }
 
 canvas {
