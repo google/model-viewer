@@ -38,7 +38,7 @@ const rotationRateIntrinsics = {
 const $autoRotateStartTime = Symbol('autoRotateStartTime');
 const $radiansPerSecond = Symbol('radiansPerSecond');
 const $syncRotationRate = Symbol('syncRotationRate');
-const $onCameraChange = Symbol('onCameraChange');
+const $onUserInteraction = Symbol('onUserInteraction');
 
 export declare interface StagingInterface {
   autoRotate: boolean;
@@ -66,13 +66,13 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     connectedCallback() {
       super.connectedCallback();
-      this.addEventListener('camera-change', this[$onCameraChange]);
+      this.addEventListener('user-interaction', this[$onUserInteraction]);
       this[$autoRotateStartTime] = performance.now();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      this.removeEventListener('camera-change', this[$onCameraChange]);
+      this.removeEventListener('user-interaction', this[$onUserInteraction]);
       this[$autoRotateStartTime] = performance.now();
     }
 
@@ -105,7 +105,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onCameraChange]() {
+    [$onUserInteraction]() {
       if (this.autoRotate) {
         this[$autoRotateStartTime] = performance.now();
       }

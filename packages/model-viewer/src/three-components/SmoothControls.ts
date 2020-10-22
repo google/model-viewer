@@ -138,7 +138,7 @@ export class SmoothControls extends EventDispatcher {
       element.addEventListener('pointerdown', this.onPointerDown);
       element.addEventListener('pointercancel', this.onPointerCancel);
       self.addEventListener('pointerup', this.onPointerUp);
-      element.addEventListener('wheel', this.onWheel);
+      element.addEventListener('wheel', this.onWheel, {passive: false});
       element.addEventListener('keydown', this.onKeyDown);
 
       this.element.style.cursor = 'grab';
@@ -487,8 +487,9 @@ export class SmoothControls extends EventDispatcher {
   };
 
   private onPointerUp = (event: PointerEvent) => {
-    if (event.isPrimary ||
-        event.pointerId === this.secondaryPointer.pointerId) {
+    if (this.touchMode !== 'none' &&
+        (event.isPrimary ||
+         event.pointerId === this.secondaryPointer.pointerId)) {
       this.touchMode = 'none';
     }
     this.element.style.cursor = 'grab';
@@ -507,9 +508,7 @@ export class SmoothControls extends EventDispatcher {
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 
-    if (event.cancelable) {
-      event.preventDefault();
-    }
+    event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
@@ -545,7 +544,7 @@ export class SmoothControls extends EventDispatcher {
         break;
     }
 
-    if (relevantKey && event.cancelable) {
+    if (relevantKey) {
       event.preventDefault();
     }
   };

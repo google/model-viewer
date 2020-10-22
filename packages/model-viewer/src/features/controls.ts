@@ -709,6 +709,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onChange] = () => {
+      this.dispatchEvent(new CustomEvent('user-interaction'));
       if (this[$userHasInteracted]) {
         return;
       }

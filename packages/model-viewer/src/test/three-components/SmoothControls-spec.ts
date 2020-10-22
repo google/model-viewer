@@ -29,9 +29,6 @@ const HALF_PI = Math.PI / 2.0;
 const QUARTER_PI = HALF_PI / 2.0;
 const THREE_QUARTERS_PI = HALF_PI + QUARTER_PI;
 
-const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
-const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
-
 /**
  * Settle controls by performing 50 frames worth of updates
  */
@@ -331,49 +328,37 @@ suite('SmoothControls', () => {
         });
 
         suite('events', () => {
-          test('dispatches "change" on user interaction', () => {
+          test('dispatches "change" event', () => {
             let didCall = false;
-            let changeSource;
 
-            controls.addEventListener('change', ({source}) => {
+            controls.addEventListener('change', () => {
               didCall = true;
-              changeSource = source;
             });
 
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
             settleControls(controls);
 
             expect(didCall).to.be.true;
-            expect(changeSource).to.equal(USER_INTERACTION_CHANGE_SOURCE);
           });
 
-          test('dispatches "change" on direct orbit change', () => {
+          test('no "change" on direct orbit change', () => {
             let didCall = false;
-            let changeSource;
 
-            controls.addEventListener('change', ({source}) => {
+            controls.addEventListener('change', () => {
               didCall = true;
-              changeSource = source;
             });
 
             controls.setOrbit(33, 33, 33);
             settleControls(controls);
 
-            expect(didCall).to.be.true;
-            expect(changeSource).to.equal(DEFAULT_INTERACTION_CHANGE_SOURCE);
+            expect(didCall).to.be.false;
           });
 
-          test('sends "user-interaction" multiple times', () => {
-            const expectedSources = [
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-            ];
-            let changeSource: Array<string> = [];
+          test('sends "move" multiple times', () => {
+            let moves = 0;
 
-            controls.addEventListener('change', ({source}) => {
-              changeSource.push(source);
+            controls.addEventListener('move', () => {
+              ++moves;
             });
 
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
@@ -381,47 +366,8 @@ suite('SmoothControls', () => {
             controls.update(performance.now(), ONE_FRAME_DELTA);
             controls.update(performance.now(), ONE_FRAME_DELTA);
 
-            expect(changeSource).to.eql(expectedSources);
+            expect(moves).to.eql(3);
           });
-
-          test('does not send "user-interaction" after setOrbit', () => {
-            const expectedSources = [
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              DEFAULT_INTERACTION_CHANGE_SOURCE,
-              DEFAULT_INTERACTION_CHANGE_SOURCE,
-            ];
-            let changeSource: Array<string> = [];
-
-            controls.addEventListener('change', ({source}) => {
-              changeSource.push(source);
-            });
-
-            dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-
-            controls.setOrbit(3, 3, 3);
-
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-
-            expect(changeSource).to.eql(expectedSources);
-          });
-
-          // suite('simultaneous user and imperative interaction', () => {
-          //   test('reports source as user interaction', async () => {
-          //     const eventDispatches = waitForEvent(controls, 'change');
-          //     controls.adjustOrbit(1, 1, 1);
-          //     dispatchSyntheticEvent(element, 'keydown', {keyCode:
-          //     KeyCode.UP}); settleControls(controls);
-
-          //     const event: any = await eventDispatches;
-          //     expect(event.source).to.be.equal(ChangeSource.USER_INTERACTION);
-          //   });
-          // });
         });
       });
     });
