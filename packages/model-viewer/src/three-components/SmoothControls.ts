@@ -494,7 +494,7 @@ export class SmoothControls extends EventDispatcher {
 
           break;
         case 'rotate':
-          const {touchAction} = this.options;
+          const {touchAction} = this._options;
           if (!this.touchDecided && touchAction !== 'none') {
             this.touchDecided = true;
             const {clientX, clientY} = touches[0];
