@@ -493,6 +493,15 @@
           "default": "1",
           "options": "any number"
         }
+      },
+      {
+        "name": "touch-action",
+        "htmlName": "touch-action",
+        "description": "Akin to the CSS touch-action property (which does not work due to some iOS bugs), the default 'pan-y' allows touch users to vertically scroll the <span class=\"attribute\">&lt;model-viewer&gt;</span> element, but can interact if their gesture starts horizontal. Legacy behavior can be achieved with 'none', where all scrolling is prevented, while 'pan-x' is the opposite of 'pan-y'. The normal CSS default 'auto' is not allowed here, as this can be achieved by not including the <span class='attribute'>camera-controls</span> attribute.",
+        "default": {
+          "default": "pan-y",
+          "options": "pan-y, pan-x, none"
+        }
       }
     ],
     "CSS": [

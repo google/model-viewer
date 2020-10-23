@@ -13,13 +13,13 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
+import {TouchAction} from '../features/controls.js';
 
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 
-export type EventHandlingBehavior = 'prevent-all'|'prevent-handled';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
-export type TouchMode = 'rotate'|'zoom';
+export type TouchMode = 'rotate'|'scroll'|'zoom';
 
 export interface Pointer {
   clientX: number, clientY: number,
@@ -42,10 +42,10 @@ export interface SmoothControlsOptions {
   minimumFieldOfView?: number;
   // The maximum camera field of view in degrees
   maximumFieldOfView?: number;
-  // Controls when events will be cancelled (always, or only when handled)
-  eventHandlingBehavior?: EventHandlingBehavior;
   // Controls when interaction is allowed (always, or only when focused)
   interactionPolicy?: InteractionPolicy;
+  // Controls scrolling behavior
+  touchAction?: TouchAction;
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
@@ -57,8 +57,8 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  eventHandlingBehavior: 'prevent-all',
-  interactionPolicy: 'always-allow'
+  interactionPolicy: 'always-allow',
+  touchAction: 'pan-y'
 });
 
 // Constants
@@ -143,6 +143,7 @@ export class SmoothControls extends EventDispatcher {
   };
   private lastTouches!: TouchList;
   private touchMode: TouchMode = 'rotate';
+  private touchDecided = false;
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -324,8 +325,7 @@ export class SmoothControls extends EventDispatcher {
    * The deltaZoom parameter adjusts both the field of view and the orbit radius
    * such that they progress across their allowed ranges in sync.
    */
-  adjustOrbit(deltaTheta: number, deltaPhi: number, deltaZoom: number):
-      boolean {
+  adjustOrbit(deltaTheta: number, deltaPhi: number, deltaZoom: number) {
     const {theta, phi, radius} = this.goalSpherical;
     const {
       minimumRadius,
@@ -352,15 +352,12 @@ export class SmoothControls extends EventDispatcher {
             Math.min(
                 isFinite(deltaRatio) ? deltaRatio : Infinity,
                 maximumRadius! - minimumRadius!);
-    let handled = this.setOrbit(goalTheta, goalPhi, goalRadius);
+    this.setOrbit(goalTheta, goalPhi, goalRadius);
 
     if (deltaZoom !== 0) {
       const goalLogFov = this.goalLogFov + deltaZoom;
       this.setFieldOfView(Math.exp(goalLogFov));
-      handled = true;
     }
-
-    return handled;
   }
 
   /**
@@ -441,8 +438,8 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private userAdjustOrbit(
-      deltaTheta: number, deltaPhi: number, deltaZoom: number): boolean {
-    const handled = this.adjustOrbit(
+      deltaTheta: number, deltaPhi: number, deltaZoom: number) {
+    this.adjustOrbit(
         deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
     this.isUserChange = true;
@@ -451,8 +448,6 @@ export class SmoothControls extends EventDispatcher {
     // event will give external observers that chance to observe that
     // interaction occurred at all:
     this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
-
-    return handled;
   }
 
   // Wraps to bewteen -pi and pi
@@ -480,8 +475,6 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
-    let handled = false;
-
     // NOTE(cdata): We test event.type as some browsers do not have a global
     // TouchEvent contructor.
     if (TOUCH_EVENT_RE.test(event.type)) {
@@ -496,27 +489,45 @@ export class SmoothControls extends EventDispatcher {
             const deltaZoom =
                 ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
 
-            handled = this.userAdjustOrbit(0, 0, deltaZoom);
+            this.userAdjustOrbit(0, 0, deltaZoom);
           }
 
           break;
         case 'rotate':
-          handled = this.handleSinglePointerMove(touches[0]);
+          const {touchAction} = this._options;
+          if (!this.touchDecided && touchAction !== 'none') {
+            this.touchDecided = true;
+            const {clientX, clientY} = touches[0];
+            const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
+            const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
+            // If motion is mostly vertical, assume scrolling is the intent,
+            // unless scrolling is not possible. Use window.innerHeight
+            // instead of body.clientHeight so that a full-screen element will
+            // still scroll the URL bar out of the way before locking.
+            if ((touchAction === 'pan-y' && dy > dx &&
+                 document.body.scrollHeight > window.innerHeight) ||
+                (touchAction === 'pan-x' && dx > dy)) {
+              this.touchMode = 'scroll';
+              return;
+            }
+          }
+          this.handleSinglePointerMove(touches[0]);
           break;
+        case 'scroll':
+          return;
       }
 
       this.lastTouches = touches;
     } else {
-      handled = this.handleSinglePointerMove(event as MouseEvent);
+      this.handleSinglePointerMove(event as MouseEvent);
     }
 
-    if ((handled || this._options.eventHandlingBehavior === 'prevent-all') &&
-        event.cancelable) {
+    if (event.cancelable) {
       event.preventDefault();
     };
   };
 
-  private handleSinglePointerMove(pointer: Pointer): boolean {
+  private handleSinglePointerMove(pointer: Pointer) {
     const {clientX, clientY} = pointer;
     const deltaTheta = this.pixelLengthToSphericalAngle(
         clientX - this.lastPointerPosition.clientX);
@@ -531,7 +542,7 @@ export class SmoothControls extends EventDispatcher {
       this.dispatchEvent({type: 'pointer-change-start', pointer: {...pointer}});
     }
 
-    return this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
+    this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
   }
 
   private onPointerDown = (event: MouseEvent|TouchEvent) => {
@@ -540,6 +551,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (TOUCH_EVENT_RE.test(event.type)) {
       const {touches} = event as TouchEvent;
+      this.touchDecided = false;
 
       switch (touches.length) {
         default:
@@ -581,10 +593,9 @@ export class SmoothControls extends EventDispatcher {
 
     const deltaZoom = (event as WheelEvent).deltaY *
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
+    this.userAdjustOrbit(0, 0, deltaZoom);
 
-    if ((this.userAdjustOrbit(0, 0, deltaZoom) ||
-         this._options.eventHandlingBehavior === 'prevent-all') &&
-        event.cancelable) {
+    if (event.cancelable) {
       event.preventDefault();
     }
   };
@@ -592,40 +603,37 @@ export class SmoothControls extends EventDispatcher {
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clober unrelated key inputs when the <model-viewer> has
-    // focus and eventHandlingBehavior is set to 'prevent-all'.
+    // focus.
     let relevantKey = false;
-    let handled = false;
 
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
         relevantKey = true;
-        handled = this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
+        this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
         break;
       case KeyCode.PAGE_DOWN:
         relevantKey = true;
-        handled = this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
+        this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
         break;
       case KeyCode.UP:
         relevantKey = true;
-        handled = this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
+        this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.DOWN:
         relevantKey = true;
-        handled = this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
+        this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.LEFT:
         relevantKey = true;
-        handled = this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       case KeyCode.RIGHT:
         relevantKey = true;
-        handled = this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
     }
 
-    if (relevantKey &&
-        (handled || this._options.eventHandlingBehavior === 'prevent-all') &&
-        event.cancelable) {
+    if (relevantKey && event.cancelable) {
       event.preventDefault();
     }
   };
