@@ -13,6 +13,7 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
+import {TouchAction} from '../features/controls.js';
 
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -43,6 +44,8 @@ export interface SmoothControlsOptions {
   maximumFieldOfView?: number;
   // Controls when interaction is allowed (always, or only when focused)
   interactionPolicy?: InteractionPolicy;
+  // Controls scrolling behavior
+  touchAction?: TouchAction;
 }
 
 export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
@@ -54,7 +57,8 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  interactionPolicy: 'always-allow'
+  interactionPolicy: 'always-allow',
+  touchAction: 'pan-y'
 });
 
 // Constants
@@ -490,16 +494,19 @@ export class SmoothControls extends EventDispatcher {
 
           break;
         case 'rotate':
-          if (!this.touchDecided) {
+          const {touchAction} = this.options;
+          if (!this.touchDecided && touchAction !== 'none') {
             this.touchDecided = true;
             const {clientX, clientY} = touches[0];
             const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
             const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
             // If motion is mostly vertical, assume scrolling is the intent,
-            // unless scrolling is not possible. Use window.innerHeight instead
-            // of body.clientHeight so that a full-screen element will still
-            // scroll the URL bar out of the way before locking.
-            if (dy > dx && document.body.scrollHeight > window.innerHeight) {
+            // unless scrolling is not possible. Use window.innerHeight
+            // instead of body.clientHeight so that a full-screen element will
+            // still scroll the URL bar out of the way before locking.
+            if ((touchAction === 'pan-y' && dy > dx &&
+                 document.body.scrollHeight > window.innerHeight) ||
+                (touchAction === 'pan-x' && dx > dy)) {
               this.touchMode = 'scroll';
               return;
             }
