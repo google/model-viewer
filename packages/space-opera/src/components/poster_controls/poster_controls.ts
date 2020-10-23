@@ -21,7 +21,6 @@ import '@material/mwc-button';
 
 import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -29,6 +28,8 @@ import {State} from '../../types.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {dispatchSetPoster} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 
 import {styles} from './poster_controls.css';
 
@@ -39,10 +40,7 @@ export class PosterControlsElement extends ConnectedLitElement {
 
   @internalProperty() poster?: string;
 
-  private modelViewer?: ModelViewerElement;
-
   stateChanged(state: State) {
-    this.modelViewer = state.modelViewerInfo.modelViewer!;
     this.poster = state.config.poster;
   }
 
@@ -75,29 +73,31 @@ export class PosterControlsElement extends ConnectedLitElement {
   }
 
   async onCreatePoster() {
-    if (!this.modelViewer)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer)
       return;
     const posterUrl =
-        createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
+        createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
     reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-    const currentOrbit =
-        reduxStore.getState().currentCamera.currentCamera!.orbit;
-    const currentFieldOfViewDeg =
-        reduxStore.getState().currentCamera.currentCamera!.fieldOfViewDeg;
+    const currentOrbit = getCameraState(modelViewer).orbit;
+    const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
     reduxStore.dispatch(
         dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
   }
 
   onDisplayPoster() {
-    if (!this.modelViewer)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer)
       return;
-    const src = this.modelViewer.src;
+    // TODO, fix such that we aren't modifying modelViewer in here. i.e. add
+    // settings to modelViewerPreview
+    const src = modelViewer.src;
     // Normally we can just use dispatchSetReveal, but the value has to be
     // changed immediately before reload.
-    this.modelViewer.reveal = 'interaction';
+    modelViewer.reveal = 'interaction';
     // Force reload the model
-    this.modelViewer.src = '';
-    this.modelViewer.src = src;
+    modelViewer.src = '';
+    modelViewer.src = src;
   }
 
   onDeletePoster() {
@@ -108,7 +108,8 @@ export class PosterControlsElement extends ConnectedLitElement {
   }
 
   async onDownloadPoster() {
-    if (!this.modelViewer || !this.poster)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer || !this.poster)
       return;
     safeDownloadCallback(
         await (await fetch(this.poster)).blob(), 'poster.png', '')();

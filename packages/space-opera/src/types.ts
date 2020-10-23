@@ -47,7 +47,7 @@ export interface State {
 
 export const INITIAL_STATE: State = {
   modelViewerInfo: {},
-  currentCamera: {},
+  currentCamera: {toggle: false},
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,

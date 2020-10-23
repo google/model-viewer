@@ -32,7 +32,7 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 import {reduxStore} from '../../space_opera_base.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchCurrentCameraState} from '../camera_settings/reducer.js';
+import {dispatchModelViewerCameraChange} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -55,7 +55,7 @@ const $gltfUrl = Symbol('gltfUrl');
 const $gltf = Symbol('gltf');
 const $playAnimation = Symbol('playAnimation');
 
-function getCameraState(viewer: ModelViewerElement) {
+export function getCameraState(viewer: ModelViewerElement) {
   const orbitRad = viewer.getCameraOrbit();
   return {
     orbit: {
@@ -87,7 +87,7 @@ async function downloadContents(url: string): Promise<ArrayBuffer> {
 @customElement('model-viewer-preview')
 export class ModelViewerPreview extends ConnectedLitElement {
   static styles = [styles, hotspotStyles];
-  @query('model-viewer') private readonly modelViewer?: ModelViewerElement;
+  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -256,11 +256,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private onCameraChange() {
-    if (!this.modelViewer) {
-      throw new Error('onCameraChange called before modelViewer defined');
-    }
-    reduxStore.dispatch(
-        dispatchCurrentCameraState(getCameraState(this.modelViewer)));
+    reduxStore.dispatch(dispatchModelViewerCameraChange());
   }
 
   private enforcePlayAnimation() {

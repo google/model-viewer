@@ -33,6 +33,7 @@ const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
 export function dispatchInitialCameraState(initialCamera?: Camera) {
   // if (!initialCamera)
   //   return;
+  console.log(initialCamera, !initialCamera);
   return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
 }
 
@@ -53,18 +54,28 @@ export function initialCameraReducer(
  * camera state.
  */
 const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
-export function dispatchCurrentCameraState(currentCamera?: Camera) {
-  // if (!currentCamera)
-  //   return;
+export function dispatchCurrentCameraState(currentCamera: Camera) {
   return {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}};
 }
 
+const TT = 'TT';
+export function dispatchModelViewerCameraChange() {
+  return {type: TT};
+}
+
 export function currentCameraReducer(
-    state: CurrentCamera = {}, action: Action): CurrentCamera {
+    state: CurrentCamera = {
+      toggle: false
+    },
+    action: Action): CurrentCamera {
   switch (action.type) {
     case SET_CURRENT_CAMERA_STATE:
       return {
         ...state, currentCamera: action.payload
+      }
+    case TT:
+      return {
+        ...state, toggle: !state.toggle
       }
     default:
       return state;

@@ -20,7 +20,8 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
-import {Camera} from '../camera_state.js';
+import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {dispatchPitchLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
@@ -39,11 +40,11 @@ export const DEFAULT_MAX_PITCH = 180;
 @customElement('me-camera-pitch-limits')
 export class PitchLimits extends LimitsBase {
   @internalProperty() pitchLimitsDeg?: Limits;
-  @internalProperty() currentCamera?: Camera;
+  @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
     this.pitchLimitsDeg = state.camera.pitchLimitsDeg;
-    this.currentCamera = state.currentCamera.currentCamera;
+    this.toggle = state.currentCamera.toggle;
   }
 
   dispatchLimits(limits?: Limits) {
@@ -63,9 +64,10 @@ export class PitchLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    if (!this.currentCamera || !this.currentCamera.orbit)
+    const currentCamera = getCameraState(getModelViewer()!);
+    if (!currentCamera || !currentCamera.orbit)
       return 0;
-    return Math.round(this.currentCamera.orbit.phiDeg);
+    return Math.round(currentCamera.orbit.phiDeg);
   }
 
   get limitsProperty() {

@@ -19,7 +19,8 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
-import {Camera} from '../camera_state.js';
+import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {dispatchYawLimits} from '../reducer.js';
 import {Limits} from '../types.js';
 
@@ -38,11 +39,11 @@ export const DEFAULT_MAX_YAW = 180;
 @customElement('me-camera-yaw-limits')
 export class YawLimits extends LimitsBase {
   @internalProperty() yawLimitsDeg?: Limits;
-  @internalProperty() currentCamera?: Camera;
+  @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
     this.yawLimitsDeg = state.camera.yawLimitsDeg;
-    this.currentCamera = state.currentCamera.currentCamera;
+    this.toggle = state.currentCamera.toggle;
   }
 
   dispatchLimits(limits?: Limits) {
@@ -62,7 +63,8 @@ export class YawLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    return Math.round(this.currentCamera?.orbit?.thetaDeg ?? 0);
+    const currentCamera = getCameraState(getModelViewer()!);
+    return Math.round(currentCamera.orbit?.thetaDeg ?? 0);
   }
 
   get limitsProperty() {

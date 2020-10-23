@@ -38,7 +38,8 @@ export interface Camera {
 }
 
 export interface CurrentCamera {
-  currentCamera?: Camera
+  currentCamera?: Camera;
+  toggle: boolean;
 }
 
 /** Initial values. All are undefined, which is to say "no opinion". */

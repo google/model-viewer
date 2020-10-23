@@ -20,6 +20,8 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
+import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {Camera} from '../camera_state.js';
 import {dispatchRadiusLimits} from '../reducer.js';
 import {Limits} from '../types.js';
@@ -33,13 +35,13 @@ export const DEFAULT_MIN_RADIUS = 0;
 @customElement('me-camera-radius-limits')
 export class RadiusLimits extends LimitsBase {
   @internalProperty() radiusLimits?: Limits;
-  @internalProperty() currentCamera?: Camera;
   @internalProperty() initialCamera?: Camera;
+  @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
     this.radiusLimits = state.camera.radiusLimits;
-    this.currentCamera = state.currentCamera.currentCamera;
     this.initialCamera = state.initialCamera;
+    this.toggle = state.currentCamera.toggle;
   }
 
   dispatchLimits(limits?: Limits) {
@@ -61,7 +63,8 @@ export class RadiusLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    return this.currentCamera?.orbit?.radius ?? 1;
+    const currentCamera = getCameraState(getModelViewer()!);
+    return currentCamera.orbit?.radius ?? 1;
   }
 
   get limitsProperty() {
