@@ -16,6 +16,5 @@
  */
 
 export interface AnimationInfo {
-  playAnimation: boolean;
   animationNames: string[];
 }

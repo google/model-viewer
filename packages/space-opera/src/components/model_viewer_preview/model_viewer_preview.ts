@@ -53,7 +53,7 @@ import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 const $edits = Symbol('edits');
 const $gltfUrl = Symbol('gltfUrl');
 const $gltf = Symbol('gltf');
-const $playAnimation = Symbol('playAnimation');
+const $autoplay = Symbol('autoplay');
 
 export function getCameraState(viewer: ModelViewerElement) {
   const orbitRad = viewer.getCameraOrbit();
@@ -92,7 +92,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
-  @internalProperty()[$playAnimation]?: boolean;
+  @internalProperty()[$autoplay]?: boolean;
   @internalProperty()[$edits]: GltfEdits = INITIAL_GLTF_EDITS;
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
@@ -106,7 +106,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$edits] = state.edits;
     this[$gltf] = state.gltfInfo.gltf;
     this[$gltfUrl] = state.gltfInfo.gltfUrl;
-    this[$playAnimation] = state.animationInfo.playAnimation;
+    this[$autoplay] = state.config.autoplay;
   }
 
   firstUpdated() {
@@ -263,7 +263,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (this.modelViewer && this.modelViewer.loaded) {
       // Calling play with no animation name will result in the first animation
       // getting played. Don't want that.
-      if (this[$playAnimation] && this.config.animationName) {
+      if (this[$autoplay] && this.config.animationName) {
         this.modelViewer.play();
       } else {
         this.modelViewer.pause();

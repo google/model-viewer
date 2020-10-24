@@ -27,7 +27,6 @@ import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
-// import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';

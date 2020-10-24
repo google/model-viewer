@@ -22,7 +22,6 @@ import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
 import {dispatchInitialCameraState} from '../components/camera_settings/reducer.js';
-import {dispatchCurrentCameraState} from '../components/camera_settings/reducer.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
@@ -775,10 +774,6 @@ describe('space opera base test', () => {
   });
 
   it('correctly updates state upon dispatching camera fields', () => {
-    reduxStore.dispatch(dispatchCurrentCameraState({fieldOfViewDeg: 42}));
-    expect(reduxStore.getState().currentCamera.currentCamera!.fieldOfViewDeg)
-        .toEqual(42);
-
     reduxStore.dispatch(dispatchInitialCameraState({fieldOfViewDeg: 451}));
     expect(reduxStore.getState().initialCamera.fieldOfViewDeg).toEqual(451);
   });

@@ -23,20 +23,12 @@ export function dispatchSetAnimationNames(animationNames: string[]) {
   return {type: SET_ANIMATION_NAMES, payload: animationNames};
 }
 
-const PLAY_ANIMATION = 'PLAY_ANIMATION';
-export function dispatchPlayAnimation(playAnimation: boolean) {
-  return {type: PLAY_ANIMATION, payload: playAnimation};
-}
-
 export function animationInfoReducer(
     state: AnimationInfo = {
       animationNames: [],
-      playAnimation: true
     },
     action: Action): AnimationInfo {
   switch (action.type) {
-    case PLAY_ANIMATION:
-      return {...state, playAnimation: !!action.payload};
     case SET_ANIMATION_NAMES:
       return {...state, animationNames: action.payload};
     default:

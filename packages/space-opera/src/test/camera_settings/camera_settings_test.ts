@@ -20,7 +20,6 @@ import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
-import {dispatchCurrentCameraState} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate} from '../../components/config/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -36,21 +35,6 @@ describe('camera constraints test', () => {
   afterEach(() => {
     cameraSettings.config = {};
     document.body.removeChild(cameraSettings);
-  });
-
-  it('dispatches save camera orbit state mutator on click', async () => {
-    reduxStore.dispatch(dispatchCurrentCameraState(
-        {orbit: {thetaDeg: 12, phiDeg: 34, radius: 56}}));
-    await cameraSettings.updateComplete;
-    const saveCameraOrbitButton =
-        cameraSettings.shadowRoot!.querySelector(
-            'mwc-button#save-camera-angle') as HTMLInputElement;
-    saveCameraOrbitButton.click();
-
-    const orbit = reduxStore.getState().camera.orbit!;
-    expect(orbit.thetaDeg).toBeCloseTo(12);
-    expect(orbit.phiDeg).toBeCloseTo(34);
-    expect(orbit.radius).toBeCloseTo(56);
   });
 
   it('updates the camera target on camera target change', () => {

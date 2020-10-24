@@ -51,7 +51,7 @@ export const INITIAL_STATE: State = {
   config: {},
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
-  animationInfo: {animationNames: [], playAnimation: true},
+  animationInfo: {animationNames: []},
   gltfInfo: {gltfJsonString: ''},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,

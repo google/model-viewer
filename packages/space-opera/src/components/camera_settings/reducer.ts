@@ -96,9 +96,10 @@ export function dispatchYawLimits(yawLimitsDeg?: Limits) {
 /** Dispatch change to radius limits */
 const SET_CAMERA_RADIUS_LIMITS = 'SET_CAMERA_RADIUS_LIMITS';
 export function dispatchRadiusLimits(radiusLimits?: Limits) {
-  if (!radiusLimits) {
-    throw new Error('No valid limits given');
-  }
+  // if (!radiusLimits) {
+  //   throw new Error('No valid limits given');
+  // }
+  console.log('Disptch Radius Limits', radiusLimits);
   return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
 }
 

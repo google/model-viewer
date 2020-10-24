@@ -71,9 +71,12 @@ describe('animation controls test', () => {
     document.body.appendChild(animationControls);
 
     await dispatchGltfAndEdits(new GltfModel(TEST_GLTF_JSON, null));
-
     await animationControls.updateComplete;
   });
+
+  afterEach(() => {
+    document.body.removeChild(animationControls);
+  })
 
   it('updates the animation names when a gltf is uploaded', async () => {
     const animationNameSelector = animationControls.shadowRoot!.querySelector(

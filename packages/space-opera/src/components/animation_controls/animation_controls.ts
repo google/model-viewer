@@ -29,8 +29,6 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 
-import {dispatchPlayAnimation} from './reducer.js';
-
 interface AnimationControlsInterface {
   autoplay?: boolean;
   animationName?: string;
@@ -41,17 +39,13 @@ interface AnimationControlsInterface {
  */
 @customElement('me-animation-controls')
 export class AnimationControls extends ConnectedLitElement {
+  @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
   @internalProperty() animationNames: string[] = [];
   @internalProperty() config: AnimationControlsInterface = {};
-  @internalProperty() playAnimation?: boolean = false;
-
-  @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
-  @query('me-checkbox#animation-play') playCheckbox?: CheckboxElement;
 
   stateChanged(state: State) {
     this.animationNames = state.animationInfo.animationNames;
     this.config = state.config;
-    this.playAnimation = state.animationInfo.playAnimation;
   }
 
   // Specifically overriding a super class method.
@@ -59,7 +53,6 @@ export class AnimationControls extends ConnectedLitElement {
   async _getUpdateComplete() {
     await super._getUpdateComplete();
     await this.autoplayCheckbox!.updateComplete;
-    await this.playCheckbox!.updateComplete;
   }
 
   render() {
@@ -90,9 +83,6 @@ export class AnimationControls extends ConnectedLitElement {
           <me-checkbox id="animation-autoplay" label="Autoplay"
             ?checked="${!!this.config.autoplay}"
             @change=${this.onAutoplayChange}></me-checkbox>
-          <me-checkbox id="animation-play" label="Play animation"
-            ?checked="${!!this.playAnimation}"
-            @change=${this.onPlayAnimationChange}></me-checkbox>
         </div>
       </me-expandable-tab>
         `;
@@ -115,15 +105,9 @@ export class AnimationControls extends ConnectedLitElement {
     // Set the bool options values to something sensible
     if (value) {
       reduxStore.dispatch(dispatchAutoplayEnabled(true));
-      reduxStore.dispatch(dispatchPlayAnimation(true));
     } else {
       reduxStore.dispatch(dispatchAutoplayEnabled(false));
-      // Leave "playAnimation" alone. It's just UI state.
     }
-  }
-
-  onPlayAnimationChange() {
-    reduxStore.dispatch(dispatchPlayAnimation(this.playCheckbox!.checked));
   }
 }
 

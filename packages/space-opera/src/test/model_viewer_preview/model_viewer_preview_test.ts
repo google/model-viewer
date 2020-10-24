@@ -18,22 +18,23 @@
 // import {GlTf, GltfModel} from
 // '@google/model-viewer-editing-adapter/lib/main.js'
 // import {createSafeObjectUrlFromArrayBuffer} from
-// '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+// '@google/model-viewer-editing-adapter/lib/util/create_object_url.js' import *
+// as Redux from 'redux';  // from
+// //third_party/javascript/redux:redux_closurized
 
 // import {ModelViewerPreview} from
 // '../../components/model_viewer_preview/model_viewer_preview.js';
 // import {dispatchGltfUrl} from
-// '../../components/model_viewer_preview/reducer.js';
-// import {dispatchResetState} from '../../components/reset/reducer.js';
-// import {reduxStore} from '../../space_opera_base.js';
-// import {until} from '../utils/test_utils.js';
+// '../../components/model_viewer_preview/reducer.js'; import {rootReducer} from
+// '../../reducers.js'; import {until} from '../utils/test_utils.js';
 
-// describe('ModelViewerPreview', () => {
+// fdescribe('ModelViewerPreview', () => {
 //   let preview: ModelViewerPreview;
+//   let reduxStore: any;
 
 //   beforeEach(async () => {
-//     dispatchResetState();
-//     expect(reduxStore.getState().modelViewer).toBeUndefined();
+//     reduxStore = Redux.createStore(rootReducer);
+//     expect(reduxStore.getState().modelViewerInfo.modelViewer).toBeUndefined();
 //     preview = new ModelViewerPreview();
 //     document.body.appendChild(preview);
 //     await preview.updateComplete;
@@ -44,7 +45,7 @@
 //   });
 
 //   it('registers a model viewer element to state', () => {
-//     expect(reduxStore.getState().modelViewer).toBeTruthy();
+//     expect(reduxStore.getState().modelViewerInfo.modelViewer).toBeTruthy();
 //   });
 
 //   it('updates ', async () => {
@@ -56,8 +57,8 @@
 //         createSafeObjectUrlFromArrayBuffer(await gltf.packGlb()).unsafeUrl;
 //     expect(reduxStore.getState().gltfInfo.gltf).toBeUndefined();
 //     reduxStore.dispatch(dispatchGltfUrl(url));
-//     // It may be several event loops before the preview downloads the model,
-//     so
+//     // It may be several event loops before the preview downloads the
+//     model,so
 //     // loop until it happens. This will timeout if there is a bug.
 //     await until(() => reduxStore.getState().gltfInfo.gltf !== undefined);
 //   });
