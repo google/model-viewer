@@ -26,6 +26,9 @@ import {editsReducer} from './components/materials_panel/reducer.js';
 import {gltfInfoReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
 import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.js';
 
+// TODO, structure in the way it is in Figma
+// Implement selectors
+
 export const rootReducer = combineReducers({
   config: configReducer,
   edits: editsReducer,

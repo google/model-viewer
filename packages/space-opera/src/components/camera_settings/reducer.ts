@@ -31,9 +31,6 @@ import {Limits} from './types.js';
  */
 const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
 export function dispatchInitialCameraState(initialCamera?: Camera) {
-  // if (!initialCamera)
-  //   return;
-  console.log(initialCamera, !initialCamera);
   return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
 }
 
@@ -48,19 +45,9 @@ export function initialCameraReducer(
 }
 
 // CURRENT CAMERA //////////////
-
-/**
- * For any component to use when they need to reference the current preview
- * camera state.
- */
-const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
-export function dispatchCurrentCameraState(currentCamera: Camera) {
-  return {type: SET_CURRENT_CAMERA_STATE, payload: {...currentCamera}};
-}
-
-const TT = 'TT';
+const MODEL_VIEWER_CAMERA_CHANGE = 'MODEL_VIEWER_CAMERA_CHANGE';
 export function dispatchModelViewerCameraChange() {
-  return {type: TT};
+  return {type: MODEL_VIEWER_CAMERA_CHANGE};
 }
 
 export function currentCameraReducer(
@@ -69,11 +56,7 @@ export function currentCameraReducer(
     },
     action: Action): CurrentCamera {
   switch (action.type) {
-    case SET_CURRENT_CAMERA_STATE:
-      return {
-        ...state, currentCamera: action.payload
-      }
-    case TT:
+    case MODEL_VIEWER_CAMERA_CHANGE:
       return {
         ...state, toggle: !state.toggle
       }
@@ -99,7 +82,6 @@ export function dispatchRadiusLimits(radiusLimits?: Limits) {
   // if (!radiusLimits) {
   //   throw new Error('No valid limits given');
   // }
-  console.log('Disptch Radius Limits', radiusLimits);
   return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
 }
 
@@ -126,8 +108,6 @@ const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
 export function dispatchSaveCameraOrbit(
     currentOrbit: SphericalPositionDeg|undefined,
     currentFieldOfViewDeg: number|undefined) {
-  // if (!reduxStore.getState().currentCamera)
-  //   return;
   return {
     type: SAVE_CAMERA_ORBIT,
     payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}

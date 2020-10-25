@@ -27,9 +27,7 @@ export function dispatchConfig(config?: ModelViewerConfig) {
   if (!config) {
     throw new Error('No config given!');
   }
-  if (config === reduxStore.getState().config) {
-    throw new Error(`Do not modify state.config in place!`);
-  }
+
   reduxStore.dispatch(dispatchSetConfig(config));
 
   // Clear camera settings. This is optional!
@@ -37,6 +35,6 @@ export function dispatchConfig(config?: ModelViewerConfig) {
 
   // Clear initialCamera too, as ModelViewerPreview will update this.
   reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
-
-  // delete reduxStore.getState().currentCamera.currentCamera;
 }
+
+// TODO, add modelViewerSnippet reducer
