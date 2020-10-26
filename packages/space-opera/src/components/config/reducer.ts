@@ -39,11 +39,7 @@ export function dispatchAutoplayEnabled(enabled?: boolean) {
 /** Set animation name */
 const SET_ANIMATION_NAME = 'SET_ANIMATION_NAME';
 export function dispatchAnimationName(animationName?: string) {
-  // if (!(animationName &&
-  //       reduxStore.getState().animationNames.indexOf(animationName) ===
-  //       -1)) {
   return {type: SET_ANIMATION_NAME, payload: animationName};
-  // }
 }
 
 /** Dispatch an edit to model viewer environmentImage attribute. */

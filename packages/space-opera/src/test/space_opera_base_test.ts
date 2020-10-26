@@ -710,15 +710,6 @@ describe('space opera base test', () => {
     expect((gltf.textures).length).toBeGreaterThanOrEqual(2);
   });
 
-  // DEPRECATED... No longer using registerStateMutator
-  // it('throws if we try to add duplicate mutator action names', () => {
-  //   const name = 'SOME_TEST_MUTATOR';
-  //   registerStateMutator(name, () => {});
-  //   expect(() => {
-  //     registerStateMutator(name, () => {});
-  //   }).toThrow();
-  // });
-
   it('applies camera edits correctly to a model viewer config', () => {
     const camera = {
       orbit: {thetaDeg: 1.2, phiDeg: 3.4, radius: 5.6},

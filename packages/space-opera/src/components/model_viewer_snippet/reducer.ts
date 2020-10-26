@@ -36,5 +36,3 @@ export function dispatchConfig(config?: ModelViewerConfig) {
   // Clear initialCamera too, as ModelViewerPreview will update this.
   reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
 }
-
-// TODO, add modelViewerSnippet reducer

@@ -17,7 +17,7 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {Action, EnvironmentState} from '../../types.js';
+import {Action, EnvironmentState, State} from '../../types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
 import {EnvironmentImage} from './lighting_state.js';
 
@@ -47,6 +47,9 @@ function addEnvironmentImage(
   const environmentImages = [...state, image];
   return environmentImages;
 }
+
+export const getEnvironmentImages = (state: State) =>
+    state.entities.environment.environmentImages;
 
 export function environmentReducer(
     state: EnvironmentState = {

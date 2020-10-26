@@ -38,7 +38,7 @@ import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_in
 
 import {styles} from './ibl_selector.css.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './lighting_state.js';
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from './reducer.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, getEnvironmentImages} from './reducer.js';
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
@@ -74,7 +74,7 @@ export class IblSelector extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.config = getConfig(state);
-    this.environmentImages = state.entities.environment.environmentImages;
+    this.environmentImages = getEnvironmentImages(state);
   }
 
   onSelectEnvironmentImage(event: CustomEvent) {
