@@ -5,13 +5,13 @@
       {
         "name": "src",
         "htmlName": "src",
-        "description": "The URL to the 3D model. This parameter is required for <span class=\"attribute\">&lt;model-viewer&gt;</span> to display. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
+        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>"
         ],
         "default": {
           "default": "empty string",
-          "options": "any legal filepath"
+          "options": "any legal URL"
         }
       },
       {
@@ -35,7 +35,7 @@
         ],
         "default": {
           "default": "empty string",
-          "options": "link to image"
+          "options": "any legal URL"
         }
       },
       {
@@ -146,7 +146,14 @@
       {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
-        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1. Defaults to 0.5."
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",
+        "links": [
+          "<a href=\"../examples/loading/#demo-container-8\">Static property usage example</a>"
+        ],
+        "default": {
+          "default": "0.5",
+          "options": "number between 0 and 1"
+        }
       },
       {
         "name": "modelCacheSize",
@@ -154,8 +161,11 @@
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number sets the maximum number of models that can be cached even if they are not being used by a <span class='attribute'>&lt;model-viewer&gt;</span> element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
         "default": {
           "default": "5",
-          "options": "any number >= 0"
-        }
+          "options": "any integer >= 0"
+        },
+        "links": [
+          "<a href=\"../examples/loading/#demo-container-8\">Static property usage example</a>"
+        ]
       }
     ],
     "Methods": [
@@ -168,13 +178,6 @@
         "name": "getDimensions()",
         "htmlName": "getDimensions",
         "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The retuned object has x, y, and z properties along with a toString() method."
-      }
-    ],
-    "Static Methods": [
-      {
-        "name": "mapURLs(callback)",
-        "htmlName": "mapURLs",
-        "description": "If provided, the <span class='attribute'>callback</span> will be passed each resource URL before a request is sent. The <span class='attribute'>callback</span> may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs."
       },
       {
         "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
@@ -185,6 +188,13 @@
         "name": "toDataURL(type, encoderOptions)",
         "htmlName": "toDataURL",
         "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
+      }
+    ],
+    "Static Methods": [
+      {
+        "name": "mapURLs(callback)",
+        "htmlName": "mapURLs",
+        "description": "If provided, the <span class='attribute'>callback</span> will be passed each resource URL before a request is sent. The <span class='attribute'>callback</span> may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs."
       }
     ],
     "Events": [
@@ -250,13 +260,13 @@
         ],
         "default": {
           "default": "webxr scene-viewer quick-look",
-          "options": "whitespace delineated: webxr scene-viewer quick-look"
+          "options": "prioritized list of allowed modes"
         }
       },
       {
         "name": "ar-scale",
         "htmlName": "arScale",
-        "description": "Controls the scaling behavior in AR mode in <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a>. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized.",
+        "description": "Controls the scaling behavior in AR mode. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized by pinch.",
         "links": [
           "<a href=\"../examples/augmentedreality/\">Related examples</a>"
         ],
@@ -279,7 +289,7 @@
         "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
         "default": {
           "default": "safari",
-          "options": "whitespace delineated: safari chrome"
+          "options": "safari chrome"
         }
       }
     ],
@@ -296,7 +306,11 @@
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. Possible values include 'not-presenting', 'session-started', 'object-placed', and 'failed'. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
+        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
+        "default": {
+          "default": "N/A",
+          "options": "not-presenting, session-started, object-placed, failed"
+        },
         "links": [
           "<a href=\"../examples/augmentedreality/#demo-container-1\"><span class='attribute'>ar-status</span> example</a>"
         ]
@@ -306,14 +320,14 @@
       {
         "name": "activateAR()",
         "htmlName": "activateAR",
-        "description": "Activates AR. Note that for any mode that is not WebXR-based, this method most likely has to be called synchronous from a user interaction handler. Otherwise, attempts to activate modes that require user interaction will most likely be ignored."
+        "description": "Activates AR. Note that this method most likely has to be called synchronous from a user interaction handler or it will most likely be ignored."
       }
     ],
     "Events": [
       {
         "name": "ar-status",
         "htmlName": "arStatus",
-        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above fires. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time ar was initiated but failed to start all of the given modes.",
+        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time AR was initiated but failed to start all of the given modes.",
         "links": [
           "<a href=\"../examples/augmentedreality/#demo-container-3\"><span class='attribute'>ar-status</span> example</a>"
         ]
@@ -321,14 +335,14 @@
       {
         "name": "quick-look-button-tapped",
         "htmlName": "quickLookButtonTapped",
-        "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
+        "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped. An action button can be defined using URL parameters on the ios-src, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
       }
     ],
     "Slots": [
       {
         "name": "ar-button",
         "htmlName": "arButton",
-        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we can't be sure until the user tries).",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we will have some false positives until the user tries).",
         "links": [
           "<a href=\"../examples/augmentedreality/#demo-container-4\"><span class='attribute'>ar-button</span> example</a>"
         ]
@@ -343,6 +357,14 @@
   {
     "Title": "Staging & Cameras",
     "Attributes": [
+      {
+        "name": "camera-controls",
+        "htmlName": "cameraControls",
+        "description": "Enables controls via mouse/touch. This attribute should nearly always be specified, unless all model motion is being controlled by JavaScript functions.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/\">Related examples</a>"
+        ]
+      },
       {
         "name": "auto-rotate",
         "htmlName": "autoRotate",
@@ -365,8 +387,8 @@
         "htmlName": "rotationPerSecond",
         "description": "Sets the speed of <span class='attribute'>auto-rotate</span>, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
         "default": {
-          "default": "pi/32",
-          "options": "degrees or radians"
+          "default": "pi/32 radians",
+          "options": "angle with units"
         }
       },
       {
@@ -393,7 +415,7 @@
       {
         "name": "interaction-prompt-style",
         "htmlName": "interactionPromptStyle",
-        "description": "Configures the presentation style of the <span class='attribute'>interaction-prompt</span> when it is raised. When set to \"wiggle\", the prompt will animate from horizontally and the model will appear to be rotated as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
+        "description": "Configures the presentation style of the <span class='attribute'>interaction-prompt</span> when it is raised. When set to \"wiggle\", the prompt will animate horizontally and the model will rotate as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
         "default": {
           "default": "wiggle",
           "options": "wiggle, basic"
@@ -409,29 +431,21 @@
         }
       },
       {
-        "name": "camera-controls",
-        "htmlName": "cameraControls",
-        "description": "Enables controls via mouse/touch when in flat view.",
-        "links": [
-          "<a href=\"../examples/stagingandcameras/\">Related examples</a>"
-        ]
-      },
-      {
         "name": "camera-orbit",
         "htmlName": "cameraOrbit",
-        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal and polar angles, and the distance from the model. Accepts values of the form \"$angle $angle $distance\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
+        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal, theta, and polar, phi, angles (phi is measured down from the top), and the radius from the center of the model. Accepts values of the form \"$theta $phi $radius\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#demo-container-2\"><span class='attribute'>camera-orbit</span> example</a>"
         ],
         "default": {
           "default": "0deg 75deg 105%",
-          "options": "$angle $angle $distance"
+          "options": "$theta $phi $radius"
         }
       },
       {
         "name": "camera-target",
         "htmlName": "cameraTarget",
-        "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Defaults to \"auto auto auto\".",
+        "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#demo-container-6\"><span class='attribute'>camera-target</span> example</a>"
         ],
@@ -443,46 +457,46 @@
       {
         "name": "field-of-view",
         "htmlName": "fieldOfView",
-        "description": "Used to configure the vertical field of view of the camera. Accepts values units in both degrees and radians (e.g., \"30deg\" or \"0.5rad\"). Accepts any value between 10 and 45 degrees. Any time this value changes from its initially configured value, the camera will interpolate from its current value to the new value. Defaults to \"auto\", which sets either the vertical or horizontal field of view to 45 degrees depending on the dimensions of the model and the aspect ratio of the canvas.",
+        "description": "Used to configure the vertical field of view of the camera. Accepts values in both degrees and radians (e.g., \"30deg\" or \"0.5rad\"). Accepts any value between the configured min and max field of view. Any time this value changes from its initially configured value, the camera will interpolate from its current value to the new value. Defaults to \"auto\", which sets either the vertical or horizontal field of view to 45 degrees depending on the dimensions of the model and the aspect ratio of the canvas. Seamless poster transitions for arbitrary element aspect ratios are only possible using \"auto\".",
         "default": {
           "default": "auto",
-          "options": "value between 10 and 45 degrees"
+          "options": "angle between 0 and 180 degrees"
         }
       },
       {
         "name": "max-camera-orbit",
         "htmlName": "maxCameraOrbit",
-        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Defaults to \"Infinity 157.5deg Infinity\". Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
+        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is the same as the <span class='attribute'>camera-orbit</span> radius \"auto\" value.",
         "default": {
-          "default": "Infinity 157.5deg Infinity",
-          "options": "$angle $angle $distance"
-        }
-      },
-      {
-        "name": "max-field-of-view",
-        "htmlName": "maxFieldOfView",
-        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>.",
-        "default": {
-          "default": "45deg",
-          "options": "value between 10 and 45 degrees"
+          "default": "Infinity 157.5deg auto",
+          "options": "$theta $phi $radius"
         }
       },
       {
         "name": "min-camera-orbit",
         "htmlName": "minCameraOrbit",
-        "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\".",
+        "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is a conservative value to ensure the camera never enters the model, so be careful when setting this to another value.",
         "default": {
-          "default": "-Infinity 22.5deg 0",
-          "options": "$angle $angle $distance"
+          "default": "-Infinity 22.5deg auto",
+          "options": "$theta $phi $radius"
+        }
+      },
+      {
+        "name": "max-field-of-view",
+        "htmlName": "maxFieldOfView",
+        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>. The default \"auto\" is the same as the default <span class='attribute'>field-of-view</span>.",
+        "default": {
+          "default": "auto",
+          "options": "angle between 0 and 180 degrees"
         }
       },
       {
         "name": "min-field-of-view",
         "htmlName": "minFieldOfView",
-        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>.",
+        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>. Set this to a small value to get close zoom-in without the camera entering the model.",
         "default": {
-          "default": "10deg",
-          "options": "value between 10 and 45 degrees"
+          "default": "25deg",
+          "options": "angle between 0 and 180 degrees"
         }
       },
       {
@@ -519,7 +533,7 @@
       {
         "name": "turntableRotation",
         "htmlName": "turntableRotation",
-        "description": "Returns the orientation of the model's turntable, which is turned by the <span class='attribute'>auto-rotate</span> setting, in radians counter-clockwise when looking down from above."
+        "description": "Returns the orientation of the model's turntable (turned by the <span class='attribute'>auto-rotate</span> setting) in radians counter-clockwise when looking down from above."
       }
     ],
     "Methods": [
@@ -614,7 +628,7 @@
       {
         "name": "updateHotspot({name, position, normal})",
         "htmlName": "updateHotspot",
-        "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
+        "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
       },
       {
         "name": "positionAndNormalFromPoint(pixelX, pixelY)",
@@ -639,7 +653,7 @@
       {
         "name": "skybox-image",
         "htmlName": "skyboxImage",
-        "description": "Sets the background image of the scene when viewed inline. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images.",
+        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images.",
         "links": [
           "<a href=\"../examples/lightingandenv/\">Related examples</a>"
         ]
