@@ -102,7 +102,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
     this.camera = state.entities.modelViewerSnippet.camera;
     this.config = state.entities.modelViewerSnippet.config;
-    this.hotspots = state.entities.modelViewerSnippet.hotspotInfo.hotspots;
+    this.hotspots = state.entities.modelViewerSnippet.hotspots;
     this[$edits] = state.entities.gltfEdits.edits;
     this[$gltf] = state.entities.gltf.gltf;
     this[$gltfUrl] = state.entities.gltf.gltfUrl;

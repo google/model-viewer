@@ -18,9 +18,9 @@
 import {combineReducers} from 'redux';
 
 import {animationInfoReducer} from './components/animation_controls/reducer.js';
-import {cameraReducer, currentCameraReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
+import {cameraReducer, cameraToggleReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
-import {hotspotsInfoReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
+import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
 import {gltfReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
@@ -32,11 +32,11 @@ const modelViewerSnippetReducer = combineReducers({
   animationInfo: animationInfoReducer,
   camera: cameraReducer,
   config: configReducer,
-  hotspotInfo: hotspotsInfoReducer
+  hotspots: hotspotsReducer
 })
 
 const entitiesReducer = combineReducers({
-  currentCamera: currentCameraReducer,
+  cameraToggle: cameraToggleReducer,
   environment: environmentReducer,
   gltf: gltfReducer,
   gltfEdits: gltfEditsReducer,

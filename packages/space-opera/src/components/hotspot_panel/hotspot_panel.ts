@@ -36,10 +36,12 @@ export class HotspotPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
-    this.hotspots = state.entities.modelViewerSnippet.hotspotInfo.hotspots;
+    console.log(this.addHotspotMode);
+    this.hotspots = state.entities.modelViewerSnippet.hotspots;
   }
 
   onAddHotspot() {
+    console.log('onAddHotspot');
     reduxStore.dispatch(dispatchUpdateHotspotMode(true));
   }
 

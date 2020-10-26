@@ -41,7 +41,7 @@ export class RadiusLimits extends LimitsBase {
   stateChanged(state: State) {
     this.radiusLimits = state.entities.modelViewerSnippet.camera.radiusLimits;
     this.initialCamera = state.entities.initialCamera;
-    this.toggle = state.entities.currentCamera.toggle;
+    this.toggle = state.entities.cameraToggle;
   }
 
   dispatchLimits(limits?: Limits) {

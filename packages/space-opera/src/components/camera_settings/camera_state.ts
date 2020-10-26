@@ -37,11 +37,6 @@ export interface Camera {
   readonly fovLimitsDeg?: Limits;
 }
 
-export interface CurrentCamera {
-  currentCamera?: Camera;
-  toggle: boolean;
-}
-
 /** Initial values. All are undefined, which is to say "no opinion". */
 export const INITIAL_CAMERA = {};
 

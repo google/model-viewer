@@ -18,7 +18,7 @@
 import {Action} from '../../types.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
-import {HotspotConfig, HotspotInfoConfig} from './types.js';
+import {HotspotConfig} from './types.js';
 
 let nextHotspotId = 1;
 let hotspotNameSet = new Set();
@@ -96,32 +96,19 @@ export function dispatchAddHotspot(config?: HotspotConfig) {
   return {type: ADD_HOTSPOT, payload: config};
 }
 
-export function hotspotsInfoReducer(
-    state: HotspotInfoConfig = {
-      hotspots: [],
-    },
-    action: Action): HotspotInfoConfig {
+export function hotspotsReducer(
+    state: HotspotConfig[] = [], action: Action): HotspotConfig[] {
   switch (action.type) {
     case SET_HOTSPOTS:
-      return {
-        ...state, hotspots: action.payload
-      }
+      return action.payload;
     case CLEAR_HOTSPOTS:
-      return {
-        ...state, hotspots: action.payload
-      }
+      return action.payload;
     case REMOVE_HOTSPOT:
-      return {
-        ...state, hotspots: removeHotspot(state.hotspots, action.payload)
-      }
+      return removeHotspot(state, action.payload);
     case UPDATE_HOTSPOT:
-      return {
-        ...state, hotspots: updateHotspot(state.hotspots, action.payload)
-      }
+      return updateHotspot(state, action.payload);
     case ADD_HOTSPOT:
-      return {
-        ...state, hotspots: addHotspot(state.hotspots, action.payload)
-      }
+      return addHotspot(state, action.payload);
     default:
       return state;
   }
@@ -139,7 +126,7 @@ export function hotspotsUiReducer(
       addHotspot: false
     },
     action: Action) {
-  switch (action.payload) {
+  switch (action.type) {
     case UPDATE_HOTSPOT_MODE:
       return {
         ...state, addHotspot: action.payload

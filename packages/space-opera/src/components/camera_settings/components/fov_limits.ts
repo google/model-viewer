@@ -40,7 +40,7 @@ export class FovLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.fovLimitsDeg = state.entities.modelViewerSnippet.camera.fovLimitsDeg;
-    this.toggle = state.entities.currentCamera.toggle;
+    this.toggle = state.entities.cameraToggle;
   }
 
   dispatchLimits(limits?: Limits) {

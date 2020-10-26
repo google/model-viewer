@@ -19,8 +19,8 @@ import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.j
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 import {AnimationInfo} from './components/animation_controls/types.js';
 
-import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
-import {HotspotInfoConfig} from './components/hotspot_panel/types.js';
+import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
+import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
 import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
@@ -46,11 +46,11 @@ interface ModelViewerSnippetState {
   animationInfo: AnimationInfo;
   camera: Camera;
   config: ModelViewerConfig;
-  hotspotInfo: HotspotInfoConfig;
+  hotspots: HotspotConfig[];
 }
 
 export interface EntitiesState {
-  currentCamera: CurrentCamera;
+  cameraToggle: boolean;
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
@@ -69,7 +69,7 @@ export interface State {
 export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
   entities: {
-    currentCamera: {toggle: false},
+    cameraToggle: false,
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
     gltfEdits: {
@@ -79,7 +79,7 @@ export const INITIAL_STATE: State = {
     modelViewerSnippet: {
       animationInfo: {animationNames: []},
       config: {},
-      hotspotInfo: {hotspots: []},
+      hotspots: [],
       camera: INITIAL_CAMERA,
     },
     initialCamera: INITIAL_CAMERA,

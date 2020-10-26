@@ -45,7 +45,7 @@ export class PitchLimits extends LimitsBase {
   stateChanged(state: State) {
     this.pitchLimitsDeg =
         state.entities.modelViewerSnippet.camera.pitchLimitsDeg;
-    this.toggle = state.entities.currentCamera.toggle;
+    this.toggle = state.entities.cameraToggle;
   }
 
   dispatchLimits(limits?: Limits) {

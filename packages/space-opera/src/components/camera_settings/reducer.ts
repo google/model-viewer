@@ -16,7 +16,7 @@
  */
 
 import {Action} from '../../types.js';
-import {CurrentCamera, INITIAL_CAMERA} from './camera_state.js';
+import {INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
@@ -50,16 +50,11 @@ export function dispatchModelViewerCameraChange() {
   return {type: MODEL_VIEWER_CAMERA_CHANGE};
 }
 
-export function currentCameraReducer(
-    state: CurrentCamera = {
-      toggle: false
-    },
-    action: Action): CurrentCamera {
+export function cameraToggleReducer(
+    state: boolean = false, action: Action): boolean {
   switch (action.type) {
     case MODEL_VIEWER_CAMERA_CHANGE:
-      return {
-        ...state, toggle: !state.toggle
-      }
+      return !state;
     default:
       return state;
   }
