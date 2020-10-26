@@ -25,7 +25,7 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
-import {dispatchUpdateHotspotMode} from './reducer.js';
+import {dispatchUpdateHotspotMode, getHotspots} from './reducer.js';
 import {HotspotConfig} from './types.js';
 
 /** Hotspot panel. */
@@ -36,12 +36,10 @@ export class HotspotPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
-    console.log(this.addHotspotMode);
-    this.hotspots = state.entities.modelViewerSnippet.hotspots;
+    this.hotspots = getHotspots(state);
   }
 
   onAddHotspot() {
-    console.log('onAddHotspot');
     reduxStore.dispatch(dispatchUpdateHotspotMode(true));
   }
 

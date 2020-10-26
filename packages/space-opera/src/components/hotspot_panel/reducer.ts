@@ -15,7 +15,7 @@
  *
  */
 
-import {Action} from '../../types.js';
+import {Action, State} from '../../types.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
 import {HotspotConfig} from './types.js';
@@ -95,6 +95,9 @@ const ADD_HOTSPOT = 'ADD_HOTSPOT';
 export function dispatchAddHotspot(config?: HotspotConfig) {
   return {type: ADD_HOTSPOT, payload: config};
 }
+
+export const getHotspots = (state: State) =>
+    state.entities.modelViewerSnippet.hotspots;
 
 export function hotspotsReducer(
     state: HotspotConfig[] = [], action: Action): HotspotConfig[] {
