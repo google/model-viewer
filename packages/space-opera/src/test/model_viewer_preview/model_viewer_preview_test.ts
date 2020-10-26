@@ -40,9 +40,9 @@
 //     await preview.updateComplete;
 //   });
 
-//   afterEach(() => {
-//     document.body.removeChild(preview);
-//   });
+// afterEach(async () => {
+//   document.body.removeChild(preview);
+// });
 
 //   it('registers a model viewer element to state', () => {
 //     expect(reduxStore.getState().modelViewerInfo.modelViewer).toBeTruthy();
