@@ -52,7 +52,8 @@ export class OpenButton extends LitElement {
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchGltfUrl(url));
-    dispatchConfig(extractStagingConfig(reduxStore.getState().config));
+    dispatchConfig(extractStagingConfig(
+        reduxStore.getState().entities.modelViewerSnippet.config));
     reduxStore.dispatch(dispatchSetHotspots([]));
   }
 }

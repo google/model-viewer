@@ -41,7 +41,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   @internalProperty() poster?: string;
 
   stateChanged(state: State) {
-    this.poster = state.config.poster;
+    this.poster = state.entities.modelViewerSnippet.config.poster;
   }
 
   render() {

@@ -55,9 +55,9 @@ export class ExportPanel extends ConnectedLitElement {
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
 
   stateChanged(state: State) {
-    this.config = state.config;
-    this.camera = state.camera;
-    this.hotspots = state.hotspotInfo.hotspots;
+    this.config = state.entities.modelViewerSnippet.config;
+    this.camera = state.entities.modelViewerSnippet.camera;
+    this.hotspots = state.entities.modelViewerSnippet.hotspotInfo.hotspots;
     this.gltfUrl = state.entities.gltf.gltfUrl;
   }
 

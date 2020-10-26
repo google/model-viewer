@@ -96,7 +96,7 @@ function dispatchGltf(args?: DispatchGltfArgs) {
   if (!edits) {
     throw new Error(`Must give valid edits!`);
   }
-  if (reduxStore.getState().edits === edits) {
+  if (reduxStore.getState().entities.gltfEdits.edits === edits) {
     throw new Error(`Same edits was given! Only call this upon actual change`);
   }
   reduxStore.dispatch(dispatchSetEdits(edits));

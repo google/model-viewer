@@ -43,7 +43,7 @@ export class InspectorPanel extends ConnectedLitElement {
   updateTexturesComplete?: Promise<void>;
 
   stateChanged(state: State) {
-    this[$texturesById] = state.edits.texturesById;
+    this[$texturesById] = state.entities.gltfEdits.edits.texturesById;
     this.gltfJsonstring = state.entities.gltf.gltfJsonString;
   }
 

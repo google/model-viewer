@@ -16,11 +16,8 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-
 import {Action} from '../../types.js';
-
-import {GltfEdits, GltfState, INITIAL_GLTF_EDITS, ModelViewerInfo} from '../model_viewer_preview/types.js';
+import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from '../model_viewer_preview/types.js';
 
 // GLTF INFO //////////////
 
@@ -71,31 +68,10 @@ export function dispatchSetOrigEdits(origEdits: GltfEdits) {
 }
 
 export function origEditsReducer(
-    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action):
-    GltfEdits {
-      switch (action.type) {
-        case SET_ORIG_EDITS:
-          return action.payload;
-        default:
-          return state;
-      }
-    }
-
-// MODEL VIEWER //////////////
-
-/** Only use in intialization. */
-const MODEL_VIEWER = 'MODEL_VIEWER';
-export function dispatchModelViewer(modelViewer?: ModelViewerElement) {
-  return {type: MODEL_VIEWER, payload: modelViewer};
-}
-
-export function modelViewerInfoReducer(
-    state: ModelViewerInfo = {}, action: Action): ModelViewerInfo {
+    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {
   switch (action.type) {
-    case MODEL_VIEWER:
-      return {
-        ...state, modelViewer: action.payload
-      }
+    case SET_ORIG_EDITS:
+      return action.payload;
     default:
       return state;
   }

@@ -36,7 +36,7 @@ export class HotspotPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
-    this.hotspots = state.hotspotInfo.hotspots;
+    this.hotspots = state.entities.modelViewerSnippet.hotspotInfo.hotspots;
   }
 
   onAddHotspot() {

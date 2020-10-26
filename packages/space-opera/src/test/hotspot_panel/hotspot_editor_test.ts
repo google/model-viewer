@@ -49,7 +49,8 @@ describe('hotspot editor test', () => {
     annotationTextArea.value = 'new annotation';
     annotationTextArea.dispatchEvent(new Event('input'));
 
-    const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+    const hotspots =
+        reduxStore.getState().entities.modelViewerSnippet.hotspotInfo.hotspots;
     expect(hotspots.length).toBe(1);
     expect(hotspots[0].annotation).toBe('new annotation');
   });
@@ -58,7 +59,8 @@ describe('hotspot editor test', () => {
     const removeButton = hotspotEditor.shadowRoot!.querySelector(
                              'mwc-icon-button#remove-hotspot') as HTMLElement;
     removeButton.click();
-    const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+    const hotspots =
+        reduxStore.getState().entities.modelViewerSnippet.hotspotInfo.hotspots;
     expect(hotspots.length).toBe(0);
   });
 });

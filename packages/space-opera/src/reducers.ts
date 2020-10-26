@@ -24,29 +24,29 @@ import {hotspotsInfoReducer, hotspotsUiReducer} from './components/hotspot_panel
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
 import {gltfReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
-import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.js';
+
+const gltfEditsReducer =
+    combineReducers({edits: editsReducer, origEdits: origEditsReducer})
+
+const modelViewerSnippetReducer = combineReducers({
+  animationInfo: animationInfoReducer,
+  camera: cameraReducer,
+  config: configReducer,
+  hotspotInfo: hotspotsInfoReducer
+})
 
 const entitiesReducer = combineReducers({
+  currentCamera: currentCameraReducer,
   environment: environmentReducer,
-  // gltfEdits: gltfEditsReducer,
-  gltf: gltfReducer
-  // modelViewerSnippet: modelViewerSnippetReducer
+  gltf: gltfReducer,
+  gltfEdits: gltfEditsReducer,
+  initialCamera: initialCameraReducer,
+  modelViewerSnippet: modelViewerSnippetReducer
 });
 
 const uiReducer = combineReducers({hotspots: hotspotsUiReducer});
 
-export const rootReducer = combineReducers({
-  entities: entitiesReducer,
-  ui: uiReducer,
-  config: configReducer,
-  edits: editsReducer,
-  origEdits: origEditsReducer,
-  animationInfo: animationInfoReducer,
-  camera: cameraReducer,
-  initialCamera: initialCameraReducer,
-  hotspotInfo: hotspotsInfoReducer,
-  modelViewerInfo: modelViewerInfoReducer,
-  currentCamera: currentCameraReducer,
-});
+export const rootReducer =
+    combineReducers({entities: entitiesReducer, ui: uiReducer});
 
 export type RootState = ReturnType<typeof rootReducer>

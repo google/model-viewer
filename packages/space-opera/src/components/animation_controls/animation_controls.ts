@@ -44,8 +44,9 @@ export class AnimationControls extends ConnectedLitElement {
   @internalProperty() config: AnimationControlsInterface = {};
 
   stateChanged(state: State) {
-    this.animationNames = state.animationInfo.animationNames;
-    this.config = state.config;
+    this.animationNames =
+        state.entities.modelViewerSnippet.animationInfo.animationNames;
+    this.config = state.entities.modelViewerSnippet.config;
   }
 
   // Specifically overriding a super class method.

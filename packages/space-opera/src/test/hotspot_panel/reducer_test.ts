@@ -36,7 +36,8 @@ describe('hotspot dispatchers test', () => {
          position: toVector3D([1, 0, 0]),
        };
        reduxStore.dispatch(dispatchAddHotspot(config));
-       const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       const hotspots = reduxStore.getState()
+                            .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(1);
        expect(hotspots[0].name).toBe('test');
        expect(hotspots[0].position.x).toBe(1);
@@ -70,7 +71,8 @@ describe('hotspot dispatchers test', () => {
          position: toVector3D([1, 0, 0]),
          annotation: 'test-annotation',
        }));
-       const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       const hotspots = reduxStore.getState()
+                            .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(1);
        expect(hotspots[0].annotation).toBe('test-annotation');
      });
@@ -101,13 +103,15 @@ describe('hotspot dispatchers test', () => {
 
        reduxStore.dispatch(dispatchRemoveHotspot('test'));
 
-       let hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       let hotspots = reduxStore.getState()
+                          .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots).toBeDefined();
        expect(hotspots.length).toBe(1);
        expect(hotspots[0].name).toBe('test-1');
 
        reduxStore.dispatch(dispatchRemoveHotspot('test-1'));
-       hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       hotspots = reduxStore.getState()
+                      .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(0);
      });
 
@@ -131,13 +135,15 @@ describe('hotspot dispatchers test', () => {
          name: generateUniqueHotspotName(),
          position: toVector3D([1, 0, 0])
        }));
-       let hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       let hotspots = reduxStore.getState()
+                          .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(1);
        reduxStore.dispatch(dispatchAddHotspot({
          name: generateUniqueHotspotName(),
          position: toVector3D([1, 0, 0])
        }));
-       hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       hotspots = reduxStore.getState()
+                      .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(2);
      });
 
@@ -151,7 +157,8 @@ describe('hotspot dispatchers test', () => {
          name: generateUniqueHotspotName(),
          position: toVector3D([1, 0, 0])
        }));
-       const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       const hotspots = reduxStore.getState()
+                            .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(3);
      });
 
@@ -160,7 +167,8 @@ describe('hotspot dispatchers test', () => {
       {name: '1', position: toVector3D([1, 0, 0])},
       {name: '2', position: toVector3D([2, 0, 0])},
     ]));
-    const hotspots = reduxStore.getState().hotspotInfo.hotspots;
+    const hotspots =
+        reduxStore.getState().entities.modelViewerSnippet.hotspotInfo.hotspots;
     expect(hotspots.length).toBe(2);
     expect(hotspots[0].name).toBe('1');
     expect(hotspots[1].name).toBe('2');
@@ -173,7 +181,8 @@ describe('hotspot dispatchers test', () => {
          {name: generateUniqueHotspotName(), position: toVector3D([1, 0, 0])},
          {name: generateUniqueHotspotName(), position: toVector3D([2, 0, 0])},
        ]));
-       let hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       let hotspots = reduxStore.getState()
+                          .entities.modelViewerSnippet.hotspotInfo.hotspots;
        reduxStore.dispatch(dispatchClearHotspot());
        reduxStore.dispatch(dispatchSetHotspots(hotspots));
 
@@ -181,7 +190,8 @@ describe('hotspot dispatchers test', () => {
          name: generateUniqueHotspotName(),
          position: toVector3D([1, 0, 0]),
        }));
-       hotspots = reduxStore.getState().hotspotInfo.hotspots;
+       hotspots = reduxStore.getState()
+                      .entities.modelViewerSnippet.hotspotInfo.hotspots;
        expect(hotspots.length).toBe(3);
      });
 });

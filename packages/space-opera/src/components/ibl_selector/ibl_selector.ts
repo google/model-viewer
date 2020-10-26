@@ -73,7 +73,7 @@ export class IblSelector extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.config;
+    this.config = state.entities.modelViewerSnippet.config;
     this.environmentImages = state.entities.environment.environmentImages;
   }
 

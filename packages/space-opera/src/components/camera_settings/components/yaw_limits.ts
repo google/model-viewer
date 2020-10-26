@@ -42,8 +42,8 @@ export class YawLimits extends LimitsBase {
   @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
-    this.yawLimitsDeg = state.camera.yawLimitsDeg;
-    this.toggle = state.currentCamera.toggle;
+    this.yawLimitsDeg = state.entities.modelViewerSnippet.camera.yawLimitsDeg;
+    this.toggle = state.entities.currentCamera.toggle;
   }
 
   dispatchLimits(limits?: Limits) {

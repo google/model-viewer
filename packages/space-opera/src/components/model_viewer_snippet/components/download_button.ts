@@ -129,7 +129,7 @@ export class ExportZipButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const config = state.config;
+    const config = state.entities.modelViewerSnippet.config;
     const gltf = state.entities.gltf.gltf;
     if (!gltf) {
       this.preparePayload = undefined;

@@ -97,21 +97,26 @@ describe('animation controls test', () => {
                                    'paper-item[value="Dance"]') as HTMLElement;
     danceAnimationItem.click();
 
-    expect(reduxStore.getState().config.animationName).toBe('Dance');
+    expect(
+        reduxStore.getState().entities.modelViewerSnippet.config.animationName)
+        .toBe('Dance');
   });
 
   it('dispatches an event on UI click', async () => {
     reduxStore.dispatch(dispatchAutoplayEnabled(false));
-    expect(reduxStore.getState().config.autoplay).toBe(false);
+    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
+        .toBe(false);
     const autoplayCheckbox = animationControls.autoplayCheckbox!;
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().config.autoplay).toBe(true);
+    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
+        .toBe(true);
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().config.autoplay).toBe(false);
+    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
+        .toBe(false);
   });
 
   it('updates selected value on animationName change', async () => {

@@ -23,13 +23,13 @@ import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_setting
 import {HotspotInfoConfig} from './components/hotspot_panel/types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
-import {GltfEdits, GltfState, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
+import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
 
-export interface HotspotsUIState {
+interface HotspotsUIState {
   addHotspot: boolean;
 }
 
-export interface UIState {
+interface UIState {
   hotspots: HotspotsUIState;
 }
 
@@ -37,43 +37,52 @@ export interface EnvironmentState {
   environmentImages: EnvironmentImage[];
 }
 
+interface GltfEditsState {
+  edits: GltfEdits;
+  origEdits: GltfEdits;
+}
+
+interface ModelViewerSnippetState {
+  animationInfo: AnimationInfo;
+  camera: Camera;
+  config: ModelViewerConfig;
+  hotspotInfo: HotspotInfoConfig;
+}
+
 export interface EntitiesState {
+  currentCamera: CurrentCamera;
   environment: EnvironmentState;
   gltf: GltfState;
+  gltfEdits: GltfEditsState;
+  initialCamera: Camera;
+  modelViewerSnippet: ModelViewerSnippetState;
 }
 
 /**
  * Space Opera state.
  */
 export interface State {
-  modelViewerInfo: ModelViewerInfo;
-  config: ModelViewerConfig;
-  animationInfo: AnimationInfo;
-  edits: GltfEdits;
-  origEdits: GltfEdits;
-  camera: Camera;
-  // This reflects the camera values as they were after model-viewer loaded.
-  initialCamera: Camera;
-  currentCamera: CurrentCamera;
-  hotspotInfo: HotspotInfoConfig;
   entities: EntitiesState;
   ui: UIState;
 }
 
 export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
-  modelViewerInfo: {},
-  currentCamera: {toggle: false},
-  config: {},
-  edits: INITIAL_GLTF_EDITS,
-  origEdits: INITIAL_GLTF_EDITS,
-  animationInfo: {animationNames: []},
-  camera: INITIAL_CAMERA,
-  initialCamera: INITIAL_CAMERA,
-  hotspotInfo: {hotspots: []},
   entities: {
+    currentCamera: {toggle: false},
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
+    gltfEdits: {
+      edits: INITIAL_GLTF_EDITS,
+      origEdits: INITIAL_GLTF_EDITS,
+    },
+    modelViewerSnippet: {
+      animationInfo: {animationNames: []},
+      config: {},
+      hotspotInfo: {hotspots: []},
+      camera: INITIAL_CAMERA,
+    },
+    initialCamera: INITIAL_CAMERA,
   },
 };
 

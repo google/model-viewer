@@ -113,7 +113,8 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target = state.camera.target ?? state.initialCamera.target;
+    this.target = state.entities.modelViewerSnippet.camera.target ??
+        state.entities.initialCamera.target;
   }
 
   protected onInputChange(event: Event) {
@@ -169,9 +170,9 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.config;
-    this.camera = state.camera;
-    this.initialCamera = state.initialCamera;
+    this.config = state.entities.modelViewerSnippet.config;
+    this.camera = state.entities.modelViewerSnippet.camera;
+    this.initialCamera = state.entities.initialCamera;
   }
 
   onCamControlsCheckboxChange(event: Event) {

@@ -82,16 +82,19 @@ describe('camera constraints test', () => {
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
     yawInput.setValue(42);
-    const stateOrbit = reduxStore.getState().camera.orbit;
+    const stateOrbit =
+        reduxStore.getState().entities.modelViewerSnippet.camera.orbit;
     expect(stateOrbit!.thetaDeg).toBeCloseTo(42);
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {
     reduxStore.dispatch(dispatchAutoRotate(false));
-    expect(reduxStore.getState().config.autoRotate).toBe(false);
+    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoRotate)
+        .toBe(false);
     await cameraSettings.updateComplete;
     cameraSettings.autoRotateCheckbox.click();
-    expect(reduxStore.getState().config.autoRotate).toBe(true);
+    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoRotate)
+        .toBe(true);
   });
 
   it('updates checkbox state when receiving auto-rotate change', async () => {

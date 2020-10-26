@@ -47,7 +47,7 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
 import {styles} from './model_viewer_preview_styles.css.js';
-import {dispatchGltfUrl, dispatchModelViewer} from './reducer.js';
+import {dispatchGltfUrl} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -100,19 +100,18 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
-    this.camera = state.camera;
-    this.config = state.config;
-    this.hotspots = state.hotspotInfo.hotspots;
-    this[$edits] = state.edits;
+    this.camera = state.entities.modelViewerSnippet.camera;
+    this.config = state.entities.modelViewerSnippet.config;
+    this.hotspots = state.entities.modelViewerSnippet.hotspotInfo.hotspots;
+    this[$edits] = state.entities.gltfEdits.edits;
     this[$gltf] = state.entities.gltf.gltf;
     this[$gltfUrl] = state.entities.gltf.gltfUrl;
-    this[$autoplay] = state.config.autoplay;
+    this[$autoplay] = state.entities.modelViewerSnippet.config.autoplay;
   }
 
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
-    reduxStore.dispatch(dispatchModelViewer(this.modelViewer));
   }
 
   private async onGltfUrlChanged() {

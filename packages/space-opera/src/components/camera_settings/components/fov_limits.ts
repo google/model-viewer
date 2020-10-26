@@ -39,8 +39,8 @@ export class FovLimits extends LimitsBase {
   @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
-    this.fovLimitsDeg = state.camera.fovLimitsDeg;
-    this.toggle = state.currentCamera.toggle;
+    this.fovLimitsDeg = state.entities.modelViewerSnippet.camera.fovLimitsDeg;
+    this.toggle = state.entities.currentCamera.toggle;
   }
 
   dispatchLimits(limits?: Limits) {
