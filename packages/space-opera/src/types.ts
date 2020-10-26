@@ -25,6 +25,14 @@ import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_envi
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
 import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
 
+export interface HotspotsUIState {
+  addHotspot: boolean;
+}
+
+export interface UIState {
+  hotspots: HotspotsUIState;
+}
+
 /**
  * Space Opera state.
  */
@@ -43,9 +51,11 @@ export interface State {
   hotspotInfo: HotspotInfoConfig;
   // A list of user provided environment images to select from
   environmentImages: EnvironmentImage[];
+  ui: UIState;
 }
 
 export const INITIAL_STATE: State = {
+  ui: {hotspots: {addHotspot: false}},
   modelViewerInfo: {},
   currentCamera: {toggle: false},
   config: {},
@@ -55,7 +65,7 @@ export const INITIAL_STATE: State = {
   gltfInfo: {gltfJsonString: ''},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
-  hotspotInfo: {hotspots: [], addHotspotMode: false},
+  hotspotInfo: {hotspots: []},
   environmentImages: INITIAL_ENVIRONMENT_IMAGES,
 };
 
@@ -66,8 +76,9 @@ export interface Action extends Redux.Action {
 
 /**
  * Convenience function for components that import GLBs.
- * We consider "staging config" to be properties that are applicable to any
- * model, and thus are sensible to preserve when a new model is loaded.
+ * We consider "staging config" to be properties that are applicable to
+ * any model, and thus are sensible to preserve when a new model is
+ * loaded.
  */
 export function extractStagingConfig(config: ModelViewerConfig):
     ModelViewerConfig {

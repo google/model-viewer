@@ -20,7 +20,7 @@ import {combineReducers} from 'redux';
 import {animationInfoReducer} from './components/animation_controls/reducer.js';
 import {cameraReducer, currentCameraReducer, initialCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
-import {hotspotsInfoReducer} from './components/hotspot_panel/reducer.js';
+import {hotspotsInfoReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentImagesReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer} from './components/materials_panel/reducer.js';
 import {gltfInfoReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
@@ -29,7 +29,18 @@ import {modelViewerInfoReducer} from './components/model_viewer_preview/reducer.
 // TODO, structure in the way it is in Figma
 // Implement selectors
 
+// const entitiesReducer = combineReducers({
+//   environment: environmentImagesReducer,
+//   gltfEdits: gltfEditsReducer,
+//   gltf: gltfReducer
+//   modelViewerSnippet: modelViewerSnippetReducer
+// });
+
+const uiReducer = combineReducers({hotspots: hotspotsUiReducer});
+
 export const rootReducer = combineReducers({
+  // entities: entitiesReducer,
+  ui: uiReducer,
   config: configReducer,
   edits: editsReducer,
   origEdits: origEditsReducer,

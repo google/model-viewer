@@ -96,15 +96,9 @@ export function dispatchAddHotspot(config?: HotspotConfig) {
   return {type: ADD_HOTSPOT, payload: config};
 }
 
-const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';
-export function dispatchAddHotspotMode(addHotspotMode: boolean) {
-  return {type: ADD_HOTSPOT_MODE, payload: addHotspotMode};
-}
-
 export function hotspotsInfoReducer(
     state: HotspotInfoConfig = {
       hotspots: [],
-      addHotspotMode: false
     },
     action: Action): HotspotInfoConfig {
   switch (action.type) {
@@ -128,9 +122,27 @@ export function hotspotsInfoReducer(
       return {
         ...state, hotspots: addHotspot(state.hotspots, action.payload)
       }
-    case ADD_HOTSPOT_MODE:
+    default:
+      return state;
+  }
+}
+
+// UI
+
+const UPDATE_HOTSPOT_MODE = 'UPDATE_HOTSPOT_MODE';
+export function dispatchUpdateHotspotMode(addHotspot: boolean) {
+  return {type: UPDATE_HOTSPOT_MODE, payload: addHotspot};
+}
+
+export function hotspotsUiReducer(
+    state = {
+      addHotspot: false
+    },
+    action: Action) {
+  switch (action.payload) {
+    case UPDATE_HOTSPOT_MODE:
       return {
-        ...state, addHotspotMode: action.payload
+        ...state, addHotspot: action.payload
       }
     default:
       return state;

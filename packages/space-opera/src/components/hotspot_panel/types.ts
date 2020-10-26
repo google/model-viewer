@@ -28,7 +28,6 @@ export interface HotspotConfig {
 
 export interface HotspotInfoConfig {
   hotspots: HotspotConfig[];
-  addHotspotMode: boolean;
 }
 
 /** Converts a number array to vector3D */
