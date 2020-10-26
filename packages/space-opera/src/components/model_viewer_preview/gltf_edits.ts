@@ -21,8 +21,9 @@ import {reduxStore} from '../../space_opera_base.js';
 import {dispatchSetAnimationNames} from '../animation_controls/reducer.js';
 import {applyMaterials, createMaterials, Texture} from '../materials_panel/material_state.js';
 import {dispatchSetEdits} from '../materials_panel/reducer.js';
+import {dispatchSetOrigEdits} from '../materials_panel/reducer.js';
 
-import {dispatchGltfJsonString, dispatchSetGltf, dispatchSetOrigEdits} from './reducer.js';
+import {dispatchGltfJsonString, dispatchSetGltf, getGltfModel} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 /**
@@ -87,7 +88,7 @@ function dispatchGltf(args?: DispatchGltfArgs) {
     throw new Error(`No args given!`);
   }
   const gltf = args.gltf;
-  if (gltf !== undefined && reduxStore.getState().entities.gltf.gltf === gltf) {
+  if (gltf !== undefined && getGltfModel(reduxStore.getState()) === gltf) {
     throw new Error(`Same gltf was given! Only call this upon actual change`);
   }
   reduxStore.dispatch(dispatchSetGltf(gltf));

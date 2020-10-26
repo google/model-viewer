@@ -34,6 +34,8 @@ export function dispatchInitialCameraState(initialCamera?: Camera) {
   return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
 }
 
+export const getInitialCamera = (state: State) => state.entities.initialCamera;
+
 export function initialCameraReducer(
     state: Camera = INITIAL_CAMERA, action: Action): Camera {
   switch (action.type) {

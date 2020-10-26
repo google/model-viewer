@@ -16,8 +16,8 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {Action} from '../../types.js';
-import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from '../model_viewer_preview/types.js';
+import {Action, State} from '../../types.js';
+import {GltfState} from '../model_viewer_preview/types.js';
 
 // GLTF INFO //////////////
 
@@ -37,41 +37,30 @@ export function dispatchGltfJsonString(gltfJsonString?: string) {
   return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
 }
 
+export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
+export const getGltfJsonString = (state: State) =>
+    state.entities.gltf.gltfJsonString;
+export const getGltfModel = (state: State) => state.entities.gltf.gltf;
+
+
 export function gltfReducer(
     state: GltfState = {
       gltfJsonString: ''
     },
-    action: Action):
-    GltfState {
-      switch (action.type) {
-        case SET_GLTF:
-          return {
-            ...state, gltf: action.payload
-          }
-        case SET_GLTF_URL:
-          return {
-            ...state, gltfUrl: action.payload
-          }
-        case SET_GLTF_JSON_STRING:
-          return {
-            ...state, gltfJsonString: action.payload
-          }
-        default:
-          return state;
-      }
-    }
-
-// Orig Edits //////////////
-const SET_ORIG_EDITS = 'SET_ORIG_EDITS'
-export function dispatchSetOrigEdits(origEdits: GltfEdits) {
-  return {type: SET_ORIG_EDITS, payload: origEdits};
-}
-
-export function origEditsReducer(
-    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {
+    action: Action): GltfState {
   switch (action.type) {
-    case SET_ORIG_EDITS:
-      return action.payload;
+    case SET_GLTF:
+      return {
+        ...state, gltf: action.payload
+      }
+    case SET_GLTF_URL:
+      return {
+        ...state, gltfUrl: action.payload
+      }
+    case SET_GLTF_JSON_STRING:
+      return {
+        ...state, gltfJsonString: action.payload
+      }
     default:
       return state;
   }

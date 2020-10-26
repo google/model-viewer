@@ -44,7 +44,8 @@ import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {TexturesById} from './material_state.js';
 import {Material} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEdits, getEditsMaterials, getEditsTextures} from './reducer.js';
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+
 
 /** Material panel. */
 @customElement('me-materials-panel')
@@ -84,8 +85,8 @@ export class MaterialPanel extends ConnectedLitElement {
   private safeTextureUrlsDirty = false;
 
   stateChanged(state: State) {
-    this.materials = getEdits(state).materials;
-    this.originalMaterials = state.entities.gltfEdits.origEdits.materials;
+    this.materials = getEditsMaterials(state);
+    this.originalMaterials = getOrigEdits(state).materials;
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
@@ -94,8 +95,8 @@ export class MaterialPanel extends ConnectedLitElement {
       }
     }
 
-    if (this.texturesById !== getEdits(state).texturesById) {
-      this.texturesById = getEdits(state).texturesById;
+    if (this.texturesById !== getEditsTextures(state)) {
+      this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
     }
   }
@@ -212,7 +213,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const index = this.selectedMaterialId;
     const baseColorFactor = this.selectedBaseColor;
     reduxStore.dispatch(dispatchMaterialBaseColor(
-        getEdits(reduxStore.getState()).materials, {index, baseColorFactor}));
+        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
   }
 
   onRoughnessChange() {

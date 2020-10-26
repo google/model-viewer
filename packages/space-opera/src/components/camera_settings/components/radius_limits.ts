@@ -23,7 +23,7 @@ import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {Camera} from '../camera_state.js';
-import {dispatchRadiusLimits, getCamera} from '../reducer.js';
+import {dispatchRadiusLimits, getCamera, getInitialCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -40,7 +40,7 @@ export class RadiusLimits extends LimitsBase {
 
   stateChanged(state: State) {
     this.radiusLimits = getCamera(state).radiusLimits;
-    this.initialCamera = state.entities.initialCamera;
+    this.initialCamera = getInitialCamera(state);
     this.toggle = state.entities.cameraToggle;
   }
 

@@ -21,11 +21,11 @@ import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_jso
 import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
-import {dispatchInitialCameraState} from '../components/camera_settings/reducer.js';
+import {dispatchInitialCameraState, getInitialCamera} from '../components/camera_settings/reducer.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
-import {dispatchGltfUrl} from '../components/model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../components/model_viewer_preview/reducer.js';
 import {INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/types.js';
 import {reduxStore} from '../space_opera_base.js';
 
@@ -212,7 +212,7 @@ describe('space opera base test', () => {
       }),
     ]);
 
-    const gltfMaterials = (reduxStore.getState().entities.gltf.gltf!.materials);
+    const gltfMaterials = (getGltfModel(reduxStore.getState())!.materials);
     // Should not be changed!
     expect(gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
         .toEqual([0.8, 0.2, 0.8, 1.0]);
@@ -242,8 +242,7 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials =
-           (reduxStore.getState().entities.gltf.gltf!.materials);
+       const gltfMaterials = getGltfModel(reduxStore.getState())!.materials;
        // Should not be changed!
        expect(gltfMaterials[1].pbrMetallicRoughness.roughnessFactor)
            .toEqual(0.2);
@@ -273,8 +272,7 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials =
-           (reduxStore.getState().entities.gltf.gltf!.materials);
+       const gltfMaterials = getGltfModel(reduxStore.getState())!.materials;
        // Should not be changed!
        expect(gltfMaterials[1].pbrMetallicRoughness.metallicFactor)
            .toEqual(0.3);
@@ -622,7 +620,7 @@ describe('space opera base test', () => {
      async () => {
        dispatchGltfAndEdits(await createGltfWithTexture());
 
-       const gltf = reduxStore.getState().entities.gltf.gltf!;
+       const gltf = getGltfModel(reduxStore.getState())!;
        expect(gltf).toBeDefined();
        expect((gltf.textures).length).toEqual(3);
 
@@ -782,8 +780,7 @@ describe('space opera base test', () => {
 
   it('correctly updates state upon dispatching camera fields', () => {
     reduxStore.dispatch(dispatchInitialCameraState({fieldOfViewDeg: 451}));
-    expect(reduxStore.getState().entities.initialCamera.fieldOfViewDeg)
-        .toEqual(451);
+    expect(getInitialCamera(reduxStore.getState()).fieldOfViewDeg).toEqual(451);
   });
 
   it('sets correct attributes for FOV limits', () => {
@@ -798,7 +795,7 @@ describe('space opera base test', () => {
 
   it('sets the URL when calling dispatchGltfUrl', () => {
     reduxStore.dispatch(dispatchGltfUrl('test.glb'));
-    expect(reduxStore.getState().entities.gltf.gltfUrl).toEqual('test.glb');
+    expect(getGltfUrl(reduxStore.getState())).toEqual('test.glb');
   });
 
   it('applies edits to texture emissiveFactor', async () => {

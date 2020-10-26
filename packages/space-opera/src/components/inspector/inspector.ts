@@ -26,6 +26,7 @@ import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {TexturesById} from '../materials_panel/material_state.js';
 import {getEdits} from '../materials_panel/reducer.js';
+import {getGltfJsonString} from '../model_viewer_preview/reducer.js';
 
 const $texturesById = Symbol('texturesById');
 
@@ -45,7 +46,7 @@ export class InspectorPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this[$texturesById] = getEdits(state).texturesById;
-    this.gltfJsonstring = state.entities.gltf.gltfJsonString;
+    this.gltfJsonstring = getGltfJsonString(state);
   }
 
   private async updateTextures(texturesById: TexturesById|undefined) {

@@ -41,7 +41,7 @@ import {styles as draggableInputRowStyles} from '../shared/draggable_input/dragg
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -113,8 +113,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target =
-        getCamera(state).target ?? state.entities.initialCamera.target;
+    this.target = getCamera(state).target ?? getInitialCamera(state).target;
   }
 
   protected onInputChange(event: Event) {
@@ -172,7 +171,7 @@ export class CameraSettings extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.camera = getCamera(state);
-    this.initialCamera = state.entities.initialCamera;
+    this.initialCamera = getInitialCamera(state);
   }
 
   onCamControlsCheckboxChange(event: Event) {

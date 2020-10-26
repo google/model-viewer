@@ -26,6 +26,7 @@ import {css, customElement, html, internalProperty} from 'lit-element';
 import {State} from '../../../types.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
+import {getGltfModel} from '../../model_viewer_preview/reducer.js';
 
 interface Payload {
   blob: Blob;
@@ -131,7 +132,7 @@ export class ExportZipButton extends GenericDownloadButton {
 
   stateChanged(state: State) {
     const config = getConfig(state);
-    const gltf = state.entities.gltf.gltf;
+    const gltf = getGltfModel(state);
     if (!gltf) {
       this.preparePayload = undefined;
       return;

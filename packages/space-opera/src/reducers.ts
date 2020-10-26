@@ -22,8 +22,8 @@ import {cameraReducer, cameraToggleReducer, initialCameraReducer} from './compon
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
-import {editsReducer} from './components/materials_panel/reducer.js';
-import {gltfReducer, origEditsReducer} from './components/model_viewer_preview/reducer.js';
+import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
+import {gltfReducer} from './components/model_viewer_preview/reducer.js';
 
 const gltfEditsReducer =
     combineReducers({edits: editsReducer, origEdits: origEditsReducer})

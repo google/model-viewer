@@ -36,7 +36,7 @@ import {dispatchModelViewerCameraChange, getCamera} from '../camera_settings/red
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName} from '../hotspot_panel/reducer.js';
+import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
@@ -47,7 +47,7 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
 import {styles} from './model_viewer_preview_styles.css.js';
-import {dispatchGltfUrl} from './reducer.js';
+import {dispatchGltfUrl, getGltfModel, getGltfUrl} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -102,10 +102,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
     this.camera = getCamera(state);
     this.config = getConfig(state);
-    this.hotspots = state.entities.modelViewerSnippet.hotspots;
+    this.hotspots = getHotspots(state);
     this[$edits] = state.entities.gltfEdits.edits;
-    this[$gltf] = state.entities.gltf.gltf;
-    this[$gltfUrl] = state.entities.gltf.gltfUrl;
+    this[$gltf] = getGltfModel(state);
+    this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
   }
 

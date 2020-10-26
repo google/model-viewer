@@ -452,3 +452,23 @@ export function editsReducer(
       return state;
   }
 }
+
+// Orig Edits //////////////
+
+const SET_ORIG_EDITS = 'SET_ORIG_EDITS'
+export function dispatchSetOrigEdits(origEdits: GltfEdits) {
+  return {type: SET_ORIG_EDITS, payload: origEdits};
+}
+
+export const getOrigEdits = (state: State) =>
+    state.entities.gltfEdits.origEdits;
+
+export function origEditsReducer(
+    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {
+  switch (action.type) {
+    case SET_ORIG_EDITS:
+      return action.payload;
+    default:
+      return state;
+  }
+}

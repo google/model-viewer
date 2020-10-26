@@ -31,9 +31,9 @@ import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camer
 import {getCamera} from '../camera_settings/reducer.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
+import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {dispatchGltfUrl} from '../model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -59,8 +59,8 @@ export class ExportPanel extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.camera = getCamera(state);
-    this.hotspots = state.entities.modelViewerSnippet.hotspots;
-    this.gltfUrl = state.entities.gltf.gltfUrl;
+    this.hotspots = getHotspots(state);
+    this.gltfUrl = getGltfUrl(state);
   }
 
   render() {
