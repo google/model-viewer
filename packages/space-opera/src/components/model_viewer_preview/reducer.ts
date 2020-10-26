@@ -19,8 +19,6 @@ import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {Action, State} from '../../types.js';
 import {GltfState} from '../model_viewer_preview/types.js';
 
-// GLTF INFO //////////////
-
 /** The user has requested a new GLTF/GLB for editing. */
 const SET_GLTF = 'SET_GLTF'
 export function dispatchSetGltf(gltf: GltfModel|undefined) {
@@ -41,7 +39,6 @@ export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
 export const getGltfJsonString = (state: State) =>
     state.entities.gltf.gltfJsonString;
 export const getGltfModel = (state: State) => state.entities.gltf.gltf;
-
 
 export function gltfReducer(
     state: GltfState = {

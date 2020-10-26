@@ -79,27 +79,18 @@ export function dispatchYawLimits(yawLimitsDeg?: Limits) {
 /** Dispatch change to radius limits */
 const SET_CAMERA_RADIUS_LIMITS = 'SET_CAMERA_RADIUS_LIMITS';
 export function dispatchRadiusLimits(radiusLimits?: Limits) {
-  // if (!radiusLimits) {
-  //   throw new Error('No valid limits given');
-  // }
   return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
 }
 
 /** Dispatch change to maximum pitch */
 const SET_CAMERA_PITCH_LIMITS = 'SET_CAMERA_PITCH_LIMITS';
 export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
-  if (!pitchLimitsDeg) {
-    throw new Error('No valid limits given');
-  }
   return {type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg};
 }
 
 /** Dispatch change to maximum FOV */
 const SET_CAMERA_FOV_LIMITS = 'SET_CAMERA_FOV_LIMITS';
 export function dispatchFovLimits(fovLimitsDeg?: Limits) {
-  if (!fovLimitsDeg) {
-    throw new Error('No valid FOV limit given');
-  }
   return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
 }
 
