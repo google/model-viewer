@@ -23,7 +23,7 @@ import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {Camera} from '../camera_state.js';
-import {dispatchRadiusLimits, getCamera, getInitialCamera} from '../reducer.js';
+import {dispatchRadiusLimits, getCamera, getInitialCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -36,12 +36,12 @@ export const DEFAULT_MIN_RADIUS = 0;
 export class RadiusLimits extends LimitsBase {
   @internalProperty() radiusLimits?: Limits;
   @internalProperty() initialCamera?: Camera;
-  @internalProperty() toggle: boolean = false;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
     this.radiusLimits = getCamera(state).radiusLimits;
     this.initialCamera = getInitialCamera(state);
-    this.toggle = state.entities.cameraToggle;
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {

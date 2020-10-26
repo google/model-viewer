@@ -32,13 +32,14 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 import {reduxStore} from '../../space_opera_base.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchModelViewerCameraChange, getCamera} from '../camera_settings/reducer.js';
+import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspots} from '../hotspot_panel/reducer.js';
+import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
+import {getEdits} from '../materials_panel/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -99,11 +100,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() gltfError: string = '';
 
   stateChanged(state: State) {
-    this.addHotspotMode = state.ui.hotspots.addHotspot || false;
+    this.addHotspotMode = getHotspotMode(state) || false;
     this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
-    this[$edits] = state.entities.gltfEdits.edits;
+    this[$edits] = getEdits(state);
     this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
@@ -255,7 +256,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private onCameraChange() {
-    reduxStore.dispatch(dispatchModelViewerCameraChange());
+    reduxStore.dispatch(dispatchCameraIsDirty());
   }
 
   private enforcePlayAnimation() {

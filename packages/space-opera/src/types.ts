@@ -49,7 +49,7 @@ interface ModelViewerSnippetState {
 }
 
 export interface EntitiesState {
-  cameraToggle: boolean;
+  isDirtyCamera: boolean;
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
@@ -68,7 +68,7 @@ export interface State {
 export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
   entities: {
-    cameraToggle: false,
+    isDirtyCamera: false,
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
     gltfEdits: {

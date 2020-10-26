@@ -124,6 +124,8 @@ export function dispatchUpdateHotspotMode(addHotspot: boolean) {
   return {type: UPDATE_HOTSPOT_MODE, payload: addHotspot};
 }
 
+export const getHotspotMode = (state: State) => state.ui.hotspots.addHotspot;
+
 export function hotspotsUiReducer(
     state = {
       addHotspot: false

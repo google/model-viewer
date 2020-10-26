@@ -20,7 +20,7 @@ import {GltfModel, TextureHandle} from '@google/model-viewer-editing-adapter/lib
 import {reduxStore} from '../../space_opera_base.js';
 import {dispatchSetAnimationNames} from '../animation_controls/reducer.js';
 import {applyMaterials, createMaterials, Texture} from '../materials_panel/material_state.js';
-import {dispatchSetEdits} from '../materials_panel/reducer.js';
+import {dispatchSetEdits, getEdits} from '../materials_panel/reducer.js';
 import {dispatchSetOrigEdits} from '../materials_panel/reducer.js';
 
 import {dispatchGltfJsonString, dispatchSetGltf, getGltfModel} from './reducer.js';
@@ -97,7 +97,7 @@ function dispatchGltf(args?: DispatchGltfArgs) {
   if (!edits) {
     throw new Error(`Must give valid edits!`);
   }
-  if (reduxStore.getState().entities.gltfEdits.edits === edits) {
+  if (getEdits(reduxStore.getState()) === edits) {
     throw new Error(`Same edits was given! Only call this upon actual change`);
   }
   reduxStore.dispatch(dispatchSetEdits(edits));

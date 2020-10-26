@@ -21,7 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
-import {dispatchFovLimits, getCamera} from '../reducer.js';
+import {dispatchFovLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -36,11 +36,11 @@ export const DEFAULT_MAX_FOV = 90;
 @customElement('me-camera-fov-limits')
 export class FovLimits extends LimitsBase {
   @internalProperty() fovLimitsDeg?: Limits;
-  @internalProperty() toggle: boolean = false;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
     this.fovLimitsDeg = getCamera(state).fovLimitsDeg;
-    this.toggle = state.entities.cameraToggle;
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {

@@ -22,7 +22,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
-import {dispatchPitchLimits, getCamera} from '../reducer.js';
+import {dispatchPitchLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -40,11 +40,11 @@ export const DEFAULT_MAX_PITCH = 180;
 @customElement('me-camera-pitch-limits')
 export class PitchLimits extends LimitsBase {
   @internalProperty() pitchLimitsDeg?: Limits;
-  @internalProperty() toggle: boolean = false;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
     this.pitchLimitsDeg = getCamera(state).pitchLimitsDeg;
-    this.toggle = state.entities.cameraToggle;
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {

@@ -46,16 +46,19 @@ export function initialCameraReducer(
   }
 }
 
-// CURRENT CAMERA //////////////
-const MODEL_VIEWER_CAMERA_CHANGE = 'MODEL_VIEWER_CAMERA_CHANGE';
-export function dispatchModelViewerCameraChange() {
-  return {type: MODEL_VIEWER_CAMERA_CHANGE};
+// DIRTY CAMERA//////////////
+
+const IS_DIRTY_CAMERA = 'IS_DIRTY_CAMERA';
+export function dispatchCameraIsDirty() {
+  return {type: IS_DIRTY_CAMERA};
 }
 
-export function cameraToggleReducer(
+export const getIsDirtyCamera = (state: State) => state.entities.isDirtyCamera;
+
+export function isDirtyCameraReducer(
     state: boolean = false, action: Action): boolean {
   switch (action.type) {
-    case MODEL_VIEWER_CAMERA_CHANGE:
+    case IS_DIRTY_CAMERA:
       return !state;
     default:
       return state;

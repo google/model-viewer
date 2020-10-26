@@ -21,7 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
-import {dispatchYawLimits, getCamera} from '../reducer.js';
+import {dispatchYawLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -39,11 +39,11 @@ export const DEFAULT_MAX_YAW = 180;
 @customElement('me-camera-yaw-limits')
 export class YawLimits extends LimitsBase {
   @internalProperty() yawLimitsDeg?: Limits;
-  @internalProperty() toggle: boolean = false;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
     this.yawLimitsDeg = getCamera(state).yawLimitsDeg;
-    this.toggle = state.entities.cameraToggle;
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {
