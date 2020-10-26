@@ -32,9 +32,9 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 import {reduxStore} from '../../space_opera_base.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchModelViewerCameraChange} from '../camera_settings/reducer.js';
+import {dispatchModelViewerCameraChange, getCamera} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
-import {dispatchEnvrionmentImage} from '../config/reducer.js';
+import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -100,13 +100,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = state.ui.hotspots.addHotspot || false;
-    this.camera = state.entities.modelViewerSnippet.camera;
-    this.config = state.entities.modelViewerSnippet.config;
+    this.camera = getCamera(state);
+    this.config = getConfig(state);
     this.hotspots = state.entities.modelViewerSnippet.hotspots;
     this[$edits] = state.entities.gltfEdits.edits;
     this[$gltf] = state.entities.gltf.gltf;
     this[$gltfUrl] = state.entities.gltf.gltfUrl;
-    this[$autoplay] = state.entities.modelViewerSnippet.config.autoplay;
+    this[$autoplay] = getConfig(state).autoplay;
   }
 
   firstUpdated() {

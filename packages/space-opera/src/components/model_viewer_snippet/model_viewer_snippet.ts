@@ -28,6 +28,8 @@ import {css, customElement, html, internalProperty, LitElement, query} from 'lit
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
+import {getCamera} from '../camera_settings/reducer.js';
+import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -55,8 +57,8 @@ export class ExportPanel extends ConnectedLitElement {
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
 
   stateChanged(state: State) {
-    this.config = state.entities.modelViewerSnippet.config;
-    this.camera = state.entities.modelViewerSnippet.camera;
+    this.config = getConfig(state);
+    this.camera = getCamera(state);
     this.hotspots = state.entities.modelViewerSnippet.hotspots;
     this.gltfUrl = state.entities.gltf.gltfUrl;
   }

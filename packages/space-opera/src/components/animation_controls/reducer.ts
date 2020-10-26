@@ -15,22 +15,21 @@
  *
  */
 
-import {Action} from '../../types.js';
-import {AnimationInfo} from './types.js';
+import {Action, State} from '../../types.js';
 
 const SET_ANIMATION_NAMES = 'SET_ANIMATION_NAMES';
 export function dispatchSetAnimationNames(animationNames: string[]) {
   return {type: SET_ANIMATION_NAMES, payload: animationNames};
 }
 
-export function animationInfoReducer(
-    state: AnimationInfo = {
-      animationNames: [],
-    },
-    action: Action): AnimationInfo {
+export const getAnimationNames = (state: State) =>
+    state.entities.modelViewerSnippet.animationNames;
+
+export function animationNamesReducer(
+    state: string[] = [], action: Action): string[] {
   switch (action.type) {
     case SET_ANIMATION_NAMES:
-      return {...state, animationNames: action.payload};
+      return action.payload;
     default:
       return state;
   }

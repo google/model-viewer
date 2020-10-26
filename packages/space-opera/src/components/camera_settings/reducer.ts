@@ -15,7 +15,7 @@
  *
  */
 
-import {Action} from '../../types.js';
+import {Action, State} from '../../types.js';
 import {INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';
@@ -125,6 +125,9 @@ const SET_CAMERA = 'SET_CAMERA';
 export function dispatchSetCamera(camera: Camera) {
   return {type: SET_CAMERA, payload: camera};
 }
+
+export const getCamera = (state: State) =>
+    state.entities.modelViewerSnippet.camera;
 
 export function cameraReducer(
     state: Camera = INITIAL_CAMERA, action: Action): Camera {

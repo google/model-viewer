@@ -24,10 +24,11 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
-import {dispatchAnimationName, dispatchAutoplayEnabled} from '../config/reducer';
+import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
+import {getAnimationNames} from './reducer.js';
 
 interface AnimationControlsInterface {
   autoplay?: boolean;
@@ -44,9 +45,8 @@ export class AnimationControls extends ConnectedLitElement {
   @internalProperty() config: AnimationControlsInterface = {};
 
   stateChanged(state: State) {
-    this.animationNames =
-        state.entities.modelViewerSnippet.animationInfo.animationNames;
-    this.config = state.entities.modelViewerSnippet.config;
+    this.animationNames = getAnimationNames(state);
+    this.config = getConfig(state);
   }
 
   // Specifically overriding a super class method.

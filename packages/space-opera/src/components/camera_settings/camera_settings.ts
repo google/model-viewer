@@ -31,7 +31,7 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
-import {dispatchAutoRotate, dispatchCameraControlsEnabled} from '../config/reducer.js';
+import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
@@ -41,7 +41,7 @@ import {styles as draggableInputRowStyles} from '../shared/draggable_input/dragg
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -113,8 +113,8 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target = state.entities.modelViewerSnippet.camera.target ??
-        state.entities.initialCamera.target;
+    this.target =
+        getCamera(state).target ?? state.entities.initialCamera.target;
   }
 
   protected onInputChange(event: Event) {
@@ -170,8 +170,8 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.entities.modelViewerSnippet.config;
-    this.camera = state.entities.modelViewerSnippet.camera;
+    this.config = getConfig(state);
+    this.camera = getCamera(state);
     this.initialCamera = state.entities.initialCamera;
   }
 

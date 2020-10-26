@@ -22,7 +22,7 @@ import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
 import {dispatchInitialCameraState} from '../components/camera_settings/reducer.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../components/materials_panel/reducer.js';
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl} from '../components/model_viewer_preview/reducer.js';
@@ -171,33 +171,32 @@ describe('space opera base test', () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
        dispatchGltfAndEdits(gltf);
 
-       expect(reduxStore.getState().entities.gltfEdits.edits.materials)
-           .toEqual([
-             jasmine.objectContaining({
-               name: 'yellow',
-               baseColorFactor: [0.8, 0.8, 0.2, 1.0],
-               roughnessFactor: 0.9,
-               metallicFactor: 0.4,
-             }),
-             jasmine.objectContaining({
-               name: 'purple',
-               baseColorFactor: [0.8, 0.2, 0.8, 1.0],
-               roughnessFactor: 0.2,
-               metallicFactor: 0.3,
-             }),
-           ]);
+       expect(getEditsMaterials(reduxStore.getState())).toEqual([
+         jasmine.objectContaining({
+           name: 'yellow',
+           baseColorFactor: [0.8, 0.8, 0.2, 1.0],
+           roughnessFactor: 0.9,
+           metallicFactor: 0.4,
+         }),
+         jasmine.objectContaining({
+           name: 'purple',
+           baseColorFactor: [0.8, 0.2, 0.8, 1.0],
+           roughnessFactor: 0.2,
+           metallicFactor: 0.3,
+         }),
+       ]);
      });
 
   it('color dispatch affects edit state, but not gltf state', async () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     dispatchGltfAndEdits(gltf);
-    reduxStore.dispatch(dispatchMaterialBaseColor(
-        reduxStore.getState().entities.gltfEdits.edits.materials, {
+    reduxStore.dispatch(
+        dispatchMaterialBaseColor(getEditsMaterials(reduxStore.getState()), {
           index: 1,
           baseColorFactor: [0.1, 0.2, 0.3, 0.5],
         }));
 
-    expect(reduxStore.getState().entities.gltfEdits.edits.materials).toEqual([
+    expect(getEditsMaterials(reduxStore.getState())).toEqual([
       jasmine.objectContaining({
         name: 'yellow',
         baseColorFactor: [0.8, 0.8, 0.2, 1.0],
@@ -224,25 +223,24 @@ describe('space opera base test', () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
        dispatchGltfAndEdits(gltf);
        reduxStore.dispatch(dispatchRoughnessFactor(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 1, roughnessFactor: 0.5}));
 
-       expect(reduxStore.getState().entities.gltfEdits.edits.materials)
-           .toEqual([
-             jasmine.objectContaining({
-               name: 'yellow',
-               baseColorFactor: [0.8, 0.8, 0.2, 1.0],
-               roughnessFactor: 0.9,
-               metallicFactor: 0.4,
-             }),
-             jasmine.objectContaining({
-               name: 'purple',
-               baseColorFactor: [0.8, 0.2, 0.8, 1.0],
-               // Changed
-               roughnessFactor: 0.5,
-               metallicFactor: 0.3,
-             }),
-           ]);
+       expect(getEditsMaterials(reduxStore.getState())).toEqual([
+         jasmine.objectContaining({
+           name: 'yellow',
+           baseColorFactor: [0.8, 0.8, 0.2, 1.0],
+           roughnessFactor: 0.9,
+           metallicFactor: 0.4,
+         }),
+         jasmine.objectContaining({
+           name: 'purple',
+           baseColorFactor: [0.8, 0.2, 0.8, 1.0],
+           // Changed
+           roughnessFactor: 0.5,
+           metallicFactor: 0.3,
+         }),
+       ]);
 
        const gltfMaterials =
            (reduxStore.getState().entities.gltf.gltf!.materials);
@@ -256,25 +254,24 @@ describe('space opera base test', () => {
        const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
        dispatchGltfAndEdits(gltf);
        reduxStore.dispatch(dispatchMetallicFactor(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 1, metallicFactor: 0.5}));
 
-       expect(reduxStore.getState().entities.gltfEdits.edits.materials)
-           .toEqual([
-             jasmine.objectContaining({
-               name: 'yellow',
-               baseColorFactor: [0.8, 0.8, 0.2, 1.0],
-               roughnessFactor: 0.9,
-               metallicFactor: 0.4,
-             }),
-             jasmine.objectContaining({
-               name: 'purple',
-               baseColorFactor: [0.8, 0.2, 0.8, 1.0],
-               roughnessFactor: 0.2,
-               // Changed
-               metallicFactor: 0.5,
-             }),
-           ]);
+       expect(getEditsMaterials(reduxStore.getState())).toEqual([
+         jasmine.objectContaining({
+           name: 'yellow',
+           baseColorFactor: [0.8, 0.8, 0.2, 1.0],
+           roughnessFactor: 0.9,
+           metallicFactor: 0.4,
+         }),
+         jasmine.objectContaining({
+           name: 'purple',
+           baseColorFactor: [0.8, 0.2, 0.8, 1.0],
+           roughnessFactor: 0.2,
+           // Changed
+           metallicFactor: 0.5,
+         }),
+       ]);
 
        const gltfMaterials =
            (reduxStore.getState().entities.gltf.gltf!.materials);
@@ -316,7 +313,7 @@ describe('space opera base test', () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     dispatchGltfAndEdits(gltf);
     reduxStore.dispatch(dispatchMaterialBaseColor(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
+        getEditsMaterials(reduxStore.getState()),
         {index: 1, baseColorFactor: [0.1, 0.2, 0.3, 0.4]}));
 
     const newGltf = await applyEditsToStoredGltf();
@@ -353,21 +350,20 @@ describe('space opera base test', () => {
        dispatchGltfAndEdits(gltf);
 
        // Make sure they have sensible defaults in edits
-       expect(reduxStore.getState().entities.gltfEdits.edits.materials)
-           .toEqual([
-             jasmine.objectContaining({
-               name: 'yellow',
-               baseColorFactor: [1, 1, 1, 1],
-               roughnessFactor: 1,
-               metallicFactor: 1,
-             }),
-             jasmine.objectContaining({
-               name: 'purple',
-               baseColorFactor: [1, 1, 1, 1],
-               roughnessFactor: 1,
-               metallicFactor: 1,
-             }),
-           ]);
+       expect(getEditsMaterials(reduxStore.getState())).toEqual([
+         jasmine.objectContaining({
+           name: 'yellow',
+           baseColorFactor: [1, 1, 1, 1],
+           roughnessFactor: 1,
+           metallicFactor: 1,
+         }),
+         jasmine.objectContaining({
+           name: 'purple',
+           baseColorFactor: [1, 1, 1, 1],
+           roughnessFactor: 1,
+           metallicFactor: 1,
+         }),
+       ]);
      });
 
   it('loading a gltf with textures results in the correct app state',
@@ -530,15 +526,14 @@ describe('space opera base test', () => {
                              .baseColorTextureId;
        expect(textureId).toBeDefined();
        reduxStore.dispatch(dispatchBaseColorTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
-           {id: 1, textureId}));
+           getEditsMaterials(reduxStore.getState()), {id: 1, textureId}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[1].pbrMetallicRoughness.baseColorTexture)
            .toEqual((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture);
 
        // Clear mat 0's texture
        reduxStore.dispatch(dispatchBaseColorTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 0, textureId: undefined}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[0].pbrMetallicRoughness.baseColorTexture)
@@ -558,15 +553,14 @@ describe('space opera base test', () => {
                              .normalTextureId;
        expect(textureId).toBeDefined();
        reduxStore.dispatch(dispatchNormalTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
-           {id: 1, textureId}));
+           getEditsMaterials(reduxStore.getState()), {id: 1, textureId}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[1].normalTexture)
            .toEqual((gltf.materials)[0].normalTexture);
 
        // Clear mat 0's texture
        reduxStore.dispatch(dispatchNormalTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 0, textureId: undefined}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[0].normalTexture).toBeNull();
@@ -585,15 +579,14 @@ describe('space opera base test', () => {
                              .emissiveTextureId;
        expect(textureId).toBeDefined();
        reduxStore.dispatch(dispatchEmissiveTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
-           {id: 1, textureId}));
+           getEditsMaterials(reduxStore.getState()), {id: 1, textureId}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[1].emissiveTexture)
            .toEqual((gltf.materials)[0].emissiveTexture);
 
        // Clear mat 0's texture
        reduxStore.dispatch(dispatchEmissiveTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 0, textureId: undefined}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[0].emissiveTexture).toBeNull();
@@ -612,15 +605,14 @@ describe('space opera base test', () => {
                              .occlusionTextureId;
        expect(textureId).toBeDefined();
        reduxStore.dispatch(dispatchOcclusionTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
-           {id: 1, textureId}));
+           getEditsMaterials(reduxStore.getState()), {id: 1, textureId}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[1].occlusionTexture)
            .toEqual((gltf.materials)[0].occlusionTexture);
 
        // Clear mat 0's texture
        reduxStore.dispatch(dispatchOcclusionTexture(
-           reduxStore.getState().entities.gltfEdits.edits.materials,
+           getEditsMaterials(reduxStore.getState()),
            {id: 0, textureId: undefined}));
        gltf = await applyEditsToStoredGltf();
        expect((gltf.materials)[0].occlusionTexture).toBeNull();
@@ -641,8 +633,8 @@ describe('space opera base test', () => {
   it('dispatchAddBaseColorTexture can add new textures', async () => {
     dispatchGltfAndEdits(await createGltfWithTexture());
     reduxStore.dispatch(dispatchAddBaseColorTexture(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        reduxStore.getState().entities.gltfEdits.edits.texturesById,
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
         {id: 1, uri: 'grass.png'}));
 
     const gltf = await applyEditsToStoredGltf();
@@ -658,8 +650,8 @@ describe('space opera base test', () => {
   it('adds new textures with dispatchAddMetallicRoughnessTexture', async () => {
     dispatchGltfAndEdits(await createGltfWithTexture());
     reduxStore.dispatch(dispatchAddMetallicRoughnessTexture(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        reduxStore.getState().entities.gltfEdits.edits.texturesById,
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
         {id: 1, uri: 'roughness.png'}));
 
     const gltf = await applyEditsToStoredGltf();
@@ -677,8 +669,8 @@ describe('space opera base test', () => {
   it('adds new textures with dispatchAddNormalTexture', async () => {
     dispatchGltfAndEdits(await createGltfWithTexture());
     reduxStore.dispatch(dispatchAddNormalTexture(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        reduxStore.getState().entities.gltfEdits.edits.texturesById,
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
         {id: 1, uri: 'normal.png'}));
 
     const gltf = await applyEditsToStoredGltf();
@@ -692,8 +684,8 @@ describe('space opera base test', () => {
   it('adds new textures with dispatchAddEmissiveTexture', async () => {
     dispatchGltfAndEdits(await createGltfWithTexture());
     reduxStore.dispatch(dispatchAddEmissiveTexture(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        reduxStore.getState().entities.gltfEdits.edits.texturesById,
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
         {id: 1, uri: 'emissive.png'}));
 
     const gltf = await applyEditsToStoredGltf();
@@ -707,8 +699,8 @@ describe('space opera base test', () => {
   it('adds new textures with dispatchAddOcclusionTexture', async () => {
     dispatchGltfAndEdits(await createGltfWithTexture());
     reduxStore.dispatch(dispatchAddOcclusionTexture(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        reduxStore.getState().entities.gltfEdits.edits.texturesById,
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
         {id: 1, uri: 'occlusion.png'}));
 
     const gltf = await applyEditsToStoredGltf();
@@ -823,7 +815,7 @@ describe('space opera base test', () => {
         .toBeUndefined();
 
     reduxStore.dispatch(dispatchSetEmissiveFactor(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
+        getEditsMaterials(reduxStore.getState()),
         {id: 1, emissiveFactor: [0.5, 0.6, 0.7]}));
 
     const newGltf = await applyEditsToStoredGltf();
@@ -837,16 +829,12 @@ describe('space opera base test', () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     dispatchGltfAndEdits(gltf);
 
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[0].alphaMode)
-        .toBe('MASK');
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[1].alphaMode)
+    expect(getEditsMaterials(reduxStore.getState())[0].alphaMode).toBe('MASK');
+    expect(getEditsMaterials(reduxStore.getState())[1].alphaMode)
         .toBeUndefined();
 
     reduxStore.dispatch(dispatchSetAlphaMode(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        {id: 1, alphaMode: 'BLEND'}));
+        getEditsMaterials(reduxStore.getState()), {id: 1, alphaMode: 'BLEND'}));
 
     const newGltf = await applyEditsToStoredGltf();
     const gltfMaterials = newGltf.materials;
@@ -859,16 +847,12 @@ describe('space opera base test', () => {
     const gltf = new GltfModel(cloneJson(TEST_GLTF_JSON), null);
     dispatchGltfAndEdits(gltf);
 
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[0].alphaCutoff)
-        .toBe(0.25);
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[1].alphaCutoff)
+    expect(getEditsMaterials(reduxStore.getState())[0].alphaCutoff).toBe(0.25);
+    expect(getEditsMaterials(reduxStore.getState())[1].alphaCutoff)
         .toBeUndefined();
 
     reduxStore.dispatch(dispatchSetAlphaCutoff(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        {id: 0, alphaCutoff: 0.6}));
+        getEditsMaterials(reduxStore.getState()), {id: 0, alphaCutoff: 0.6}));
 
     const newGltf = await applyEditsToStoredGltf();
     const gltfMaterials = newGltf.materials;

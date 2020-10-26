@@ -21,6 +21,7 @@ import '../../file_modal/file_modal.js';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, query} from 'lit-element';
 
+import {getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {extractStagingConfig} from '../../../types.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
@@ -52,8 +53,7 @@ export class OpenButton extends LitElement {
     const arrayBuffer = await files[0].arrayBuffer();
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchGltfUrl(url));
-    dispatchConfig(extractStagingConfig(
-        reduxStore.getState().entities.modelViewerSnippet.config));
+    dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
     reduxStore.dispatch(dispatchSetHotspots([]));
   }
 }

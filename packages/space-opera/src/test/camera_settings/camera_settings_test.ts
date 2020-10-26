@@ -20,8 +20,9 @@ import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
+import {getCamera} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
-import {dispatchAutoRotate} from '../../components/config/reducer.js';
+import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('camera constraints test', () => {
@@ -82,19 +83,16 @@ describe('camera constraints test', () => {
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
     yawInput.setValue(42);
-    const stateOrbit =
-        reduxStore.getState().entities.modelViewerSnippet.camera.orbit;
+    const stateOrbit = getCamera(reduxStore.getState()).orbit;
     expect(stateOrbit!.thetaDeg).toBeCloseTo(42);
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {
     reduxStore.dispatch(dispatchAutoRotate(false));
-    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoRotate)
-        .toBe(false);
+    expect(getConfig(reduxStore.getState()).autoRotate).toBe(false);
     await cameraSettings.updateComplete;
     cameraSettings.autoRotateCheckbox.click();
-    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoRotate)
-        .toBe(true);
+    expect(getConfig(reduxStore.getState()).autoRotate).toBe(true);
   });
 
   it('updates checkbox state when receiving auto-rotate change', async () => {

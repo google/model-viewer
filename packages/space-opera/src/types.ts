@@ -17,7 +17,6 @@
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
-import {AnimationInfo} from './components/animation_controls/types.js';
 
 import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/types.js';
@@ -43,7 +42,7 @@ interface GltfEditsState {
 }
 
 interface ModelViewerSnippetState {
-  animationInfo: AnimationInfo;
+  animationNames: string[];
   camera: Camera;
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
@@ -77,7 +76,7 @@ export const INITIAL_STATE: State = {
       origEdits: INITIAL_GLTF_EDITS,
     },
     modelViewerSnippet: {
-      animationInfo: {animationNames: []},
+      animationNames: [],
       config: {},
       hotspots: [],
       camera: INITIAL_CAMERA,

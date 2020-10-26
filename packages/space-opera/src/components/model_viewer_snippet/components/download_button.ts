@@ -24,6 +24,7 @@ import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
 import {State} from '../../../types.js';
+import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 
 interface Payload {
@@ -129,7 +130,7 @@ export class ExportZipButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const config = state.entities.modelViewerSnippet.config;
+    const config = getConfig(state);
     const gltf = state.entities.gltf.gltf;
     if (!gltf) {
       this.preparePayload = undefined;

@@ -1,6 +1,23 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 
-import {Action} from '../../types.js';
+import {Action, State} from '../../types.js';
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {
@@ -78,53 +95,56 @@ export function dispatchSetConfig(config: ModelViewerConfig) {
   return {type: SET_CONFIG, payload: config};
 }
 
-export function configReducer(state: ModelViewerConfig = {}, action: Action):
-    ModelViewerConfig {
-      switch (action.type) {
-        case SET_CONFIG: {
-          return action.payload;
-        }
-        case SET_REVEAL:
-          return {...state, reveal: action.payload};
-        case SET_POSTER:
-          return {
-            ...state, poster: action.payload
-          }
-        case UPDATE_SHADOW_SOFTNESS:
-          return {
-            ...state, shadowSoftness: action.payload
-          }
-        case UPDATE_SHADOW_INTENSITY:
-          return {
-            ...state, shadowIntensity: action.payload
-          }
-        case SET_USE_ENV_AS_SKYBOX:
-          return {
-            ...state, useEnvAsSkybox: action.payload
-          }
-        case UPDATE_EXPOSURE:
-          return {
-            ...state, exposure: action.payload
-          }
-        case UPDATE_IBL:
-          return {
-            ...state, environmentImage: action.payload
-          }
-        case SET_AUTOPLAY_ENABLED:
-          return {
-            ...state, autoplay: action.payload
-          }
-        case SET_ANIMATION_NAME:
-          return {...state, animationName: action.payload};
-        case SET_CAMERA_CONTROLS_ENABLED:
-          return {
-            ...state, cameraControls: action.payload
-          }
-        case SET_AUTO_ROTATE:
-          return {
-            ...state, autoRotate: action.payload
-          }
-        default:
-          return state;
-      }
+export const getConfig = (state: State) =>
+    state.entities.modelViewerSnippet.config;
+
+export function configReducer(
+    state: ModelViewerConfig = {}, action: Action): ModelViewerConfig {
+  switch (action.type) {
+    case SET_CONFIG: {
+      return action.payload;
     }
+    case SET_REVEAL:
+      return {...state, reveal: action.payload};
+    case SET_POSTER:
+      return {
+        ...state, poster: action.payload
+      }
+    case UPDATE_SHADOW_SOFTNESS:
+      return {
+        ...state, shadowSoftness: action.payload
+      }
+    case UPDATE_SHADOW_INTENSITY:
+      return {
+        ...state, shadowIntensity: action.payload
+      }
+    case SET_USE_ENV_AS_SKYBOX:
+      return {
+        ...state, useEnvAsSkybox: action.payload
+      }
+    case UPDATE_EXPOSURE:
+      return {
+        ...state, exposure: action.payload
+      }
+    case UPDATE_IBL:
+      return {
+        ...state, environmentImage: action.payload
+      }
+    case SET_AUTOPLAY_ENABLED:
+      return {
+        ...state, autoplay: action.payload
+      }
+    case SET_ANIMATION_NAME:
+      return {...state, animationName: action.payload};
+    case SET_CAMERA_CONTROLS_ENABLED:
+      return {
+        ...state, cameraControls: action.payload
+      }
+    case SET_AUTO_ROTATE:
+      return {
+        ...state, autoRotate: action.payload
+      }
+    default:
+      return state;
+  }
+}

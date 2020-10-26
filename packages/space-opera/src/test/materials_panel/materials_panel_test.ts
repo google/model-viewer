@@ -21,7 +21,7 @@ import '../../components/materials_panel/materials_panel.js';
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
-import {dispatchSetAlphaCutoff} from '../../components/materials_panel/reducer.js';
+import {dispatchSetAlphaCutoff, getEditsMaterials, getEditsTextures} from '../../components/materials_panel/reducer.js';
 import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
@@ -282,8 +282,7 @@ describe('material panel test', () => {
     doubleSidedCheckbox.checked = true;
     doubleSidedCheckbox.dispatchEvent(new Event('change'));
 
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[0].doubleSided)
+    expect(getEditsMaterials(reduxStore.getState())[0].doubleSided)
         .toEqual(true);
   });
 
@@ -300,8 +299,7 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.texturesById
+       expect(getEditsTextures(reduxStore.getState())
                   .get(reduxStore.getState()
                            .entities.gltfEdits.edits.materials[0]
                            .baseColorTextureId!)!.uri)
@@ -320,8 +318,7 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.texturesById
+       expect(getEditsTextures(reduxStore.getState())
                   .get(reduxStore.getState()
                            .entities.gltfEdits.edits.materials[0]
                            .normalTextureId!)!.uri)
@@ -340,8 +337,7 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.texturesById
+       expect(getEditsTextures(reduxStore.getState())
                   .get(reduxStore.getState()
                            .entities.gltfEdits.edits.materials[0]
                            .metallicRoughnessTextureId!)!.uri)
@@ -360,8 +356,7 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.texturesById
+       expect(getEditsTextures(reduxStore.getState())
                   .get(reduxStore.getState()
                            .entities.gltfEdits.edits.materials[0]
                            .emissiveTextureId!)!.uri)
@@ -380,8 +375,7 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.texturesById
+       expect(getEditsTextures(reduxStore.getState())
                   .get(reduxStore.getState()
                            .entities.gltfEdits.edits.materials[0]
                            .occlusionTextureId!)!.uri)
@@ -410,8 +404,7 @@ describe('material panel test', () => {
     const maskItem =
         dropdown.querySelector('paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[0].alphaMode)
+    expect(getEditsMaterials(reduxStore.getState())[0].alphaMode)
         .toEqual('MASK');
   });
 
@@ -447,13 +440,10 @@ describe('material panel test', () => {
     alphaCutoffSlider.value = 1;
     alphaCutoffSlider.dispatchEvent(new Event('change'));
 
-    expect(
-        reduxStore.getState().entities.gltfEdits.edits.materials[0].alphaCutoff)
-        .toEqual(1);
+    expect(getEditsMaterials(reduxStore.getState())[0].alphaCutoff).toEqual(1);
 
     reduxStore.dispatch(dispatchSetAlphaCutoff(
-        reduxStore.getState().entities.gltfEdits.edits.materials,
-        {id: 0, alphaCutoff: 0}));
+        getEditsMaterials(reduxStore.getState()), {id: 0, alphaCutoff: 0}));
     await panel.updateComplete;
 
     expect(alphaCutoffSlider.value).toEqual(0);

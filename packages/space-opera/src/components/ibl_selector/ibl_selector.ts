@@ -29,7 +29,7 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
-import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../config/reducer.js';
+import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -73,7 +73,7 @@ export class IblSelector extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.entities.modelViewerSnippet.config;
+    this.config = getConfig(state);
     this.environmentImages = state.entities.environment.environmentImages;
   }
 

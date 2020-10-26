@@ -26,7 +26,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
-import {dispatchSetPoster} from '../config/reducer.js';
+import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
@@ -41,7 +41,7 @@ export class PosterControlsElement extends ConnectedLitElement {
   @internalProperty() poster?: string;
 
   stateChanged(state: State) {
-    this.poster = state.entities.modelViewerSnippet.config.poster;
+    this.poster = getConfig(state).poster;
   }
 
   render() {

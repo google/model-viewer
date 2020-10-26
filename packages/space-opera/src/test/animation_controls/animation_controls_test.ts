@@ -22,6 +22,7 @@ import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-ad
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/config/reducer.js';
+import {getConfig} from '../../components/config/reducer.js';
 import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -97,26 +98,21 @@ describe('animation controls test', () => {
                                    'paper-item[value="Dance"]') as HTMLElement;
     danceAnimationItem.click();
 
-    expect(
-        reduxStore.getState().entities.modelViewerSnippet.config.animationName)
-        .toBe('Dance');
+    expect(getConfig(reduxStore.getState()).animationName).toBe('Dance');
   });
 
   it('dispatches an event on UI click', async () => {
     reduxStore.dispatch(dispatchAutoplayEnabled(false));
-    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
-        .toBe(false);
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
     const autoplayCheckbox = animationControls.autoplayCheckbox!;
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
-        .toBe(true);
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().entities.modelViewerSnippet.config.autoplay)
-        .toBe(false);
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
   });
 
   it('updates selected value on animationName change', async () => {

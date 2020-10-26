@@ -17,7 +17,7 @@
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
-import {Action} from '../../types.js';
+import {Action, State} from '../../types.js';
 import {TexturesById} from '../materials_panel/material_state.js';
 import {generateTextureId} from '../model_viewer_preview/gltf_edits.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/types.js';
@@ -382,6 +382,12 @@ const SET_EDITS = 'SET_EDITS';
 export function dispatchSetEdits(edits: GltfEdits) {
   return {type: SET_EDITS, payload: edits};
 }
+
+export const getEdits = (state: State) => state.entities.gltfEdits.edits;
+export const getEditsMaterials = (state: State) =>
+    state.entities.gltfEdits.edits.materials;
+export const getEditsTextures = (state: State) =>
+    state.entities.gltfEdits.edits.texturesById;
 
 export function editsReducer(
     state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {

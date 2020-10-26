@@ -25,6 +25,7 @@ import {customElement, html, internalProperty, PropertyValues} from 'lit-element
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {TexturesById} from '../materials_panel/material_state.js';
+import {getEdits} from '../materials_panel/reducer.js';
 
 const $texturesById = Symbol('texturesById');
 
@@ -43,7 +44,7 @@ export class InspectorPanel extends ConnectedLitElement {
   updateTexturesComplete?: Promise<void>;
 
   stateChanged(state: State) {
-    this[$texturesById] = state.entities.gltfEdits.edits.texturesById;
+    this[$texturesById] = getEdits(state).texturesById;
     this.gltfJsonstring = state.entities.gltf.gltfJsonString;
   }
 

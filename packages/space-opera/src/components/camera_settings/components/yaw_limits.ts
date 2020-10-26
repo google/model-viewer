@@ -21,7 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
-import {dispatchYawLimits} from '../reducer.js';
+import {dispatchYawLimits, getCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -42,7 +42,7 @@ export class YawLimits extends LimitsBase {
   @internalProperty() toggle: boolean = false;
 
   stateChanged(state: State) {
-    this.yawLimitsDeg = state.entities.modelViewerSnippet.camera.yawLimitsDeg;
+    this.yawLimitsDeg = getCamera(state).yawLimitsDeg;
     this.toggle = state.entities.cameraToggle;
   }
 
