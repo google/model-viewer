@@ -153,11 +153,11 @@ async function createGltfWithTexture() {
 
 async function applyEditsToStoredGltf() {
   const state = reduxStore.getState();
-  if (!state.gltfInfo.gltf) {
+  if (!state.entities.gltf.gltf) {
     throw new Error(`no GLTF in state to edit!`);
   }
-  await applyEdits(state.gltfInfo.gltf, state.edits);
-  return state.gltfInfo.gltf;
+  await applyEdits(state.entities.gltf.gltf, state.edits);
+  return state.entities.gltf.gltf;
 }
 
 describe('space opera base test', () => {
@@ -212,7 +212,7 @@ describe('space opera base test', () => {
       }),
     ]);
 
-    const gltfMaterials = (reduxStore.getState().gltfInfo.gltf!.materials);
+    const gltfMaterials = (reduxStore.getState().entities.gltf.gltf!.materials);
     // Should not be changed!
     expect(gltfMaterials[1].pbrMetallicRoughness.baseColorFactor)
         .toEqual([0.8, 0.2, 0.8, 1.0]);
@@ -242,7 +242,8 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials = (reduxStore.getState().gltfInfo.gltf!.materials);
+       const gltfMaterials =
+           (reduxStore.getState().entities.gltf.gltf!.materials);
        // Should not be changed!
        expect(gltfMaterials[1].pbrMetallicRoughness.roughnessFactor)
            .toEqual(0.2);
@@ -272,7 +273,8 @@ describe('space opera base test', () => {
          }),
        ]);
 
-       const gltfMaterials = (reduxStore.getState().gltfInfo.gltf!.materials);
+       const gltfMaterials =
+           (reduxStore.getState().entities.gltf.gltf!.materials);
        // Should not be changed!
        expect(gltfMaterials[1].pbrMetallicRoughness.metallicFactor)
            .toEqual(0.3);
@@ -615,7 +617,7 @@ describe('space opera base test', () => {
      async () => {
        dispatchGltfAndEdits(await createGltfWithTexture());
 
-       const gltf = reduxStore.getState().gltfInfo.gltf!;
+       const gltf = reduxStore.getState().entities.gltf.gltf!;
        expect(gltf).toBeDefined();
        expect((gltf.textures).length).toEqual(3);
 
@@ -790,7 +792,7 @@ describe('space opera base test', () => {
 
   it('sets the URL when calling dispatchGltfUrl', () => {
     reduxStore.dispatch(dispatchGltfUrl('test.glb'));
-    expect(reduxStore.getState().gltfInfo.gltfUrl).toEqual('test.glb');
+    expect(reduxStore.getState().entities.gltf.gltfUrl).toEqual('test.glb');
   });
 
   it('applies edits to texture emissiveFactor', async () => {

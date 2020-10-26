@@ -23,7 +23,7 @@ import {Camera, CurrentCamera, INITIAL_CAMERA} from './components/camera_setting
 import {HotspotInfoConfig} from './components/hotspot_panel/types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
 import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
-import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
+import {GltfEdits, GltfState, INITIAL_GLTF_EDITS, ModelViewerInfo} from './components/model_viewer_preview/types.js';
 
 export interface HotspotsUIState {
   addHotspot: boolean;
@@ -33,24 +33,30 @@ export interface UIState {
   hotspots: HotspotsUIState;
 }
 
+export interface EnvironmentState {
+  environmentImages: EnvironmentImage[];
+}
+
+export interface EntitiesState {
+  environment: EnvironmentState;
+  gltf: GltfState;
+}
+
 /**
  * Space Opera state.
  */
 export interface State {
   modelViewerInfo: ModelViewerInfo;
   config: ModelViewerConfig;
-  gltfInfo: GltfInfo;
   animationInfo: AnimationInfo;
   edits: GltfEdits;
-  // A copy of the original, so we can revert individual properties.
   origEdits: GltfEdits;
   camera: Camera;
   // This reflects the camera values as they were after model-viewer loaded.
   initialCamera: Camera;
   currentCamera: CurrentCamera;
   hotspotInfo: HotspotInfoConfig;
-  // A list of user provided environment images to select from
-  environmentImages: EnvironmentImage[];
+  entities: EntitiesState;
   ui: UIState;
 }
 
@@ -62,11 +68,13 @@ export const INITIAL_STATE: State = {
   edits: INITIAL_GLTF_EDITS,
   origEdits: INITIAL_GLTF_EDITS,
   animationInfo: {animationNames: []},
-  gltfInfo: {gltfJsonString: ''},
   camera: INITIAL_CAMERA,
   initialCamera: INITIAL_CAMERA,
   hotspotInfo: {hotspots: []},
-  environmentImages: INITIAL_ENVIRONMENT_IMAGES,
+  entities: {
+    environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
+    gltf: {gltfJsonString: ''},
+  },
 };
 
 export interface Action extends Redux.Action {

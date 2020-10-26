@@ -20,7 +20,7 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action} from '../../types.js';
 
-import {GltfEdits, GltfInfo, INITIAL_GLTF_EDITS, ModelViewerInfo} from '../model_viewer_preview/types.js';
+import {GltfEdits, GltfState, INITIAL_GLTF_EDITS, ModelViewerInfo} from '../model_viewer_preview/types.js';
 
 // GLTF INFO //////////////
 
@@ -40,12 +40,12 @@ export function dispatchGltfJsonString(gltfJsonString?: string) {
   return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
 }
 
-export function gltfInfoReducer(
-    state: GltfInfo = {
+export function gltfReducer(
+    state: GltfState = {
       gltfJsonString: ''
     },
     action: Action):
-    GltfInfo {
+    GltfState {
       switch (action.type) {
         case SET_GLTF:
           return {

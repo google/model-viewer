@@ -17,7 +17,7 @@
 
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
-import {Action} from '../../types.js';
+import {Action, EnvironmentState} from '../../types.js';
 import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
 import {EnvironmentImage} from './lighting_state.js';
 
@@ -39,9 +39,6 @@ export async function createBlobUrlFromEnvironmentImage(file: File) {
 /** Dispatch an edit to potential environment images to select. */
 const UPLOAD_ENVIRONMENT_IMAGE = 'UPLOAD_ENVIRONMENT_IMAGE';
 export function dispatchAddEnvironmentImage(image?: EnvironmentImage) {
-  // if (!image) {
-  //   return;
-  // }
   return {type: UPLOAD_ENVIRONMENT_IMAGE, payload: image};
 }
 
@@ -51,12 +48,17 @@ function addEnvironmentImage(
   return environmentImages;
 }
 
-export function environmentImagesReducer(
-    state: EnvironmentImage[] = INITIAL_ENVIRONMENT_IMAGES,
-    action: Action): EnvironmentImage[] {
+export function environmentReducer(
+    state: EnvironmentState = {
+      environmentImages: INITIAL_ENVIRONMENT_IMAGES
+    },
+    action: Action): EnvironmentState {
   switch (action.type) {
     case UPLOAD_ENVIRONMENT_IMAGE:
-      return addEnvironmentImage(state, action.payload);
+      return {
+        environmentImages:
+            addEnvironmentImage(state.environmentImages, action.payload)
+      };
     default:
       return state;
   }

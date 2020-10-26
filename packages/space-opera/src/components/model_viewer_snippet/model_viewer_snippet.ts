@@ -58,7 +58,7 @@ export class ExportPanel extends ConnectedLitElement {
     this.config = state.config;
     this.camera = state.camera;
     this.hotspots = state.hotspotInfo.hotspots;
-    this.gltfUrl = state.gltfInfo.gltfUrl;
+    this.gltfUrl = state.entities.gltf.gltfUrl;
   }
 
   render() {

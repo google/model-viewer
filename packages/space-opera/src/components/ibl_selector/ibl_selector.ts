@@ -74,7 +74,7 @@ export class IblSelector extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.config = state.config;
-    this.environmentImages = state.environmentImages;
+    this.environmentImages = state.entities.environment.environmentImages;
   }
 
   onSelectEnvironmentImage(event: CustomEvent) {

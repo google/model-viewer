@@ -104,8 +104,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.config = state.config;
     this.hotspots = state.hotspotInfo.hotspots;
     this[$edits] = state.edits;
-    this[$gltf] = state.gltfInfo.gltf;
-    this[$gltfUrl] = state.gltfInfo.gltfUrl;
+    this[$gltf] = state.entities.gltf.gltf;
+    this[$gltfUrl] = state.entities.gltf.gltfUrl;
     this[$autoplay] = state.config.autoplay;
   }
 

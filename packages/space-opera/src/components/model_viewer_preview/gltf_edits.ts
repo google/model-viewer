@@ -87,7 +87,7 @@ function dispatchGltf(args?: DispatchGltfArgs) {
     throw new Error(`No args given!`);
   }
   const gltf = args.gltf;
-  if (gltf !== undefined && reduxStore.getState().gltfInfo.gltf === gltf) {
+  if (gltf !== undefined && reduxStore.getState().entities.gltf.gltf === gltf) {
     throw new Error(`Same gltf was given! Only call this upon actual change`);
   }
   reduxStore.dispatch(dispatchSetGltf(gltf));

@@ -21,7 +21,7 @@ export const INITIAL_GLTF_EDITS: GltfEdits = {
   materials: [],
 };
 
-export interface GltfInfo {
+export interface GltfState {
   gltfUrl?: string;
   gltf?: GltfModel;
   gltfJsonString: string;
