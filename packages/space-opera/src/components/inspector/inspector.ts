@@ -22,9 +22,11 @@
 import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, PropertyValues} from 'lit-element';
 
-import {State} from '../../space_opera_base.js';
+import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {TexturesById} from '../materials_panel/material_state.js';
+import {getEdits} from '../materials_panel/reducer.js';
+import {getGltfJsonString} from '../model_viewer_preview/reducer.js';
 
 const $texturesById = Symbol('texturesById');
 
@@ -43,8 +45,8 @@ export class InspectorPanel extends ConnectedLitElement {
   updateTexturesComplete?: Promise<void>;
 
   stateChanged(state: State) {
-    this[$texturesById] = state.edits.texturesById;
-    this.gltfJsonstring = state.gltfJsonString;
+    this[$texturesById] = getEdits(state).texturesById;
+    this.gltfJsonstring = getGltfJsonString(state);
   }
 
   private async updateTextures(texturesById: TexturesById|undefined) {

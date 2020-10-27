@@ -15,34 +15,22 @@
  *
  */
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, State} from '../../types.js';
 
-/** Set auto play enabled or not */
-const SET_AUTOPLAY_ENABLED = 'SET_AUTOPLAY_ENABLED';
-export const dispatchAutoplayEnabled = registerStateMutator(
-    SET_AUTOPLAY_ENABLED, (state: State, enabled?: boolean) => {
-      state.config = {...state.config, autoplay: !!enabled};
-    });
+const SET_ANIMATION_NAMES = 'SET_ANIMATION_NAMES';
+export function dispatchSetAnimationNames(animationNames: string[]) {
+  return {type: SET_ANIMATION_NAMES, payload: animationNames};
+}
 
-/** Set animation name */
-const SET_ANIMATION_NAME = 'SET_ANIMATION_NAME';
-export const dispatchAnimationName = registerStateMutator(
-    SET_ANIMATION_NAME, (state: State, animationName?: string) => {
-      // Allow animationName === undefined to unset animationName
-      if (animationName && state.animationNames.indexOf(animationName) === -1) {
-        return;
-      }
+export const getAnimationNames = (state: State) =>
+    state.entities.modelViewerSnippet.animationNames;
 
-      state.config = {
-        ...state.config,
-        animationName,
-      };
-    });
-
-/** Set playAnimation or not */
-const PLAY_ANIMATION = 'PLAY_ANIMATION';
-export const dispatchPlayAnimation = registerStateMutator(
-    PLAY_ANIMATION, (state: State, playAnimation?: boolean) => {
-      // No need to copy state - we're always given a new copy.
-      state.playAnimation = !!playAnimation;
-    });
+export function animationNamesReducer(
+    state: string[] = [], action: Action): string[] {
+  switch (action.type) {
+    case SET_ANIMATION_NAMES:
+      return action.payload;
+    default:
+      return state;
+  }
+}

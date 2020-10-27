@@ -15,4 +15,38 @@
  *
  */
 
-// TODO: Refactor reducers to follow best practices, then combine them all here.
+import {combineReducers} from 'redux';
+
+import {animationNamesReducer} from './components/animation_controls/reducer.js';
+import {cameraReducer, initialCameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
+import {configReducer} from './components/config/reducer.js';
+import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
+import {environmentReducer} from './components/ibl_selector/reducer.js'
+import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
+import {gltfReducer} from './components/model_viewer_preview/reducer.js';
+
+const gltfEditsReducer =
+    combineReducers({edits: editsReducer, origEdits: origEditsReducer})
+
+const modelViewerSnippetReducer = combineReducers({
+  animationNames: animationNamesReducer,
+  camera: cameraReducer,
+  config: configReducer,
+  hotspots: hotspotsReducer
+})
+
+const entitiesReducer = combineReducers({
+  isDirtyCamera: isDirtyCameraReducer,
+  environment: environmentReducer,
+  gltf: gltfReducer,
+  gltfEdits: gltfEditsReducer,
+  initialCamera: initialCameraReducer,
+  modelViewerSnippet: modelViewerSnippetReducer
+});
+
+const uiReducer = combineReducers({hotspots: hotspotsUiReducer});
+
+export const rootReducer =
+    combineReducers({entities: entitiesReducer, ui: uiReducer});
+
+export type RootState = ReturnType<typeof rootReducer>

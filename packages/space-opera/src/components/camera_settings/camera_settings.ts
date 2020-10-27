@@ -29,15 +29,19 @@ import '../shared/checkbox/checkbox.js';
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
-import {State} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {State} from '../../types.js';
+import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {styles as cameraSettingsStyles} from './camera_settings.css.js';
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchAutoRotate, dispatchCameraControlsEnabled, dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -109,7 +113,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   @internalProperty() target?: Vector3D;
 
   stateChanged(state: State) {
-    this.target = state.camera.target ?? state.initialCamera.target;
+    this.target = getCamera(state).target ?? getInitialCamera(state).target;
   }
 
   protected onInputChange(event: Event) {
@@ -165,25 +169,30 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.config;
-    this.camera = state.camera;
-    this.initialCamera = state.initialCamera;
+    this.config = getConfig(state);
+    this.camera = getCamera(state);
+    this.initialCamera = getInitialCamera(state);
   }
 
   onCamControlsCheckboxChange(event: Event) {
-    dispatchCameraControlsEnabled((event.target as HTMLInputElement).checked);
+    reduxStore.dispatch(dispatchCameraControlsEnabled(
+        (event.target as HTMLInputElement).checked));
   }
 
   onSaveCameraOrbit() {
-    dispatchSaveCameraOrbit();
+    const modelViewer = getModelViewer()!;
+    const currentOrbit = getCameraState(modelViewer).orbit;
+    const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
+    reduxStore.dispatch(
+        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
   }
 
   onCameraTargetChange(newValue: Vector3D) {
-    dispatchCameraTarget(newValue);
+    reduxStore.dispatch(dispatchCameraTarget(newValue));
   }
 
   onAutoRotateChange() {
-    dispatchAutoRotate(this.autoRotateCheckbox.checked);
+    reduxStore.dispatch(dispatchAutoRotate(this.autoRotateCheckbox.checked));
   }
 
   render() {
@@ -251,7 +260,8 @@ export class CameraSettings extends ConnectedLitElement {
   onCameraOrbitEditorChange() {
     if (!this.cameraOrbitEditor)
       return;
-    dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit);
+    reduxStore.dispatch(
+        dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit));
   }
 }
 

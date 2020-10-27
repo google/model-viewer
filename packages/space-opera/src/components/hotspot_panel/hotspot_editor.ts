@@ -21,10 +21,11 @@ import '@material/mwc-icon-button';
 
 import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
 
-import {HotspotConfig} from './hotspot_config.js';
+import {reduxStore} from '../../space_opera_base.js';
 
 import {styles} from './hotspot_editor.css.js';
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
+import {HotspotConfig} from './types.js';
 
 /** A editor card for a single hotspot */
 @customElement('me-hotspot-editor')
@@ -62,14 +63,14 @@ export class HotspotEditorElement extends LitElement {
       ...this.config,
       annotation: this.annotationInput.value
     } as HotspotConfig;
-    dispatchUpdateHotspot(newConfig);
+    reduxStore.dispatch(dispatchUpdateHotspot(newConfig));
   }
 
   onRemoveHotspot() {
     if (!this.config) {
       throw new Error('Invalid config');
     }
-    dispatchRemoveHotspot(this.config.name);
+    reduxStore.dispatch(dispatchRemoveHotspot(this.config.name));
   }
 }
 

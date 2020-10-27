@@ -15,7 +15,7 @@
  *
  */
 
-import {HotspotConfig} from '../../hotspot_panel/hotspot_config.js';
+import {HotspotConfig} from '../../hotspot_panel/types.js';
 
 /**
  * Renders a list of hotspots

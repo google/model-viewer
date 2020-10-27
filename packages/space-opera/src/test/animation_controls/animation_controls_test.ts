@@ -21,8 +21,9 @@ import '../../components/animation_controls/animation_controls.js';
 import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
-import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/animation_controls/reducer.js';
-import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/config/reducer.js';
+import {getConfig} from '../../components/config/reducer.js';
+import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {reduxStore} from '../../space_opera_base.js';
 
@@ -71,9 +72,12 @@ describe('animation controls test', () => {
     document.body.appendChild(animationControls);
 
     await dispatchGltfAndEdits(new GltfModel(TEST_GLTF_JSON, null));
-
     await animationControls.updateComplete;
   });
+
+  afterEach(() => {
+    document.body.removeChild(animationControls);
+  })
 
   it('updates the animation names when a gltf is uploaded', async () => {
     const animationNameSelector = animationControls.shadowRoot!.querySelector(
@@ -94,25 +98,26 @@ describe('animation controls test', () => {
                                    'paper-item[value="Dance"]') as HTMLElement;
     danceAnimationItem.click();
 
-    expect(reduxStore.getState().config.animationName).toBe('Dance');
+    expect(getConfig(reduxStore.getState()).animationName).toBe('Dance');
   });
 
   it('dispatches an event on UI click', async () => {
-    dispatchAutoplayEnabled(false);
-    expect(reduxStore.getState().config.autoplay).toBe(false);
+    reduxStore.dispatch(dispatchAutoplayEnabled(false));
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
     const autoplayCheckbox = animationControls.autoplayCheckbox!;
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().config.autoplay).toBe(true);
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
 
     await animationControls.updateComplete;
     autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(reduxStore.getState().config.autoplay).toBe(false);
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
   });
 
   it('updates selected value on animationName change', async () => {
-    dispatchAnimationName('Idle');
+    const animationName = 'Idle';
+    reduxStore.dispatch(dispatchAnimationName(animationName));
     const animationNameSelector =
         animationControls.shadowRoot!.querySelector(
             'me-dropdown#animation-name-selector') as Dropdown;

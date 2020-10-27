@@ -17,8 +17,10 @@
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, State} from '../../types.js';
+import {TexturesById} from '../materials_panel/material_state.js';
 import {generateTextureId} from '../model_viewer_preview/gltf_edits.js';
+import {GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/types.js';
 import {immutableArrayUpdate, immutableMapUpdate} from '../utils/reducer_utils.js';
 
 import {Material} from './material_state.js';
@@ -58,29 +60,30 @@ export interface AddTextureArgs {
  * Note: updateMaterial must NOT mutate the arg, but rather returns a new object
  */
 function setMaterialTexture(
-    state: State,
-    args: SetTextureArgs|undefined,
+    name: string,
+    args: SetTextureArgs,
+    materials: Material[],
     updateMaterial: (material: Material) => Material) {
-  if (!args)
-    return;
-  const materials = state.edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID was out of bounds');
   }
-  if (args.textureId !== undefined &&
-      !state.edits.texturesById.has(args.textureId)) {
-    throw new Error(
-        `Tried to use a texture ID that does not exist: ${args.textureId}`);
-  }
+  // TODO: Add back in, but move reduxStore out of file, so pull textureIds from
+  // actions...
+
+  // if (args.textureId !== undefined &&
+  //     !reduxStore.getState().edits.texturesById.has(args.textureId)) {
+  //   throw new Error(
+  //       `Tried to use a texture ID that does not exist: ${args.textureId}`);
+  // }
 
   const newMaterial = updateMaterial(materials[args.id]);
   if (newMaterial === materials[args.id]) {
     throw new Error('updateMaterial returns same object');
   }
 
-  state.edits = {
-    ...state.edits,
-    materials: immutableArrayUpdate(materials, args.id, newMaterial)
+  return {
+    type: name,
+    payload: immutableArrayUpdate(materials, args.id, newMaterial)
   };
 }
 
@@ -89,191 +92,203 @@ function setMaterialTexture(
  * Note: updateMaterial must NOT mutate the arg, but rather returns a new object
  */
 function addMaterialTexture(
-    state: State,
-    args: AddTextureArgs|undefined,
+    name: string,
+    args: AddTextureArgs,
+    materials: Material[],
+    texturesById: TexturesById,
     updateMaterial: (material: Material, textureId: string) => Material) {
-  if (!args)
-    return;
-  const materials = state.edits.materials;
   if (args.id >= materials.length || args.id < 0) {
     throw new Error('Given ID is out of bounds');
   }
-
   const textureId = generateTextureId();
   const texture = {id: textureId, uri: args.uri};
-
   const newMaterial = updateMaterial(materials[args.id], textureId);
   if (newMaterial === materials[args.id]) {
     throw new Error('updateMaterial returns same object');
   }
-
-  state.edits = {
-    ...state.edits,
-    texturesById:
-        immutableMapUpdate(state.edits.texturesById, textureId, texture),
-    materials: immutableArrayUpdate(materials, args.id, newMaterial)
+  return {
+    type: name,
+    payload: {
+      texturesById: immutableMapUpdate(texturesById, textureId, texture),
+      materials: immutableArrayUpdate(materials, args.id, newMaterial)
+    }
   };
 }
 
 /**
  * Dispatch an edit to a material's base color factor.
  */
-export const dispatchMaterialBaseColor = registerStateMutator(
-    'SET_MATERIAL_BASE_COLOR_FACTOR',
-    (state: State, args?: MaterialBaseColorArgs) => {
-      if (!args)
-        return;
-      const index = args.index;
-      const baseColorFactor = args.baseColorFactor;
-      const materials = state.edits.materials;
-      if (index >= materials.length || index < 0) {
-        throw new Error('Given ID is out of bounds');
-      }
-
-      state.edits = {
-        ...state.edits,
-        materials: immutableArrayUpdate(
-            materials, index, {...materials[index], baseColorFactor})
-      };
-    });
+const SET_MATERIAL_BASE_COLOR_FACTOR = 'SET_MATERIAL_BASE_COLOR_FACTOR';
+export function dispatchMaterialBaseColor(
+    materials: Material[], args: MaterialBaseColorArgs) {
+  const index = args.index;
+  const baseColorFactor = args.baseColorFactor;
+  if (index >= materials.length || index < 0) {
+    throw new Error('Given ID is out of bounds');
+  }
+  return {
+    type: SET_MATERIAL_BASE_COLOR_FACTOR,
+    payload: immutableArrayUpdate(
+        materials, index, {...materials[index], baseColorFactor})
+  };
+}
 
 /**
  * Dispatch an edit to a material's roughness factor.
  */
-export const dispatchRoughnessFactor = registerStateMutator(
-    'SET_MATERIAL_ROUGHNESS', (state: State, args?: RoughnessFactorArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const roughnessFactor = args.roughnessFactor;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID was out of bounds');
-      }
-
-      state.edits = {
-        ...state.edits,
-        materials: immutableArrayUpdate(
-            materials, id, {...materials[id], roughnessFactor})
-      };
-    });
+const SET_MATERIAL_ROUGHNESS = 'SET_MATERIAL_ROUGHNESS';
+export function dispatchRoughnessFactor(
+    materials: Material[], args: RoughnessFactorArgs) {
+  const id = args.id;
+  const roughnessFactor = args.roughnessFactor;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID was out of bounds');
+  }
+  return {
+    type: SET_MATERIAL_ROUGHNESS,
+    payload:
+        immutableArrayUpdate(materials, id, {...materials[id], roughnessFactor})
+  };
+}
 
 /** Dispatch an edit to a material's metallic factor. */
-export const dispatchMetallicFactor = registerStateMutator(
-    'SET_MATERIAL_METALLIC', (state: State, args?: MetallicFactorArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const metallicFactor = args.metallicFactor;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID was out of bounds');
-      }
-
-      state.edits = {
-        ...state.edits,
-        materials: immutableArrayUpdate(
-            materials, id, {...materials[id], metallicFactor})
-      };
-    });
+const SET_MATERIAL_METALLIC = 'SET_MATERIAL_METALLIC';
+export function dispatchMetallicFactor(
+    materials: Material[], args: MetallicFactorArgs) {
+  const id = args.id;
+  const metallicFactor = args.metallicFactor;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID was out of bounds');
+  }
+  return {
+    type: SET_MATERIAL_METALLIC,
+    payload:
+        immutableArrayUpdate(materials, id, {...materials[id], metallicFactor})
+  };
+}
 
 /** Dispatch an edit to a material's base color texture */
-export const dispatchBaseColorTexture = registerStateMutator(
-    'SET_BASE_COLOR_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args)
-        return;
-      setMaterialTexture(state, args, (material: Material) => {
+const SET_BASE_COLOR_TEXTURE = 'SET_BASE_COLOR_TEXTURE';
+export function dispatchBaseColorTexture(
+    materials: Material[], args: SetTextureArgs) {
+  return setMaterialTexture(
+      SET_BASE_COLOR_TEXTURE, args, materials, (material: Material) => {
         return {
           ...material,
           baseColorTextureId: args.textureId,
         };
       });
-    });
+}
 
 /** Dispatch to create a new texture and assign it to the given material */
-export const dispatchAddBaseColorTexture = registerStateMutator(
-    'ADD_BASE_COLOR_TEXTURE', (state: State, args?: AddTextureArgs) => {
-      addMaterialTexture(
-          state, args, (material: Material, textureId: string) => {
-            return {...material, baseColorTextureId: textureId};
-          });
-    });
+const ADD_BASE_COLOR_TEXTURE = 'ADD_BASE_COLOR_TEXTURE';
+export function dispatchAddBaseColorTexture(
+    materials: Material[], texturesById: TexturesById, args: AddTextureArgs) {
+  return addMaterialTexture(
+      ADD_BASE_COLOR_TEXTURE,
+      args,
+      materials,
+      texturesById,
+      (material: Material, textureId: string) => {
+        return {...material, baseColorTextureId: textureId};
+      });
+}
 
 /** Dispatch an edit to a material's Metallic-Roughness texture. */
-export const dispatchMetallicRoughnessTexture = registerStateMutator(
-    'SET_METALLIC_ROUGHNESS_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args)
-        return;
-      setMaterialTexture(state, args, (material: Material) => {
+const SET_METALLIC_ROUGHNESS_TEXTURE = 'SET_METALLIC_ROUGHNESS_TEXTURE';
+export function dispatchMetallicRoughnessTexture(
+    materials: Material[], args: SetTextureArgs) {
+  return setMaterialTexture(
+      SET_METALLIC_ROUGHNESS_TEXTURE, args, materials, (material: Material) => {
         return {...material, metallicRoughnessTextureId: args.textureId};
       });
-    });
+}
 
 /** Dispatch to create a new texture and assign it to the given material. */
-export const dispatchAddMetallicRoughnessTexture = registerStateMutator(
-    'ADD_METALLIC_ROUGHNESS_TEXTURE', (state: State, args?: AddTextureArgs) => {
-      addMaterialTexture(
-          state, args, (material: Material, textureId: string) => {
-            return {...material, metallicRoughnessTextureId: textureId};
-          });
-    });
+const ADD_METALLIC_ROUGHNESS_TEXTURE = 'ADD_METALLIC_ROUGHNESS_TEXTURE';
+export function dispatchAddMetallicRoughnessTexture(
+    materials: Material[], texturesById: TexturesById, args: AddTextureArgs) {
+  return addMaterialTexture(
+      ADD_METALLIC_ROUGHNESS_TEXTURE,
+      args,
+      materials,
+      texturesById,
+      (material: Material, textureId: string) => {
+        return {...material, metallicRoughnessTextureId: textureId};
+      });
+}
 
 /** Dispatch an edit to a material's normal texture. */
-export const dispatchNormalTexture = registerStateMutator(
-    'SET_NORMAL_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args)
-        return;
-      setMaterialTexture(state, args, (material: Material) => {
+const SET_NORMAL_TEXTURE = 'SET_NORMAL_TEXTURE';
+export function dispatchNormalTexture(
+    materials: Material[], args: SetTextureArgs) {
+  return setMaterialTexture(
+      SET_NORMAL_TEXTURE, args, materials, (material: Material) => {
         return {...material, normalTextureId: args.textureId};
       });
-    });
+}
 
 /** Dispatch to create a new texture and assign it to the given material. */
-export const dispatchAddNormalTexture = registerStateMutator(
-    'ADD_NORMAL_TEXTURE', (state: State, args?: AddTextureArgs) => {
-      addMaterialTexture(
-          state, args, (material: Material, textureId: string) => {
-            return {...material, normalTextureId: textureId};
-          });
-    });
+const ADD_NORMAL_TEXTURE = 'ADD_NORMAL_TEXTURE';
+export function dispatchAddNormalTexture(
+    materials: Material[], texturesById: TexturesById, args: AddTextureArgs) {
+  return addMaterialTexture(
+      ADD_NORMAL_TEXTURE,
+      args,
+      materials,
+      texturesById,
+      (material: Material, textureId: string) => {
+        return {...material, normalTextureId: textureId};
+      });
+}
 
 /** Dispatch an edit to a material's normal texture. */
-export const dispatchEmissiveTexture = registerStateMutator(
-    'SET_EMISSIVE_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args)
-        return;
-      setMaterialTexture(state, args, (material: Material) => {
+const SET_EMISSIVE_TEXTURE = 'SET_EMISSIVE_TEXTURE';
+export function dispatchEmissiveTexture(
+    materials: Material[], args: SetTextureArgs) {
+  return setMaterialTexture(
+      SET_EMISSIVE_TEXTURE, args, materials, (material: Material) => {
         return {...material, emissiveTextureId: args.textureId};
       });
-    });
+}
 
 /** Dispatch to create a new texture and assign it to the given material. */
-export const dispatchAddEmissiveTexture = registerStateMutator(
-    'ADD_EMISSIVE_TEXTURE', (state: State, args?: AddTextureArgs) => {
-      addMaterialTexture(
-          state, args, (material: Material, textureId: string) => {
-            return {...material, emissiveTextureId: textureId};
-          });
-    });
+const ADD_EMISSIVE_TEXTURE = 'ADD_EMISSIVE_TEXTURE';
+export function dispatchAddEmissiveTexture(
+    materials: Material[], texturesById: TexturesById, args: AddTextureArgs) {
+  return addMaterialTexture(
+      ADD_EMISSIVE_TEXTURE,
+      args,
+      materials,
+      texturesById,
+      (material: Material, textureId: string) => {
+        return {...material, emissiveTextureId: textureId};
+      });
+}
 
 /** Dispatch an edit to a material's occlusion texture. */
-export const dispatchOcclusionTexture = registerStateMutator(
-    'SET_OCCLUSION_TEXTURE', (state: State, args?: SetTextureArgs) => {
-      if (!args)
-        return;
-      setMaterialTexture(state, args, (material: Material) => {
+const SET_OCCLUSION_TEXTURE = 'SET_OCCLUSION_TEXTURE';
+export function dispatchOcclusionTexture(
+    materials: Material[], args: SetTextureArgs) {
+  return setMaterialTexture(
+      SET_OCCLUSION_TEXTURE, args, materials, (material: Material) => {
         return {...material, occlusionTextureId: args.textureId};
       });
-    });
+}
 
 /** Dispatch to create a new texture and assign it to the given material. */
-export const dispatchAddOcclusionTexture = registerStateMutator(
-    'ADD_OCCLUSION_TEXTURE', (state: State, args?: AddTextureArgs) => {
-      addMaterialTexture(
-          state, args, (material: Material, textureId: string) => {
-            return {...material, occlusionTextureId: textureId};
-          });
-    });
+const ADD_OCCLUSION_TEXTURE = 'ADD_OCCLUSION_TEXTURE';
+export function dispatchAddOcclusionTexture(
+    materials: Material[], texturesById: TexturesById, args: AddTextureArgs) {
+  return addMaterialTexture(
+      ADD_OCCLUSION_TEXTURE,
+      args,
+      materials,
+      texturesById,
+      (material: Material, textureId: string) => {
+        return {...material, occlusionTextureId: textureId};
+      });
+}
 
 /** Argument container for dispatchEmissiveFactor. */
 export interface EmissiveFactorArgs {
@@ -282,23 +297,20 @@ export interface EmissiveFactorArgs {
 }
 
 /** Dispatch an edit to a material's emissiveFactor. */
-export const dispatchSetEmissiveFactor = registerStateMutator(
-    'SET_EMISSIVE_FACTOR', (state: State, args?: EmissiveFactorArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const emissiveFactor = args.emissiveFactor;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID is out of bounds');
-      }
-
-      state.edits = {
-        ...state.edits,
-        materials: immutableArrayUpdate(
-            materials, id, {...materials[id], emissiveFactor})
-      };
-    });
+const SET_EMISSIVE_FACTOR = 'SET_EMISSIVE_FACTOR';
+export function dispatchSetEmissiveFactor(
+    materials: Material[], args: EmissiveFactorArgs) {
+  const id = args.id;
+  const emissiveFactor = args.emissiveFactor;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID is out of bounds');
+  }
+  return {
+    type: SET_EMISSIVE_FACTOR,
+    payload:
+        immutableArrayUpdate(materials, id, {...materials[id], emissiveFactor})
+  };
+}
 
 /** Argument container for dispatchDoubleSided. */
 export interface DoubleSidedArgs {
@@ -307,23 +319,21 @@ export interface DoubleSidedArgs {
 }
 
 /** Dispatch an edit to a material's doublesidedness. */
-export const dispatchDoubleSided = registerStateMutator(
-    'SET_DOUBLESIDED', (state: State, args?: DoubleSidedArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const doubleSided = args.doubleSided;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID was out of bounds');
-      }
+const SET_DOUBLESIDED = 'SET_DOUBLESIDED';
+export function dispatchDoubleSided(
+    materials: Material[], args: DoubleSidedArgs) {
+  const id = args.id;
+  const doubleSided = args.doubleSided;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID was out of bounds');
+  }
 
-      state.edits = {
-        ...state.edits,
-        materials:
-            immutableArrayUpdate(materials, id, {...materials[id], doubleSided})
-      };
-    });
+  return {
+    type: SET_DOUBLESIDED,
+    payload:
+        immutableArrayUpdate(materials, id, {...materials[id], doubleSided})
+  };
+}
 
 /** Argument container for dispatch alpha mode. */
 export interface AlphaModeArgs {
@@ -332,23 +342,19 @@ export interface AlphaModeArgs {
 }
 
 /** Dispatch an edit to a material's alpha mode. */
-export const dispatchSetAlphaMode = registerStateMutator(
-    'SET_ALPHA_MODE', (state: State, args?: AlphaModeArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const alphaMode = args.alphaMode;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID was out of bounds');
-      }
-
-      state.edits = {
-        ...state.edits,
-        materials:
-            immutableArrayUpdate(materials, id, {...materials[id], alphaMode})
-      };
-    });
+const SET_ALPHA_MODE = 'SET_ALPHA_MODE';
+export function dispatchSetAlphaMode(
+    materials: Material[], args: AlphaModeArgs) {
+  const id = args.id;
+  const alphaMode = args.alphaMode;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID was out of bounds');
+  }
+  return {
+    type: SET_ALPHA_MODE,
+    payload: immutableArrayUpdate(materials, id, {...materials[id], alphaMode})
+  };
+}
 
 /** Argument container for dispatch alpha cutoff. */
 export interface AlphaCutoffArgs {
@@ -357,19 +363,112 @@ export interface AlphaCutoffArgs {
 }
 
 /** Dispatch an edit to a material's alpha cutoff. */
-export const dispatchSetAlphaCutoff = registerStateMutator(
-    'SET_ALPHA_CUTOFF', (state: State, args?: AlphaCutoffArgs) => {
-      if (!args)
-        return;
-      const id = args.id;
-      const alphaCutoff = args.alphaCutoff;
-      const materials = state.edits.materials;
-      if (id >= materials.length || id < 0) {
-        throw new Error('Given ID was out of bounds');
-      }
-      state.edits = {
-        ...state.edits,
-        materials:
-            immutableArrayUpdate(materials, id, {...materials[id], alphaCutoff})
+const SET_ALPHA_CUTOFF = 'SET_ALPHA_CUTOFF';
+export function dispatchSetAlphaCutoff(
+    materials: Material[], args: AlphaCutoffArgs) {
+  const id = args.id;
+  const alphaCutoff = args.alphaCutoff;
+  if (id >= materials.length || id < 0) {
+    throw new Error('Given ID was out of bounds');
+  }
+  return {
+    type: SET_ALPHA_CUTOFF,
+    payload:
+        immutableArrayUpdate(materials, id, {...materials[id], alphaCutoff})
+  };
+}
+
+const SET_EDITS = 'SET_EDITS';
+export function dispatchSetEdits(edits: GltfEdits) {
+  return {type: SET_EDITS, payload: edits};
+}
+
+export const getEdits = (state: State) => state.entities.gltfEdits.edits;
+export const getEditsMaterials = (state: State) =>
+    state.entities.gltfEdits.edits.materials;
+export const getEditsTextures = (state: State) =>
+    state.entities.gltfEdits.edits.texturesById;
+
+export function editsReducer(
+    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {
+  switch (action.type) {
+    case SET_ALPHA_CUTOFF:
+      return {...state, materials: action.payload};
+    case SET_ALPHA_MODE:
+      return {...state, materials: action.payload};
+    case SET_DOUBLESIDED:
+      return {...state, materials: action.payload};
+    case SET_EMISSIVE_FACTOR:
+      return {...state, materials: action.payload};
+    case ADD_OCCLUSION_TEXTURE:
+      return {
+        ...state,
+        texturesById: action.payload.texturesById,
+        materials: action.payload.materials
       };
-    });
+    case SET_OCCLUSION_TEXTURE:
+      return {...state, materials: action.payload};
+    case ADD_EMISSIVE_TEXTURE:
+      return {
+        ...state,
+        texturesById: action.payload.texturesById,
+        materials: action.payload.materials
+      };
+    case SET_EMISSIVE_TEXTURE:
+      return {...state, materials: action.payload};
+    case ADD_NORMAL_TEXTURE:
+      return {
+        ...state,
+        texturesById: action.payload.texturesById,
+        materials: action.payload.materials
+      };
+    case SET_NORMAL_TEXTURE:
+      return {...state, materials: action.payload};
+    case ADD_METALLIC_ROUGHNESS_TEXTURE:
+      return {
+        ...state,
+        texturesById: action.payload.texturesById,
+        materials: action.payload.materials
+      };
+    case SET_METALLIC_ROUGHNESS_TEXTURE:
+      return {...state, materials: action.payload};
+    case ADD_BASE_COLOR_TEXTURE:
+      return {
+        ...state,
+        texturesById: action.payload.texturesById,
+        materials: action.payload.materials
+      };
+    case SET_BASE_COLOR_TEXTURE:
+      return {...state, materials: action.payload};
+    case SET_MATERIAL_METALLIC:
+      return {...state, materials: action.payload};
+    case SET_MATERIAL_ROUGHNESS:
+      return {...state, materials: action.payload};
+    case SET_MATERIAL_BASE_COLOR_FACTOR:
+      return {...state, materials: action.payload};
+    case SET_EDITS:
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
+// Orig Edits //////////////
+
+const SET_ORIG_EDITS = 'SET_ORIG_EDITS'
+export function dispatchSetOrigEdits(origEdits: GltfEdits) {
+  return {type: SET_ORIG_EDITS, payload: origEdits};
+}
+
+export const getOrigEdits = (state: State) =>
+    state.entities.gltfEdits.origEdits;
+
+export function origEditsReducer(
+    state: GltfEdits = INITIAL_GLTF_EDITS, action: Action): GltfEdits {
+  switch (action.type) {
+    case SET_ORIG_EDITS:
+      return action.payload;
+    default:
+      return state;
+  }
+}

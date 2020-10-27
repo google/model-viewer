@@ -25,12 +25,15 @@ import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adap
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-import {State} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
+import {getCamera} from '../camera_settings/reducer.js';
+import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
-import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
-import {dispatchGltfUrl} from '../model_viewer_preview/reducer.js';
+import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
+import {dispatchGltfUrl, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -54,10 +57,10 @@ export class ExportPanel extends ConnectedLitElement {
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
 
   stateChanged(state: State) {
-    this.config = state.config;
-    this.camera = state.camera;
-    this.hotspots = state.hotspots;
-    this.gltfUrl = state.gltfUrl;
+    this.config = getConfig(state);
+    this.camera = getCamera(state);
+    this.hotspots = getHotspots(state);
+    this.gltfUrl = getGltfUrl(state);
   }
 
   render() {
@@ -147,12 +150,12 @@ export class ModelViewerSnippet extends LitElement {
         // If we can't fetch the snippet's src, don't even bother using it.
         // But still dispatch the config, hotspots, etc.
         if (config.src && (await fetch(config.src)).ok) {
-          dispatchGltfUrl(undefined);
+          reduxStore.dispatch(dispatchGltfUrl(undefined));
           // Because of update-batching, we need to sleep first to force reload.
           await new Promise(resolve => {
             setTimeout(resolve, 0);
           });
-          dispatchGltfUrl(config.src);
+          reduxStore.dispatch(dispatchGltfUrl(config.src));
         }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
@@ -161,7 +164,7 @@ export class ModelViewerSnippet extends LitElement {
         // anim by name, can't find it because the model is empty, thus
         // triggering a change event selecting none).
         dispatchConfig(config);
-        dispatchSetHotspots(hotspotConfigs);
+        reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${

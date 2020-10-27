@@ -17,27 +17,22 @@
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 
-import {registerStateMutator} from '../../space_opera_base.js';
-import {State} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-
-// TODO: BUGGY! This is mutating the state!
+import {dispatchInitialCameraState, dispatchSetCamera} from '../camera_settings/reducer.js';
+import {dispatchSetConfig} from '../config/reducer.js';
 
 /** Use when the user wants to load a new config (probably from a snippet). */
-export const dispatchConfig = registerStateMutator(
-    'MODEL_VIEWER_CONFIG', (state: State, config?: ModelViewerConfig) => {
-      if (!config) {
-        throw new Error('No config given!');
-      }
-      if (config === state.config) {
-        throw new Error(`Do not modify state.config in place!`);
-      }
-      state.config = config;
+export function dispatchConfig(config?: ModelViewerConfig) {
+  if (!config) {
+    throw new Error('No config given!');
+  }
 
-      // Clear camera settings. This is optional!
-      state.camera = INITIAL_CAMERA;
+  reduxStore.dispatch(dispatchSetConfig(config));
 
-      // Clear initialCamera too, as ModelViewerPreview will update this.
-      state.initialCamera = INITIAL_CAMERA;
-      delete state.currentCamera;
-    });
+  // Clear camera settings. This is optional!
+  reduxStore.dispatch(dispatchSetCamera(INITIAL_CAMERA));
+
+  // Clear initialCamera too, as ModelViewerPreview will update this.
+  reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
+}

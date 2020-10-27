@@ -29,29 +29,34 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
-import {extractStagingConfig, State} from '../../space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchCurrentCameraState} from '../camera_settings/reducer.js';
+import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
 import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
+import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {HotspotConfig} from '../hotspot_panel/hotspot_config.js';
-import {dispatchAddHotspot, dispatchAddHotspotMode, dispatchSetHotspots, generateUniqueHotspotName} from '../hotspot_panel/reducer.js';
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage} from '../ibl_selector/reducer.js';
+import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
+import {getEdits} from '../materials_panel/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {applyEdits, GltfEdits, INITIAL_GLTF_EDITS} from './gltf_edits.js';
+import {applyEdits} from './gltf_edits.js';
+import {dispatchGltfAndEdits} from './gltf_edits.js';
 import {styles} from './model_viewer_preview_styles.css.js';
-import {dispatchGltfAndEdits, dispatchGltfUrl, dispatchModelViewer} from './reducer.js';
+import {dispatchGltfUrl, getGltfModel, getGltfUrl} from './reducer.js';
+import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
 const $gltfUrl = Symbol('gltfUrl');
 const $gltf = Symbol('gltf');
-const $playAnimation = Symbol('playAnimation');
+const $autoplay = Symbol('autoplay');
 
-function getCameraState(viewer: ModelViewerElement) {
+export function getCameraState(viewer: ModelViewerElement) {
   const orbitRad = viewer.getCameraOrbit();
   return {
     orbit: {
@@ -83,32 +88,31 @@ async function downloadContents(url: string): Promise<ArrayBuffer> {
 @customElement('model-viewer-preview')
 export class ModelViewerPreview extends ConnectedLitElement {
   static styles = [styles, hotspotStyles];
-  @query('model-viewer') private readonly modelViewer?: ModelViewerElement;
+  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
-  @internalProperty()[$playAnimation]?: boolean;
+  @internalProperty()[$autoplay]?: boolean;
   @internalProperty()[$edits]: GltfEdits = INITIAL_GLTF_EDITS;
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
 
   stateChanged(state: State) {
-    this.addHotspotMode = state.addHotspotMode || false;
-    this.camera = state.camera;
-    this.config = state.config;
-    this.hotspots = state.hotspots;
-    this[$edits] = state.edits;
-    this[$gltf] = state.gltf;
-    this[$gltfUrl] = state.gltfUrl;
-    this[$playAnimation] = state.playAnimation;
+    this.addHotspotMode = getHotspotMode(state) || false;
+    this.camera = getCamera(state);
+    this.config = getConfig(state);
+    this.hotspots = getHotspots(state);
+    this[$edits] = getEdits(state);
+    this[$gltf] = getGltfModel(state);
+    this[$gltfUrl] = getGltfUrl(state);
+    this[$autoplay] = getConfig(state).autoplay;
   }
 
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
-    dispatchModelViewer(this.modelViewer);
   }
 
   private async onGltfUrlChanged() {
@@ -180,10 +184,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   protected render() {
+    // If the gltf model has a URL, it must be more recent
+    const currentSrc = this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl];
     const editedConfig = {
       ...this.config,
-      // If the gltf model has a URL, it must be more recent
-      src: this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl],
+      src: currentSrc,
       // Always enable camera controls for preview
       cameraControls: true
     };
@@ -247,21 +252,19 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!this.modelViewer || !this.modelViewer.loaded) {
       throw new Error('onModelVisible called before mv was loaded');
     }
-    dispatchInitialCameraState(getCameraState(this.modelViewer));
+    reduxStore.dispatch(
+        dispatchInitialCameraState(getCameraState(this.modelViewer)));
   }
 
   private onCameraChange() {
-    if (!this.modelViewer) {
-      throw new Error('onCameraChange called before modelViewer defined');
-    }
-    dispatchCurrentCameraState(getCameraState(this.modelViewer));
+    reduxStore.dispatch(dispatchCameraIsDirty());
   }
 
   private enforcePlayAnimation() {
     if (this.modelViewer && this.modelViewer.loaded) {
       // Calling play with no animation name will result in the first animation
       // getting played. Don't want that.
-      if (this[$playAnimation] && this.config.animationName) {
+      if (this[$autoplay] && this.config.animationName) {
         this.modelViewer.play();
       } else {
         this.modelViewer.pause();
@@ -280,12 +283,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!positionAndNormal) {
       throw new Error('invalid click position');
     }
-    dispatchAddHotspot({
+    reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
       position: positionAndNormal.position,
       normal: positionAndNormal.normal,
-    });
-    dispatchAddHotspotMode(false);
+    }));
+    reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }
 
   private async downloadScreenshot() {
@@ -314,15 +317,16 @@ export class ModelViewerPreview extends ConnectedLitElement {
       if (file.name.match(/\.(glb)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-        dispatchGltfUrl(url);
+        reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
-        dispatchSetHotspots([]);
+        reduxStore.dispatch(dispatchSetHotspots([]));
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
         const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
-        dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
-        dispatchEnvrionmentImage(unsafeUrl);
+        reduxStore.dispatch(
+            dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+        reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
       }
     }
   }

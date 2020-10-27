@@ -15,10 +15,10 @@
  *
  */
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, State} from '../../types.js';
 import {immutableArrayUpdate} from '../utils/reducer_utils.js';
 
-import {HotspotConfig} from './hotspot_config.js';
+import {HotspotConfig} from './types.js';
 
 let nextHotspotId = 1;
 let hotspotNameSet = new Set();
@@ -44,69 +44,99 @@ function findHotspotIndex(hotspots: HotspotConfig[], name: string) {
   return index;
 }
 
-/** Dispatch a state mutator to add a hotspot */
-const ADD_HOTSPOT = 'ADD_HOTSPOT';
-export const dispatchAddHotspot = registerStateMutator(
-    ADD_HOTSPOT, (state: State, config?: HotspotConfig) => {
-      if (!config)
-        return;
-      if (hotspotNameSet.has(config.name)) {
-        throw new Error(`Hotspot name duplicate: ${config.name}`);
-      }
-      state.hotspots = [...(state.hotspots ?? []), config];
-      hotspotNameSet.add(config.name);
-    });
+function addHotspot(state: HotspotConfig[], config: HotspotConfig) {
+  if (hotspotNameSet.has(config.name)) {
+    throw new Error(`Hotspot name duplicate: ${config.name}`);
+  }
+  hotspotNameSet.add(config.name);
+  const hotspots = [...(state ?? []), config];
+  return hotspots;
+}
 
-/** Dispatch a state mutator to update a hotspot */
-const UPDATE_HOTSPOT = 'UPDATE_HOTSPOT';
-export const dispatchUpdateHotspot = registerStateMutator(
-    UPDATE_HOTSPOT, (state: State, config?: HotspotConfig) => {
-      if (!config)
-        return;
+function updateHotspot(state: HotspotConfig[], config: HotspotConfig) {
+  const index = findHotspotIndex(state, config.name);
+  const hotspots = immutableArrayUpdate(state, index, config);
+  return hotspots;
+}
 
-      const index = findHotspotIndex(state.hotspots, config.name);
+function removeHotspot(state: HotspotConfig[], name: string) {
+  const index = findHotspotIndex(state, name);
+  const hotspots = [...state];
+  hotspots.splice(index, 1);
+  hotspotNameSet.delete(name);
+  return hotspots;
+}
 
-      state.hotspots = immutableArrayUpdate(state.hotspots, index, config);
-    });
-
-/** Dispatch a state mutator to clear hotspot configs */
-const REMOVE_HOTSPOT = 'REMOVE_HOTSPOT';
-export const dispatchRemoveHotspot =
-    registerStateMutator(REMOVE_HOTSPOT, (state: State, name?: string) => {
-      if (!name)
-        return;
-
-      const index = findHotspotIndex(state.hotspots, name);
-      const hotspots = [...state.hotspots];
-      hotspots.splice(index, 1);
-      state.hotspots = hotspots;
-
-      hotspotNameSet.delete(name);
-    });
-
-/** Dispatch a state mutator to clear hotspot configs */
-const CLEAR_HOTSPOTS = 'CLEAR_HOTSPOTS';
-export const dispatchClearHotspot =
-    registerStateMutator(CLEAR_HOTSPOTS, (state: State) => {
-      state.hotspots = [];
-      hotspotNameSet.clear();
-      nextHotspotId = 1;
-    });
-
-/** Dispatch a state mutator to set all hotspots */
 const SET_HOTSPOTS = 'SET_HOTSPOTS';
-export const dispatchSetHotspots = registerStateMutator(
-    SET_HOTSPOTS, (state: State, hotspots?: HotspotConfig[]) => {
-      if (!hotspots)
-        return;
-      state.hotspots = hotspots;
-      hotspotNameSet = new Set(hotspots.map(hotspot => hotspot.name));
-      nextHotspotId = 1;
-    });
+export function dispatchSetHotspots(hotspots: HotspotConfig[]) {
+  hotspotNameSet = new Set(hotspots.map(hotspot => hotspot.name));
+  nextHotspotId = 1;
+  return {type: SET_HOTSPOTS, payload: hotspots};
+}
 
-/** Dispatch a state mutator to enter / exit addHospotMode */
-const ADD_HOTSPOT_MODE = 'ADD_HOTSPOT_MODE';
-export const dispatchAddHotspotMode = registerStateMutator(
-    ADD_HOTSPOT_MODE, (state: State, addHotspotMode?: boolean) => {
-      state.addHotspotMode = addHotspotMode;
-    });
+const CLEAR_HOTSPOTS = 'CLEAR_HOTSPOTS';
+export function dispatchClearHotspot() {
+  hotspotNameSet.clear();
+  nextHotspotId = 1;
+  return {type: CLEAR_HOTSPOTS, payload: []};
+}
+
+const REMOVE_HOTSPOT = 'REMOVE_HOTSPOT';
+export function dispatchRemoveHotspot(name?: string) {
+  return {type: REMOVE_HOTSPOT, payload: name};
+}
+
+const UPDATE_HOTSPOT = 'UPDATE_HOTSPOT';
+export function dispatchUpdateHotspot(config?: HotspotConfig) {
+  return {type: UPDATE_HOTSPOT, payload: config};
+};
+
+const ADD_HOTSPOT = 'ADD_HOTSPOT';
+export function dispatchAddHotspot(config?: HotspotConfig) {
+  return {type: ADD_HOTSPOT, payload: config};
+}
+
+export const getHotspots = (state: State) =>
+    state.entities.modelViewerSnippet.hotspots;
+
+export function hotspotsReducer(
+    state: HotspotConfig[] = [], action: Action): HotspotConfig[] {
+  switch (action.type) {
+    case SET_HOTSPOTS:
+      return action.payload;
+    case CLEAR_HOTSPOTS:
+      return action.payload;
+    case REMOVE_HOTSPOT:
+      return removeHotspot(state, action.payload);
+    case UPDATE_HOTSPOT:
+      return updateHotspot(state, action.payload);
+    case ADD_HOTSPOT:
+      return addHotspot(state, action.payload);
+    default:
+      return state;
+  }
+}
+
+// UI
+
+const UPDATE_HOTSPOT_MODE = 'UPDATE_HOTSPOT_MODE';
+export function dispatchUpdateHotspotMode(addHotspot: boolean) {
+  return {type: UPDATE_HOTSPOT_MODE, payload: addHotspot};
+}
+
+export const getHotspotMode = (state: State) => state.ui.hotspots.addHotspot;
+
+export function hotspotsUiReducer(
+    state = {
+      addHotspot: false
+    },
+    action: Action) {
+  switch (action.type) {
+    case UPDATE_HOTSPOT_MODE:
+      return {
+        ...state, addHotspot: action.payload
+      }
+    default:
+      return state;
+  }
+}

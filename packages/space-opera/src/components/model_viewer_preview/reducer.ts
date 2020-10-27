@@ -16,68 +16,49 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-
-import {registerStateMutator} from '../../space_opera_base.js';
-import {State} from '../../space_opera_base.js';
-import {getGltfEdits, GltfEdits, INITIAL_GLTF_EDITS} from '../model_viewer_preview/gltf_edits.js';
+import {Action, State} from '../../types.js';
+import {GltfState} from '../model_viewer_preview/types.js';
 
 /** The user has requested a new GLTF/GLB for editing. */
-export const dispatchGltfUrl =
-    registerStateMutator('SET_GLTF_URL', (state: State, gltfUrl?: string) => {
-      state.gltfUrl = gltfUrl;
-    });
+const SET_GLTF = 'SET_GLTF'
+export function dispatchSetGltf(gltf: GltfModel|undefined) {
+  return {type: SET_GLTF, payload: gltf};
+}
 
-class DispatchGltfArgs {
-  constructor(
-      readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {
+const SET_GLTF_URL = 'SET_GLTF_URL'
+export function dispatchGltfUrl(gltfUrl?: string|undefined) {
+  return {type: SET_GLTF_URL, payload: gltfUrl};
+}
+
+const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
+export function dispatchGltfJsonString(gltfJsonString?: string) {
+  return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
+}
+
+export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
+export const getGltfJsonString = (state: State) =>
+    state.entities.gltf.gltfJsonString;
+export const getGltfModel = (state: State) => state.entities.gltf.gltf;
+
+export function gltfReducer(
+    state: GltfState = {
+      gltfJsonString: ''
+    },
+    action: Action): GltfState {
+  switch (action.type) {
+    case SET_GLTF:
+      return {
+        ...state, gltf: action.payload
+      }
+    case SET_GLTF_URL:
+      return {
+        ...state, gltfUrl: action.payload
+      }
+    case SET_GLTF_JSON_STRING:
+      return {
+        ...state, gltfJsonString: action.payload
+      }
+    default:
+      return state;
   }
 }
-
-const dispatchGltf = registerStateMutator(
-    'SET_GLTF', (state: State, args?: DispatchGltfArgs) => {
-      if (!args) {
-        throw new Error(`No args given!`);
-      }
-      const gltf = args.gltf;
-      if (gltf !== undefined && state.gltf === gltf) {
-        throw new Error(
-            `Same gltf was given! Only call this upon actual change`);
-      }
-      state.gltf = gltf;
-
-      const edits = args.edits;
-      if (!edits) {
-        throw new Error(`Must give valid edits!`);
-      }
-      if (state.edits === edits) {
-        throw new Error(
-            `Same edits was given! Only call this upon actual change`);
-      }
-      state.edits = edits;
-      state.origEdits = edits;
-      state.animationNames = args.animationNames;
-      state.gltfJsonString = args.jsonString;
-    });
-
-/**
- * Helper async function
- */
-export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
-  // NOTE: This encodes a design decision: Whether or not we reset edits
-  // upon loading a new GLTF. It may be sensible to not reset edits and just
-  // apply previous edits to the same, but updated, GLTF. That could be
-  // later exposed as an option, and in that case we would simply apply the
-  // existing edits (with null previousEdits) to this new model and not
-  // dispatch new edits.
-  const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
-  dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
-}
-
-/** Only use in intialization. */
-export const dispatchModelViewer = registerStateMutator(
-    'MODEL_VIEWER', (state: State, modelViewer?: ModelViewerElement) => {
-      state.modelViewer = modelViewer;
-    })

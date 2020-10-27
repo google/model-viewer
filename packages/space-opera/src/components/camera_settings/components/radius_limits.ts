@@ -18,8 +18,12 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
+import {reduxStore} from '../../../space_opera_base.js';
+import {State} from '../../../types.js';
+import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
 import {Camera} from '../camera_state.js';
+import {dispatchRadiusLimits, getCamera, getInitialCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -27,39 +31,21 @@ import {LimitsBase} from './limits_base.js';
 /** Absolute minimum radius (meters) */
 export const DEFAULT_MIN_RADIUS = 0;
 
-/** Dispatch change to radius limits */
-export const dispatchRadiusLimits = registerStateMutator(
-    'SET_CAMERA_RADIUS_LIMITS', (state, radiusLimits?: Limits) => {
-      if (!radiusLimits) {
-        throw new Error('No valid limits given');
-      }
-      if (radiusLimits === state.camera.radiusLimits) {
-        throw new Error(
-            'Do not edit radiusLimits in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        radiusLimits,
-      };
-    });
-
-
 /** The Camera Settings panel. */
 @customElement('me-camera-radius-limits')
 export class RadiusLimits extends LimitsBase {
   @internalProperty() radiusLimits?: Limits;
-  @internalProperty() currentCamera?: Camera;
   @internalProperty() initialCamera?: Camera;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.radiusLimits = state.camera.radiusLimits;
-    this.currentCamera = state.currentCamera;
-    this.initialCamera = state.initialCamera;
+    this.radiusLimits = getCamera(state).radiusLimits;
+    this.initialCamera = getInitialCamera(state);
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchRadiusLimits(limits);
+    reduxStore.dispatch(dispatchRadiusLimits(limits));
   }
 
   get label() {
@@ -77,7 +63,8 @@ export class RadiusLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    return this.currentCamera?.orbit?.radius ?? 1;
+    const currentCamera = getCameraState(getModelViewer()!);
+    return currentCamera.orbit?.radius ?? 1;
   }
 
   get limitsProperty() {

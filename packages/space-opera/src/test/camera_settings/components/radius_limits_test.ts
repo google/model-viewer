@@ -18,15 +18,21 @@
 
 import '../../../components/camera_settings/components/radius_limits.js';
 
-import {DEFAULT_MIN_RADIUS, dispatchRadiusLimits, RadiusLimits} from '../../../components/camera_settings/components/radius_limits.js';
-import {dispatchInitialCameraState} from '../../../components/camera_settings/reducer.js';
-import {dispatchCurrentCameraState} from '../../../components/camera_settings/reducer.js';
+import {DEFAULT_MIN_RADIUS, RadiusLimits} from '../../../components/camera_settings/components/radius_limits.js';
+import {dispatchInitialCameraState, dispatchRadiusLimits, getCamera} from '../../../components/camera_settings/reducer.js';
+import {getModelViewer} from '../../../components/model_viewer_preview/model_viewer.js';
+import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {reduxStore} from '../../../space_opera_base.js';
 
-describe('radius limits editor test', () => {
+xdescribe('radius limits editor test', () => {
   let radiusLimits: RadiusLimits;
+  let preview: ModelViewerPreview;
 
   beforeEach(async () => {
+    preview = new ModelViewerPreview();
+    document.body.appendChild(preview);
+    await preview.updateComplete;
+
     radiusLimits = new RadiusLimits();
     document.body.appendChild(radiusLimits);
     dispatchRadiusLimits({enabled: false, min: 0, max: 0});
@@ -34,6 +40,7 @@ describe('radius limits editor test', () => {
   });
 
   afterEach(() => {
+    document.body.removeChild(preview);
     document.body.removeChild(radiusLimits);
   });
 
@@ -50,18 +57,19 @@ describe('radius limits editor test', () => {
   it('correctly dispatches when I click set and clear', async () => {
     // Enable to show the buttons
     dispatchRadiusLimits({enabled: true, min: 0, max: 99});
-    dispatchCurrentCameraState({orbit: {thetaDeg: 0, radius: 10, phiDeg: 33}});
+    const modelViewer = getModelViewer()!;
+    modelViewer.cameraOrbit = '33deg 0deg 10m';
     await radiusLimits.updateComplete;
 
     (radiusLimits.shadowRoot!.querySelector('#set-min-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.radiusLimits!.min).toEqual(10);
+    expect(getCamera(reduxStore.getState()).radiusLimits!.min).toEqual(10);
 
     (radiusLimits.shadowRoot!.querySelector('#clear-min-button')! as
      HTMLInputElement)
         .click();
-    expect(reduxStore.getState().camera.radiusLimits!.min)
+    expect(getCamera(reduxStore.getState()).radiusLimits!.min)
         .toEqual(DEFAULT_MIN_RADIUS);
   });
 });

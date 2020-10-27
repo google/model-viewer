@@ -18,8 +18,11 @@
 
 import {customElement, internalProperty} from 'lit-element';
 
-import {registerStateMutator, State} from '../../../space_opera_base.js';
-import {Camera} from '../camera_state.js';
+import {reduxStore} from '../../../space_opera_base.js';
+import {State} from '../../../types.js';
+import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
+import {dispatchPitchLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 import {LimitsBase} from './limits_base.js';
@@ -32,37 +35,20 @@ export const DEFAULT_MIN_PITCH = 0;
 /** Default maximum pitch angle (degrees) */
 export const DEFAULT_MAX_PITCH = 180;
 
-/** Dispatch change to maximum pitch */
-export const dispatchPitchLimits = registerStateMutator(
-    'SET_CAMERA_PITCH_LIMITS', (state, pitchLimitsDeg?: Limits) => {
-      if (!pitchLimitsDeg) {
-        throw new Error('No valid limits given');
-      }
-      if (pitchLimitsDeg === state.camera.pitchLimitsDeg) {
-        throw new Error(
-            'Do not edit pitchLimitsDeg in place. You passed in the same object');
-      }
-
-      state.camera = {
-        ...state.camera,
-        pitchLimitsDeg,
-      };
-    });
-
 
 /** The Camera Settings panel. */
 @customElement('me-camera-pitch-limits')
 export class PitchLimits extends LimitsBase {
   @internalProperty() pitchLimitsDeg?: Limits;
-  @internalProperty() currentCamera?: Camera;
+  @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.pitchLimitsDeg = state.camera.pitchLimitsDeg;
-    this.currentCamera = state.currentCamera;
+    this.pitchLimitsDeg = getCamera(state).pitchLimitsDeg;
+    this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
   dispatchLimits(limits?: Limits) {
-    dispatchPitchLimits(limits);
+    reduxStore.dispatch(dispatchPitchLimits(limits));
   }
 
   get label() {
@@ -78,9 +64,10 @@ export class PitchLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    if (!this.currentCamera || !this.currentCamera.orbit)
+    const currentCamera = getCameraState(getModelViewer()!);
+    if (!currentCamera || !currentCamera.orbit)
       return 0;
-    return Math.round(this.currentCamera.orbit.phiDeg);
+    return Math.round(currentCamera.orbit.phiDeg);
   }
 
   get limitsProperty() {

@@ -17,9 +17,9 @@
 
 
 
-import {toVector3D} from '../../components/hotspot_panel/hotspot_config.js';
 import {HotspotEditorElement} from '../../components/hotspot_panel/hotspot_editor.js';
-import {dispatchAddHotspot, dispatchClearHotspot} from '../../components/hotspot_panel/reducer.js';
+import {dispatchAddHotspot, dispatchClearHotspot, getHotspots} from '../../components/hotspot_panel/reducer.js';
+import {toVector3D} from '../../components/hotspot_panel/types.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('hotspot editor test', () => {
@@ -30,7 +30,7 @@ describe('hotspot editor test', () => {
       name: 'test',
       position: toVector3D([1, 0, 0]),
     };
-    dispatchAddHotspot(config);
+    reduxStore.dispatch(dispatchAddHotspot(config));
     hotspotEditor = new HotspotEditorElement();
     hotspotEditor.config = config;
     document.body.appendChild(hotspotEditor);
@@ -39,7 +39,7 @@ describe('hotspot editor test', () => {
 
   afterEach(() => {
     document.body.removeChild(hotspotEditor);
-    dispatchClearHotspot();
+    reduxStore.dispatch(dispatchClearHotspot());
   });
 
   it('fires dispatchUpdateHotspot when user updates annotation text', () => {
@@ -49,7 +49,7 @@ describe('hotspot editor test', () => {
     annotationTextArea.value = 'new annotation';
     annotationTextArea.dispatchEvent(new Event('input'));
 
-    const hotspots = reduxStore.getState().hotspots;
+    const hotspots = getHotspots(reduxStore.getState());
     expect(hotspots.length).toBe(1);
     expect(hotspots[0].annotation).toBe('new annotation');
   });
@@ -58,7 +58,7 @@ describe('hotspot editor test', () => {
     const removeButton = hotspotEditor.shadowRoot!.querySelector(
                              'mwc-icon-button#remove-hotspot') as HTMLElement;
     removeButton.click();
-    const hotspots = reduxStore.getState().hotspots;
+    const hotspots = getHotspots(reduxStore.getState());
     expect(hotspots.length).toBe(0);
   });
 });

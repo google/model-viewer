@@ -15,14 +15,14 @@
  *
  */
 
-import {registerStateMutator, State} from '../../space_opera_base.js';
+import {Action, State} from '../../types.js';
+import {INITIAL_CAMERA} from './camera_state.js';
 
 import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
+import {Limits} from './types.js';
 
-/*
- * Register state mutators and get corresponding dispatchers.
- */
+// INITIAL CAMERA //////////////
 
 /**
  * Used to initialize camera state with model-viewer's initial state. This means
@@ -30,71 +30,134 @@ import {SphericalPositionDeg, Vector3D} from './types.js';
  * doing it ourselves.
  */
 const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
-export const dispatchInitialCameraState = registerStateMutator(
-    SET_INITIAL_CAMERA_STATE, (state, initialCamera?: Camera) => {
-      if (!initialCamera)
-        return;
-      state.initialCamera = {...initialCamera};
-    });
+export function dispatchInitialCameraState(initialCamera?: Camera) {
+  return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
+}
 
-/**
- * For any component to use when they need to reference the current preview
- * camera state.
- */
-const SET_CURRENT_CAMERA_STATE = 'SET_CURRENT_CAMERA_STATE';
-export const dispatchCurrentCameraState = registerStateMutator(
-    SET_CURRENT_CAMERA_STATE, (state, currentCamera?: Camera) => {
-      if (!currentCamera)
-        return;
-      state.currentCamera = {...currentCamera};
-    });
+export const getInitialCamera = (state: State) => state.entities.initialCamera;
 
+export function initialCameraReducer(
+    state: Camera = INITIAL_CAMERA, action: Action): Camera {
+  switch (action.type) {
+    case SET_INITIAL_CAMERA_STATE:
+      return action.payload;
+    default:
+      return state;
+  }
+}
 
-const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
-export const dispatchCameraControlsEnabled = registerStateMutator(
-    SET_CAMERA_CONTROLS_ENABLED, (state: State, enabled?: boolean) => {
-      state.config = {...state.config, cameraControls: !!enabled};
-    });
+// DIRTY CAMERA//////////////
+
+const IS_DIRTY_CAMERA = 'IS_DIRTY_CAMERA';
+export function dispatchCameraIsDirty() {
+  return {type: IS_DIRTY_CAMERA};
+}
+
+export const getIsDirtyCamera = (state: State) => state.entities.isDirtyCamera;
+
+export function isDirtyCameraReducer(
+    state: boolean = false, action: Action): boolean {
+  switch (action.type) {
+    case IS_DIRTY_CAMERA:
+      return !state;
+    default:
+      return state;
+  }
+}
+
+// CAMERA //////////////
+
+/** Dispatch change to maximum pitch */
+const SET_CAMERA_YAW_LIMITS = 'SET_CAMERA_YAW_LIMITS';
+export function dispatchYawLimits(yawLimitsDeg?: Limits) {
+  if (!yawLimitsDeg) {
+    throw new Error('No limits given');
+  }
+  return {type: SET_CAMERA_YAW_LIMITS, payload: yawLimitsDeg};
+}
+
+/** Dispatch change to radius limits */
+const SET_CAMERA_RADIUS_LIMITS = 'SET_CAMERA_RADIUS_LIMITS';
+export function dispatchRadiusLimits(radiusLimits?: Limits) {
+  return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
+}
+
+/** Dispatch change to maximum pitch */
+const SET_CAMERA_PITCH_LIMITS = 'SET_CAMERA_PITCH_LIMITS';
+export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
+  return {type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg};
+}
+
+/** Dispatch change to maximum FOV */
+const SET_CAMERA_FOV_LIMITS = 'SET_CAMERA_FOV_LIMITS';
+export function dispatchFovLimits(fovLimitsDeg?: Limits) {
+  return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
+}
 
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export const dispatchSaveCameraOrbit =
-    registerStateMutator(SAVE_CAMERA_ORBIT, (state: State) => {
-      if (!state.currentCamera)
-        return;
-      const currentOrbit = state.currentCamera.orbit;
-      if (!currentOrbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit: {...currentOrbit},
-        fieldOfViewDeg: state.currentCamera.fieldOfViewDeg,
-      };
-    });
+export function dispatchSaveCameraOrbit(
+    currentOrbit: SphericalPositionDeg|undefined,
+    currentFieldOfViewDeg: number|undefined) {
+  return {
+    type: SAVE_CAMERA_ORBIT,
+    payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}
+  };
+}
 
 /** Event dispatcher for changes to camera-target. */
 const SET_CAMERA_TARGET = 'SET_CAMERA_TARGET';
-export const dispatchCameraTarget = registerStateMutator(
-    SET_CAMERA_TARGET, (state: State, target?: Vector3D) => {
-      state.camera = {...state.camera, target};
-    });
+export function dispatchCameraTarget(target?: Vector3D) {
+  return {type: SET_CAMERA_TARGET, payload: target};
+}
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export const dispatchInitialOrbit = registerStateMutator(
-    SET_CAMERA_STATE_INITIAL_ORBIT,
-    (state: State, orbit?: SphericalPositionDeg) => {
-      if (!orbit)
-        return;
-      state.camera = {
-        ...state.camera,
-        orbit,
-      };
-    });
+export function dispatchInitialOrbit(orbit: SphericalPositionDeg) {
+  return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
+}
 
-/** Dispatch changes to auto rotate */
-const SET_AUTO_ROTATE = 'SET_AUTO_ROTATE';
-export const dispatchAutoRotate =
-    registerStateMutator(SET_AUTO_ROTATE, (state, autoRotate?: boolean) => {
-      state.config = {...state.config, autoRotate};
-    });
+const SET_CAMERA = 'SET_CAMERA';
+export function dispatchSetCamera(camera: Camera) {
+  return {type: SET_CAMERA, payload: camera};
+}
+
+export const getCamera = (state: State) =>
+    state.entities.modelViewerSnippet.camera;
+
+export function cameraReducer(
+    state: Camera = INITIAL_CAMERA, action: Action): Camera {
+  switch (action.type) {
+    case SET_CAMERA:
+      return action.payload;
+    case SET_CAMERA_STATE_INITIAL_ORBIT:
+      return {...state, orbit: action.payload};
+    case SET_CAMERA_TARGET:
+      return {
+        ...state, target: action.payload
+      }
+    case SAVE_CAMERA_ORBIT:
+      return {
+        ...state, orbit: {...action.payload.orbit},
+            fieldOfViewDeg: action.payload.fieldOfViewDeg,
+      }
+    case SET_CAMERA_FOV_LIMITS:
+      return {
+        ...state, fovLimitsDeg: action.payload
+      }
+    case SET_CAMERA_PITCH_LIMITS:
+      return {
+        ...state, pitchLimitsDeg: action.payload
+      }
+    case SET_CAMERA_RADIUS_LIMITS:
+      return {
+        ...state, radiusLimits: action.payload
+      }
+    case SET_CAMERA_YAW_LIMITS:
+      return {
+        ...state, yawLimitsDeg: action.payload
+      }
+    default:
+      return state;
+  }
+}
