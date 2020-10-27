@@ -185,9 +185,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   protected render() {
     // If the gltf model has a URL, it must be more recent
-    console.log('mv', this[$gltf]?.modelViewer);
-    console.log('mv source', this[$gltf]?.getModelViewerSource());
-    console.log('url', this[$gltfUrl]);
     const currentSrc = this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl];
     const editedConfig = {
       ...this.config,
