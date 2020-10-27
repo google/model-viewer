@@ -99,7 +99,7 @@ export class AnimationControls extends ConnectedLitElement {
     // console throws a warning.
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
-    if (!(value && this.animationNames.indexOf(value) === -1)) {
+    if (value !== undefined && this.animationNames.indexOf(value) !== -1) {
       reduxStore.dispatch(dispatchAnimationName(value));
     }
 
