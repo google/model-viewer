@@ -25,7 +25,7 @@ export const styles: CSSResult = css`.HeaderLabel {
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: #FF0000;
+  color: #FFFFFF;
 }
 
 .EnvironmnetImageDropdown,
