@@ -4,47 +4,47 @@
     "htmlName": "loading",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "displayPoster",
         "name": "Display Poster"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "preload",
         "name": "Preload"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "customizeLoad",
         "name": "Customize Load"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "invalidModel",
         "name": "Invalid Model"
       },
       {
-        "htmlId": "demo-container-5",
+        "htmlId": "cyclingPosters",
         "name": "Cycling Posters"
       },
       {
-        "htmlId": "demo-container-6",
+        "htmlId": "gltfModel",
         "name": "glTF Model"
       },
       {
-        "htmlId": "demo-container-7",
+        "htmlId": "glbModel",
         "name": "GLB Model"
       },
       {
-        "htmlId": "demo-container-8",
+        "htmlId": "dracoSupport",
         "name": "DRACO Support"
       },
       {
-        "htmlId": "demo-container-9",
+        "htmlId": "usdzModel",
         "name": "USDZ Model"
       },
       {
-        "htmlId": "demo-container-10",
+        "htmlId": "noModel",
         "name": "No Model"
       },
       {
-        "htmlId": "demo-container-11",
+        "htmlId": "cyclingModels",
         "name": "Cycling Models"
       }
     ]
@@ -54,23 +54,23 @@
     "htmlName": "augmentedreality",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "webXR",
         "name": "WebXR"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "ar",
         "name": "AR"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "sceneViewer",
         "name": "Scene Viewer"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "customButton",
         "name": "Custom Button"
       },
       {
-        "htmlId": "demo-container-5",
+        "htmlId": "transparentBackground",
         "name": "Transparent Background"
       }
     ]
@@ -80,32 +80,32 @@
     "htmlName": "stagingandcameras",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "enableInteraction",
         "name": "Enable Interaction"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "cameraOrbit",
         "name": "Camera Orbit"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "orbitAndScroll",
         "name": "Orbit and Scroll"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "interpolation",
         "name": "Interpolation"
       },
       {
-        "htmlId": "demo-container-5",
+        "htmlId": "defaultTarget",
         "name": "Default Target"
       },
       {
-        "htmlId": "demo-container-6",
+        "htmlId": "cameraTarget",
         "name": "Camera Target"
       },
       {
-        "htmlId": "demo-container-7",
-        "name": "Other Interactions"
+        "htmlId": "panning",
+        "name": "Panning"
       }
     ]
   },
@@ -114,7 +114,7 @@
     "htmlName": "annotations",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "addHotspots",
         "name": "Add Hotspots"
       }
     ]
@@ -124,39 +124,39 @@
     "htmlName": "lightingandenv",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "hdrSkyboyImage",
         "name": "HDR skybox-image"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "litModel",
         "name": "Lit Model"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "unlitModel",
         "name": "Unlit Model"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "environmentLighting",
         "name": "Environment Lighting"
       },
       {
-        "htmlId": "demo-container-5",
+        "htmlId": "skyboxAndEnvrionment",
         "name": "Skybox and Environment"
       },
       {
-        "htmlId": "demo-container-6",
+        "htmlId": "renderExposure",
         "name": "Render Exposure"
       },
       {
-        "htmlId": "demo-container-7",
+        "htmlId": "shadows",
         "name": "Shadows"
       },
       {
-        "htmlId": "demo-container-8",
-        "name": "Another HDR Examples"
+        "htmlId": "anotherHDRExample",
+        "name": "Another HDR Example"
       },
       {
-        "htmlId": "demo-container-9",
+        "htmlId": "ldrEnvironmentImage",
         "name": "LDR environment-image"
       }
     ]
@@ -166,19 +166,19 @@
     "htmlName": "animation",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "autoplay",
         "name": "Autoplay"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "selectingAnimations",
         "name": "Selecting Animations"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "crossFade",
         "name": "Crossfade"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "paused",
         "name": "Paused"
       }
     ]
@@ -188,27 +188,27 @@
     "htmlName": "scenegraph",
     "examples": [
       {
-        "htmlId": "demo-container-1",
+        "htmlId": "changeColor",
         "name": "Change Color"
       },
       {
-        "htmlId": "demo-container-2",
+        "htmlId": "changeMaterial",
         "name": "Change Material"
       },
       {
-        "htmlId": "demo-container-3",
+        "htmlId": "swapTextures",
         "name": "Swap Textures"
       },
       {
-        "htmlId": "demo-container-4",
+        "htmlId": "swapTextures2",
         "name": "Swap Textures 2"
       },
       {
-        "htmlId": "demo-container-5",
+        "htmlId": "exporter",
         "name": "Exporter"
       },
       {
-        "htmlId": "demo-container-6",
+        "htmlId": "exporterWithOptions",
         "name": "Exporter w/ Options"
       }
     ]

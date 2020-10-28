@@ -92,14 +92,12 @@ export function starterSidebar(docsOrExample: string) {
 function getExamples(category: any): string {
   const examples = category['examples'];
   let examplesString = '';
-  let i = 1;
   for (const example of examples) {
     examplesString += `
-<h4 class="subcategory-header" id="container-${i}-sidebar">
+<h4 class="subcategory-header" id="container-${example.htmlId}-sidebar">
   <a class="darken" href="#${example.htmlId}" onclick="sidebarClick()">${
         example.name}</a>
 </h4>`;
-    i += 1;
   }
   return examplesString;
 }
