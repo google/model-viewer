@@ -140,10 +140,6 @@
         "name": "Environment Lighting"
       },
       {
-        "htmlId": "skyboxAndEnvrionment",
-        "name": "Skybox and Environment"
-      },
-      {
         "htmlId": "renderExposure",
         "name": "Render Exposure"
       },
@@ -158,6 +154,10 @@
       {
         "htmlId": "ldrEnvironmentImage",
         "name": "LDR environment-image"
+      },
+      {
+        "htmlId": "skyboxAndEnvrionment",
+        "name": "Skybox and Environment"
       }
     ]
   },

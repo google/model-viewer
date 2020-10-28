@@ -72,16 +72,15 @@ window.oscillate = function(min, max, period, time) {
         </div>
       </div>
     </div>
-
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="litModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with a lit model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="litModel" highlight-as="html">
             <template>
 <model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
@@ -91,14 +90,14 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="unlitModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with an unlit model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="unlitModel" highlight-as="html">
             <template>
 <model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
             </template>
@@ -108,14 +107,14 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="environmentLighting" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Use environment-image to set environmental lighting without changing the background</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
 <model-viewer camera-controls environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
@@ -125,31 +124,14 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="demo-container-5" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Supports different <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
-            <h4></h4>
-          </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
-            <template>
-<model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" environment-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of a sphere reflecting a sunrise, backdropped by a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-    <div class="sample">
-      <div id="demo-container-6" class="demo"></div>
+      <div id="renderExposure" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
           <h2 class="demo-title">Control render exposure with <span class="attribute">exposure</span></h2>
           <h4></h4>
         </div>
-        <example-snippet stamp-to="demo-container-6" highlight-as="html">
+        <example-snippet stamp-to="renderExposure" highlight-as="html">
           <template>
 <model-viewer camera-controls id="exposure-demo" exposure="1" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
@@ -172,14 +154,14 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="demo-container-7" class="demo"></div>
+      <div id="shadows" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Control shadow with <span class="attribute">shadow-intensity</span> and <span class="attribute">shadow-softness</span></h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-7" highlight-as="html">
+          <example-snippet stamp-to="shadows" highlight-as="html">
             <template>
 <model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
@@ -202,14 +184,14 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="demo-container-8" class="demo"></div>
+      <div id="anotherHDRExample" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-8" highlight-as="html">
+          <example-snippet stamp-to="anotherHDRExample" highlight-as="html">
             <template>
 <model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
             </template>
@@ -217,25 +199,56 @@ window.oscillate = function(min, max, period, time) {
         </div>
       </div>
     </div>
-
+  
     <div class="sample">
-        <div id="demo-container-9" class="demo"></div>
-        <div class="content">
-          <div class="wrapper">
-            <div class="heading">
-              <h2 class="demo-title">An equirectangular LDR <span class="attribute">environment-image</span></h2>
-              <h4>Note we are still specifying an HDR skybox-image. This is not in general necessary, but if you have multiple &lt;model-viewer&gt; elements
-                on a page (as here) there is a performance problem with having different format skyboxes. To avoid it, simply use only HDR or only LDR for your skyboxes.
-              </h4>
-            </div>
-            <example-snippet stamp-to="demo-container-9" highlight-as="html">
-              <template>
-<model-viewer camera-controls environment-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
-              </template>
-            </example-snippet>
+      <div id="ldrEnvironmentImage" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular LDR <span class="attribute">skybox-image</span></h2>
+            <h4>Note that if you have multiple &lt;model-viewer&gt; elements
+            visible on a page with skyboxes, it is important to be consistent in
+            using either HDR, LDR, or separate environment and skybox for all
+            visible elements. When combining them (as in these examples), there is
+            a serious performance problem, which you will probably notice
+            depending on which examples are currently in your viewport. As this
+            edge case is unlikely anywhere outside of these example pages, it may
+            be some time before it is fixed in three.js.</h4>
           </div>
+          <example-snippet stamp-to="ldrEnvironmentImage" highlight-as="html">
+            <template>
+<model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+            </template>
+          </example-snippet>
         </div>
       </div>
+    </div>
+  
+    <div class="sample">
+      <div id="skyboxAndEnvrionment" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Supports different resolutions of <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
+            <h4>Environment images should be no more than 1k (1024x512) as they
+            are clamped to this resolution internally. If one needs a higher
+            resolution skybox, then two images must be supplied: a high-res JPEG for the
+            <span class="attribute">skybox-image</span> and a matching 1k (or
+            less) HDR for the <span class="attribute">environment-image</span>.
+            Due to compression efficiency, the 4k JPEG and 1k HDR images below are
+            each about 1.5Mb, despite the JPEG having 16 times as many pixels.
+            However, HDR is still recommended for lighting as it yields much more
+            realistic results. 
+            </h4>
+          </div>
+          <example-snippet stamp-to="skyboxAndEnvrionment" highlight-as="html">
+            <template>
+<model-viewer camera-controls skybox-image="../../assets/spruit_sunrise_4k_LDR.jpg" environment-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
 
     <div class="footer">
