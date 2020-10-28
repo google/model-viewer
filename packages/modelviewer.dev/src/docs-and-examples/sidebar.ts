@@ -278,7 +278,6 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
-    // const idList = id.split('-');
     const sidebarName = `container-${id}-sidebar`;
     if (id === maxName) {
       document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
@@ -323,7 +322,6 @@ export function sidebarObserver(docsOrExample: string) {
       threshold: [0, 0.25, 0.5, 0.75, 1],
     };
     const observer = new IntersectionObserver(handleExamples, options);
-    console.log(document.querySelectorAll('div[class="demo"]'));
     document.querySelectorAll('div[class="demo"]').forEach((section) => {
       observer.observe(section);
     });
