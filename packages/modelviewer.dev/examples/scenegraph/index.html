@@ -66,7 +66,7 @@ button {
   
   <div class="examples-container">
     <div class="sample">
-      <div id="demo-container-1" class="demo"></div>
+      <div id="changeColor" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</h4>
@@ -74,7 +74,7 @@ button {
             <h2 class="demo-title">Change Material Base Color</h2>
             <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
 <model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <div id="controls">
@@ -109,13 +109,13 @@ document.querySelector('#controls').addEventListener('click', (event) => {
 
 
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="changeMaterial" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Change Material Metalness and Roughness Factors</h2>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
 <model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
   <div id="controls">
@@ -163,13 +163,13 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="swapTextures" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Swap textures - Diffuse/MetallicRoughness</h2>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
 <model-viewer id="lantern" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
   <div id="controls">
@@ -219,13 +219,13 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
     </div>
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="swapTextures2" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
 <model-viewer id="helmet" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
   <div id="controls">
@@ -286,7 +286,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
     </div>
 
     <div class="sample">
-      <div id="demo-container-5" class="demo"></div>
+      <div id="exporter" class="demo"></div>
       <div class="content">
         <div class="wrapper">
 
@@ -294,7 +294,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
           <div class="heading">
             <h2 class="demo-title">Exporter</h2>
           </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <example-snippet stamp-to="exporter" highlight-as="html">
             <template>
 <model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
   <div id="controls">
@@ -319,13 +319,13 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
     </div>
 
     <div class="sample">
-      <div id="demo-container-6" class="demo"></div>
+      <div id="exporterWithOptions" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Exporter with options</h2>
           </div>
-          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <example-snippet stamp-to="exporterWithOptions" highlight-as="html">
             <template>
 <model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
   <div id="controls">

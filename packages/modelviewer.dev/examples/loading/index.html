@@ -49,7 +49,7 @@
 
   <div class="examples-container">
     <div class="sample">
-      <div id="demo-container-1" class="demo"></div>
+      <div id="displayPoster" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Lazy Loading. </span>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the &lt;model-viewer&gt; element using the poster attribute.</h4>
@@ -58,7 +58,7 @@
             <h2 class="demo-title">Display a poster until loaded</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="displayPoster" highlight-as="html">
             
             <template>
 <style>
@@ -74,14 +74,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="preload" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Preload with poster and show model on interaction</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="preload" highlight-as="html">
             <template>
 <style>
   model-viewer#interaction {
@@ -97,7 +97,7 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="customizeLoad" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
@@ -105,7 +105,7 @@
             <!-- <h2 class="demo-title">Lazy load with poster until interaction</h2> -->
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="customizeLoad" highlight-as="html">
             <template>
 <style>
   #lazy-load-poster {
@@ -152,14 +152,14 @@
 
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="invalidModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Poster with invalid model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="invalidModel" highlight-as="html">
             <template>
 <model-viewer poster="../../assets/poster-astronaut.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
             </template>
@@ -169,14 +169,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-5" class="demo"></div>
+      <div id="cyclingPosters" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Cycling between posters</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <example-snippet stamp-to="cyclingPosters" highlight-as="html">
             <template>
 <model-viewer id="toggle-poster" reveal="interaction" auto-rotate poster="../../assets/poster-astronaut2.png" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
@@ -193,7 +193,7 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-6" class="demo"></div>
+      <div id="gltfModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Model Formats. </span>Learn how model formats work on different platforms. This page tests configurations of the model source.</h4>
@@ -201,7 +201,7 @@
             <h2 class="demo-title">With a glTF model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <example-snippet stamp-to="gltfModel" highlight-as="html">
             <template>
 <model-viewer camera-controls alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
 </model-viewer>
@@ -212,14 +212,14 @@
     </div>
   
     <div class="sample">
-      <div id="demo-container-7" class="demo"></div>
+      <div id="glbModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">With a GLB model</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-7" highlight-as="html">
+          <example-snippet stamp-to="glbModel" highlight-as="html">
             <template>
 <model-viewer camera-controls
     alt="A 3D model of an astronaut" src="../../shared-assets/models/Astronaut.glb">
@@ -231,7 +231,7 @@
     </div>
   
     <div class="sample">
-      <div id="demo-container-8" class="demo"></div>
+      <div id="dracoSupport" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
@@ -247,7 +247,7 @@
               how to customize this behavior.
             </h4>
           </div>
-          <example-snippet stamp-to="demo-container-8" highlight-as="html">
+          <example-snippet stamp-to="dracoSupport" highlight-as="html">
             <template>
 <model-viewer camera-controls alt="A 3D model of an astronaut" src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
 </model-viewer>
@@ -306,14 +306,14 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
     </div>
   
     <div class="sample">
-      <div id="demo-container-9" class="demo"></div>
+      <div id="usdzModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">With only a USDZ model</h2>
             <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with poster to show a static image and the icon to enter augmented reality mode</h4>
           </div>
-          <example-snippet stamp-to="demo-container-9" highlight-as="html">
+          <example-snippet stamp-to="usdzModel" highlight-as="html">
             <template>
 <model-viewer camera-controls alt="A 3D model of an astronaut" ar ios-src="../../shared-assets/models/Astronaut.usdz">
 </model-viewer>
@@ -324,14 +324,14 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
     </div>
   
     <div class="sample">
-      <div id="demo-container-10" class="demo"></div>
+      <div id="noModel" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">With no model</h2>
             <h4>There's nothing to show, but also no error.</h4>
           </div>
-          <example-snippet stamp-to="demo-container-10" highlight-as="html">
+          <example-snippet stamp-to="noModel" highlight-as="html">
             <template>
 <model-viewer alt="An invalid model" src="i-do-not-exist.glb">
 </model-viewer>
@@ -342,14 +342,14 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
     </div>
   
     <div class="sample">
-      <div id="demo-container-11" class="demo"></div>
+      <div id="cyclingModels" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Cycling between different models</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-11" highlight-as="html">
+          <example-snippet stamp-to="cyclingModels" highlight-as="html">
             <template>
 <model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
 <script>

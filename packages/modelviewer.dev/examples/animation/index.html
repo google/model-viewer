@@ -48,7 +48,7 @@
   
   <div class="examples-container">
     <div class="sample">
-      <div id="demo-container-1" class="demo"></div>
+      <div id="autoplay" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Animation. </span>Use &lt;model-viewer&gt; to show off your animated models. This page showcases how you can control models with animations</h4>
@@ -56,7 +56,7 @@
             <h2 class="demo-title">Automatically play animations with the autoplay attribute</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="autoplay" highlight-as="html">
             <template>
 <model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
             </template>
@@ -66,14 +66,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="selectingAnimations" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Select a specific animation with animation-name</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="selectingAnimations" highlight-as="html">
             <template>
 <model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
             </template>
@@ -83,14 +83,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="crossFade" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Animations crossfade when you change them</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="crossFade" highlight-as="html">
             <template>
 <model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
 <script>
@@ -110,14 +110,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="paused" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">A paused model shows the first frame of the configured animation</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="paused" highlight-as="html">
             <template>
 <model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
 <script>

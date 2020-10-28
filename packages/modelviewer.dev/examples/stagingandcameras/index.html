@@ -48,7 +48,7 @@
   
   <div class="examples-container">
     <div class="sample">
-      <div id="demo-container-1" class="demo"></div>
+      <div id="enableInteraction" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Staging &amp; Camera Control. </span>Use these features to frame the perfect shot for your model</h4>
@@ -56,7 +56,7 @@
             <h2 class="demo-title">Use the <span class="attribute">camera-controls</span> attribute to enable user interaction</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="enableInteraction" highlight-as="html">
             <template>
 <model-viewer camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
@@ -66,14 +66,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="cameraOrbit" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Set the <span class="attribute">camera-orbit</span> change the initial angle and position of the camera</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="cameraOrbit" highlight-as="html">
             <template>
 <model-viewer camera-controls camera-orbit="45deg 55deg 2.5m" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
@@ -83,14 +83,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="orbitAndScroll" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Use CSS-like <span class="attribute">calc()</span> to sync camera orbit with scroll position</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="orbitAndScroll" highlight-as="html">
             <template>
 <model-viewer camera-controls camera-orbit="calc(-1.5rad + env(window-scroll-y) * 4rad) calc(0deg + env(window-scroll-y) * 180deg) calc(3m - env(window-scroll-y) * 1.5m)" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
@@ -100,14 +100,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="interpolation" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">The camera automatically interpolates between orbits (even when controls are disabled)</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="interpolation" highlight-as="html">
             <template>
 <model-viewer id="orbit-demo" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
@@ -133,14 +133,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-5" class="demo"></div>
+      <div id="defaultTarget" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">By default, the camera targets the center of the model's bounding box</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-5" highlight-as="html">
+          <example-snippet stamp-to="defaultTarget" highlight-as="html">
             <template>
 <model-viewer camera-controls auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
             </template>
@@ -150,14 +150,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-6" class="demo"></div>
+      <div id="cameraTarget" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Use the <span class="attribute">camera-target</span> attribute to orbit a different coordinate</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-6" highlight-as="html">
+          <example-snippet stamp-to="cameraTarget" highlight-as="html">
             <template>
 <model-viewer camera-controls camera-target="0m 0m 0m" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
             </template>
@@ -167,7 +167,7 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-7" class="demo"></div>
+      <div id="panning" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
@@ -183,7 +183,7 @@
             reasonable API around. It also tends to be confusing to users in cases
             where it is not necessary.</p>
           </div>
-          <example-snippet stamp-to="demo-container-7" highlight-as="html">
+          <example-snippet stamp-to="panning" highlight-as="html">
             <template>
 <model-viewer id="pan-demo" camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>

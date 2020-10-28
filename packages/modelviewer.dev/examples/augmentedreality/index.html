@@ -47,7 +47,7 @@
   
   <div class="examples-container">
     <div class="sample">
-      <div id="demo-container-1" class="demo"></div>
+      <div id="webXR" class="demo"></div>
       <div class="content">
         <div class="wrapper">
   
@@ -75,7 +75,7 @@
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
           </div>
-          <example-snippet stamp-to="demo-container-1" highlight-as="html">
+          <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
 <model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls alt="A 3D model carousel">
   
@@ -246,14 +246,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-2" class="demo"></div>
+      <div id="ar" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Augmented Reality</h2>
             <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
           </div>
-          <example-snippet stamp-to="demo-container-2" highlight-as="html">
+          <example-snippet stamp-to="ar" highlight-as="html">
             <template>
 <model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
@@ -264,14 +264,14 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-3" class="demo"></div>
+      <div id="sceneViewer" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Scene Viewer</h2>
             <h4>Here the Scene Viewer app is given priority, to make it easier to compare with the default WebXR, above.</h4>
           </div>
-          <example-snippet stamp-to="demo-container-3" highlight-as="html">
+          <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
 <model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
@@ -311,7 +311,7 @@
     </div>
 
     <div class="sample">
-      <div id="demo-container-4" class="demo"></div>
+      <div id="customButton" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Using Slots In &lt;model-viewer&gt;. </span>This page demonstrates how you can change parts of &lt;model-viewer&gt; using web component slots.</h4>
@@ -319,7 +319,7 @@
             <h2 class="demo-title">Custom AR Button</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="demo-container-4" highlight-as="html">
+          <example-snippet stamp-to="customButton" highlight-as="html">
             <template>
 <model-viewer ar camera-controls ios-src="assets/Astronaut.usdz" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
@@ -340,14 +340,14 @@
     </div>
   
     <div class="sample">
-      <div id="demo-container-5" class="demo"></div>
+      <div id="transparentBackground" class="demo"></div>
         <div class="content">
           <div class="wrapper">
             <div class="heading">
               <h2 class="demo-title">Transparent Background</h2>
               <h4></h4>
             </div>
-            <example-snippet stamp-to="demo-container-5" highlight-as="html">
+            <example-snippet stamp-to="transparentBackground" highlight-as="html">
               <template>
 <div class="background-demo" style="background: linear-gradient(#ffffff, #ada996);">
   <span style="position: absolute; text-align: center; font-size: 100px; top:50%;">Background</span>
