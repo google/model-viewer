@@ -153,15 +153,17 @@ export class IblSelector extends ConnectedLitElement {
               value="${this.config.exposure ?? DEFAULT_EXPOSURE}">
             </me-slider-with-input>
           </me-section-row>
-          <me-section-row class="Row" label="Use Environment as Skybox">
-            <me-checkbox id="skybox"
+          <me-checkbox 
+            id="skybox" 
+            label="Use Environment as Skybox"
             ?checked="${!!this.config.useEnvAsSkybox}"
-            @change=${this.onUseEnvAsSkyboxChange}></me-checkbox>
-            ${
+            @change=${this.onUseEnvAsSkyboxChange}
+            >
+          </me-checkbox>
+          ${
         selectedIndex === 0 && this.config.useEnvAsSkybox ?
-            html`<br/><div><small>Choose a non-default environment</small></div>` :
+            html`<div class="defaultError"><small>Choose a non-default environment</small></div>` :
             html``}
-          </me-section-row>
 
           <me-section-row class="Row" label="Shadow Intensity">
             <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
