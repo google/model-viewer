@@ -355,8 +355,8 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
 <script>
     const models = ['shishkebab.glb', 'Astronaut.glb'];
     const toggleModel = document.querySelector('#toggle-model');
-    let i = 0;
-    setInterval(() => toggleModel.setAttribute('src', `../../shared-assets/models/${models[i++ % 2]}`), 2000);
+    let j = 0;
+    setInterval(() => toggleModel.setAttribute('src', `../../shared-assets/models/${models[j++ % 2]}`), 2000);
 </script>
             </template>
           </example-snippet>
