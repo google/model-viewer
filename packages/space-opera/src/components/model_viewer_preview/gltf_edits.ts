@@ -83,7 +83,7 @@ class DispatchGltfArgs {
   }
 }
 
-function dispatchGltf(args?: DispatchGltfArgs) {
+function dispatchGltf(args?: DispatchGltfArgs, isFromPoster?: boolean) {
   if (!args) {
     throw new Error(`No args given!`);
   }
@@ -100,7 +100,9 @@ function dispatchGltf(args?: DispatchGltfArgs) {
   if (getEdits(reduxStore.getState()) === edits) {
     throw new Error(`Same edits was given! Only call this upon actual change`);
   }
-  reduxStore.dispatch(dispatchSetEdits(edits));
+  if (!isFromPoster) {
+    reduxStore.dispatch(dispatchSetEdits(edits));
+  }
   reduxStore.dispatch(dispatchSetOrigEdits(edits));
   reduxStore.dispatch(dispatchSetAnimationNames(args.animationNames));
   reduxStore.dispatch(dispatchGltfJsonString(args.jsonString));
@@ -109,7 +111,8 @@ function dispatchGltf(args?: DispatchGltfArgs) {
 /**
  * Helper async function
  */
-export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
+export function dispatchGltfAndEdits(
+    gltf: GltfModel|undefined, isFromPoster?: boolean) {
   // NOTE: This encodes a design decision: Whether or not we reset edits
   // upon loading a new GLTF. It may be sensible to not reset edits and just
   // apply previous edits to the same, but updated, GLTF. That could be
@@ -117,6 +120,8 @@ export function dispatchGltfAndEdits(gltf: GltfModel|undefined) {
   // existing edits (with null previousEdits) to this new model and not
   // dispatch new edits.
   const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
-  dispatchGltf(new DispatchGltfArgs(
-      gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''));
+  dispatchGltf(
+      new DispatchGltfArgs(
+          gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''),
+      isFromPoster);
 }
