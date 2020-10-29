@@ -22,6 +22,12 @@ export const styles: CSSResult = css`.HeaderLabel {
   font-weight: 500;
 }
 
+.defaultError {
+  margin-top: 0;
+  margin-left: 15px;
+  color: #FFFFFF;
+}
+
 .EnvironmnetImageDropdown,
 .UploadButton,
 .Row {

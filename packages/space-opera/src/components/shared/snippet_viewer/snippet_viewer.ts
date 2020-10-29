@@ -76,7 +76,7 @@ ${css_beautify(this.renderedStyle)}
     // Remove the ar-status runtime-added tag
     html = html.replace(/ar-status="[\w- ]+" */, '');
     // Remove redundant ="" for boolean attribs
-    html = html.replace(/=""/, '');
+    html = html.replace(/=""/g, '');
     return html_beautify(html);
   }
 }

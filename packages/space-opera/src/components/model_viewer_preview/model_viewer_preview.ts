@@ -39,7 +39,7 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
-import {getEdits} from '../materials_panel/reducer.js';
+import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -52,6 +52,7 @@ import {dispatchGltfUrl, getGltfModel, getGltfUrl} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
+const $origEdits = Symbol('origEdits');
 const $gltfUrl = Symbol('gltfUrl');
 const $gltf = Symbol('gltf');
 const $autoplay = Symbol('autoplay');
@@ -95,6 +96,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() addHotspotMode = false;
   @internalProperty()[$autoplay]?: boolean;
   @internalProperty()[$edits]: GltfEdits = INITIAL_GLTF_EDITS;
+  @internalProperty()[$origEdits]: GltfEdits = INITIAL_GLTF_EDITS;
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
@@ -104,6 +106,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
+    this[$origEdits] = getOrigEdits(state);
     this[$edits] = getEdits(state);
     this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
@@ -121,9 +124,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
 
     // Clear potential poster settings.
-    if (this.config.reveal === 'interaction' ||
-        this.config.reveal === 'manual') {
-      this.modelViewer.reveal = this.config.reveal;
+    let isFromPoster = false;
+    if (this.modelViewer.reveal === 'interaction' ||
+        this.modelViewer.reveal === 'manual') {
+      this.modelViewer.reveal = 'auto';
+      isFromPoster = true;
     } else {
       this.modelViewer.reveal = 'auto';
     }
@@ -137,7 +142,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
         const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
         const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-        dispatchGltfAndEdits(gltf);
+        dispatchGltfAndEdits(gltf, isFromPoster);
+        if (isFromPoster) {
+          this.updateGltf(false, this[$origEdits]);
+        }
       } catch (error) {
         this.gltfError = error.message;
       }
@@ -159,7 +167,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
       // Got a new GLTF, assume that previous edits were not applied yet.
       previousEdits = undefined;
     }
-
     const gltf = this[$gltf];
     if (gltf) {
       await applyEdits(gltf, this[$edits], previousEdits);
@@ -245,6 +252,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   private onModelLoaded() {
     // Handle the case when the model is loaded for the first time.
+    this.onGltfUrlChanged();
     this.enforcePlayAnimation();
   }
 

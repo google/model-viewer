@@ -178,7 +178,7 @@ export class ModelViewerSnippet extends LitElement {
   render() {
     const exampleLoadableSnippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/Astronaut.glb'
-  shadow-intensity="1">
+  shadow-intensity="1" camera-controls>
 </model-viewer>`;
 
     return html`
