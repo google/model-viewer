@@ -40,8 +40,6 @@
 </head>
 <body>
 
-  <a id="button-github" class="icon-github icon-button" href="https://github.com/google/model-viewer"></a>
-
   <div class="sample">
     <div id="demo-container" class="demo"></div>
     <div class="content">
@@ -291,8 +289,14 @@
       </li>
     </ul>
     <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
+    <div id='footer-links'></div>
   </div>
+
+  <script type="module" src="./examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { initFooterLinks();})();
+  </script>
 
 
   <!-- Documentation-specific dependencies: -->

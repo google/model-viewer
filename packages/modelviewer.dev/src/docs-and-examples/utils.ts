@@ -84,6 +84,14 @@ function jumpToSection() {
   }
 }
 
+export function initFooterLinks() {
+  const footerLinks = document.getElementById('footer-links');
+  footerLinks!.innerHTML = `
+<div>
+  <a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a> ∙ <a href="https://policies.google.com/privacy">Privacy</a>
+</div>`;
+}
+
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
  * docsOrExample: 'docs' or 'examples-${category}'
@@ -120,12 +128,13 @@ export function toggleSidebar() {
 (self as any).toggleSidebar = toggleSidebar;
 (self as any).switchPages = switchPages;
 (self as any).init = init;
+(self as any).initFooterLinks = initFooterLinks;
 
 function handleSideBarClickToggle(event: any) {
   const nav = document.getElementById('sidenav')!;
   var mouseClickWidth = event.clientX;
   // toggle nav when clicking outside of nav on small device
-  if (mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
+  if (nav && mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
       window.innerWidth <= 800) {
     toggleSidebar();
   }

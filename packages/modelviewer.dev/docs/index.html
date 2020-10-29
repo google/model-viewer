@@ -41,13 +41,20 @@
     <div id="lightingandenv-docs"></div>
     <div id="animation-docs"></div>
     <div id="scenegraph-docs"></div>
+    <div class="footerDocumentation">
+      <div class="footer">
+        <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+        <div id='footer-links'></div>
+      </div>
+    </div>
   </div>
-  <div class="footerDocumentation"></div>
+  
 
   <script type="module" src="../examples/built/docs-and-examples.js">
   </script>
   <script type="module">
     (() => { init('docs'); })();
+    (() => { initFooterLinks();})();
   </script>
   <script>
     function addMargin() {
