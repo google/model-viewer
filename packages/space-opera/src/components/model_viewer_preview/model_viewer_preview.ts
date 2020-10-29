@@ -142,7 +142,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
         const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
         const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-        // TODO, add in a conditional here that doesn't reset edits
         dispatchGltfAndEdits(gltf, isFromPoster);
         if (isFromPoster) {
           this.updateGltf(false, this[$origEdits]);
