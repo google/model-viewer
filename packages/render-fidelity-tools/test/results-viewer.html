@@ -49,9 +49,51 @@
     max-width: 1000px;
     text-align: left;
   }
+  .icon-modelviewer-black {
+    background-image: url(./ic_modelviewer.svg);
+  }
+  .icon-button {
+    margin-left: -4px;
+    margin-right: 8px;
+    width: 34px;
+    height: 34px;
+    background-size: 34px;
+  }
+  .inner-home {
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+    text-decoration: none;
+  }
+  .home {
+    padding: 20px;
+    overflow: auto;
+    white-space: nowrap;
+  }
+  .lockup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    color: rgba(0,0,0,.87);
+  }
+  .attribute {
+    white-space: pre-wrap !important;
+    font-family: 'Roboto Mono', monospace;
+    color: black;
+  }
+  .attribute:hover {
+    text-decoration: underline;
+    color: #444444;
+  }
 </style>
 </head>
 <body>
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
+      <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    </a>
+  </div>
   <div align="center">
     <h2>Render Fidelity Comparison Results</h2>
   

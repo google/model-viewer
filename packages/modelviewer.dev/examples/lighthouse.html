@@ -191,14 +191,52 @@
     model-viewer > .ar-prompt > img {
       animation: circle 4s linear infinite;
     }
+    .icon-modelviewer-black {
+    background-image: url(../assets/ic_modelviewer.svg);
+    }
+    .icon-button {
+      margin-left: -4px;
+      margin-right: 8px;
+      width: 34px;
+      height: 34px;
+      background-size: 34px;
+    }
+    .inner-home {
+      display: flex;
+      align-items: center;
+      font-size: 1.1em;
+      text-decoration: none;
+    }
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+    .lockup {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      color: rgba(0,0,0,.87);
+    }
+    .attribute {
+      white-space: pre-wrap !important;
+      font-family: 'Roboto Mono', monospace;
+      color: black;
+    }
+    .attribute:hover {
+      text-decoration: underline;
+      color: #444444;
+    }
   </style>
 </head>
 <body>
-  <div align="center">
-    <a href="../index.html" class="sidebar-mv inner-home">
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
       <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
     </a>
-  <!-- First Example -->
+  </div>
+  <div align="center">
 
     <h2>Setting up <code>&lt;model-viewer&gt;</code> for good Lighthouse scores</h2>
   
