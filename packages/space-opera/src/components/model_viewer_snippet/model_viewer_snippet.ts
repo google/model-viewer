@@ -198,6 +198,7 @@ export class ModelViewerSnippet extends LitElement {
     </me-expandable-tab>
 
     <me-export-panel></me-export-panel>
+    <a href="https://policies.google.com/privacy" style="color: white">Privacy</a>
             `;
   }
 

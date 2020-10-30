@@ -40,6 +40,15 @@
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 </head>
 <body>
 
@@ -131,7 +140,7 @@
         </li>
       </ul>
       <div style="margin-top:24px;" class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
-      <div><a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a></div>
+      <div id='footer-links'></div>
     </div>
   </div>
 </div>
@@ -140,6 +149,7 @@
 </script>
 <script type="module">
   (() => { init('examples-annotations'); })();
+  (() => { initFooterLinks();})();
 </script>
 
 

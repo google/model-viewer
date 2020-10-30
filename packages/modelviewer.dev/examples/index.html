@@ -14,80 +14,14 @@
  * limitations under the License.
  */
 -->
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <title>&lt;model-viewer&gt; Examples and Documentation</title>
   <meta charset="utf-8">
-  <meta name="description" content="&lt;model-viewer&gt; examples and documentation">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
-  <link type="text/css" href="../styles/docs.css" rel="stylesheet" />
-  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png" />
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
-  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+  <meta http-equiv="refresh" content="0; url='./loading/index.html'" />
 </head>
-
 <body>
-  <div class="sidebar">
-    <div class="home lockup">
-      <a href="../" class="sidebar-mv inner-home">
-        <div class="icon-button icon-modelviewer-black inner-home"></div>
-        <h1 class="inner-home">model-viewer</h1>
-      </a>
-    </div>
-    <hr class="sidebar-hr">
-    <div class="flipper">
-      <div class="inner-flipper" id="examples-flipper" onclick="switchPages('examples', 'examples')">
-        <a class="darken bolden">EXAMPLES</a>
-      </div>
-      <div class="inner-flipper">|</div>
-      <div class="inner-flipper" id="documentation-flipper" onclick="switchPages('examples', 'docs')">
-        <a class="darken">DOCUMENTATION</a>
-      </div>
-    </div>
-    <div class="categories" id="sidebar-category-container">
-    </div>
-  </div>
-
-  <!-- Start of all documentation -->
-  <div class="outer-content">
-    <div id="loading-examples-header"></div>
-    <div id="loading-examples"></div>
-  </div>
-
-  <script type="module" src="../examples/built/docs-and-examples.js">
-  </script>
-  <script type="module">
-    (() => { init('examples'); })();
-  </script>
-
-  <!-- Documentation-specific dependencies: -->
-  <script type="module" src="../examples/built/dependencies.js">
-  </script>
-  <script nomodule src="../examples/built/dependencies-legacy.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on modern browsers: -->
-  <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule src="../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
-  </script>
+  <p>Please follow <a href="./loading/index.html">this link</a>.</p>
 </body>
-
 </html>
