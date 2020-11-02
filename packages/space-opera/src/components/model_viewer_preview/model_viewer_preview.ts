@@ -250,6 +250,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
             childElements)}`;
   }
 
+  // Handle the case when the model is loaded for the first time.
   private onModelLoaded() {
     // only update on poster reveal
     if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
