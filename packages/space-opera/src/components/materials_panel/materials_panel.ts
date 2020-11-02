@@ -549,43 +549,48 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-section-row label="Texture">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-          title="Revert to original metallic roughness texture"
-          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
+      <me-card title="Texture">
+        <div slot="content">
+          <div class="TexturePickerContainer">
+            <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+            title="Revert to original metallic roughness texture"
+            @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+            <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="metallic-roughness-texture-picker" @texture-changed=${
         this.onMetallicRoughnessTextureChange} @texture-uploaded=${
         this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
+            </me-texture-picker>
+          </div>
         </div>
-      </me-section-row>
-      <div class="MRSliders">
-        <div class="MRSliderLabel">Metallic factor</div>
-        <div class="MRSliderContainer">
-          <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
-          title="Revert to original metallic factor"
-          @click=${this.revertMetallicFactor}></mwc-icon-button>
-          <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
-        step="0.01" value="${material.metallicFactor}" @change=${
+      </me-card>
+      <me-card title="Metallic factor">
+        <div slot="content">
+          <div class="MRSliderContainer">
+            <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
+            title="Revert to original metallic factor"
+            @click=${this.revertMetallicFactor}></mwc-icon-button>
+            <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
+          step="0.01" value="${material.metallicFactor}" @change=${
         this.onMetallicChange}>
-          </me-slider-with-input>
+            </me-slider-with-input>
+          </div>
         </div>
-
-        <div class="MRSliderLabel">Roughness factor</div>
-        <div class="MRSliderContainer">
-          <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
-          title="Revert to original roughness factor"
-          @click=${this.revertRoughnessFactor}></mwc-icon-button>
-          <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
-          step="0.01" value="${material.roughnessFactor}" @change=${
+      </me-card>
+      <me-card title="Roughness factor">
+        <div slot="content">
+          <div class="MRSliderContainer">
+            <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
+            title="Revert to original roughness factor"
+            @click=${this.revertRoughnessFactor}></mwc-icon-button>
+            <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
+            step="0.01" value="${material.roughnessFactor}" @change=${
         this.onRoughnessChange}>
-          </me-slider-with-input>
+            </me-slider-with-input>
+          </div>
         </div>
-      </div>
+      </me-card>
     </div>
   </me-expandable-tab>`;
   }
@@ -603,7 +608,8 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Base Color">
     <div slot="content">
-      <me-section-row label="Factor">
+      <me-card title="Factor">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
             title="Revert to original base color factor"
@@ -613,8 +619,10 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onBaseColorChange}>
           </me-color-picker>
         </div>
-      </me-section-row>
-      <me-section-row label="Texture">
+        </div>
+      </me-card>
+      <me-card title="Texture">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
           title="Revert to original base color texture"
@@ -627,7 +635,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onBaseColorTextureUpload} .images=${
         this.safeTextureUrls}></me-texture-picker>
         </div>
-      </me-section-row>
+        </div>
+      </me-card>
     </div>
   </me-expandable-tab>
     `;
@@ -642,7 +651,8 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
-      <me-section-row label="Texture">
+      <me-card title="Texture">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
           title="Revert to original normal map texture"
@@ -655,7 +665,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
           </me-texture-picker>
         </div>
-      </me-section-row>
+        </div>
+      </me-card>
     </div>
   </me-expandable-tab>`;
   }
@@ -673,7 +684,8 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Emissive">
     <div slot="content">
-      <me-section-row label="Factor">
+      <me-card title="Factor">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
           title="Revert to original emissive factor"
@@ -682,8 +694,10 @@ export class MaterialPanel extends ConnectedLitElement {
         selectedColorHex} id="emissive-factor-picker" @change=${
         this.onEmissiveFactorChanged}></me-color-picker>
         </div>
-      </me-section-row>
-      <me-section-row label="Texture">
+        </div>
+      </me-card>
+      <me-card title="Texture">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
           title="Revert to original emissive texture"
@@ -696,7 +710,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onEmissiveTextureUpload} .images=${this.safeTextureUrls}>
         </me-texture-picker>
         </div>
-      </me-section-row>
+        </div>
+      </me-card>
     </div>
   </me-expandable-tab>`;
   }
@@ -710,7 +725,8 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
-      <me-section-row label="Texture">
+      <me-card title="Texture">
+      <div slot="content">
         <div class="TexturePickerContainer">
           <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
           title="Revert to original occlusion texture"
@@ -723,7 +739,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
           </me-texture-picker>
         </div>
-      </me-section-row>
+        </div>
+      </me-card>
     </div>
   </me-expandable-tab>`;
   }
@@ -738,19 +755,22 @@ export class MaterialPanel extends ConnectedLitElement {
     const selectedIndex =
         material.alphaMode ? ALPHA_BLEND_MODES.indexOf(material.alphaMode) : 0;
     return html`
-    <div class="SectionLabel">Alpha Blend Mode:</div>
-    <div class="DropdownContainer">
-      <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
-        title="Revert to original alpha mode"
-        @click=${this.revertAlphaMode}></mwc-icon-button>
-      <me-dropdown id="alpha-mode-picker"
-        selectedIndex=${selectedIndex}
-        @select=${this.onAlphaModeSelect}>
-        ${
+    <me-card title="Alpha Blend Mode">
+      <div slot="content">
+        <div class="DropdownContainer">
+          <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
+            title="Revert to original alpha mode"
+            @click=${this.revertAlphaMode}></mwc-icon-button>
+          <me-dropdown id="alpha-mode-picker"
+            selectedIndex=${selectedIndex}
+            @select=${this.onAlphaModeSelect}>
+            ${
         ALPHA_BLEND_MODES.map(
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
-      </me-dropdown>
-    </div>
+          </me-dropdown>
+        </div>
+      </div>
+    </me-card>
       ${
         material.alphaMode === 'MASK' ?
             html`
@@ -777,16 +797,21 @@ export class MaterialPanel extends ConnectedLitElement {
 
     // By default, double sided is false. So if it's undefined, assume false.
     return html`
-      <div class="CheckboxContainer">
-        <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
-        title="Revert to original double sidedness"
-        @click=${this.revertDoubleSided}></mwc-icon-button>
-        <me-checkbox id="doubleSidedCheckbox"
-          ?checked=${
+    <me-card title="Double Sided">
+      <div slot="content">
+        <div class="CheckboxContainer">
+          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+          title="Revert to original double sidedness"
+          @click=${this.revertDoubleSided}></mwc-icon-button>
+          <me-checkbox id="doubleSidedCheckbox"
+            ?checked=${
     !!this.materials[this.selectedMaterialId].doubleSided}
-          label="Double Sided"
-          @change=${this.onDoubleSidedChange}></me-checkbox>
-      </div>`;
+            label="Double Sided"
+            @change=${this.onDoubleSidedChange}></me-checkbox>
+        </div>
+      </div>
+    </me-card>
+      `;
   }
 
   renderOtherTab() {

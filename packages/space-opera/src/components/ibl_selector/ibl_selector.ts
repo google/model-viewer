@@ -134,52 +134,60 @@ export class IblSelector extends ConnectedLitElement {
     return html`
       <me-expandable-tab tabName="Lighting">
         <div slot="content">
-          <div class="HeaderLabel">Environment Image:</div>
-          <me-dropdown
-            class="EnvironmnetImageDropdown"
-            selectedIndex=${selectedIndex}
-            @select=${this.onSelectEnvironmentImage}>
-            <paper-item>Default</paper-item>
-            ${
+          <me-card title="Environment Image">
+            <div slot="content">
+              <mwc-button class="UploadButton" id="uploadButton" unelevated
+                icon="cloud_upload" @click="${this.openFileModal}">Upload
+              </mwc-button>
+              <me-dropdown
+                class="EnvironmnetImageDropdown"
+                selectedIndex=${selectedIndex}
+                @select=${this.onSelectEnvironmentImage}>
+                <paper-item>Default</paper-item>
+                ${
         this.environmentImages.map(
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
-          </me-dropdown>
-          <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="cloud_upload" @click="${this.openFileModal}">Upload</mwc-button>
-          <me-section-row class="Row" label="Exposure">
-            <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
-              @change="${this.onExposureChange}"
-              value="${this.config.exposure ?? DEFAULT_EXPOSURE}">
-            </me-slider-with-input>
-          </me-section-row>
-          <me-checkbox 
-            id="skybox" 
-            label="Use Environment as Skybox"
-            ?checked="${!!this.config.useEnvAsSkybox}"
-            @change=${this.onUseEnvAsSkyboxChange}
-            >
-          </me-checkbox>
-          ${
+              </me-dropdown>
+              <me-checkbox 
+                id="skybox" 
+                label="Use Environment as Skybox"
+                ?checked="${!!this.config.useEnvAsSkybox}"
+                @change=${this.onUseEnvAsSkyboxChange}
+                >
+              </me-checkbox>
+              ${
         selectedIndex === 0 && this.config.useEnvAsSkybox ?
             html`<div class="defaultError"><small>Choose a non-default environment</small></div>` :
             html``}
-
-          <me-section-row class="Row" label="Shadow Intensity">
-            <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
-              @change="${this.onShadowIntensityChange}"
-              value="${
+            </div>
+          </me-card>
+          <me-card title="Exposure">
+            <div slot="content">
+              <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
+                @change="${this.onExposureChange}"
+                value="${this.config.exposure ?? DEFAULT_EXPOSURE}">
+              </me-slider-with-input>
+            </div>
+          </me-card>
+          <me-card title="Shadow Intensity">
+            <div slot="content">
+              <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
+                @change="${this.onShadowIntensityChange}"
+                value="${
         this.config.shadowIntensity ?? DEFAULT_SHADOW_INTENSITY}">
-            </me-slider-with-input>
-          </me-section-row>
-
-          <me-section-row class="Row" label="Shadow Softness">
-            <me-slider-with-input min="0" max="1" step="0.01" id="shadow-softness"
-              @change="${this.onShadowSoftnessChange}"
-              value="${this.config.shadowSoftness ?? DEFAULT_SHADOW_SOFTNESS}">
-            </me-slider-with-input>
-          </me-section-row>
-
+              </me-slider-with-input>
+            </div>
+          </me-card>
+          <me-card title="Shadow Softness">
+            <div slot="content">
+              <me-slider-with-input min="0" max="1" step="0.01" id="shadow-softness"
+                @change="${this.onShadowSoftnessChange}"
+                value="${
+        this.config.shadowSoftness ?? DEFAULT_SHADOW_SOFTNESS}">
+              </me-slider-with-input>
+            </div>
+          </me-card>
           <me-file-modal id="imageUpload" accept=${ACCEPT_IMAGE_TYPE}>
           </me-file-modal>
         </div>

@@ -71,19 +71,23 @@ export class AnimationControls extends ConnectedLitElement {
     return html`
       <me-expandable-tab tabName=${tabHeader} .enabled=${hasAnims}>
         <div slot="content">
-          <me-dropdown id="animation-name-selector"
-            selectedIndex=${selectedAnimationIndex}
-            @select=${this.onAnimationNameChange}>
-            ${this.animationNames.map(name => {
+          <me-card title="Options">
+            <div slot="content">
+              <me-dropdown id="animation-name-selector"
+                selectedIndex=${selectedAnimationIndex}
+                @select=${this.onAnimationNameChange}>
+                ${this.animationNames.map(name => {
       return html`
-              <paper-item value="${name}">
-                ${name}
-              </paper-item>`;
+                  <paper-item value="${name}">
+                    ${name}
+                  </paper-item>`;
     })}
-          </me-dropdown>
-          <me-checkbox id="animation-autoplay" label="Autoplay"
-            ?checked="${!!this.config.autoplay}"
-            @change=${this.onAutoplayChange}></me-checkbox>
+              </me-dropdown>
+              <me-checkbox id="animation-autoplay" label="Autoplay"
+                ?checked="${!!this.config.autoplay}"
+                @change=${this.onAutoplayChange}></me-checkbox>
+            </div>
+          </me-card>
         </div>
       </me-expandable-tab>
         `;
