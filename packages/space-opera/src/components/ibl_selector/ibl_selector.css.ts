@@ -26,7 +26,7 @@ export const styles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: #FFFFFF;
+  color: black;
 }
 
 .EnvironmnetImageDropdown,

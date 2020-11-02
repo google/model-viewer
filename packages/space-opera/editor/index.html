@@ -86,9 +86,10 @@
   }
 
   me-tabs {
-    background-color: #202124;  /* GOOGLE_GREY_900 */
+    background-color: white;  /* GOOGLE_GREY_900 */
     padding: 0;
     width: 440px;
+    border-left: 1px solid #d4d4d4
   }
 
   me-tabs a {
@@ -117,6 +118,7 @@
           <model-viewer-snippet></model-viewer-snippet>
         </me-tabbed-panel>
         <me-tabbed-panel icon="create">
+          <me-export-panel header="true"></me-export-panel>
           <me-transformation-controls></me-transformation-controls>
           <me-ibl-selector></me-ibl-selector>
           <me-animation-controls></me-animation-controls>
@@ -127,6 +129,7 @@
           <me-materials-panel></me-materials-panel>
         </me-tabbed-panel>
         <me-tabbed-panel icon="photo_camera">
+          <me-export-panel header="true"></me-export-panel>
           <me-camera-settings></me-camera-settings>
         </me-tabbed-panel>
         <me-tabbed-panel icon="search">

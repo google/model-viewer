@@ -15,6 +15,8 @@
  *
  */
 
+import '@material/mwc-button';
+
 import {customElement, html, LitElement, property} from 'lit-element';
 
 import {styles} from './styles.css.js';
@@ -24,16 +26,31 @@ import {styles} from './styles.css.js';
  */
 @customElement('me-card')
 export class CardElement extends LitElement {
-  @property({type: String}) title = '';
   static styles = styles;
+  @property({type: String}) title = '';
+  @property({type: Function}) uploadFunction?: Function;
+  @property({type: Function}) copyFunction?: Function;
 
-  /** Proxies to mwc-checkbox's checked field */
-  @property({type: Boolean}) checked = false;
   render() {
+    console.log(typeof (this.uploadFunction));
+    const upload = this.uploadFunction !== undefined ? html`
+        <mwc-button class="upload" id="uploadButton"
+          icon="cloud_upload" @click="${this.uploadFunction}">
+        </mwc-button>` :
+                                                       html``;
+    const copy = this.copyFunction !== undefined ? html`
+        <mwc-button class="upload" id="uploadButton"
+          icon="cloud_upload" @click="${this.copyFunction}">
+        </mwc-button>` :
+                                                   html``;
     return html`
     <div class="card">
       <div class="container">
-        <div class="header">${this.title}</div> 
+        <div class="header-container">
+          <div class="header">${this.title}</div> 
+          ${upload}
+          ${copy}
+        </div>
         <div class="content-container">
           <span slot="content">
             <slot name="content"></slot>

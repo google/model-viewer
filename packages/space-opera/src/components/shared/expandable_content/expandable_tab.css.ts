@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`:host {
+export const styles: CSSResult = css`
+:host {
   --me-theme-container-background: #2b2d30;
 }
 
@@ -29,6 +30,8 @@ export const styles: CSSResult = css`:host {
   justify-content: space-between;
   line-height: 40px;
   margin: 0 16px;
+  color: #5F5F5F;
+  background-color: white;
 }
 
 .DisabledTabHeader {
@@ -37,6 +40,7 @@ export const styles: CSSResult = css`:host {
 
 .TabLabel {
   position: relative;
+  color: #5F5F5F;
 }
 
 .TabLabel .exportInfoIcon {
@@ -71,11 +75,12 @@ export const styles: CSSResult = css`:host {
   overflow: hidden;
   padding: 0 20px;
   transition: max-height 500ms ease-in-out;
+  background-color: white;
 }
 
 .TabContent[open],
 .SectionContent[open] {
-  background-color: var(--me-theme-container-background);
+  background-color: white;
   padding: 20px;
   overflow: unset;
   max-height: none;
@@ -89,7 +94,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .RadioButtonExpandableContent[open] {
-  background-color: $content-container-background-color;
+  background-color: white;
   padding: 0;
   overflow: unset;
   max-height: none;
@@ -103,8 +108,18 @@ export const styles: CSSResult = css`:host {
 }
 
 .Spacer {
-  background-color: $content-container-background-color;
+  background-color: white;
   display: flex;
   height: 2px;
+}
+
+.expandableTab {
+  border-top: 1px solid #5F5F5F;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  cursor: default;
 }
 `;

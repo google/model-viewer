@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`:host {
+export const styles: CSSResult = css`
+:host {
   display: flex;
   --material-color-google-blue-500: #4285f4;
   --material-color-google-grey-300: #dadce0;
@@ -25,11 +26,12 @@ export const styles: CSSResult = css`:host {
 
 mwc-checkbox {
   --mdc-theme-secondary: var(--material-color-google-blue-500);
-  --mdc-checkbox-unchecked-color: var(--material-color-google-grey-300);
+  --mdc-checkbox-unchecked-color: black;
   margin: auto 0;
 }
 
 .Label {
   margin: auto 0;
+  color: black;
 }
 `;
