@@ -175,6 +175,11 @@
         "description": "Dismisses the <span class='attribute'>poster</span>, causing the model to load and render if necessary. This is currently effectively the same as interacting with the <span class='attribute'>poster</span> via user input."
       },
       {
+        "name": "showPoster()",
+        "htmlName": "showPoster",
+        "description": "Shows the <span class='attribute'>poster</span>, hiding the model. If this is called after the 3D model has been revealed, then it will behave as though <span class='attribute'>reveal='interaction'</span>, being dismissed either by a user click or a call to dismissPoster()."
+      },
+      {
         "name": "getDimensions()",
         "htmlName": "getDimensions",
         "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The retuned object has x, y, and z properties along with a toString() method."
