@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`.HeaderLabel {
+export const styles: CSSResult = css`
+.HeaderLabel {
   font-size: 14px;
   font-weight: 500;
 }

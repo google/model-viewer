@@ -17,9 +17,10 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`:host {
-  --input-background: #3c4043;
-  --input-font-color: #dadce0;
+export const styles: CSSResult = css`
+:host {
+  --input-background: #F5F5F5;
+  --input-font-color: black;
   display: block;
 }
 
@@ -27,7 +28,7 @@ export const styles: CSSResult = css`:host {
   width: 100%;
   border-radius: 4px;
   background-color: var(--input-background);
-  --primary-text-color: #f8f9fa;
+  --primary-text-color: var(--input-font-color);
   --primary-background-color: var(--input-background);
   --paper-input-container-shared-input-style_-_padding: 0 5px;
   --paper-input-container-shared-input-style_-_line-height: 24px;
