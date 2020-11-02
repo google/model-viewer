@@ -251,8 +251,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private onModelLoaded() {
-    // Handle the case when the model is loaded for the first time.
-    this.onGltfUrlChanged();
+    // only update on poster reveal
+    if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
+      this.onGltfUrlChanged();
+    }
     this.enforcePlayAnimation();
   }
 
