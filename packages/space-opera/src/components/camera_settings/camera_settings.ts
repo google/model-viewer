@@ -103,7 +103,7 @@ class CameraOrbitEditor extends LitElement {
 /** Camera target input panel. */
 @customElement('me-camera-target-input')
 export class CameraTargetInput extends ConnectedLitElement {
-  static styles = [draggableInputRowStyles];
+  static styles = [draggableInputRowStyles, cameraSettingsStyles];
 
   @query('me-draggable-input#camera-target-x') xInput!: HTMLInputElement;
   @query('me-draggable-input#camera-target-y') yInput!: HTMLInputElement;
@@ -132,7 +132,7 @@ export class CameraTargetInput extends ConnectedLitElement {
 
   render() {
     if (!this.target) {
-      return html`Waiting for camera target...`;
+      return html`<div class="note">Waiting for camera target...</div>`;
     }
     return html`
         <me-draggable-input value=${this.target.x}
@@ -207,7 +207,7 @@ export class CameraSettings extends ConnectedLitElement {
             </me-checkbox>
             ${
     !this.config.cameraControls ?
-        html`<div><small>Note: Camera interaction is always enabled in the preview, but will not be on your page.</small></div>` :
+        html`<div class="note"><small>Note: Camera interaction is always enabled in the preview, but will not be on your page.</small></div>` :
         ``}
             <me-checkbox id="auto-rotate" label="Auto-rotate"
               ?checked="${!!this.config.autoRotate}"
@@ -244,7 +244,6 @@ export class CameraSettings extends ConnectedLitElement {
 
     <me-expandable-tab tabName="Customize Limits">
       <div slot="content">
-      Override default limits for:
         <me-camera-yaw-limits></me-camera-yaw-limits>
         <me-camera-pitch-limits></me-camera-pitch-limits>
         <me-camera-radius-limits></me-camera-radius-limits>

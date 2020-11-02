@@ -29,7 +29,7 @@ export const styles: CSSResult = css`
   font-weight: 500;
   justify-content: space-between;
   line-height: 40px;
-  margin: 0 16px;
+  padding: 0 16px;
   color: #5F5F5F;
   background-color: white;
 }
@@ -119,7 +119,9 @@ export const styles: CSSResult = css`
 
 .sticky {
   position: sticky;
+  z-index: 100;
   top: 0;
   cursor: default;
+  border-bottom: 2px solid #5F5F5F;
 }
 `;
