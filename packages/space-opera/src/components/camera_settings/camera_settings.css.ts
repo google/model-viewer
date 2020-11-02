@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`.HeaderLabel {
+export const styles: CSSResult = css`
+.HeaderLabel {
   font-size: 14px;
   font-weight: 500;
   margin-top: 20px;
@@ -27,5 +28,10 @@ export const styles: CSSResult = css`.HeaderLabel {
 me-camera-orbit-editor,
 me-camera-target-input {
   margin-top: 10px;
+}
+
+.note {
+  color: black;
+  margin-left: 15px;
 }
 `;

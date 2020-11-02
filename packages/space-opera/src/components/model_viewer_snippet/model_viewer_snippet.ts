@@ -94,7 +94,7 @@ export class ExportPanel extends ConnectedLitElement {
     if (this.header === 'true') {
       return html`
         <me-expandable-tab tabName="model-viewer snippet" .open=${
-          true} .sticky=${true} style="z-index: 100">
+          true} .sticky=${true}>
         <div slot="content">
           <me-card title="model-viewer snippet">
             <div slot="content">
