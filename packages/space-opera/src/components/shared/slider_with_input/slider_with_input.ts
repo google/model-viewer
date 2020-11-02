@@ -69,15 +69,6 @@ export class SliderWithInputElement extends LitElement {
   render() {
     return html`
     <div class="Container">
-      <paper-slider
-        class="Slider"
-        value="${this.value}"
-        min="${this.min}"
-        max="${this.max}"
-        step="${this.step}"
-        @immediate-value-change=${this.onSliderChange}
-        @change=${this.onSliderChange}></paper-slider>
-
       <div class="InputContainer">
         <input type="number"
           class="InlineInput"
@@ -87,6 +78,14 @@ export class SliderWithInputElement extends LitElement {
           @change="${this.onInputChange}"
           ?disabled=${this.disabled}>
       </div>
+      <paper-slider
+        class="Slider"
+        value="${this.value}"
+        min="${this.min}"
+        max="${this.max}"
+        step="${this.step}"
+        @immediate-value-change=${this.onSliderChange}
+        @change=${this.onSliderChange}></paper-slider>
     </div>`;
   }
 

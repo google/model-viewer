@@ -15,9 +15,9 @@
  *
  */
 
-
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`:host {
+export const styles: CSSResult = css`
+:host {
   --me-theme-container-background: #2b2d30;
 }
 
@@ -30,7 +30,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .SectionContent[open] {
-  background-color: var(--me-theme-container-background);
+  background-color: white;
   overflow: unset;
   max-height: 100vh;
   padding: 20px;

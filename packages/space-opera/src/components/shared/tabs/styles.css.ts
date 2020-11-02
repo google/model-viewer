@@ -35,19 +35,19 @@ export const styles: CSSResult = css`:host {
   --mdc-tab-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-text-label-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-stacked-height: 100px;
-  background: var(--me-theme-container-background-color);
+  background: white;
   display: flex;
   flex-direction: column;
 }
 
 :host .exportTab.isFocused {
-  background-color: var(--me-theme-tab-background-color);
+  background-color: white;
   outline: var(--me-theme-focused-color) solid 1px;
   outline-offset: -1px;
 }
 
 .TabHeader {
-  background-color: var(--me-theme-tab-background-color);
+  background-color: white;
   font-family: 'Google Sans';
   font-size: 14px;
   letter-spacing: .25px;

@@ -37,7 +37,7 @@ export const styles: CSSResult = css`:host {
 }
 
 paper-slider {
-  --paper-slider-knob-color: var(--google-grey-300);
+  --paper-slider-knob-color: black;
   --paper-slider-active-color: var(--google-grey-300);
 }
 
@@ -48,7 +48,7 @@ paper-slider {
 }
 
 .InputContainer {
-  background: var(--google-grey-800);
+  background: #F1F1F1;
   border-radius: 4px;
   display: inline-flex;
   justify-content: space-between;
@@ -57,8 +57,12 @@ paper-slider {
   padding: 6px 12px;
 }
 
+.InputContainer:hover {
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, .05);
+}
+
 .InlineInput {
-  color: var(--google-grey-300);
+  color: black;
   -moz-appearance:textfield;
   background: transparent;
   border: none;

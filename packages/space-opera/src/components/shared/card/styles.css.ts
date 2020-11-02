@@ -2,7 +2,7 @@ import {css, CSSResult} from 'lit-element';
 
 export const styles: CSSResult = css`
 .card {
-  border-color: #D4D4D4;
+  border: 1px solid #D4D4D4;
   transition: 0.3s;
   width: 100%;
   border-radius: 5px;
@@ -13,15 +13,27 @@ export const styles: CSSResult = css`
   margin: auto 0 10px auto;
 }
 
+.header-container {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
 .header {
   margin-top: 0;
+  margin-right: 5px;
   font-size: 14px;
-  font-weight: 500;
   color: #5F5F5F;
 }
 
+.upload {
+  --mdc-icon-button-size: 32px;
+  margin: 0;
+}
+
 .card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .1);
+  border: 1px solid rgba(0, 0, 0, 0);
 }
 
 .container {
@@ -30,7 +42,7 @@ export const styles: CSSResult = css`
 }
 
 .content-container {
-  padding: 0 10px 5px 10px;
+  padding: 5px 10px 5px 10px;
   padding-bottom: 
 }
 `;

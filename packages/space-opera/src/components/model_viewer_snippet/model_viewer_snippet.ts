@@ -23,7 +23,7 @@ import '../shared/expandable_content/expandable_tab.js';
 
 import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
-import {css, customElement, html, internalProperty, LitElement, query} from 'lit-element';
+import {css, customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
@@ -48,6 +48,8 @@ import {dispatchConfig} from './reducer.js';
  */
 @customElement('me-export-panel')
 export class ExportPanel extends ConnectedLitElement {
+  @property({type: String}) header = '';
+
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -89,18 +91,41 @@ export class ExportPanel extends ConnectedLitElement {
     const snippet =
         renderModelViewer(editedConfig, {}, renderHotspots(this.hotspots));
 
+    if (this.header === 'true') {
+      return html`
+        <me-expandable-tab tabName="model-viewer snippet" .open=${
+          true} .sticky=${true} style="z-index: 100">
+        <div slot="content">
+          <me-card title="model-viewer snippet">
+            <div slot="content">
+              <snippet-viewer .renderedSnippet=${snippet}
+                .renderedStyle=${
+          this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
+              </snippet-viewer>
+            </div>
+          </me-card>
+        </div>
+      </me-expandable-tab>`;
+    }
+
     return html`
     <me-expandable-tab tabName="Export" .open=${true}>
-    <div slot="content">
-      <me-download-button id="download-gltf"></me-download-button>
-      <me-export-zip-button id="export-zip"></me-export-zip-button><br/>
-      <br/>
-      And use this model-viewer snippet:<br/>
-      <br/>
-      <snippet-viewer .renderedSnippet=${snippet}
-        .renderedStyle=${this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
-      </snippet-viewer>
-    </div>
+      <div slot="content">
+        <me-card title="Downloads">
+          <div slot="content">
+            <me-download-button id="download-gltf"></me-download-button>
+            <me-export-zip-button id="export-zip"></me-export-zip-button>
+          </div>
+        </me-card>
+        <me-card title="Copy model-viewer Snippet">
+          <div slot="content">
+            <snippet-viewer .renderedSnippet=${snippet}
+              .renderedStyle=${
+        this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
+            </snippet-viewer>
+          </div>
+        </me-card>
+      </div>
     </me-expandable-tab>`;
   }
 
@@ -183,22 +208,27 @@ export class ModelViewerSnippet extends LitElement {
 
     return html`
     <me-expandable-tab tabName="Import" .open=${true}>
-    <div slot="content">
-      <me-open-button></me-open-button><br/>
-      <br/>
-      Or load a model-viewer snippet:<br/>
-      <br/>
-      <textarea id="mv-input" rows=10
-        >${exampleLoadableSnippet}</textarea>
-      ${this.errors.map(error => html`<div>${error}</div>`)}
-      <mwc-button unelevated icon="folder_open"
-        @click=${this.handleSubmitSnippet}
-        >Import snippet</mwc-button>
-    </div>
+      <div slot="content">
+        <me-card title="Import GLB">
+          <div slot="content">
+            <me-open-button></me-open-button><br/>
+          </div>
+        </me-card>
+        <me-card title="Load model-viewer Snippet">
+          <div slot="content">
+            <textarea id="mv-input" rows=10
+              >${exampleLoadableSnippet}</textarea>
+            ${this.errors.map(error => html`<div>${error}</div>`)}
+            <mwc-button unelevated icon="folder_open"
+              @click=${this.handleSubmitSnippet}
+              >Import snippet
+            </mwc-button>
+          </div>
+        </me-card>
+      </div>
     </me-expandable-tab>
 
     <me-export-panel></me-export-panel>
-    <a href="https://policies.google.com/privacy" style="color: white">Privacy</a>
             `;
   }
 

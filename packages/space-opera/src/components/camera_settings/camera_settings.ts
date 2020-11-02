@@ -198,47 +198,48 @@ export class CameraSettings extends ConnectedLitElement {
   render() {
     return html`
     <me-expandable-tab tabName="Camera Setup">
-    <div slot="content">
-
-      <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
-      ?checked="${!!this.config.cameraControls}"
-      @change=${this.onCamControlsCheckboxChange}></me-checkbox>
-
-                ${
+      <div slot="content">
+        <me-card title="Camera Settings">
+          <div slot="content">
+            <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
+              ?checked="${!!this.config.cameraControls}"
+              @change=${this.onCamControlsCheckboxChange}>
+            </me-checkbox>
+            ${
     !this.config.cameraControls ?
         html`<div><small>Note: Camera interaction is always enabled in the preview, but will not be on your page.</small></div>` :
         ``}
-
-      <div class="HeaderLabel">
-        Initial camera position:
-      </div>
-
-      <me-camera-orbit-editor
-      @change=${this.onCameraOrbitEditorChange}
-       .orbit=${
+            <me-checkbox id="auto-rotate" label="Auto-rotate"
+              ?checked="${!!this.config.autoRotate}"
+              @change=${this.onAutoRotateChange}>
+            </me-checkbox>
+          </div>
+        </me-card>
+        <me-card title="Initial Camera Position">
+          <div slot="content">
+            <me-camera-orbit-editor
+              @change=${this.onCameraOrbitEditorChange}
+              .orbit=${
         this.camera.orbit ??
-        this.initialCamera.orbit}></me-camera-orbit-editor>
-
-      <mwc-button
-      class="SaveCameraButton"
-      id="save-camera-angle"
-      unelevated
-      icon="photo_camera"
-      @click=${this.onSaveCameraOrbit}>
-      Save current as initial</mwc-button>
-
-      <div class="HeaderLabel">
-        Target point:
+        this.initialCamera.orbit}>
+            </me-camera-orbit-editor>
+            <mwc-button
+              class="SaveCameraButton"
+              id="save-camera-angle"
+              unelevated
+              icon="photo_camera"
+              @click=${this.onSaveCameraOrbit}>
+              Save current as initial
+            </mwc-button>
+          </div>
+        </me-card>
+        <me-card title="Target Point">
+          <div slot="content">
+            <me-camera-target-input .change=${this.onCameraTargetChange}>
+            </me-camera-target-input>
+          </div>
+        </me-card>
       </div>
-
-      <me-camera-target-input .change=${
-        this.onCameraTargetChange}></me-camera-target-input>
-
-      <me-checkbox id="auto-rotate" label="Auto-rotate"
-        ?checked="${!!this.config.autoRotate}"
-        @change=${this.onAutoRotateChange}></me-checkbox>
-
-    </div>
     </me-expandable-tab>
 
     <me-expandable-tab tabName="Customize Limits">

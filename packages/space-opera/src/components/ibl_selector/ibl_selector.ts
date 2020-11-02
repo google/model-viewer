@@ -134,11 +134,9 @@ export class IblSelector extends ConnectedLitElement {
     return html`
       <me-expandable-tab tabName="Lighting">
         <div slot="content">
-          <me-card title="Environment Image">
+          <me-card title="Environment Image" .uploadFunction=${
+        this.openFileModal.bind(this)}>
             <div slot="content">
-              <mwc-button class="UploadButton" id="uploadButton" unelevated
-                icon="cloud_upload" @click="${this.openFileModal}">Upload
-              </mwc-button>
               <me-dropdown
                 class="EnvironmnetImageDropdown"
                 selectedIndex=${selectedIndex}

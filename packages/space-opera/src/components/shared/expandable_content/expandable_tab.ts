@@ -31,49 +31,81 @@ export class ExpandableTab extends LitElement {
   @property({type: String}) tabName = '';
   @property({type: Boolean}) open = false;
   @property({type: Boolean}) enabled = true;
+  @property({type: Boolean}) sticky? = false;
 
   static styles = styles;
 
   render() {
+    const stickyClass = this.sticky ? 'sticky' : 'none';
+    if (this.sticky) {
+      return html`
+    <div class="expandableTab ${stickyClass}">
+      <div data-element-type="expandableTab">
+        <div class="TabHeader">
+          <span class="TabLabel">
+            ${this.tabName}
+            <slot name="tooltip"></slot>
+          </span>
+        </div>
+      </div>
+
+      <me-expandable-section ?open=${this.open}>
+        <span slot="content">
+          <slot name="content"></slot>
+        </span>
+      </me-expandable-section>
+      <div class="Spacer"></div>
+    </div>
+  `;
+    }
+
     if (!this.enabled) {
       return html`
-    <div data-element-type="expandableTab">
-      <div class="TabHeader DisabledTabHeader">
-        <span class="TabLabel">
-          ${this.tabName}
-          <slot name="tooltip"></slot>
-        </span>
+    <div class="expandableTab ${stickyClass}">
+      <div data-element-type="expandableTab">
+        <div class="TabHeader DisabledTabHeader">
+          <span class="TabLabel">
+            ${this.tabName}
+            <slot name="tooltip"></slot>
+          </span>
+        </div>
       </div>
     </div>
   `;
     }
     return html`
-  <div data-element-type="expandableTab">
-    <div class="TabHeader" @click="${this.toggle}">
-      <span class="TabLabel">
-        ${this.tabName}
-        <slot name="tooltip"></slot>
-      </span>
+  <div class="expandableTab ${stickyClass}">
+    <div data-element-type="expandableTab">
+      <div class="TabHeader" @click="${this.toggle}">
+        <span class="TabLabel">
+          ${this.tabName}
+          <slot name="tooltip"></slot>
+        </span>
 
-      <div class="IconArea">
-        <mwc-icon>
-        ${this.open ? html`keyboard_arrow_up` : html`keyboard_arrow_down`}
-        </mwc-icon>
+        ${
+    !this.sticky ? html`<div class="IconArea">
+          <mwc-icon>
+          ${this.open ? html`keyboard_arrow_up` : html`keyboard_arrow_down`}
+          </mwc-icon>
+        </div>` :
+                   html``}
       </div>
     </div>
-  </div>
 
-  <me-expandable-section ?open=${this.open}>
-    <span slot="content">
-      <slot name="content"></slot>
-    </span>
-  </me-expandable-section>
-  <div class="Spacer"></div>
+    <me-expandable-section ?open=${this.open}>
+      <span slot="content">
+        <slot name="content"></slot>
+      </span>
+    </me-expandable-section>
+    <div class="Spacer"></div>
+  </div>
         `;
   }
 
   toggle() {
-    this.open = !this.open;
+    if (!this.sticky) {
+      this.open = !this.open;
+    }
   }
 }
 
