@@ -38,15 +38,17 @@ export class ExpandableTab extends LitElement {
 
   render() {
     const stickyClass = this.sticky ? 'sticky' : '';
+    const greyStickyClass = this.sticky ? 'GreySticky' : '';
     const noIconClass = this.copyFunction === undefined ? 'no-icon' : '';
     const copy = this.copyFunction !== undefined ? html`
         <mwc-button class="upload" id="uploadButton"
           icon="file_copy" @click="${this.copyFunction}">
         </mwc-button>` :
                                                    html``;
+    const noBorder = this.tabName === 'GLTF JSON' ? 'noBorder' : '';
     if (this.sticky) {
       return html`
-    <div class="expandableTab ${stickyClass}">
+    <div class="expandableTab ${stickyClass} ${greyStickyClass} ${noBorder}">
       <div data-element-type="expandableTab">
         <div class="sticky-container">
           <div class="sticky-label ${noIconClass}">
@@ -56,7 +58,7 @@ export class ExpandableTab extends LitElement {
         </div>
       </div>
 
-      <me-expandable-section ?open=${this.open}>
+      <me-expandable-section ?open=${this.open} .stick=${true}>
         <span slot="content">
           <slot name="content"></slot>
         </span>

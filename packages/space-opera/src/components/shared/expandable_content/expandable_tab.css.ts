@@ -33,6 +33,10 @@ export const styles: CSSResult = css`
   background-color: white;
 }
 
+.TabHeader:hover {
+  background-color: #F5F5F5;
+}
+
 .sticky-container {
   white-space: nowrap;
   display: flex;
@@ -130,7 +134,7 @@ export const styles: CSSResult = css`
 }
 
 .expandableTab {
-  border-top: 1px solid #5F5F5F;
+  border-bottom: 1px solid #5F5F5F;
 }
 
 .sticky {
@@ -138,6 +142,13 @@ export const styles: CSSResult = css`
   z-index: 10;
   top: 0;
   border-bottom: 2px solid #5F5F5F;
-  background-color: white;
+}
+
+.GreySticky {
+  background-color: #FBFBFB;
+}
+
+.noBorder {
+  border-bottom: 1px solid rgba(0, 0, 0, 0);
 }
 `;

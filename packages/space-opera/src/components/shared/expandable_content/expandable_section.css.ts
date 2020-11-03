@@ -30,11 +30,18 @@ export const styles: CSSResult = css`
 }
 
 .SectionContent[open] {
-  background-color: white;
   overflow: unset;
   max-height: 100vh;
   padding: 20px;
   transition-duration: 250ms;
   transition-timing-function: ease-in;
+}
+
+.sticky {
+  background-color: #FBFBFB;
+}
+
+.sticky[open] {
+  background-color: #FBFBFB;
 }
 `;

@@ -17,7 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`model-viewer {
+export const styles: CSSResult = css`
+model-viewer {
   cursor: -webkit-grab;
   cursor: -moz-grab;
   display: flex;

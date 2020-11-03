@@ -126,11 +126,12 @@ export class IblSelector extends ConnectedLitElement {
   // TODO: On snippet input if IBL is defined, select the
   // correct option from the dropdown.
   render() {
+    // 0 is the default state
     const selectedIndex = this.config.environmentImage ?
         this.environmentImages.findIndex(
             (image) => image.uri === this.config.environmentImage) +
             1 :
-        0;  // 0 is the default state
+        0;
     return html`
       <me-expandable-tab tabName="Lighting">
         <div slot="content">
@@ -138,7 +139,6 @@ export class IblSelector extends ConnectedLitElement {
         this.openFileModal.bind(this)}>
             <div slot="content">
               <me-dropdown
-                class="EnvironmnetImageDropdown"
                 selectedIndex=${selectedIndex}
                 @select=${this.onSelectEnvironmentImage}>
                 <paper-item>Default</paper-item>
