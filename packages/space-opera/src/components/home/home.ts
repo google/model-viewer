@@ -19,8 +19,9 @@ import '@material/mwc-tab';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {customElement, html, property} from 'lit-element';
+
+import {homeStyles} from '../../styles.css.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {styles} from './styles.css.js';
 
 const CARD_CONTENT = {
   quick: {
@@ -64,7 +65,7 @@ const CARD_CONTENT = {
  */
 @customElement('home-container-card')
 export class HomeContainerCard extends ConnectedLitElement {
-  static styles = styles;
+  static styles = homeStyles;
   @property({type: String, reflect: true}) icon = '';
   @property({type: String}) homeCardHeader = '';
   @property({type: String}) homeCardBody = '';
@@ -90,7 +91,7 @@ export class HomeContainerCard extends ConnectedLitElement {
  */
 @customElement('home-container')
 export class HomeContainer extends ConnectedLitElement {
-  static styles = styles;
+  static styles = homeStyles;
 
   render() {
     return html`
