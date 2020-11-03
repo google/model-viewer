@@ -24,6 +24,7 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
+import {posterControlsStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {dispatchSetPoster, getConfig} from '../config/reducer.js';
@@ -31,12 +32,10 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 
-import {styles} from './poster_controls.css';
-
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
 export class PosterControlsElement extends ConnectedLitElement {
-  static styles = styles;
+  static styles = posterControlsStyles;
 
   @internalProperty() poster?: string;
 
