@@ -16,10 +16,12 @@
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {assetPath, loadThreeGLTF} from '../../test-helpers.js';
-
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
+import {assetPath, loadThreeGLTF} from './test-helpers.js';
+import {$correlatedObjects} from './three-dom-element.js';
+
+const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
@@ -48,7 +50,7 @@ suite('facade/three-js/model', () => {
       const collectedMaterials = new Set<MeshStandardMaterial>();
 
       model.materials.forEach((material) => {
-        for (const threeMaterial of material.correlatedObjects as
+        for (const threeMaterial of material[$correlatedObjects] as
              Set<MeshStandardMaterial>) {
           collectedMaterials.add(threeMaterial);
           expect(materials.has(threeMaterial)).to.be.true;

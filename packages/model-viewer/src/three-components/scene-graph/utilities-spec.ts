@@ -17,6 +17,8 @@ import {GLTF} from './gltf-2.0.js';
 import {assetPath, loadThreeGLTF} from './test-helpers.js';
 import {getLocallyUniqueId, GLTFTreeVisitor} from './utilities.js';
 
+const expect = chai.expect;
+
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 
 suite('utilities', () => {

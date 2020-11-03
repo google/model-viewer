@@ -17,11 +17,12 @@
 import {Material} from 'three';
 import {Object3D} from 'three/src/core/Object3D.js';
 
-import {createFakeThreeGLTF} from '../../test-helpers.js';
-
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
+import {createFakeThreeGLTF} from './test-helpers.js';
 import {ThreeDOMElement} from './three-dom-element.js';
+
+const expect = chai.expect;
 
 suite('facade/three-js/three-dom-element', () => {
   suite('ThreeDOMElement', () => {
