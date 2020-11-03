@@ -33,4 +33,8 @@ export const styles: CSSResult = css`
 .text {
   display: inline-block;
 }
+
+.note {
+  color: black;
+}
 `;

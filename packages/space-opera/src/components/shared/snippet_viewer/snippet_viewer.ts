@@ -49,12 +49,9 @@ export class SnippetViewer extends LitElement {
   }
 
   protected render() {
-    return html`<span id="tag" style='display: none'>${
-        this.renderedSnippet}</span>
-        <textarea id="snippet" readonly rows=10></textarea>
-        <mwc-button unelevated icon="file_copy"
-        @click=${this.copyToClipboard}
-        >Copy snippet</mwc-button>
+    return html`
+      <span id="tag" style='display: none'>${this.renderedSnippet}</span>
+      <textarea id="snippet" readonly rows=10></textarea>
 `;
   }
 

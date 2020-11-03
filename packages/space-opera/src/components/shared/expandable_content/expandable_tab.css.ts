@@ -26,12 +26,18 @@ export const styles: CSSResult = css`
   cursor: pointer;
   display: flex;
   font-size: 14px;
-  font-weight: 500;
   justify-content: space-between;
   line-height: 40px;
   padding: 0 16px;
   color: #5F5F5F;
   background-color: white;
+}
+
+.sticky-container {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
 }
 
 .DisabledTabHeader {
@@ -46,6 +52,16 @@ export const styles: CSSResult = css`
 .TabLabel .exportInfoIcon {
   position: relative;
   top: 3px;
+}
+
+.sticky-label {
+  margin-right: 5px;
+  font-size: 14px;
+  color: #5F5F5F;
+}
+
+.no-icon {
+  padding-top: 10px;
 }
 
 .IconArea {
@@ -119,9 +135,9 @@ export const styles: CSSResult = css`
 
 .sticky {
   position: sticky;
-  z-index: 100;
+  z-index: 10;
   top: 0;
-  cursor: default;
   border-bottom: 2px solid #5F5F5F;
+  background-color: white;
 }
 `;

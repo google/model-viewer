@@ -23,7 +23,7 @@ export const styles: CSSResult = css`:host {
   justify-content: space-between;
   padding: 6px 12px;
   overflow: hidden;
-  background: #3c4043;
+  background: #F1F1F1;
   min-width: 60px;
 }
 
@@ -37,7 +37,7 @@ export const styles: CSSResult = css`:host {
   font-size: 14px;
   outline: none;
   width: 0;
-  color: #dadce0;
+  color: black;
 }
 
 /**
@@ -51,7 +51,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .InlineLabel {
-  color: #888;
+  color: black;
   cursor: col-resize;
   margin-left: 12px;
   text-align: right;

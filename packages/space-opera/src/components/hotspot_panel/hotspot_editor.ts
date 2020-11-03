@@ -46,13 +46,14 @@ export class HotspotEditorElement extends LitElement {
       return html``;
 
     return html`
-    <me-section-row label="Label:">
-      <textarea id="annotation" @input=${this.onAnnotationInput}>${
-        this.config.annotation}</textarea>
-      <mwc-icon-button id="remove-hotspot"
-        icon="delete"
-        @click="${this.onRemoveHotspot}"></mwc-icon-button>
-    </me-section-row>
+<me-card title="Hotspot Label" .removeFunction=${
+        this.onRemoveHotspot.bind(this)}>
+  <div slot="content">
+    <textarea id="annotation" @input=${this.onAnnotationInput}>${
+        this.config.annotation}
+    </textarea>
+  </div>
+</me-card>
     `;
   }
 

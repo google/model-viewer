@@ -32,20 +32,27 @@ export class ExpandableTab extends LitElement {
   @property({type: Boolean}) open = false;
   @property({type: Boolean}) enabled = true;
   @property({type: Boolean}) sticky? = false;
+  @property({type: Function}) copyFunction?: Function;
 
   static styles = styles;
 
   render() {
-    const stickyClass = this.sticky ? 'sticky' : 'none';
+    const stickyClass = this.sticky ? 'sticky' : '';
+    const noIconClass = this.copyFunction === undefined ? 'no-icon' : '';
+    const copy = this.copyFunction !== undefined ? html`
+        <mwc-button class="upload" id="uploadButton"
+          icon="file_copy" @click="${this.copyFunction}">
+        </mwc-button>` :
+                                                   html``;
     if (this.sticky) {
       return html`
     <div class="expandableTab ${stickyClass}">
       <div data-element-type="expandableTab">
-        <div class="TabHeader">
-          <span class="TabLabel">
+        <div class="sticky-container">
+          <div class="sticky-label ${noIconClass}">
             ${this.tabName}
-            <slot name="tooltip"></slot>
-          </span>
+          </div>
+          ${copy}
         </div>
       </div>
 

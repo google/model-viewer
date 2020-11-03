@@ -65,6 +65,10 @@ export class ExportPanel extends ConnectedLitElement {
     this.gltfUrl = getGltfUrl(state);
   }
 
+  snippetCopyToClipboard() {
+    this.snippetViewer.copyToClipboard();
+  }
+
   render() {
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
@@ -93,40 +97,36 @@ export class ExportPanel extends ConnectedLitElement {
 
     if (this.header === 'true') {
       return html`
-        <me-expandable-tab tabName="model-viewer snippet" .open=${
-          true} .sticky=${true}>
-        <div slot="content">
-          <me-card title="model-viewer snippet">
-            <div slot="content">
-              <snippet-viewer .renderedSnippet=${snippet}
-                .renderedStyle=${
-          this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
-              </snippet-viewer>
-            </div>
-          </me-card>
-        </div>
-      </me-expandable-tab>`;
+<me-expandable-tab tabName="model-viewer snippet" .open=${true} .sticky=${
+          true} .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
+  <div slot="content">
+    <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}
+      .renderedStyle=${this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
+    </snippet-viewer>
+  </div>
+</me-expandable-tab>`;
     }
 
     return html`
-    <me-expandable-tab tabName="Export" .open=${true}>
+<me-expandable-tab tabName="Export" .open=${true}>
+  <div slot="content">
+    <me-card title="Downloads">
       <div slot="content">
-        <me-card title="Downloads">
-          <div slot="content">
-            <me-download-button id="download-gltf"></me-download-button>
-            <me-export-zip-button id="export-zip"></me-export-zip-button>
-          </div>
-        </me-card>
-        <me-card title="Copy model-viewer Snippet">
-          <div slot="content">
-            <snippet-viewer .renderedSnippet=${snippet}
-              .renderedStyle=${
-        this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
-            </snippet-viewer>
-          </div>
-        </me-card>
+        <me-download-button id="download-gltf"></me-download-button>
+        <me-export-zip-button id="export-zip"></me-export-zip-button>
       </div>
-    </me-expandable-tab>`;
+    </me-card>
+    <me-card title="model-viewer snippet" .copyFunction=${
+        this.snippetCopyToClipboard.bind(this)}>
+      <div slot="content">
+        <snippet-viewer .renderedSnippet=${snippet}
+          .renderedStyle=${
+        this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
+        </snippet-viewer>
+      </div>
+    </me-card>
+  </div>
+</me-expandable-tab>`;
   }
 
   protected updated() {

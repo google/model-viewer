@@ -28,20 +28,38 @@ import {styles} from './styles.css.js';
 export class CardElement extends LitElement {
   static styles = styles;
   @property({type: String}) title = '';
+  @property({type: String}) functionId = '';
+  @property({type: String}) functionTitle = '';
   @property({type: Function}) uploadFunction?: Function;
   @property({type: Function}) copyFunction?: Function;
+  @property({type: Function}) removeFunction?: Function;
+  @property({type: Function}) undoFunction?: Function;
 
   render() {
-    console.log(typeof (this.uploadFunction));
     const upload = this.uploadFunction !== undefined ? html`
-        <mwc-button class="upload" id="uploadButton"
-          icon="cloud_upload" @click="${this.uploadFunction}">
-        </mwc-button>` :
+    <mwc-button class="upload" id="uploadButton"
+      icon="cloud_upload" @click="${this.uploadFunction}">
+    </mwc-button>` :
                                                        html``;
     const copy = this.copyFunction !== undefined ? html`
-        <mwc-button class="upload" id="uploadButton"
-          icon="cloud_upload" @click="${this.copyFunction}">
-        </mwc-button>` :
+    <mwc-button class="upload"
+      icon="file_copy" @click="${this.copyFunction}">
+    </mwc-button>` :
+                                                   html``;
+    const remove = this.removeFunction !== undefined ? html`
+    <mwc-button class="upload" id="remove-hotspot"
+      icon="delete"
+      @click="${this.removeFunction}">
+    </mwc-button>
+    ` :
+                                                       html``;
+    const undo = this.undoFunction !== undefined ? html`
+    <mwc-button class="upload" id=${this.functionId}
+      icon="undo"
+      title=${this.functionTitle}
+      @click="${this.undoFunction}">
+    </mwc-button>
+    ` :
                                                    html``;
     return html`
     <div class="card">
@@ -50,6 +68,8 @@ export class CardElement extends LitElement {
           <div class="header">${this.title}</div> 
           ${upload}
           ${copy}
+          ${remove}
+          ${undo}
         </div>
         <div class="content-container">
           <span slot="content">
