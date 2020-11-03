@@ -18,12 +18,6 @@
 
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
-.HeaderLabel {
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 20px;
-}
-
 .SaveCameraButton,
 me-camera-orbit-editor,
 me-camera-target-input {

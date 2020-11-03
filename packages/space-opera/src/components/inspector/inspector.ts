@@ -75,7 +75,7 @@ export class InspectorPanel extends ConnectedLitElement {
 
   render() {
     return html`
-      <me-expandable-tab tabName="GLTF JSON" .open=${true}>
+      <me-expandable-tab tabName="GLTF JSON" .open=${true} .sticky=${true}>
         <div slot="content">
           <div style="color: black">
             <pre class="inspector-content">${

@@ -18,20 +18,9 @@
 
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
-.HeaderLabel {
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
   color: black;
-}
-
-.EnvironmnetImageDropdown,
-.UploadButton,
-.Row {
-  margin-top: 10px;
 }
 `;

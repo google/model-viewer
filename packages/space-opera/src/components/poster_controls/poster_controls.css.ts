@@ -18,8 +18,9 @@
 
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
-.ButtonContainer:not(:first-child) {
-  margin-top: 10px;
+.PosterButton {
+  margin-bottom: 10px;
+  display: block;
 }
 
 mwc-button {

@@ -52,6 +52,7 @@ export const styles: CSSResult = css`:host {
   font-size: 14px;
   letter-spacing: .25px;
   line-height: 40px;
+  border-bottom: 1px solid #5F5F5F;
 }
 
 .TabPanel {

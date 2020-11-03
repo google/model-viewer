@@ -43,15 +43,12 @@ import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
 
 import {TexturesById} from './material_state.js';
 import {Material} from './material_state.js';
-import {styles} from './materials_panel.css.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
 @customElement('me-materials-panel')
 export class MaterialPanel extends ConnectedLitElement {
-  static styles = styles;
-
   @property({type: Number}) selectedMaterialId?: number;
 
   @internalProperty() materials: Material[] = [];
@@ -553,15 +550,13 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-card title="Texture" functionId="revert-metallic-roughness-texture" functionTitle="Revert to original metallic roughness texture"
         .undoFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
         <div slot="content">
-          <div class="TexturePickerContainer">
-            <me-texture-picker .selectedIndex=${
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="metallic-roughness-texture-picker" @texture-changed=${
         this.onMetallicRoughnessTextureChange} @texture-uploaded=${
         this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-            </me-texture-picker>
-          </div>
+          </me-texture-picker>
         </div>
       </me-card>
       <me-card title="Metallic factor" functionTitle="Revert to original metallic factor" functionId="revert-metallic-factor" 
@@ -635,15 +630,13 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-card title="Texture" functionId="revert-normal-map-texture" functionTitle="Revert to original normal map texture"
         .undoFunction=${this.revertNormalTexture.bind(this)}>
         <div slot="content">
-          <div class="TexturePickerContainer">
-            <me-texture-picker .selectedIndex=${
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
         this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
-            </me-texture-picker>
-          </div>
+          </me-texture-picker>
         </div>
       </me-card>
     </div>
@@ -666,26 +659,22 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-card title="Factor" functionId="revert-emissive-factor" functionTitle="Revert to original emissive factor"
         .undoFunction=${this.revertEmissiveFactor.bind(this)}>
         <div slot="content">
-          <div class="TexturePickerContainer">
-            <me-color-picker selectedColorHex=${
+          <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
         this.onEmissiveFactorChanged}>
-            </me-color-picker>
-          </div>
+          </me-color-picker>
         </div>
       </me-card>
       <me-card title="Texture" functionId="revert-emissive-texture" functionTitle="Revert to original emissive texture"
         .undoFunction=${this.revertEmissiveTexture.bind(this)}>
         <div slot="content">
-          <div class="TexturePickerContainer">
-            <me-texture-picker .selectedIndex=${
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="emissive-texture-picker" @texture-changed=${
         this.onEmissiveTextureChange} @texture-uploaded=${
         this.onEmissiveTextureUpload} .images=${this.safeTextureUrls}>
-            </me-texture-picker>
-          </div>
+          </me-texture-picker>
         </div>
       </me-card>
     </div>
@@ -704,15 +693,13 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-card title="Texture" functionId="revert-occlusion-texture" functionTitle="Revert to original occlusion texture"
         .undoFunction=${this.revertOcclusionTexture.bind(this)}>
         <div slot="content">
-          <div class="TexturePickerContainer">
-            <me-texture-picker .selectedIndex=${
+          <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
         this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
-            </me-texture-picker>
-          </div>
+          </me-texture-picker>
         </div>
       </me-card>
     </div>

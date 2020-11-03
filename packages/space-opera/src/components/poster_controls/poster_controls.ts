@@ -48,24 +48,16 @@ export class PosterControlsElement extends ConnectedLitElement {
     return html`
       <me-expandable-tab tabName="Poster">
         <div slot="content">
-          <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onCreatePoster}">Create Poster</mwc-button>
-          </div>
+          <mwc-button unelevated class="PosterButton" 
+            @click="${this.onCreatePoster}">Create Poster</mwc-button>
           ${
     !!this.poster ? html`
-            <div class="ButtonContainer">
-              <mwc-button unelevated
-                @click="${this.onDownloadPoster}">Download</mwc-button>
-            </div>
-            <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onDisplayPoster}">Display Poster</mwc-button>
-          </div>
-          <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onDeletePoster}">Delete Poster</mwc-button>
-          </div>` :
+          <mwc-button unelevated class="PosterButton"
+            @click="${this.onDownloadPoster}">Download</mwc-button>
+          <mwc-button unelevated class="PosterButton"
+            @click="${this.onDisplayPoster}">Display Poster</mwc-button>
+          <mwc-button unelevated class="PosterButton"
+            @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
         </div>
       </me-expandable-tab>

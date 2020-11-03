@@ -71,16 +71,14 @@ export class HomeContainerCard extends ConnectedLitElement {
 
   render() {
     return html`
-      <div class="home lockup">
-        <div class="inner-home">
-          <div class="inner-home">
-            <mwc-tab icon=${this.icon}>
-            </mwc-tab>
-          </div>
-          <div class="inner-home text">
-            <div class="home-card-header">${this.homeCardHeader}</div> 
-            <div class="home-card-content">${this.homeCardBody}</div>
-          </div>
+      <div class="CardContainer">
+        <div class="CardContent">
+          <mwc-tab icon=${this.icon}>
+          </mwc-tab>
+        </div>
+        <div class="CardContent text">
+          <div class="HomeCardHeader">${this.homeCardHeader}</div> 
+          <div class="HomeCardContent">${this.homeCardBody}</div>
         </div>
       </div>
     `;

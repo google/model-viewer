@@ -19,7 +19,7 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --input-background: #F5F5F5;
+  --input-background: #FFFFFF;
   --input-font-color: black;
   display: block;
 }
@@ -27,6 +27,7 @@ export const styles: CSSResult = css`
 .EditorDropdown {
   width: 100%;
   border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, .1);
   background-color: var(--input-background);
   --primary-text-color: var(--input-font-color);
   --primary-background-color: var(--input-background);
@@ -34,6 +35,11 @@ export const styles: CSSResult = css`
   --paper-input-container-shared-input-style_-_line-height: 24px;
   --paper-input-container-underline-color: none;
   --paper-input-container-underline-focus-color: none;
+}
+
+.EditorDropdown:hover {
+  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .1);
+  border: 1px solid rgba(0, 0, 0, 0);
 }
 
 /* @overrideSelector {quantum.wiz.menu.paperselect} */
