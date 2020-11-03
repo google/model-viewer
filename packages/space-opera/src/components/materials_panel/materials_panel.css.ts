@@ -72,9 +72,4 @@ export const styles: CSSResult = css`.EditingMaterial {
 .DropdownContainer me-dropdown {
   width: calc(100% - 40px);
 }
-
-#alpha-mode-picker,
-#alpha-cutoff-label {
-  margin-top: 10px;
-}
 `;

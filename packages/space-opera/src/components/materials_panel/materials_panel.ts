@@ -136,7 +136,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
   renderSelectMaterialTab() {
     return html`
-    <me-expandable-tab tabName="Selected Material" .open=${true}>
+    <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
+        true}>
       <me-dropdown
         .selectedIndex=${this.selectedMaterialId || 0}
         slot="content"
@@ -549,12 +550,10 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-card title="Texture">
+      <me-card title="Texture" functionId="revert-metallic-roughness-texture" functionTitle="Revert to original metallic roughness texture"
+        .undoFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
         <div slot="content">
           <div class="TexturePickerContainer">
-            <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-            title="Revert to original metallic roughness texture"
-            @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
             <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
@@ -565,30 +564,20 @@ export class MaterialPanel extends ConnectedLitElement {
           </div>
         </div>
       </me-card>
-      <me-card title="Metallic factor">
+      <me-card title="Metallic factor" functionTitle="Revert to original metallic factor" functionId="revert-metallic-factor" 
+        .undoFunction=${this.revertMetallicFactor.bind(this)}>
         <div slot="content">
-          <div class="MRSliderContainer">
-            <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
-            title="Revert to original metallic factor"
-            @click=${this.revertMetallicFactor}></mwc-icon-button>
-            <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
-          step="0.01" value="${material.metallicFactor}" @change=${
-        this.onMetallicChange}>
-            </me-slider-with-input>
-          </div>
+          <me-slider-with-input id="metallic-factor" min="0.0" max="1.0" step="0.01" 
+            value="${material.metallicFactor}" @change=${this.onMetallicChange}>
+          </me-slider-with-input>
         </div>
       </me-card>
-      <me-card title="Roughness factor">
+      <me-card title="Roughness factor" functionId="revert-roughness-factor" functionTitle="Revert to original roughness factor"
+        .undoFunction=${this.revertRoughnessFactor.bind(this)}>
         <div slot="content">
-          <div class="MRSliderContainer">
-            <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
-            title="Revert to original roughness factor"
-            @click=${this.revertRoughnessFactor}></mwc-icon-button>
-            <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
-            step="0.01" value="${material.roughnessFactor}" @change=${
-        this.onRoughnessChange}>
-            </me-slider-with-input>
-          </div>
+          <me-slider-with-input id="roughness-factor" min="0.0" max="1.0" step="0.01" 
+          value="${material.roughnessFactor}" @change=${this.onRoughnessChange}>
+          </me-slider-with-input>
         </div>
       </me-card>
     </div>
@@ -608,33 +597,25 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Base Color">
     <div slot="content">
-      <me-card title="Factor">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
-            title="Revert to original base color factor"
-            @click=${this.revertBaseColorFactor}></mwc-icon-button>
+      <me-card title="Factor" functionId="revert-base-color-factor" functionTitle="Revert to original base color factor"
+        .undoFunction=${this.revertBaseColorFactor.bind(this)}>
+        <div slot="content">
           <me-color-picker id="base-color-picker"
           selectedColorHex=${selectedColorHex} @change=${
         this.onBaseColorChange}>
           </me-color-picker>
         </div>
-        </div>
       </me-card>
-      <me-card title="Texture">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
-          title="Revert to original base color texture"
-            @click=${this.revertBaseColorTexture}></mwc-icon-button>
+      <me-card title="Texture" functionId="revert-base-color-texture" functionTitle="Revert to original base color texture"
+        .undoFunction=${this.revertBaseColorTexture.bind(this)}>
+        <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="base-color-texture-picker" @texture-changed=${
         this.onBaseColorTextureChange} @texture-uploaded=${
-        this.onBaseColorTextureUpload} .images=${
-        this.safeTextureUrls}></me-texture-picker>
-        </div>
+        this.onBaseColorTextureUpload} .images=${this.safeTextureUrls}>
+          </me-texture-picker>
         </div>
       </me-card>
     </div>
@@ -651,20 +632,18 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
-      <me-card title="Texture">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
-          title="Revert to original normal map texture"
-            @click=${this.revertNormalTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
+      <me-card title="Texture" functionId="revert-normal-map-texture" functionTitle="Revert to original normal map texture"
+        .undoFunction=${this.revertNormalTexture.bind(this)}>
+        <div slot="content">
+          <div class="TexturePickerContainer">
+            <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
         this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
+            </me-texture-picker>
+          </div>
         </div>
       </me-card>
     </div>
@@ -684,32 +663,29 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Emissive">
     <div slot="content">
-      <me-card title="Factor">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
-          title="Revert to original emissive factor"
-          @click=${this.revertEmissiveFactor}></mwc-icon-button>
-          <me-color-picker selectedColorHex=${
+      <me-card title="Factor" functionId="revert-emissive-factor" functionTitle="Revert to original emissive factor"
+        .undoFunction=${this.revertEmissiveFactor.bind(this)}>
+        <div slot="content">
+          <div class="TexturePickerContainer">
+            <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
-        this.onEmissiveFactorChanged}></me-color-picker>
-        </div>
+        this.onEmissiveFactorChanged}>
+            </me-color-picker>
+          </div>
         </div>
       </me-card>
-      <me-card title="Texture">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
-          title="Revert to original emissive texture"
-          @click=${this.revertEmissiveTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
+      <me-card title="Texture" functionId="revert-emissive-texture" functionTitle="Revert to original emissive texture"
+        .undoFunction=${this.revertEmissiveTexture.bind(this)}>
+        <div slot="content">
+          <div class="TexturePickerContainer">
+            <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="emissive-texture-picker" @texture-changed=${
         this.onEmissiveTextureChange} @texture-uploaded=${
         this.onEmissiveTextureUpload} .images=${this.safeTextureUrls}>
-        </me-texture-picker>
-        </div>
+            </me-texture-picker>
+          </div>
         </div>
       </me-card>
     </div>
@@ -725,20 +701,18 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
-      <me-card title="Texture">
-      <div slot="content">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
-          title="Revert to original occlusion texture"
-          @click=${this.revertOcclusionTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
+      <me-card title="Texture" functionId="revert-occlusion-texture" functionTitle="Revert to original occlusion texture"
+        .undoFunction=${this.revertOcclusionTexture.bind(this)}>
+        <div slot="content">
+          <div class="TexturePickerContainer">
+            <me-texture-picker .selectedIndex=${
         currentTextureId ?
             this.safeUrlIds.indexOf(currentTextureId) :
             undefined} id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
         this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
+            </me-texture-picker>
+          </div>
         </div>
       </me-card>
     </div>
@@ -751,42 +725,36 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const material = this.materials[this.selectedMaterialId];
+    // Alpha cutoff defaults to 0.5 by gltf specification
+    const alphaCutOff = material.alphaCutoff ?? 0.5;
     // Alpha blend mode defaults to 'OPAQUE' by gltf specification.
     const selectedIndex =
         material.alphaMode ? ALPHA_BLEND_MODES.indexOf(material.alphaMode) : 0;
     return html`
-    <me-card title="Alpha Blend Mode">
+    <me-card title="Alpha Blend Mode" functionId="revert-alpha-cutoff" functionTitle="Revert to original alpha mode"
+      .undoFunction=${this.revertAlphaMode.bind(this)}>
       <div slot="content">
-        <div class="DropdownContainer">
-          <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
-            title="Revert to original alpha mode"
-            @click=${this.revertAlphaMode}></mwc-icon-button>
-          <me-dropdown id="alpha-mode-picker"
-            selectedIndex=${selectedIndex}
-            @select=${this.onAlphaModeSelect}>
-            ${
+        <me-dropdown id="alpha-mode-picker"
+          selectedIndex=${selectedIndex}
+          @select=${this.onAlphaModeSelect}>
+          ${
         ALPHA_BLEND_MODES.map(
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
-          </me-dropdown>
-        </div>
+        </me-dropdown>
       </div>
     </me-card>
       ${
-        material.alphaMode === 'MASK' ?
-            html`
-      <div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
-        <div class="MRSliderContainer">
-          <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
-            title="Revert to original alpha cutoff"
-            @click=${this.revertAlphaCutoff}></mwc-icon-button>
-          <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
-          step="0.01" value="${
-                material.alphaCutoff ??
-                0.5  // Alpha cutoff defaults to 0.5 by gltf specification
-            }" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
-        </div>
-      ` :
-            html``}
+        material.alphaMode === 'MASK' ? html`
+    <me-card title="Alpha Cutoff" functionId="revert-alpha-mode" functionTitle="Revert to original alpha cutoff"
+      .undoFunction=${this.revertAlphaCutoff.bind(this)}>
+      <div slot="content">
+        <me-slider-with-input id="alpha-cutoff" min="0.0" max="1.0"
+          step="0.01" value="${alphaCutOff}" @change=${
+                                            this.onAlphaCutoffChange}>
+        </me-slider-with-input>
+      </div>
+    </me-card>` :
+                                        html``}
       `;
   }
 
@@ -797,18 +765,14 @@ export class MaterialPanel extends ConnectedLitElement {
 
     // By default, double sided is false. So if it's undefined, assume false.
     return html`
-    <me-card title="Double Sided">
+    <me-card title="Double Sided" functionId="revert-occlusion-texture" functionTitle="Revert to original double sidedness"
+      .undoFunction=${this.revertDoubleSided.bind(this)}>
       <div slot="content">
-        <div class="CheckboxContainer">
-          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
-          title="Revert to original double sidedness"
-          @click=${this.revertDoubleSided}></mwc-icon-button>
-          <me-checkbox id="doubleSidedCheckbox"
-            ?checked=${
-    !!this.materials[this.selectedMaterialId].doubleSided}
-            label="Double Sided"
-            @change=${this.onDoubleSidedChange}></me-checkbox>
-        </div>
+        <me-checkbox id="doubleSidedCheckbox"
+          ?checked=${!!this.materials[this.selectedMaterialId].doubleSided}
+          label="Double Sided"
+          @change=${this.onDoubleSidedChange}>
+        </me-checkbox>
       </div>
     </me-card>
       `;
@@ -830,7 +794,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   render() {
     if (this.materials.length === 0) {
-      return html`No materials to edit`;
+      return html`<div style="color: black">No materials to edit</div>`;
     }
 
     return html`

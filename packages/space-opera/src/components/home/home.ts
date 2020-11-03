@@ -96,28 +96,15 @@ export class HomeContainer extends ConnectedLitElement {
 
   render() {
     return html`
-      <me-expandable-tab tabName="home" .open=${true}>
+      <me-expandable-tab tabName="Home" .open=${true} .sticky=${true}>
         <div slot="content">
-          <p>
+          <div class="note">
             Welcome to the model viewer editor where you can generate &lt;model-viewer&gt; HTML snippets, as well as edit GLBs.
-          </p>
+          </div>
           <a href="https://policies.google.com/privacy" style="color: black">Privacy</a>
         </div>
       </me-expandable-tab>
-      <me-expandable-tab tabName="beginner" .open=${true}>
-        <div slot="content">
-          <me-card title="Quick Start">
-            <div slot="content">
-              <home-container-card 
-                icon=${CARD_CONTENT.quick.icon}
-                homeCardHeader=${CARD_CONTENT.quick.header}
-                homeCardBody=${CARD_CONTENT.quick.body}
-              ></home-container-card>
-            </div>
-          </me-card>
-        </div>
-      </me-expandable-tab>
-      <me-expandable-tab tabName="advanced" .open=${true}>
+      <me-expandable-tab tabName="Modules" .open=${true}>
         <div slot="content">
           <me-card title="File Manager">
             <div slot="content">

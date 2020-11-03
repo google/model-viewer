@@ -75,16 +75,19 @@ export class InspectorPanel extends ConnectedLitElement {
 
   render() {
     return html`
-        <div>
-          <pre class="inspector-content">${
-        this.gltfJsonstring || 'No model loaded'}
-          </pre>
-          <div class="texture-images">
-            ${
+      <me-expandable-tab tabName="GLTF JSON" .open=${true}>
+        <div slot="content">
+          <div style="color: black">
+            <pre class="inspector-content">${
+        this.gltfJsonstring || 'No model loaded'}</pre>
+            <div class="texture-images">
+              ${
         this.safeTextureUrls.map(
             url => html`<img width="100" src="${url.url}">`)}
+            </div>
           </div>
         </div>
+      </me-expandable-tab>
     `;
   }
 }

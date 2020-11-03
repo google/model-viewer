@@ -17,6 +17,7 @@ export const styles: CSSResult = css`
   white-space: nowrap;
   display: flex;
   align-items: center;
+  padding-bottom: 5px;
 }
 
 .header {
