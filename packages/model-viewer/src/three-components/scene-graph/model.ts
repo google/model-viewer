@@ -15,14 +15,12 @@
 
 import {MeshStandardMaterial} from 'three';
 
-import {SerializedModel} from '../../protocol.js';
-import {GLTFTreeVisitor} from '../../utilities.js';
-import {Model as ModelInterface} from '../api.js';
-
+import {Model as ModelInterface} from './api.js';
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
 import {ThreeDOMElement} from './three-dom-element.js';
+import {GLTFTreeVisitor} from './utilities.js';
 
 
 const $modelUri = Symbol('modelUri');
@@ -67,15 +65,5 @@ export class Model extends ThreeDOMElement implements ModelInterface {
    */
   get materials(): Array<Material> {
     return this[$materials];
-  }
-
-  toJSON(): SerializedModel {
-    const serialized: Partial<SerializedModel> = super.toJSON();
-
-    serialized.modelUri = this[$modelUri];
-    serialized.materials =
-        this[$materials].map((material) => material.toJSON());
-
-    return serialized as SerializedModel;
   }
 }

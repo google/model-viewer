@@ -15,10 +15,8 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {TextureInfo as GLTFTextureInfo} from '../../gltf-2.0.js';
-import {SerializedTexture, SerializedTextureInfo} from '../../protocol.js';
-import {TextureInfo as TextureInfoInterface} from '../api.js';
-
+import {TextureInfo as TextureInfoInterface} from './api.js';
+import {TextureInfo as GLTFTextureInfo} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {Texture} from './texture.js';
 import {ThreeDOMElement} from './three-dom-element.js';
@@ -51,17 +49,5 @@ export class TextureInfo extends ThreeDOMElement implements
 
   get texture(): Texture|null {
     return this[$texture];
-  }
-
-  toJSON(): SerializedTexture {
-    const serialized: Partial<SerializedTextureInfo> = super.toJSON();
-
-    const {texture} = this;
-
-    if (texture != null) {
-      serialized.texture = texture.toJSON();
-    }
-
-    return serialized as SerializedTexture;
   }
 }

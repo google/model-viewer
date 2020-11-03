@@ -127,17 +127,17 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
   /**
    * Changes the base color factor of the material to the given value.
    */
-  setBaseColorFactor(rgba: RGBA): Promise<void>;
+  setBaseColorFactor(rgba: RGBA): void;
 
   /**
    * Changes the metalness factor of the material to the given value.
    */
-  setMetallicFactor(value: number): Promise<void>;
+  setMetallicFactor(value: number): void;
 
   /**
    * Changes the roughness factor of the material to the given value.
    */
-  setRoughnessFactor(value: number): Promise<void>;
+  setRoughnessFactor(value: number): void;
 }
 
 /**
@@ -154,7 +154,7 @@ export declare interface TextureInfo extends ThreeDOMElement {
   /**
    * Configure the Texture referenced by this TextureInfo
    */
-  setTexture(texture: Texture|null): Promise<void>;
+  setTexture(texture: Texture|null): void;
 }
 
 /**
@@ -181,12 +181,12 @@ export declare interface Texture extends ThreeDOMElement {
   /**
    * Configure the Sampler used for this Texture.
    */
-  setSampler(sampler: Sampler): Promise<void>;
+  setSampler(sampler: Sampler): void;
 
   /**
    * Configure the source Image used for this Texture.
    */
-  setSource(image: Image): Promise<void>;
+  setSource(image: Image): void;
 }
 
 /**
@@ -203,12 +203,12 @@ export declare interface Sampler extends ThreeDOMElement {
   /**
    * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerminfilter
    */
-  readonly minFilter: MinFilter|null;
+  readonly minFilter: MinFilter;
 
   /**
    * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplermagfilter
    */
-  readonly magFilter: MagFilter|null;
+  readonly magFilter: MagFilter;
 
   /**
    * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerwraps
@@ -223,22 +223,22 @@ export declare interface Sampler extends ThreeDOMElement {
   /**
    * Configure the minFilter value of the Sampler.
    */
-  setMinFilter(filter: MinFilter|null): Promise<void>;
+  setMinFilter(filter: MinFilter|null): void;
 
   /**
    * Configure the magFilter value of the Sampler.
    */
-  setMagFilter(filter: MagFilter|null): Promise<void>;
+  setMagFilter(filter: MagFilter|null): void;
 
   /**
    * Configure the S (U) wrap mode of the Sampler.
    */
-  setWrapS(mode: WrapMode): Promise<void>;
+  setWrapS(mode: WrapMode|null): void;
 
   /**
    * Configure the T (V) wrap mode of the Sampler.
    */
-  setWrapT(mode: WrapMode): Promise<void>;
+  setWrapT(mode: WrapMode|null): void;
 }
 
 

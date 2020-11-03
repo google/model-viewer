@@ -15,13 +15,15 @@
 
 import {Material, Object3D, Texture} from 'three';
 
-import {GLTF, GLTFElement} from '../../gltf-2.0.js';
-import {getLocallyUniqueId} from '../../utilities.js';
 import {Model, ThreeDOMElement as ThreeDOMElementInterface} from './api.js';
+import {GLTF, GLTFElement} from './gltf-2.0.js';
+import {ModelGraft} from './model-graft.js';
+import {getLocallyUniqueId} from './utilities.js';
 
 export const $correlatedObjects = Symbol('correlatedObjects');
 export const $sourceObject = Symbol('sourceObject');
 export const $internalID = Symbol('internalID');
+const $graft = Symbol('graft');
 
 export type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
 
@@ -32,8 +34,7 @@ export type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
  * serializability.
  */
 export class ThreeDOMElement implements ThreeDOMElementInterface {
-  // The Model of provenance for this scene graph element.
-  readonly ownerModel: Model;
+  private[$graft]: ModelGraft;
   // The canonical GLTF or GLTFElement represented by this facade.
   readonly[$sourceObject]: GLTFElement|GLTF;
   // The backing Three.js scene graph construct for this element.
@@ -46,11 +47,18 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
   readonly[$internalID]: number = getLocallyUniqueId();
 
   constructor(
-      model: Model, element: GLTFElement|GLTF,
+      graft: ModelGraft, element: GLTFElement|GLTF,
       correlatedObjects: CorrelatedObjects|null = null) {
-    this.ownerModel = model;
+    this[$graft] = graft;
     this[$sourceObject] = element;
     this[$correlatedObjects] = correlatedObjects;
+  }
+
+  /**
+   * The Model of provenance for this scene graph element.
+   */
+  get ownerModel(): Model {
+    return this[$graft].model;
   }
 
   /**
@@ -59,7 +67,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * We only want to expose a name that is set in the source glTF, so Three.js
    * generated names are ignored.
    */
-  get name(): string|null {
-    return (this[$sourceObject] as unknown as {name?: string}).name || null;
+  get name(): string|undefined {
+    return this[$sourceObject].name;
   }
 }

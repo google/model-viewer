@@ -15,16 +15,15 @@
 
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
-import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../gltf-2.0.js';
-import {SerializedImage} from '../../protocol.js';
-import {Image as ImageInterface} from '../api.js';
-
+import {Image as ImageInterface} from './api.js';
+import {EmbeddedImage as GLTFEmbeddedImage, Image as GLTFImage} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
-import {$correlatedObjects, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const loader = new ImageLoader();
 
 const $threeTextures = Symbol('threeTextures');
+const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
 
 /**
@@ -35,6 +34,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
+  private[$uri]: string|null;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
   constructor(
@@ -49,16 +49,21 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     }
   }
 
-  async mutate(property: 'uri', value: string|null): Promise<void> {
+  get uri(): string|null {
+    return this[$uri];
+  }
+
+  get type(): 'embedded'|'external' {
+    return this.uri != null ? 'external' : 'embedded';
+  }
+
+  async setURI(uri: string|null): Promise<void> {
+    this[$uri] = uri;
     let image: HTMLImageElement|null = null;
 
-    if (property !== 'uri') {
-      throw new Error(`Cannot configure property "${property}" on Image`);
-    }
-
-    if (value != null) {
+    if (uri != null) {
       image = await new Promise((resolve, reject) => {
-        loader.load(value, resolve, undefined, reject);
+        loader.load(uri, resolve, undefined, reject);
       });
     }
 
@@ -67,7 +72,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       // (this would happen if it started out as embedded), then fall back to
       // the cached object URL created by GLTFLoader:
       if (image == null &&
-          (this.sourceObject as GLTFEmbeddedImage).bufferView != null) {
+          (this[$sourceObject] as GLTFEmbeddedImage).bufferView != null) {
         texture.image = this[$bufferViewImages].get(texture);
       } else {
         texture.image = image;
@@ -75,16 +80,5 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
       texture.needsUpdate = true;
     }
-  }
-
-  toJSON(): SerializedImage {
-    const serialized: Partial<SerializedImage> = super.toJSON();
-    const {uri} = this.sourceObject as GLTFExternalImage;
-
-    if (uri != null) {
-      serialized.uri = uri;
-    }
-
-    return serialized as SerializedImage;
   }
 }

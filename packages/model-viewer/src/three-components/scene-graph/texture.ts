@@ -15,10 +15,8 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {Texture as GLTFTexture} from '../../gltf-2.0.js';
-import {SerializedTexture} from '../../protocol.js';
-import {Texture as TextureInterface} from '../api.js';
-
+import {Texture as TextureInterface} from './api.js';
+import {Texture as GLTFTexture} from './gltf-2.0.js';
 import {Image} from './image.js';
 import {ModelGraft} from './model-graft.js';
 import {Sampler} from './sampler.js';
@@ -44,7 +42,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     const {sampler: samplerIndex, source: imageIndex} = texture;
 
     if (samplerIndex != null) {
-      const sampler = glTF.samplers && glTF.samplers[samplerIndex];
+      const sampler = glTF.samplers ?? [samplerIndex];
 
       if (sampler != null) {
         this[$sampler] = new Sampler(graft, sampler, correlatedTextures);
@@ -52,7 +50,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     }
 
     if (imageIndex != null) {
-      const image = glTF.images && glTF.images[imageIndex];
+      const image = glTF.images ?? [imageIndex];
 
       if (image != null) {
         this[$source] = new Image(graft, image, correlatedTextures);
@@ -66,21 +64,5 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
 
   get source(): Image|null {
     return this[$source];
-  }
-
-  toJSON(): SerializedTexture {
-    const serialized: Partial<SerializedTexture> = super.toJSON();
-
-    const {sampler, source} = this;
-
-    if (sampler != null) {
-      serialized.sampler = sampler.toJSON();
-    }
-
-    if (source != null) {
-      serialized.source = source.toJSON();
-    }
-
-    return serialized as SerializedTexture;
   }
 }
