@@ -65,25 +65,29 @@ const CARD_CONTENT = {
   }
 };
 
+interface CardContentInterface {
+  icon?: string;
+  header?: string;
+  body?: string;
+}
+
 /**
  * Home Container Card
  */
 @customElement('home-container-card')
 export class HomeContainerCard extends ConnectedLitElement {
   static styles = homeStyles;
-  @property({type: String, reflect: true}) icon = '';
-  @property({type: String}) homeCardHeader = '';
-  @property({type: String}) homeCardBody = '';
+  @property({type: Object}) content: CardContentInterface = {};
 
   render() {
     return html`
       <div class="CardContainer">
         <div class="CardContent">
-          <img src=${this.icon}>
+          <img src=${this.content.icon}>
         </div>
         <div class="CardContent text">
-          <div class="HomeCardHeader">${this.homeCardHeader}</div> 
-          <div class="HomeCardContent">${this.homeCardBody}</div>
+          <div class="HomeCardHeader">${this.content.header}</div> 
+          <div class="HomeCardContent">${this.content.body}</div>
         </div>
       </div>
     `;
@@ -111,39 +115,24 @@ export class HomeContainer extends ConnectedLitElement {
         <div slot="content">
           <me-card title="File Manager">
             <div slot="content">
-              <home-container-card 
-                icon=${CARD_CONTENT.save.icon}
-                homeCardHeader=${CARD_CONTENT.save.header}
-                homeCardBody=${CARD_CONTENT.save.body}
-              ></home-container-card>
+              <home-container-card .content=${CARD_CONTENT.save}>
+              </home-container-card>
             </div>
           </me-card>
           <me-card title="model-viewer snippet">
             <div slot="content">
-              <home-container-card 
-                icon=${CARD_CONTENT.edit.icon}
-                homeCardHeader=${CARD_CONTENT.edit.header}
-                homeCardBody=${CARD_CONTENT.edit.body}
-              ></home-container-card>
-              <home-container-card 
-                icon=${CARD_CONTENT.camera.icon}
-                homeCardHeader=${CARD_CONTENT.camera.header}
-                homeCardBody=${CARD_CONTENT.camera.body}
-              ></home-container-card>
+              <home-container-card .content=${CARD_CONTENT.edit}>
+              </home-container-card>
+              <home-container-card .content=${CARD_CONTENT.camera}>
+              </home-container-card>
             </div>
           </me-card>
           <me-card title="GLB Model">
             <div slot="content">
-              <home-container-card 
-                icon=${CARD_CONTENT.materials.icon}
-                homeCardHeader=${CARD_CONTENT.materials.header}
-                homeCardBody=${CARD_CONTENT.materials.body}
-              ></home-container-card>
-              <home-container-card 
-                icon=${CARD_CONTENT.inspector.icon}
-                homeCardHeader=${CARD_CONTENT.inspector.header}
-                homeCardBody=${CARD_CONTENT.inspector.body}
-              ></home-container-card>
+              <home-container-card .content=${CARD_CONTENT.materials}>
+              </home-container-card>
+              <home-container-card .content=${CARD_CONTENT.inspector}>
+              </home-container-card>
             </div>
           </me-card>
         </div>

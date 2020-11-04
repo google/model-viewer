@@ -548,7 +548,7 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
       <me-card title="Texture" functionId="revert-metallic-roughness-texture" functionTitle="Revert to original metallic roughness texture"
-        .undoFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
+        .revertFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
         <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -560,7 +560,7 @@ export class MaterialPanel extends ConnectedLitElement {
         </div>
       </me-card>
       <me-card title="Metallic factor" functionTitle="Revert to original metallic factor" functionId="revert-metallic-factor" 
-        .undoFunction=${this.revertMetallicFactor.bind(this)}>
+        .revertFunction=${this.revertMetallicFactor.bind(this)}>
         <div slot="content">
           <me-slider-with-input id="metallic-factor" min="0.0" max="1.0" step="0.01" 
             value="${material.metallicFactor}" @change=${this.onMetallicChange}>
@@ -568,7 +568,7 @@ export class MaterialPanel extends ConnectedLitElement {
         </div>
       </me-card>
       <me-card title="Roughness factor" functionId="revert-roughness-factor" functionTitle="Revert to original roughness factor"
-        .undoFunction=${this.revertRoughnessFactor.bind(this)}>
+        .revertFunction=${this.revertRoughnessFactor.bind(this)}>
         <div slot="content">
           <me-slider-with-input id="roughness-factor" min="0.0" max="1.0" step="0.01" 
           value="${material.roughnessFactor}" @change=${this.onRoughnessChange}>
@@ -593,7 +593,7 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Base Color">
     <div slot="content">
       <me-card title="Factor" functionId="revert-base-color-factor" functionTitle="Revert to original base color factor"
-        .undoFunction=${this.revertBaseColorFactor.bind(this)}>
+        .revertFunction=${this.revertBaseColorFactor.bind(this)}>
         <div slot="content">
           <me-color-picker id="base-color-picker"
           selectedColorHex=${selectedColorHex} @change=${
@@ -602,7 +602,7 @@ export class MaterialPanel extends ConnectedLitElement {
         </div>
       </me-card>
       <me-card title="Texture" functionId="revert-base-color-texture" functionTitle="Revert to original base color texture"
-        .undoFunction=${this.revertBaseColorTexture.bind(this)}>
+        .revertFunction=${this.revertBaseColorTexture.bind(this)}>
         <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -628,7 +628,7 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
       <me-card title="Texture" functionId="revert-normal-map-texture" functionTitle="Revert to original normal map texture"
-        .undoFunction=${this.revertNormalTexture.bind(this)}>
+        .revertFunction=${this.revertNormalTexture.bind(this)}>
         <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -657,7 +657,7 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Emissive">
     <div slot="content">
       <me-card title="Factor" functionId="revert-emissive-factor" functionTitle="Revert to original emissive factor"
-        .undoFunction=${this.revertEmissiveFactor.bind(this)}>
+        .revertFunction=${this.revertEmissiveFactor.bind(this)}>
         <div slot="content">
           <me-color-picker selectedColorHex=${
         selectedColorHex} id="emissive-factor-picker" @change=${
@@ -666,7 +666,7 @@ export class MaterialPanel extends ConnectedLitElement {
         </div>
       </me-card>
       <me-card title="Texture" functionId="revert-emissive-texture" functionTitle="Revert to original emissive texture"
-        .undoFunction=${this.revertEmissiveTexture.bind(this)}>
+        .revertFunction=${this.revertEmissiveTexture.bind(this)}>
         <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -691,7 +691,7 @@ export class MaterialPanel extends ConnectedLitElement {
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
       <me-card title="Texture" functionId="revert-occlusion-texture" functionTitle="Revert to original occlusion texture"
-        .undoFunction=${this.revertOcclusionTexture.bind(this)}>
+        .revertFunction=${this.revertOcclusionTexture.bind(this)}>
         <div slot="content">
           <me-texture-picker .selectedIndex=${
         currentTextureId ?
@@ -719,7 +719,7 @@ export class MaterialPanel extends ConnectedLitElement {
         material.alphaMode ? ALPHA_BLEND_MODES.indexOf(material.alphaMode) : 0;
     return html`
     <me-card title="Alpha Blend Mode" functionId="revert-alpha-cutoff" functionTitle="Revert to original alpha mode"
-      .undoFunction=${this.revertAlphaMode.bind(this)}>
+      .revertFunction=${this.revertAlphaMode.bind(this)}>
       <div slot="content">
         <me-dropdown id="alpha-mode-picker"
           selectedIndex=${selectedIndex}
@@ -733,7 +733,7 @@ export class MaterialPanel extends ConnectedLitElement {
       ${
         material.alphaMode === 'MASK' ? html`
     <me-card title="Alpha Cutoff" functionId="revert-alpha-mode" functionTitle="Revert to original alpha cutoff"
-      .undoFunction=${this.revertAlphaCutoff.bind(this)}>
+      .revertFunction=${this.revertAlphaCutoff.bind(this)}>
       <div slot="content">
         <me-slider-with-input id="alpha-cutoff" min="0.0" max="1.0"
           step="0.01" value="${alphaCutOff}" @change=${
@@ -753,7 +753,7 @@ export class MaterialPanel extends ConnectedLitElement {
     // By default, double sided is false. So if it's undefined, assume false.
     return html`
     <me-card title="Double Sided" functionId="revert-occlusion-texture" functionTitle="Revert to original double sidedness"
-      .undoFunction=${this.revertDoubleSided.bind(this)}>
+      .revertFunction=${this.revertDoubleSided.bind(this)}>
       <div slot="content">
         <me-checkbox id="doubleSidedCheckbox"
           ?checked=${!!this.materials[this.selectedMaterialId].doubleSided}

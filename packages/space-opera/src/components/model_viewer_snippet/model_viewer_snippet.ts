@@ -131,8 +131,10 @@ export class ExportPanel extends ConnectedLitElement {
 
   protected updated() {
     this.snippetViewer.updateComplete.then(() => {
-      this.exportZipButton.snippetText =
-          this.snippetViewer.snippet.textContent || '';
+      if (this.exportZipButton) {
+        this.exportZipButton.snippetText =
+            this.snippetViewer.snippet.textContent || '';
+      }
     });
   }
 }
