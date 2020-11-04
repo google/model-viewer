@@ -33,7 +33,7 @@ export class CardElement extends LitElement {
   @property({type: Function}) uploadFunction?: Function;
   @property({type: Function}) copyFunction?: Function;
   @property({type: Function}) removeFunction?: Function;
-  @property({type: Function}) undoFunction?: Function;
+  @property({type: Function}) revertFunction?: Function;
 
   render() {
     const upload = this.uploadFunction !== undefined ? html`
@@ -53,14 +53,14 @@ export class CardElement extends LitElement {
     </mwc-button>
     ` :
                                                        html``;
-    const undo = this.undoFunction !== undefined ? html`
+    const undo = this.revertFunction !== undefined ? html`
     <mwc-button class="upload" id=${this.functionId}
       icon="undo"
       title=${this.functionTitle}
-      @click="${this.undoFunction}">
+      @click="${this.revertFunction}">
     </mwc-button>
     ` :
-                                                   html``;
+                                                     html``;
     return html`
     <div class="card">
       <div class="container">
