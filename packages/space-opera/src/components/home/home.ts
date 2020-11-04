@@ -31,30 +31,35 @@ const CARD_CONTENT = {
         'This module is for beginners. Assembly Line is a bundle of features including: loading, basic editing, and export.'
   },
   save: {
-    icon: 'save',
+    icon:
+        'https://fonts.gstatic.com/s/i/materialiconsextended/save/v6/grey600-24dp/1x/baseline_save_grey600_24dp.png',
     header: 'Import/ Export',
     body:
         'Import or export your GLB models as well as insert or copy &lt;model-viewer&gt; HTML snippets.'
   },
   edit: {
-    icon: 'create',
+    icon:
+        'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/grey600-24dp/1x/gm_create_grey600_24dp.png',
     header: 'Edit',
     body: 'Adjust your lighting, hotspots, or posters in finer detail.'
   },
   camera: {
-    icon: 'photo_camera',
+    icon:
+        'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/grey600-24dp/1x/baseline_photo_camera_grey600_24dp.png',
     header: 'Camera',
     body:
         'Update the camera settings including adding interactivity, rotation, and targets.'
   },
   materials: {
-    icon: 'color_lens',
+    icon:
+        'https://fonts.gstatic.com/s/i/materialiconsextended/color_lens/v7/grey600-24dp/1x/baseline_color_lens_grey600_24dp.png',
     header: 'Materials',
     body:
         'Modify properties of materials such as color, metallic roughness, normal maps, etc.'
   },
   inspector: {
-    icon: 'search',
+    icon:
+        'https://fonts.gstatic.com/s/i/materialiconsextended/search/v7/grey600-24dp/1x/baseline_search_grey600_24dp.png',
     header: 'Inspector',
     body: 'Visualize the gltf json string generated from your imported model.'
   }
@@ -74,8 +79,7 @@ export class HomeContainerCard extends ConnectedLitElement {
     return html`
       <div class="CardContainer">
         <div class="CardContent">
-          <mwc-tab icon=${this.icon}>
-          </mwc-tab>
+          <img src=${this.icon}>
         </div>
         <div class="CardContent text">
           <div class="HomeCardHeader">${this.homeCardHeader}</div> 
@@ -114,7 +118,7 @@ export class HomeContainer extends ConnectedLitElement {
               ></home-container-card>
             </div>
           </me-card>
-          <me-card title="&lt;model-viewer&gt; snippet">
+          <me-card title="model-viewer snippet">
             <div slot="content">
               <home-container-card 
                 icon=${CARD_CONTENT.edit.icon}
