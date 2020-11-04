@@ -20,10 +20,7 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
 import {ThreeDOMElement} from './three-dom-element.js';
-import {GLTFTreeVisitor} from './utilities.js';
 
-
-const $modelUri = Symbol('modelUri');
 const $materials = Symbol('materials');
 
 /**
@@ -32,27 +29,18 @@ const $materials = Symbol('materials');
  * scene graph.
  */
 export class Model extends ThreeDOMElement implements ModelInterface {
-  private[$modelUri] = '';
   private[$materials]: Array<Material> = [];
 
-  constructor(
-      graft: ModelGraft, modelUri: string,
-      correlatedSceneGraph: CorrelatedSceneGraph) {
+  constructor(graft: ModelGraft, correlatedSceneGraph: CorrelatedSceneGraph) {
     super(graft, correlatedSceneGraph.gltf);
 
-    this[$modelUri] = modelUri;
-
-    const visitor = new GLTFTreeVisitor({
-      material: (material) => {
-        this[$materials].push(new Material(
-            graft,
-            material,
-            correlatedSceneGraph.gltfElementMap.get(material) as
-                Set<MeshStandardMaterial>));
-      }
+    correlatedSceneGraph.gltf.materials!.forEach(material => {
+      this[$materials].push(new Material(
+          graft,
+          material,
+          correlatedSceneGraph.gltfElementMap.get(material) as
+              Set<MeshStandardMaterial>));
     });
-
-    visitor.visit(correlatedSceneGraph.gltf, {sparse: true});
   }
 
   /**

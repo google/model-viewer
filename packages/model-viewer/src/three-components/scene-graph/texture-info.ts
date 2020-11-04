@@ -29,7 +29,7 @@ const $texture = Symbol('texture');
  */
 export class TextureInfo extends ThreeDOMElement implements
     TextureInfoInterface {
-  private[$texture]: Texture|null = null;
+  private[$texture]: Texture;
 
   constructor(
       graft: ModelGraft, textureInfo: GLTFTextureInfo,
@@ -38,16 +38,14 @@ export class TextureInfo extends ThreeDOMElement implements
 
     const glTF = graft.correlatedSceneGraph.gltf;
     const {index: textureIndex} = textureInfo;
-    const texture = textureIndex != null && glTF.textures != null ?
-        glTF.textures[textureIndex] :
-        null;
+    const texture = glTF.textures![textureIndex];
 
     if (texture != null) {
       this[$texture] = new Texture(graft, texture, correlatedTextures);
     }
   }
 
-  get texture(): Texture|null {
+  get texture(): Texture {
     return this[$texture];
   }
 }

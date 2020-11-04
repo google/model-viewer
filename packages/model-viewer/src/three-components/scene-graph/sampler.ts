@@ -54,18 +54,6 @@ const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
   }
 };
 
-// These defaults represent a convergence of glTF defaults for wrap mode and
-// Three.js defaults for filters. Per glTF 2.0 spec, a renderer may choose its
-// own defaults for filters.
-// @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
-// @see https://threejs.org/docs/#api/en/textures/Texture
-const defaultValues = {
-  minFilter: 9987 as MinFilter,
-  magFilter: 9729 as MagFilter,
-  wrapS: 10497 as WrapMode,
-  wrapT: 10497 as WrapMode,
-};
-
 const $threeTextures = Symbol('threeTextures');
 const $setProperty = Symbol('setProperty');
 
@@ -80,6 +68,24 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   constructor(
       graft: ModelGraft, sampler: GLTFSampler,
       correlatedTextures: Set<ThreeTexture>) {
+    // These defaults represent a convergence of glTF defaults for wrap mode and
+    // Three.js defaults for filters. Per glTF 2.0 spec, a renderer may choose
+    // its own defaults for filters.
+    // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
+    // @see https://threejs.org/docs/#api/en/textures/Texture
+    if (sampler.minFilter == null) {
+      sampler.minFilter = 9987;
+    }
+    if (sampler.magFilter == null) {
+      sampler.magFilter = 9729;
+    }
+    if (sampler.wrapS == null) {
+      sampler.wrapS = 10497;
+    }
+    if (sampler.wrapT == null) {
+      sampler.wrapT = 10497;
+    }
+
     super(graft, sampler, correlatedTextures);
   }
 
@@ -99,11 +105,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     return (this[$sourceObject] as GLTFSampler).wrapT!;
   }
 
-  setMinFilter(filter: MinFilter|null) {
+  setMinFilter(filter: MinFilter) {
     this[$setProperty]('minFilter', filter);
   }
 
-  setMagFilter(filter: MagFilter|null) {
+  setMagFilter(filter: MagFilter) {
     this[$setProperty]('magFilter', filter);
   }
 
@@ -116,12 +122,8 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
-      property: P, value: MinFilter|MagFilter|WrapMode|null) {
+      property: P, value: MinFilter|MagFilter|WrapMode) {
     const sampler = this[$sourceObject] as GLTFSampler;
-
-    if (value == null) {
-      value = defaultValues[property];
-    }
 
     if (isValidSamplerValue(property, value)) {
       sampler[property] = value;

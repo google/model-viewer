@@ -7,16 +7,11 @@ export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>
     void;
 
-export interface GLTFElementHandle {
-  key: Exclude<keyof GLTF, 'scene'>;
-  element: GLTFElement;
-}
-
 export type ThreeObjectSet = Set<ThreeSceneObject>;
 
 export type GLTFElementToThreeObjectMap = Map<GLTFElement, ThreeObjectSet>;
 export type ThreeObjectToGLTFElementHandleMap =
-    Map<Object3D|Material|Texture, GLTFReference>;
+    Map<ThreeSceneObject, GLTFReference>;
 
 const $threeGLTF = Symbol('threeGLTF');
 const $gltf = Symbol('gltf');
@@ -66,16 +61,24 @@ export class CorrelatedSceneGraph {
     const {associations} = threeGLTF.parser;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
 
+    const defaultMaterial = {name: 'Default'} as Material;
+    const defaultReference = {type: 'materials', index: -1} as GLTFReference;
+
     // NOTE: IE11 does not have Map iterator methods
     associations.forEach((gltfElementReference, threeObject) => {
       // Note: GLTFLoader creates a "default" material that has no corresponding
       // glTF element in the case that no materials are specified in the source
-      // glTF. This means that for basic models without any of their own
-      // materials, we might accidentally try to present a configurable glTF
-      // material that doesn't exist. It might be valuable to make this default
-      // material configurable in the future, but for now we ignore it.
+      // glTF. In this case we append a default material to allow this to be
+      // operated upon.
       if (gltfElementReference == null) {
-        return;
+        if (defaultReference.index < 0) {
+          if (gltf.materials == null) {
+            gltf.materials = [];
+          }
+          defaultReference.index = gltf.materials.length;
+          gltf.materials.push(defaultMaterial);
+        }
+        gltfElementReference = defaultReference;
       }
 
       const {type, index} = gltfElementReference;

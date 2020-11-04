@@ -28,7 +28,7 @@ suite('facade/three-js/three-dom-element', () => {
   suite('ThreeDOMElement', () => {
     test('has a reference to a Model', () => {
       const graft =
-          new ModelGraft('', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+          new ModelGraft(CorrelatedSceneGraph.from(createFakeThreeGLTF()));
       const object3D = new Object3D();
       const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
       expect(element.ownerModel).to.be.equal(graft.model);
@@ -36,8 +36,8 @@ suite('facade/three-js/three-dom-element', () => {
 
     suite('names', () => {
       test('ignores a Three.js-generated name', () => {
-        const graft = new ModelGraft(
-            '', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+        const graft =
+            new ModelGraft(CorrelatedSceneGraph.from(createFakeThreeGLTF()));
         const object3D = new Object3D();
 
         object3D.name = 'generated';
@@ -47,8 +47,8 @@ suite('facade/three-js/three-dom-element', () => {
       });
 
       test('expresses a name for a Three.js Material', () => {
-        const graft = new ModelGraft(
-            '', CorrelatedSceneGraph.from(createFakeThreeGLTF()));
+        const graft =
+            new ModelGraft(CorrelatedSceneGraph.from(createFakeThreeGLTF()));
         const material = new Material();
         const name = 'original';
 

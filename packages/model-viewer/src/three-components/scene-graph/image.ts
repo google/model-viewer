@@ -16,7 +16,7 @@
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
 import {Image as ImageInterface} from './api.js';
-import {EmbeddedImage as GLTFEmbeddedImage, Image as GLTFImage} from './gltf-2.0.js';
+import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -34,13 +34,17 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  private[$uri]: string|null;
+  private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
   constructor(
       graft: ModelGraft, image: GLTFImage,
       correlatedTextures: Set<ThreeTexture>) {
     super(graft, image, correlatedTextures);
+
+    if ((image as GLTFExternalImage).uri != null) {
+      this[$uri] = (image as GLTFExternalImage).uri;
+    }
 
     if ((image as GLTFEmbeddedImage).bufferView != null) {
       for (const texture of correlatedTextures) {
@@ -49,7 +53,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     }
   }
 
-  get uri(): string|null {
+  get uri(): string|undefined {
     return this[$uri];
   }
 
@@ -57,15 +61,12 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this.uri != null ? 'external' : 'embedded';
   }
 
-  async setURI(uri: string|null): Promise<void> {
+  async setURI(uri: string): Promise<void> {
     this[$uri] = uri;
-    let image: HTMLImageElement|null = null;
 
-    if (uri != null) {
-      image = await new Promise((resolve, reject) => {
-        loader.load(uri, resolve, undefined, reject);
-      });
-    }
+    const image = await new Promise((resolve, reject) => {
+      loader.load(uri, resolve, undefined, reject);
+    });
 
     for (const texture of this[$threeTextures]) {
       // If the URI is set to null but the Image had an associated buffer view

@@ -43,6 +43,17 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       correlatedMaterials: Set<MeshStandardMaterial>) {
     super(graft, pbrMetallicRoughness, correlatedMaterials);
 
+    // Assign glTF default values
+    if (pbrMetallicRoughness.baseColorFactor == null) {
+      pbrMetallicRoughness.baseColorFactor = [1, 1, 1, 1];
+    }
+    if (pbrMetallicRoughness.roughnessFactor == null) {
+      pbrMetallicRoughness.roughnessFactor = 0;
+    }
+    if (pbrMetallicRoughness.metallicFactor == null) {
+      pbrMetallicRoughness.metallicFactor = 0;
+    }
+
     const {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
     const baseColorTextures = new Set<ThreeTexture>();
     const metallicRoughnessTextures = new Set<ThreeTexture>();
@@ -73,16 +84,15 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
 
   get baseColorFactor(): RGBA {
-    return (this[$sourceObject] as PBRMetallicRoughness).baseColorFactor ||
-        [1, 1, 1, 1];
+    return (this[$sourceObject] as GLTFPBRMetallicRoughness).baseColorFactor!;
   }
 
   get metallicFactor(): number {
-    return (this[$sourceObject] as PBRMetallicRoughness).metallicFactor || 0;
+    return (this[$sourceObject] as GLTFPBRMetallicRoughness).metallicFactor!;
   }
 
   get roughnessFactor(): number {
-    return (this[$sourceObject] as PBRMetallicRoughness).roughnessFactor || 0;
+    return (this[$sourceObject] as GLTFPBRMetallicRoughness).roughnessFactor!;
   }
 
   get baseColorTexture(): TextureInfo|null {
@@ -97,15 +107,9 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     for (const material of this[$threeMaterials]) {
       material.color.fromArray(rgba);
       material.opacity = (rgba)[3];
-
       const pbrMetallicRoughness =
           this[$sourceObject] as GLTFPBRMetallicRoughness;
-
-      if (rgba[0] === 1 && rgba[1] === 1 && rgba[2] === 1 && rgba[3] === 1) {
-        delete pbrMetallicRoughness.baseColorFactor;
-      } else {
-        pbrMetallicRoughness.baseColorFactor = rgba;
-      }
+      pbrMetallicRoughness.baseColorFactor = rgba;
     }
   }
 

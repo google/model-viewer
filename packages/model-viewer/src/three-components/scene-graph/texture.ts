@@ -30,8 +30,8 @@ const $sampler = Symbol('sampler');
  * Material facade implementation for Three.js materials
  */
 export class Texture extends ThreeDOMElement implements TextureInterface {
-  private[$source]: Image|null = null;
-  private[$sampler]: Sampler|null = null;
+  private[$source]: Image;
+  private[$sampler]: Sampler;
 
   constructor(
       graft: ModelGraft, texture: GLTFTexture,
@@ -41,16 +41,13 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     const glTF = graft.correlatedSceneGraph.gltf;
     const {sampler: samplerIndex, source: imageIndex} = texture;
 
-    if (samplerIndex != null) {
-      const sampler = glTF.samplers ?? [samplerIndex];
+    const sampler = (glTF.samplers != null && samplerIndex != null) ?
+        glTF.samplers[samplerIndex] :
+        {};
+    this[$sampler] = new Sampler(graft, sampler, correlatedTextures);
 
-      if (sampler != null) {
-        this[$sampler] = new Sampler(graft, sampler, correlatedTextures);
-      }
-    }
-
-    if (imageIndex != null) {
-      const image = glTF.images ?? [imageIndex];
+    if (glTF.images != null && imageIndex != null) {
+      const image = glTF.images[imageIndex];
 
       if (image != null) {
         this[$source] = new Image(graft, image, correlatedTextures);
@@ -58,11 +55,11 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     }
   }
 
-  get sampler(): Sampler|null {
+  get sampler(): Sampler {
     return this[$sampler];
   }
 
-  get source(): Image|null {
+  get source(): Image {
     return this[$source];
   }
 }

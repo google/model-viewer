@@ -47,9 +47,9 @@ export class ModelGraft {
   private[$model]: Model;
   private[$correlatedSceneGraph]: CorrelatedSceneGraph;
 
-  constructor(modelUri: string, correlatedSceneGraph: CorrelatedSceneGraph) {
+  constructor(correlatedSceneGraph: CorrelatedSceneGraph) {
     this[$correlatedSceneGraph] = correlatedSceneGraph;
-    this[$model] = new Model(this, modelUri, correlatedSceneGraph);
+    this[$model] = new Model(this, correlatedSceneGraph);
   }
 
   get correlatedSceneGraph(): CorrelatedSceneGraph {

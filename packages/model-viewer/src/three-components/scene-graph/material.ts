@@ -32,7 +32,7 @@ const $emissiveTexture = Symbol('emissiveTexture');
  * Material facade implementation for Three.js materials
  */
 export class Material extends ThreeDOMElement implements MaterialInterface {
-  private[$pbrMetallicRoughness]: PBRMetallicRoughness|null = null;
+  private[$pbrMetallicRoughness]: PBRMetallicRoughness;
 
   private[$normalTexture]: TextureInfo|null = null;
   private[$occlusionTexture]: TextureInfo|null = null;
@@ -43,17 +43,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       correlatedMaterials: Set<MeshStandardMaterial>) {
     super(graft, material, correlatedMaterials);
 
-    const {
-      pbrMetallicRoughness,
-      normalTexture,
-      occlusionTexture,
-      emissiveTexture
-    } = material;
-
-    if (pbrMetallicRoughness != null) {
-      this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
-          graft, pbrMetallicRoughness, correlatedMaterials);
+    if (material.pbrMetallicRoughness == null) {
+      material.pbrMetallicRoughness = {};
     }
+    this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
+        graft, material.pbrMetallicRoughness, correlatedMaterials);
+
+    const {normalTexture, occlusionTexture, emissiveTexture} = material;
 
     const normalTextures = new Set<ThreeTexture>();
     const occlusionTextures = new Set<ThreeTexture>();
@@ -91,7 +87,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
   }
 
-  get pbrMetallicRoughness(): PBRMetallicRoughness|null {
+  get pbrMetallicRoughness(): PBRMetallicRoughness {
     return this[$pbrMetallicRoughness];
   }
 

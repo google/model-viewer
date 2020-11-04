@@ -15,12 +15,6 @@
 import {MagFilter, MinFilter, WrapMode} from './gltf-2.0.js';
 
 /**
- * IMPORTANT NOTE: 3DOM is an experimental / radioactive API. It is very likely
- * to change rapidly over time while we iterate on the design. Please try it out
- * but also keep in mind that things might break without much notice!
- */
-
-/**
  * All constructs in a 3DOM scene graph have a corresponding string name.
  * This is similar in spirit to the concept of a "tag name" in HTML, and exists
  * in support of looking up 3DOM elements by type.
@@ -33,16 +27,6 @@ export declare interface ThreeDOMElementMap {
   'image': Image;
   'texture': Texture;
   'texture-info': TextureInfo;
-}
-
-/**
- * The 3DOM API
- */
-export declare interface ThreeDOM {
-  /**
-   * A reference to the most recently loaded model, if one is available.
-   */
-  readonly model?: Model;
 }
 
 /**
@@ -149,12 +133,7 @@ export declare interface TextureInfo extends ThreeDOMElement {
   /**
    * The Texture being referenced by this TextureInfo
    */
-  readonly texture: Texture|null;
-
-  /**
-   * Configure the Texture referenced by this TextureInfo
-   */
-  setTexture(texture: Texture|null): void;
+  readonly texture: Texture;
 }
 
 /**
@@ -171,22 +150,12 @@ export declare interface Texture extends ThreeDOMElement {
   /**
    * The Sampler for this Texture
    */
-  readonly sampler: Sampler|null;
+  readonly sampler: Sampler;
 
   /**
    * The source Image for this Texture
    */
-  readonly source: Image|null;
-
-  /**
-   * Configure the Sampler used for this Texture.
-   */
-  setSampler(sampler: Sampler): void;
-
-  /**
-   * Configure the source Image used for this Texture.
-   */
-  setSource(image: Image): void;
+  readonly source: Image;
 }
 
 /**
@@ -223,22 +192,22 @@ export declare interface Sampler extends ThreeDOMElement {
   /**
    * Configure the minFilter value of the Sampler.
    */
-  setMinFilter(filter: MinFilter|null): void;
+  setMinFilter(filter: MinFilter): void;
 
   /**
    * Configure the magFilter value of the Sampler.
    */
-  setMagFilter(filter: MagFilter|null): void;
+  setMagFilter(filter: MagFilter): void;
 
   /**
    * Configure the S (U) wrap mode of the Sampler.
    */
-  setWrapS(mode: WrapMode|null): void;
+  setWrapS(mode: WrapMode): void;
 
   /**
    * Configure the T (V) wrap mode of the Sampler.
    */
-  setWrapT(mode: WrapMode|null): void;
+  setWrapT(mode: WrapMode): void;
 }
 
 
@@ -264,7 +233,7 @@ export declare interface Image extends ThreeDOMElement {
   /**
    * The URI of the image, if it is external.
    */
-  readonly uri: string|null;
+  readonly uri?: string;
 
   /**
    * Configure the URI of the image. If a URI is specified for an otherwise

@@ -68,6 +68,7 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
    * generated names are ignored.
    */
   get name(): string|undefined {
-    return this[$sourceObject].name;
+    return (this[$sourceObject] as unknown as {name?: string}).name ||
+        undefined;
   }
 }
