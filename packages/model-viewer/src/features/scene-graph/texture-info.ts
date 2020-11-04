@@ -15,8 +15,9 @@
 
 import {Texture as ThreeTexture} from 'three';
 
+import {TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {TextureInfo as TextureInfoInterface} from './api.js';
-import {TextureInfo as GLTFTextureInfo} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {Texture} from './texture.js';
 import {ThreeDOMElement} from './three-dom-element.js';

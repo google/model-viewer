@@ -15,8 +15,9 @@
 
 import {Texture as ThreeTexture} from 'three';
 
+import {MagFilter, MinFilter, Sampler as GLTFSampler, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {Sampler as SamplerInterface} from './api.js';
-import {MagFilter, MinFilter, Sampler as GLTFSampler, WrapMode} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 

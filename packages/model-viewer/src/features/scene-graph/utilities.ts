@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {GLTF, GLTFElement, GLTFElementMap} from './gltf-2.0.js';
+import {GLTF, GLTFElement, GLTFElementMap} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 /**
  * Produces a "locally" unique ID. This ID is only guaranteed to be unique

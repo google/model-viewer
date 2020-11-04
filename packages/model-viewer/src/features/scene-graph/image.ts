@@ -15,8 +15,9 @@
 
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
+import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {Image as ImageInterface} from './api.js';
-import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 

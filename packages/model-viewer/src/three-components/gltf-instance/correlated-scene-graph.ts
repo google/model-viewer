@@ -1,7 +1,7 @@
 import {Group, Material, Mesh, Object3D, Texture} from 'three';
 import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {GLTF, GLTFElement} from './gltf-2.0.js';
+import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>

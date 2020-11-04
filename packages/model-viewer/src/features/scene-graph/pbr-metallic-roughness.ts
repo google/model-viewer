@@ -15,9 +15,10 @@
 
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
+import {PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {RGBA} from './api.js';
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from './api.js';
-import {PBRMetallicRoughness as GLTFPBRMetallicRoughness} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';

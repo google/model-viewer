@@ -15,8 +15,9 @@
 
 import {Material, Object3D, Texture} from 'three';
 
+import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {Model, ThreeDOMElement as ThreeDOMElementInterface} from './api.js';
-import {GLTF, GLTFElement} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {getLocallyUniqueId} from './utilities.js';
 

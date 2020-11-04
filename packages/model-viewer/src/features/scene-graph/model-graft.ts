@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {Model} from './model.js';
 
 const $model = Symbol('model');

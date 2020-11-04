@@ -15,8 +15,9 @@
 
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
+import {Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {Material as MaterialInterface} from './api.js';
-import {Material as GLTFMaterial} from './gltf-2.0.js';
 import {ModelGraft} from './model-graft.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo} from './texture-info.js';

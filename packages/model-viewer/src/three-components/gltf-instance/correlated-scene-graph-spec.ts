@@ -17,9 +17,10 @@ import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
 import {GLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 
+import {assetPath, loadThreeGLTF} from '../../features/scene-graph/test-helpers.js';
+import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
-import {Material, PBRMetallicRoughness, Texture, TextureInfo} from './gltf-2.0.js';
-import {assetPath, loadThreeGLTF} from './test-helpers.js';
 
 const expect = chai.expect;
 

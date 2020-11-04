@@ -17,7 +17,7 @@
 import {Material} from 'three';
 import {Object3D} from 'three/src/core/Object3D.js';
 
-import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 import {createFakeThreeGLTF} from './test-helpers.js';
 import {ThreeDOMElement} from './three-dom-element.js';

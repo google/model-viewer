@@ -15,8 +15,9 @@
 
 import {MeshStandardMaterial} from 'three';
 
+import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
+
 import {Model as ModelInterface} from './api.js';
-import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 import {Material} from './material.js';
 import {ModelGraft} from './model-graft.js';
 import {ThreeDOMElement} from './three-dom-element.js';

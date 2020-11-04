@@ -16,7 +16,7 @@
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
+import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {ModelGraft} from './model-graft.js';
 import {assetPath, loadThreeGLTF} from './test-helpers.js';
 import {$correlatedObjects} from './three-dom-element.js';
