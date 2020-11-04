@@ -15,13 +15,12 @@
 
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
-import {Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Material as MaterialInterface} from './api.js';
-import {ModelGraft} from './model-graft.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo} from './texture-info.js';
-import {ThreeDOMElement} from './three-dom-element.js';
+import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
@@ -40,15 +39,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$emissiveTexture]: TextureInfo|null = null;
 
   constructor(
-      graft: ModelGraft, material: GLTFMaterial,
+      gltf: GLTF, material: GLTFMaterial,
       correlatedMaterials: Set<MeshStandardMaterial>) {
-    super(graft, material, correlatedMaterials);
+    super(material, correlatedMaterials);
 
     if (material.pbrMetallicRoughness == null) {
       material.pbrMetallicRoughness = {};
     }
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
-        graft, material.pbrMetallicRoughness, correlatedMaterials);
+        gltf, material.pbrMetallicRoughness, correlatedMaterials);
 
     const {normalTexture, occlusionTexture, emissiveTexture} = material;
 
@@ -74,18 +73,22 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     if (normalTextures.size > 0) {
       this[$normalTexture] =
-          new TextureInfo(graft, normalTexture!, normalTextures);
+          new TextureInfo(gltf, normalTexture!, normalTextures);
     }
 
     if (occlusionTextures.size > 0) {
       this[$occlusionTexture] =
-          new TextureInfo(graft, occlusionTexture!, occlusionTextures);
+          new TextureInfo(gltf, occlusionTexture!, occlusionTextures);
     }
 
     if (emissiveTextures.size > 0) {
       this[$emissiveTexture] =
-          new TextureInfo(graft, emissiveTexture!, emissiveTextures);
+          new TextureInfo(gltf, emissiveTexture!, emissiveTextures);
     }
+  }
+
+  get name(): string {
+    return (this[$sourceObject] as any).name || '';
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {

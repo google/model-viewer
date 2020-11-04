@@ -19,8 +19,6 @@ import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correla
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
-import {ModelGraft} from './model-graft.js';
-import {ThreeDOMElement} from './three-dom-element.js';
 
 const $materials = Symbol('materials');
 
@@ -29,28 +27,25 @@ const $materials = Symbol('materials');
  * Currently, the model only bothers itself with the materials in the Three.js
  * scene graph.
  */
-export class Model extends ThreeDOMElement implements ModelInterface {
+export class Model implements ModelInterface {
   private[$materials]: Array<Material> = [];
 
-  constructor(graft: ModelGraft, correlatedSceneGraph: CorrelatedSceneGraph) {
-    super(graft, correlatedSceneGraph.gltf);
+  constructor(correlatedSceneGraph: CorrelatedSceneGraph) {
+    const {gltf, gltfElementMap} = correlatedSceneGraph;
 
-    correlatedSceneGraph.gltf.materials!.forEach(material => {
+    gltf.materials!.forEach(material => {
       this[$materials].push(new Material(
-          graft,
+          gltf,
           material,
-          correlatedSceneGraph.gltfElementMap.get(material) as
-              Set<MeshStandardMaterial>));
+          gltfElementMap.get(material) as Set<MeshStandardMaterial>));
     });
   }
 
   /**
-   * A flat list of all unique materials found in this scene graph. Materials
-   * are listed in the order they appear during pre-order, depth-first traveral
-   * of the scene graph.
+   * Materials are listed in the order of the GLTF materials array, plus a
+   * default material at the end if one is used.
    *
    * TODO(#1003): How do we handle non-active scenes?
-   * TODO(#1002): Desctibe and enforce traversal order
    */
   get materials(): Array<Material> {
     return this[$materials];

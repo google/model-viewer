@@ -15,10 +15,9 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
-import {ModelGraft} from './model-graft.js';
 import {Texture} from './texture.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -33,16 +32,15 @@ export class TextureInfo extends ThreeDOMElement implements
   private[$texture]: Texture;
 
   constructor(
-      graft: ModelGraft, textureInfo: GLTFTextureInfo,
+      gltf: GLTF, textureInfo: GLTFTextureInfo,
       correlatedTextures: Set<ThreeTexture>) {
-    super(graft, textureInfo, correlatedTextures);
+    super(textureInfo, correlatedTextures);
 
-    const glTF = graft.correlatedSceneGraph.gltf;
     const {index: textureIndex} = textureInfo;
-    const texture = glTF.textures![textureIndex];
+    const texture = gltf.textures![textureIndex];
 
     if (texture != null) {
-      this[$texture] = new Texture(graft, texture, correlatedTextures);
+      this[$texture] = new Texture(gltf, texture, correlatedTextures);
     }
   }
 

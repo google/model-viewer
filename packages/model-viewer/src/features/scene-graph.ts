@@ -20,11 +20,11 @@ import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelVi
 import {$shadow} from '../three-components/Model.js';
 import {Constructor} from '../utilities.js';
 
-import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
-import {ModelGraft} from './scene-graph/model-graft.js';
+import {Image, Material, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Model} from './scene-graph/model.js';
 
 const $currentGLTF = Symbol('currentGLTF');
-const $modelGraft = Symbol('modelGraft');
+const $model = Symbol('model');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -44,13 +44,13 @@ export interface SceneGraphInterface {
 export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<SceneGraphInterface>&T => {
   class SceneGraphModelViewerElement extends ModelViewerElement {
-    protected[$modelGraft]: ModelGraft|null = null;
+    protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
 
     // Scene-graph API:
     /** @export */
     get model() {
-      return this[$modelGraft]?.model;
+      return this[$model];
     }
 
     /**
@@ -75,7 +75,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (correlatedSceneGraph != null &&
             currentGLTF !== this[$currentGLTF]) {
-          this[$modelGraft] = new ModelGraft(correlatedSceneGraph);
+          this[$model] = new Model(correlatedSceneGraph);
         }
       }
 

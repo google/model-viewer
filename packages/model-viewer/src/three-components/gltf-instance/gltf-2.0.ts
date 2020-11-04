@@ -264,10 +264,8 @@ export interface Animation {
   extras?: Extras;
 }
 
-export type GLTFElement = Scene|Node|Mesh|Material|Image|Texture|
-    PBRMetallicRoughness|Accessor|Camera|Animation;
-
-export type GLTFStructure = PBRMetallicRoughness|Primitive;
+export type GLTFElement = Scene|Node|Mesh|Material|Image|Texture|TextureInfo|
+    Sampler|PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler;
 
 export interface GLTFElementMap {
   'scene': Scene;
@@ -275,10 +273,13 @@ export interface GLTFElementMap {
   'mesh': Mesh;
   'material': Material;
   'image': Image;
-  'camera': Camera;
   'texture': Texture;
+  'texture-info': TextureInfo;
+  'sampler': Sampler;
   'accessor': Accessor;
+  'camera': Camera;
   'animation': Animation;
+  'animation-sampler': AnimationSampler;
 }
 
 export interface Asset {

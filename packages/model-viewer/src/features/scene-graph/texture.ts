@@ -15,13 +15,12 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
-import {ModelGraft} from './model-graft.js';
 import {Sampler} from './sampler.js';
-import {ThreeDOMElement} from './three-dom-element.js';
+import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 const $source = Symbol('source');
@@ -35,25 +34,27 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$sampler]: Sampler;
 
   constructor(
-      graft: ModelGraft, texture: GLTFTexture,
-      correlatedTextures: Set<ThreeTexture>) {
-    super(graft, texture, correlatedTextures);
+      gltf: GLTF, texture: GLTFTexture, correlatedTextures: Set<ThreeTexture>) {
+    super(texture, correlatedTextures);
 
-    const glTF = graft.correlatedSceneGraph.gltf;
     const {sampler: samplerIndex, source: imageIndex} = texture;
 
-    const sampler = (glTF.samplers != null && samplerIndex != null) ?
-        glTF.samplers[samplerIndex] :
+    const sampler = (gltf.samplers != null && samplerIndex != null) ?
+        gltf.samplers[samplerIndex] :
         {};
-    this[$sampler] = new Sampler(graft, sampler, correlatedTextures);
+    this[$sampler] = new Sampler(sampler, correlatedTextures);
 
-    if (glTF.images != null && imageIndex != null) {
-      const image = glTF.images[imageIndex];
+    if (gltf.images != null && imageIndex != null) {
+      const image = gltf.images[imageIndex];
 
       if (image != null) {
-        this[$source] = new Image(graft, image, correlatedTextures);
+        this[$source] = new Image(image, correlatedTextures);
       }
     }
+  }
+
+  get name(): string {
+    return (this[$sourceObject] as any).name || '';
   }
 
   get sampler(): Sampler {

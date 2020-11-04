@@ -15,11 +15,10 @@
 
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
-import {PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {RGBA} from './api.js';
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from './api.js';
-import {ModelGraft} from './model-graft.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -40,9 +39,9 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   }
 
   constructor(
-      graft: ModelGraft, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
+      gltf: GLTF, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
       correlatedMaterials: Set<MeshStandardMaterial>) {
-    super(graft, pbrMetallicRoughness, correlatedMaterials);
+    super(pbrMetallicRoughness, correlatedMaterials);
 
     // Assign glTF default values
     if (pbrMetallicRoughness.baseColorFactor == null) {
@@ -74,12 +73,12 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     if (baseColorTextures.size > 0) {
       this[$baseColorTexture] =
-          new TextureInfo(graft, baseColorTexture!, baseColorTextures);
+          new TextureInfo(gltf, baseColorTexture!, baseColorTextures);
     }
 
     if (metallicRoughnessTextures.size > 0) {
       this[$metallicRoughnessTexture] = new TextureInfo(
-          graft, metallicRoughnessTexture!, metallicRoughnessTextures);
+          gltf, metallicRoughnessTexture!, metallicRoughnessTextures);
     }
   }
 

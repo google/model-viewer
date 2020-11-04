@@ -48,7 +48,6 @@ import './features/loading-spec.js';
 import './features/loading/status-announcer-spec.js';
 import './features/scene-graph-spec.js';
 import './features/scene-graph/model-spec.js';
-import './features/scene-graph/three-dom-element-spec.js';
 import './features/ar-spec.js';
 
 try {

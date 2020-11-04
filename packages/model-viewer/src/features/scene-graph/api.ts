@@ -30,21 +30,10 @@ export declare interface ThreeDOMElementMap {
 }
 
 /**
- * A basic element in the 3DOM domain.
- */
-export declare interface ThreeDOMElement {
-  /**
-   * A 3DOM element always has a reference to its Model of provenance unless it
-   * is the root of the scene graph (implictly the Model).
-   */
-  readonly ownerModel?: Model;
-}
-
-/**
  * A Model is the root element of a 3DOM scene graph. It gives scripts access
  * to the sub-elements found without the graph.
  */
-export declare interface Model extends ThreeDOMElement {
+export declare interface Model {
   /**
    * An ordered set of unique Materials found in this model. The Materials are
    * listed in scene graph traversal order.
@@ -58,11 +47,11 @@ export declare interface Model extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-material
  */
-export declare interface Material extends ThreeDOMElement {
+export declare interface Material {
   /**
    * The name of the material, if any.
    */
-  readonly name?: string;
+  readonly name: string;
 
   readonly normalTexture: TextureInfo|null;
   readonly occlusionTexture: TextureInfo|null;
@@ -79,7 +68,7 @@ export declare interface Material extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-pbrmetallicroughness
  */
-export declare interface PBRMetallicRoughness extends ThreeDOMElement {
+export declare interface PBRMetallicRoughness {
   /**
    * The base color factor of the material, represented as RGBA values
    */
@@ -129,7 +118,7 @@ export declare interface PBRMetallicRoughness extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-textureinfo
  */
-export declare interface TextureInfo extends ThreeDOMElement {
+export declare interface TextureInfo {
   /**
    * The Texture being referenced by this TextureInfo
    */
@@ -141,11 +130,11 @@ export declare interface TextureInfo extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-texture
  */
-export declare interface Texture extends ThreeDOMElement {
+export declare interface Texture {
   /**
    * The name of the texture, if any.
    */
-  readonly name?: string;
+  readonly name: string;
 
   /**
    * The Sampler for this Texture
@@ -163,11 +152,11 @@ export declare interface Texture extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
  */
-export declare interface Sampler extends ThreeDOMElement {
+export declare interface Sampler {
   /**
    * The name of the sampler, if any.
    */
-  readonly name?: string;
+  readonly name: string;
 
   /**
    * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerminfilter
@@ -217,11 +206,11 @@ export declare interface Sampler extends ThreeDOMElement {
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-image
  */
-export declare interface Image extends ThreeDOMElement {
+export declare interface Image {
   /**
    * The name of the image, if any.
    */
-  readonly name?: string;
+  readonly name: string;
 
   /**
    * The type is 'external' if the image has a configured URI. Otherwise, it is

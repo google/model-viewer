@@ -16,7 +16,7 @@
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 
-import {ModelGraft} from '../../../features/scene-graph/model-graft.js';
+import {Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
@@ -43,9 +43,8 @@ suite('facade/three-js/model', () => {
         }
       });
 
-      const graft = new ModelGraft(CorrelatedSceneGraph.from(threeGLTF));
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
 
-      const model = graft.model;
       const collectedMaterials = new Set<MeshStandardMaterial>();
 
       model.materials.forEach((material) => {
