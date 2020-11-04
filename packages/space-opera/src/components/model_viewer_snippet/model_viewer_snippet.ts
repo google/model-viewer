@@ -214,7 +214,7 @@ export class ModelViewerSnippet extends LitElement {
             <me-open-button></me-open-button><br/>
           </div>
         </me-card>
-        <me-card title="Load model-viewer Snippet">
+        <me-card title="Load model-viewer snippet">
           <div slot="content">
             <textarea id="mv-input" rows=10
               >${exampleLoadableSnippet}</textarea>

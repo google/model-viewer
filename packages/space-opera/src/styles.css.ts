@@ -53,6 +53,10 @@ export const homeStyles: CSSResult = css`
   align-items: center;
 }
 
+img {
+  padding-right: 10px;
+}
+
 .text {
   display: inline-block;
 }

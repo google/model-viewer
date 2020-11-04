@@ -40,8 +40,8 @@ export const styles: CSSResult = css`
 .header {
   margin-top: 0;
   margin-right: 5px;
-  font-size: 14px;
-  color: #5F5F5F;
+  font-size: 12px;
+  color: #555555;
 }
 
 .upload {
