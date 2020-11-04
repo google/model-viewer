@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {GLTF} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {assetPath, loadThreeGLTF} from './test-helpers.js';
-import {getLocallyUniqueId, GLTFTreeVisitor} from './utilities.js';
+import {GLTF} from '../../../three-components/gltf-instance/gltf-2.0.js';
+import {getLocallyUniqueId, GLTFTreeVisitor} from '../../../three-components/gltf-instance/utilities.js';
+import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 const expect = chai.expect;
 

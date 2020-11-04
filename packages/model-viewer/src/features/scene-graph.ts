@@ -89,6 +89,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$modelGraft] = modelGraft;
       this[$currentGLTF] = currentGLTF;
+
+      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
     /** @export */

@@ -16,10 +16,10 @@
 import {Material, Object3D, Texture} from 'three';
 
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {getLocallyUniqueId} from '../../three-components/gltf-instance/utilities.js';
 
 import {Model, ThreeDOMElement as ThreeDOMElementInterface} from './api.js';
 import {ModelGraft} from './model-graft.js';
-import {getLocallyUniqueId} from './utilities.js';
 
 export const $correlatedObjects = Symbol('correlatedObjects');
 export const $sourceObject = Symbol('sourceObject');

@@ -17,10 +17,10 @@
 import {Material} from 'three';
 import {Object3D} from 'three/src/core/Object3D.js';
 
-import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
-import {ModelGraft} from './model-graft.js';
-import {createFakeThreeGLTF} from './test-helpers.js';
-import {ThreeDOMElement} from './three-dom-element.js';
+import {ModelGraft} from '../../../features/scene-graph/model-graft.js';
+import {ThreeDOMElement} from '../../../features/scene-graph/three-dom-element.js';
+import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
+import {createFakeThreeGLTF} from '../../helpers.js';
 
 const expect = chai.expect;
 
@@ -43,7 +43,7 @@ suite('facade/three-js/three-dom-element', () => {
         object3D.name = 'generated';
 
         const element = new ThreeDOMElement(graft, {}, new Set([object3D]));
-        expect(element.name).to.be.equal(null);
+        expect(element.name).to.be.equal(undefined);
       });
 
       test('expresses a name for a Three.js Material', () => {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {Group} from 'three';
-import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
 import {deserializeUrl, PredicateFunction} from '../utilities.js';
@@ -165,6 +165,13 @@ export const operatorNode = (value: Operator): OperatorNode =>
 export const functionNode =
     (name: string, args: Array<ExpressionNode>): FunctionNode =>
         ({type: 'function', name: identNode(name), arguments: args});
+
+export const loadThreeGLTF = (url: string): Promise<ThreeGLTF> => {
+  const loader = new GLTFLoader();
+  return new Promise<ThreeGLTF>((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
+  });
+};
 
 export const createFakeThreeGLTF = () => {
   const scene = new Group();
