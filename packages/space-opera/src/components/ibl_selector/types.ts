@@ -33,3 +33,14 @@ export const DEFAULT_SHADOW_INTENSITY = 0;
 
 /** Default shadow softness for model-viewer */
 export const DEFAULT_SHADOW_SOFTNESS = 1;
+
+export const INITIAL_ENVIRONMENT_IMAGES: EnvironmentImage[] = [
+  {
+    uri: '../shared-assets/environments/spruit_sunrise_1k_HDR.hdr',
+    name: 'Spruit Sunrise'
+  },
+  {
+    uri: '../shared-assets/environments/aircraft_workshop_01_1k.hdr',
+    name: 'Aircraft Workshop'
+  },
+];

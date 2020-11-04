@@ -117,8 +117,6 @@ export function hotspotsReducer(
   }
 }
 
-// UI
-
 const UPDATE_HOTSPOT_MODE = 'UPDATE_HOTSPOT_MODE';
 export function dispatchUpdateHotspotMode(addHotspot: boolean) {
   return {type: UPDATE_HOTSPOT_MODE, payload: addHotspot};

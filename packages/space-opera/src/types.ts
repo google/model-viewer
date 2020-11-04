@@ -20,8 +20,7 @@ import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_cl
 
 import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/types.js';
-import {INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/initial_environment_images.js';
-import {EnvironmentImage} from './components/ibl_selector/lighting_state.js';
+import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
 import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
 
 interface HotspotsUIState {
