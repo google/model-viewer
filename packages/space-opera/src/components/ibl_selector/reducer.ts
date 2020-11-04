@@ -18,8 +18,7 @@
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
 import {Action, EnvironmentState, State} from '../../types.js';
-import {INITIAL_ENVIRONMENT_IMAGES} from './initial_environment_images.js';
-import {EnvironmentImage} from './lighting_state.js';
+import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './types.js';
 
 /**
  * Creates a blob url from an uploaded file, should be used only for

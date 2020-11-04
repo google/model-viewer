@@ -94,3 +94,50 @@ mwc-button {
   width: 180px;
 }
 `;
+
+export const modelViewerPreviewStyles: CSSResult = css`
+model-viewer {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  width: 100%;
+}
+
+.ScreenShotButton {
+  border-radius: 50%;
+  border: 1px #4285f4 solid;
+  bottom: 25px;
+  color: #4285f4; /* MATERIAL_COLOR_GOOGLE_BLUE_500 */;
+  position: absolute;
+  right: 25px;
+}
+
+.HelpText {
+  font-family: Roboto;
+  font-size: 20pt;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.HelpText small {
+  font-size: 12pt;
+}
+
+.ErrorText {
+  font-family: Roboto;
+  color: darkred;
+  font-size: 20pt;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+`;
