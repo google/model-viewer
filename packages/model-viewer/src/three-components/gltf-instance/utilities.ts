@@ -16,15 +16,6 @@
 import {GLTF, GLTFElement, GLTFElementMap} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 /**
- * Produces a "locally" unique ID. This ID is only guaranteed to be unique
- * over the lifetime of the function and in the current execution context.
- */
-export const getLocallyUniqueId = (() => {
-  let id = 0;
-  return () => id++;
-})();
-
-/**
  * A VisitorCallback is used to access an element of a GLTF scene graph. The
  * callback receives a reference to the element, the element's index relative
  * to other elements of its type (as it would appear in the top-level element

@@ -50,8 +50,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     // Scene-graph API:
     /** @export */
     get model() {
-      const graft = this[$modelGraft];
-      return graft ? graft.model : undefined;
+      return this[$modelGraft]?.model;
     }
 
     /**
@@ -69,27 +68,18 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelLoad]() {
       super[$onModelLoad]();
 
-      const scene = this[$scene];
-      const {model} = scene;
-      const {currentGLTF} = model;
-      let modelGraft: ModelGraft|null = null;
+      const {currentGLTF} = this[$scene].model;
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
-        const currentModelGraft = this[$modelGraft];
 
-        if (correlatedSceneGraph != null) {
-          if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
-            return;
-          }
-
-          modelGraft = new ModelGraft(correlatedSceneGraph);
+        if (correlatedSceneGraph != null &&
+            currentGLTF !== this[$currentGLTF]) {
+          this[$modelGraft] = new ModelGraft(correlatedSceneGraph);
         }
       }
 
-      this[$modelGraft] = modelGraft;
       this[$currentGLTF] = currentGLTF;
-
       this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 

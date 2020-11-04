@@ -16,14 +16,12 @@
 import {Material, Object3D, Texture} from 'three';
 
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {getLocallyUniqueId} from '../../three-components/gltf-instance/utilities.js';
 
 import {Model, ThreeDOMElement as ThreeDOMElementInterface} from './api.js';
 import {ModelGraft} from './model-graft.js';
 
 export const $correlatedObjects = Symbol('correlatedObjects');
 export const $sourceObject = Symbol('sourceObject');
-export const $internalID = Symbol('internalID');
 const $graft = Symbol('graft');
 
 export type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
@@ -40,12 +38,6 @@ export class ThreeDOMElement implements ThreeDOMElementInterface {
   readonly[$sourceObject]: GLTFElement|GLTF;
   // The backing Three.js scene graph construct for this element.
   readonly[$correlatedObjects]: CorrelatedObjects|null;
-  /**
-   * The unique ID that marks this element. In generally, an ID should only be
-   * considered unique to the element in the context of its scene graph. These
-   * IDs are not guaranteed to be stable across script executions.
-   */
-  readonly[$internalID]: number = getLocallyUniqueId();
 
   constructor(
       graft: ModelGraft, element: GLTFElement|GLTF,

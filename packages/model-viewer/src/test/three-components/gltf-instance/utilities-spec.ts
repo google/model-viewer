@@ -14,7 +14,7 @@
  */
 
 import {GLTF} from '../../../three-components/gltf-instance/gltf-2.0.js';
-import {getLocallyUniqueId, GLTFTreeVisitor} from '../../../three-components/gltf-instance/utilities.js';
+import {GLTFTreeVisitor} from '../../../three-components/gltf-instance/utilities.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 const expect = chai.expect;
@@ -22,20 +22,6 @@ const expect = chai.expect;
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 
 suite('utilities', () => {
-  suite('getLocallyUniqueId', () => {
-    test('always yields a unique ID', () => {
-      const arbitrarilyLargeNumber = 9999;
-      const yieldedIds: Set<number> = new Set();
-      for (let i = 0; i < arbitrarilyLargeNumber; ++i) {
-        const nextId = getLocallyUniqueId();
-        if (yieldedIds.has(nextId)) {
-          throw new Error('ID already yielded!');
-        }
-        yieldedIds.add(nextId);
-      }
-    });
-  });
-
   suite('GLTFTreeVisitor', () => {
     let gltf: GLTF;
 
