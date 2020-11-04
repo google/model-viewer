@@ -18,7 +18,7 @@ import {ImageLoader, Texture as ThreeTexture} from 'three';
 import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const loader = new ImageLoader();
 
@@ -37,8 +37,10 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
-  constructor(image: GLTFImage, correlatedTextures: Set<ThreeTexture>) {
-    super(image, correlatedTextures);
+  constructor(
+      onUpdate: () => void, image: GLTFImage,
+      correlatedTextures: Set<ThreeTexture>) {
+    super(onUpdate, image, correlatedTextures);
 
     if ((image as GLTFExternalImage).uri != null) {
       this[$uri] = (image as GLTFExternalImage).uri;
@@ -83,5 +85,6 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
       texture.needsUpdate = true;
     }
+    this[$onUpdate]();
   }
 }

@@ -32,15 +32,15 @@ export class TextureInfo extends ThreeDOMElement implements
   private[$texture]: Texture;
 
   constructor(
-      gltf: GLTF, textureInfo: GLTFTextureInfo,
+      onUpdate: () => void, gltf: GLTF, textureInfo: GLTFTextureInfo,
       correlatedTextures: Set<ThreeTexture>) {
-    super(textureInfo, correlatedTextures);
+    super(onUpdate, textureInfo, correlatedTextures);
 
     const {index: textureIndex} = textureInfo;
     const texture = gltf.textures![textureIndex];
 
     if (texture != null) {
-      this[$texture] = new Texture(gltf, texture, correlatedTextures);
+      this[$texture] = new Texture(onUpdate, gltf, texture, correlatedTextures);
     }
   }
 

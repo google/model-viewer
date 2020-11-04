@@ -39,15 +39,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$emissiveTexture]: TextureInfo|null = null;
 
   constructor(
-      gltf: GLTF, material: GLTFMaterial,
+      onUpdate: () => void, gltf: GLTF, material: GLTFMaterial,
       correlatedMaterials: Set<MeshStandardMaterial>) {
-    super(material, correlatedMaterials);
+    super(onUpdate, material, correlatedMaterials);
 
     if (material.pbrMetallicRoughness == null) {
       material.pbrMetallicRoughness = {};
     }
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
-        gltf, material.pbrMetallicRoughness, correlatedMaterials);
+        onUpdate, gltf, material.pbrMetallicRoughness, correlatedMaterials);
 
     const {normalTexture, occlusionTexture, emissiveTexture} = material;
 
@@ -73,17 +73,17 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     if (normalTextures.size > 0) {
       this[$normalTexture] =
-          new TextureInfo(gltf, normalTexture!, normalTextures);
+          new TextureInfo(onUpdate, gltf, normalTexture!, normalTextures);
     }
 
     if (occlusionTextures.size > 0) {
       this[$occlusionTexture] =
-          new TextureInfo(gltf, occlusionTexture!, occlusionTextures);
+          new TextureInfo(onUpdate, gltf, occlusionTexture!, occlusionTextures);
     }
 
     if (emissiveTextures.size > 0) {
       this[$emissiveTexture] =
-          new TextureInfo(gltf, emissiveTexture!, emissiveTextures);
+          new TextureInfo(onUpdate, gltf, emissiveTexture!, emissiveTextures);
     }
   }
 

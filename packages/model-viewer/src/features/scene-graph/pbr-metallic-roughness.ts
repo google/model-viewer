@@ -20,7 +20,7 @@ import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../thre
 import {RGBA} from './api.js';
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from './api.js';
 import {TextureInfo} from './texture-info.js';
-import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $threeMaterials = Symbol('threeMaterials');
 const $baseColorTexture = Symbol('baseColorTexture');
@@ -39,9 +39,10 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   }
 
   constructor(
-      gltf: GLTF, pbrMetallicRoughness: GLTFPBRMetallicRoughness,
+      onUpdate: () => void, gltf: GLTF,
+      pbrMetallicRoughness: GLTFPBRMetallicRoughness,
       correlatedMaterials: Set<MeshStandardMaterial>) {
-    super(pbrMetallicRoughness, correlatedMaterials);
+    super(onUpdate, pbrMetallicRoughness, correlatedMaterials);
 
     // Assign glTF default values
     if (pbrMetallicRoughness.baseColorFactor == null) {
@@ -73,12 +74,12 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     if (baseColorTextures.size > 0) {
       this[$baseColorTexture] =
-          new TextureInfo(gltf, baseColorTexture!, baseColorTextures);
+          new TextureInfo(onUpdate, gltf, baseColorTexture!, baseColorTextures);
     }
 
     if (metallicRoughnessTextures.size > 0) {
       this[$metallicRoughnessTexture] = new TextureInfo(
-          gltf, metallicRoughnessTexture!, metallicRoughnessTextures);
+          onUpdate, gltf, metallicRoughnessTexture!, metallicRoughnessTextures);
     }
   }
 
@@ -111,6 +112,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
           this[$sourceObject] as GLTFPBRMetallicRoughness;
       pbrMetallicRoughness.baseColorFactor = rgba;
     }
+    this[$onUpdate]();
   }
 
   setMetallicFactor(value: number) {
@@ -120,6 +122,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
           this[$sourceObject] as GLTFPBRMetallicRoughness;
       pbrMetallicRoughness.metallicFactor = value;
     }
+    this[$onUpdate]();
   }
 
   setRoughnessFactor(value: number) {
@@ -129,5 +132,6 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
           this[$sourceObject] as GLTFPBRMetallicRoughness;
       pbrMetallicRoughness.roughnessFactor = value;
     }
+    this[$onUpdate]();
   }
 }

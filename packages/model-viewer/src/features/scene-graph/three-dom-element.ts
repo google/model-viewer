@@ -19,6 +19,7 @@ import {GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 export const $correlatedObjects = Symbol('correlatedObjects');
 export const $sourceObject = Symbol('sourceObject');
+export const $onUpdate = Symbol('onUpdate');
 
 type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
 
@@ -29,13 +30,16 @@ type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
  * serializability.
  */
 export class ThreeDOMElement {
+  readonly[$onUpdate]: () => void;
   // The canonical GLTF or GLTFElement represented by this facade.
   readonly[$sourceObject]: GLTFElement;
   // The backing Three.js scene graph construct for this element.
   readonly[$correlatedObjects]: CorrelatedObjects|null;
 
   constructor(
-      element: GLTFElement, correlatedObjects: CorrelatedObjects|null = null) {
+      onUpdate: () => void, element: GLTFElement,
+      correlatedObjects: CorrelatedObjects|null = null) {
+    this[$onUpdate] = onUpdate;
     this[$sourceObject] = element;
     this[$correlatedObjects] = correlatedObjects;
   }

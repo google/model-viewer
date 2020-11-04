@@ -15,7 +15,7 @@
 
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
-import ModelViewerElementBase, {$onModelLoad, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {$shadow} from '../three-components/Model.js';
 import {Constructor} from '../utilities.js';
@@ -75,7 +75,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (correlatedSceneGraph != null &&
             currentGLTF !== this[$currentGLTF]) {
-          this[$model] = new Model(correlatedSceneGraph);
+          this[$model] = new Model(correlatedSceneGraph, () => {
+            this[$needsRender]();
+          });
         }
       }
 

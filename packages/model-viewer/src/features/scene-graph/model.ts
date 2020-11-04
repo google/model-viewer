@@ -30,11 +30,14 @@ const $materials = Symbol('materials');
 export class Model implements ModelInterface {
   private[$materials]: Array<Material> = [];
 
-  constructor(correlatedSceneGraph: CorrelatedSceneGraph) {
+  constructor(
+      correlatedSceneGraph: CorrelatedSceneGraph,
+      onUpdate: () => void = () => {}) {
     const {gltf, gltfElementMap} = correlatedSceneGraph;
 
     gltf.materials!.forEach(material => {
       this[$materials].push(new Material(
+          onUpdate,
           gltf,
           material,
           gltfElementMap.get(material) as Set<MeshStandardMaterial>));
