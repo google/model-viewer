@@ -54,7 +54,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     * References to each 3DOM constructor. Supports instanceof checks; these
+     * References to each element constructor. Supports instanceof checks; these
      * classes are not directly constructable.
      */
     static Model: Constructor<Model>;

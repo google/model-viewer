@@ -37,7 +37,6 @@ jobs:
 
     - name: Build packages
       run: |
-       ./node_modules/.bin/lerna run --scope @google/3dom build --stream
        ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
        ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
 
