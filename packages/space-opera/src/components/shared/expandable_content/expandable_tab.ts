@@ -90,7 +90,6 @@ export class ExpandableTab extends LitElement {
           ${this.tabName}
           <slot name="tooltip"></slot>
         </span>
-
         ${
     !this.sticky ? html`<div class="IconArea">
           <mwc-icon>
