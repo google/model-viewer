@@ -41,7 +41,7 @@ const getObject3DByName =
       return null;
     };
 
-suite('facade/three-js/correlated-scene-graph', () => {
+suite('correlated-scene-graph', () => {
   suite('CorrelatedSceneGraph', () => {
     test('maps Three.js materials to glTF elements', async () => {
       const threeGLTF = await loadThreeGLTF(HORSE_GLB_PATH);
@@ -105,11 +105,11 @@ suite('facade/three-js/correlated-scene-graph', () => {
         const cloneCorrelatedSceneGraph =
             CorrelatedSceneGraph.from(cloneThreeGLTF, correlatedSceneGraph);
 
-        for (const threeObject of
-                 cloneCorrelatedSceneGraph.threeObjectMap.keys()) {
-          expect((threeObject as MeshStandardMaterial).isMaterial)
-              .to.be.undefined;
-        }
+        cloneCorrelatedSceneGraph.threeObjectMap.forEach(
+            (_reference, threeObject) => {
+              expect((threeObject as MeshStandardMaterial).isMaterial)
+                  .to.be.undefined;
+            });
       });
     });
   });

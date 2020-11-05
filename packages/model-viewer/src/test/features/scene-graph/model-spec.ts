@@ -25,7 +25,7 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
-suite('facade/three-js/model', () => {
+suite('scene-graph/model', () => {
   suite('Model', () => {
     test('exposes a list of materials in the scene', async () => {
       const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
