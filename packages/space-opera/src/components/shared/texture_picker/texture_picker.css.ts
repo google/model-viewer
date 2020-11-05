@@ -44,6 +44,7 @@ export const styles: CSSResult = css`:host {
   cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
+  border: 1px solid #D4D4D4;
 }
 
 .NullTextureSquareInList{
@@ -57,6 +58,7 @@ export const styles: CSSResult = css`:host {
   cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
+  border: 1px solid #D4D4D4;
 }
 
 .PickerContentContainer {
@@ -95,7 +97,7 @@ export const styles: CSSResult = css`:host {
 .TextureSquare {
   background-color: white;
   border-radius: 3px;
-  border: 1px solid var(--me-swatch-border-color);
+  border: 1px solid #D4D4D4;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
 }

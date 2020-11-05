@@ -33,7 +33,7 @@ export const styles: CSSResult = css`:host {
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
   border-radius: 3px;
-  border: 1px solid white;
+  border: 1px solid #D4D4D4;
 }
 
 .HueSlider {
