@@ -94,22 +94,26 @@ suite('Renderer', () => {
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(0);
-      expect(scene.isDirty).to.be.ok;
+      expect(scene.isDirty).to.be.eq(true);
 
       scene.element[$loaded] = true;
 
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.ok;
+      expect(!scene.isDirty).to.be.eq(true);
     });
 
     test('uses the proper canvas when unregsitering scenes', () => {
       renderer.render(performance.now());
 
-      expect(renderer.canvasElement.classList.contains('show')).to.be.eq(false);
-      expect(scene.element[$canvas].classList.contains('show')).to.be.eq(true);
+      expect(renderer.canvasElement.classList.contains('show'))
+          .to.be.eq(
+              false, 'webgl canvas should not be shown with multiple scenes.');
+      expect(scene.element[$canvas].classList.contains('show'))
+          .to.be.eq(true, 'scene canvas should be shown with multiple scenes.');
       expect(otherScene.element[$canvas].classList.contains('show'))
-          .to.be.eq(true);
+          .to.be.eq(
+              true, 'otherScene canvas should be shown with multiple scenes.');
 
       renderer.unregisterScene(scene);
       renderer.render(performance.now());
@@ -123,9 +127,11 @@ suite('Renderer', () => {
         expect(renderer.canvasElement.parentElement)
             .to.be.eq(otherScene.element[$userInputElement]);
         expect(renderer.canvasElement.classList.contains('show'))
-            .to.be.eq(true);
+            .to.be.eq(true, 'webgl canvas should be shown with single scene.');
         expect(otherScene.element[$canvas].classList.contains('show'))
-            .to.be.eq(false);
+            .to.be.eq(
+                false,
+                'otherScene canvas should not be shown when it is the only scene.');
       }
     });
 
