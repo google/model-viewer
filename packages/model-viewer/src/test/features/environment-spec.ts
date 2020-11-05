@@ -24,10 +24,8 @@ import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
-const BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const HDR_BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 const MODEL_URL = assetPath('models/reflective-sphere.gltf');
-const MULTI_MATERIAL_MODEL_URL = assetPath('models/Triangle.gltf');
 
 const backgroundHasMap =
     (scene: ModelScene, url: string|null) => {
@@ -118,43 +116,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
       test('changes the environment exactly once', async function() {
         expect(environmentChanges).to.be.eq(1);
-      });
-    });
-  });
-
-  suite('with a skybox-image property', () => {
-    suite('and a src property', () => {
-      setup(async () => {
-        let onLoad = waitForLoadAndEnvMap(element);
-        element.src = MODEL_URL;
-        element.skyboxImage = BG_IMAGE_URL;
-        document.body.insertBefore(element, document.body.firstChild);
-        await onLoad;
-      });
-
-      teardown(() => {
-        document.body.removeChild(element);
-      });
-
-      test('displays background with the correct map', async function() {
-        expect(backgroundHasMap(scene, element.skyboxImage!)).to.be.ok;
-      });
-
-      test('applies the image as an environment map', async function() {
-        expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
-      });
-
-      suite('on a model with multi-material meshes', () => {
-        setup(async () => {
-          let onLoad = waitForEvent(element, 'load');
-          element.src = MULTI_MATERIAL_MODEL_URL;
-          await onLoad;
-        });
-        test(
-            'applies environment map on model with multi-material meshes',
-            async function() {
-              expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
-            });
       });
     });
   });
