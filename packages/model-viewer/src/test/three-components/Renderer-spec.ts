@@ -55,7 +55,10 @@ suite('Renderer', () => {
   });
 
   teardown(() => {
-    renderer.unregisterScene(scene);
+    const {element} = scene;
+    if (element.parentNode != null) {
+      element.parentNode.removeChild(element);
+    }
     renderer.render(performance.now());
   });
 
@@ -67,7 +70,10 @@ suite('Renderer', () => {
     });
 
     teardown(() => {
-      renderer.unregisterScene(otherScene);
+      const {element} = otherScene;
+      if (element.parentNode != null) {
+        element.parentNode.removeChild(element);
+      }
       renderer.render(performance.now());
     });
 
