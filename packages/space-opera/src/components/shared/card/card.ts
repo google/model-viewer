@@ -38,7 +38,7 @@ export class CardElement extends LitElement {
   render() {
     const upload = this.uploadFunction !== undefined ? html`
     <mwc-button class="upload" id="uploadButton"
-      icon="cloud_upload" @click="${this.uploadFunction}">
+      icon="upload_file" @click="${this.uploadFunction}">
     </mwc-button>` :
                                                        html``;
     const copy = this.copyFunction !== undefined ? html`

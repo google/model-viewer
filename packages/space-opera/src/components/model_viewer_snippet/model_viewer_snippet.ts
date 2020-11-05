@@ -150,6 +150,11 @@ export class ModelViewerSnippet extends LitElement {
   #mv-input {
     width: 95%;
   }
+  .mv-note {
+    color: black;
+    font-size: 10pt;
+    margin-top: 5px;
+  }
         `;
   }
 
@@ -216,15 +221,18 @@ export class ModelViewerSnippet extends LitElement {
             <me-open-button></me-open-button><br/>
           </div>
         </me-card>
-        <me-card title="Load model-viewer snippet">
+        <me-card title="Replace model-viewer snippet">
           <div slot="content">
             <textarea id="mv-input" rows=10
               >${exampleLoadableSnippet}</textarea>
             ${this.errors.map(error => html`<div>${error}</div>`)}
-            <mwc-button unelevated icon="folder_open"
+            <mwc-button unelevated icon="publish"
               @click=${this.handleSubmitSnippet}
-              >Import snippet
+              >Replace model-viewer snippet
             </mwc-button>
+            <div class="mv-note">Edit the snippet above to replace the
+             exportable model-viewer snippet and update the editor.
+            </div>
           </div>
         </me-card>
       </div>

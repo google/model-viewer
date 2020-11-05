@@ -134,8 +134,6 @@ export abstract class LimitsBase extends ConnectedLitElement {
     return html`
     <me-section-row label="Minimum">
       <div class="LabelRowContent">
-        <mwc-button id="clear-min-button" unelevated icon="cancel" @click="${
-        this.onClearMin}"></mwc-button>
         <mwc-button id="set-min-button" class="SetButton" unelevated @click="${
         this.onSetMin}">Set to ${
         this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>
@@ -153,8 +151,6 @@ export abstract class LimitsBase extends ConnectedLitElement {
 
     <me-section-row class="MaxLabelRow" label="Maximum">
       <div class="LabelRowContent">
-        <mwc-button id="clear-max-button" unelevated icon="cancel" @click="${
-        this.onClearMax}"></mwc-button>
         <mwc-button id="set-max-button" class="SetButton" unelevated @click="${
         this.onSetMax}">Set to ${
         this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>

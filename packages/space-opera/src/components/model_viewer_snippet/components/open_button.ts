@@ -40,7 +40,7 @@ export class OpenButton extends LitElement {
     return html`
         <me-file-modal accept=".glb,model/gltf-binary" uploadType="GLB"></me-file-modal>
         <mwc-button unelevated
-          icon="folder_open"
+          icon="upload_file"
           @click=${this.onClick}>
           Import GLB
         </mwc-button>`;
