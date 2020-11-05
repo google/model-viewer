@@ -14,7 +14,7 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $loaded, $onResize, $scene, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $loaded, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -31,46 +31,22 @@ const ModelViewerElement = class extends ModelViewerElementBase {
 // Ensure tests are not rescaling
 ModelViewerElement.minimumRenderScale = 1;
 
-interface TestScene {
-  renderCount?: number;
-}
-
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
-async function createScene(): Promise<ModelScene&TestScene> {
+async function createScene(): Promise<ModelScene> {
   const element = new ModelViewerElement();
   document.body.insertBefore(element, document.body.firstChild);
   const sourceLoads = waitForEvent(element, 'load');
   element.src = assetPath('models/Astronaut.glb');
+  // manual render loop
+  element[$renderer].threeRenderer.setAnimationLoop(null);
   await sourceLoads;
 
-  const scene = element[$scene] as ModelScene & TestScene;
-  scene.renderCount = 0;
-
-  scene.createContext();
-  const {context} = scene;
-  if (context instanceof CanvasRenderingContext2D) {
-    const drawImage = context.drawImage;
-    context.drawImage = (...args: any[]) => {
-      scene.renderCount!++;
-      (drawImage as any).call(context, ...args);
-    };
-  } else if (context instanceof ImageBitmapRenderingContext) {
-    const transferFromImageBitmap = context.transferFromImageBitmap;
-    context.transferFromImageBitmap = (...args: any[]) => {
-      scene.renderCount!++;
-      (transferFromImageBitmap as any).call(context, ...args);
-    }
-  } else {
-    throw new Error(
-        'context is neither a CanvasRenderingContext2D nor an ImageBitmapRenderingContext.');
-  }
-
-  return scene;
+  return element[$scene];
 }
 
 suite('Renderer', () => {
-  let scene: ModelScene&TestScene;
+  let scene: ModelScene;
   let renderer: Renderer;
 
   setup(async () => {
@@ -84,7 +60,7 @@ suite('Renderer', () => {
   });
 
   suite('render', () => {
-    let otherScene: ModelScene&TestScene;
+    let otherScene: ModelScene;
 
     setup(async () => {
       otherScene = await createScene();
@@ -158,7 +134,7 @@ suite('Renderer', () => {
         Object.defineProperty(self, 'devicePixelRatio', {value: originalDpr});
       });
 
-      test('updates effective DPR', async () => {
+      test('updates effective DPR', () => {
         const {element} = scene;
         const initialDpr = renderer.dpr;
         const {width, height} = scene.getSize();
@@ -168,7 +144,7 @@ suite('Renderer', () => {
         Object.defineProperty(
             self, 'devicePixelRatio', {value: initialDpr + 1});
 
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        renderer.render(performance.now());
 
         const newDpr = renderer.dpr;
 

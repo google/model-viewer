@@ -398,6 +398,7 @@ export class Renderer extends EventDispatcher {
         continue;
       }
       scene.isDirty = false;
+      ++scene.renderCount;
 
       if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
