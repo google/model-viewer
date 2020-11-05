@@ -62,7 +62,9 @@ export const styles: CSSResult = css`:host {
 }
 
 .PickerContentContainer {
-  background: var(--material-color-google-grey-800);
+  background: white;
+  border: 1px solid #252525;
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   width: 214px;
@@ -79,7 +81,7 @@ export const styles: CSSResult = css`:host {
 .TextureList {
   align-content: flex-start;
   align-self: stretch;
-  background-color: var(--material-color-google-grey-900);
+  background-color: rgba(0, 0, 0, .1);
   display: flex;
   flex-wrap: wrap;
   height: 150px;

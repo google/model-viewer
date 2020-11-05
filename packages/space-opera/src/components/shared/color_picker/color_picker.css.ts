@@ -25,14 +25,16 @@ export const styles: CSSResult = css`:host {
 .ColorPickerContent {
   width: 200px;
   display: block;
-  background: var(--material-color-google-grey-800);
+  background: white;
+  border: 1px solid #252525;
+  border-radius: 3px;
   padding: 10px;
 }
 
 .Thumbnail {
-  height: calc(var(--me-swatch-size) - 2px);
-  width: calc(var(--me-swatch-size) - 2px);
-  border-radius: 3px;
+  height: 25px;
+  width: 25px;
+  border-radius: 60px;
   border: 1px solid #D4D4D4;
 }
 
@@ -47,15 +49,19 @@ export const styles: CSSResult = css`:host {
 }
 
 .HexInput {
-  background: #202124;    /* GOOGLE GREY 900 */
-  border-radius: 4px;
-  border: none;
-  color: #dadce0;         /* GOOGLE GREY 300 */
+  background: white;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, .1);
+  color: black;
   font-size: 16px;
   height: 20px;
   margin-top: 18px;
   outline: none;
   padding: 5px 10px;
   width: calc(100% - 20px);
+}
+.HexInput:hover {
+  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .05);
+  border: 1px solid rgba(0, 0, 0, 0);
 }
 `;
