@@ -30,8 +30,7 @@ me-camera-target-input {
 }
 `;
 
-export const fileModalStyles: CSSResult = css`
-input[type="file"] {
+export const fileModalStyles: CSSResult = css`input[type="file"] {
   display: none;
 }
 `;
