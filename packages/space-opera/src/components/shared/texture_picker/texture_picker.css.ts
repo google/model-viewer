@@ -44,6 +44,7 @@ export const styles: CSSResult = css`:host {
   cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
+  border: 1px solid #D4D4D4;
 }
 
 .NullTextureSquareInList{
@@ -57,10 +58,13 @@ export const styles: CSSResult = css`:host {
   cursor: pointer;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
+  border: 1px solid #D4D4D4;
 }
 
 .PickerContentContainer {
-  background: var(--material-color-google-grey-800);
+  background: white;
+  border: 1px solid #252525;
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   width: 214px;
@@ -77,7 +81,7 @@ export const styles: CSSResult = css`:host {
 .TextureList {
   align-content: flex-start;
   align-self: stretch;
-  background-color: var(--material-color-google-grey-900);
+  background-color: rgba(0, 0, 0, .1);
   display: flex;
   flex-wrap: wrap;
   height: 150px;
@@ -95,7 +99,7 @@ export const styles: CSSResult = css`:host {
 .TextureSquare {
   background-color: white;
   border-radius: 3px;
-  border: 1px solid var(--me-swatch-border-color);
+  border: 1px solid #D4D4D4;
   height: calc(var(--me-swatch-size) - 2px);
   width: calc(var(--me-swatch-size) - 2px);
 }

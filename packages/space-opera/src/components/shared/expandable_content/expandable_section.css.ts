@@ -25,16 +25,12 @@ export const styles: CSSResult = css`
   max-height: 0;
   overflow: hidden;
   padding: 0 20px;
-  transition-duration: 300ms;
-  transition-timing-function: ease-out;
 }
 
 .SectionContent[open] {
-  overflow: unset;
+  overflow: visible;
   max-height: 100vh;
   padding: 20px;
-  transition-duration: 250ms;
-  transition-timing-function: ease-in;
 }
 
 .sticky {

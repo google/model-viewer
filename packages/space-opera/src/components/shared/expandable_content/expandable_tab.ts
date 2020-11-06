@@ -45,7 +45,10 @@ export class ExpandableTab extends LitElement {
           icon="file_copy" @click="${this.copyFunction}">
         </mwc-button>` :
                                                    html``;
-    const noBorder = this.tabName === 'GLTF JSON' ? 'noBorder' : '';
+    const noBorder =
+        (this.tabName === 'GLTF JSON' || this.tabName === 'Materials') ?
+        'noBorder' :
+        '';
     if (this.sticky) {
       return html`
     <div class="expandableTab ${stickyClass} ${greyStickyClass} ${noBorder}">
@@ -90,7 +93,6 @@ export class ExpandableTab extends LitElement {
           ${this.tabName}
           <slot name="tooltip"></slot>
         </span>
-
         ${
     !this.sticky ? html`<div class="IconArea">
           <mwc-icon>

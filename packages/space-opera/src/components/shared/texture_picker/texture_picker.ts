@@ -92,15 +92,16 @@ export class TexturePicker extends LitElement {
 
   renderTextureUploadButton() {
     return html`
-        <mwc-icon-button id="uploadButton" class=${
+        <mwc-button id="uploadButton" class=${
         this.images.length > 0 ?
             'UploadButton' :
-            'UploadButtonNoTextures'} icon="cloud_upload" @click="${
-        this.openFileModal}"></mwc-icon-button>`;
+            'UploadButtonNoTextures'} icon="upload_file" @click="${
+        this.openFileModal}"></mwc-button>`;
   }
 
   renderTextureUploadModal() {
-    return html`<me-file-modal id="textureUpload" accept=${ACCEPT_IMAGE_TYPE}
+    return html`<me-file-modal id="textureUpload" accept=${
+        ACCEPT_IMAGE_TYPE} uploadType="Image"
       @click="${this.stopPropagation}">
   </me-file-modal>`;
   }
