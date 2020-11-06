@@ -57,6 +57,7 @@ export class ModelScene extends Scene {
   public width = 1;
   public height = 1;
   public isDirty = false;
+  public renderCount = 0;
   public element: ModelViewerElementBase;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;

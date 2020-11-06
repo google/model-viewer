@@ -18,7 +18,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && ./scripts/pre-commit.sh"
+      "pre-commit": "./scripts/pre-commit.sh"
     }
   },
   "repository": {

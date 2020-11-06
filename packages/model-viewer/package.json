@@ -73,7 +73,6 @@
     "3d"
   ],
   "devDependencies": {
-    "@google/3dom": "0.3.0",
     "lit-element": "^2.4.0",
     "three": "^0.121.1",
     "@types/resize-observer-browser": "^0.1.2",

@@ -27,6 +27,8 @@ import './three-components/Renderer-spec.js';
 import './three-components/ARRenderer-spec.js';
 import './three-components/GLTFInstance-spec.js';
 import './three-components/gltf-instance/ModelViewerGLTFInstance-spec.js';
+import './three-components/gltf-instance/correlated-scene-graph-spec.js';
+import './three-components/gltf-instance/utilities-spec.js';
 import './three-components/SmoothControls-spec.js';
 import './three-components/Damper-spec.js';
 import './three-components/TextureUtils-spec.js';
@@ -45,6 +47,7 @@ import './features/environment-spec.js';
 import './features/loading-spec.js';
 import './features/loading/status-announcer-spec.js';
 import './features/scene-graph-spec.js';
+import './features/scene-graph/model-spec.js';
 import './features/ar-spec.js';
 
 try {
