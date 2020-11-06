@@ -31,6 +31,7 @@ export const styles: CSSResult = css`
   padding: 0 16px;
   color: #5F5F5F;
   background-color: white;
+  align-items: center;
 }
 
 .TabHeader:hover {
@@ -73,6 +74,7 @@ export const styles: CSSResult = css`
   height: 20px;
   pointer-events: none;
   position: relative;
+  margin-top: -5px;
 }
 
 .ArrowIcon {

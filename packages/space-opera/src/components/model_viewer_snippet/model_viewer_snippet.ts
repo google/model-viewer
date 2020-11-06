@@ -97,8 +97,9 @@ export class ExportPanel extends ConnectedLitElement {
 
     if (this.header === 'true') {
       return html`
-<me-expandable-tab tabName="model-viewer snippet" .open=${true} .sticky=${
-          true} .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
+<me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
+  .open=${true} .sticky=${true} 
+  .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}
       .renderedStyle=${this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
@@ -116,7 +117,7 @@ export class ExportPanel extends ConnectedLitElement {
         <me-export-zip-button id="export-zip"></me-export-zip-button>
       </div>
     </me-card>
-    <me-card title="model-viewer snippet" .copyFunction=${
+    <me-card title="&lt;model-viewer&gt; snippet" .copyFunction=${
         this.snippetCopyToClipboard.bind(this)}>
       <div slot="content">
         <snippet-viewer .renderedSnippet=${snippet}
@@ -149,6 +150,11 @@ export class ModelViewerSnippet extends LitElement {
     return css`
   #mv-input {
     width: 95%;
+  }
+  .mv-note {
+    color: black;
+    font-size: 10pt;
+    margin-top: 5px;
   }
         `;
   }
@@ -216,15 +222,18 @@ export class ModelViewerSnippet extends LitElement {
             <me-open-button></me-open-button><br/>
           </div>
         </me-card>
-        <me-card title="Load model-viewer snippet">
+        <me-card title="Replace &lt;model-viewer&gt; snippet">
           <div slot="content">
             <textarea id="mv-input" rows=10
               >${exampleLoadableSnippet}</textarea>
             ${this.errors.map(error => html`<div>${error}</div>`)}
-            <mwc-button unelevated icon="folder_open"
+            <mwc-button unelevated icon="publish"
               @click=${this.handleSubmitSnippet}
-              >Import snippet
+              >Replace &lt;model-viewer&gt; snippet
             </mwc-button>
+            <div class="mv-note">Edit the snippet above to replace the
+             exportable &lt;model-viewer&gt; snippet and update the editor.
+            </div>
           </div>
         </me-card>
       </div>

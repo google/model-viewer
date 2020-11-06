@@ -24,44 +24,38 @@ import {homeStyles} from '../../styles.css.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
 const CARD_CONTENT = {
-  quick: {
-    icon: 'play_arrow',
-    header: 'Assembly Line',
-    body:
-        'This module is for beginners. Assembly Line is a bundle of features including: loading, basic editing, and export.'
-  },
   save: {
     icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/save/v6/grey600-24dp/1x/baseline_save_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/materialiconsextended/import_export/v6/grey600-24dp/1x/baseline_import_export_grey600_24dp.png',
     header: 'Import/ Export',
-    body:
-        'Import or export your GLB models as well as insert or copy &lt;model-viewer&gt; HTML snippets.'
+    body: 'Import or export GLB models as well as model-viewer HTML snippets.'
   },
   edit: {
     icon:
         'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/grey600-24dp/1x/gm_create_grey600_24dp.png',
     header: 'Edit',
-    body: 'Adjust your lighting, hotspots, or posters in finer detail.'
+    body:
+        'Adjust <model-viewer>\'s parameters for lighting, hotspots, and posters.'
   },
   camera: {
     icon:
         'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/grey600-24dp/1x/baseline_photo_camera_grey600_24dp.png',
     header: 'Camera',
     body:
-        'Update the camera settings including adding interactivity, rotation, and targets.'
+        'Adjust <model-viewer>\'s camera parameters for interactivity, rotation, and targets.'
   },
   materials: {
     icon:
         'https://fonts.gstatic.com/s/i/materialiconsextended/color_lens/v7/grey600-24dp/1x/baseline_color_lens_grey600_24dp.png',
     header: 'Materials',
     body:
-        'Modify properties of materials such as color, metallic roughness, normal maps, etc.'
+        'Modify GLB materials such as base color, roughness, normal maps, etc.'
   },
   inspector: {
     icon:
         'https://fonts.gstatic.com/s/i/materialiconsextended/search/v7/grey600-24dp/1x/baseline_search_grey600_24dp.png',
     header: 'Inspector',
-    body: 'Visualize the gltf json string generated from your imported model.'
+    body: 'Visualize the model\'s JSON string.'
   }
 };
 
@@ -119,7 +113,7 @@ export class HomeContainer extends ConnectedLitElement {
               </home-container-card>
             </div>
           </me-card>
-          <me-card title="model-viewer snippet">
+          <me-card title="&lt;model-viewer&gt; snippet">
             <div slot="content">
               <home-container-card .content=${CARD_CONTENT.edit}>
               </home-container-card>

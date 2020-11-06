@@ -60,7 +60,7 @@ class GenericDownloadButton extends ConnectedLitElement {
 
   render() {
     return html`<mwc-button unelevated
-        icon="save"
+        icon="file_download"
         ?disabled=${!this.preparePayload}
         @click=${this.onDownloadClick}>
           ${this.buttonLabel}</mwc-button>`;

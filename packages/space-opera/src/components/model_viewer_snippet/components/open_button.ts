@@ -38,11 +38,12 @@ export class OpenButton extends LitElement {
 
   render() {
     return html`
-        <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
+        <me-file-modal accept=".glb,model/gltf-binary" uploadType="GLB"></me-file-modal>
         <mwc-button unelevated
-        icon="folder_open"
-        @click=${this.onClick}>
-          Import GLB</mwc-button>`;
+          icon="upload_file"
+          @click=${this.onClick}>
+          Import GLB
+        </mwc-button>`;
   }
 
   async onClick() {

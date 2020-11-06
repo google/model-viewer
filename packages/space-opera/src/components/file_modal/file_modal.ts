@@ -19,6 +19,7 @@ import '@material/mwc-button';
 import '@polymer/paper-dialog';
 
 import {customElement, html, internalProperty, LitElement, property, PropertyValues, query} from 'lit-element';
+import {fileModalStyles} from '../../styles.css.js';
 
 interface BlobArrayResolver {
   resolve: (fileList?: Blob[]|PromiseLike<Blob[]>) => void;
@@ -30,10 +31,13 @@ interface BlobArrayResolver {
  */
 @customElement('me-file-modal')
 export class FileModalElement extends LitElement {
+  static styles = fileModalStyles;
+
   @internalProperty() show = false;
 
   /** Proxies to file-input accept attribute */
   @property({type: String}) accept = '';
+  @property({type: String}) uploadType = '';
   @query('input#file-input') fileInput!: HTMLInputElement;
 
   private blobsResolver?: BlobArrayResolver;
@@ -60,14 +64,21 @@ export class FileModalElement extends LitElement {
 
   render() {
     return html`
-    <paper-dialog id="file-modal" modal ?opened=${this.show}>
-      <div>
-        <input type="file" class="input" id="file-input"
-          @change="${this.onFileChange}">
-        <mwc-button unelevated icon="cancel" @click=${
-        this.onCancel}>Cancel</mwc-button>
-      </div>
-    </paper-dialog>
+      <paper-dialog id="file-modal" modal ?opened=${this.show}>
+        <div class="FileModalContainer">
+          <div class="FileModalHeader">
+            <div>Upload ${this.uploadType}</div>
+          </div>
+          <label for="file-input" class="custom-file-upload">
+              <img src="https://fonts.gstatic.com/s/i/materialiconsextended/upload_file/v5/black-24dp/1x/baseline_upload_file_black_24dp.png"/>
+              <div>Click to Upload</div>
+          </label>
+          <input type="file" class="input" id="file-input" @change="${
+        this.onFileChange}"/>
+        </div>
+        <mwc-button class="FileModalCancel" icon="cancel" 
+          @click=${this.onCancel}></mwc-button>
+      </paper-dialog>
         `;
   }
 
