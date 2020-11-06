@@ -34,6 +34,7 @@ export class FileModalElement extends LitElement {
 
   /** Proxies to file-input accept attribute */
   @property({type: String}) accept = '';
+  @property({type: String}) uploadType = '';
   @query('input#file-input') fileInput!: HTMLInputElement;
 
   private blobsResolver?: BlobArrayResolver;
