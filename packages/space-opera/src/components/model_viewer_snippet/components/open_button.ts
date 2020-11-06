@@ -49,6 +49,7 @@ export class OpenButton extends LitElement {
   async onClick() {
     const files = await this.fileModal.open();
     if (!files) {
+      /// The user canceled the previous upload
       return;
     }
     const arrayBuffer = await files[0].arrayBuffer();
