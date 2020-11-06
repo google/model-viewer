@@ -35,14 +35,14 @@ const CARD_CONTENT = {
         'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/grey600-24dp/1x/gm_create_grey600_24dp.png',
     header: 'Edit',
     body:
-        'Adjust model-viewer\'s parameters for lighting, hotspots, and posters.'
+        'Adjust <model-viewer>\'s parameters for lighting, hotspots, and posters.'
   },
   camera: {
     icon:
         'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/grey600-24dp/1x/baseline_photo_camera_grey600_24dp.png',
     header: 'Camera',
     body:
-        'Adjust model-viewer\'s camera parameters for interactivity, rotation, and targets.'
+        'Adjust <model-viewer>\'s camera parameters for interactivity, rotation, and targets.'
   },
   materials: {
     icon:
@@ -113,7 +113,7 @@ export class HomeContainer extends ConnectedLitElement {
               </home-container-card>
             </div>
           </me-card>
-          <me-card title="model-viewer snippet">
+          <me-card title="&lt;model-viewer&gt; snippet">
             <div slot="content">
               <home-container-card .content=${CARD_CONTENT.edit}>
               </home-container-card>
