@@ -18,7 +18,7 @@
 
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`:host {
-  color: black
+  color: #212121;
   display: block;
   font-family: Roboto;
 }
@@ -33,7 +33,7 @@ export const styles: CSSResult = css`:host {
   flex-direction: row;
   justify-content: space-between;
   margin: auto 12px auto 0;
-  color: black
+  color: #212121;
 }
 
 .RowContent {

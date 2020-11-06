@@ -102,7 +102,7 @@ export class HomeContainer extends ConnectedLitElement {
           <div class="note">
             Welcome to the model viewer editor where you can generate &lt;model-viewer&gt; HTML snippets, as well as edit GLBs.
           </div>
-          <a href="https://policies.google.com/privacy" style="color: black">Privacy</a>
+          <a href="https://policies.google.com/privacy" style="color: #212121">Privacy</a>
         </div>
       </me-expandable-tab>
       <me-expandable-tab tabName="Modules" .open=${true}>

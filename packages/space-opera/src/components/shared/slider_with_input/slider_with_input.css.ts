@@ -37,7 +37,7 @@ export const styles: CSSResult = css`:host {
 }
 
 paper-slider {
-  --paper-slider-knob-color: black;
+  --paper-slider-knob-color: #212121;
   --paper-slider-active-color: var(--google-grey-300);
 }
 
@@ -62,7 +62,7 @@ paper-slider {
 }
 
 .InlineInput {
-  color: black;
+  color: #212121;
   -moz-appearance:textfield;
   background: transparent;
   border: none;

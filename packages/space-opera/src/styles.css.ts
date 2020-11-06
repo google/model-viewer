@@ -25,7 +25,7 @@ me-camera-target-input {
 }
 
 .note {
-  color: black;
+  color: #212121;
   margin-left: 15px;
 }
 `;
@@ -38,7 +38,7 @@ export const fileModalStyles: CSSResult = css`input[type="file"] {
 export const homeStyles: CSSResult = css`
 .HomeCardHeader {
   font-size: 20px;
-  color: black;
+  color: #212121;
 }
 
 .HomeCardContent {
@@ -67,7 +67,7 @@ img {
 }
 
 .note {
-  color: black;
+  color: #212121;
 }
 `;
 
@@ -83,7 +83,7 @@ export const iblSelectorStyles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: black;
+  color: #212121;
 }
 `;
 

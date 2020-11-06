@@ -152,7 +152,7 @@ export class ModelViewerSnippet extends LitElement {
     width: 95%;
   }
   .mv-note {
-    color: black;
+    color: #212121;
     font-size: 10pt;
     margin-top: 5px;
   }
