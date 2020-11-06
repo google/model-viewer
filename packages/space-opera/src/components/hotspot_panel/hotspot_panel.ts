@@ -53,7 +53,7 @@ export class HotspotPanel extends ConnectedLitElement {
                 hotspot}"></me-hotspot-editor>`)}
     ${
         this.addHotspotMode ?
-            html`<div style="color: black"> Click on the model in the preview to add a hotspot.</div>` :
+            html`<div style="color: #212121"> Click on the model in the preview to add a hotspot.</div>` :
             html`<mwc-button unelevated icon="add_circle"
                 id="add-hotspot" @click="${this.onAddHotspot}">Add hotspot
       </mwc-button>`}

@@ -20,7 +20,7 @@ import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
   --input-background: #FFFFFF;
-  --input-font-color: black;
+  --input-font-color: #212121;
   display: block;
 }
 

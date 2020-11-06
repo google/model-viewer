@@ -80,7 +80,7 @@ export class InspectorPanel extends ConnectedLitElement {
     return html`
       <me-expandable-tab tabName="GLTF JSON" .open=${true} .sticky=${true}>
         <div slot="content">
-          <div style="color: black">
+          <div style="color: #212121">
             ${textContent}
             <div class="texture-images">
               ${

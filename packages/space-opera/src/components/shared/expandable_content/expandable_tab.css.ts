@@ -20,6 +20,7 @@ import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
   --me-theme-container-background: #2b2d30;
+  --tab-background-color: white;
 }
 
 .TabHeader{
@@ -30,7 +31,7 @@ export const styles: CSSResult = css`
   line-height: 40px;
   padding: 0 16px;
   color: #5F5F5F;
-  background-color: white;
+  background-color: var(--tab-background-color);
   align-items: center;
 }
 
@@ -97,12 +98,12 @@ export const styles: CSSResult = css`
   overflow: hidden;
   padding: 0 20px;
   transition: max-height 500ms ease-in-out;
-  background-color: white;
+  background-color: var(--tab-background-color);
 }
 
 .TabContent[open],
 .SectionContent[open] {
-  background-color: white;
+  background-color: var(--tab-background-color);
   padding: 20px;
   overflow: unset;
   max-height: none;
@@ -116,7 +117,7 @@ export const styles: CSSResult = css`
 }
 
 .RadioButtonExpandableContent[open] {
-  background-color: white;
+  background-color: var(--tab-background-color);
   padding: 0;
   overflow: unset;
   max-height: none;
@@ -130,20 +131,20 @@ export const styles: CSSResult = css`
 }
 
 .Spacer {
-  background-color: white;
+  background-color: var(--tab-background-color);
   display: flex;
   height: 2px;
 }
 
 .expandableTab {
-  border-bottom: 1px solid #5F5F5F;
+  border-bottom: 1px solid #212121;
 }
 
 .sticky {
   position: sticky;
   z-index: 10;
   top: 0;
-  border-bottom: 2px solid #5F5F5F;
+  border-bottom: 1px solid #212121;
 }
 
 .GreySticky {
