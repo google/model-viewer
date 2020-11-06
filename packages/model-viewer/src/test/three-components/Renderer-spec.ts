@@ -14,7 +14,7 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $loaded, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $getModelIsVisible, $loaded, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -38,6 +38,9 @@ async function createScene(): Promise<ModelScene> {
   document.body.insertBefore(element, document.body.firstChild);
   const sourceLoads = waitForEvent(element, 'load');
   element.src = assetPath('models/Astronaut.glb');
+  element[$getModelIsVisible] = () => {
+    return true;
+  };
   // manual render loop
   element[$renderer].threeRenderer.setAnimationLoop(null);
   await sourceLoads;
