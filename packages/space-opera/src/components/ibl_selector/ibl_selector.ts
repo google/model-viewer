@@ -186,8 +186,7 @@ export class IblSelector extends ConnectedLitElement {
               </me-slider-with-input>
             </div>
           </me-card>
-          <me-file-modal id="imageUpload" uploadType="Image" accept=${
-        ACCEPT_IMAGE_TYPE}>
+          <me-file-modal id="imageUpload" accept=${ACCEPT_IMAGE_TYPE}>
           </me-file-modal>
         </div>
       </me-expandable-tab>

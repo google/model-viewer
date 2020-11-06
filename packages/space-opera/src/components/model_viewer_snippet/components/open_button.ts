@@ -38,7 +38,7 @@ export class OpenButton extends LitElement {
 
   render() {
     return html`
-        <me-file-modal accept=".glb,model/gltf-binary" uploadType="GLB"></me-file-modal>
+        <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
         <mwc-button unelevated
           icon="upload_file"
           @click=${this.onClick}>
@@ -49,6 +49,7 @@ export class OpenButton extends LitElement {
   async onClick() {
     const files = await this.fileModal.open();
     if (!files) {
+      /// The user canceled the previous upload
       return;
     }
     const arrayBuffer = await files[0].arrayBuffer();
