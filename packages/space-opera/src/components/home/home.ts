@@ -26,34 +26,34 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 const CARD_CONTENT = {
   save: {
     icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/import_export/v6/grey600-24dp/1x/baseline_import_export_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/materialiconsextended/import_export/v6/white-24dp/1x/baseline_import_export_white_24dp.png',
     header: 'Import/ Export',
     body: 'Import or export GLB models as well as model-viewer HTML snippets.'
   },
   edit: {
     icon:
-        'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/grey600-24dp/1x/gm_create_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/white-24dp/1x/gm_create_white_24dp.png',
     header: 'Edit',
     body:
         'Adjust <model-viewer>\'s parameters for lighting, hotspots, and posters.'
   },
   camera: {
     icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/grey600-24dp/1x/baseline_photo_camera_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/white-24dp/1x/baseline_photo_camera_white_24dp.png',
     header: 'Camera',
     body:
         'Adjust <model-viewer>\'s camera parameters for interactivity, rotation, and targets.'
   },
   materials: {
     icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/color_lens/v7/grey600-24dp/1x/baseline_color_lens_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/materialiconsextended/color_lens/v7/white-24dp/1x/baseline_color_lens_white_24dp.png',
     header: 'Materials',
     body:
         'Modify GLB materials such as base color, roughness, normal maps, etc.'
   },
   inspector: {
     icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/search/v7/grey600-24dp/1x/baseline_search_grey600_24dp.png',
+        'https://fonts.gstatic.com/s/i/materialiconsextended/search/v7/white-24dp/1x/baseline_search_white_24dp.png',
     header: 'Inspector',
     body: 'Visualize the model\'s JSON string.'
   }
@@ -102,7 +102,7 @@ export class HomeContainer extends ConnectedLitElement {
           <div class="note">
             Welcome to the model viewer editor where you can generate &lt;model-viewer&gt; HTML snippets, as well as edit GLBs.
           </div>
-          <a href="https://policies.google.com/privacy" style="color: #212121">Privacy</a>
+          <a href="https://policies.google.com/privacy" style="color: var(--default-text-color);">Privacy</a>
         </div>
       </me-expandable-tab>
       <me-expandable-tab tabName="Modules" .open=${true}>

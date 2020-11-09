@@ -48,7 +48,7 @@ paper-slider {
 }
 
 .InputContainer {
-  background: #F1F1F1;
+  background: var(--entity-background-color);
   border-radius: 4px;
   display: inline-flex;
   justify-content: space-between;
@@ -58,11 +58,11 @@ paper-slider {
 }
 
 .InputContainer:hover {
-  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, .05);
+  box-shadow: 0 1px 2px 1px rgba(255, 255, 255, .25);
 }
 
 .InlineInput {
-  color: #212121;
+  color: var(--default-text-color);
   -moz-appearance:textfield;
   background: transparent;
   border: none;
