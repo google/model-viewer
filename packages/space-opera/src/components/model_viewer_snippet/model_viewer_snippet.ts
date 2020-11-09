@@ -114,9 +114,14 @@ export class ExportPanel extends ConnectedLitElement {
     }
 
     return html`
-<me-expandable-tab tabName="Export" .open=${true}>
+<me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
-    <me-card title="Downloads">
+    <me-card title="Import Content">
+      <div slot="content">
+        <me-open-button></me-open-button>
+      </div>
+    </me-card>
+    <me-card title="Export Content">
       <div slot="content">
         <me-download-button id="download-gltf"></me-download-button>
         <me-export-zip-button id="export-zip"></me-export-zip-button>
@@ -153,16 +158,6 @@ export class ExportPanel extends ConnectedLitElement {
 export class ModelViewerSnippet extends LitElement {
   render() {
     return html`
-    <me-expandable-tab tabName="Import" .open=${true}>
-      <div slot="content">
-        <me-card title="Import GLB">
-          <div slot="content">
-            <me-open-button></me-open-button><br/>
-          </div>
-        </me-card>
-      </div>
-    </me-expandable-tab>
-
     <me-export-panel></me-export-panel>
             `;
   }
