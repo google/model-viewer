@@ -136,7 +136,7 @@ export class OpenModal extends LitElement {
     </div>
     <div class="OpenModalSection" @click=${this.onClick}>
       <label for="file-input" class="custom-file-upload">
-          <img src="https://fonts.gstatic.com/s/i/materialiconsextended/upload_file/v5/black-24dp/1x/baseline_upload_file_black_24dp.png"/>
+          <img src="https://fonts.gstatic.com/s/i/materialiconsextended/file_upload/v6/black-24dp/1x/baseline_file_upload_black_24dp.png"/>
           <div>Click to Upload</div>
       </label>
       <div>
@@ -179,9 +179,9 @@ export class OpenButton extends LitElement {
     return html`
         <me-open-modal id="open-modal"></me-open-modal>
         <mwc-button unelevated
-          icon="upload_file"
+          icon="file_upload"
           @click=${this.onClick}>
-          Import GLB
+          Upload
         </mwc-button>`;
   }
 }
