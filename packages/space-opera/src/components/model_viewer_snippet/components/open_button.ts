@@ -62,6 +62,7 @@ export class OpenButton extends LitElement {
   }
 }
 
+
 declare global {
   interface HTMLElementTagNameMap {
     'me-open-button': OpenButton;
