@@ -26,11 +26,12 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {reduxStore} from '../../space_opera_base.js';
 import {posterControlsStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
-import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
+// import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
 import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
+// import {getCameraState} from
+// '../model_viewer_preview/model_viewer_preview.js';
 
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
@@ -45,11 +46,13 @@ export class PosterControlsElement extends ConnectedLitElement {
 
   render() {
     return html`
-      <me-expandable-tab tabName="Poster">
-        <div slot="content">
-          <mwc-button unelevated class="PosterButton" 
-            @click="${this.onCreatePoster}">Create Poster</mwc-button>
-          ${
+<me-expandable-tab tabName="Poster">
+  <div slot="content">
+    <me-card title="Options">
+      <div slot="content">
+        <mwc-button unelevated class="PosterButton"
+        @click="${this.onCreatePoster}">Create Poster</mwc-button>
+        ${
     !!this.poster ? html`
           <mwc-button unelevated class="PosterButton"
             @click="${this.onDownloadPoster}">Download</mwc-button>
@@ -58,8 +61,10 @@ export class PosterControlsElement extends ConnectedLitElement {
           <mwc-button unelevated class="PosterButton"
             @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
-        </div>
-      </me-expandable-tab>
+      </div>
+    </me-card>
+  </div>
+</me-expandable-tab>
         `;
   }
 
@@ -70,25 +75,21 @@ export class PosterControlsElement extends ConnectedLitElement {
     const posterUrl =
         createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
     reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-    const currentOrbit = getCameraState(modelViewer).orbit;
-    const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
-    reduxStore.dispatch(
-        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
+    // const currentOrbit = getCameraState(modelViewer).orbit;
+    // const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
+    // reduxStore.dispatch(
+    //     dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
   }
 
   onDisplayPoster() {
     const modelViewer = getModelViewer()!;
     if (!modelViewer)
       return;
-    // TODO, fix such that we aren't modifying modelViewer in here. i.e. add
-    // settings to modelViewerPreview
-    const src = modelViewer.src;
     // Normally we can just use dispatchSetReveal, but the value has to be
     // changed immediately before reload.
     modelViewer.reveal = 'interaction';
     // Force reload the model
-    modelViewer.src = '';
-    modelViewer.src = src;
+    modelViewer.showPoster();
   }
 
   onDeletePoster() {

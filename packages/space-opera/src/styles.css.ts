@@ -146,3 +146,39 @@ model-viewer {
   transform: translate(-50%, -50%);
 }
 `;
+
+export const modelViewerSnippetUploadStyles: CSSResult = css`
+.FileModalContainer {
+  height: 250px;
+  width: 300px;
+}
+.FileModalHeader {
+  font-size: 20px;
+  color: black;
+  margin-bottom: 20px;
+}
+.FileModalCancel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  padding: 0;
+}
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload {
+  display: flex;
+  align-items: center;
+  border: 1px solid #D4D4D4;
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+img {
+  padding-right: 10px;
+}
+.custom-file-upload:hover {
+  background: #D4D4D4;
+}
+`;

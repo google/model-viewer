@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-import {Image, Material, Model, PBRMetallicRoughness, Sampler, Texture, TextureInfo, ThreeDOM} from '@google/3dom/lib/api.js';
-import {ModelKernel} from '@google/3dom/lib/api/model-kernel.js';
-import {ModelGraftManipulator} from '@google/3dom/lib/facade/model-graft-manipulator.js';
-import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
-import {SerializedModel, ThreeDOMMessageType} from '@google/3dom/lib/protocol';
-import {property} from 'lit-element';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
@@ -26,15 +20,11 @@ import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelVi
 import {$shadow} from '../three-components/Model.js';
 import {Constructor} from '../utilities.js';
 
-const $updateThreeSide = Symbol('updateThreeSide');
+import {Image, Material, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Model} from './scene-graph/model.js';
+
 const $currentGLTF = Symbol('currentGLTF');
-const $modelGraft = Symbol('modelGraft');
-const $mainPort = Symbol('mainPort');
-const $threePort = Symbol('threePort');
-const $manipulator = Symbol('manipulator');
-const $modelKernel = Symbol('modelKernel');
-const $onModelChange = Symbol('onModelChange');
-const $onModelGraftMutation = Symbol('onModelGraftMutation');
+const $model = Symbol('model');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -48,30 +38,23 @@ export interface SceneGraphInterface {
 }
 
 /**
- * SceneGraphMixin manages a `<model-viewer>` integration with the 3DOM library
- * in order to support operations on the <model-viewer> scene graph.
+ * SceneGraphMixin manages exposes a model API in order to support operations on
+ * the <model-viewer> scene graph.
  */
 export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<SceneGraphInterface>&T => {
-  class SceneGraphModelViewerElement extends ModelViewerElement implements
-      ThreeDOM {
-    @property({type: Object}) protected[$modelGraft]: ModelGraft|null = null;
-
+  class SceneGraphModelViewerElement extends ModelViewerElement {
+    protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
-    protected[$mainPort]: MessagePort|null = null;
-    protected[$threePort]: MessagePort|null = null;
-    protected[$manipulator]: ModelGraftManipulator|null = null;
-    protected[$modelKernel]: ModelKernel|null = null;
 
-    // ThreeDOM implementation:
+    // Scene-graph API:
     /** @export */
     get model() {
-      const kernel = this[$modelKernel];
-      return kernel ? kernel.model : undefined;
+      return this[$model];
     }
 
     /**
-     * References to each 3DOM constructor. Supports instanceof checks; these
+     * References to each element constructor. Supports instanceof checks; these
      * classes are not directly constructable.
      */
     static Model: Constructor<Model>;
@@ -82,134 +65,24 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
-    connectedCallback() {
-      super.connectedCallback();
-
-      const {port1, port2} = new MessageChannel();
-      port1.start();
-      port2.start();
-      this[$mainPort] = port1;
-      this[$threePort] = port2;
-      this[$mainPort]!.onmessage = this[$onModelChange];
-    }
-
-    disconnectedCallback() {
-      super.disconnectedCallback();
-
-      this[$mainPort]!.close();
-      this[$threePort]!.close();
-      this[$mainPort] = null;
-      this[$threePort] = null;
-      if (this[$manipulator] != null) {
-        this[$manipulator]!.dispose();
-      }
-      if (this[$modelKernel] != null) {
-        this[$modelKernel]!.deactivate();
-      }
-    }
-
-    updated(changedProperties: Map<string|symbol, unknown>): void {
-      super.updated(changedProperties);
-      if (changedProperties.has($modelGraft)) {
-        const oldModelGraft =
-            changedProperties.get($modelGraft) as ModelGraft | null;
-        if (oldModelGraft != null) {
-          oldModelGraft.removeEventListener(
-              'mutation', this[$onModelGraftMutation]);
-        }
-
-        const modelGraft = this[$modelGraft];
-
-        if (modelGraft != null) {
-          modelGraft.addEventListener('mutation', this[$onModelGraftMutation]);
-        }
-      }
-    }
-
     [$onModelLoad]() {
       super[$onModelLoad]();
 
-      this[$updateThreeSide]();
-    }
-
-    [$updateThreeSide]() {
-      // Three.js side (will eventually move to worker)
-      const scene = this[$scene];
-      const {model} = scene;
-      const {currentGLTF} = model;
-      let modelGraft: ModelGraft|null = null;
-      let manipulator: ModelGraftManipulator|null = null;
+      const {currentGLTF} = this[$scene].model;
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
-        const currentModelGraft = this[$modelGraft];
-        const currentManipulator = this[$manipulator];
 
-        if (correlatedSceneGraph != null) {
-          if (currentManipulator != null) {
-            currentManipulator.dispose();
-          }
-
-          if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
-            return;
-          }
-
-          modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
-
-          let channel = null;
-          if (modelGraft != null && modelGraft.model != null) {
-            channel = new MessageChannel();
-            manipulator = new ModelGraftManipulator(modelGraft, channel.port1);
-
-            this[$threePort]!.postMessage(
-                {
-                  type: ThreeDOMMessageType.MODEL_CHANGE,
-                  model: modelGraft.model.toJSON(),
-                  port: channel.port2
-                },
-                [channel.port2]);
-          } else {
-            this[$threePort]!.postMessage({
-              type: ThreeDOMMessageType.MODEL_CHANGE,
-              model: null,
-              port: null
-            });
-          }
+        if (correlatedSceneGraph != null &&
+            currentGLTF !== this[$currentGLTF]) {
+          this[$model] = new Model(correlatedSceneGraph, () => {
+            this[$needsRender]();
+          });
         }
       }
 
-      this[$modelGraft] = modelGraft;
-      this[$manipulator] = manipulator;
       this[$currentGLTF] = currentGLTF;
-    }
-
-    [$onModelChange] = (event: MessageEvent) => {
-      const {data} = event;
-      if (data && data.type === ThreeDOMMessageType.MODEL_CHANGE) {
-        const serialized: SerializedModel|null = data.model;
-        const currentKernel = this[$modelKernel];
-
-        if (currentKernel != null) {
-          currentKernel.deactivate();
-        } else if (serialized == null) {
-          // Do not proceed if transitioning from null to null
-          return;
-        }
-
-        if (serialized != null) {
-          this[$modelKernel] = new ModelKernel(data.port, serialized);
-        } else {
-          this[$modelKernel] = null;
-        }
-
-        this.dispatchEvent(new CustomEvent(
-            'scene-graph-ready',
-            {detail: {url: serialized ? serialized.modelUri : null}}));
-      }
-    };
-
-    [$onModelGraftMutation] = (_event: Event) => {
-      this[$needsRender]();
+      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
     /** @export */

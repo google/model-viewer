@@ -100,8 +100,7 @@ export class TexturePicker extends LitElement {
   }
 
   renderTextureUploadModal() {
-    return html`<me-file-modal id="textureUpload" accept=${
-        ACCEPT_IMAGE_TYPE} uploadType="Image"
+    return html`<me-file-modal id="textureUpload" accept=${ACCEPT_IMAGE_TYPE}
       @click="${this.stopPropagation}">
   </me-file-modal>`;
   }
