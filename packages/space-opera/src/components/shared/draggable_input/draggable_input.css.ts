@@ -37,7 +37,7 @@ export const styles: CSSResult = css`:host {
   font-size: 14px;
   outline: none;
   width: 0;
-  color: #212121;
+  color: var(--default-text-color);
 }
 
 /**
@@ -51,7 +51,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .InlineLabel {
-  color: #212121;
+  color: var(--default-text-color);
   cursor: col-resize;
   margin-left: 12px;
   text-align: right;

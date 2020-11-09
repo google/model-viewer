@@ -38,26 +38,23 @@ export class ExpandableTab extends LitElement {
 
   render() {
     const stickyClass = this.sticky ? 'sticky' : '';
-    const greyStickyClass = this.sticky ? 'GreySticky' : '';
-    const noIconClass = this.copyFunction === undefined ? 'no-icon' : '';
+    // const noIconClass = this.copyFunction === undefined ? 'no-icon' : '';
     const copy = this.copyFunction !== undefined ? html`
         <mwc-button class="upload" id="uploadButton"
           icon="file_copy" @click="${this.copyFunction}">
         </mwc-button>` :
                                                    html``;
-    const noBorder =
-        (this.tabName === 'GLTF JSON' || this.tabName === 'Materials') ?
-        'noBorder' :
-        '';
     if (this.sticky) {
       return html`
-    <div class="expandableTab ${stickyClass} ${greyStickyClass} ${noBorder}">
+    <div class="expandableTab ${stickyClass}">
       <div data-element-type="expandableTab">
-        <div class="sticky-container">
-          <div class="sticky-label ${noIconClass}">
-            ${this.tabName}
+        <div class="TabHeader sticky-container">
+          <div class="StickyContentContainer">
+            <div class="sticky-label">
+              ${this.tabName}
+            </div>
+            ${copy}
           </div>
-          ${copy}
         </div>
       </div>
 
@@ -73,7 +70,7 @@ export class ExpandableTab extends LitElement {
 
     if (!this.enabled) {
       return html`
-    <div class="expandableTab ${stickyClass}">
+    <div class="expandableTab">
       <div data-element-type="expandableTab">
         <div class="TabHeader DisabledTabHeader">
           <span class="TabLabel">
@@ -85,31 +82,29 @@ export class ExpandableTab extends LitElement {
     </div>
   `;
     }
+
     return html`
-  <div class="expandableTab ${stickyClass}">
-    <div data-element-type="expandableTab">
-      <div class="TabHeader" @click="${this.toggle}">
-        <span class="TabLabel">
-          ${this.tabName}
-          <slot name="tooltip"></slot>
-        </span>
-        ${
-    !this.sticky ? html`<div class="IconArea">
-          <mwc-icon>
-          ${this.open ? html`keyboard_arrow_up` : html`keyboard_arrow_down`}
-          </mwc-icon>
-        </div>` :
-                   html``}
+<div class="expandableTab">
+  <div data-element-type="expandableTab">
+    <div class="TabHeader" @click="${this.toggle}">
+      <span class="TabLabel">
+        ${this.tabName}
+        <slot name="tooltip"></slot>
+      </span>
+      <div class="IconArea">
+        <mwc-icon>
+        ${this.open ? html`keyboard_arrow_up` : html`keyboard_arrow_down`}
+        </mwc-icon>
       </div>
     </div>
-
-    <me-expandable-section ?open=${this.open}>
-      <span slot="content">
-        <slot name="content"></slot>
-      </span>
-    </me-expandable-section>
-    <div class="Spacer"></div>
   </div>
+
+  <me-expandable-section ?open=${this.open}>
+    <span slot="content">
+      <slot name="content"></slot>
+    </span>
+  </me-expandable-section>
+</div>
         `;
   }
 

@@ -19,8 +19,8 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --input-background: #FFFFFF;
-  --input-font-color: #212121;
+  --input-background: var(--entity-background-color);
+  --input-font-color: var(--default-text-color);
   display: block;
 }
 

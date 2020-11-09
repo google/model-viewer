@@ -19,8 +19,8 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --me-theme-container-background: #2b2d30;
-  --tab-background-color: white;
+  --me-theme-container-background: var(--expandable-section-background-color);
+  --tab-background-color: var(--expandable-section-header);
 }
 
 .TabHeader{
@@ -30,29 +30,45 @@ export const styles: CSSResult = css`
   justify-content: space-between;
   line-height: 40px;
   padding: 0 16px;
-  color: #5F5F5F;
+  color: var(--title-color);
   background-color: var(--tab-background-color);
   align-items: center;
 }
 
 .TabHeader:hover {
-  background-color: #F5F5F5;
+  background-color: var(--expandable-section-header-hover);
 }
 
 .sticky-container {
   white-space: nowrap;
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  cursor: default;
+}
+
+.upload {
+  --mdc-icon-button-size: 32px;
+  margin: 0;
+}
+
+.sticky-container:hover {
+  background-color: var(--tab-background-color);
+}
+
+.StickyContentContainer {
+  justify-content: left;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .DisabledTabHeader {
-  color: #888;
+  color: var(--title-color);
 }
 
 .TabLabel {
   position: relative;
-  color: #5F5F5F;
+  color: var(--title-color);
 }
 
 .TabLabel .exportInfoIcon {
@@ -63,11 +79,7 @@ export const styles: CSSResult = css`
 .sticky-label {
   margin-right: 5px;
   font-size: 14px;
-  color: #5F5F5F;
-}
-
-.no-icon {
-  padding-top: 10px;
+  color: var(--title-color);
 }
 
 .IconArea {
@@ -130,28 +142,11 @@ export const styles: CSSResult = css`
   padding-bottom: 8px;
 }
 
-.Spacer {
-  background-color: var(--tab-background-color);
-  display: flex;
-  height: 2px;
-}
-
-.expandableTab {
-  border-bottom: 1px solid #212121;
-}
-
 .sticky {
   position: sticky;
   z-index: 10;
   top: 0;
-  border-bottom: 1px solid #212121;
+  background-color: var(--tab-background-color);
 }
 
-.GreySticky {
-  background-color: #FBFBFB;
-}
-
-.noBorder {
-  border-bottom: 1px solid rgba(0, 0, 0, 0);
-}
 `;

@@ -19,11 +19,10 @@ import {css, CSSResult} from 'lit-element';
 
 export const styles: CSSResult = css`
 .card {
-  border: 1px solid #D4D4D4;
   transition: 0.3s;
   width: 100%;
   border-radius: 5px;
-  background: white;
+  background: var(--card-background-color);
 
   display: inline-flex;
   flex-grow: 1;
@@ -41,7 +40,7 @@ export const styles: CSSResult = css`
   margin-top: 0;
   margin-right: 5px;
   font-size: 12px;
-  color: #555555;
+  color: var(--title-color);
 }
 
 .upload {
@@ -49,9 +48,9 @@ export const styles: CSSResult = css`
   margin: 0;
 }
 
+
 .card:hover {
-  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .1);
-  border: 1px solid rgba(0, 0, 0, 0);
+  box-shadow: 0 1px 4px 3px rgba(255, 255, 255, .15);
 }
 
 .container {
@@ -61,6 +60,5 @@ export const styles: CSSResult = css`
 
 .content-container {
   padding: 5px 10px 5px 10px;
-  padding-bottom: 
 }
 `;

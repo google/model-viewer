@@ -25,7 +25,7 @@ me-camera-target-input {
 }
 
 .note {
-  color: #212121;
+  color: var(--default-text-color);
   margin-left: 15px;
 }
 `;
@@ -38,12 +38,12 @@ export const fileModalStyles: CSSResult = css`input[type="file"] {
 export const homeStyles: CSSResult = css`
 .HomeCardHeader {
   font-size: 20px;
-  color: #212121;
+  color: var(--default-text-color);
 }
 
 .HomeCardContent {
   font-size: 14px;
-  color: #5F5F5F;
+  color: var(--subtext-color);
 }
 
 .CardContainer {
@@ -67,7 +67,7 @@ img {
 }
 
 .note {
-  color: #212121;
+  color: var(--default-text-color);
 }
 `;
 
@@ -83,7 +83,7 @@ export const iblSelectorStyles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: #212121;
+  color: var(--default-text-color);
 }
 `;
 
@@ -190,7 +190,7 @@ img {
   width: 95%;
 }
 .mv-note {
-  color: #212121;
+  color: var(--default-text-color);
   font-size: 10pt;
   margin-top: 5px;
 }
