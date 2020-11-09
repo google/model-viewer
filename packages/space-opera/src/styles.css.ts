@@ -149,8 +149,8 @@ model-viewer {
 
 export const openModalStyles: CSSResult = css`
 .FileModalContainer {
-  height: 250px;
-  width: 300px;
+  height: 600px;
+  width: 800px;
 }
 .FileModalHeader {
   font-size: 20px;
@@ -180,5 +180,18 @@ img {
 }
 .custom-file-upload:hover {
   background: #D4D4D4;
+}
+
+.OpenModalSection {
+  padding-top: 20px;
+}
+
+#mv-input {
+  width: 95%;
+}
+.mv-note {
+  color: #212121;
+  font-size: 10pt;
+  margin-top: 5px;
 }
 `;
