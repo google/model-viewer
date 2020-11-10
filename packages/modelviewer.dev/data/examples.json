@@ -92,6 +92,10 @@
         "name": "Orbit and Scroll"
       },
       {
+        "htmlId": "disableZoom",
+        "name": "Disable Zoom"
+      },
+      {
         "htmlId": "interpolation",
         "name": "Interpolation"
       },

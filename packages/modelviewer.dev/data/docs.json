@@ -371,6 +371,32 @@
         ]
       },
       {
+        "name": "touch-action",
+        "htmlName": "touch-action",
+        "description": "Akin to the CSS touch-action property (which does not work due to some iOS bugs), the default 'pan-y' allows touch users to vertically scroll the <span class=\"attribute\">&lt;model-viewer&gt;</span> element, but can interact if their gesture starts horizontal. Legacy behavior can be achieved with 'none', where all scrolling is prevented, while 'pan-x' is the opposite of 'pan-y'. The normal CSS default 'auto' is not allowed here, as this can be achieved by not including the <span class='attribute'>camera-controls</span> attribute.",
+        "default": {
+          "default": "pan-y",
+          "options": "pan-y, pan-x, none"
+        }
+      },
+      {
+        "name": "disable-zoom",
+        "htmlName": "disable-zoom",
+        "description": "Disables user zoom when <span class=\"attribute\">camera-controls</span> is enabled (has no effect otherwise). Has the secondary effect of not swallowing mouse wheel events and pinch gestures, so these will then scroll and zoom the page, respectively.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#disableZoom\"><span class='attribute'>disable-zoom</span> example</a>"
+        ]
+      },
+      {
+        "name": "orbit-sensitivity",
+        "htmlName": "orbitSensitivity",
+        "description": "Adjusts the speed of theta and phi orbit interactions. Can also be set negative to reverse, which is helpful when using zero radius to look around the inside of a cave-like model.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
         "name": "auto-rotate",
         "htmlName": "autoRotate",
         "description": "Enables the auto-rotation of the model.",
@@ -502,24 +528,6 @@
         "default": {
           "default": "25deg",
           "options": "angle between 0 and 180 degrees"
-        }
-      },
-      {
-        "name": "orbit-sensitivity",
-        "htmlName": "orbitSensitivity",
-        "description": "Adjusts the speed of theta and phi orbit interactions. Can also be set negative to reverse, which is helpful when using zero radius to look around the inside of a cave-like model.",
-        "default": {
-          "default": "1",
-          "options": "any number"
-        }
-      },
-      {
-        "name": "touch-action",
-        "htmlName": "touch-action",
-        "description": "Akin to the CSS touch-action property (which does not work due to some iOS bugs), the default 'pan-y' allows touch users to vertically scroll the <span class=\"attribute\">&lt;model-viewer&gt;</span> element, but can interact if their gesture starts horizontal. Legacy behavior can be achieved with 'none', where all scrolling is prevented, while 'pan-x' is the opposite of 'pan-y'. The normal CSS default 'auto' is not allowed here, as this can be achieved by not including the <span class='attribute'>camera-controls</span> attribute.",
-        "default": {
-          "default": "pan-y",
-          "options": "pan-y, pan-x, none"
         }
       }
     ],

@@ -122,6 +122,7 @@ export class SmoothControls extends EventDispatcher {
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
+  private _disableZoom = false;
   private isUserChange = false;
   private isUserPointing = false;
 
@@ -165,7 +166,9 @@ export class SmoothControls extends EventDispatcher {
       const {element} = this;
       element.addEventListener('mousemove', this.onPointerMove);
       element.addEventListener('mousedown', this.onPointerDown);
-      element.addEventListener('wheel', this.onWheel);
+      if (!this._disableZoom) {
+        element.addEventListener('wheel', this.onWheel);
+      }
       element.addEventListener('keydown', this.onKeyDown);
       element.addEventListener(
           'touchstart', this.onPointerDown, {passive: true});
@@ -185,7 +188,9 @@ export class SmoothControls extends EventDispatcher {
 
       element.removeEventListener('mousemove', this.onPointerMove);
       element.removeEventListener('mousedown', this.onPointerDown);
-      element.removeEventListener('wheel', this.onWheel);
+      if (!this._disableZoom) {
+        element.removeEventListener('wheel', this.onWheel);
+      }
       element.removeEventListener('keydown', this.onKeyDown);
       element.removeEventListener('touchstart', this.onPointerDown);
       element.removeEventListener('touchmove', this.onPointerMove);
@@ -203,6 +208,17 @@ export class SmoothControls extends EventDispatcher {
    */
   get options() {
     return this._options;
+  }
+
+  set disableZoom(disable: boolean) {
+    if (this._disableZoom != disable) {
+      this._disableZoom = disable;
+      if (disable === true) {
+        this.element.removeEventListener('wheel', this.onWheel);
+      } else {
+        this.element.addEventListener('wheel', this.onWheel);
+      }
+    }
   }
 
   /**
@@ -560,7 +576,7 @@ export class SmoothControls extends EventDispatcher {
           this.handleSinglePointerDown(touches[0]);
           break;
         case 2:
-          this.touchMode = 'zoom';
+          this.touchMode = this._disableZoom ? 'scroll' : 'zoom';
           break;
       }
 

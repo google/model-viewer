@@ -337,6 +337,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'touch-action'})
     touchAction: TouchAction = TouchAction.PAN_Y;
 
+    @property({type: Boolean, attribute: 'disable-zoom'})
+    disableZoom: boolean = false;
+
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
@@ -445,6 +448,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           controls.disableInteraction();
           this[$deferInteractionPrompt]();
         }
+      }
+
+      if (changedProperties.has('disableZoom')) {
+        controls.disableZoom = this.disableZoom;
       }
 
       if (changedProperties.has('interactionPrompt') ||
