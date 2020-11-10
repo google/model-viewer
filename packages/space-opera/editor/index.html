@@ -46,6 +46,18 @@
   <script async src='https://www.google-analytics.com/analytics.js'></script>
 </head>
 <style>
+  :root {
+    --card-background-color: #333333;
+    --expandable-section-header: #212121;
+    --expandable-section-header-hover: #333333;
+    --expandable-section-background-color: #424242;
+    --title-color: #EEEEEE;
+    --default-text-color: #F5F5F5;
+    --default-opp-color: #212121;
+    --subtext-color: #E0E0E0;
+    --entity-background-color: #212121;
+  }
+  
   body {
     margin: 0
   }
@@ -86,10 +98,9 @@
   }
 
   me-tabs {
-    background-color: white;
+    background-color: var(--expandable-section-background-color);
     padding: 0;
     width: 440px;
-    border-left: 1px solid #212121;
   }
 
   me-tabs a {

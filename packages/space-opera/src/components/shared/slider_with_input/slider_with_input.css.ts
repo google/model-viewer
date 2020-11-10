@@ -17,9 +17,8 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`:host {
-  --google-grey-300: #dadce0;
-  --google-grey-800: #3c4043;
+export const styles: CSSResult = css`
+:host {
   display: block;
 }
 
@@ -37,8 +36,8 @@ export const styles: CSSResult = css`:host {
 }
 
 paper-slider {
-  --paper-slider-knob-color: #212121;
-  --paper-slider-active-color: var(--google-grey-300);
+  --paper-slider-knob-color: var(--default-text-color);
+  --paper-slider-active-color: var(--default-text-color);
 }
 
 .InputArea {
@@ -58,12 +57,12 @@ paper-slider {
 }
 
 .InputContainer:hover {
-  box-shadow: 0 1px 2px 1px rgba(255, 255, 255, .25);
+  box-shadow: 0 1px 2px 1px rgba(255, 255, 255, .1);
 }
 
 .InlineInput {
   color: var(--default-text-color);
-  -moz-appearance:textfield;
+  -moz-appearance: textfield;
   background: transparent;
   border: none;
   border-style: unset;

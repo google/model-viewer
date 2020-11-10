@@ -52,7 +52,7 @@ export const styles: CSSResult = css`:host {
   background: white;
   border-radius: 3px;
   border: 1px solid rgba(0, 0, 0, .1);
-  color: var(--default-text-color);
+  color: var(--default-opp-color);
   font-size: 16px;
   height: 20px;
   margin-top: 18px;

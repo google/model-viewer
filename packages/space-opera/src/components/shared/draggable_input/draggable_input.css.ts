@@ -23,7 +23,7 @@ export const styles: CSSResult = css`:host {
   justify-content: space-between;
   padding: 6px 12px;
   overflow: hidden;
-  background: #F1F1F1;
+  background: var(--entity-background-color);
   min-width: 60px;
 }
 

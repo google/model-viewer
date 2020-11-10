@@ -44,22 +44,17 @@ export const styles: CSSResult = css`
   display: flex;
   align-items: center;
   cursor: default;
+  font-size: 14px;
+  color: var(--title-color);
+  background-color: var(--tab-background-color);
+
+  line-height: 40px;
+  padding: 0 16px;
 }
 
 .upload {
   --mdc-icon-button-size: 32px;
   margin: 0;
-}
-
-.sticky-container:hover {
-  background-color: var(--tab-background-color);
-}
-
-.StickyContentContainer {
-  justify-content: left;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
 }
 
 .DisabledTabHeader {

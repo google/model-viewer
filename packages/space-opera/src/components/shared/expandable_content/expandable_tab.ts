@@ -48,13 +48,11 @@ export class ExpandableTab extends LitElement {
       return html`
     <div class="expandableTab ${stickyClass}">
       <div data-element-type="expandableTab">
-        <div class="TabHeader sticky-container">
-          <div class="StickyContentContainer">
-            <div class="sticky-label">
-              ${this.tabName}
-            </div>
-            ${copy}
+        <div class="sticky-container">
+          <div class="sticky-label">
+            ${this.tabName}
           </div>
+          ${copy}
         </div>
       </div>
 
