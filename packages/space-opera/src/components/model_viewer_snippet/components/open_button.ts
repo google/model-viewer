@@ -70,6 +70,7 @@ export class OpenModal extends LitElement {
             setTimeout(resolve, 0);
           });
           reduxStore.dispatch(dispatchGltfUrl(config.src));
+          this.currentName = config.src;
         }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
@@ -87,7 +88,6 @@ export class OpenModal extends LitElement {
     } else {
       this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
-    this.currentName = 'Astronaut.glb';
   }
 
   updated() {
@@ -134,32 +134,43 @@ export class OpenModal extends LitElement {
     <div class="FileModalHeader">
       <div>Upload</div>
     </div>
-    <div class="OpenModalSection" @click=${this.onClick}>
-      <label for="file-input" class="custom-file-upload">
+    <div class="Header">
+      1. GLB
+    </div>
+    <div class="OpenModalSection">
+      <label for="file-input" class="custom-file-upload" @click=${this.onClick}>
           <img src="https://fonts.gstatic.com/s/i/materialiconsextended/file_upload/v6/black-24dp/1x/baseline_file_upload_black_24dp.png"/>
           <div>Click to Upload</div>
       </label>
-      <div>
+      <div class="Indent">
         ${
         this.currentName === '' ? html`No File Selected` :
                                   html`${this.currentName}`}
       </div>
     </div>
-    <div class="OpenModalSection">
-      <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
-      ${this.errors.map(error => html`<div>${error}</div>`)}
-      <mwc-button unelevated icon="publish"
-        @click=${this.handleSubmitSnippet}
-        >Replace &lt;model-viewer&gt; snippet
-      </mwc-button>
-      <div class="mv-note">Edit the snippet above to replace the
-        exportable &lt;model-viewer&gt; snippet and update the editor.
+    <div class="Header">
+      2. &lt;model-viewer&gt snippet
+    </div>
+    <div class="OpenModalSection ModalSnippet">
+      <div class="InnerSnippetModal">
+        <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
+        ${this.errors.map(error => html`<div>${error}</div>`)}
       </div>
-      <me-export-panel .isJustOutput=${true}></me-export-panel>
+      <div>
+        <mwc-button icon="forward" @click=${this.handleSubmitSnippet}>
+        </mwc-button>
+      </div>
+      <div class="InnerSnippetModal">
+        <me-export-panel .isJustOutput=${true}></me-export-panel>
+      </div>
+    </div>
+    <div class="mv-note">
+    Paste into or edit the left-most snippet. Then press the conversion button to replace the right-most snippet, 
+    which will be used to set &lt;model-viewer&gt paramters and update the editor.
     </div>
   </div>
   <mwc-button class="FileModalCancel" icon="cancel" 
-    @click=${this.close}></mwc-button>
+    @click=${this.close}>Done</mwc-button>
 </paper-dialog>`;
   }
 }

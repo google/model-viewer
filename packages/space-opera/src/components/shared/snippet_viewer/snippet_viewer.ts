@@ -29,7 +29,7 @@ export class SnippetViewer extends LitElement {
   static get styles() {
     return css`
       textarea#snippet {
-        width: 95%;
+        width: 100%;
       }
     `;
   }

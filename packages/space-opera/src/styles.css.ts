@@ -149,13 +149,14 @@ model-viewer {
 
 export const openModalStyles: CSSResult = css`
 .FileModalContainer {
-  height: 600px;
+  height: 500px;
   width: 800px;
+  margin-top: 20px;
 }
 .FileModalHeader {
-  font-size: 20px;
-  color: black;
-  margin-bottom: 20px;
+  font-size: 24px;
+  color: var(--default-opp-color);
+  margin-bottom: 10px;
 }
 .FileModalCancel {
   position: absolute;
@@ -167,31 +168,57 @@ export const openModalStyles: CSSResult = css`
 input[type="file"] {
   display: none;
 }
+
 .custom-file-upload {
   display: flex;
   align-items: center;
-  border: 1px solid #D4D4D4;
   border-radius: 5px;
   padding: 6px 12px;
   cursor: pointer;
+  font-size: 16px;
 }
+
+.Indent {
+  padding-left: 15px;
+  padding-top: 5px;
+}
+
 img {
   padding-right: 10px;
 }
+
 .custom-file-upload:hover {
-  background: #D4D4D4;
+  background: #E3F2FD;
 }
 
 .OpenModalSection {
   padding-top: 20px;
+  width: 100%;
 }
 
 #mv-input {
-  width: 95%;
+  width: 100%;
 }
+
 .mv-note {
-  color: var(--default-text-color);
-  font-size: 10pt;
   margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.ModalSnippet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.InnerSnippetModal {
+  width: 45%;
+}
+
+.Header {
+  font-size: 18px;
+  color: var(--default-opp-color);
+  padding-top: 30px;
 }
 `;
