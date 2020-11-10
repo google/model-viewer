@@ -50,7 +50,7 @@ export const styles: CSSResult = css`
 
 
 .card:hover {
-  box-shadow: 0 1px 4px 3px rgba(255, 255, 255, .15);
+  box-shadow: 0 1px 4px 3px rgba(255, 255, 255, .05);
 }
 
 .container {
