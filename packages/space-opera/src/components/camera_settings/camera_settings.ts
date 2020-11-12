@@ -17,7 +17,6 @@
 
 import './components/pitch_limits.js';
 import './components/yaw_limits.js';
-import './components/fov_limits.js';
 import './components/zoom.js';
 import '../shared/checkbox/checkbox.js';
 import '@material/mwc-button';
