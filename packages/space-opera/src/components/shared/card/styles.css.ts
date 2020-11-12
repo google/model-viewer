@@ -48,11 +48,6 @@ export const styles: CSSResult = css`
   margin: 0;
 }
 
-
-.card:hover {
-  box-shadow: 0 1px 4px 3px rgba(255, 255, 255, .05);
-}
-
 .container {
   padding: 4px 4px;
   width: 100%;

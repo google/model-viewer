@@ -28,6 +28,17 @@ me-camera-target-input {
   color: var(--default-text-color);
   margin-left: 15px;
 }
+
+.InitialCameraNote {
+  margin-top: 5px;
+  color: var(--default-text-color);
+}
+`;
+
+export const zoomStyls: CSSResult = css`
+.Spacer {
+  padding-bottom: 10px;
+}
 `;
 
 export const fileModalStyles: CSSResult = css`input[type="file"] {
@@ -169,30 +180,13 @@ input[type="file"] {
   display: none;
 }
 
-.custom-file-upload {
-  display: flex;
-  align-items: center;
-  border-radius: 5px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.Indent {
-  padding-left: 15px;
-  padding-top: 5px;
-}
-
-img {
-  padding-right: 10px;
-}
-
-.custom-file-upload:hover {
-  background: #E3F2FD;
+.note {
+  margin-top: 5px;
+  padding-bottom: 20px;
 }
 
 .OpenModalSection {
-  padding-top: 20px;
+  padding-top: 10px;
   width: 100%;
 }
 
@@ -219,6 +213,6 @@ img {
 .Header {
   font-size: 18px;
   color: var(--default-opp-color);
-  padding-top: 30px;
+  padding-top: 20px;
 }
 `;

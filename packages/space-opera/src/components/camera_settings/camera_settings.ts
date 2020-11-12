@@ -15,10 +15,10 @@
  *
  */
 
-import './components/radius_limits.js';
 import './components/pitch_limits.js';
 import './components/yaw_limits.js';
 import './components/fov_limits.js';
+import './components/zoom.js';
 import '../shared/checkbox/checkbox.js';
 import '@material/mwc-button';
 import '../shared/expandable_content/expandable_tab.js';
@@ -41,8 +41,8 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
-import {SphericalPositionDeg, Vector3D} from './types.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
+import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends LitElement {
@@ -89,9 +89,9 @@ class CameraOrbitEditor extends LitElement {
           @change=${this.onChange}>
         </me-draggable-input>
 
-        <me-draggable-input
+        <me-draggable-input 
           id="radius"
-          innerLabel="dist."
+          innerLabel="dist"
           value=${this.orbit.radius}
           min=-9999 max=9999
           @change=${this.onChange}>
@@ -182,6 +182,7 @@ export class CameraSettings extends ConnectedLitElement {
   onSaveCameraOrbit() {
     const modelViewer = getModelViewer()!;
     const currentOrbit = getCameraState(modelViewer).orbit;
+    // currentOrbit returns in mmeters
     const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
     reduxStore.dispatch(
         dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
@@ -231,6 +232,8 @@ export class CameraSettings extends ConnectedLitElement {
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
             </mwc-button>
+            <div class="InitialCameraNote"><small>Note: Setting the initial camera will break seamless poster transitions for your model.</small></div>
+            <div class="InitialCameraNote"><small>Note: Set your max and min zoom before setting the initial camera or else clipping may occur.</small></div>
           </div>
         </me-card>
         <me-card title="Target Point">
@@ -246,8 +249,7 @@ export class CameraSettings extends ConnectedLitElement {
       <div slot="content">
         <me-camera-yaw-limits></me-camera-yaw-limits>
         <me-camera-pitch-limits></me-camera-pitch-limits>
-        <me-camera-radius-limits></me-camera-radius-limits>
-        <me-camera-fov-limits></me-camera-fov-limits>
+        <me-camera-zoom-limits></me-camera-zoom-limits>
       </div>
     </me-expandable-tab>
 `;
@@ -260,6 +262,17 @@ export class CameraSettings extends ConnectedLitElement {
   onCameraOrbitEditorChange() {
     if (!this.cameraOrbitEditor)
       return;
+    // Set min/max radius limits before setting radius such that we don't clip.
+    const radiusLimits: Limits = {
+      enabled: true,
+      min: 'auto',
+      max: this.cameraOrbitEditor.currentOrbit.radius
+    };
+    // Set field of view to max value
+    const modelViewer = getModelViewer()!;
+    modelViewer.fieldOfView = '45deg'
+
+    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
     reduxStore.dispatch(
         dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit));
   }

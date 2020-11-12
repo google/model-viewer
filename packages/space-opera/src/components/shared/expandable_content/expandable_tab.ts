@@ -44,11 +44,13 @@ export class ExpandableTab extends LitElement {
           icon="file_copy" @click="${this.copyFunction}">
         </mwc-button>` :
                                                    html``;
+    const StickyWithLineHeightClass =
+        this.copyFunction !== undefined ? '' : 'StickyWithLineHeight';
     if (this.sticky) {
       return html`
     <div class="expandableTab ${stickyClass}">
       <div data-element-type="expandableTab">
-        <div class="sticky-container">
+        <div class="sticky-container ${StickyWithLineHeightClass}">
           <div class="sticky-label">
             ${this.tabName}
           </div>

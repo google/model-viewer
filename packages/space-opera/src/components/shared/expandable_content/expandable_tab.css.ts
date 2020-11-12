@@ -47,9 +47,12 @@ export const styles: CSSResult = css`
   font-size: 14px;
   color: var(--title-color);
   background-color: var(--tab-background-color);
+  padding: 2px 16px;
+}
 
+.StickyWithLineHeight {
   line-height: 40px;
-  padding: 0 16px;
+  padding: 0px 16px;
 }
 
 .upload {

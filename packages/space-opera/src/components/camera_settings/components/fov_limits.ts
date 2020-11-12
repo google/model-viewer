@@ -21,6 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
+// import {getFOV, getOrbitString} from '../camera_state.js';
 import {dispatchFovLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
@@ -30,7 +31,7 @@ import {LimitsBase} from './limits_base.js';
 export const DEFAULT_MIN_FOV = 10;
 
 /** Default maximum FOV angle (degrees) */
-export const DEFAULT_MAX_FOV = 90;
+export const DEFAULT_MAX_FOV = 45;
 
 /** The Camera Settings panel. */
 @customElement('me-camera-fov-limits')
@@ -43,12 +44,52 @@ export class FovLimits extends LimitsBase {
     this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
-  dispatchLimits(limits?: Limits) {
-    reduxStore.dispatch(dispatchFovLimits(limits));
+  // Only called on setting the minumum value for fov
+  dispatchLimits(limits: Limits) {
+    if (limits === undefined || typeof limits.min === 'string') {
+      throw new Error('FOV Limits undefined or fov.min is a string');
+    }
+
+    // Update radius/fov of model viewer if minimum zoom checkbox is active
+    // if (limits.enabled) {
+    //   const modelViewer = getModelViewer()!;
+    //   // Set radius to 0 to clamp radius, thus keeping it in synv with the
+    //   FOV
+    //   // when we are setting the minimum FOV value.
+    //   const currentCamera = getCameraState(getModelViewer()!);
+    //   if (currentCamera.orbit !== undefined) {
+    //     const orb = {...currentCamera.orbit, radius: 0};
+    //     const newOrbit = getOrbitString(orb);
+    //     modelViewer.cameraOrbit = newOrbit;
+    //   }
+    //   // Set current FOV to the minimum value to keep the actual minimum
+    //   // zoomed represention visible in the model viewer element on the page
+    //   // but do NOT dispatch it, because that would set the FOV in the
+    //   initial
+    //   // FOV to the value.
+    //   modelViewer.fieldOfView = getFOV(limits.min);
+    // }
+
+    // reduxStore.dispatch(dispatchFovDeg(limits.min));
+    const actualLimits: Limits = {...limits, max: 'auto'};
+    reduxStore.dispatch(
+        dispatchFovLimits(actualLimits));  // uses fov limits to set
+
+    // set min radius limit to current
+    // const currentCamera = getCameraState(getModelViewer()!);
+    // const radiusLimits: Limits = {
+    //   enabled: true,
+    //   min: currentCamera.orbit?.radius!,
+    //   max: currentCamera.radiusLimits?.max!
+    // };
+
+    // if (typeof radiusLimits.min !== 'string') {
+    //   reduxStore.dispatch(dispatchSetMinZoom(limits.min, radiusLimits.min));
+    // }
   }
 
   get label() {
-    return 'Field of view';
+    return 'Zoom';
   }
 
   get absoluteMinimum() {

@@ -31,9 +31,7 @@ import {styles} from './limits_base.css.js';
 
 /** Abstract component that can be extended for editing scalar limits. */
 export abstract class LimitsBase extends ConnectedLitElement {
-  static get styles() {
-    return styles;
-  }
+  static styles = styles;
 
   abstract get label(): string;
   abstract get absoluteMinimum(): number;

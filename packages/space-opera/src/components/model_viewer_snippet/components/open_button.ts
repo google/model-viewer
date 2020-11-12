@@ -138,18 +138,20 @@ export class OpenModal extends LitElement {
       1. GLB
     </div>
     <div class="OpenModalSection">
-      <label for="file-input" class="custom-file-upload" @click=${this.onClick}>
-          <img src="https://fonts.gstatic.com/s/i/materialiconsextended/file_upload/v6/black-24dp/1x/baseline_file_upload_black_24dp.png"/>
-          <div>Click to Upload</div>
-      </label>
-      <div class="Indent">
+      <mwc-button unelevated
+        icon="file_upload"
+        @click=${this.onClick}>
+        Click to Upload GLB
+      </mwc-button>
+      <div class="note">
         ${
         this.currentName === '' ? html`No File Selected` :
                                   html`${this.currentName}`}
       </div>
     </div>
+    <hr />
     <div class="Header">
-      2. &lt;model-viewer&gt snippet
+      2. (Optional) &lt;model-viewer&gt snippet
     </div>
     <div class="OpenModalSection ModalSnippet">
       <div class="InnerSnippetModal">
@@ -157,7 +159,8 @@ export class OpenModal extends LitElement {
         ${this.errors.map(error => html`<div>${error}</div>`)}
       </div>
       <div>
-        <mwc-button icon="forward" @click=${this.handleSubmitSnippet}>
+        <mwc-button unelevated icon="forward" @click=${
+        this.handleSubmitSnippet}>
         </mwc-button>
       </div>
       <div class="InnerSnippetModal">
@@ -169,7 +172,7 @@ export class OpenModal extends LitElement {
     which will be used to set &lt;model-viewer&gt paramters and update the editor.
     </div>
   </div>
-  <mwc-button class="FileModalCancel" icon="cancel" 
+  <mwc-button unelevated class="FileModalCancel" icon="cancel" 
     @click=${this.close}>Done</mwc-button>
 </paper-dialog>`;
   }
