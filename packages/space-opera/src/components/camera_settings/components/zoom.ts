@@ -22,7 +22,7 @@ import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
 import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
-import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMaxZoom, dispatchSetMinZoom, dispatchZoomEnabled, getCamera} from '../reducer.js';
+import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMinZoom, dispatchZoomEnabled, getCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
 /** The Camera Settings panel. */
@@ -62,17 +62,6 @@ export class ZooomLimits extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetMinZoom('auto', 'auto'));
   }
 
-  dispatchMax() {
-    const currentCamera = getCameraState(getModelViewer()!);
-    const currFieldOfView = currentCamera.fieldOfViewDeg;
-    const currRadius = currentCamera.orbit?.radius;
-    reduxStore.dispatch(dispatchSetMaxZoom(currFieldOfView!, currRadius!));
-  }
-
-  dispatchResetMax() {
-    reduxStore.dispatch(dispatchSetMaxZoom('auto', 'auto'));
-  }
-
   render() {
     return html`
     <me-card title="Zoom">
@@ -91,16 +80,6 @@ export class ZooomLimits extends ConnectedLitElement {
             @click="${this.dispatchMin}">Set Min</mwc-button>
             <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
             @click="${this.dispatchResetMin}">Reset Min</mwc-button>
-          </div>
-        </me-section-row>
-        <me-section-row class="MaxLabelRow" label="Maximum">
-          <div class="LabelRowContent">
-            <mwc-button id="set-max-button" class="SetButton" unelevated 
-              @click="${this.dispatchMax}">
-              Set Max
-            </mwc-button>
-            <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
-            @click="${this.dispatchResetMax}">Reset Max</mwc-button>
           </div>
         </me-section-row>
         ` :

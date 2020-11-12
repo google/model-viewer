@@ -102,14 +102,6 @@ export function dispatchSetMinZoom(
   }
 }
 
-const SET_MAX_ZOOM = 'SET_MAX_ZOOM';
-export function dispatchSetMaxZoom(
-    fovDeg: number|string, radius: number|string) {
-  return {
-    type: SET_MAX_ZOOM, payload: {radius: radius, fov: fovDeg}
-  }
-}
-
 const SET_ZOOM_ENABLED = 'SET_ZOOM_ENABLED';
 export function dispatchZoomEnabled(isEnabled: boolean) {
   return {
@@ -185,12 +177,6 @@ export function cameraReducer(
         ...state,
             radiusLimits: {...state.radiusLimits!, min: action.payload.radius},
             fovLimitsDeg: {...state.fovLimitsDeg!, min: action.payload.fov}
-      }
-    case SET_MAX_ZOOM:
-      return {
-        ...state,
-            radiusLimits: {...state.radiusLimits!, max: action.payload.radius},
-            fovLimitsDeg: {...state.fovLimitsDeg!, max: action.payload.fov}
       }
     case SET_ZOOM_ENABLED:
       return {
