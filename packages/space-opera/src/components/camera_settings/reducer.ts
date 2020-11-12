@@ -111,13 +111,9 @@ export function dispatchZoomEnabled(isEnabled: boolean) {
 
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit(
-    currentOrbit: SphericalPositionDeg|undefined,
-    currentFieldOfViewDeg: number|undefined) {
-  return {
-    type: SAVE_CAMERA_ORBIT,
-    payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}
-  };
+export function dispatchSaveCameraOrbit(currentOrbit: SphericalPositionDeg|
+                                        undefined) {
+  return {type: SAVE_CAMERA_ORBIT, payload: {orbit: {...currentOrbit}}};
 }
 
 /** Event dispatcher for changes to camera-target. */
@@ -153,8 +149,7 @@ export function cameraReducer(
       }
     case SAVE_CAMERA_ORBIT:
       return {
-        ...state, orbit: {...action.payload.orbit},
-            fieldOfViewDeg: action.payload.fieldOfViewDeg,
+        ...state, orbit: {...action.payload.orbit}
       }
     case SET_CAMERA_FOV_LIMITS:
       return {

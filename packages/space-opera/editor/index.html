@@ -47,17 +47,22 @@
 </head>
 <style>
   :root {
-    --card-background-color: #3c4043;
-    --expandable-section-header: #111111;
+    --tabs-conatiner-border: #212121;
+
+    --expandable-section-header-background: #111111; 
     --expandable-section-header-hover: #424242;
-    --expandable-section-background-color: #2b2d30;
-    --title-color: #EEEEEE;
-    --default-text-color: #F5F5F5;
-    --default-opp-color: #212121;
-    --subtext-color: #E0E0E0;
-    --entity-background-color: #212121;
+    --expandable-section-background: #2b2d30;
+    --expandable-section-text: #EEEEEE;
+    --text-on-expandable-background: #F5F5F5;
+    
+    --secondary-text-on-expandable-background: #E0E0E0;
+    --dropdown-background: #212121;
+    --number-input-background: #212121;
+
+    --card-background-color: #3c4043;
+    --card-border-color: #2b2d30;
   }
-  
+
   body {
     margin: 0
   }
@@ -98,9 +103,10 @@
   }
 
   me-tabs {
-    background-color: var(--expandable-section-background-color);
+    background-color: var(--expandable-section-background);
     padding: 0;
     width: 440px;
+    border-left: 1px solid var(--tabs-conatiner-border)
   }
 
   me-tabs a {
@@ -114,8 +120,8 @@
   }
 </style>
 <body>
-  <model-editor>
-    <div class="app">
+<model-editor>
+  <div class="app">
     <div class="editor-body-root">
       <div class="mvContainer">
         <model-viewer-preview id="editing_adapter">
@@ -148,5 +154,6 @@
         </me-tabbed-panel>
       </me-tabs>
     </div>
-  </div></model-editor>
+  </div>
+</model-editor>
 </body>

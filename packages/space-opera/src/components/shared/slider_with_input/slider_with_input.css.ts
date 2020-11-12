@@ -36,8 +36,8 @@ export const styles: CSSResult = css`
 }
 
 paper-slider {
-  --paper-slider-knob-color: var(--default-text-color);
-  --paper-slider-active-color: var(--default-text-color);
+  --paper-slider-knob-color: var(--text-on-expandable-background);
+  --paper-slider-active-color: var(--text-on-expandable-background);
 }
 
 .InputArea {
@@ -47,7 +47,7 @@ paper-slider {
 }
 
 .InputContainer {
-  background: var(--entity-background-color);
+  background: var(--number-input-background);
   border-radius: 4px;
   display: inline-flex;
   justify-content: space-between;
@@ -61,7 +61,7 @@ paper-slider {
 }
 
 .InlineInput {
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
   -moz-appearance: textfield;
   background: transparent;
   border: none;

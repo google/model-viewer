@@ -25,13 +25,13 @@ me-camera-target-input {
 }
 
 .note {
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
   margin-left: 15px;
 }
 
 .InitialCameraNote {
   margin-top: 5px;
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 `;
 
@@ -47,14 +47,18 @@ export const fileModalStyles: CSSResult = css`input[type="file"] {
 `;
 
 export const homeStyles: CSSResult = css`
+mwc-formfield {
+  display: block;
+}
+
 .HomeCardHeader {
   font-size: 20px;
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 
 .HomeCardContent {
   font-size: 14px;
-  color: var(--subtext-color);
+  color: var(--secondary-text-on-expandable-background);
 }
 
 .CardContainer {
@@ -78,7 +82,7 @@ img {
 }
 
 .note {
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 `;
 
@@ -94,7 +98,7 @@ export const iblSelectorStyles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 `;
 
@@ -159,16 +163,22 @@ model-viewer {
 `;
 
 export const openModalStyles: CSSResult = css`
+paper-dialog {
+  background: var(--expandable-section-background);
+}
+
 .FileModalContainer {
-  height: 500px;
+  height: 650px;
   width: 800px;
   margin-top: 20px;
 }
+
 .FileModalHeader {
   font-size: 24px;
-  color: var(--default-opp-color);
+  color: var(--expandable-section-text);
   margin-bottom: 10px;
 }
+
 .FileModalCancel {
   position: absolute;
   top: 10px;
@@ -183,6 +193,7 @@ input[type="file"] {
 .note {
   margin-top: 5px;
   padding-bottom: 20px;
+  color: var(--secondary-text-on-expandable-background);
 }
 
 .OpenModalSection {
@@ -198,16 +209,18 @@ input[type="file"] {
   margin-top: 5px;
   display: flex;
   flex-wrap: wrap;
+  color: var(--secondary-text-on-expandable-background);
 }
 
 .ModalSnippet {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .InnerSnippetModal {
-  width: 45%;
+  width: 90%;
 }
 
 .Header {

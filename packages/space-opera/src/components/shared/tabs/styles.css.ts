@@ -30,7 +30,7 @@ export const styles: CSSResult = css`:host {
   --mdc-tab-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-text-label-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-stacked-height: 100px;
-  background: var(--expandable-section-background-color);
+  background: var(--expandable-section-background);
   display: flex;
   flex-direction: column;
 }
@@ -42,7 +42,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .TabHeader {
-  background-color: var(--expandable-section-background-color);
+  background-color: var(--expandable-section-background);
   font-family: 'Google Sans';
   font-size: 14px;
   letter-spacing: .25px;

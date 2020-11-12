@@ -87,14 +87,6 @@ class CameraOrbitEditor extends LitElement {
           min=-9999 max=9999
           @change=${this.onChange}>
         </me-draggable-input>
-
-        <me-draggable-input 
-          id="radius"
-          innerLabel="dist"
-          value=${this.orbit.radius}
-          min=-9999 max=9999
-          @change=${this.onChange}>
-        </me-draggable-input>
 `;
   }
 }
@@ -180,11 +172,16 @@ export class CameraSettings extends ConnectedLitElement {
 
   onSaveCameraOrbit() {
     const modelViewer = getModelViewer()!;
-    const currentOrbit = getCameraState(modelViewer).orbit;
-    // currentOrbit returns in mmeters
-    const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
-    reduxStore.dispatch(
-        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
+    const cameraState = getCameraState(modelViewer);
+    const currentOrbit = cameraState.orbit;
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+    // set max radius to current value
+    const radiusLimits: Limits = {
+      enabled: true,
+      min: cameraState.radiusLimits?.min ?? 'auto',
+      max: currentOrbit?.radius ?? 'auto'
+    };
+    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
   }
 
   onCameraTargetChange(newValue: Vector3D) {
@@ -231,7 +228,6 @@ export class CameraSettings extends ConnectedLitElement {
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
             </mwc-button>
-            <div class="InitialCameraNote"><small>Note: Setting the initial camera will break seamless poster transitions for your model.</small></div>
             <div class="InitialCameraNote"><small>Note: Set your max and min zoom before setting the initial camera or else clipping may occur.</small></div>
           </div>
         </me-card>

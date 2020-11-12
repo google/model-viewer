@@ -19,8 +19,8 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --me-theme-container-background: var(--expandable-section-background-color);
-  --tab-background-color: var(--expandable-section-header);
+  --me-theme-container-background: var(--expandable-section-background);
+  --tab-background-color: var(--expandable-section-header-background);
 }
 
 .TabHeader{
@@ -30,7 +30,7 @@ export const styles: CSSResult = css`
   justify-content: space-between;
   line-height: 40px;
   padding: 0 16px;
-  color: var(--title-color);
+  color: var(--expandable-section-text);
   background-color: var(--tab-background-color);
   align-items: center;
 }
@@ -45,7 +45,7 @@ export const styles: CSSResult = css`
   align-items: center;
   cursor: default;
   font-size: 14px;
-  color: var(--title-color);
+  color: var(--expandable-section-text);
   background-color: var(--tab-background-color);
   padding: 2px 16px;
 }
@@ -61,12 +61,12 @@ export const styles: CSSResult = css`
 }
 
 .DisabledTabHeader {
-  color: var(--title-color);
+  color: var(--expandable-section-text);
 }
 
 .TabLabel {
   position: relative;
-  color: var(--title-color);
+  color: var(--expandable-section-text);
 }
 
 .TabLabel .exportInfoIcon {
@@ -77,7 +77,7 @@ export const styles: CSSResult = css`
 .sticky-label {
   margin-right: 5px;
   font-size: 14px;
-  color: var(--title-color);
+  color: var(--expandable-section-text);
 }
 
 .IconArea {

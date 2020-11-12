@@ -26,12 +26,12 @@ export const styles: CSSResult = css`
 
 mwc-checkbox {
   --mdc-theme-secondary: var(--material-color-google-blue-500);
-  --mdc-checkbox-unchecked-color: var(--default-text-color);
+  --mdc-checkbox-unchecked-color: var(--text-on-expandable-background);
   margin: auto 0;
 }
 
 .Label {
   margin: auto 0;
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 `;

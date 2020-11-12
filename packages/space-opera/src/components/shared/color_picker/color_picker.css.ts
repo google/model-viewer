@@ -25,8 +25,8 @@ export const styles: CSSResult = css`:host {
 .ColorPickerContent {
   width: 200px;
   display: block;
-  background: white;
-  border: 1px solid #252525;
+  background: var(--expandable-section-background);
+  border: 1px solid var(--expandable-section-text);
   border-radius: 3px;
   padding: 10px;
 }
@@ -49,19 +49,15 @@ export const styles: CSSResult = css`:host {
 }
 
 .HexInput {
-  background: white;
+  background: var(--number-input-background);
   border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, .1);
-  color: var(--default-opp-color);
+  border: 1px solid var(--text-on-expandable-background);
+  color: var(--text-on-expandable-background);
   font-size: 16px;
   height: 20px;
   margin-top: 18px;
   outline: none;
   padding: 5px 10px;
   width: calc(100% - 20px);
-}
-.HexInput:hover {
-  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .05);
-  border: 1px solid rgba(0, 0, 0, 0);
 }
 `;

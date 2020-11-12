@@ -23,6 +23,7 @@ export const styles: CSSResult = css`
   width: 100%;
   border-radius: 5px;
   background: var(--card-background-color);
+  border: 1px solid var(--card-border-color);
 
   display: inline-flex;
   flex-grow: 1;
@@ -40,7 +41,7 @@ export const styles: CSSResult = css`
   margin-top: 0;
   margin-right: 5px;
   font-size: 12px;
-  color: var(--title-color);
+  color: var(--expandable-section-text);
 }
 
 .upload {

@@ -784,7 +784,7 @@ export class MaterialPanel extends ConnectedLitElement {
       return html`
       <me-expandable-tab tabName="Materials" .open=${true} .sticky=${true}>
         <div slot="content">
-          <div style="color: var(--default-text-color);">No materials to edit. Load a model to edit the materials.</div>
+          <div style="color: var(--text-on-expandable-background);">No materials to edit. Load a model to edit the materials.</div>
         </div>
       </me-expandable-tab>
        `;

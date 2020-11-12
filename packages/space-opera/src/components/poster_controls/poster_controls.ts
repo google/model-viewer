@@ -71,9 +71,9 @@ export class PosterControlsElement extends ConnectedLitElement {
         createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
     reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
     const currentOrbit = getCameraState(modelViewer).orbit;
-    const currentFieldOfViewDeg = getCameraState(modelViewer).fieldOfViewDeg;
-    reduxStore.dispatch(
-        dispatchSaveCameraOrbit(currentOrbit, currentFieldOfViewDeg));
+
+    // TODO, remove the setting of current FOV, never set that here.
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
   }
 
   onDisplayPoster() {

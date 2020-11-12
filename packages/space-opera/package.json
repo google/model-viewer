@@ -44,6 +44,8 @@
     "@material/mwc-tab": "^0.18.0",
     "@material/mwc-tab-bar": "^0.18.0",
     "@material/mwc-textfield": "^0.18.0",
+    "@material/mwc-radio": "^0.18.0",
+    "@material/mwc-formfield": "^0.18.0",
     "@open-wc/karma-esm": "^3.0.4",
     "@polymer/paper-dialog": "^3.0.1",
     "@polymer/paper-dropdown-menu": "^3.0.1",

@@ -23,7 +23,7 @@ export const styles: CSSResult = css`:host {
   justify-content: space-between;
   padding: 6px 12px;
   overflow: hidden;
-  background: var(--entity-background-color);
+  background: var(--number-input-background);
   min-width: 60px;
 }
 
@@ -37,7 +37,7 @@ export const styles: CSSResult = css`:host {
   font-size: 14px;
   outline: none;
   width: 0;
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
 }
 
 /**
@@ -51,7 +51,7 @@ export const styles: CSSResult = css`:host {
 }
 
 .InlineLabel {
-  color: var(--default-text-color);
+  color: var(--text-on-expandable-background);
   cursor: col-resize;
   margin-left: 12px;
   text-align: right;

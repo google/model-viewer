@@ -19,27 +19,20 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --input-background: var(--entity-background-color);
-  --input-font-color: var(--default-text-color);
+  --input-font-color: var(--text-on-expandable-background);
   display: block;
 }
 
 .EditorDropdown {
   width: 100%;
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, .1);
-  background-color: var(--input-background);
+  background-color: var(--dropdown-background);
   --primary-text-color: var(--input-font-color);
-  --primary-background-color: var(--input-background);
+  --primary-background-color: var(--dropdown-background);
   --paper-input-container-shared-input-style_-_padding: 0 5px;
   --paper-input-container-shared-input-style_-_line-height: 24px;
   --paper-input-container-underline-color: none;
   --paper-input-container-underline-focus-color: none;
-}
-
-.EditorDropdown:hover {
-  box-shadow: 0 1px 4px 3px rgba(0, 0, 0, .1);
-  border: 1px solid rgba(0, 0, 0, 0);
 }
 
 /* @overrideSelector {quantum.wiz.menu.paperselect} */
@@ -52,7 +45,7 @@ export const styles: CSSResult = css`
   font-weight: normal;
   color: var(--input-font-color);
   padding: 6px 24px;
-  --primary-background-color: var(--input-background);
+  --primary-background-color: var(--dropdown-background);
   --paper-item-min-height: none;
 }
 `;

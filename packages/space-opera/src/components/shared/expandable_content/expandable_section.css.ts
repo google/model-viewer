@@ -18,7 +18,7 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --me-theme-container-background: var(--expandable-section-background-color);
+  --me-theme-container-background: var(--expandable-section-background);
 }
 
 .SectionContent {
@@ -31,7 +31,7 @@ export const styles: CSSResult = css`
   overflow: visible;
   max-height: 100vh;
   padding: 20px;
-  background-color: var(--expandable-section-background-color);
+  background-color: var(--expandable-section-background);
 }
 
 .sticky {

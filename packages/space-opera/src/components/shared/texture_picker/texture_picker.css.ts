@@ -62,8 +62,8 @@ export const styles: CSSResult = css`:host {
 }
 
 .PickerContentContainer {
-  background: white;
-  border: 1px solid #252525;
+  background: var(--expandable-section-background);
+  border: 1px solid var(--expandable-section-text);
   border-radius: 3px;
   display: flex;
   flex-direction: column;

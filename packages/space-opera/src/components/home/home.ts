@@ -16,54 +16,17 @@
  */
 
 import '@material/mwc-tab';
+import '@material/mwc-radio';
+import '@material/mwc-formfield';
 import '../shared/expandable_content/expandable_tab.js';
+import '../shared/pill_buttons/pill_buttons.js'
 
-import {customElement, html, property} from 'lit-element';
+import {customElement, html, internalProperty, property} from 'lit-element';
 
 import {homeStyles} from '../../styles.css.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 
-const CARD_CONTENT = {
-  save: {
-    icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/import_export/v6/white-24dp/1x/baseline_import_export_white_24dp.png',
-    header: 'Import/ Export',
-    body: 'Import or export GLB models as well as model-viewer HTML snippets.'
-  },
-  edit: {
-    icon:
-        'https://fonts.gstatic.com/s/i/googlematerialicons/create/v6/white-24dp/1x/gm_create_white_24dp.png',
-    header: 'Edit',
-    body:
-        'Adjust <model-viewer>\'s parameters for lighting, hotspots, and posters.'
-  },
-  camera: {
-    icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/photo_camera/v6/white-24dp/1x/baseline_photo_camera_white_24dp.png',
-    header: 'Camera',
-    body:
-        'Adjust <model-viewer>\'s camera parameters for interactivity, rotation, and targets.'
-  },
-  materials: {
-    icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/color_lens/v7/white-24dp/1x/baseline_color_lens_white_24dp.png',
-    header: 'Materials',
-    body:
-        'Modify GLB materials such as base color, roughness, normal maps, etc.'
-  },
-  inspector: {
-    icon:
-        'https://fonts.gstatic.com/s/i/materialiconsextended/search/v7/white-24dp/1x/baseline_search_white_24dp.png',
-    header: 'Inspector',
-    body: 'Visualize the model\'s JSON string.'
-  }
-};
-
-interface CardContentInterface {
-  icon?: string;
-  header?: string;
-  body?: string;
-}
+import {CARD_CONTENT, CardContentInterface, THEMES} from './types.js';
 
 /**
  * Home Container Card
@@ -72,12 +35,15 @@ interface CardContentInterface {
 export class HomeContainerCard extends ConnectedLitElement {
   static styles = homeStyles;
   @property({type: Object}) content: CardContentInterface = {};
+  @property({type: String}) theme: string = '';
 
   render() {
+    const icon = this.theme === 'light' ? this.content.iconForLight :
+                                          this.content.iconForDark;
     return html`
       <div class="CardContainer">
         <div class="CardContent">
-          <img src=${this.content.icon}>
+          <img src=${icon}>
         </div>
         <div class="CardContent text">
           <div class="HomeCardHeader">${this.content.header}</div> 
@@ -94,6 +60,42 @@ export class HomeContainerCard extends ConnectedLitElement {
 @customElement('home-container')
 export class HomeContainer extends ConnectedLitElement {
   static styles = homeStyles;
+  @internalProperty() theme: 'light'|'dark' = 'dark';
+
+  setTheme() {
+    const theme = THEMES[this.theme];
+    const root = document.documentElement;
+    root.style.setProperty('--card-background-color', theme.cardBackground);
+    root.style.setProperty('--card-border-color', theme.cardBorder)
+    root.style.setProperty(
+        '--expandable-section-text', theme.expandableSectionText)
+    root.style.setProperty(
+        '--expandable-section-header-background',
+        theme.expandableSectionHeaderBackground);
+    root.style.setProperty(
+        '--expandable-section-header-hover',
+        theme.expandableSectionHeaderHover);
+    root.style.setProperty(
+        '--text-on-expandable-background', theme.textOnExpandableBackground);
+    root.style.setProperty(
+        '--expandable-section-background', theme.expandableSectionBackground);
+    root.style.setProperty(
+        '--secondary-text-on-expandable-background',
+        theme.secondaryTextOnExpandbleBackground)
+    root.style.setProperty('--dropdown-background', theme.dropdownBackground);
+    root.style.setProperty(
+        '--number-input-background', theme.numberInputBackground);
+  }
+
+  enableDarkTheme() {
+    this.theme = 'dark';
+    this.setTheme();
+  }
+
+  enableLightTheme() {
+    this.theme = 'light';
+    this.setTheme();
+  }
 
   render() {
     return html`
@@ -102,31 +104,54 @@ export class HomeContainer extends ConnectedLitElement {
           <div class="note">
             Welcome to the model viewer editor where you can generate &lt;model-viewer&gt; HTML snippets, as well as edit GLBs.
           </div>
-          <a href="https://policies.google.com/privacy" style="color: var(--default-text-color);">Privacy</a>
+          <a href="https://policies.google.com/privacy" style="color: var(--text-on-expandable-background);">Privacy</a>
         </div>
       </me-expandable-tab>
       <me-expandable-tab tabName="Modules" .open=${true}>
         <div slot="content">
           <me-card title="File Manager">
             <div slot="content">
-              <home-container-card .content=${CARD_CONTENT.save}>
+              <home-container-card .content=${CARD_CONTENT.save} 
+                theme=${this.theme}>
               </home-container-card>
             </div>
           </me-card>
           <me-card title="&lt;model-viewer&gt; snippet">
             <div slot="content">
-              <home-container-card .content=${CARD_CONTENT.edit}>
+              <home-container-card .content=${CARD_CONTENT.edit} 
+                theme=${this.theme}>
               </home-container-card>
-              <home-container-card .content=${CARD_CONTENT.camera}>
+              <home-container-card .content=${CARD_CONTENT.camera} 
+                theme=${this.theme}>
               </home-container-card>
             </div>
           </me-card>
           <me-card title="GLB Model">
             <div slot="content">
-              <home-container-card .content=${CARD_CONTENT.materials}>
+              <home-container-card .content=${CARD_CONTENT.materials}
+                theme=${this.theme}>
               </home-container-card>
-              <home-container-card .content=${CARD_CONTENT.inspector}>
+              <home-container-card .content=${CARD_CONTENT.inspector}
+                theme=${this.theme}>
               </home-container-card>
+            </div>
+          </me-card>
+        </div>
+      </me-expandable-tab>
+      <me-expandable-tab tabName="Editor Settings" .open=${true}>
+        <div slot="content">
+          <me-card title="Color Themes">
+            <div slot="content">
+              <mwc-formfield label="Dark Theme">
+                <mwc-radio name="location" checked 
+                  @click=${this.enableDarkTheme}>
+                </mwc-radio>
+              </mwc-formfield>
+              <mwc-formfield label="Light Theme">
+                <mwc-radio name="location" 
+                  @click=${this.enableLightTheme}>
+                </mwc-radio>
+              </mwc-formfield>
             </div>
           </me-card>
         </div>

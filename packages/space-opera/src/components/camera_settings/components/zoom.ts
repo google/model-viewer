@@ -64,24 +64,20 @@ export class ZooomLimits extends ConnectedLitElement {
 
   render() {
     return html`
-    <me-card title="Zoom">
+    <me-card title="Minimum Zoom">
       <div slot="content">
         <me-checkbox
           id="limit-enabled"
-          label="Zoom"
+          label="Minimum Zoom"
           ?checked="${!!this.hasZoom}"
           @change=${this.onToggle}>
         </me-checkbox>
         ${
         this.hasZoom ? html`
-        <me-section-row label="Minimum" class="Space">
-          <div class="LabelRowContent">
-            <mwc-button id="set-min-button" class="SetButton" unelevated 
-            @click="${this.dispatchMin}">Set Min</mwc-button>
-            <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
-            @click="${this.dispatchResetMin}">Reset Min</mwc-button>
-          </div>
-        </me-section-row>
+          <mwc-button id="set-min-button" class="SetButton" unelevated 
+          @click="${this.dispatchMin}">Set Min</mwc-button>
+          <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
+          @click="${this.dispatchResetMin}">Reset Min</mwc-button>
         ` :
                        html``}
       </div>

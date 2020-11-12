@@ -134,43 +134,44 @@ export class OpenModal extends LitElement {
     <div class="FileModalHeader">
       <div>Upload</div>
     </div>
-    <div class="Header">
-      1. GLB
-    </div>
-    <div class="OpenModalSection">
-      <mwc-button unelevated
-        icon="file_upload"
-        @click=${this.onClick}>
-        Click to Upload GLB
-      </mwc-button>
-      <div class="note">
-        ${
+    <me-card title="GLB">
+      <div slot="content">
+        <div class="OpenModalSection">
+          <mwc-button unelevated
+            icon="file_upload"
+            @click=${this.onClick}>
+            Click to Upload GLB
+          </mwc-button>
+          <div class="note">
+            ${
         this.currentName === '' ? html`No File Selected` :
                                   html`${this.currentName}`}
+          </div>
+        </div>
       </div>
-    </div>
-    <hr />
-    <div class="Header">
-      2. (Optional) &lt;model-viewer&gt snippet
-    </div>
-    <div class="OpenModalSection ModalSnippet">
-      <div class="InnerSnippetModal">
-        <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
-        ${this.errors.map(error => html`<div>${error}</div>`)}
+    </me-card>
+    <me-card title="(Optional) &lt;model-viewer&gt snippet">
+      <div slot="content">
+        <div class="OpenModalSection ModalSnippet">
+          <div class="InnerSnippetModal">
+            <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
+            ${this.errors.map(error => html`<div>${error}</div>`)}
+          </div>
+          <div>
+            <mwc-button unelevated icon="south" @click=${
+        this.handleSubmitSnippet}>Update
+            </mwc-button>
+          </div>
+          <div class="InnerSnippetModal">
+            <me-export-panel .isJustOutput=${true}></me-export-panel>
+          </div>
+        </div>
+        <div class="mv-note">
+        Paste into or edit the left-most snippet. Then press the conversion button to replace the right-most snippet, 
+        which will be used to set &lt;model-viewer&gt paramters and update the editor.
+        </div>
       </div>
-      <div>
-        <mwc-button unelevated icon="forward" @click=${
-        this.handleSubmitSnippet}>
-        </mwc-button>
-      </div>
-      <div class="InnerSnippetModal">
-        <me-export-panel .isJustOutput=${true}></me-export-panel>
-      </div>
-    </div>
-    <div class="mv-note">
-    Paste into or edit the left-most snippet. Then press the conversion button to replace the right-most snippet, 
-    which will be used to set &lt;model-viewer&gt paramters and update the editor.
-    </div>
+    </me-card>
   </div>
   <mwc-button unelevated class="FileModalCancel" icon="cancel" 
     @click=${this.close}>Done</mwc-button>
