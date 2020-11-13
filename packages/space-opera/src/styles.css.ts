@@ -39,11 +39,20 @@ me-camera-target-input {
   min-width: 60px;
   color: var(--text-on-expandable-background);
 }
+
+.error {
+  color: #FFEBEE;
+  margin-top: 5px;
+}
 `;
 
-export const zoomStyls: CSSResult = css`
-.Spacer {
-  padding-bottom: 10px;
+export const zoomStyles: CSSResult = css`
+.ZoomTitle {
+  color: var(--text-on-expandable-background);
+}
+
+.max {
+  padding-top: 10px;
 }
 `;
 

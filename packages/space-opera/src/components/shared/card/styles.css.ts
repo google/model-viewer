@@ -57,4 +57,9 @@ export const styles: CSSResult = css`
 .content-container {
   padding: 5px 10px 5px 10px;
 }
+
+.error {
+  border: 1px solid #E53935;
+  background: #EF5350;
+}
 `;

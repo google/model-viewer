@@ -40,7 +40,7 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -146,6 +146,7 @@ export class CameraSettings extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() initialCamera: Camera = INITIAL_CAMERA;
+  @internalProperty() cameraOutOfBounds: boolean = false;
 
   @query('me-camera-orbit-editor') cameraOrbitEditor?: CameraOrbitEditor;
   @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
@@ -162,6 +163,36 @@ export class CameraSettings extends ConnectedLitElement {
     this.config = getConfig(state);
     this.camera = getCamera(state);
     this.initialCamera = getInitialCamera(state);
+    this.cameraOutOfBounds = this.outOfBounds();
+  }
+
+  outOfBounds() {
+    const snippet = this.camera;
+    if (snippet.orbit === undefined) {
+      return false;
+    }
+    if ((snippet.pitchLimitsDeg !== undefined) &&
+        ((snippet.pitchLimitsDeg.max !== 'auto' &&
+          snippet.orbit?.phiDeg > snippet.pitchLimitsDeg?.max) ||
+         (snippet.pitchLimitsDeg.min !== 'auto' &&
+          snippet.orbit?.phiDeg < snippet.pitchLimitsDeg?.min))) {
+      return true;
+    } else if (
+        (snippet.yawLimitsDeg !== undefined) &&
+        ((snippet.yawLimitsDeg.max !== 'auto' &&
+          snippet.orbit?.thetaDeg > snippet.yawLimitsDeg?.max) ||
+         (snippet.yawLimitsDeg.min !== 'auto' &&
+          snippet.orbit?.thetaDeg < snippet.yawLimitsDeg?.min))) {
+      return true;
+    } else if (
+        (snippet.radiusLimits !== undefined) &&
+        ((snippet.radiusLimits.max !== 'auto' &&
+          snippet.orbit?.radius > snippet.radiusLimits?.max) ||
+         (snippet.radiusLimits.min !== 'auto' &&
+          snippet.orbit?.radius < snippet.radiusLimits?.min))) {
+      return true;
+    }
+    return false;
   }
 
   onCamControlsCheckboxChange(event: Event) {
@@ -180,6 +211,19 @@ export class CameraSettings extends ConnectedLitElement {
       enabled: true,
       min: cameraState.radiusLimits?.min ?? 'auto',
       max: currentOrbit?.radius ?? 'auto'
+    };
+    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
+  }
+
+  undoInitialCamera() {
+    reduxStore.dispatch(dispatchInitialOrbit(undefined));
+    const modelViewer = getModelViewer()!;
+    const cameraState = getCameraState(modelViewer);
+    // set max radius to current value
+    const radiusLimits: Limits = {
+      enabled: true,
+      min: cameraState.radiusLimits?.min ?? 'auto',
+      max: 'auto'
     };
     reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
   }
@@ -212,7 +256,9 @@ export class CameraSettings extends ConnectedLitElement {
             </me-checkbox>
           </div>
         </me-card>
-        <me-card title="Initial Camera Position">
+        <me-card title="Initial Camera Position" 
+          .hasError="${this.cameraOutOfBounds}" .revertFunction=${
+        this.undoInitialCamera.bind(this)}>
           <div slot="content">
             <me-camera-orbit-editor
               @change=${this.onCameraOrbitEditorChange}
@@ -228,6 +274,10 @@ export class CameraSettings extends ConnectedLitElement {
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
             </mwc-button>
+            ${
+        this.cameraOutOfBounds ?
+        html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :
+        html``}
           </div>
         </me-card>
         <me-card title="Target Point">

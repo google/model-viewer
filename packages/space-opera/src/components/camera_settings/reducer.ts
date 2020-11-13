@@ -124,7 +124,7 @@ export function dispatchCameraTarget(target?: Vector3D) {
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export function dispatchInitialOrbit(orbit: SphericalPositionDeg) {
+export function dispatchInitialOrbit(orbit: SphericalPositionDeg|undefined) {
   return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
 }
 

@@ -34,8 +34,10 @@ export class CardElement extends LitElement {
   @property({type: Function}) copyFunction?: Function;
   @property({type: Function}) removeFunction?: Function;
   @property({type: Function}) revertFunction?: Function;
+  @property({type: Boolean}) hasError?: boolean;
 
   render() {
+    const hasError = this.hasError ? 'error' : '';
     const upload = this.uploadFunction !== undefined ? html`
     <mwc-button class="upload" id="uploadButton"
       icon="upload_file" @click="${this.uploadFunction}">
@@ -62,7 +64,7 @@ export class CardElement extends LitElement {
     ` :
                                                      html``;
     return html`
-    <div class="card">
+    <div class="card ${hasError}">
       <div class="container">
         <div class="header-container">
           <div class="header">${this.title}</div> 
