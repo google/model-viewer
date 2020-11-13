@@ -21,17 +21,19 @@ import '../../shared/section_row/section_row.js';
 import '../../shared/slider_with_input/slider_with_input.js';
 import '../../shared/checkbox/checkbox.js';
 
-import {html, query} from 'lit-element';
+import {html, internalProperty, query} from 'lit-element';
 
+import {snackbarStyles} from '../../../styles.css.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
 import {Limits} from '../types.js';
 
 import {styles} from './limits_base.css.js';
 
+
 /** Abstract component that can be extended for editing scalar limits. */
 export abstract class LimitsBase extends ConnectedLitElement {
-  static styles = styles;
+  static styles = [styles, snackbarStyles];
 
   abstract get label(): string;
   abstract get absoluteMinimum(): number;
@@ -39,6 +41,9 @@ export abstract class LimitsBase extends ConnectedLitElement {
   abstract get currentPreviewValue(): number;
   abstract get limitsProperty(): Limits|undefined;
   abstract dispatchLimits(limits?: Limits): void;
+
+  @internalProperty() snackClassName: string = '';
+  @internalProperty() snackBody: string = '';
 
   get decimalPlaces(): number {
     return 0;
@@ -66,6 +71,15 @@ export abstract class LimitsBase extends ConnectedLitElement {
 
   onToggle(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      this.snackBody =
+          'After setting limits, reset the initial camera to avoid clipping.';
+      this.snackClassName = 'show';
+      setTimeout(() => {
+        this.snackClassName = '';
+      }, 4000);
+    }
 
     if (!this.limitsProperty) {
       const newLimits = {
@@ -163,6 +177,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
       value=${this.limitsProperty.max}
       @change=${this.onMaximumInputChange}>
     </me-slider-with-input>
+
+    <div class="${this.snackClassName}" id="snackbar">${this.snackBody}</div>
     `;
   }
 }

@@ -18,6 +18,7 @@
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
+import {snackbarStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
@@ -28,8 +29,12 @@ import {Limits} from '../types.js';
 /** The Camera Settings panel. */
 @customElement('me-camera-zoom-limits')
 export class ZooomLimits extends ConnectedLitElement {
+  static styles = snackbarStyles;
+
   @internalProperty() hasZoom: boolean|undefined = false;
   @internalProperty() fovLimitsDeg: Limits|undefined = undefined;
+  @internalProperty() snackClassName: string = '';
+  @internalProperty() snackBody: string = '';
 
   stateChanged(state: State) {
     this.hasZoom = getCamera(state).fovLimitsDeg?.enabled;
@@ -38,6 +43,15 @@ export class ZooomLimits extends ConnectedLitElement {
 
   onToggle(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.snackBody =
+          'After setting limits, reset the initial camera to avoid clipping.';
+      this.snackClassName = 'show';
+      setTimeout(() => {
+        this.snackClassName = '';
+      }, 4000);
+    }
+
     if (checked && this.fovLimitsDeg === undefined) {
       const newLimits = {
         enabled: checked,
@@ -82,6 +96,7 @@ export class ZooomLimits extends ConnectedLitElement {
                        html``}
       </div>
     </me-card>
+    <div class="${this.snackClassName}" id="snackbar">${this.snackBody}</div>
 `;
   }
 }

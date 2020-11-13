@@ -25,8 +25,10 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {posterControlsStyles} from '../../styles.css.js';
+import {snackbarStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
-import {dispatchSaveCameraOrbit} from '../camera_settings/reducer.js';
+import {Camera} from '../camera_settings/camera_state.js';
+import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
 import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
@@ -35,31 +37,43 @@ import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
 export class PosterControlsElement extends ConnectedLitElement {
-  static styles = posterControlsStyles;
+  static styles = [posterControlsStyles, snackbarStyles];
 
   @internalProperty() poster?: string;
+  @internalProperty() className: string = '';
+  @internalProperty() snackBody: string = '';
+  @internalProperty() cameraSnippet: Camera = {};
 
   stateChanged(state: State) {
     this.poster = getConfig(state).poster;
+    this.cameraSnippet = getCamera(state);
   }
 
   render() {
     return html`
-      <me-expandable-tab tabName="Poster">
-        <div slot="content">
-          <mwc-button unelevated class="PosterButton" 
-            @click="${this.onCreatePoster}">Create Poster</mwc-button>
-          ${
+<me-expandable-tab tabName="Poster">
+  <div slot="content">
+    <me-card title="Poster Creation">
+      <div slot="content">
+        <mwc-button unelevated class="PosterButton" 
+          @click="${
+        this.onCreatePoster}">Generate Poster At Current Camera</mwc-button>
+        <div class="PosterHelperButtons">
+        ${
     !!this.poster ? html`
-          <mwc-button unelevated class="PosterButton"
-            @click="${this.onDownloadPoster}">Download</mwc-button>
-          <mwc-button unelevated class="PosterButton"
-            @click="${this.onDisplayPoster}">Display Poster</mwc-button>
-          <mwc-button unelevated class="PosterButton"
-            @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
+        <mwc-button unelevated class="PosterButton"
+          @click="${this.onDownloadPoster}">Download Poster</mwc-button>
+        <mwc-button unelevated class="PosterButton"
+          @click="${this.onDisplayPoster}">Redisplay Poster</mwc-button>
+        <mwc-button unelevated class="PosterButton"
+          @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
         </div>
-      </me-expandable-tab>
+      </div>
+    </me-card>
+  </div>
+</me-expandable-tab>
+<div class="${this.className}" id="snackbar">${this.snackBody}</div>
         `;
   }
 
@@ -67,28 +81,35 @@ export class PosterControlsElement extends ConnectedLitElement {
     const modelViewer = getModelViewer()!;
     if (!modelViewer)
       return;
-    const posterUrl =
+
+    // we can't set the camera orbit and then create the poster,
+    // because there is a slight delay in when we manually set the
+    // model-viewer cameraOrbit and when it actually changes
+    const currentOrbit = getCameraState(modelViewer).orbit;
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+    let posterUrl =
         createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
     reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-    const currentOrbit = getCameraState(modelViewer).orbit;
 
-    // TODO, remove the setting of current FOV, never set that here.
-    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+    this.snackBody = 'Setting initial camera and poster.';
+    this.className = 'show';
+    setTimeout(() => {
+      this.className = '';
+    }, 4000);
+
+    this.onDisplayPoster();
   }
 
   onDisplayPoster() {
+    // TODO: Possibly move model to initial camera
+
     const modelViewer = getModelViewer()!;
     if (!modelViewer)
       return;
-    // TODO, fix such that we aren't modifying modelViewer in here. i.e. add
-    // settings to modelViewerPreview
-    const src = modelViewer.src;
     // Normally we can just use dispatchSetReveal, but the value has to be
     // changed immediately before reload.
     modelViewer.reveal = 'interaction';
-    // Force reload the model
-    modelViewer.src = '';
-    modelViewer.src = src;
+    modelViewer.showPoster()
   }
 
   onDeletePoster() {

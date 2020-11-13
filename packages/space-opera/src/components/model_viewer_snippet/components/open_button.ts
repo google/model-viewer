@@ -157,7 +157,8 @@ export class OpenModal extends LitElement {
             <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
             ${this.errors.map(error => html`<div>${error}</div>`)}
           </div>
-          <div>
+          <div class="mv-note">Edit the top snippet. Then update the bottom snippet, which sets the &lt;model-viewer&gt paramters in the editor.</div>
+          <div class="update-button">
             <mwc-button unelevated icon="south" @click=${
         this.handleSubmitSnippet}>Update
             </mwc-button>
@@ -165,10 +166,6 @@ export class OpenModal extends LitElement {
           <div class="InnerSnippetModal">
             <me-export-panel .isJustOutput=${true}></me-export-panel>
           </div>
-        </div>
-        <div class="mv-note">
-        Paste into or edit the left-most snippet. Then press the conversion button to replace the right-most snippet, 
-        which will be used to set &lt;model-viewer&gt paramters and update the editor.
         </div>
       </div>
     </me-card>

@@ -23,7 +23,7 @@ import '../shared/expandable_content/expandable_tab.js';
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
-import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
+import {customElement, html, internalProperty, property, query} from 'lit-element';
 
 import {State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
@@ -150,22 +150,8 @@ export class ExportPanel extends ConnectedLitElement {
   }
 }
 
-/**
- * Import/Export panel.
- * TODO:: This should be factored out/renamed.
- */
-@customElement('model-viewer-snippet')
-export class ModelViewerSnippet extends LitElement {
-  render() {
-    return html`
-    <me-export-panel></me-export-panel>
-            `;
-  }
-}
-
 declare global {
   interface HTMLElementTagNameMap {
-    'model-viewer-snippet': ModelViewerSnippet;
     'me-export-panel': ExportPanel;
   }
 }

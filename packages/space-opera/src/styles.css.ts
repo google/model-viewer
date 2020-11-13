@@ -29,8 +29,14 @@ me-camera-target-input {
   margin-left: 15px;
 }
 
-.InitialCameraNote {
-  margin-top: 5px;
+.Orbit {
+  border-radius: 4px;
+  display: inline-flex;
+  justify-content: space-between;
+  padding: 6px 12px;
+  overflow: hidden;
+  background: var(--number-input-background);
+  min-width: 60px;
   color: var(--text-on-expandable-background);
 }
 `;
@@ -47,6 +53,11 @@ export const fileModalStyles: CSSResult = css`input[type="file"] {
 `;
 
 export const homeStyles: CSSResult = css`
+:host {
+  --mdc-theme-text-primary-on-background: var(--text-on-expandable-background);
+  --mdc-theme-secondary: #5185ec;
+}
+
 mwc-formfield {
   display: block;
 }
@@ -108,10 +119,13 @@ export const posterControlsStyles: CSSResult = css`
   display: block;
 }
 
+.PosterHelperButtons {
+  padding-left: 30px;
+}
+
 mwc-button {
   --mdc-button-disabled-fill-color: #ddd;
   --mdc-button-disabled-ink-color: #fff;
-  width: 180px;
 }
 `;
 
@@ -182,7 +196,7 @@ paper-dialog {
 .FileModalCancel {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 24px;
   margin: 0;
   padding: 0;
 }
@@ -201,12 +215,16 @@ input[type="file"] {
   width: 100%;
 }
 
+.update-button {
+  padding: 0 0 5px 0;
+}
+
 #mv-input {
   width: 100%;
 }
 
 .mv-note {
-  margin-top: 5px;
+  margin: 5px 0;
   display: flex;
   flex-wrap: wrap;
   color: var(--secondary-text-on-expandable-background);
@@ -229,3 +247,48 @@ input[type="file"] {
   padding-top: 20px;
 }
 `;
+
+// https://www.w3schools.com/howto/howto_js_snackbar.asp
+export const snackbarStyles: CSSResult = css`
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #FF9800;
+  color: white;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 20;
+  left: 20%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 3.5s;
+  animation: fadein 0.5s, fadeout 0.5s 3.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;} 
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;} 
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+`

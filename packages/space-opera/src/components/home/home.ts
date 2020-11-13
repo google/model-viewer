@@ -142,12 +142,12 @@ export class HomeContainer extends ConnectedLitElement {
         <div slot="content">
           <me-card title="Color Themes">
             <div slot="content">
-              <mwc-formfield label="Dark Theme">
+              <mwc-formfield label="Dark Theme" class="themeButtons">
                 <mwc-radio name="location" checked 
                   @click=${this.enableDarkTheme}>
                 </mwc-radio>
               </mwc-formfield>
-              <mwc-formfield label="Light Theme">
+              <mwc-formfield label="Light Theme" class="themeButtons">
                 <mwc-radio name="location" 
                   @click=${this.enableLightTheme}>
                 </mwc-radio>

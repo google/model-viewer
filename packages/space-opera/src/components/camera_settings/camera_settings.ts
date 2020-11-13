@@ -26,7 +26,7 @@ import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
 import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
-import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
+import {customElement, html, internalProperty, property, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
@@ -40,27 +40,26 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
+import {dispatchCameraTarget, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
-class CameraOrbitEditor extends LitElement {
-  static styles = [draggableInputRowStyles];
+class CameraOrbitEditor extends ConnectedLitElement {
+  static styles = [cameraSettingsStyles, draggableInputRowStyles];
 
   @query('me-draggable-input#yaw') yawInput?: DraggableInput;
   @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
-  @query('me-draggable-input#radius') radiusInput?: DraggableInput;
+  @internalProperty() radius: number = 0;
 
   @property({type: Object}) orbit?: SphericalPositionDeg;
 
   get currentOrbit() {
-    if (!this.yawInput || !this.pitchInput || !this.radiusInput) {
+    if (!this.yawInput || !this.pitchInput) {
       throw new Error('Rendering not complete');
     }
     return {
       phiDeg: this.pitchInput.value,
       thetaDeg: this.yawInput.value,
-      radius: this.radiusInput.value,
     };
   }
 
@@ -175,6 +174,7 @@ export class CameraSettings extends ConnectedLitElement {
     const cameraState = getCameraState(modelViewer);
     const currentOrbit = cameraState.orbit;
     reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+
     // set max radius to current value
     const radiusLimits: Limits = {
       enabled: true,
@@ -228,7 +228,6 @@ export class CameraSettings extends ConnectedLitElement {
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
             </mwc-button>
-            <div class="InitialCameraNote"><small>Note: Set your max and min zoom before setting the initial camera or else clipping may occur.</small></div>
           </div>
         </me-card>
         <me-card title="Target Point">
@@ -258,18 +257,20 @@ export class CameraSettings extends ConnectedLitElement {
     if (!this.cameraOrbitEditor)
       return;
     // Set min/max radius limits before setting radius such that we don't clip.
-    const radiusLimits: Limits = {
-      enabled: true,
-      min: 'auto',
-      max: this.cameraOrbitEditor.currentOrbit.radius
-    };
-    // Set field of view to max value
     const modelViewer = getModelViewer()!;
-    modelViewer.fieldOfView = '45deg'
+    if (!modelViewer)
+      return;
 
+    const currentOrbit = getCameraState(modelViewer).orbit;
+    const radiusLimits:
+        Limits = {enabled: true, min: 'auto', max: currentOrbit!.radius};
     reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
-    reduxStore.dispatch(
-        dispatchInitialOrbit(this.cameraOrbitEditor.currentOrbit));
+
+    const orb = {
+      ...this.cameraOrbitEditor.currentOrbit,
+      radius: currentOrbit?.radius!,
+    };
+    reduxStore.dispatch(dispatchSaveCameraOrbit(orb));
   }
 }
 
