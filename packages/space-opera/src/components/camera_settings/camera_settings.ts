@@ -49,7 +49,6 @@ class CameraOrbitEditor extends ConnectedLitElement {
 
   @query('me-draggable-input#yaw') yawInput?: DraggableInput;
   @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
-  @internalProperty() radius: number = 0;
 
   @property({type: Object}) orbit?: SphericalPositionDeg;
 
@@ -166,30 +165,27 @@ export class CameraSettings extends ConnectedLitElement {
     this.cameraOutOfBounds = this.outOfBounds();
   }
 
+  orbitValueBound(limits: Limits|undefined, val: string|number) {
+    if ((limits !== undefined) &&
+        ((limits.max !== 'auto' && val > limits.max) ||
+         (limits.min !== 'auto' && val < limits.min))) {
+      return true;
+    }
+    return false;
+  }
+
   outOfBounds() {
     const snippet = this.camera;
     if (snippet.orbit === undefined) {
       return false;
     }
-    if ((snippet.pitchLimitsDeg !== undefined) &&
-        ((snippet.pitchLimitsDeg.max !== 'auto' &&
-          snippet.orbit?.phiDeg > snippet.pitchLimitsDeg?.max) ||
-         (snippet.pitchLimitsDeg.min !== 'auto' &&
-          snippet.orbit?.phiDeg < snippet.pitchLimitsDeg?.min))) {
+    if (this.orbitValueBound(snippet.pitchLimitsDeg, snippet.orbit?.phiDeg)) {
       return true;
-    } else if (
-        (snippet.yawLimitsDeg !== undefined) &&
-        ((snippet.yawLimitsDeg.max !== 'auto' &&
-          snippet.orbit?.thetaDeg > snippet.yawLimitsDeg?.max) ||
-         (snippet.yawLimitsDeg.min !== 'auto' &&
-          snippet.orbit?.thetaDeg < snippet.yawLimitsDeg?.min))) {
+    } else if (this.orbitValueBound(
+                   snippet.yawLimitsDeg, snippet.orbit?.thetaDeg)) {
       return true;
-    } else if (
-        (snippet.radiusLimits !== undefined) &&
-        ((snippet.radiusLimits.max !== 'auto' &&
-          snippet.orbit?.radius > snippet.radiusLimits?.max) ||
-         (snippet.radiusLimits.min !== 'auto' &&
-          snippet.orbit?.radius < snippet.radiusLimits?.min))) {
+    } else if (this.orbitValueBound(
+                   snippet.radiusLimits, snippet.orbit?.radius)) {
       return true;
     }
     return false;

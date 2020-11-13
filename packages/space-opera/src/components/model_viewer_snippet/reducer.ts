@@ -35,9 +35,4 @@ export function dispatchConfig(config?: ModelViewerConfig) {
 
   // Clear initialCamera too, as ModelViewerPreview will update this.
   reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
-
-  // This should only be done if they aren't set
-  // reduxStore.dispatch(dispatchRadiusLimits(INITIAL_RADIUS_LIMITS));
-
-  // reduxStore.dispatch(dispatchFovLimits(INITIAL_FOV_LIMITS));
 }
