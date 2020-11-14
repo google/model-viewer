@@ -287,7 +287,6 @@
     const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
     const thisY = 0.5 * (touches[0].clientY + touches[1].clientY);
 	
-	console.log(thisX +" "+thisY);
     movePan(thisX, thisY);
   }, true);
 
@@ -332,7 +331,6 @@ let startX;
 let lastX;
 let metersPerPixel;
 var orbiting = false;
-
 var orbit;
     
 const startOrbit = () => {
@@ -342,8 +340,7 @@ const startOrbit = () => {
   modelViewer.interactionPrompt = 'none';
 };
 
-const updateOrbit = (thisX) => {
-        
+const updateOrbit = (thisX) => {      
   const dx = (thisX - lastX) * metersPerPixel;
   lastX = thisX;
   orbit = modelViewer.getCameraOrbit();
@@ -351,7 +348,6 @@ const updateOrbit = (thisX) => {
   modelViewer.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad`;
   modelViewer.resetTurntableRotation(orbit.theta);
   modelViewer.jumpCameraToGoal();
-
 }
 
 modelViewer.addEventListener('mousedown', (event) => {
