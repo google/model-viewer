@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 /* @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -40,7 +40,7 @@
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
 </head>
-<body>
+<body id="body">
 
   <div class="sample">
     <div id="demo-container-1" class="demo"></div>
@@ -324,43 +324,62 @@
           <template>
 <model-viewer id="envlight-demo" camera-controls src="../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  environment-image="../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
 <script type="module">
-  const modelViewer = document.querySelector("#envlight-demo");
-  
-  // Add the event listeners for mousedown, mousemove, and mouseup
-  modelViewer.addEventListener('mousedown', (event) => {
+	
+const modelViewer = document.querySelector("#envlight-demo");
+modelViewer.addEventListener('contextmenu', event => event.preventDefault());
 
-  	console.log("mouse down");
-  }, true);
-  
-  modelViewer.addEventListener('mousemove', (event) => {
-   
-  // Speed and direction on X axis   
-  var speedX = event.movementX;
-	  
-  if (event.shiftKey && event.which == 1) {
-			
-    const updateOrbit = () => {
-    const orbit = modelViewer.getCameraOrbit(); 
-    console.log(speedX);
-    modelViewer.cameraOrbit = `${orbit.theta + 0.001*(-speedX)}rad ${orbit.phi}rad`;
-    modelViewer.jumpCameraToGoal();
-    modelViewer.resetTurntableRotation(orbit.theta - 0.01*(-speedX));
-    requestAnimationFrame(() => updateOrbit()); 
-   };
-   updateOrbit();
-   }
-  }, true);
+let startX;
+let lastX;
+let metersPerPixel;
+var orbiting = false;
 
-  modelViewer.addEventListener('mouseup', (event) => {
-    const updateOrbit = () => {
-	const orbit = modelViewer.getCameraOrbit(); 
-	modelViewer.jumpCameraToGoal();
-	requestAnimationFrame(() => updateOrbit()); 
-	};
-	updateOrbit();
+var orbit;
+    
+const startOrbit = () => {
+  const orbit = modelViewer.getCameraOrbit();
+  const { theta, phi, radius } = orbit;
+  metersPerPixel = 0.15 * radius / modelViewer.getBoundingClientRect().height;
+  modelViewer.interactionPrompt = 'none';
+};
 
-  }, true);
-   
+const updateOrbit = (thisX) => {
+        
+  const dx = (thisX - lastX) * metersPerPixel;
+  lastX = thisX;
+  orbit = modelViewer.getCameraOrbit();
+  orbit.theta += dx;
+  modelViewer.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad`;
+  modelViewer.resetTurntableRotation(orbit.theta);
+  modelViewer.jumpCameraToGoal();
+
+}
+
+modelViewer.addEventListener('mousedown', (event) => {
+  startX = event.clientX;
+     
+  orbiting = event.shiftKey;
+  if (!orbiting)
+    return;
+
+  lastX = startX;
+  startOrbit();
+  event.stopPropagation();
+}, true);
+
+self.addEventListener('mouseup', (event) => {
+  orbiting = false;
+}, true);
+
+modelViewer.addEventListener('mousemove', (event) => {
+  if (!orbiting)
+    return;
+  if (orbiting) {
+    requestAnimationFrame(() => updateOrbit(event.clientX));
+  }
+
+  event.stopPropagation();
+}, true);
+
 </script>
           </template>
         </example-snippet>
