@@ -18,7 +18,7 @@
 import {LitElement} from 'lit-element';
 import {connect} from 'pwa-helpers/connect-mixin';
 
-import {reduxStore} from '../../redux/space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
 
 // This is only here because we can't export this directly.
 const connectedLitElementInternal = connect(reduxStore)(LitElement);

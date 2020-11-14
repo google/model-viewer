@@ -16,8 +16,6 @@ Check out the README.md files for specific projects to get more details:
 
 🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
 
-📦 **[3DOM](packages/3dom)** • A generic glTF scene graph API that enables operations on 3D models while abstracting the in-memory representation. 
-
 ## Development
 
 When developing across all the projects in this repository, first install git,

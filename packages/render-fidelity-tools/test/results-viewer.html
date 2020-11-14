@@ -24,6 +24,14 @@
 
   <!-- Web Components polyfill is required to support Edge and Firefox < 63: -->
   <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
 <style>
   @import url('https://fonts.googleapis.com/css?family=Rubik:400,500');
   body {
@@ -41,9 +49,51 @@
     max-width: 1000px;
     text-align: left;
   }
+  .icon-modelviewer-black {
+    background-image: url(./results/ic_modelviewer.svg);
+  }
+  .icon-button {
+    margin-left: -4px;
+    margin-right: 8px;
+    width: 34px;
+    height: 34px;
+    background-size: 34px;
+  }
+  .inner-home {
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+    text-decoration: none;
+  }
+  .home {
+    padding: 20px;
+    overflow: auto;
+    white-space: nowrap;
+  }
+  .lockup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    color: rgba(0,0,0,.87);
+  }
+  .attribute {
+    white-space: pre-wrap !important;
+    font-family: 'Roboto Mono', monospace;
+    color: black;
+  }
+  .attribute:hover {
+    text-decoration: underline;
+    color: #444444;
+  }
 </style>
 </head>
 <body>
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
+      <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    </a>
+  </div>
   <div align="center">
     <h2>Render Fidelity Comparison Results</h2>
   
@@ -97,6 +147,8 @@
     differences, excluding the transparent background. This is <b>not</b> a
     perceptual metric, so take it with a grain of salt. It is mostly there to
     help us identify regressions.</p>
+
+    <p><a href="https://policies.google.com/privacy">Privacy</a></p>
   </div>
 
   <image-comparison-app src="./results/config.json"></image-comparison-app>

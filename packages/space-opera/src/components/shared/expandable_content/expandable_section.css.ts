@@ -25,6 +25,8 @@ export const styles: CSSResult = css`:host {
   max-height: 0;
   overflow: hidden;
   padding: 0 20px;
+  transition-duration: 300ms;
+  transition-timing-function: ease-out;
 }
 
 .SectionContent[open] {
@@ -32,6 +34,7 @@ export const styles: CSSResult = css`:host {
   overflow: unset;
   max-height: 100vh;
   padding: 20px;
-  transition: max-height 500ms ease-in-out;
+  transition-duration: 250ms;
+  transition-timing-function: ease-in;
 }
 `;

@@ -24,13 +24,13 @@ import '@polymer/paper-dialog/paper-dialog';
 
 import './components/animation_controls/animation_controls.js';
 import './components/camera_settings/camera_settings.js';
-import './components/download_button/download_button.js';
+import './components/model_viewer_snippet/components/download_button.js';
 import './components/file_modal/file_modal.js';
 import './components/hotspot_panel/hotspot_panel.js';
 import './components/poster_controls/poster_controls.js';
 import './components/ibl_selector/ibl_selector.js';
 import './components/materials_panel/materials_panel.js';
-import './components/open_button/open_button.js';
+import './components/model_viewer_snippet/components/open_button.js';
 import './components/model_editor/model_editor.js';
 import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/model_viewer_snippet/model_viewer_snippet.js';
