@@ -114,6 +114,15 @@ export class ExportPanel extends ConnectedLitElement {
     }
 
     return html`
+<me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
+  .open=${true} .sticky=${true} 
+  .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
+  <div slot="content">
+    <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}
+      .renderedStyle=${this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
+    </snippet-viewer>
+  </div>
+</me-expandable-tab>
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
@@ -121,15 +130,6 @@ export class ExportPanel extends ConnectedLitElement {
       <div slot="content" style="margin: 10px 0">
         <me-download-button id="download-gltf"></me-download-button>
         <me-export-zip-button id="export-zip"></me-export-zip-button>
-      </div>
-    </me-card>
-    <me-card title="&lt;model-viewer&gt; snippet" .copyFunction=${
-        this.snippetCopyToClipboard.bind(this)}>
-      <div slot="content">
-        <snippet-viewer .renderedSnippet=${snippet}
-          .renderedStyle=${
-        this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
-        </snippet-viewer>
       </div>
     </me-card>
   </div>
