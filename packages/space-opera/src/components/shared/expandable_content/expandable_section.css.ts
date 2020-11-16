@@ -17,9 +17,7 @@
 
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
-:host {
-  --me-theme-container-background: var(--expandable-section-background);
-}
+
 
 .SectionContent {
   max-height: 0;
@@ -34,11 +32,7 @@ export const styles: CSSResult = css`
   background-color: var(--expandable-section-background);
 }
 
-.sticky {
-  background-color: #FBFBFB;
-}
-
 .sticky[open] {
-  background-color: #FBFBFB;
+  background-color: var(--expandable-section-header-background);
 }
 `;

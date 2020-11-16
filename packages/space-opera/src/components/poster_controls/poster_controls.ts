@@ -25,7 +25,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {posterControlsStyles} from '../../styles.css.js';
-import {snackbarStyles} from '../../styles.css.js';
+import {toastStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {Camera, getOrbitString} from '../camera_settings/camera_state.js';
 import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
@@ -37,11 +37,11 @@ import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
 export class PosterControlsElement extends ConnectedLitElement {
-  static styles = [posterControlsStyles, snackbarStyles];
+  static styles = [posterControlsStyles, toastStyles];
 
   @internalProperty() poster?: string;
-  @internalProperty() className: string = '';
-  @internalProperty() snackBody: string = '';
+  @internalProperty() toastClassName: string = '';
+  @internalProperty() toastBody: string = '';
   @internalProperty() cameraSnippet: Camera = {};
 
   stateChanged(state: State) {
@@ -64,7 +64,7 @@ export class PosterControlsElement extends ConnectedLitElement {
         <mwc-button unelevated class="PosterButton"
           @click="${this.onDownloadPoster}">Download Poster</mwc-button>
         <mwc-button unelevated class="PosterButton"
-          @click="${this.onDisplayPoster}">Redisplay Poster</mwc-button>
+          @click="${this.onDisplayPoster}">Display Poster</mwc-button>
         <mwc-button unelevated class="PosterButton"
           @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
@@ -73,7 +73,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     </me-card>
   </div>
 </me-expandable-tab>
-<div class="${this.className}" id="snackbar">${this.snackBody}</div>
+<div class="${this.toastClassName}" id="snackbar">${this.toastBody}</div>
         `;
   }
 
@@ -87,21 +87,20 @@ export class PosterControlsElement extends ConnectedLitElement {
       const initialOrbit = this.cameraSnippet.orbit;
       modelViewer.cameraOrbit = getOrbitString(initialOrbit);
       modelViewer.jumpCameraToGoal();
-      modelViewer.requestUpdate();
       requestAnimationFrame(async () => {
         let posterUrl =
             createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
         reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-      })
+      });
     } else {
       // otherwise, take the current model-viewer state
       const currentOrbit = getCameraState(modelViewer).orbit;
       reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
-      this.snackBody =
+      this.toastBody =
           'Initial camera undefined, setting initial camera to current camera.';
-      this.className = 'show';
+      this.toastClassName = 'show';
       setTimeout(() => {
-        this.className = '';
+        this.toastClassName = '';
       }, 4000);
       let posterUrl =
           createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
@@ -113,10 +112,15 @@ export class PosterControlsElement extends ConnectedLitElement {
     const modelViewer = getModelViewer()!;
     if (!modelViewer)
       return;
-    // Normally we can just use dispatchSetReveal, but the value has to be
-    // changed immediately before reload.
-    modelViewer.reveal = 'interaction';
-    modelViewer.showPoster()
+    if (this.cameraSnippet.orbit !== undefined) {
+      const initialOrbit = this.cameraSnippet.orbit;
+      modelViewer.cameraOrbit = getOrbitString(initialOrbit);
+      modelViewer.jumpCameraToGoal();
+      requestAnimationFrame(async () => {
+        modelViewer.reveal = 'interaction';
+        modelViewer.showPoster()
+      });
+    }
   }
 
   onDeletePoster() {

@@ -51,7 +51,7 @@ export class YawLimits extends LimitsBase {
   }
 
   get label() {
-    return 'Yaw';
+    return 'Apply Yaw Limits';
   }
 
   get absoluteMinimum() {

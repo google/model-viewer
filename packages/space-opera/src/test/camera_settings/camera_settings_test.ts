@@ -80,7 +80,7 @@ describe('camera constraints test', () => {
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
-    // Now has a dependency on model-viewer.
+    // Now has a dependency on model-viewer via onCameraOrbitEditorChange()
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {

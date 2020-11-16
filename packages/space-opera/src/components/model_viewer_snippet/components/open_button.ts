@@ -29,27 +29,29 @@ import {extractStagingConfig} from '../../../types.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {dispatchConfig} from '../reducer.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends LitElement {
   static styles = openModalStyles;
-  @query('me-file-modal') fileModal!: FileModalElement;
-  @internalProperty() currentName: string = '';
+
   @internalProperty() isOpen: boolean = false;
-
-
+  @internalProperty() errors: string[] = [];
   @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
 
-  @internalProperty() errors: string[] = [];
-
-  async handleSubmitSnippet(event: Event) {
-    event.preventDefault();
+  async handleSubmitSnippet(value?: string) {
     if (!this.textArea)
       return;
     this.errors = [];
-    const inputText: string = this.textArea.value.trim();
+    let inputText: string = '';
+    if (value === undefined) {
+      inputText = this.textArea.value.trim();
+    } else {
+      inputText = value;
+    }
+
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
@@ -70,7 +72,6 @@ export class OpenModal extends LitElement {
             setTimeout(resolve, 0);
           });
           reduxStore.dispatch(dispatchGltfUrl(config.src));
-          this.currentName = config.src;
         }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
@@ -96,29 +97,20 @@ export class OpenModal extends LitElement {
         this.errors.length > 0 ? 'pink' : 'white';
   }
 
-  async onClick() {
-    const files = await this.fileModal.open();
-    if (!files) {
-      /// The user canceled the previous upload
-      return;
-    }
-    const arrayBuffer = await files[0].arrayBuffer();
-    // @ts-ignore
-    this.currentName = files[0].name;
-    const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-    reduxStore.dispatch(dispatchGltfUrl(url));
-    dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
-    // enable camera controls by default
-    reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-    reduxStore.dispatch(dispatchSetHotspots([]));
-  }
-
   open() {
     this.isOpen = true;
   }
 
   close() {
     this.isOpen = false;
+  }
+
+  saveAndClose(event: Event) {
+    event.preventDefault();
+    this.handleSubmitSnippet();
+    if (this.errors.length === 0) {
+      this.isOpen = false;
+    }
   }
 
   render() {
@@ -128,50 +120,26 @@ export class OpenModal extends LitElement {
 </model-viewer>`;
 
     return html`
-<me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
   <div class="FileModalContainer">
     <div class="FileModalHeader">
-      <div>Upload</div>
+      <div>Update &lt;model-viewer&gt; Snippet</div>
     </div>
-    <me-card title="GLB">
-      <div slot="content">
-        <div class="OpenModalSection">
-          <mwc-button unelevated
-            icon="file_upload"
-            @click=${this.onClick}>
-            Click to Upload GLB
-          </mwc-button>
-          <div class="note">
-            ${
-        this.currentName === '' ? html`No File Selected` :
-                                  html`${this.currentName}`}
-          </div>
-        </div>
-      </div>
-    </me-card>
-    <me-card title="(Optional) &lt;model-viewer&gt snippet">
-      <div slot="content">
-        <div class="OpenModalSection ModalSnippet">
-          <div class="InnerSnippetModal">
-            <textarea id="mv-input" rows=10>${exampleLoadableSnippet}</textarea>
-            ${this.errors.map(error => html`<div>${error}</div>`)}
-          </div>
-          <div class="mv-note">Edit the top snippet. Then update the bottom snippet, which sets the &lt;model-viewer&gt paramters in the editor.</div>
-          <div class="update-button">
-            <mwc-button unelevated icon="south" @click=${
-        this.handleSubmitSnippet}>Update
-            </mwc-button>
-          </div>
-          <div class="InnerSnippetModal">
-            <me-export-panel .isJustOutput=${true}></me-export-panel>
-          </div>
+    <me-card title="Edit&#47; Paste &lt;model-viewer&gt Snippet">
+      <div class="OpenModalSection ModalSnippet" slot="content">
+        <div class="InnerSnippetModal">
+          <textarea id="mv-input" rows=15>${exampleLoadableSnippet}</textarea>
+          ${this.errors.map(error => html`<div>${error}</div>`)}
         </div>
       </div>
     </me-card>
   </div>
-  <mwc-button unelevated class="FileModalCancel" icon="cancel" 
-    @click=${this.close}>Done</mwc-button>
+  <div class="FileModalCancel">
+    <mwc-button unelevated icon="save_alt" class="SaveButton"
+      @click=${this.saveAndClose}>Save</mwc-button>
+    <mwc-button unelevated icon="cancel" 
+      @click=${this.close}>Cancel</mwc-button>
+  </div>
 </paper-dialog>`;
   }
 }
@@ -179,29 +147,101 @@ export class OpenModal extends LitElement {
 /**
  * A button to open file resources.
  */
-@customElement('me-open-button')
-export class OpenButton extends LitElement {
-  @query('me-open-modal#open-modal') openModal!: FileModalElement;
+@customElement('me-import-card')
+export class ImportCard extends LitElement {
+  @query('me-open-modal#open-modal') openModal!: OpenModal;
+  @query('me-file-modal') fileModal!: FileModalElement;
+  @internalProperty() selectedDefaultOption: number = 0;
 
-  onClick() {
+  async onUploadGLB() {
+    const files = await this.fileModal.open();
+    if (!files) {
+      /// The user canceled the previous upload
+      return;
+    }
+    const arrayBuffer = await files[0].arrayBuffer();
+    const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+    reduxStore.dispatch(dispatchGltfUrl(url));
+    dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
+    // enable camera controls by default
+    reduxStore.dispatch(dispatchCameraControlsEnabled(true));
+    reduxStore.dispatch(dispatchSetHotspots([]));
+  }
+
+  onSnippetOpen() {
     this.openModal.open();
+  }
+
+  onDefaultSelect(event: CustomEvent) {
+    const dropdown = event.target as Dropdown;
+    const value = dropdown.selectedItem?.getAttribute('value') || undefined;
+    const map = {
+      'Astronaut': 1,
+      'Horse': 2,
+      'RobotExpressive': 3,
+      'pbr-spheres': 4,
+      'shishkebab': 5
+    };
+    if (value !== undefined) {
+      if (value === 'none') {
+        this.selectedDefaultOption = 0;
+        return;
+      } else {
+        // @ts-ignore
+        this.selectedDefaultOption = map[value];
+      }
+      const snippet = `<model-viewer
+  src='https://modelviewer.dev/shared-assets/models/${value}.glb'
+  shadow-intensity="1" camera-controls>
+</model-viewer>`;
+      this.openModal.handleSubmitSnippet(snippet);
+    }
   }
 
   render() {
     return html`
+    <me-card title="Import Content">
+      <div slot="content">
+        <div style="margin: 10px 0">
+          <mwc-button unelevated
+              icon="file_upload"
+              @click=${this.onUploadGLB}>
+              Import GLB
+            </mwc-button>
+          <mwc-button unelevated
+            icon="file_upload"
+            @click=${this.onSnippetOpen}>
+            Update Snippet
+          </mwc-button>
+        </div>
         <me-open-modal id="open-modal"></me-open-modal>
-        <mwc-button unelevated
-          icon="file_upload"
-          @click=${this.onClick}>
-          Upload
-        </mwc-button>`;
+        <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
+      </div>
+    </me-card>
+    <me-card title="Load Default Model">
+      <div slot="content">
+        <me-dropdown
+          .selectedIndex=${this.selectedDefaultOption}
+          slot="content"
+          @select=${this.onDefaultSelect}
+        >
+          <paper-item value='none'>None</paper-item>
+          <paper-item value='Astronaut'>Astronaut</paper-item>
+          <paper-item value='Horse'>Horse</paper-item>
+          <paper-item value='RobotExpressive'>Robot</paper-item>
+          <paper-item value='pbr-spheres'>Spheres</paper-item>
+          <paper-item value='shishkebab'>Shishkebab</paper-item>
+        </me-dropdown>
+      </div>
+    </me-card>
+    `;
   }
 }
 
 
 declare global {
   interface HTMLElementTagNameMap {
-    'me-open-button': OpenButton;
+    'me-import-card': ImportCard;
     'me-open-modal': OpenModal;
   }
 }

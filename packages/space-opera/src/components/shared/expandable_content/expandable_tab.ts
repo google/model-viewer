@@ -58,7 +58,7 @@ export class ExpandableTab extends LitElement {
         </div>
       </div>
 
-      <me-expandable-section ?open=${this.open} .stick=${true}>
+      <me-expandable-section ?open=${this.open} .sticky=${true}>
         <span slot="content">
           <slot name="content"></slot>
         </span>

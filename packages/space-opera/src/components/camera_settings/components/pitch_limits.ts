@@ -52,7 +52,7 @@ export class PitchLimits extends LimitsBase {
   }
 
   get label() {
-    return 'Pitch';
+    return 'Apply Pitch Limits';
   }
 
   get absoluteMinimum() {

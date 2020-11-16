@@ -191,7 +191,7 @@ paper-dialog {
 }
 
 .FileModalContainer {
-  height: 650px;
+  height: 400px;
   width: 800px;
   margin-top: 20px;
 }
@@ -199,7 +199,11 @@ paper-dialog {
 .FileModalHeader {
   font-size: 24px;
   color: var(--expandable-section-text);
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.SaveButton {
+  margin-right: 5px;
 }
 
 .FileModalCancel {
@@ -209,14 +213,9 @@ paper-dialog {
   margin: 0;
   padding: 0;
 }
+
 input[type="file"] {
   display: none;
-}
-
-.note {
-  margin-top: 5px;
-  padding-bottom: 20px;
-  color: var(--secondary-text-on-expandable-background);
 }
 
 .OpenModalSection {
@@ -224,19 +223,8 @@ input[type="file"] {
   width: 100%;
 }
 
-.update-button {
-  padding: 0 0 5px 0;
-}
-
 #mv-input {
   width: 100%;
-}
-
-.mv-note {
-  margin: 5px 0;
-  display: flex;
-  flex-wrap: wrap;
-  color: var(--secondary-text-on-expandable-background);
 }
 
 .ModalSnippet {
@@ -247,18 +235,12 @@ input[type="file"] {
 }
 
 .InnerSnippetModal {
-  width: 90%;
-}
-
-.Header {
-  font-size: 18px;
-  color: var(--default-opp-color);
-  padding-top: 20px;
+  width: 95%;
 }
 `;
 
 // https://www.w3schools.com/howto/howto_js_snackbar.asp
-export const snackbarStyles: CSSResult = css`
+export const toastStyles: CSSResult = css`
 #snackbar {
   visibility: hidden;
   min-width: 250px;

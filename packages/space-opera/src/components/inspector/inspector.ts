@@ -78,9 +78,9 @@ export class InspectorPanel extends ConnectedLitElement {
         html`<div>Load a model to inspect the JSON.</div>` :
         html`<pre class="inspector-content">${this.gltfJsonstring}</pre>`
     return html`
-      <me-expandable-tab tabName="GLTF JSON" .open=${true} .sticky=${true}>
+      <me-expandable-tab tabName="GLTF JSON" .open=${true}>
         <div slot="content">
-          <div style="color: var(--text-on-expandable-background);">
+          <div style="color: var(--text-on-expandable-background); overflow: scroll">
             ${textContent}
             <div class="texture-images">
               ${

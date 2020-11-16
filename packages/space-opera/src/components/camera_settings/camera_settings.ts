@@ -120,6 +120,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   }
 
   render() {
+    // TODO, allow the ability to initialize target point...
     if (!this.target) {
       return html`<div class="note">Waiting for camera target...</div>`;
     }
@@ -211,7 +212,7 @@ export class CameraSettings extends ConnectedLitElement {
     reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
   }
 
-  undoInitialCamera() {
+  resetInitialCamera() {
     reduxStore.dispatch(dispatchInitialOrbit(undefined));
     const modelViewer = getModelViewer()!;
     const cameraState = getCameraState(modelViewer);
@@ -254,7 +255,7 @@ export class CameraSettings extends ConnectedLitElement {
         </me-card>
         <me-card title="Initial Camera Position" 
           .hasError="${this.cameraOutOfBounds}" .revertFunction=${
-        this.undoInitialCamera.bind(this)}>
+        this.resetInitialCamera.bind(this)}>
           <div slot="content">
             <me-camera-orbit-editor
               @change=${this.onCameraOrbitEditorChange}

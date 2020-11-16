@@ -25,7 +25,7 @@ import {styles} from './expandable_section.css.js';
 @customElement('me-expandable-section')
 export class ExpandableSection extends LitElement {
   @property({type: Boolean}) open = false;
-  @property({type: Boolean}) sticky = false;
+  @property({type: Boolean}) sticky? = false;
 
   static styles = styles;
 

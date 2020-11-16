@@ -23,7 +23,6 @@ import '../../shared/checkbox/checkbox.js';
 
 import {html, query} from 'lit-element';
 
-import {snackbarStyles} from '../../../styles.css.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
 import {Limits} from '../types.js';
@@ -33,7 +32,7 @@ import {styles} from './limits_base.css.js';
 
 /** Abstract component that can be extended for editing scalar limits. */
 export abstract class LimitsBase extends ConnectedLitElement {
-  static styles = [styles, snackbarStyles];
+  static styles = [styles];
 
   abstract get label(): string;
   abstract get absoluteMinimum(): number;
@@ -113,7 +112,7 @@ export abstract class LimitsBase extends ConnectedLitElement {
 
   render() {
     return html`
-    <me-card title=${this.label}>
+    <me-card>
       <div slot="content">
         <me-checkbox
           id="limit-enabled"
@@ -131,8 +130,18 @@ export abstract class LimitsBase extends ConnectedLitElement {
     if (!this.limitsProperty?.enabled)
       return html``;
 
+    let labelMin = '';
+    let labelMax = '';
+    if (this.label === 'Apply Yaw Limits') {
+      labelMin = 'Counter-Clockwise Limit';
+      labelMax = 'Clockwise Limit';
+    } else {
+      labelMin = 'Top-down Limit';
+      labelMax = 'Bottom-up Limit';
+    }
+
     return html`
-    <me-section-row label="Minimum">
+    <me-section-row label="${labelMin}">
       <div class="LabelRowContent">
         <mwc-button id="set-min-button" class="SetButton" unelevated @click="${
         this.onSetMin}">Set to ${
@@ -149,7 +158,7 @@ export abstract class LimitsBase extends ConnectedLitElement {
       @change=${this.onMinimumInputChange}>
     </me-slider-with-input>
 
-    <me-section-row class="MaxLabelRow" label="Maximum">
+    <me-section-row class="MaxLabelRow" label="${labelMax}">
       <div class="LabelRowContent">
         <mwc-button id="set-max-button" class="SetButton" unelevated @click="${
         this.onSetMax}">Set to ${

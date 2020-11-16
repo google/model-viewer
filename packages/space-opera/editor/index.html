@@ -106,7 +106,8 @@
     background-color: var(--expandable-section-background);
     padding: 0;
     width: 440px;
-    border-left: 1px solid var(--tabs-conatiner-border)
+    min-width: 440px;
+    max-width: 440px;
   }
 
   me-tabs a {
@@ -128,9 +129,6 @@
         </model-viewer-preview>
       </div>
       <me-tabs>
-        <me-tabbed-panel icon="home">
-          <home-container></home-container>
-        </me-tabbed-panel>
         <me-tabbed-panel icon="import_export">
           <me-export-panel></me-export-panel>
         </me-tabbed-panel>

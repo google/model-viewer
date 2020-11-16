@@ -547,18 +547,6 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-card title="Texture" functionId="revert-metallic-roughness-texture" functionTitle="Revert to original metallic roughness texture"
-        .revertFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
-        <div slot="content">
-          <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
-        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
-        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
-      </me-card>
       <me-card title="Metallic factor" functionTitle="Revert to original metallic factor" functionId="revert-metallic-factor" 
         .revertFunction=${this.revertMetallicFactor.bind(this)}>
         <div slot="content">
@@ -573,6 +561,18 @@ export class MaterialPanel extends ConnectedLitElement {
           <me-slider-with-input id="roughness-factor" min="0.0" max="1.0" step="0.01" 
           value="${material.roughnessFactor}" @change=${this.onRoughnessChange}>
           </me-slider-with-input>
+        </div>
+      </me-card>
+      <me-card title="Texture" functionId="revert-metallic-roughness-texture" functionTitle="Revert to original metallic roughness texture"
+        .revertFunction=${this.revertMetallicRoughnessTexture.bind(this)}>
+        <div slot="content">
+          <me-texture-picker .selectedIndex=${
+        currentTextureId ?
+            this.safeUrlIds.indexOf(currentTextureId) :
+            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
+        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
+        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
+          </me-texture-picker>
         </div>
       </me-card>
     </div>

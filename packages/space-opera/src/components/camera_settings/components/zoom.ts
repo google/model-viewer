@@ -70,11 +70,11 @@ export class ZooomLimits extends ConnectedLitElement {
 
   render() {
     return html`
-    <me-card title="Minimum Zoom">
+    <me-card>
       <div slot="content">
         <me-checkbox
           id="limit-enabled"
-          label="Minimum Zoom"
+          label="Apply Minimum Zoom"
           ?checked="${!!this.hasZoom}"
           @change=${this.onToggle}>
         </me-checkbox>
