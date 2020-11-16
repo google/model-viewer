@@ -16,8 +16,6 @@
  */
 
 import '@material/mwc-tab';
-import '@material/mwc-radio';
-import '@material/mwc-formfield';
 import '../shared/expandable_content/expandable_tab.js';
 import '../shared/pill_buttons/pill_buttons.js'
 
@@ -25,6 +23,7 @@ import {customElement, html, internalProperty, property} from 'lit-element';
 
 import {homeStyles} from '../../styles.css.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {Dropdown} from '../shared/dropdown/dropdown.js';
 
 import {CARD_CONTENT, CardContentInterface, THEMES} from './types.js';
 
@@ -61,6 +60,7 @@ export class HomeContainerCard extends ConnectedLitElement {
 export class HomeContainer extends ConnectedLitElement {
   static styles = homeStyles;
   @internalProperty() theme: 'light'|'dark' = 'dark';
+  @internalProperty() selectedTheme: number = 0;
 
   setTheme() {
     const theme = THEMES[this.theme];
@@ -89,12 +89,26 @@ export class HomeContainer extends ConnectedLitElement {
 
   enableDarkTheme() {
     this.theme = 'dark';
+    this.selectedTheme = 0;
     this.setTheme();
   }
 
   enableLightTheme() {
     this.theme = 'light';
+    this.selectedTheme = 1;
     this.setTheme();
+  }
+
+  onSelectTheme(event: CustomEvent) {
+    const dropdownElement = event.target as Dropdown;
+    if (dropdownElement.selectedItem &&
+        dropdownElement.selectedItem.getAttribute('value') === 'dark') {
+      this.enableDarkTheme();
+    } else if (
+        dropdownElement.selectedItem &&
+        dropdownElement.selectedItem.getAttribute('value') === 'light') {
+      this.enableLightTheme();
+    }
   }
 
   render() {
@@ -141,18 +155,15 @@ export class HomeContainer extends ConnectedLitElement {
       <me-expandable-tab tabName="Editor Settings" .open=${true}>
         <div slot="content">
           <me-card title="Color Themes">
-            <div slot="content">
-              <mwc-formfield label="Dark Theme" class="themeButtons">
-                <mwc-radio name="location" checked 
-                  @click=${this.enableDarkTheme}>
-                </mwc-radio>
-              </mwc-formfield>
-              <mwc-formfield label="Light Theme" class="themeButtons">
-                <mwc-radio name="location" 
-                  @click=${this.enableLightTheme}>
-                </mwc-radio>
-              </mwc-formfield>
-            </div>
+            <me-dropdown
+            .selectedIndex=${this.selectedTheme}
+            slot="content"
+            id="material-selector"
+            @select=${this.onSelectTheme}
+            >
+              <paper-item value="dark">Dark Theme</paper-item>
+              <paper-item value="light">Light Theme</paper-item>
+          </me-dropdown>
           </me-card>
         </div>
       </me-expandable-tab>
