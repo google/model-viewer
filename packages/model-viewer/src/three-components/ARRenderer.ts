@@ -264,6 +264,22 @@ export class ARRenderer extends EventDispatcher {
     }
   }
 
+  /**
+   * True if a scene is currently in the process of being presented in AR
+   */
+  get isPresenting(): boolean {
+    return this.presentedScene != null;
+  }
+
+  updateTarget() {
+    const scene = this.presentedScene;
+    if (scene != null) {
+      // Move the scene's target to the model's floor height.
+      const target = scene.getTarget();
+      scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
+    }
+  }
+
   private postSessionCleanup() {
     // The offscreen WebXR framebuffer is now invalid, switch
     // back to the default framebuffer for canvas output.
@@ -351,28 +367,12 @@ export class ARRenderer extends EventDispatcher {
     this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
-  /**
-   * True if a scene is currently in the process of being presented in AR
-   */
-  get isPresenting(): boolean {
-    return this.presentedScene != null;
-  }
-
   private onUpdateScene = () => {
     if (this.placementBox != null && this.isPresenting) {
       this.placementBox!.dispose();
       this.placementBox = new PlacementBox(this.presentedScene!.model);
     }
   };
-
-  updateTarget() {
-    const scene = this.presentedScene;
-    if (scene != null) {
-      // Move the scene's target to the model's floor height.
-      const target = scene.getTarget();
-      scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
-    }
-  }
 
   private updateCamera(view: XRView) {
     const {camera} = this;
@@ -482,6 +482,8 @@ export class ARRenderer extends EventDispatcher {
    * This ensures the model is placed according to the chosen target, is not
    * reoriented, and does not intersect the camera even when the model
    * is large (unless the target is chosen outside of the model's bounding box).
+   *
+   * Only a public method to make it testable.
    */
   public placeModel(hit: Vector3) {
     const scene = this.presentedScene!;
@@ -694,6 +696,9 @@ export class ARRenderer extends EventDispatcher {
         (time, frame) => this.onWebXRFrame(time, frame));
   }
 
+  /**
+   * Only public to make it testable.
+   */
   public onWebXRFrame(time: number, frame: XRFrame) {
     this.frame = frame;
     const pose = frame.getViewerPose(this.refSpace!);
