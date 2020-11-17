@@ -25,17 +25,15 @@ export const styles: CSSResult = css`:host {
 .ColorPickerContent {
   width: 200px;
   display: block;
-  background: var(--expandable-section-background);
-  border: 1px solid var(--expandable-section-text);
-  border-radius: 3px;
+  background: var(--material-color-google-grey-800);
   padding: 10px;
 }
 
 .Thumbnail {
-  height: 25px;
-  width: 25px;
-  border-radius: 60px;
-  border: 1px solid #BDBDBD;
+  height: calc(var(--me-swatch-size) - 2px);
+  width: calc(var(--me-swatch-size) - 2px);
+  border-radius: 3px;
+  border: 1px solid white;
 }
 
 .HueSlider {
@@ -49,10 +47,10 @@ export const styles: CSSResult = css`:host {
 }
 
 .HexInput {
-  background: var(--number-input-background);
-  border-radius: 3px;
-  border: 1px solid var(--text-on-expandable-background);
-  color: var(--text-on-expandable-background);
+  background: #202124;    /* GOOGLE GREY 900 */
+  border-radius: 4px;
+  border: none;
+  color: #dadce0;         /* GOOGLE GREY 300 */
   font-size: 16px;
   height: 20px;
   margin-top: 18px;

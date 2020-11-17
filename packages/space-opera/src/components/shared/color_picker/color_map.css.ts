@@ -17,8 +17,7 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`
-:host {
+export const styles: CSSResult = css`:host {
   height: 150px;
   width: 200px;
   position: relative;

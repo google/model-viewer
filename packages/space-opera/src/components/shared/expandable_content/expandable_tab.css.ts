@@ -19,8 +19,7 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --me-theme-container-background: var(--expandable-section-background);
-  --tab-background-color: var(--expandable-section-header-background);
+  --me-theme-container-background: #2b2d30;
 }
 
 .TabHeader{
@@ -61,7 +60,7 @@ export const styles: CSSResult = css`
 }
 
 .DisabledTabHeader {
-  color: var(--expandable-section-text);
+  color: #888;
 }
 
 .TabLabel {
@@ -113,7 +112,7 @@ export const styles: CSSResult = css`
 
 .TabContent[open],
 .SectionContent[open] {
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
   padding: 20px;
   overflow: unset;
   max-height: none;

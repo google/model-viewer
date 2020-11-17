@@ -26,7 +26,6 @@ mwc-button {
 }
 
 .SetButton {
-  margin-right: 10px;
   width: 120px;
 }
 

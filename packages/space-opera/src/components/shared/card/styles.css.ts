@@ -22,12 +22,11 @@ export const styles: CSSResult = css`
   transition: 0.3s;
   width: 100%;
   border-radius: 5px;
-  background: var(--card-background-color);
+  background: var(--expandable-section-background);
   border: 1px solid var(--card-border-color);
 
   display: inline-flex;
   flex-grow: 1;
-  margin: auto 0 10px auto;
 }
 
 .header-container {
@@ -40,7 +39,7 @@ export const styles: CSSResult = css`
 .header {
   margin-top: 0;
   margin-right: 5px;
-  font-size: 12px;
+  font-size: 16px;
   color: var(--expandable-section-text);
 }
 
@@ -54,8 +53,12 @@ export const styles: CSSResult = css`
   width: 100%;
 }
 
+.noPad {
+  padding-bottom: 0px;
+}
+
 .content-container {
-  padding: 5px 10px 5px 10px;
+  padding: 0px 10px 0px 0px;
 }
 
 .error {

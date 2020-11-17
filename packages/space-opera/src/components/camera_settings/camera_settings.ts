@@ -237,8 +237,6 @@ export class CameraSettings extends ConnectedLitElement {
     return html`
     <me-expandable-tab tabName="Camera Setup">
       <div slot="content">
-        <me-card title="Camera Settings">
-          <div slot="content">
             <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
               ?checked="${!!this.config.cameraControls}"
               @change=${this.onCamControlsCheckboxChange}>
@@ -251,8 +249,6 @@ export class CameraSettings extends ConnectedLitElement {
               ?checked="${!!this.config.autoRotate}"
               @change=${this.onAutoRotateChange}>
             </me-checkbox>
-          </div>
-        </me-card>
         <me-card title="Initial Camera Position" 
           .hasError="${this.cameraOutOfBounds}" .revertFunction=${
         this.resetInitialCamera.bind(this)}>
@@ -277,12 +273,9 @@ export class CameraSettings extends ConnectedLitElement {
         html``}
           </div>
         </me-card>
-        <me-card title="Target Point">
-          <div slot="content">
-            <me-camera-target-input .change=${this.onCameraTargetChange}>
-            </me-camera-target-input>
-          </div>
-        </me-card>
+        <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
+        <me-camera-target-input .change=${this.onCameraTargetChange}>
+        </me-camera-target-input>
       </div>
     </me-expandable-tab>
 

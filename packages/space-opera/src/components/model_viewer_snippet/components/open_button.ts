@@ -200,40 +200,31 @@ export class ImportCard extends LitElement {
 
   render() {
     return html`
-    <me-card title="Import Content">
-      <div slot="content">
-        <div style="margin: 10px 0">
-          <mwc-button unelevated
-              icon="file_upload"
-              @click=${this.onUploadGLB}>
-              Import GLB
-            </mwc-button>
-          <mwc-button unelevated
-            icon="file_upload"
-            @click=${this.onSnippetOpen}>
-            Update Snippet
-          </mwc-button>
-        </div>
-        <me-open-modal id="open-modal"></me-open-modal>
-        <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
-      </div>
-    </me-card>
-    <me-card title="Load Default Model">
-      <div slot="content">
-        <me-dropdown
-          .selectedIndex=${this.selectedDefaultOption}
-          slot="content"
-          @select=${this.onDefaultSelect}
-        >
-          <paper-item value='none'>None</paper-item>
-          <paper-item value='Astronaut'>Astronaut</paper-item>
-          <paper-item value='Horse'>Horse</paper-item>
-          <paper-item value='RobotExpressive'>Robot</paper-item>
-          <paper-item value='pbr-spheres'>Spheres</paper-item>
-          <paper-item value='shishkebab'>Shishkebab</paper-item>
-        </me-dropdown>
-      </div>
-    </me-card>
+      <mwc-button unelevated
+          icon="file_upload" style="margin-bottom: 5px"
+          @click=${this.onUploadGLB}>
+          Import GLB 
+        </mwc-button>
+      <mwc-button unelevated
+        icon="file_upload" style="margin-bottom: 20px"
+        @click=${this.onSnippetOpen}>
+        Update Snippet
+      </mwc-button>
+    <me-open-modal id="open-modal"></me-open-modal>
+    <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
+    <div style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">Default Model:</div>
+    <me-dropdown
+      .selectedIndex=${this.selectedDefaultOption}
+      slot="content" style="margin-bottom: 20px"
+      @select=${this.onDefaultSelect}
+    >
+      <paper-item value='none'>None</paper-item>
+      <paper-item value='Astronaut'>Astronaut</paper-item>
+      <paper-item value='Horse'>Horse</paper-item>
+      <paper-item value='RobotExpressive'>Robot</paper-item>
+      <paper-item value='pbr-spheres'>Spheres</paper-item>
+      <paper-item value='shishkebab'>Shishkebab</paper-item>
+    </me-dropdown>
     `;
   }
 }

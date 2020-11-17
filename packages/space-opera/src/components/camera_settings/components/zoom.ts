@@ -70,24 +70,20 @@ export class ZooomLimits extends ConnectedLitElement {
 
   render() {
     return html`
-    <me-card>
-      <div slot="content">
-        <me-checkbox
-          id="limit-enabled"
-          label="Apply Minimum Zoom"
-          ?checked="${!!this.hasZoom}"
-          @change=${this.onToggle}>
-        </me-checkbox>
-        ${
+    <me-checkbox
+      id="limit-enabled"
+      label="Apply Minimum Zoom"
+      ?checked="${!!this.hasZoom}"
+      @change=${this.onToggle}>
+    </me-checkbox>
+    ${
         this.hasZoom ? html`
-          <mwc-button id="set-min-button" class="SetButton" unelevated 
-          @click="${this.dispatchMin}">Set Min</mwc-button>
-          <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
-          @click="${this.dispatchResetMin}">Reset Min</mwc-button>
-        ` :
+      <mwc-button id="set-min-button" class="SetButton" unelevated 
+      @click="${this.dispatchMin}">Set Min</mwc-button>
+      <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
+      @click="${this.dispatchResetMin}">Reset Min</mwc-button>
+    ` :
                        html``}
-      </div>
-    </me-card>
     <div class="${this.snackClassName}" id="snackbar">${this.snackBody}</div>
 `;
   }

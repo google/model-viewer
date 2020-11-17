@@ -15,27 +15,23 @@
  *
  */
 
+
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
-:host {
-  --me-theme-container-background: #2b2d30;
+.HeaderLabel {
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.SectionContent {
-  max-height: 0;
-  overflow: hidden;
-  padding: 0 20px;
+.defaultError {
+  margin-top: 0;
+  margin-left: 15px;
+  color: #FFFFFF;
 }
 
-.SectionContent[open] {
-  background-color: var(--me-theme-container-background);
-  overflow: visible;
-  max-height: 100vh;
-  padding: 20px;
-  background-color: var(--expandable-section-background);
-}
-
-.sticky[open] {
-  background-color: #202124;  /* GOOGLE_GREY_900 */
+.EnvironmnetImageDropdown,
+.UploadButton,
+.Row {
+  margin-top: 10px;
 }
 `;

@@ -19,30 +19,35 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`:host {
   font-family: Roboto;
+  /* MATERIAL_COLOR_GOOGLE_GREY_300 */
   color: #dadce0;
   --me-theme-focused-color: #4285f4;
+  /* MATERIAL_COLOR_GOOGLE_GREY_800 */
   --me-theme-tab-background-color: #3c4043;
+  /* MATERIAL_COLOR_GOOGLE_GREY_300 */
   --me-theme-tab-default-color: #dadce0;
+  /* MATERIAL_COLOR_GOOGLE_BLUE_500 */
   --me-theme-tab-selected-color: #4285f4;
+  /* MATERIAL_COLOR_GOOGLE_GREY_900 */
   --me-theme-container-background-color: #202124;
   --mdc-theme-primary: var(--me-theme-tab-selected-color);
   --mdc-text-transform: none;
   --mdc-tab-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-text-label-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-stacked-height: 100px;
-  background: var(--expandable-section-background);
+  background: var(--me-theme-container-background-color);
   display: flex;
   flex-direction: column;
 }
 
 :host .exportTab.isFocused {
-  background-color: white;
+  background-color: var(--me-theme-tab-background-color);
   outline: var(--me-theme-focused-color) solid 1px;
   outline-offset: -1px;
 }
 
 .TabHeader {
-  background-color: var(--expandable-section-background);
+  background-color: var(--me-theme-tab-background-color);
   font-family: 'Google Sans';
   font-size: 14px;
   letter-spacing: .25px;

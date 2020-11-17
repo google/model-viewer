@@ -63,10 +63,13 @@ export class CardElement extends LitElement {
     </mwc-button>
     ` :
                                                      html``;
+    const noFunctino =
+        (this.uploadFunction !== undefined || this.copyFunction !== undefined ||
+         this.removeFunction !== undefined || this.revertFunction !== undefined)
     return html`
     <div class="card ${hasError}">
       <div class="container">
-        <div class="header-container">
+        <div class="header-container ${noFunctino ? 'noPad' : ''}">
           <div class="header">${this.title}</div> 
           ${upload}
           ${copy}

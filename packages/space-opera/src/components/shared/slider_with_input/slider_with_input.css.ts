@@ -17,8 +17,9 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`
-:host {
+export const styles: CSSResult = css`:host {
+  --google-grey-300: #dadce0;
+  --google-grey-800: #3c4043;
   display: block;
 }
 
@@ -36,8 +37,8 @@ export const styles: CSSResult = css`
 }
 
 paper-slider {
-  --paper-slider-knob-color: var(--text-on-expandable-background);
-  --paper-slider-active-color: var(--text-on-expandable-background);
+  --paper-slider-knob-color: var(--google-grey-300);
+  --paper-slider-active-color: var(--google-grey-300);
 }
 
 .InputArea {
@@ -47,7 +48,7 @@ paper-slider {
 }
 
 .InputContainer {
-  background: var(--number-input-background);
+  background: var(--google-grey-800);
   border-radius: 4px;
   display: inline-flex;
   justify-content: space-between;
@@ -56,13 +57,9 @@ paper-slider {
   padding: 6px 12px;
 }
 
-.InputContainer:hover {
-  box-shadow: 0 1px 2px 1px rgba(255, 255, 255, .1);
-}
-
 .InlineInput {
-  color: var(--text-on-expandable-background);
-  -moz-appearance: textfield;
+  color: var(--google-grey-300);
+  -moz-appearance:textfield;
   background: transparent;
   border: none;
   border-style: unset;

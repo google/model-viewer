@@ -53,24 +53,19 @@ export class PosterControlsElement extends ConnectedLitElement {
     return html`
 <me-expandable-tab tabName="Poster">
   <div slot="content">
-    <me-card title="Poster Creation">
-      <div slot="content">
-        <mwc-button unelevated class="PosterButton" 
-          @click="${
-        this.onCreatePoster}">Generate Poster At Initial Camera</mwc-button>
-        <div class="PosterHelperButtons">
-        ${
+    <mwc-button unelevated class="PosterButton" 
+      @click="${this.onCreatePoster}">Generate Poster</mwc-button>
+    <div class="PosterHelperButtons">
+    ${
     !!this.poster ? html`
-        <mwc-button unelevated class="PosterButton"
-          @click="${this.onDownloadPoster}">Download Poster</mwc-button>
-        <mwc-button unelevated class="PosterButton"
-          @click="${this.onDisplayPoster}">Display Poster</mwc-button>
-        <mwc-button unelevated class="PosterButton"
-          @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDownloadPoster}">Download Poster</mwc-button>
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDisplayPoster}">Display Poster</mwc-button>
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
-        </div>
-      </div>
-    </me-card>
+    </div>
   </div>
 </me-expandable-tab>
 <div class="${this.toastClassName}" id="snackbar">${this.toastBody}</div>

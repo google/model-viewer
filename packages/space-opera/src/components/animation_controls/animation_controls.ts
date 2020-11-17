@@ -70,8 +70,6 @@ export class AnimationControls extends ConnectedLitElement {
     const tabHeader = hasAnims ? 'Animations' : 'Animations (Model has none)';
     return html`
       <me-expandable-tab tabName=${tabHeader} .enabled=${hasAnims}>
-        <div slot="content">
-          <me-card title="Options">
             <div slot="content">
               <me-dropdown id="animation-name-selector"
                 selectedIndex=${selectedAnimationIndex}
@@ -87,8 +85,6 @@ export class AnimationControls extends ConnectedLitElement {
                 ?checked="${!!this.config.autoplay}"
                 @change=${this.onAutoplayChange}></me-checkbox>
             </div>
-          </me-card>
-        </div>
       </me-expandable-tab>
         `;
   }

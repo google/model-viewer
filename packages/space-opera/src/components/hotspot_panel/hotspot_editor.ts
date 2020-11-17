@@ -22,15 +22,15 @@ import '@material/mwc-icon-button';
 import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {hotspotEditorStyles} from '../../styles.css.js';
 
+import {styles} from './hotspot_editor.css.js';
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
 import {HotspotConfig} from './types.js';
 
 /** A editor card for a single hotspot */
 @customElement('me-hotspot-editor')
 export class HotspotEditorElement extends LitElement {
-  static styles = hotspotEditorStyles;
+  static styles = styles;
 
   @property({type: Object}) config?: HotspotConfig;
   @query('textarea#annotation') annotationInput!: HTMLTextAreaElement;
@@ -46,14 +46,13 @@ export class HotspotEditorElement extends LitElement {
       return html``;
 
     return html`
-<me-card title="Hotspot Label" .removeFunction=${
-        this.onRemoveHotspot.bind(this)}>
-  <div slot="content">
-    <textarea id="annotation" @input=${this.onAnnotationInput}>${
-        this.config.annotation}
-    </textarea>
-  </div>
-</me-card>
+    <me-section-row label="Label:">
+      <textarea id="annotation" @input=${this.onAnnotationInput}>${
+        this.config.annotation}</textarea>
+      <mwc-icon-button id="remove-hotspot"
+        icon="delete"
+        @click="${this.onRemoveHotspot}"></mwc-icon-button>
+    </me-section-row>
     `;
   }
 

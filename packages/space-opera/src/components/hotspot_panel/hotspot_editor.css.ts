@@ -15,27 +15,19 @@
  *
  */
 
+
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`
-:host {
-  --me-theme-container-background: #2b2d30;
+export const styles: CSSResult = css`:host {
+  border-radius: 3px;
+  border: 1px solid rgba(218,220,224,0.122);
+  padding: 5px;
+  display: block;
+  margin-bottom: 10px;
 }
 
-.SectionContent {
-  max-height: 0;
-  overflow: hidden;
-  padding: 0 20px;
-}
-
-.SectionContent[open] {
-  background-color: var(--me-theme-container-background);
-  overflow: visible;
-  max-height: 100vh;
-  padding: 20px;
-  background-color: var(--expandable-section-background);
-}
-
-.sticky[open] {
-  background-color: #202124;  /* GOOGLE_GREY_900 */
+textarea {
+  outline: none;
+  resize: vertical;
+  width: 100%;
 }
 `;

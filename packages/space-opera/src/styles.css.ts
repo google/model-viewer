@@ -61,51 +61,6 @@ export const fileModalStyles: CSSResult = css`input[type="file"] {
 }
 `;
 
-export const homeStyles: CSSResult = css`
-:host {
-  --mdc-theme-text-primary-on-background: var(--text-on-expandable-background);
-  --mdc-theme-secondary: #5185ec;
-}
-
-mwc-formfield {
-  display: block;
-}
-
-.HomeCardHeader {
-  font-size: 20px;
-  color: var(--text-on-expandable-background);
-}
-
-.HomeCardContent {
-  font-size: 14px;
-  color: var(--secondary-text-on-expandable-background);
-}
-
-.CardContainer {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-  color: rgba(0,0,0,.87);
-}
-
-.CardContent{
-  display: flex;
-  align-items: center;
-}
-
-img {
-  padding-right: 10px;
-}
-
-.text {
-  display: inline-block;
-}
-
-.note {
-  color: var(--text-on-expandable-background);
-}
-`;
-
 export const hotspotEditorStyles: CSSResult = css`
 textarea {
   outline: none;

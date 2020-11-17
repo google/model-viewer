@@ -112,17 +112,13 @@ export abstract class LimitsBase extends ConnectedLitElement {
 
   render() {
     return html`
-    <me-card>
-      <div slot="content">
-        <me-checkbox
-          id="limit-enabled"
-          label=${this.label}
-          ?checked="${!!this.limitsProperty?.enabled}"
-          @change=${this.onToggle}>
-        </me-checkbox>
-        ${this.renderLimits()}
-      </div>
-    </me-card>
+    <me-checkbox
+      id="limit-enabled"
+      label=${this.label}
+      ?checked="${!!this.limitsProperty?.enabled}"
+      @change=${this.onToggle}>
+    </me-checkbox>
+    ${this.renderLimits()}
 `;
   }
 

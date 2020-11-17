@@ -17,18 +17,18 @@
 
 
 import {css, CSSResult} from 'lit-element';
-export const styles: CSSResult = css`
-:host {
-  --input-font-color: var(--text-on-expandable-background);
+export const styles: CSSResult = css`:host {
+  --input-background: #3c4043;
+  --input-font-color: #dadce0;
   display: block;
 }
 
 .EditorDropdown {
   width: 100%;
   border-radius: 4px;
-  background-color: var(--dropdown-background);
-  --primary-text-color: var(--input-font-color);
-  --primary-background-color: var(--dropdown-background);
+  background-color: var(--input-background);
+  --primary-text-color: #f8f9fa;
+  --primary-background-color: var(--input-background);
   --paper-input-container-shared-input-style_-_padding: 0 5px;
   --paper-input-container-shared-input-style_-_line-height: 24px;
   --paper-input-container-underline-color: none;
@@ -45,7 +45,7 @@ export const styles: CSSResult = css`
   font-weight: normal;
   color: var(--input-font-color);
   padding: 6px 24px;
-  --primary-background-color: var(--dropdown-background);
+  --primary-background-color: var(--input-background);
   --paper-item-min-height: none;
 }
 `;
