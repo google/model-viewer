@@ -180,21 +180,21 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
           </div>
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
-<model-viewer id="lantern" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" alt="A 3D model of a lantern">
+<model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
   <div id="controls">
     <div>
       <p>Diffuse</p>
       <select id="diffuse">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
       </select>
     </div>
     <div>
       <p>Metallic-roughness</p>
       <select id="metallicRoughness">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
       </select>
     </div>
@@ -236,7 +236,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
           </div>
           <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
-<model-viewer id="helmet" camera-controls interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of an helmet">
+<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
   <div id="controls">
     <div>
       <p>Normals</p>

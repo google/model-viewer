@@ -180,14 +180,6 @@ export interface Node {
   extras?: Extras;
 }
 
-export interface Texture {
-  name?: string;
-  source?: number;
-  sampler?: number;
-  extensions?: ExtensionDictionary;
-  extras?: Extras;
-}
-
 export interface ExternalImage {
   name?: string;
   uri: string;
