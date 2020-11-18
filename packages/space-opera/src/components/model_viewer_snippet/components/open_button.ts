@@ -123,7 +123,7 @@ export class OpenModal extends LitElement {
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
   <div class="FileModalContainer">
     <div class="FileModalHeader">
-      <div>Update &lt;model-viewer&gt; Snippet</div>
+      <div>Edit &lt;model-viewer&gt; Snippet</div>
     </div>
     <div style="font-size: 14px; font-weight: 500; margin-top: 10px; color: white">Edit&#47; Paste &lt;model-viewer&gt Snippet</div>
       <div class="InnerSnippetModal">
@@ -172,56 +172,77 @@ export class ImportCard extends LitElement {
   onDefaultSelect(event: CustomEvent) {
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
-    const map = {
+    let snippet = '';
+    const simpleMap = {
       'Astronaut': 1,
       'Horse': 2,
       'RobotExpressive': 3,
-      'pbr-spheres': 4,
-      'shishkebab': 5
+      'alpha-blend-litmus': 4
+    };
+    const advancedMap = {
+      'BoomBox': 5,
+      'BrainStem': 6,
+      'Corset': 7,
+      'DamagedHelmet': 8,
+      'FlightHelmet': 9,
+      'Lantern': 10,
+      'Suzanne': 11,
+      'SpecGlossVsMetalRough': 12
     };
     if (value !== undefined) {
       if (value === 'none') {
         this.selectedDefaultOption = 0;
         return;
-      } else {
+      } else if (value in simpleMap) {
         // @ts-ignore
-        this.selectedDefaultOption = map[value];
-      }
-      const snippet = `<model-viewer
+        this.selectedDefaultOption = simpleMap[value];
+        snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/${value}.glb'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
+      } else if (value in advancedMap) {
+        // @ts-ignore
+        this.selectedDefaultOption = advancedMap[value];
+        snippet = `<model-viewer
+  src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
+            value}/glTF-Binary/${value}.glb'
+  shadow-intensity="1" camera-controls>
+</model-viewer>`;
+      }
+
       this.openModal.handleSubmitSnippet(snippet);
     }
   }
 
   render() {
     return html`
-      <mwc-button unelevated
-          icon="file_upload" style="margin-bottom: 5px"
-          @click=${this.onUploadGLB}>
-          Import GLB 
-        </mwc-button>
-      <mwc-button unelevated
-        icon="file_upload" style="margin-bottom: 20px"
-        @click=${this.onSnippetOpen}>
-        Update Snippet
-      </mwc-button>
     <me-open-modal id="open-modal"></me-open-modal>
     <me-file-modal accept=".glb,model/gltf-binary"></me-file-modal>
-    <div style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">Default Model:</div>
-    <me-dropdown
-      .selectedIndex=${this.selectedDefaultOption}
-      slot="content" style="margin-bottom: 20px"
-      @select=${this.onDefaultSelect}
-    >
-      <paper-item value='none'>None</paper-item>
-      <paper-item value='Astronaut'>Astronaut</paper-item>
-      <paper-item value='Horse'>Horse</paper-item>
-      <paper-item value='RobotExpressive'>Robot</paper-item>
-      <paper-item value='pbr-spheres'>Spheres</paper-item>
-      <paper-item value='shishkebab'>Shishkebab</paper-item>
-    </me-dropdown>
+    <div style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">Select Model:</div>
+    <div style="display: flex; justify-content: space-between">
+      <me-dropdown
+        .selectedIndex=${this.selectedDefaultOption}
+        slot="content" style="width: 60%; align-self: center;"
+        @select=${this.onDefaultSelect}
+      >
+        <paper-item value='none'>None</paper-item>
+        <paper-item value='Astronaut'>Astronaut</paper-item>
+        <paper-item value='Horse'>Horse</paper-item>
+        <paper-item value='RobotExpressive'>Robot</paper-item>
+        <paper-item value='alpha-blend-litmus'>Transparency Test</paper-item>
+        <paper-item value='BoomBox'>Boom Box</paper-item>
+        <paper-item value='BrainStem'>Brain Stem</paper-item>
+        <paper-item value='Corset'>Corset</paper-item>
+        <paper-item value='DamagedHelmet'>Damaged Helmet</paper-item>
+        <paper-item value='Lantern'>Lantern</paper-item>
+        <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
+      </me-dropdown>
+      <mwc-button unelevated
+        icon="file_upload" style="width: 35%; align-self: center;"
+        @click=${this.onUploadGLB}>
+        GLB
+      </mwc-button>
+    </div>
     `;
   }
 }

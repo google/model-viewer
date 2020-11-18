@@ -109,6 +109,16 @@
     overflow-y: auto;
     display: block;
   }
+  .privacy {
+    color: var(--expandable-section-text);
+    margin: 5px 16px;
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+  }
+  .privacy-link {
+    color: var(--expandable-section-text);
+  }
 </style>
 <body>
 <model-editor>
@@ -121,6 +131,12 @@
       <me-tabs>
         <me-tabbed-panel icon="import_export">
           <me-export-panel></me-export-panel>
+          <div class="privacy">
+            This &lt;model-viewer&gt; editor does not send any imported content to servers:
+            <a href="https://policies.google.com/privacy" class="privacy-link">
+              Privacy
+            </a>
+          </div>
         </me-tabbed-panel>
         <me-tabbed-panel icon="create">
           <me-export-panel header="true"></me-export-panel>

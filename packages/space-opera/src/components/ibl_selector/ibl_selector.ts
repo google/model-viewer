@@ -132,7 +132,7 @@ export class IblSelector extends ConnectedLitElement {
             1 :
         0;  // 0 is the default state
     return html`
-      <me-expandable-tab tabName="Lighting">
+      <me-expandable-tab tabName="Lighting" .open=${true}>
         <div slot="content">
           <div class="HeaderLabel">Environment Image:</div>
           <me-dropdown
@@ -146,7 +146,7 @@ export class IblSelector extends ConnectedLitElement {
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
           </me-dropdown>
           <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="cloud_upload" @click="${this.openFileModal}">Upload</mwc-button>
+        icon="cloud_upload" @click="${this.openFileModal}">HDR</mwc-button>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
               @change="${this.onExposureChange}"

@@ -19,7 +19,7 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 :host {
-  --me-theme-container-background: #2b2d30;
+  --me-theme-container-background: #202124;
 }
 
 .TabHeader{
@@ -30,7 +30,7 @@ export const styles: CSSResult = css`
   line-height: 40px;
   padding: 0 16px;
   color: var(--expandable-section-text);
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
   align-items: center;
 }
 
@@ -41,7 +41,7 @@ export const styles: CSSResult = css`
   cursor: default;
   font-size: 14px;
   color: var(--expandable-section-text);
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
   padding: 2px 16px;
 }
 
@@ -103,7 +103,7 @@ export const styles: CSSResult = css`
   overflow: hidden;
   padding: 0 20px;
   transition: max-height 500ms ease-in-out;
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
 }
 
 .TabContent[open],
@@ -122,7 +122,7 @@ export const styles: CSSResult = css`
 }
 
 .RadioButtonExpandableContent[open] {
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
   padding: 0;
   overflow: unset;
   max-height: none;
@@ -139,7 +139,7 @@ export const styles: CSSResult = css`
   position: sticky;
   z-index: 10;
   top: 0;
-  background-color: var(--tab-background-color);
+  background-color: var(--me-theme-container-background);
 }
 
 `;

@@ -244,7 +244,7 @@ export class CameraSettings extends ConnectedLitElement {
   render() {
     const initalError = this.cameraOutOfBounds ? 'initialError' : ''
     return html`
-    <me-expandable-tab tabName="Camera Setup">
+    <me-expandable-tab tabName="Camera Setup" .open=${true}>
       <div slot="content">
         <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
           ?checked="${!!this.config.cameraControls}"

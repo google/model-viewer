@@ -136,7 +136,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
   renderSelectMaterialTab() {
     return html`
-    <me-expandable-tab tabName="Selected Material" .open=${true}>
+    <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
+        true}>
       <me-dropdown
         .selectedIndex=${this.selectedMaterialId || 0}
         slot="content"
@@ -607,7 +608,7 @@ export class MaterialPanel extends ConnectedLitElement {
         (color: number) => Math.round(color * 255));
     const selectedColorHex = color.rgbArrayToHex(selectedColorRgb);
     return html`
-  <me-expandable-tab tabName="Base Color">
+  <me-expandable-tab tabName="Base Color" .open=${true}>
     <div slot="content">
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">

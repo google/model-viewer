@@ -39,6 +39,7 @@ import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {ExportZipButton} from './components/download_button.js';
+import {ImportCard} from './components/open_button.js';
 
 /**
  *
@@ -55,6 +56,7 @@ export class ExportPanel extends ConnectedLitElement {
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
+  @query('me-import-card') importCard!: ImportCard;
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -65,6 +67,10 @@ export class ExportPanel extends ConnectedLitElement {
 
   snippetCopyToClipboard() {
     this.snippetViewer.copyToClipboard();
+  }
+
+  onSnippetOpen() {
+    this.importCard.onSnippetOpen();
   }
 
   render() {
@@ -113,6 +119,7 @@ export class ExportPanel extends ConnectedLitElement {
 </me-expandable-tab>`;
     }
 
+    // on import/export tab
     return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
   .open=${true} .sticky=${true} 
@@ -121,16 +128,20 @@ export class ExportPanel extends ConnectedLitElement {
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}
       .renderedStyle=${this.hotspots.length > 0 ? hotspotStyles.cssText : ``}>
     </snippet-viewer>
+    <mwc-button unelevated
+        @click=${this.onSnippetOpen}>
+        Edit Snippet
+      </mwc-button>
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px">Export Content:</div>
     <me-download-button id="download-gltf"></me-download-button>
     <me-export-zip-button id="export-zip"></me-export-zip-button>
   </div>
 </me-expandable-tab>
-<a href="https://policies.google.com/privacy" style="color: white">Privacy</a>
 `;
   }
 

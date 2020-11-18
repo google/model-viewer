@@ -75,6 +75,7 @@ export class SliderWithInputElement extends LitElement {
         min="${this.min}"
         max="${this.max}"
         step="${this.step}"
+        secondary-progress="-180"
         @immediate-value-change=${this.onSliderChange}
         @change=${this.onSliderChange}></paper-slider>
 
