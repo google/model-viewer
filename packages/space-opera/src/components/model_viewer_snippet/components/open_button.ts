@@ -129,8 +129,8 @@ export class OpenModal extends LitElement {
       <div class="InnerSnippetModal">
         <textarea id="mv-input" rows=15>${exampleLoadableSnippet}</textarea>
         ${this.errors.map(error => html`<div>${error}</div>`)}
+      </div>
     </div>
-  </div>
   <div class="FileModalCancel">
     <mwc-button unelevated icon="save_alt" class="SaveButton"
       @click=${this.saveAndClose}>Save</mwc-button>
