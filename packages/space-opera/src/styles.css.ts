@@ -56,12 +56,21 @@ export const zoomStyles: CSSResult = css`
 }
 `;
 
-export const fileModalStyles: CSSResult = css`input[type="file"] {
+export const fileModalStyles: CSSResult = css`
+input[type="file"] {
   display: none;
 }
 `;
 
 export const hotspotEditorStyles: CSSResult = css`
+:host {
+  border-radius: 3px;
+  border: 1px solid rgba(218,220,224,0.122);
+  padding: 5px;
+  display: block;
+  margin-bottom: 10px;
+}
+
 textarea {
   outline: none;
   resize: vertical;
@@ -70,10 +79,21 @@ textarea {
 `;
 
 export const iblSelectorStyles: CSSResult = css`
+.HeaderLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: var(--text-on-expandable-background);
+  color: #FFFFFF;
+}
+
+.EnvironmnetImageDropdown,
+.UploadButton,
+.Row {
+  margin-top: 10px;
 }
 `;
 

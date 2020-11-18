@@ -28,6 +28,7 @@ import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
+import {iblSelectorStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -36,7 +37,6 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
-import {styles} from './ibl_selector.css.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, getEnvironmentImages} from './reducer.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './types.js';
 
@@ -47,7 +47,7 @@ const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
  */
 @customElement('me-ibl-selector')
 export class IblSelector extends ConnectedLitElement {
-  static styles = styles;
+  static styles = iblSelectorStyles;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() environmentImages: EnvironmentImage[] = [];

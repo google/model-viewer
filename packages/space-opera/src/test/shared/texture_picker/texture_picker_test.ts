@@ -69,7 +69,7 @@ describe('texture picker test', () => {
     spyOn(textureUploadFileModal, 'open').and.returnValue(openPromise);
 
     const fileUploadButton = texturePicker.shadowRoot!.querySelector(
-                                 'mwc-button#uploadButton')! as IconButton;
+                                 'mwc-icon-button#uploadButton')! as IconButton;
 
     fileUploadButton.click();
 
