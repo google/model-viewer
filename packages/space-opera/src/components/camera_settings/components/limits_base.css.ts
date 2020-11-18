@@ -33,8 +33,4 @@ mwc-button {
 .MaxLabelRow {
   margin-top: 10px;
 }
-
-.isFov {
-  display: none;
-}
 `;

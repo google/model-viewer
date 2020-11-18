@@ -55,6 +55,14 @@ export class PitchLimits extends LimitsBase {
     return 'Apply Pitch Limits';
   }
 
+  get minimumLabel() {
+    return 'Top-down Limit';
+  }
+
+  get maximumLabel() {
+    return 'Bottom-up Limit';
+  }
+
   get absoluteMinimum() {
     return DEFAULT_MIN_PITCH;
   }

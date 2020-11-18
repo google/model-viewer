@@ -35,6 +35,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
   static styles = [styles];
 
   abstract get label(): string;
+  abstract get minimumLabel(): string;
+  abstract get maximumLabel(): string;
   abstract get absoluteMinimum(): number;
   abstract get absoluteMaximum(): number;
   abstract get currentPreviewValue(): number;
@@ -126,18 +128,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
     if (!this.limitsProperty?.enabled)
       return html``;
 
-    let labelMin = '';
-    let labelMax = '';
-    if (this.label === 'Apply Yaw Limits') {
-      labelMin = 'Counter-Clockwise Limit';
-      labelMax = 'Clockwise Limit';
-    } else {
-      labelMin = 'Top-down Limit';
-      labelMax = 'Bottom-up Limit';
-    }
-
     return html`
-    <me-section-row label="${labelMin}">
+    <me-section-row label="${this.minimumLabel}">
       <div class="LabelRowContent">
         <mwc-button id="set-min-button" class="SetButton" unelevated @click="${
         this.onSetMin}">Set to ${
@@ -154,7 +146,7 @@ export abstract class LimitsBase extends ConnectedLitElement {
       @change=${this.onMinimumInputChange}>
     </me-slider-with-input>
 
-    <me-section-row class="MaxLabelRow" label="${labelMax}">
+    <me-section-row class="MaxLabelRow" label="${this.maximumLabel}">
       <div class="LabelRowContent">
         <mwc-button id="set-max-button" class="SetButton" unelevated @click="${
         this.onSetMax}">Set to ${

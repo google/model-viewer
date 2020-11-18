@@ -54,6 +54,14 @@ export class YawLimits extends LimitsBase {
     return 'Apply Yaw Limits';
   }
 
+  get minimumLabel() {
+    return 'Counter-Clockwise Limit';
+  }
+
+  get maximumLabel() {
+    return 'Clockwise Limit';
+  }
+
   get absoluteMinimum() {
     return DEFAULT_MIN_YAW;
   }
