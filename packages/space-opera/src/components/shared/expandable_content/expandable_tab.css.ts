@@ -34,10 +34,6 @@ export const styles: CSSResult = css`
   align-items: center;
 }
 
-.TabHeader:hover {
-  background-color: var(--expandable-section-header-hover);
-}
-
 .sticky-container {
   white-space: nowrap;
   display: flex;
