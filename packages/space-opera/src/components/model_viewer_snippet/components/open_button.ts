@@ -125,14 +125,11 @@ export class OpenModal extends LitElement {
     <div class="FileModalHeader">
       <div>Update &lt;model-viewer&gt; Snippet</div>
     </div>
-    <me-card title="Edit&#47; Paste &lt;model-viewer&gt Snippet">
-      <div class="OpenModalSection ModalSnippet" slot="content">
-        <div class="InnerSnippetModal">
-          <textarea id="mv-input" rows=15>${exampleLoadableSnippet}</textarea>
-          ${this.errors.map(error => html`<div>${error}</div>`)}
-        </div>
-      </div>
-    </me-card>
+    <div style="font-size: 14px; font-weight: 500; margin-top: 10px; color: white">Edit&#47; Paste &lt;model-viewer&gt Snippet</div>
+      <div class="InnerSnippetModal">
+        <textarea id="mv-input" rows=15>${exampleLoadableSnippet}</textarea>
+        ${this.errors.map(error => html`<div>${error}</div>`)}
+    </div>
   </div>
   <div class="FileModalCancel">
     <mwc-button unelevated icon="save_alt" class="SaveButton"

@@ -44,6 +44,11 @@ me-camera-target-input {
   color: #FFEBEE;
   margin-top: 5px;
 }
+
+.initialError {
+  border: 1px solid #E53935;
+  background: #EF5350;
+}
 `;
 
 export const zoomStyles: CSSResult = css`
@@ -166,9 +171,10 @@ paper-dialog {
 }
 
 .FileModalContainer {
-  height: 400px;
+  height: auto;
   width: 800px;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .FileModalHeader {
@@ -193,24 +199,13 @@ input[type="file"] {
   display: none;
 }
 
-.OpenModalSection {
-  padding-top: 10px;
-  width: 100%;
-}
-
 #mv-input {
   width: 100%;
 }
 
-.ModalSnippet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
 .InnerSnippetModal {
-  width: 95%;
+  padding-top: 10px;
+  width: 100%;
 }
 `;
 

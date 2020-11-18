@@ -51,6 +51,7 @@ class CameraOrbitEditor extends ConnectedLitElement {
   @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
 
   @property({type: Object}) orbit?: SphericalPositionDeg;
+  @property({type: Function}) resetFunction?: Function;
 
   get currentOrbit() {
     if (!this.yawInput || !this.pitchInput) {
@@ -70,6 +71,7 @@ class CameraOrbitEditor extends ConnectedLitElement {
     if (!this.orbit)
       return html``;
     return html`
+      <div style="justify-content: space-between; width: 100%; display: flex;">
         <me-draggable-input
           id="yaw"
           innerLabel="yaw"
@@ -85,6 +87,12 @@ class CameraOrbitEditor extends ConnectedLitElement {
           min=-9999 max=9999
           @change=${this.onChange}>
         </me-draggable-input>
+
+        <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Reset initial camera" @click=${this.resetFunction}
+          >
+        </mwc-icon-button>
+      </div>
 `;
   }
 }
@@ -234,58 +242,57 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   render() {
+    const initalError = this.cameraOutOfBounds ? 'initialError' : ''
     return html`
     <me-expandable-tab tabName="Camera Setup">
       <div slot="content">
-            <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
-              ?checked="${!!this.config.cameraControls}"
-              @change=${this.onCamControlsCheckboxChange}>
-            </me-checkbox>
-            ${
+        <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
+          ?checked="${!!this.config.cameraControls}"
+          @change=${this.onCamControlsCheckboxChange}>
+        </me-checkbox>
+        ${
     !this.config.cameraControls ?
         html`<div class="note"><small>Note: Camera interaction is always enabled in the preview, but will not be on your page.</small></div>` :
         ``}
-            <me-checkbox id="auto-rotate" label="Auto-rotate"
-              ?checked="${!!this.config.autoRotate}"
-              @change=${this.onAutoRotateChange}>
-            </me-checkbox>
-        <me-card title="Initial Camera Position" 
-          .hasError="${this.cameraOutOfBounds}" .revertFunction=${
-        this.resetInitialCamera.bind(this)}>
-          <div slot="content">
-            <me-camera-orbit-editor
-              @change=${this.onCameraOrbitEditorChange}
-              .orbit=${
+        <me-checkbox id="auto-rotate" label="Auto-rotate"
+          ?checked="${!!this.config.autoRotate}"
+          @change=${this.onAutoRotateChange}>
+        </me-checkbox>
+        <div class="${initalError}">
+          <div style="font-size: 14px; font-weight: 500; margin-top: 10px">Initial Camera Position:</div>
+          <me-camera-orbit-editor
+            @change=${this.onCameraOrbitEditorChange}
+            .orbit=${
         this.camera.orbit ??
-        this.initialCamera.orbit}>
-            </me-camera-orbit-editor>
-            <mwc-button
-              class="SaveCameraButton"
-              id="save-camera-angle"
-              unelevated
-              icon="photo_camera"
-              @click=${this.onSaveCameraOrbit}>
-              Save current as initial
-            </mwc-button>
-            ${
+        this.initialCamera.orbit}
+            .resetFunction=${this.resetInitialCamera.bind(this)}>
+          </me-camera-orbit-editor>
+          <mwc-button
+            class="SaveCameraButton"
+            id="save-camera-angle"
+            unelevated
+            icon="photo_camera"
+            @click=${this.onSaveCameraOrbit}>
+            Save current as initial
+          </mwc-button>
+          ${
         this.cameraOutOfBounds ?
         html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :
         html``}
-          </div>
-        </me-card>
+        </div>
         <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
         <me-camera-target-input .change=${this.onCameraTargetChange}>
         </me-camera-target-input>
       </div>
     </me-expandable-tab>
 
-    <me-expandable-tab tabName="Customize Limits">
-      <div slot="content">
-        <me-camera-yaw-limits></me-camera-yaw-limits>
-        <me-camera-pitch-limits></me-camera-pitch-limits>
-        <me-camera-zoom-limits></me-camera-zoom-limits>
-      </div>
-    </me-expandable-tab>
+<me-expandable-tab tabName="Customize Limits">
+  <div slot="content">
+    <me-camera-yaw-limits></me-camera-yaw-limits>
+    <me-camera-pitch-limits></me-camera-pitch-limits>
+    <me-camera-zoom-limits></me-camera-zoom-limits>
+  </div>
+</me-expandable-tab>
 `;
   }
 
