@@ -83,6 +83,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
+    @property({type: String, attribute: 'ar-placement'})
+    arPlacement: string = 'floor';
+
     @property({type: String, attribute: 'ar-modes'})
     arModes: string = DEFAULT_AR_MODES;
 
@@ -156,6 +159,10 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
             deserializeQuickLookBrowsers(this.quickLookBrowsers);
       }
 
+      if (changedProperties.has('arScale')) {
+        this[$scene].canScale = this.arScale !== 'fixed';
+      }
+
       if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
           !changedProperties.has('iosSrc')) {
         return;
@@ -163,10 +170,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('arModes')) {
         this[$arModes] = deserializeARModes(this.arModes);
-      }
-
-      if (changedProperties.has('arScale')) {
-        this[$scene].canScale = this.arScale !== 'fixed';
       }
 
       this[$selectARMode]();
@@ -264,7 +267,9 @@ configuration or device capabilities');
       try {
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
-        await this[$renderer].arRenderer.present(this[$scene]);
+        const {arRenderer} = this[$renderer];
+        arRenderer.placeOnWall = this.arPlacement === 'wall';
+        await arRenderer.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);

@@ -66,6 +66,7 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
   public camera: PerspectiveCamera = new PerspectiveCamera();
   public currentSession: XRSession|null = null;
+  public placeOnWall = false;
 
   private placementBox: PlacementBox|null = null;
   private lastTick: number|null = null;
