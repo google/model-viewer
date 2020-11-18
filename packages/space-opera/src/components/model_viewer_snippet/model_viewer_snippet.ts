@@ -129,7 +129,9 @@ export class ExportPanel extends ConnectedLitElement {
     <me-download-button id="download-gltf"></me-download-button>
     <me-export-zip-button id="export-zip"></me-export-zip-button>
   </div>
-</me-expandable-tab>`;
+</me-expandable-tab>
+<a href="https://policies.google.com/privacy" style="color: white">Privacy</a>
+`;
   }
 
   protected updated() {
