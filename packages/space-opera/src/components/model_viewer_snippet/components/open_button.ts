@@ -18,36 +18,52 @@
 import '@material/mwc-button';
 import '../../file_modal/file_modal.js';
 
-import {parseSnippet} from '@google/model-viewer-editing-adapter/lib/main';
-import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main';
+import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {extractStagingConfig} from '../../../types.js';
+import {extractStagingConfig, State} from '../../../types.js';
+import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
+import {getCamera} from '../../camera_settings/reducer.js';
+import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
-import {dispatchGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
+import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
+import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {dispatchConfig} from '../reducer.js';
 
 @customElement('me-open-modal')
-export class OpenModal extends LitElement {
+export class OpenModal extends ConnectedLitElement {
   static styles = openModalStyles;
 
   @internalProperty() isOpen: boolean = false;
+  @internalProperty() config: ModelViewerConfig = {};
+  @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() errors: string[] = [];
-  @query('textarea#mv-input') private readonly textArea!: HTMLInputElement;
+  @internalProperty() gltfUrl?: string;
+  @query('snippet-viewer#snippet-input')
+  private readonly snippetViewer!: SnippetViewer;
+
+  stateChanged(state: State) {
+    this.config = getConfig(state);
+    this.camera = getCamera(state);
+    this.gltfUrl = getGltfUrl(state);
+  }
 
   async handleSubmitSnippet(value?: string) {
-    if (!this.textArea)
+    const textArea = this.snippetViewer.snippet;
+    if (!textArea)
       return;
     this.errors = [];
     let inputText: string = '';
     if (value === undefined) {
-      inputText = this.textArea.value.trim();
+      inputText = textArea.value.trim();
     } else {
       inputText = value;
     }
@@ -92,9 +108,9 @@ export class OpenModal extends LitElement {
   }
 
   updated() {
+    const textArea = this.snippetViewer.snippet;
     // Work-around closureZ issue.
-    this.textArea.style.backgroundColor =
-        this.errors.length > 0 ? 'pink' : 'white';
+    textArea.style.backgroundColor = this.errors.length > 0 ? 'pink' : 'white';
   }
 
   open() {
@@ -114,21 +130,35 @@ export class OpenModal extends LitElement {
   }
 
   render() {
-    const exampleLoadableSnippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/Astronaut.glb'
-  shadow-intensity="1" camera-controls>
-</model-viewer>`;
+    //// Get the model-viewer snippet for the edit snippet modal
+    const editedConfig = {...this.config};
+    applyCameraEdits(editedConfig, this.camera);
+    if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
+      editedConfig.src = this.gltfUrl;
+    } else {
+      // Uploaded GLB
+      editedConfig.src = `Change this to your GLB URL`;
+    }
+    if (editedConfig.environmentImage &&
+        isObjectUrl(editedConfig.environmentImage)) {
+      // Uploaded env image
+      editedConfig.environmentImage = `Change this to your HDR URL`;
+    }
+    const exampleLoadableSnippet =
+        renderModelViewer(editedConfig, {}, undefined);
+    ////
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
   <div class="FileModalContainer">
     <div class="FileModalHeader">
-      <div>Edit &lt;model-viewer&gt; Snippet</div>
+      <div>Edit Snippet</div>
     </div>
-    <div style="font-size: 14px; font-weight: 500; margin-top: 10px; color: white">Edit&#47; Paste &lt;model-viewer&gt Snippet</div>
+    <div style="font-size: 14px; font-weight: 500; margin-top: 10px; color: white">Edit or paste a &lt;model-viewer&gt snippet</div>
       <div class="InnerSnippetModal">
-        <textarea id="mv-input" rows=15>${exampleLoadableSnippet}</textarea>
-        ${this.errors.map(error => html`<div>${error}</div>`)}
+      <snippet-viewer id="snippet-input" .renderedSnippet=${
+        exampleLoadableSnippet} .isReadOnly=${false}>
+      </snippet-viewer>
       </div>
     </div>
   <div class="FileModalCancel">

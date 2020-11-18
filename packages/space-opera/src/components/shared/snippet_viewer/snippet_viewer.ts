@@ -36,6 +36,7 @@ export class SnippetViewer extends LitElement {
 
   @property({type: Object}) renderedSnippet: TemplateResult = html``;
   @property({type: String}) renderedStyle = '';
+  @property({type: Boolean}) isReadOnly?: Boolean = true;
   @query('span#tag') shadowTag!: HTMLElement;
   @query('textarea#snippet') snippet!: HTMLTextAreaElement;
 
@@ -49,6 +50,11 @@ export class SnippetViewer extends LitElement {
   }
 
   protected render() {
+    if (this.isReadOnly === false) {
+      return html`<span id="tag" style='display: none'>${
+          this.renderedSnippet}</span>
+      <textarea id="snippet" rows=15></textarea>`
+    }
     return html`
       <span id="tag" style='display: none'>${this.renderedSnippet}</span>
       <textarea id="snippet" readonly rows=10></textarea>

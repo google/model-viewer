@@ -109,7 +109,7 @@ async function prepareZipArchive(
 export class DownloadButton extends GenericDownloadButton {
   constructor() {
     super();
-    this.buttonLabel = 'Export GLB';
+    this.buttonLabel = 'GLB';
   }
 
   stateChanged(state: State) {
@@ -127,7 +127,7 @@ export class ExportZipButton extends GenericDownloadButton {
 
   constructor() {
     super();
-    this.buttonLabel = 'Export ZIP';
+    this.buttonLabel = 'ZIP';
   }
 
   stateChanged(state: State) {
