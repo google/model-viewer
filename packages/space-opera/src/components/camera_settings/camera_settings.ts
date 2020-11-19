@@ -77,6 +77,7 @@ class CameraOrbitEditor extends ConnectedLitElement {
             innerLabel="yaw"
             value=${this.orbit.thetaDeg}
             min=-9999 max=9999
+            style="min-width: 90px; max-width: 90px;"
             @change=${this.onChange}>
           </me-draggable-input>
           <me-draggable-input
@@ -84,6 +85,7 @@ class CameraOrbitEditor extends ConnectedLitElement {
             innerLabel="pitch"
             value=${this.orbit.phiDeg}
             min=-9999 max=9999
+            style="min-width: 90px; max-width: 90px;"
             @change=${this.onChange}>
           </me-draggable-input>
         </div>
