@@ -32,6 +32,7 @@ export const styles: CSSResult = css`
   color: var(--expandable-section-text);
   background-color: var(--me-theme-container-background);
   align-items: center;
+  font-weight: 500;
 }
 
 .sticky-container {
@@ -140,6 +141,7 @@ export const styles: CSSResult = css`
   z-index: 10;
   top: 0;
   background-color: var(--me-theme-container-background);
+  font-weight: 500;
 }
 
 `;
