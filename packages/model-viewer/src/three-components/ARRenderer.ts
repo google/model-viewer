@@ -224,9 +224,11 @@ export class ARRenderer extends EventDispatcher {
     scene.addEventListener('model-load', this.onUpdateScene);
 
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
-    const ray = new XRRay(
-        new DOMPoint(0, 0, 0),
-        {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
+    const ray = this.placeOnWall === true ?
+        undefined :
+        new XRRay(
+            new DOMPoint(0, 0, 0),
+            {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
         .requestHitTestSource({space: this.viewerRefSpace!, offsetRay: ray})
         .then(hitTestSource => {
@@ -436,12 +438,12 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const hit = hitTestResults[0];
-    const hitMatrix = this.getHitPoint(hit);
-    if (hitMatrix == null) {
+    const hitPoint = this.getHitPoint(hit);
+    if (hitPoint == null) {
       return;
     }
 
-    this.placeModel(hitMatrix);
+    this.placeModel(hitPoint);
 
     hitSource.cancel();
     this.initialHitSource = null;
@@ -463,9 +465,14 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const hitMatrix = matrix4.fromArray(pose.transform.matrix);
+
+    if (this.placeOnWall === true) {
+      // Orient the model to the wall's normal vector.
+      this.goalYaw = Math.atan2(hitMatrix.elements[4], hitMatrix.elements[6]);
+    }
     // Check that the y-coordinate of the normal is large enough that the normal
-    // is pointing up.
-    return hitMatrix.elements[5] > 0.75 ?
+    // is pointing up for floor placement; opposite for wall placement.
+    return hitMatrix.elements[5] > 0.75 !== this.placeOnWall ?
         hitPosition.setFromMatrixPosition(hitMatrix) :
         null;
   }
@@ -490,41 +497,48 @@ export class ARRenderer extends EventDispatcher {
     const scene = this.presentedScene!;
     const {model} = scene;
     const {min, max} = model.boundingBox;
+    const target = scene.getTarget();
 
     this.placementBox!.show = true;
 
     const goal = this.goalPosition;
     goal.copy(hit);
-    const floor = hit.y;
 
-    const origin = this.camera.position.clone();
-    const direction = hit.clone().sub(origin).normalize();
-    // Pull camera back enough to be outside of large models.
-    origin.sub(direction.multiplyScalar(model.idealCameraDistance));
-    const ray = new Ray(origin, direction.normalize());
+    if (this.placeOnWall === true) {
+      // Move the scene's target to the center of the back of the model's
+      // bounding box.
+      scene.setTarget(target.x, target.y, min.z);
+    } else {
+      const floor = hit.y;
 
-    const modelToWorld = this.initialModelToWorld;
-    const modelPosition =
-        new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
-    modelToWorld.setPosition(modelPosition);
-    const world2Model = new Matrix4().getInverse(modelToWorld);
-    ray.applyMatrix4(world2Model);
+      const origin = this.camera.position.clone();
+      const direction = hit.clone().sub(origin).normalize();
+      // Pull camera back enough to be outside of large models.
+      origin.sub(direction.multiplyScalar(model.idealCameraDistance));
+      const ray = new Ray(origin, direction.normalize());
 
-    // Make the box tall so that we don't intersect the top face.
-    max.y += 10;
-    ray.intersectBox(model.boundingBox, modelPosition);
-    max.y -= 10;
+      const modelToWorld = this.initialModelToWorld;
+      const modelPosition =
+          new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
+      modelToWorld.setPosition(modelPosition);
+      const world2Model = new Matrix4().getInverse(modelToWorld);
+      ray.applyMatrix4(world2Model);
 
-    if (modelPosition != null) {
-      modelPosition.applyMatrix4(modelToWorld);
-      goal.add(hit).sub(modelPosition);
+      // Make the box tall so that we don't intersect the top face.
+      max.y += 10;
+      ray.intersectBox(model.boundingBox, modelPosition);
+      max.y -= 10;
+
+      if (modelPosition != null) {
+        modelPosition.applyMatrix4(modelToWorld);
+        goal.add(hit).sub(modelPosition);
+      }
+
+      // Move the scene's target to the model's floor height.
+      scene.setTarget(target.x, min.y, target.z);
+      // Ignore the y-coordinate and set on the floor instead.
+      goal.y = floor;
     }
-
-    // Move the scene's target to the model's floor height.
-    const target = scene.getTarget();
-    scene.setTarget(target.x, min.y, target.z);
-    // Ignore the y-coordinate and set on the floor instead.
-    goal.y = floor;
 
     this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
   }
@@ -548,7 +562,7 @@ export class ARRenderer extends EventDispatcher {
       if (hitPosition != null) {
         this.isTranslating = true;
         this.lastDragPosition.copy(hitPosition);
-      } else {
+      } else if (this.placeOnWall === false) {
         this.isRotating = true;
         this.lastScalar = axes[0];
       }
@@ -631,17 +645,19 @@ export class ARRenderer extends EventDispatcher {
 
         this.goalPosition.sub(this.lastDragPosition);
 
-        const offset = hit.y - this.lastDragPosition.y;
-        // When a lower floor is found, keep the model at the same height, but
-        // drop the placement box to the floor. The model falls on select end.
-        if (offset < 0) {
-          this.placementBox!.offsetHeight = offset / scale;
-          this.presentedScene!.model.setShadowScaleAndOffset(scale, offset);
-          // Interpolate hit ray up to drag plane
-          const cameraPosition = vector3.copy(this.camera.position);
-          const alpha = -offset / (cameraPosition.y - hit.y);
-          cameraPosition.multiplyScalar(alpha);
-          hit.multiplyScalar(1 - alpha).add(cameraPosition);
+        if (this.placeOnWall === false) {
+          const offset = hit.y - this.lastDragPosition.y;
+          // When a lower floor is found, keep the model at the same height, but
+          // drop the placement box to the floor. The model falls on select end.
+          if (offset < 0) {
+            this.placementBox!.offsetHeight = offset / scale;
+            this.presentedScene!.model.setShadowScaleAndOffset(scale, offset);
+            // Interpolate hit ray up to drag plane
+            const cameraPosition = vector3.copy(this.camera.position);
+            const alpha = -offset / (cameraPosition.y - hit.y);
+            cameraPosition.multiplyScalar(alpha);
+            hit.multiplyScalar(1 - alpha).add(cameraPosition);
+          }
         }
 
         this.goalPosition.add(hit);
