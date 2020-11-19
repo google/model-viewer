@@ -42,11 +42,5 @@ export const INITIAL_ENVIRONMENT_IMAGES: EnvironmentImage[] = [
   {
     uri: '../shared-assets/environments/aircraft_workshop_01_1k.hdr',
     name: 'Aircraft Workshop'
-  },
-  {uri: '../shared-assets/environments/lightroom_14b.hdr', name: 'Lightroom'},
-  {uri: '../shared-assets/environments/spot1Lux.hdr', name: 'Spot'},
-  {
-    uri: '../shared-assets/environments/white_furnace.hdr',
-    name: 'White Furnace'
-  },
+  }
 ];
