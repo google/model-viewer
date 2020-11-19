@@ -51,7 +51,6 @@ class CameraOrbitEditor extends ConnectedLitElement {
   @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
 
   @property({type: Object}) orbit?: SphericalPositionDeg;
-  @property({type: Function}) resetFunction?: Function;
 
   get currentOrbit() {
     if (!this.yawInput || !this.pitchInput) {
@@ -72,26 +71,22 @@ class CameraOrbitEditor extends ConnectedLitElement {
       return html``;
     return html`
       <div style="justify-content: space-between; width: 100%; display: flex;">
-        <me-draggable-input
-          id="yaw"
-          innerLabel="yaw"
-          value=${this.orbit.thetaDeg}
-          min=-9999 max=9999
-          @change=${this.onChange}>
-        </me-draggable-input>
-
-        <me-draggable-input
-          id="pitch"
-          innerLabel="pitch"
-          value=${this.orbit.phiDeg}
-          min=-9999 max=9999
-          @change=${this.onChange}>
-        </me-draggable-input>
-
-        <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-          title="Reset initial camera" @click=${this.resetFunction}
-          >
-        </mwc-icon-button>
+        <div>
+          <me-draggable-input
+            id="yaw"
+            innerLabel="yaw"
+            value=${this.orbit.thetaDeg}
+            min=-9999 max=9999
+            @change=${this.onChange}>
+          </me-draggable-input>
+          <me-draggable-input
+            id="pitch"
+            innerLabel="pitch"
+            value=${this.orbit.phiDeg}
+            min=-9999 max=9999
+            @change=${this.onChange}>
+          </me-draggable-input>
+        </div>
       </div>
 `;
   }
@@ -264,17 +259,22 @@ export class CameraSettings extends ConnectedLitElement {
             @change=${this.onCameraOrbitEditorChange}
             .orbit=${
         this.camera.orbit ??
-        this.initialCamera.orbit}
-            .resetFunction=${this.resetInitialCamera.bind(this)}>
+        this.initialCamera.orbit}>
           </me-camera-orbit-editor>
-          <mwc-button
-            class="SaveCameraButton"
-            id="save-camera-angle"
-            unelevated
-            icon="photo_camera"
-            @click=${this.onSaveCameraOrbit}>
-            Save current as initial
-          </mwc-button>
+          <div style="justify-content: space-between; width: 100%; display: flex;">
+            <mwc-button
+              class="SaveCameraButton"
+              id="save-camera-angle"
+              unelevated
+              icon="photo_camera"
+              style="align-self: center"
+              @click=${this.onSaveCameraOrbit}>
+              Save current as initial
+            </mwc-button>
+            <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: 10px;" id="revert-metallic-roughness-texture" icon="undo"
+            title="Reset initial camera" @click=${this.resetInitialCamera}>
+            </mwc-icon-button>
+          </div>
           ${
         this.cameraOutOfBounds ?
         html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :

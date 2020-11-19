@@ -110,14 +110,20 @@
     display: block;
   }
   .privacy {
-    color: var(--expandable-section-text);
+    color:#BDBDBD;
     margin: 5px 16px;
     position: absolute;
     bottom: 0;
     font-size: small;
+    z-index: 0;
+  }
+  @media only screen and (max-height: 600px) {
+    .privacy {
+      z-index: -1;
+    }
   }
   .privacy-link {
-    color: var(--expandable-section-text);
+    color: #BDBDBD;
   }
 </style>
 <body>

@@ -251,7 +251,7 @@ export class ImportCard extends LitElement {
     <div style="display: flex; justify-content: space-between">
       <me-dropdown
         .selectedIndex=${this.selectedDefaultOption}
-        slot="content" style="width: 60%; align-self: center;"
+        slot="content" style="align-self: center; width: 71%;"
         @select=${this.onDefaultSelect}
       >
         <paper-item value='none'>None</paper-item>
@@ -267,7 +267,7 @@ export class ImportCard extends LitElement {
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
       </me-dropdown>
       <mwc-button unelevated
-        icon="file_upload" style="width: 35%; align-self: center;"
+        icon="file_upload" style="align-self: center;"
         @click=${this.onUploadGLB}>
         GLB
       </mwc-button>

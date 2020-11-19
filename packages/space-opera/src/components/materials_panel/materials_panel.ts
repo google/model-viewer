@@ -556,20 +556,6 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-section-row label="Texture">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-          title="Revert to original metallic roughness texture"
-          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
-        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
-        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
-      </me-section-row>
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
         <div class="MRSliderContainer">
@@ -593,6 +579,20 @@ export class MaterialPanel extends ConnectedLitElement {
           </me-slider-with-input>
         </div>
       </div>
+      <me-section-row label="Texture">
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Revert to original metallic roughness texture"
+          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
+        currentTextureId ?
+            this.safeUrlIds.indexOf(currentTextureId) :
+            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
+        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
+        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
+          </me-texture-picker>
+        </div>
+      </me-section-row>
     </div>
   </me-expandable-tab>`;
   }

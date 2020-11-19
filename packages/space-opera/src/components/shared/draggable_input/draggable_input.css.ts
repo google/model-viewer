@@ -24,7 +24,9 @@ export const styles: CSSResult = css`:host {
   padding: 6px 12px;
   overflow: hidden;
   background: #3c4043;
-  min-width: 60px;
+  min-width: 80px;
+  max-width: 80px;
+  max-height: 19px;
   align-items: center;
 }
 
