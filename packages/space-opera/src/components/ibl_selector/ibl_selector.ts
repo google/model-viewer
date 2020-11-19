@@ -135,18 +135,24 @@ export class IblSelector extends ConnectedLitElement {
       <me-expandable-tab tabName="Lighting" .open=${true}>
         <div slot="content">
           <div class="HeaderLabel">Environment Image:</div>
-          <me-dropdown
-            class="EnvironmnetImageDropdown"
-            selectedIndex=${selectedIndex}
-            @select=${this.onSelectEnvironmentImage}>
-            <paper-item>Default</paper-item>
-            ${
+          <div style="display: flex; justify-content: space-between">
+            <me-dropdown
+              class="EnvironmnetImageDropdown"
+              selectedIndex=${selectedIndex}
+              style="align-self: center; width: 70%;"
+              @select=${this.onSelectEnvironmentImage}>
+              <paper-item>Default</paper-item>
+              ${
         this.environmentImages.map(
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
-          </me-dropdown>
-          <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
+            </me-dropdown>
+            <mwc-button 
+              class="UploadButton"
+              style="align-self: center;"
+              id="uploadButton" unelevated
+              icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
+          </div>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
               @change="${this.onExposureChange}"
