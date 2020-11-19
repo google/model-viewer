@@ -146,7 +146,7 @@ export class IblSelector extends ConnectedLitElement {
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
           </me-dropdown>
           <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="cloud_upload" @click="${this.openFileModal}">HDR</mwc-button>
+        icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
               @change="${this.onExposureChange}"

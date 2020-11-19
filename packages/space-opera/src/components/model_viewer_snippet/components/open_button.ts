@@ -130,7 +130,7 @@ export class OpenModal extends ConnectedLitElement {
   }
 
   render() {
-    //// Get the model-viewer snippet for the edit snippet modal
+    // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
     if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
@@ -146,7 +146,6 @@ export class OpenModal extends ConnectedLitElement {
     }
     const exampleLoadableSnippet =
         renderModelViewer(editedConfig, {}, undefined);
-    ////
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
