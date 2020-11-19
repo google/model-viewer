@@ -18,14 +18,13 @@ import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, Mesh
 import {Damper} from './Damper.js';
 import Model from './Model.js';
 import {ModelScene} from './ModelScene.js';
+import {Side} from './Shadow.js';
 
 const RADIUS = 0.2;
 const LINE_WIDTH = 0.03;
 const MAX_OPACITY = 0.75;
 const SEGMENTS = 12;
 const DELTA_PHI = Math.PI / (2 * SEGMENTS);
-
-export type Side = 'back'|'bottom';
 
 const vector2 = new Vector2();
 

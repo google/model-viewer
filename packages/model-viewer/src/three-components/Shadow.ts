@@ -17,6 +17,8 @@ import {Box3, DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial, Vecto
 
 import Model from './Model';
 
+export type Side = 'back'|'bottom';
+
 // Nothing within Offset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
 const OFFSET = 0.001;
@@ -49,9 +51,10 @@ export class Shadow extends DirectionalLight {
   private boundingBox = new Box3;
   private size = new Vector3;
   private isAnimated = false;
+  private side: Side = 'bottom';
   public needsUpdate = false;
 
-  constructor(model: Model, softness: number) {
+  constructor(model: Model, softness: number, side: Side) {
     super();
 
     // We use the light only to cast a shadow, not to light the scene.
@@ -71,17 +74,25 @@ export class Shadow extends DirectionalLight {
     model.add(this);
     this.target = model;
 
-    this.setModel(model, softness);
+    this.setModel(model, softness, side);
   }
 
   /**
    * Update the shadow's size and position for a new model. Softness is also
    * needed, as this controls the shadow's resolution.
    */
-  setModel(model: Model, softness: number) {
+  setModel(model: Model, softness: number, side: Side) {
+    this.side = side;
     this.isAnimated = model.animationNames.length > 0;
     this.boundingBox.copy(model.boundingBox);
     this.size.copy(model.size);
+    if (this.side === 'back') {
+      const {min, max} = this.boundingBox;
+      [min.y, min.z] = [min.z, min.y];
+      [max.y, max.z] = [max.z, max.y];
+      [this.size.y, this.size.z] = [this.size.z, this.size.y];
+      this.rotateX(Math.PI / 2);
+    }
     const {boundingBox, size} = this;
 
     if (this.isAnimated) {
@@ -93,8 +104,12 @@ export class Shadow extends DirectionalLight {
       size.set(maxDimension, maxDimension, maxDimension);
     }
 
-    const shadowOffset = size.y * OFFSET;
-    this.position.y = boundingBox.max.y + shadowOffset;
+    const shadowOffset = boundingBox.max.y + size.y * OFFSET;
+    if (side === 'bottom') {
+      this.position.y = shadowOffset;
+    } else {
+      this.position.z = shadowOffset;
+    }
     boundingBox.getCenter(this.floor.position);
 
     this.setSoftness(softness);
@@ -175,6 +190,10 @@ export class Shadow extends DirectionalLight {
    * absolute orientation about the Y-axis (other rotations are not supported).
    */
   setRotation(radiansY: number) {
+    if (this.side !== 'bottom') {
+      // We don't support rotation about a horizontal axis yet.
+      return;
+    }
     this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
     this.shadow.updateMatrices(this);
   }

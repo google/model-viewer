@@ -20,7 +20,7 @@ import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
-import {Shadow} from './Shadow.js';
+import {Shadow, Side} from './Shadow.js';
 
 export const DEFAULT_FOV_DEG = 45;
 const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
@@ -295,13 +295,14 @@ export default class Model extends Object3D {
   /**
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
-  setShadowIntensity(shadowIntensity: number, shadowSoftness: number) {
+  setShadowIntensity(
+      shadowIntensity: number, shadowSoftness: number, side: Side) {
     let shadow = this[$shadow];
     if (shadow != null) {
       shadow.setIntensity(shadowIntensity);
-      shadow.setModel(this, shadowSoftness);
+      shadow.setModel(this, shadowSoftness, side);
     } else if (shadowIntensity > 0) {
-      shadow = new Shadow(this, shadowSoftness);
+      shadow = new Shadow(this, shadowSoftness, side);
       shadow.setIntensity(shadowIntensity);
       this[$shadow] = shadow;
     }
