@@ -42,5 +42,14 @@ export const INITIAL_ENVIRONMENT_IMAGES: EnvironmentImage[] = [
   {
     uri: '../shared-assets/environments/aircraft_workshop_01_1k.hdr',
     name: 'Aircraft Workshop'
-  }
+  },
+  {
+    uri: '../shared-assets/environments/music_hall_01_1k.hdr',
+    name: 'Music Hall'
+  },
+  {uri: '../shared-assets/environments/pillars_1k.hdr', name: 'Pillars'},
+  {
+    uri: '../shared-assets/environments/whipple_creek_regional_park_04_1k.hdr',
+    name: 'Whipple Creek'
+  },
 ];
