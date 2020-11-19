@@ -236,7 +236,8 @@ export class ARRenderer extends EventDispatcher {
         });
 
     this.currentSession = currentSession;
-    this.placementBox = new PlacementBox(scene.model);
+    this.placementBox =
+        new PlacementBox(scene.model, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
     this.lastTick = performance.now();
 
@@ -373,7 +374,8 @@ export class ARRenderer extends EventDispatcher {
   private onUpdateScene = () => {
     if (this.placementBox != null && this.isPresenting) {
       this.placementBox!.dispose();
-      this.placementBox = new PlacementBox(this.presentedScene!.model);
+      this.placementBox = new PlacementBox(
+          this.presentedScene!.model, this.placeOnWall ? 'back' : 'bottom');
     }
   };
 
