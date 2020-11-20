@@ -807,6 +807,7 @@ export class GltfModel {
         throw new Error(`Invalid bufferView at index ${i}?`);
       }
       this.root.bufferViews[i].byteOffset! -= bytesSaved;
+      // Adjust the corresponding buffer's byteLength also. 
       if ((this.root.buffers === undefined) ||
           (this.root.bufferViews[i]?.buffer === undefined)) {
         throw new Error(`Invalid bufferView at index ${i}?`);
