@@ -40,6 +40,9 @@ const INTRO_DAMPER_RATE = 0.4;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
+// For automatic dynamic viewport scaling, don't let the scale drop below this limit.
+const MIN_VIEWPORT_SCALE = 0.25;
+
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
 
@@ -457,6 +460,15 @@ export class ARRenderer extends EventDispatcher {
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
+    // Use automatic dynamic viewport scaling if supported.
+    if (view.requestViewportScale && view.recommendedViewportScale) {
+      const scale = view.recommendedViewportScale;
+      view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
+    }
+    const layer = this[$currentSession]!.renderState.baseLayer;
+    const viewport = layer!.getViewport(view);
+    this.threeRenderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+
     this[$presentedScene]!.model.orientHotspots(
         Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
@@ -744,20 +756,30 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
-    this[$updateCamera](pose.views[0]);
+    // WebXR may return multiple views, i.e. for headset AR. This
+    // isn't really supported at this point, but make a best-effort
+    // attempt to render other views also, using the first view
+    // as the main viewpoint.
+    let isFirstView: boolean = true;
+    for (const view of pose.views) {
+      this[$updateCamera](view);
 
-    this[$placeInitially](frame);
+      if (isFirstView) {
+        this[$placeInitially](frame);
 
-    this[$processInput](frame);
+        this[$processInput](frame);
 
-    const delta = time - this[$lastTick]!;
-    this[$moveScene](delta);
-    this.renderer.preRender(scene, time, delta);
-    this[$lastTick] = time;
+        const delta = time - this[$lastTick]!;
+        this[$moveScene](delta);
+        this.renderer.preRender(scene, time, delta);
+        this[$lastTick] = time;
+      }
 
-    // NOTE: Clearing depth caused issues on Samsung devices
-    // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-    // this.threeRenderer.clearDepth();
-    this.threeRenderer.render(scene, this.camera);
+      // NOTE: Clearing depth caused issues on Samsung devices
+      // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
+      // this.threeRenderer.clearDepth();
+      this.threeRenderer.render(scene, this.camera);
+      isFirstView = false;
+    }
   }
 }

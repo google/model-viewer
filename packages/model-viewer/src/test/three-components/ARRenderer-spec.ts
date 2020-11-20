@@ -55,7 +55,9 @@ class MockXRFrame implements XRFrame {
       projectionMatrix: camera.projectionMatrix.elements as unknown as
           Float32Array,
       viewMatrix: {} as Float32Array,
-      transform: transform
+      transform: transform,
+      recommendedViewportScale: null,
+      requestViewportScale: (_scale: number|null) => {}
     };
     const viewerPos: XRViewerPose = {transform: transform, views: [view]};
 
@@ -95,7 +97,9 @@ suite('ARRenderer', () => {
   const stubWebXrInterface = (arRenderer: ARRenderer) => {
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
-        public renderState: XRRenderState = {baseLayer: {} as XRLayer} as
+        public renderState: XRRenderState = {baseLayer: {
+          getViewport: () => { return {x: 0, y: 0, width: 320, height: 240} as XRViewport }
+        } as XRLayer} as
             XRRenderState;
 
         public hitTestSources: Set<XRHitTestSource> =

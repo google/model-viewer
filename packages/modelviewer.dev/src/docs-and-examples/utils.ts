@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-import {convertJSONToHTML} from './create-html';
+import {convertJSONToHTML, createExamplesHeader, createExamplesSidebar, starterSidebar} from './create-html';
 import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
 
-export function switchPages(oldType: string, newType: string) {
-  if (oldType !== newType) {
-    // TODO: Handle going from examples back to docs (old state), possibly
-    // include a previous state to revert to in URI
-    const newSidebarCategory = getSidebarCategoryForNewPage();
-    const newURI = '../'.concat(newType, '/#', newSidebarCategory);
+
+// TODO: Handle going from examples back to docs (old state), possibly
+// include a previous state to revert to in URI
+export function switchPages(oldLocation: string, newLocation: string) {
+  if (oldLocation !== newLocation) {
+    let URI = '';
+    if (oldLocation === 'docs') {
+      const category = getSidebarCategoryForNewPage();
+      URI = '../examples/'.concat(category);
+    } else {
+      URI = newLocation;
+    }
     const d = document.createElement('a');
-    d.setAttribute('href', newURI);
+    d.setAttribute('href', URI);
     window.location.href = d.href;
   }
 }
@@ -43,17 +49,6 @@ function stickyHeader() {
       header.classList.remove('sticky');
     }
   }
-}
-
-async function fetchHtmlAsText(url: string): Promise<string> {
-  const response = await fetch(url);
-  return await response.text();
-}
-
-export async function loadExamples() {
-  const loadingExample = document.getElementById('loading-examples');
-  loadingExample!.innerHTML =
-      await fetchHtmlAsText('../examples/lazy-loading.html');
 }
 
 interface JSONCallback {
@@ -89,21 +84,60 @@ function jumpToSection() {
   }
 }
 
+export function initFooterLinks() {
+  const footerLinks = document.getElementById('footer-links');
+  footerLinks!.innerHTML = `
+<div>
+  <a href="https://github.com/google/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/google/model-viewer/issues">Bug report</a> ∙ <a href="https://policies.google.com/privacy">Privacy</a>
+</div>`;
+}
+
 /* Load the JSON asynchronously, then generate the sidebarObserver after all the
  * documentation in the window.
- * docsOrExamples: 'docs' or 'examples'
+ * docsOrExample: 'docs' or 'examples-${category}'
  */
-export function init(docsOrExamples: 'docs'|'examples') {
-  loadJSON('../data/loading.json', function(response: string) {
-    const actualJSON = JSON.parse(response);
-    convertJSONToHTML(actualJSON, docsOrExamples);
-    if (docsOrExamples === 'examples') {
-      loadExamples();
+export function init(docsOrExample: string) {
+  const filePath = docsOrExample === 'docs' ? '../data/docs.json' :
+                                              '../../data/examples.json';
+  loadJSON(filePath, function(response: string) {
+    const json = JSON.parse(response);
+    starterSidebar(docsOrExample);
+    if (docsOrExample === 'docs') {
+      convertJSONToHTML(json);
+    } else {
+      createExamplesSidebar(json);
+      createExamplesHeader();
     }
-    sidebarObserver(docsOrExamples);
+    sidebarObserver(docsOrExample);
     jumpToSection();
   });
 }
 
+export function toggleSidebar() {
+  const root = document.documentElement;
+  const nav = document.getElementById('sidenav')!;
+  if (nav.offsetWidth > 150) {
+    root.style.setProperty('--sidebar-width', '0px');
+    root.style.setProperty('--neg-sidebar-width', '-300px');
+  } else {
+    root.style.setProperty('--sidebar-width', '300px');
+    root.style.setProperty('--neg-sidebar-width', '0px');
+  }
+}
+
+(self as any).toggleSidebar = toggleSidebar;
 (self as any).switchPages = switchPages;
 (self as any).init = init;
+(self as any).initFooterLinks = initFooterLinks;
+
+function handleSideBarClickToggle(event: any) {
+  const nav = document.getElementById('sidenav')!;
+  var mouseClickWidth = event.clientX;
+  // toggle nav when clicking outside of nav on small device
+  if (nav && mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
+      window.innerWidth <= 800) {
+    toggleSidebar();
+  }
+}
+
+document.addEventListener('click', handleSideBarClickToggle);

@@ -17,13 +17,6 @@
 
 <!DOCTYPE html>
 <head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169901325-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-169901325-1');
-  </script>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; editor">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,8 +36,23 @@
   };
   </script>
   <script type="module" src="../dist/space-opera.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
 </head>
 <style>
+  :root {
+    --expandable-section-background: #2b2d30;
+    --expandable-section-text: #EEEEEE;
+    --text-on-expandable-background: #F5F5F5;
+    --number-input-background: #212121;
+  }
+
   body {
     margin: 0
   }
@@ -88,6 +96,8 @@
     background-color: #202124;  /* GOOGLE_GREY_900 */
     padding: 0;
     width: 360px;
+    min-width: 360px;
+    max-width: 360px;
   }
 
   me-tabs a {
@@ -95,40 +105,65 @@
   }
 
   me-tabbed-panel {
-    max-height: calc(100vh - 96px);
+    max-height: calc(100vh - 45px);
     overflow-y: auto;
     display: block;
   }
+  .privacy {
+    color:#BDBDBD;
+    margin: 5px 16px;
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+    z-index: 0;
+  }
+  @media only screen and (max-height: 600px) {
+    .privacy {
+      z-index: -1;
+    }
+  }
+  .privacy-link {
+    color: #BDBDBD;
+  }
 </style>
 <body>
-  <model-editor>
-    <div class="app">
+<model-editor>
+  <div class="app">
     <div class="editor-body-root">
       <div class="mvContainer">
         <model-viewer-preview id="editing_adapter">
         </model-viewer-preview>
       </div>
       <me-tabs>
-        <me-tabbed-panel icon="save">
-          <model-viewer-snippet></model-viewer-snippet>
+        <me-tabbed-panel icon="import_export">
+          <me-export-panel></me-export-panel>
+          <div class="privacy">
+            This &lt;model-viewer&gt; editor does not send any imported content to servers:
+            <a href="https://policies.google.com/privacy" class="privacy-link">
+              Privacy
+            </a>
+          </div>
         </me-tabbed-panel>
         <me-tabbed-panel icon="create">
+          <me-export-panel header="true"></me-export-panel>
           <me-transformation-controls></me-transformation-controls>
           <me-ibl-selector></me-ibl-selector>
           <me-animation-controls></me-animation-controls>
           <me-hotspot-panel></me-hotspot-panel>
           <me-poster-controls></me-poster-controls>
         </me-tabbed-panel>
+        <me-tabbed-panel icon="photo_camera">
+          <me-export-panel header="true"></me-export-panel>
+          <me-camera-settings></me-camera-settings>
+        </me-tabbed-panel>
         <me-tabbed-panel icon="color_lens">
           <me-materials-panel></me-materials-panel>
-        </me-tabbed-panel>
-        <me-tabbed-panel icon="photo_camera">
-          <me-camera-settings></me-camera-settings>
         </me-tabbed-panel>
         <me-tabbed-panel icon="search">
           <me-inspector-panel></me-inspector-panel>
         </me-tabbed-panel>
       </me-tabs>
     </div>
-  </div></model-editor>
+  </div>
+</model-editor>
 </body>

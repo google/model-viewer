@@ -32,7 +32,7 @@
 
 const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
 
-const watchFiles = ['lib/**', '../3dom/lib/**', '../model-viewer/lib/**'];
+const watchFiles = ['lib/**', '../model-viewer/lib/**'];
 const plugins = [resolve()];
 
 export default [{

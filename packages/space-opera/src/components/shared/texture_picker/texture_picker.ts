@@ -95,7 +95,7 @@ export class TexturePicker extends LitElement {
         <mwc-icon-button id="uploadButton" class=${
         this.images.length > 0 ?
             'UploadButton' :
-            'UploadButtonNoTextures'} icon="cloud_upload" @click="${
+            'UploadButtonNoTextures'} icon="file_upload" @click="${
         this.openFileModal}"></mwc-icon-button>`;
   }
 

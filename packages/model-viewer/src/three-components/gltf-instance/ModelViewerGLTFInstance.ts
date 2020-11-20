@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import {CorrelatedSceneGraph} from '@google/3dom/lib/facade/three-js/correlated-scene-graph.js';
 import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
 import {Renderer} from '../Renderer.js';
 import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
+
+import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
@@ -136,10 +137,12 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         if (Array.isArray(mesh.material)) {
           mesh.material = mesh.material.map(
               (material) => this[$cloneAndPatchMaterial](
-                  material, sourceUUIDToClonedMaterial));
+                  material as MeshStandardMaterial,
+                  sourceUUIDToClonedMaterial));
         } else if (mesh.material != null) {
           mesh.material = this[$cloneAndPatchMaterial](
-              mesh.material, sourceUUIDToClonedMaterial);
+              mesh.material as MeshStandardMaterial,
+              sourceUUIDToClonedMaterial);
         }
       }
     });
@@ -158,7 +161,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
    * shader program.
    */
   [$cloneAndPatchMaterial](
-      material: Material, sourceUUIDToClonedMaterial: Map<string, Material>) {
+      material: MeshStandardMaterial,
+      sourceUUIDToClonedMaterial: Map<string, Material>) {
     // If we already cloned this material (determined by tracking the UUID of
     // source materials that have been cloned), then return that previously
     // cloned instance:
@@ -167,6 +171,35 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     }
 
     const clone = material.clone();
+
+    // Clone the textures manually since material cloning is shallow. The
+    // underlying images are still shared.
+    clone.map = material.map?.clone() ?? null;
+    clone.normalMap = material.normalMap?.clone() ?? null;
+    clone.emissiveMap = material.emissiveMap?.clone() ?? null;
+    clone.aoMap = material.aoMap?.clone() ?? null;
+
+    if ((material as any).isGLTFSpecularGlossinessMaterial) {
+      (clone as any).specularMap =
+          (material as any).specularMap?.clone() ?? null;
+      (clone as any).glossinessMap =
+          (material as any).glossinessMap?.clone() ?? null;
+    } else {
+      // ao, roughness and metalness sometimes share a texture.
+      if (material.metalnessMap === material.aoMap) {
+        clone.metalnessMap = clone.aoMap;
+      } else {
+        clone.metalnessMap = material.metalnessMap?.clone() ?? null;
+      }
+
+      if (material.roughnessMap === material.aoMap) {
+        clone.roughnessMap = clone.aoMap;
+      } else if (material.roughnessMap === material.metalnessMap) {
+        clone.roughnessMap = clone.metalnessMap;
+      } else {
+        clone.roughnessMap = material.roughnessMap?.clone() ?? null;
+      }
+    }
 
     // This allows us to patch three's materials, on top of patches already
     // made, for instance GLTFLoader patches SpecularGlossiness materials.

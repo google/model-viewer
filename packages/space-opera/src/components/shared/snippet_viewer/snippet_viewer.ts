@@ -29,13 +29,14 @@ export class SnippetViewer extends LitElement {
   static get styles() {
     return css`
       textarea#snippet {
-        width: 95%;
+        width: 100%;
       }
     `;
   }
 
   @property({type: Object}) renderedSnippet: TemplateResult = html``;
   @property({type: String}) renderedStyle = '';
+  @property({type: Boolean}) isReadOnly?: Boolean = true;
   @query('span#tag') shadowTag!: HTMLElement;
   @query('textarea#snippet') snippet!: HTMLTextAreaElement;
 
@@ -49,12 +50,14 @@ export class SnippetViewer extends LitElement {
   }
 
   protected render() {
-    return html`<span id="tag" style='display: none'>${
-        this.renderedSnippet}</span>
-        <textarea id="snippet" readonly rows=10></textarea>
-        <mwc-button unelevated icon="file_copy"
-        @click=${this.copyToClipboard}
-        >Copy snippet</mwc-button>
+    if (this.isReadOnly === false) {
+      return html`<span id="tag" style='display: none'>${
+          this.renderedSnippet}</span>
+      <textarea id="snippet" rows=15></textarea>`
+    }
+    return html`
+      <span id="tag" style='display: none'>${this.renderedSnippet}</span>
+      <textarea id="snippet" readonly rows=10></textarea>
 `;
   }
 
@@ -76,7 +79,7 @@ ${css_beautify(this.renderedStyle)}
     // Remove the ar-status runtime-added tag
     html = html.replace(/ar-status="[\w- ]+" */, '');
     // Remove redundant ="" for boolean attribs
-    html = html.replace(/=""/, '');
+    html = html.replace(/=""/g, '');
     return html_beautify(html);
   }
 }

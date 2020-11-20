@@ -78,6 +78,7 @@ export interface SphericalPosition {
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
+export type TouchAction = 'pan-y'|'pan-x'|'none';
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -95,6 +96,12 @@ export const InteractionPromptStyle:
 export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
   ALWAYS_ALLOW: 'always-allow',
   WHEN_FOCUSED: 'allow-when-focused'
+};
+
+export const TouchAction: {[index: string]: TouchAction} = {
+  PAN_Y: 'pan-y',
+  PAN_X: 'pan-x',
+  NONE: 'none'
 };
 
 export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
@@ -327,6 +334,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'orbit-sensitivity'})
     orbitSensitivity: number = 1;
 
+    @property({type: String, attribute: 'touch-action'})
+    touchAction: TouchAction = TouchAction.PAN_Y;
+
+    @property({type: Boolean, attribute: 'disable-zoom'})
+    disableZoom: boolean = false;
+
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
@@ -437,6 +450,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
+      if (changedProperties.has('disableZoom')) {
+        controls.disableZoom = this.disableZoom;
+      }
+
       if (changedProperties.has('interactionPrompt') ||
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
@@ -457,6 +474,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
         controls.applyOptions({interactionPolicy});
+      }
+
+      if (changedProperties.has('touchAction')) {
+        const touchAction = this.touchAction;
+        controls.applyOptions({touchAction});
       }
 
       if (changedProperties.has('orbitSensitivity')) {

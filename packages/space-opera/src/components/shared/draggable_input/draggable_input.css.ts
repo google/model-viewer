@@ -25,6 +25,8 @@ export const styles: CSSResult = css`:host {
   overflow: hidden;
   background: #3c4043;
   min-width: 60px;
+  max-height: 19px;
+  align-items: center;
 }
 
 .InlineInput {

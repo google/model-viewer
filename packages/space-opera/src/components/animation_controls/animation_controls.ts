@@ -22,61 +22,31 @@ import '@polymer/paper-item';
 
 import {customElement, html, internalProperty, query} from 'lit-element';
 
-import {registerStateMutator, State} from '../../redux/space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {State} from '../../types.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
+import {getAnimationNames} from './reducer.js';
 
 interface AnimationControlsInterface {
   autoplay?: boolean;
   animationName?: string;
 }
 
-// Register state mutators and get corresponding dispatchers.
-
-/** Set auto play enabled or not */
-export const dispatchAutoplayEnabled =
-    registerStateMutator('SET_AUTOPLAY_ENABLED', (state, enabled?: boolean) => {
-      state.config = {...state.config, autoplay: !!enabled};
-    });
-
-/** Set animation name */
-export const dispatchAnimationName = registerStateMutator(
-    'SET_ANIMATION_NAME', (state, animationName?: string) => {
-      // Allow animationName === undefined to unset animationName
-      if (animationName && state.animationNames.indexOf(animationName) === -1) {
-        return;
-      }
-
-      state.config = {
-        ...state.config,
-        animationName,
-      };
-    });
-
-/** Set playAnimation or not */
-export const dispatchPlayAnimation =
-    registerStateMutator('PLAY_ANIMATION', (state, playAnimation?: boolean) => {
-      // No need to copy state - we're always given a new copy.
-      state.playAnimation = !!playAnimation;
-    });
-
 /**
  * Animation controls for gltf and model-viewer.
  */
 @customElement('me-animation-controls')
 export class AnimationControls extends ConnectedLitElement {
+  @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
   @internalProperty() animationNames: string[] = [];
   @internalProperty() config: AnimationControlsInterface = {};
-  @internalProperty() playAnimation?: boolean = false;
-
-  @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
-  @query('me-checkbox#animation-play') playCheckbox?: CheckboxElement;
 
   stateChanged(state: State) {
-    this.animationNames = state.animationNames;
-    this.config = state.config;
-    this.playAnimation = state.playAnimation;
+    this.animationNames = getAnimationNames(state);
+    this.config = getConfig(state);
   }
 
   // Specifically overriding a super class method.
@@ -84,7 +54,6 @@ export class AnimationControls extends ConnectedLitElement {
   async _getUpdateComplete() {
     await super._getUpdateComplete();
     await this.autoplayCheckbox!.updateComplete;
-    await this.playCheckbox!.updateComplete;
   }
 
   render() {
@@ -115,16 +84,14 @@ export class AnimationControls extends ConnectedLitElement {
           <me-checkbox id="animation-autoplay" label="Autoplay"
             ?checked="${!!this.config.autoplay}"
             @change=${this.onAutoplayChange}></me-checkbox>
-          <me-checkbox id="animation-play" label="Play animation"
-            ?checked="${!!this.playAnimation}"
-            @change=${this.onPlayAnimationChange}></me-checkbox>
         </div>
       </me-expandable-tab>
         `;
   }
 
   onAutoplayChange() {
-    dispatchAutoplayEnabled(this.autoplayCheckbox!.checked);
+    reduxStore.dispatch(
+        dispatchAutoplayEnabled(this.autoplayCheckbox!.checked));
   }
 
   onAnimationNameChange(event: CustomEvent) {
@@ -132,21 +99,16 @@ export class AnimationControls extends ConnectedLitElement {
     // console throws a warning.
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
-
-    dispatchAnimationName(value);
+    if (value !== undefined && this.animationNames.indexOf(value) !== -1) {
+      reduxStore.dispatch(dispatchAnimationName(value));
+    }
 
     // Set the bool options values to something sensible
     if (value) {
-      dispatchAutoplayEnabled(true);
-      dispatchPlayAnimation(true);
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     } else {
-      dispatchAutoplayEnabled(false);
-      // Leave "playAnimation" alone. It's just UI state.
+      reduxStore.dispatch(dispatchAutoplayEnabled(false));
     }
-  }
-
-  onPlayAnimationChange() {
-    dispatchPlayAnimation(this.playCheckbox!.checked);
   }
 }
 

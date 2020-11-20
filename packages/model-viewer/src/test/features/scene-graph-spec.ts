@@ -15,10 +15,10 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
-import {IS_IE11} from '../../constants.js';
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {assetPath, rafPasses, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -54,7 +54,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
   BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-  (IS_IE11 ? suite.skip : suite)('scene export', () => {
+  suite('scene export', () => {
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = ASTRONAUT_GLB_PATH;
@@ -77,7 +77,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
   });
 
-  (IS_IE11 ? suite.skip : suite)('with a loaded scene graph', () => {
+  suite('with a loaded scene graph', () => {
     let material: MeshStandardMaterial;
 
     setup(async () => {

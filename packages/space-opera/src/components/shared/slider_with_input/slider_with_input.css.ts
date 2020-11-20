@@ -39,6 +39,8 @@ export const styles: CSSResult = css`:host {
 paper-slider {
   --paper-slider-knob-color: var(--google-grey-300);
   --paper-slider-active-color: var(--google-grey-300);
+  --paper-slider-knob-start-color: var(--google-grey-300);
+  --paper-slider-knob-start-border-color: var(--google-grey-300);
 }
 
 .InputArea {

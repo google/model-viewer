@@ -1,8 +1,8 @@
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {Constructor} from '../utilities.js';
+import {Constructor, waitForEvent} from '../utilities.js';
 
-import {assetPath, waitForEvent} from './helpers.js';
+import {assetPath} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
@@ -31,11 +31,13 @@ const setupModelViewer = async (modelViewer: ModelViewerElement) => {
 
 const setupLighting =
     async (modelViewer: ModelViewerElement, lighting: string) => {
+  const posterDismissed = waitForEvent(modelViewer, 'poster-dismissed');
+
   const lightingPath = assetPath(lighting);
   modelViewer.environmentImage = lightingPath;
   modelViewer.skyboxImage = lightingPath;
 
-  await waitForEvent(modelViewer, 'poster-dismissed');
+  await posterDismissed;
 }
 
 // TODO(sun765): this only test whether the screenshot

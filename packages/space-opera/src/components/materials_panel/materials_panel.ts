@@ -33,17 +33,19 @@ import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor} from '../../redux/edit_dispatchers.js';
-import {TexturesById} from '../../redux/material_state.js';
-import {Material} from '../../redux/material_state.js';
-import {State} from '../../redux/space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
 
+import {TexturesById} from './material_state.js';
+import {Material} from './material_state.js';
 import {styles} from './materials_panel.css.js';
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+
 
 /** Material panel. */
 @customElement('me-materials-panel')
@@ -83,8 +85,8 @@ export class MaterialPanel extends ConnectedLitElement {
   private safeTextureUrlsDirty = false;
 
   stateChanged(state: State) {
-    this.materials = state.edits.materials;
-    this.originalMaterials = state.origEdits.materials;
+    this.materials = getEditsMaterials(state);
+    this.originalMaterials = getOrigEdits(state).materials;
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
@@ -93,8 +95,8 @@ export class MaterialPanel extends ConnectedLitElement {
       }
     }
 
-    if (this.texturesById !== state.edits.texturesById) {
-      this.texturesById = state.edits.texturesById;
+    if (this.texturesById !== getEditsTextures(state)) {
+      this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
     }
   }
@@ -134,7 +136,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
   renderSelectMaterialTab() {
     return html`
-    <me-expandable-tab tabName="Selected Material" .open=${true}>
+    <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
+        true}>
       <me-dropdown
         .selectedIndex=${this.selectedMaterialId || 0}
         slot="content"
@@ -210,7 +213,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const index = this.selectedMaterialId;
     const baseColorFactor = this.selectedBaseColor;
-    dispatchMaterialBaseColor({index, baseColorFactor});
+    reduxStore.dispatch(dispatchMaterialBaseColor(
+        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
   }
 
   onRoughnessChange() {
@@ -219,7 +223,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const roughnessFactor = this.selectedRoughnessFactor;
-    dispatchRoughnessFactor({id, roughnessFactor});
+    reduxStore.dispatch(dispatchRoughnessFactor(
+        getEditsMaterials(reduxStore.getState()), {id, roughnessFactor}));
   }
 
   onMetallicChange() {
@@ -228,7 +233,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const metallicFactor = this.selectedMetallicFactor;
-    dispatchMetallicFactor({id, metallicFactor});
+    reduxStore.dispatch(dispatchMetallicFactor(
+        getEditsMaterials(reduxStore.getState()), {id, metallicFactor}));
   }
 
   onDoubleSidedChange(event: Event) {
@@ -237,7 +243,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const doubleSided = (event.target as HTMLInputElement).checked;
-    dispatchDoubleSided({id, doubleSided});
+    reduxStore.dispatch(dispatchDoubleSided(
+        getEditsMaterials(reduxStore.getState()), {id, doubleSided}));
   }
 
   get selectedBaseColorTextureId(): string|undefined {
@@ -296,7 +303,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const textureId = this.selectedBaseColorTextureId;
-    dispatchBaseColorTexture({id, textureId});
+    reduxStore.dispatch(dispatchBaseColorTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   onBaseColorTextureUpload(event: CustomEvent) {
@@ -306,7 +314,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddBaseColorTexture({id, uri});
+    reduxStore.dispatch(dispatchAddBaseColorTexture(
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
+        {id, uri}));
   }
 
   onMetallicRoughnessTextureChange() {
@@ -315,7 +326,8 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const id = this.selectedMaterialId;
     const textureId = this.selectedMetallicRoughnessTextureId;
-    dispatchMetallicRoughnessTexture({id, textureId});
+    reduxStore.dispatch(dispatchMetallicRoughnessTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent) {
@@ -325,7 +337,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddMetallicRoughnessTexture({id, uri});
+    reduxStore.dispatch(dispatchAddMetallicRoughnessTexture(
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
+        {id, uri}));
   }
 
   onNormalTextureChange() {
@@ -335,7 +350,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedNormalTextureId;
-    dispatchNormalTexture({id, textureId});
+    reduxStore.dispatch(dispatchNormalTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   onNormalTextureUpload(event: CustomEvent) {
@@ -345,7 +361,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddNormalTexture({id, uri});
+    reduxStore.dispatch(dispatchAddNormalTexture(
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
+        {id, uri}));
   }
 
   onEmissiveTextureChange() {
@@ -355,7 +374,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedEmissiveTextureId;
-    dispatchEmissiveTexture({id, textureId});
+    reduxStore.dispatch(dispatchEmissiveTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   onEmissiveTextureUpload(event: CustomEvent) {
@@ -365,7 +385,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddEmissiveTexture({id, uri});
+    reduxStore.dispatch(dispatchAddEmissiveTexture(
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
+        {id, uri}));
   }
 
   onEmissiveFactorChanged() {
@@ -375,7 +398,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const emissiveFactor = this.selectedEmissiveFactor;
-    dispatchSetEmissiveFactor({id, emissiveFactor});
+    reduxStore.dispatch(dispatchSetEmissiveFactor(
+        getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
   }
 
   onOcclusionTextureChange() {
@@ -385,7 +409,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const textureId = this.selectedOcclusionTextureId;
-    dispatchOcclusionTexture({id, textureId});
+    reduxStore.dispatch(dispatchOcclusionTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   onOcclusionTextureUpload(event: CustomEvent) {
@@ -395,7 +420,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const id = this.selectedMaterialId;
     const uri = event.detail;
-    dispatchAddOcclusionTexture({id, uri});
+    reduxStore.dispatch(dispatchAddOcclusionTexture(
+        getEditsMaterials(reduxStore.getState()),
+        getEditsTextures(reduxStore.getState()),
+        {id, uri}));
   }
 
   onAlphaModeSelect() {
@@ -410,10 +438,11 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
 
-    dispatchSetAlphaMode({
-      id: this.selectedMaterialId,
-      alphaMode: selectedMode,
-    });
+    reduxStore.dispatch(
+        dispatchSetAlphaMode(getEditsMaterials(reduxStore.getState()), {
+          id: this.selectedMaterialId,
+          alphaMode: selectedMode,
+        }));
   }
 
   onAlphaCutoffChange() {
@@ -421,107 +450,112 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    dispatchSetAlphaCutoff({
-      id: this.selectedMaterialId,
-      alphaCutoff: this.selectedAlphaCutoff,
-    });
+    reduxStore.dispatch(
+        dispatchSetAlphaCutoff(getEditsMaterials(reduxStore.getState()), {
+          id: this.selectedMaterialId,
+          alphaCutoff: this.selectedAlphaCutoff,
+        }));
   }
 
   revertMetallicRoughnessTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].metallicRoughnessTextureId;
-    dispatchMetallicRoughnessTexture({id, textureId});
+    reduxStore.dispatch(dispatchMetallicRoughnessTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   revertMetallicFactor() {
     const id = this.safeSelectedMaterialId;
     const metallicFactor = this.originalMaterials[id].metallicFactor;
-    dispatchMetallicFactor({id, metallicFactor});
+    reduxStore.dispatch(dispatchMetallicFactor(
+        getEditsMaterials(reduxStore.getState()), {id, metallicFactor}));
   }
 
   revertRoughnessFactor() {
     const id = this.safeSelectedMaterialId;
     const roughnessFactor = this.originalMaterials[id].roughnessFactor;
-    dispatchRoughnessFactor({id, roughnessFactor});
+    reduxStore.dispatch(dispatchRoughnessFactor(
+        getEditsMaterials(reduxStore.getState()), {id, roughnessFactor}));
   }
 
   revertBaseColorFactor() {
     const index = this.safeSelectedMaterialId;
     const baseColorFactor = this.originalMaterials[index].baseColorFactor;
-    dispatchMaterialBaseColor({index, baseColorFactor});
+    reduxStore.dispatch(dispatchMaterialBaseColor(
+        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
   }
 
   revertBaseColorTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].baseColorTextureId;
-    dispatchBaseColorTexture({id, textureId});
+    reduxStore.dispatch(dispatchBaseColorTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   revertNormalTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].normalTextureId;
-    dispatchNormalTexture({id, textureId});
+    reduxStore.dispatch(dispatchNormalTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   revertEmissiveTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].emissiveTextureId;
-    dispatchEmissiveTexture({id, textureId});
+    reduxStore.dispatch(dispatchEmissiveTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   revertEmissiveFactor() {
     const id = this.safeSelectedMaterialId;
     const emissiveFactor = this.originalMaterials[id].emissiveFactor;
-    dispatchSetEmissiveFactor({id, emissiveFactor});
+    reduxStore.dispatch(dispatchSetEmissiveFactor(
+        getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
   }
 
   revertOcclusionTexture() {
     const id = this.safeSelectedMaterialId;
     const textureId = this.originalMaterials[id].occlusionTextureId;
-    dispatchOcclusionTexture({id, textureId});
+    reduxStore.dispatch(dispatchOcclusionTexture(
+        getEditsMaterials(reduxStore.getState()), {id, textureId}));
   }
 
   revertAlphaCutoff() {
     const id = this.safeSelectedMaterialId;
     const alphaCutoff = this.originalMaterials[id].alphaCutoff;
-    dispatchSetAlphaCutoff({id, alphaCutoff});
+    reduxStore.dispatch(dispatchSetAlphaCutoff(
+        getEditsMaterials(reduxStore.getState()), {id, alphaCutoff}));
   }
 
   revertAlphaMode() {
     const id = this.safeSelectedMaterialId;
     const alphaMode = this.originalMaterials[id].alphaMode;
-    dispatchSetAlphaMode({id, alphaMode});
+    reduxStore.dispatch(dispatchSetAlphaMode(
+        getEditsMaterials(reduxStore.getState()), {id, alphaMode}));
   }
 
   revertDoubleSided() {
     const id = this.safeSelectedMaterialId;
     const doubleSided = this.originalMaterials[id].doubleSided;
-    dispatchDoubleSided({id, doubleSided});
+    reduxStore.dispatch(dispatchDoubleSided(
+        getEditsMaterials(reduxStore.getState()), {id, doubleSided}));
   }
 
   renderMetallicRoughnessTab() {
     if (this.selectedMaterialId === undefined) {
-      return `No material selected`;
+      return `<me-expandable-tab tabName="Materials" .open=${true} .sticky=${
+          true}>
+      <div slot="content">
+        <div style="color: var(--text-on-expandable-background);">No materials to edit. Load a model to edit the materials.</div>
+      </div>
+    </me-expandable-tab>`;
     }
+
     const material = this.materials[this.selectedMaterialId];
     const currentTextureId = material.metallicRoughnessTextureId;
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-section-row label="Texture">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-          title="Revert to original metallic roughness texture"
-          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
-        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
-        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
-      </me-section-row>
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
         <div class="MRSliderContainer">
@@ -545,6 +579,20 @@ export class MaterialPanel extends ConnectedLitElement {
           </me-slider-with-input>
         </div>
       </div>
+      <me-section-row label="Texture">
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Revert to original metallic roughness texture"
+          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
+        currentTextureId ?
+            this.safeUrlIds.indexOf(currentTextureId) :
+            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
+        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
+        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
+          </me-texture-picker>
+        </div>
+      </me-section-row>
     </div>
   </me-expandable-tab>`;
   }
@@ -560,7 +608,7 @@ export class MaterialPanel extends ConnectedLitElement {
         (color: number) => Math.round(color * 255));
     const selectedColorHex = color.rgbArrayToHex(selectedColorRgb);
     return html`
-  <me-expandable-tab tabName="Base Color">
+  <me-expandable-tab tabName="Base Color" .open=${true}>
     <div slot="content">
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">

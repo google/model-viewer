@@ -21,88 +21,113 @@ import '@material/mwc-button';
 
 import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty} from 'lit-element';
 
-import {dispatchSetPoster} from '../../redux/poster_dispatchers.js';
-import {State} from '../../redux/space_opera_base.js';
-import {dispatchSaveCameraOrbit} from '../camera_settings/camera_settings.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {posterControlsStyles} from '../../styles.css.js';
+import {toastStyles} from '../../styles.css.js';
+import {State} from '../../types.js';
+import {Camera, getOrbitString} from '../camera_settings/camera_state.js';
+import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
+import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-
-import {styles} from './poster_controls.css';
+import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
+import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
 
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
 export class PosterControlsElement extends ConnectedLitElement {
-  static styles = styles;
+  static styles = [posterControlsStyles, toastStyles];
 
   @internalProperty() poster?: string;
-
-  private modelViewer?: ModelViewerElement;
+  @internalProperty() toastClassName: string = '';
+  @internalProperty() toastBody: string = '';
+  @internalProperty() cameraSnippet: Camera = {};
 
   stateChanged(state: State) {
-    this.modelViewer = state.modelViewer;
-    this.poster = state.config.poster;
+    this.poster = getConfig(state).poster;
+    this.cameraSnippet = getCamera(state);
   }
 
   render() {
     return html`
-      <me-expandable-tab tabName="Poster">
-        <div slot="content">
-          <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onCreatePoster}">Create Poster</mwc-button>
-          </div>
-          ${
+<me-expandable-tab tabName="Poster">
+  <div slot="content">
+    <mwc-button unelevated class="PosterButton" 
+      @click="${this.onCreatePoster}">Generate Poster</mwc-button>
+    <div class="PosterHelperButtons">
+    ${
     !!this.poster ? html`
-            <div class="ButtonContainer">
-              <mwc-button unelevated
-                @click="${this.onDownloadPoster}">Download</mwc-button>
-            </div>
-            <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onDisplayPoster}">Display Poster</mwc-button>
-          </div>
-          <div class="ButtonContainer">
-            <mwc-button unelevated
-              @click="${this.onDeletePoster}">Delete Poster</mwc-button>
-          </div>` :
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDownloadPoster}">Download Poster</mwc-button>
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDisplayPoster}">Display Poster</mwc-button>
+    <mwc-button unelevated class="PosterButton"
+      @click="${this.onDeletePoster}">Delete Poster</mwc-button>` :
                     html` `}
-        </div>
-      </me-expandable-tab>
+    </div>
+  </div>
+</me-expandable-tab>
+<div class="${this.toastClassName}" id="snackbar">${this.toastBody}</div>
         `;
   }
 
   async onCreatePoster() {
-    if (!this.modelViewer)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer)
       return;
-    const posterUrl =
-        createSafeObjectURL(await this.modelViewer.toBlob({idealAspect: true}));
-    dispatchSetPoster(posterUrl.unsafeUrl);
-    dispatchSaveCameraOrbit();
+
+    // if we've already set the initial camera, use it
+    if (this.cameraSnippet.orbit !== undefined) {
+      const initialOrbit = this.cameraSnippet.orbit;
+      modelViewer.cameraOrbit = getOrbitString(initialOrbit);
+      modelViewer.jumpCameraToGoal();
+      requestAnimationFrame(async () => {
+        let posterUrl =
+            createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
+        reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
+      });
+    } else {
+      // otherwise, take the current model-viewer state
+      const currentOrbit = getCameraState(modelViewer).orbit;
+      reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+      this.toastBody =
+          'Initial camera undefined, setting initial camera to current camera.';
+      this.toastClassName = 'show';
+      setTimeout(() => {
+        this.toastClassName = '';
+      }, 4000);
+      let posterUrl =
+          createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
+      reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
+    }
   }
 
   onDisplayPoster() {
-    if (!this.modelViewer)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer)
       return;
-    const src = this.modelViewer.src;
-    // Normally we can just use dispatchSetReveal, but the value has to be
-    // changed immediately before reload.
-    this.modelViewer.reveal = 'interaction';
-    // Force reload the model
-    this.modelViewer.src = '';
-    this.modelViewer.src = src;
+    if (this.cameraSnippet.orbit !== undefined) {
+      const initialOrbit = this.cameraSnippet.orbit;
+      modelViewer.cameraOrbit = getOrbitString(initialOrbit);
+      modelViewer.jumpCameraToGoal();
+      requestAnimationFrame(async () => {
+        modelViewer.reveal = 'interaction';
+        modelViewer.showPoster()
+      });
+    }
   }
 
   onDeletePoster() {
     if (this.poster) {
       URL.revokeObjectURL(this.poster);
     }
-    dispatchSetPoster(undefined);
+    reduxStore.dispatch(dispatchSetPoster(undefined));
   }
 
   async onDownloadPoster() {
-    if (!this.modelViewer || !this.poster)
+    const modelViewer = getModelViewer()!;
+    if (!modelViewer || !this.poster)
       return;
     safeDownloadCallback(
         await (await fetch(this.poster)).blob(), 'poster.png', '')();

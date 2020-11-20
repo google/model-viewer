@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -61,7 +61,6 @@ export const $posterContainerElement = Symbol('posterContainerElement');
 export const $defaultPosterElement = Symbol('defaultPosterElement');
 
 const $posterDismissalSource = Symbol('posterDismissalSource');
-const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
@@ -84,6 +83,8 @@ export declare interface LoadingInterface {
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
+  showPoster(): void;
+  getDimensions(): Vector3D;
 }
 
 export declare interface LoadingStaticInterface {
@@ -206,6 +207,34 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
         this[$updateSource]();
       }
+    }
+
+    /**
+     * Displays the poster, hiding the 3D model. If this is called after the 3D
+     * model has been revealed, then it will behave as though
+     * reveal='interaction', being dismissed either by a user click or a call to
+     * dismissPoster().
+     */
+    showPoster() {
+      const posterContainerElement = this[$posterContainerElement];
+      const defaultPosterElement = this[$defaultPosterElement];
+
+      defaultPosterElement.removeAttribute('tabindex');
+      defaultPosterElement.removeAttribute('aria-hidden');
+      posterContainerElement.classList.add('show');
+
+      const oldVisibility = this.modelIsVisible;
+      this[$modelIsRevealed] = false;
+      this[$announceModelVisibility](oldVisibility);
+      this[$transitioned] = false;
+    }
+
+    /**
+     * Returns the model's bounding box dimensions in meters, independent of
+     * turntable rotation.
+     */
+    getDimensions(): Vector3D {
+      return toVector3D(this[$scene].model.size);
     }
 
     protected[$modelIsRevealed] = false;
@@ -388,20 +417,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$lastReportedProgress] === 1.0;
     }
 
-    [$showPoster]() {
-      const posterContainerElement = this[$posterContainerElement];
-      const defaultPosterElement = this[$defaultPosterElement];
-
-      defaultPosterElement.removeAttribute('tabindex');
-      defaultPosterElement.removeAttribute('aria-hidden');
-      posterContainerElement.classList.add('show');
-
-      const oldVisibility = this.modelIsVisible;
-      this[$modelIsRevealed] = false;
-      this[$announceModelVisibility](oldVisibility);
-      this[$transitioned] = false;
-    }
-
     [$hidePoster]() {
       this[$posterDismissalSource] = null;
       const posterContainerElement = this[$posterContainerElement];
@@ -451,7 +466,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$scene].model.currentGLTF == null || this.src == null ||
           !this[$shouldAttemptPreload]()) {
         // Don't show the poster when switching models.
-        this[$showPoster]();
+        this.showPoster();
       }
       await super[$updateSource]();
     }

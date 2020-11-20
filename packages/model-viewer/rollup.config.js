@@ -32,7 +32,7 @@ const onwarn = (warning, warn) => {
 let plugins =
     [resolve({dedupe: ['three']}), replace({'Reflect.decorate': 'undefined'})];
 
-const watchFiles = ['lib/**', '../3dom/lib/**'];
+const watchFiles = ['lib/**'];
 
 const outputOptions = [{
   input: './lib/model-viewer.js',

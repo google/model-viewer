@@ -27,16 +27,18 @@ import '../file_modal/file_modal.js';
 import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox} from '../../redux/lighting_dispatchers.js';
-import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from '../../redux/lighting_state.js';
-import {State} from '../../redux/space_opera_base.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {iblSelectorStyles} from '../../styles.css.js';
+import {State} from '../../types.js';
+import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
-import {styles} from './ibl_selector.css.js';
+import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, getEnvironmentImages} from './reducer.js';
+import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './types.js';
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
@@ -45,7 +47,7 @@ const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
  */
 @customElement('me-ibl-selector')
 export class IblSelector extends ConnectedLitElement {
-  static styles = styles;
+  static styles = iblSelectorStyles;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() environmentImages: EnvironmentImage[] = [];
@@ -71,8 +73,8 @@ export class IblSelector extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    this.config = state.config;
-    this.environmentImages = state.environmentImages;
+    this.config = getConfig(state);
+    this.environmentImages = getEnvironmentImages(state);
   }
 
   onSelectEnvironmentImage(event: CustomEvent) {
@@ -82,25 +84,27 @@ export class IblSelector extends ConnectedLitElement {
     if (dropdownElement.selectedItem &&
         dropdownElement.selectedItem.getAttribute('value') !==
             this.config.environmentImage) {
-      dispatchEnvrionmentImage(
-          dropdownElement.selectedItem.getAttribute('value') || undefined);
+      reduxStore.dispatch(dispatchEnvrionmentImage(
+          dropdownElement.selectedItem.getAttribute('value') || undefined));
     }
   }
 
   onExposureChange() {
-    dispatchExposure(this.exposureSlider.value);
+    reduxStore.dispatch(dispatchExposure(this.exposureSlider.value));
   }
 
   onUseEnvAsSkyboxChange() {
-    dispatchUseEnvAsSkybox(this.skyboxCheckbox.checked);
+    reduxStore.dispatch(dispatchUseEnvAsSkybox(this.skyboxCheckbox.checked));
   }
 
   onShadowIntensityChange() {
-    dispatchShadowIntensity(this.shadowIntensitySlider.value);
+    reduxStore.dispatch(
+        dispatchShadowIntensity(this.shadowIntensitySlider.value));
   }
 
   onShadowSoftnessChange() {
-    dispatchShadowSoftness(this.shadowSoftnessSlider.value);
+    reduxStore.dispatch(
+        dispatchShadowSoftness(this.shadowSoftnessSlider.value));
   }
 
   // TODO:: Add test to this.
@@ -114,8 +118,9 @@ export class IblSelector extends ConnectedLitElement {
     const file = files[0] as File;
     const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
 
-    dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name});
-    dispatchEnvrionmentImage(unsafeUrl);
+    reduxStore.dispatch(
+        dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+    reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
   }
 
   // TODO: On snippet input if IBL is defined, select the
@@ -127,37 +132,44 @@ export class IblSelector extends ConnectedLitElement {
             1 :
         0;  // 0 is the default state
     return html`
-      <me-expandable-tab tabName="Lighting">
+      <me-expandable-tab tabName="Lighting" .open=${true}>
         <div slot="content">
           <div class="HeaderLabel">Environment Image:</div>
-          <me-dropdown
-            class="EnvironmnetImageDropdown"
-            selectedIndex=${selectedIndex}
-            @select=${this.onSelectEnvironmentImage}>
-            <paper-item>Default</paper-item>
-            ${
+          <div style="display: flex; justify-content: space-between">
+            <me-dropdown
+              class="EnvironmnetImageDropdown"
+              selectedIndex=${selectedIndex}
+              style="align-self: center; width: 70%;"
+              @select=${this.onSelectEnvironmentImage}>
+              <paper-item>Default</paper-item>
+              ${
         this.environmentImages.map(
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
-          </me-dropdown>
-          <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="cloud_upload" @click="${this.openFileModal}">Upload</mwc-button>
+            </me-dropdown>
+            <mwc-button 
+              class="UploadButton"
+              style="align-self: center;"
+              id="uploadButton" unelevated
+              icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
+          </div>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
               @change="${this.onExposureChange}"
               value="${this.config.exposure ?? DEFAULT_EXPOSURE}">
             </me-slider-with-input>
           </me-section-row>
-          <me-section-row class="Row" label="Use Environment as Skybox">
-            <me-checkbox id="skybox"
+          <me-checkbox 
+            id="skybox" 
+            label="Use Environment as Skybox"
             ?checked="${!!this.config.useEnvAsSkybox}"
-            @change=${this.onUseEnvAsSkyboxChange}></me-checkbox>
-            ${
+            @change=${this.onUseEnvAsSkyboxChange}
+            >
+          </me-checkbox>
+          ${
         selectedIndex === 0 && this.config.useEnvAsSkybox ?
-            html`<br/><div><small>Choose a non-default environment</small></div>` :
+            html`<div class="defaultError"><small>Choose a non-default environment</small></div>` :
             html``}
-          </me-section-row>
-
           <me-section-row class="Row" label="Shadow Intensity">
             <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
               @change="${this.onShadowIntensityChange}"

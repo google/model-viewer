@@ -16,7 +16,8 @@
 import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -133,6 +134,13 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             } finally {
               element.removeEventListener('load', onLoad);
             }
+          });
+
+          test('getDimensions() returns correct size', () => {
+            const size = element.getDimensions();
+            expect(size.x).to.be.eq(1);
+            expect(size.y).to.be.eq(1);
+            expect(size.z).to.be.eq(1);
           });
         });
       });

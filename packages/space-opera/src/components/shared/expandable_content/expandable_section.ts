@@ -25,12 +25,14 @@ import {styles} from './expandable_section.css.js';
 @customElement('me-expandable-section')
 export class ExpandableSection extends LitElement {
   @property({type: Boolean}) open = false;
+  @property({type: Boolean}) sticky? = false;
 
   static styles = styles;
 
   render() {
+    const stickyClass = this.sticky ? 'sticky' : '';
     return html`
-    <div class="SectionContent" ?open=${this.open}>
+    <div class="SectionContent ${stickyClass}" ?open=${this.open}>
         <slot name="content"></slot>
     </div>
    `;
