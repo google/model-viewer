@@ -69,7 +69,11 @@ export class Shadow extends DirectionalLight {
     this.floor.frustumCulled = false;
     this.add(this.floor);
 
-    this.shadow.camera.up.set(0, 0, 1);
+    if (side === 'bottom') {
+      this.shadow.camera.up.set(0, 0, 1);
+    } else {
+      this.shadow.camera.up.set(0, 1, 0);
+    }
 
     model.add(this);
     this.target = model;
@@ -104,13 +108,15 @@ export class Shadow extends DirectionalLight {
       size.set(maxDimension, maxDimension, maxDimension);
     }
 
+    boundingBox.getCenter(this.floor.position);
     const shadowOffset = boundingBox.max.y + size.y * OFFSET;
     if (side === 'bottom') {
       this.position.y = shadowOffset;
     } else {
+      this.position.y = 0;
       this.position.z = shadowOffset;
+      this.floor.position.z *= -1;
     }
-    boundingBox.getCenter(this.floor.position);
 
     this.setSoftness(softness);
   }
