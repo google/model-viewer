@@ -28,6 +28,7 @@ import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
+import {iblSelectorStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -36,9 +37,8 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
-import {styles} from './ibl_selector.css.js';
-import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './lighting_state.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, getEnvironmentImages} from './reducer.js';
+import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './types.js';
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 
@@ -47,7 +47,7 @@ const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
  */
 @customElement('me-ibl-selector')
 export class IblSelector extends ConnectedLitElement {
-  static styles = styles;
+  static styles = iblSelectorStyles;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() environmentImages: EnvironmentImage[] = [];
@@ -132,21 +132,27 @@ export class IblSelector extends ConnectedLitElement {
             1 :
         0;  // 0 is the default state
     return html`
-      <me-expandable-tab tabName="Lighting">
+      <me-expandable-tab tabName="Lighting" .open=${true}>
         <div slot="content">
           <div class="HeaderLabel">Environment Image:</div>
-          <me-dropdown
-            class="EnvironmnetImageDropdown"
-            selectedIndex=${selectedIndex}
-            @select=${this.onSelectEnvironmentImage}>
-            <paper-item>Default</paper-item>
-            ${
+          <div style="display: flex; justify-content: space-between">
+            <me-dropdown
+              class="EnvironmnetImageDropdown"
+              selectedIndex=${selectedIndex}
+              style="align-self: center; width: 70%;"
+              @select=${this.onSelectEnvironmentImage}>
+              <paper-item>Default</paper-item>
+              ${
         this.environmentImages.map(
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
-          </me-dropdown>
-          <mwc-button class="UploadButton" id="uploadButton" unelevated
-        icon="cloud_upload" @click="${this.openFileModal}">Upload</mwc-button>
+            </me-dropdown>
+            <mwc-button 
+              class="UploadButton"
+              style="align-self: center;"
+              id="uploadButton" unelevated
+              icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
+          </div>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
               @change="${this.onExposureChange}"
@@ -164,7 +170,6 @@ export class IblSelector extends ConnectedLitElement {
         selectedIndex === 0 && this.config.useEnvAsSkybox ?
             html`<div class="defaultError"><small>Choose a non-default environment</small></div>` :
             html``}
-
           <me-section-row class="Row" label="Shadow Intensity">
             <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
               @change="${this.onShadowIntensityChange}"

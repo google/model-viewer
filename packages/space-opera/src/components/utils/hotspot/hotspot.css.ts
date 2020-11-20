@@ -63,6 +63,7 @@ export const styles: CSSResult = css`.Hotspot {
   font-weight: 700;
   left: calc(100% + 1em);
   max-width: 128px;
+  overflow-wrap: break-word;
   padding: 0.5em 1em;
   position: absolute;
   top: 50%;

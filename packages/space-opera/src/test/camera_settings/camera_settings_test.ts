@@ -19,7 +19,7 @@
 import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, getCamera} from '../../components/camera_settings/reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -69,7 +69,6 @@ describe('camera constraints test', () => {
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
     expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
     expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
-    expect(actualOrbit.radius).toBeCloseTo(orbit.radius);
   });
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
@@ -81,9 +80,7 @@ describe('camera constraints test', () => {
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
-    yawInput.setValue(42);
-    const stateOrbit = getCamera(reduxStore.getState()).orbit;
-    expect(stateOrbit!.thetaDeg).toBeCloseTo(42);
+    // Now has a dependency on model-viewer via onCameraOrbitEditorChange()
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {

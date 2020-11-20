@@ -94,15 +94,26 @@ export function dispatchFovLimits(fovLimitsDeg?: Limits) {
   return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
 }
 
+const SET_MIN_ZOOM = 'SET_MIN_ZOOM';
+export function dispatchSetMinZoom(
+    fovDeg: number|string, radius: number|string) {
+  return {
+    type: SET_MIN_ZOOM, payload: {radius: radius, fov: fovDeg}
+  }
+}
+
+const SET_ZOOM_ENABLED = 'SET_ZOOM_ENABLED';
+export function dispatchZoomEnabled(isEnabled: boolean) {
+  return {
+    type: SET_ZOOM_ENABLED, payload: isEnabled
+  }
+}
+
 // Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit(
-    currentOrbit: SphericalPositionDeg|undefined,
-    currentFieldOfViewDeg: number|undefined) {
-  return {
-    type: SAVE_CAMERA_ORBIT,
-    payload: {orbit: {...currentOrbit}, fieldOfViewDeg: currentFieldOfViewDeg}
-  };
+export function dispatchSaveCameraOrbit(currentOrbit: SphericalPositionDeg|
+                                        undefined) {
+  return {type: SAVE_CAMERA_ORBIT, payload: {orbit: {...currentOrbit}}};
 }
 
 /** Event dispatcher for changes to camera-target. */
@@ -113,7 +124,7 @@ export function dispatchCameraTarget(target?: Vector3D) {
 
 /** Dispatch initial orbit in camera state */
 const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export function dispatchInitialOrbit(orbit: SphericalPositionDeg) {
+export function dispatchInitialOrbit(orbit: SphericalPositionDeg|undefined) {
   return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
 }
 
@@ -138,8 +149,7 @@ export function cameraReducer(
       }
     case SAVE_CAMERA_ORBIT:
       return {
-        ...state, orbit: {...action.payload.orbit},
-            fieldOfViewDeg: action.payload.fieldOfViewDeg,
+        ...state, orbit: {...action.payload.orbit}
       }
     case SET_CAMERA_FOV_LIMITS:
       return {
@@ -156,6 +166,18 @@ export function cameraReducer(
     case SET_CAMERA_YAW_LIMITS:
       return {
         ...state, yawLimitsDeg: action.payload
+      }
+    case SET_MIN_ZOOM:
+      return {
+        ...state,
+            radiusLimits: {...state.radiusLimits!, min: action.payload.radius},
+            fovLimitsDeg: {...state.fovLimitsDeg!, min: action.payload.fov}
+      }
+    case SET_ZOOM_ENABLED:
+      return {
+        ...state,
+            radiusLimits: {...state.radiusLimits!, enabled: action.payload},
+            fovLimitsDeg: {...state.fovLimitsDeg!, enabled: action.payload}
       }
     default:
       return state;

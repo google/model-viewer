@@ -33,3 +33,23 @@ export const DEFAULT_SHADOW_INTENSITY = 0;
 
 /** Default shadow softness for model-viewer */
 export const DEFAULT_SHADOW_SOFTNESS = 1;
+
+export const INITIAL_ENVIRONMENT_IMAGES: EnvironmentImage[] = [
+  {
+    uri: '../shared-assets/environments/spruit_sunrise_1k_HDR.hdr',
+    name: 'Spruit Sunrise'
+  },
+  {
+    uri: '../shared-assets/environments/aircraft_workshop_01_1k.hdr',
+    name: 'Aircraft Workshop'
+  },
+  {
+    uri: '../shared-assets/environments/music_hall_01_1k.hdr',
+    name: 'Music Hall'
+  },
+  {uri: '../shared-assets/environments/pillars_1k.hdr', name: 'Pillars'},
+  {
+    uri: '../shared-assets/environments/whipple_creek_regional_park_04_1k.hdr',
+    name: 'Whipple Creek'
+  },
+];

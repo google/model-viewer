@@ -40,6 +40,6 @@ export interface Vector3D {
  */
 export interface Limits {
   readonly enabled: boolean;
-  readonly min: number;
-  readonly max: number;
+  readonly min: number|string;
+  readonly max: number|string;
 }

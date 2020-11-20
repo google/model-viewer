@@ -16,9 +16,9 @@
  */
 
 import '@material/mwc-button';
-import '@polymer/paper-dialog';
 
-import {customElement, html, internalProperty, LitElement, property, PropertyValues, query} from 'lit-element';
+import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
+import {fileModalStyles} from '../../styles.css.js';
 
 interface BlobArrayResolver {
   resolve: (fileList?: Blob[]|PromiseLike<Blob[]>) => void;
@@ -30,7 +30,7 @@ interface BlobArrayResolver {
  */
 @customElement('me-file-modal')
 export class FileModalElement extends LitElement {
-  @internalProperty() show = false;
+  static styles = fileModalStyles;
 
   /** Proxies to file-input accept attribute */
   @property({type: String}) accept = '';
@@ -39,10 +39,15 @@ export class FileModalElement extends LitElement {
   private blobsResolver?: BlobArrayResolver;
 
   open(): Promise<Blob[]|undefined> {
+    // The user canceled the previous upload
+    if (this.blobsResolver !== undefined) {
+      this.blobsResolver.resolve(undefined);
+      delete this.blobsResolver;
+    }
     // Reset this, so the user can reload the same file again.
+    // TODO: When user reloads same file, animations don't run...
     this.fileInput.value = '';
-    this.show = true;
-    this.blobsResolver?.reject();
+    this.fileInput.click();
     const promise = new Promise<Blob[]>((resolve, reject) => {
       this.blobsResolver = {resolve, reject};
     });
@@ -60,29 +65,11 @@ export class FileModalElement extends LitElement {
 
   render() {
     return html`
-    <paper-dialog id="file-modal" modal ?opened=${this.show}>
-      <div>
-        <input type="file" class="input" id="file-input"
-          @change="${this.onFileChange}">
-        <mwc-button unelevated icon="cancel" @click=${
-        this.onCancel}>Cancel</mwc-button>
-      </div>
-    </paper-dialog>
-        `;
-  }
-
-  onCancel() {
-    this.show = false;
-    if (!this.blobsResolver) {
-      throw new Error('onCancel called but no blobsResolver was presetn');
-    }
-    this.blobsResolver.resolve(undefined);
-    delete this.blobsResolver;
+  <input type="file" class="input" id="file-input" @change="${
+        this.onFileChange}"/>`;
   }
 
   async onFileChange() {
-    this.show = false;
-
     if (!this.blobsResolver) {
       throw new Error('No file upload resolver found');
     }

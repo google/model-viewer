@@ -30,6 +30,7 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
+import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
@@ -47,7 +48,6 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
-import {styles} from './model_viewer_preview_styles.css.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
@@ -88,7 +88,7 @@ async function downloadContents(url: string): Promise<ArrayBuffer> {
  */
 @customElement('model-viewer-preview')
 export class ModelViewerPreview extends ConnectedLitElement {
-  static styles = [styles, hotspotStyles];
+  static styles = [modelViewerPreviewStyles, hotspotStyles];
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
@@ -250,6 +250,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
             childElements)}`;
   }
 
+  // Handle the case when the model is loaded for the first time.
   private onModelLoaded() {
     // only update on poster reveal
     if (this.modelViewer && this.modelViewer.reveal === 'interaction') {

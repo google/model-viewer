@@ -60,7 +60,7 @@ class GenericDownloadButton extends ConnectedLitElement {
 
   render() {
     return html`<mwc-button unelevated
-        icon="save"
+        icon="file_download"
         ?disabled=${!this.preparePayload}
         @click=${this.onDownloadClick}>
           ${this.buttonLabel}</mwc-button>`;
@@ -109,7 +109,7 @@ async function prepareZipArchive(
 export class DownloadButton extends GenericDownloadButton {
   constructor() {
     super();
-    this.buttonLabel = 'Export GLB';
+    this.buttonLabel = 'GLB';
   }
 
   stateChanged(state: State) {
@@ -127,7 +127,7 @@ export class ExportZipButton extends GenericDownloadButton {
 
   constructor() {
     super();
-    this.buttonLabel = 'Export ZIP';
+    this.buttonLabel = 'ZIP';
   }
 
   stateChanged(state: State) {

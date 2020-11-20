@@ -41,17 +41,31 @@ export interface Camera {
 export const INITIAL_CAMERA = {};
 
 function getMinString(limits: Limits|undefined, suffix: string) {
-  if (!limits || !limits.enabled) {
+  if (!limits || !limits.enabled || limits.min === 'auto') {
     return 'auto';
+  } else if (typeof limits.min === 'string') {
+    throw new Error(`Unhandled Min Limit Value: ${suffix}`);
   }
   return `${roundToDigits(limits.min, DIGITS)}${suffix}`;
 }
 
 function getMaxString(limits: Limits|undefined, suffix: string) {
-  if (!limits || !limits.enabled) {
+  if (!limits || !limits.enabled || limits.max === 'auto') {
     return 'auto';
+  } else if (typeof limits.max === 'string') {
+    throw new Error(`Unhandled Max Limit Value: ${suffix}`);
   }
   return `${roundToDigits(limits.max, DIGITS)}${suffix}`;
+}
+
+export function getOrbitString(orbit: SphericalPositionDeg) {
+  return `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
+      roundToDigits(
+          orbit.phiDeg, DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`
+}
+
+export function getFOV(fov: number) {
+  return `${roundToDigits(fov, DIGITS)}deg`;
 }
 
 /**
@@ -61,9 +75,7 @@ function getMaxString(limits: Limits|undefined, suffix: string) {
 export function applyCameraEdits(config: ModelViewerConfig, edits: Camera) {
   const orbit = edits.orbit;
   if (orbit) {
-    config.cameraOrbit = `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
-        roundToDigits(
-            orbit.phiDeg, DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`;
+    config.cameraOrbit = getOrbitString(orbit);
   }
 
   const target = edits.target;
@@ -74,7 +86,7 @@ export function applyCameraEdits(config: ModelViewerConfig, edits: Camera) {
 
   const fov = edits.fieldOfViewDeg;
   if (fov) {
-    config.fieldOfView = `${roundToDigits(fov, DIGITS)}deg`;
+    config.fieldOfView = getFOV(fov);
   }
 
   if (edits.yawLimitsDeg || edits.pitchLimitsDeg || edits.radiusLimits) {

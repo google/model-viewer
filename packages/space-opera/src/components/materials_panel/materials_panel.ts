@@ -136,7 +136,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
   renderSelectMaterialTab() {
     return html`
-    <me-expandable-tab tabName="Selected Material" .open=${true}>
+    <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
+        true}>
       <me-dropdown
         .selectedIndex=${this.selectedMaterialId || 0}
         slot="content"
@@ -542,27 +543,19 @@ export class MaterialPanel extends ConnectedLitElement {
 
   renderMetallicRoughnessTab() {
     if (this.selectedMaterialId === undefined) {
-      return `No material selected`;
+      return `<me-expandable-tab tabName="Materials" .open=${true} .sticky=${
+          true}>
+      <div slot="content">
+        <div style="color: var(--text-on-expandable-background);">No materials to edit. Load a model to edit the materials.</div>
+      </div>
+    </me-expandable-tab>`;
     }
+
     const material = this.materials[this.selectedMaterialId];
     const currentTextureId = material.metallicRoughnessTextureId;
     return html`
   <me-expandable-tab tabName="Metallic Roughness">
     <div slot="content">
-      <me-section-row label="Texture">
-        <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
-          title="Revert to original metallic roughness texture"
-          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
-          <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
-        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
-        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
-          </me-texture-picker>
-        </div>
-      </me-section-row>
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
         <div class="MRSliderContainer">
@@ -586,6 +579,20 @@ export class MaterialPanel extends ConnectedLitElement {
           </me-slider-with-input>
         </div>
       </div>
+      <me-section-row label="Texture">
+        <div class="TexturePickerContainer">
+          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          title="Revert to original metallic roughness texture"
+          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          <me-texture-picker .selectedIndex=${
+        currentTextureId ?
+            this.safeUrlIds.indexOf(currentTextureId) :
+            undefined} id="metallic-roughness-texture-picker" @texture-changed=${
+        this.onMetallicRoughnessTextureChange} @texture-uploaded=${
+        this.onMetallicRoughnessTextureUpload} .images=${this.safeTextureUrls}>
+          </me-texture-picker>
+        </div>
+      </me-section-row>
     </div>
   </me-expandable-tab>`;
   }
@@ -601,7 +608,7 @@ export class MaterialPanel extends ConnectedLitElement {
         (color: number) => Math.round(color * 255));
     const selectedColorHex = color.rgbArrayToHex(selectedColorRgb);
     return html`
-  <me-expandable-tab tabName="Base Color">
+  <me-expandable-tab tabName="Base Color" .open=${true}>
     <div slot="content">
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">

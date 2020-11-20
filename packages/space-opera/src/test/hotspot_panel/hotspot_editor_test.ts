@@ -54,10 +54,8 @@ describe('hotspot editor test', () => {
     expect(hotspots[0].annotation).toBe('new annotation');
   });
 
-  it('fires dispatchRemoveHotspot when remove button is clicked', () => {
-    const removeButton = hotspotEditor.shadowRoot!.querySelector(
-                             'mwc-icon-button#remove-hotspot') as HTMLElement;
-    removeButton.click();
+  it('fires dispatchRemoveHotspot when onRemoveHotspot is called', () => {
+    hotspotEditor.onRemoveHotspot();
     const hotspots = getHotspots(reduxStore.getState());
     expect(hotspots.length).toBe(0);
   });

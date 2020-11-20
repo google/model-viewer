@@ -29,13 +29,14 @@ import {Limits} from '../types.js';
 
 import {styles} from './limits_base.css.js';
 
+
 /** Abstract component that can be extended for editing scalar limits. */
 export abstract class LimitsBase extends ConnectedLitElement {
-  static get styles() {
-    return styles;
-  }
+  static styles = [styles];
 
   abstract get label(): string;
+  abstract get minimumLabel(): string;
+  abstract get maximumLabel(): string;
   abstract get absoluteMinimum(): number;
   abstract get absoluteMaximum(): number;
   abstract get currentPreviewValue(): number;
@@ -128,10 +129,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
       return html``;
 
     return html`
-    <me-section-row label="Minimum">
+    <me-section-row label="${this.minimumLabel}">
       <div class="LabelRowContent">
-        <mwc-button id="clear-min-button" unelevated icon="cancel" @click="${
-        this.onClearMin}"></mwc-button>
         <mwc-button id="set-min-button" class="SetButton" unelevated @click="${
         this.onSetMin}">Set to ${
         this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>
@@ -147,10 +146,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
       @change=${this.onMinimumInputChange}>
     </me-slider-with-input>
 
-    <me-section-row class="MaxLabelRow" label="Maximum">
+    <me-section-row class="MaxLabelRow" label="${this.maximumLabel}">
       <div class="LabelRowContent">
-        <mwc-button id="clear-max-button" unelevated icon="cancel" @click="${
-        this.onClearMax}"></mwc-button>
         <mwc-button id="set-max-button" class="SetButton" unelevated @click="${
         this.onSetMax}">Set to ${
         this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>
