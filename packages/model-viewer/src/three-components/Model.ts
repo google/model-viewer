@@ -27,10 +27,6 @@ const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
 export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
 export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 
-export const $shadow = Symbol('shadow');
-const $cancelPendingSourceChange = Symbol('cancelPendingSourceChange');
-const $currentGLTF = Symbol('currentGLTF');
-
 const view = new Vector3();
 const target = new Vector3();
 const normalWorld = new Vector3();
@@ -39,11 +35,11 @@ const normalWorld = new Vector3();
  * An Object3D that can swap out its underlying model.
  */
 export default class Model extends Object3D {
-  protected[$shadow]: Shadow|null = null;
+  public shadow: Shadow|null = null;
 
-  private[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+  private _currentGLTF: ModelViewerGLTFInstance|null = null;
   private mixer: AnimationMixer;
-  private[$cancelPendingSourceChange]: (() => void)|null;
+  private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
 
@@ -58,7 +54,7 @@ export default class Model extends Object3D {
   public url: string|null = null;
 
   get currentGLTF() {
-    return this[$currentGLTF];
+    return this._currentGLTF;
   }
 
   /**
@@ -105,9 +101,9 @@ export default class Model extends Object3D {
 
     // If we have pending work due to a previous source change in progress,
     // cancel it so that we do not incur a race condition:
-    if (this[$cancelPendingSourceChange] != null) {
-      this[$cancelPendingSourceChange]!();
-      this[$cancelPendingSourceChange] = null;
+    if (this.cancelPendingSourceChange != null) {
+      this.cancelPendingSourceChange!();
+      this.cancelPendingSourceChange = null;
     }
 
     this.url = url;
@@ -117,7 +113,7 @@ export default class Model extends Object3D {
     try {
       gltf = await new Promise<ModelViewerGLTFInstance>(
           async (resolve, reject) => {
-            this[$cancelPendingSourceChange] = () => reject();
+            this.cancelPendingSourceChange = () => reject();
             try {
               const result = await element[$renderer].loader.load(
                   url, element, progressCallback);
@@ -136,7 +132,7 @@ export default class Model extends Object3D {
     }
 
     this.clear();
-    this[$currentGLTF] = gltf;
+    this._currentGLTF = gltf;
 
     if (gltf != null) {
       this.modelContainer.add(gltf.scene);
@@ -236,14 +232,14 @@ export default class Model extends Object3D {
   clear() {
     this.url = null;
     this.userData = {url: null};
-    const gltf = this[$currentGLTF];
+    const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
       for (const child of this.modelContainer.children) {
         this.modelContainer.remove(child);
       }
       gltf.dispose();
-      this[$currentGLTF] = null;
+      this._currentGLTF = null;
     }
 
     if (this.currentAnimationAction != null) {
@@ -297,14 +293,14 @@ export default class Model extends Object3D {
    */
   setShadowIntensity(
       shadowIntensity: number, shadowSoftness: number, side: Side) {
-    let shadow = this[$shadow];
+    let shadow = this.shadow;
     if (shadow != null) {
       shadow.setIntensity(shadowIntensity);
       shadow.setModel(this, shadowSoftness, side);
     } else if (shadowIntensity > 0) {
       shadow = new Shadow(this, shadowSoftness, side);
       shadow.setIntensity(shadowIntensity);
-      this[$shadow] = shadow;
+      this.shadow = shadow;
     }
   }
 
@@ -314,7 +310,7 @@ export default class Model extends Object3D {
    * changed frequently. Softer shadows are cheaper to render.
    */
   setShadowSoftness(softness: number) {
-    const shadow = this[$shadow];
+    const shadow = this.shadow;
     if (shadow != null) {
       shadow.setSoftness(softness);
     }
@@ -325,7 +321,7 @@ export default class Model extends Object3D {
    * this model. The input is the global orientation about the Y axis.
    */
   setShadowRotation(radiansY: number) {
-    const shadow = this[$shadow];
+    const shadow = this.shadow;
     if (shadow != null) {
       shadow.setRotation(radiansY);
     }
@@ -336,7 +332,7 @@ export default class Model extends Object3D {
    * resets the state.
    */
   updateShadow(): boolean {
-    const shadow = this[$shadow];
+    const shadow = this.shadow;
     if (shadow == null) {
       return false;
     } else {
@@ -351,7 +347,7 @@ export default class Model extends Object3D {
    * offset (should generally be negative).
    */
   setShadowScaleAndOffset(scale: number, offset: number) {
-    const shadow = this[$shadow];
+    const shadow = this.shadow;
     if (shadow != null) {
       shadow.setScaleAndOffset(scale, offset);
     }

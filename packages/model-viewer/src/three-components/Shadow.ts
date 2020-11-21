@@ -21,7 +21,7 @@ export type Side = 'back'|'bottom';
 
 // Nothing within Offset of the bottom of the model casts a shadow
 // (this is to avoid having a baked-in shadow plane cast its own shadow).
-const OFFSET = 0.001;
+const OFFSET = 0.002;
 // The softness [0, 1] of the shadow is mapped to a resolution between
 // 2^LOG_MAX_RESOLUTION and 2^LOG_MIN_RESOLUTION.
 const LOG_MAX_RESOLUTION = 9;
@@ -95,7 +95,8 @@ export class Shadow extends DirectionalLight {
       [min.y, min.z] = [min.z, min.y];
       [max.y, max.z] = [max.z, max.y];
       [this.size.y, this.size.z] = [this.size.z, this.size.y];
-      this.rotateX(Math.PI / 2);
+      this.rotation.x = Math.PI / 2;
+      this.rotation.y = Math.PI;
     }
     const {boundingBox, size} = this;
 
@@ -115,7 +116,6 @@ export class Shadow extends DirectionalLight {
     } else {
       this.position.y = 0;
       this.position.z = shadowOffset;
-      this.floor.position.z *= -1;
     }
 
     this.setSoftness(softness);
@@ -198,6 +198,7 @@ export class Shadow extends DirectionalLight {
   setRotation(radiansY: number) {
     if (this.side !== 'bottom') {
       // We don't support rotation about a horizontal axis yet.
+      this.shadow.updateMatrices(this);
       return;
     }
     this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
