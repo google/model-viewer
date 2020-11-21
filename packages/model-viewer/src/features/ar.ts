@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$loaded, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$loaded, $needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -161,6 +161,11 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('arScale')) {
         this[$scene].canScale = this.arScale !== 'fixed';
+      }
+
+      if (changedProperties.has('arPlacement')) {
+        this[$scene].setShadowIntensity(this[$scene].shadowIntensity);
+        this[$needsRender]();
       }
 
       if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
