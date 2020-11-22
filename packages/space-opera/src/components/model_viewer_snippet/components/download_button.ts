@@ -17,16 +17,17 @@
 
 import '@material/mwc-button';
 
-import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 // tslint:disable-next-line:enforce-name-casing JSZip is a class.
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {State} from '../../../types.js';
+import {RelativeFilePathsState, State} from '../../../types.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getGltfModel} from '../../model_viewer_preview/reducer.js';
+import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 
 interface Payload {
   blob: Blob;
@@ -45,6 +46,7 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 
   @internalProperty() buttonLabel = '';
+  @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @internalProperty() preparePayload?: () => Promise<Payload|null>;
 
   // NOTE: Because this is async, it is possible for multiple downloads to be
@@ -78,20 +80,29 @@ async function prepareGlbPayload(gltf: GltfModel): Promise<Payload> {
 }
 
 async function prepareZipArchive(
-    gltf: GltfModel, urls: string[], data: {snippetText: string}):
-    Promise<Payload> {
+    gltf: GltfModel,
+    config: ModelViewerConfig,
+    data: {snippetText: string},
+    relativeFilePaths: RelativeFilePathsState): Promise<Payload> {
   const zip = new JSZip();
 
   const glb = await prepareGlbPayload(gltf);
-  zip.file(glb.filename, glb.blob);
+  zip.file(relativeFilePaths.modelName!, glb.blob);
 
-  for (const url of urls) {
-    // TODO:: Check or normalize all URLs as relative paths.
-    const response = await fetch(url);
+  if (config.environmentImage) {
+    const response = await fetch(config.environmentImage);
     if (!response.ok) {
-      throw new Error(`Failed to fetch url ${url}`);
+      throw new Error(`Failed to fetch url ${config.environmentImage}`);
     }
-    zip.file(url, response.blob());
+    zip.file(relativeFilePaths.environmentName!, response.blob());
+  }
+
+  if (config.poster) {
+    const response = await fetch(config.poster);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch url ${config.poster}`);
+    }
+    zip.file(relativeFilePaths.posterName!, response.blob());
   }
 
   zip.file('snippet.txt', data.snippetText);
@@ -133,6 +144,7 @@ export class ExportZipButton extends GenericDownloadButton {
   stateChanged(state: State) {
     const config = getConfig(state);
     const gltf = getGltfModel(state);
+    const relativeFilePaths = getRelativeFilePaths(state);
     if (!gltf) {
       this.preparePayload = undefined;
       return;
@@ -146,7 +158,8 @@ export class ExportZipButton extends GenericDownloadButton {
     // Note that snippet text will necessarily be set manually post-update,
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
-    this.preparePayload = () => prepareZipArchive(gltf, urls, this);
+    this.preparePayload = () =>
+        prepareZipArchive(gltf, config, this, relativeFilePaths);
   }
 }
 
