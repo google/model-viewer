@@ -238,6 +238,7 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
+    this.updateMatrixWorld(true);
     this.model.setShadowRotation(radiansY);
     this.isDirty = true;
   }

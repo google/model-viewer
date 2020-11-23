@@ -691,7 +691,7 @@ export class ARRenderer extends EventDispatcher {
 
       if (!this.isTranslating) {
         const offset = goal.y - y;
-        if (this.placementComplete) {
+        if (this.placementComplete && this.placeOnWall === false) {
           box.offsetHeight = offset / newScale;
           model.setShadowScaleAndOffset(newScale, offset);
         } else if (offset === 0) {
@@ -704,8 +704,6 @@ export class ARRenderer extends EventDispatcher {
     }
     box.updateOpacity(delta);
     scene.updateTarget(delta);
-    // This updates the model's position, which the shadow is based on.
-    scene.updateMatrixWorld(true);
     // yaw must be updated last, since this also updates the shadow position.
     scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
   }
