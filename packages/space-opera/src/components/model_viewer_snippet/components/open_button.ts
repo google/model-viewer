@@ -203,8 +203,7 @@ export class ImportCard extends LitElement {
       return;
     }
     const arrayBuffer = await files[0].arrayBuffer();
-    const modelName = files[0].name;
-    reduxStore.dispatch(dispatchSetModelName(modelName));
+    reduxStore.dispatch(dispatchSetModelName(files[0].name));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchGltfUrl(url));
     dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));

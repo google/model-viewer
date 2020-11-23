@@ -328,8 +328,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         return;
       if (file.name.match(/\.(glb)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
-        const modelName = file.name;
-        reduxStore.dispatch(dispatchSetModelName(modelName));
+        reduxStore.dispatch(dispatchSetModelName(file.name));
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
