@@ -15,8 +15,8 @@
 
 import {AnimationMixin} from '../../features/animation.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {waitForEvent} from '../../utilities.js';
-import {assetPath, timePasses} from '../helpers.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;

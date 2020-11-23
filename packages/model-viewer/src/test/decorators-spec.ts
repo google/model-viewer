@@ -16,7 +16,7 @@ import {property, UpdatingElement} from 'lit-element';
 
 import {style} from '../decorators.js';
 import {numberNode} from '../styles/parsers.js';
-import {timePasses} from './helpers.js';
+import {timePasses} from '../utilities.js';
 
 const expect = chai.expect;
 

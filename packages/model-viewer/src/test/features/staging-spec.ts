@@ -17,8 +17,8 @@ import {CameraChangeDetails} from '../../features/controls.js';
 import {StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
-import {waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses, timePasses,} from '../helpers.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;

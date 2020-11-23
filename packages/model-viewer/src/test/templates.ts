@@ -17,8 +17,7 @@ import {Cache} from 'three';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-
-import {timePasses} from './helpers.js';
+import {timePasses} from '../utilities.js';
 
 export type Constructor<T = object> = {
   new (...args: any[]): T

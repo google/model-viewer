@@ -16,8 +16,8 @@
 import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
 import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
-import {waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, timePasses, until} from '../helpers.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
