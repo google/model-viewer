@@ -22,6 +22,7 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {arrayBufferEqualityTester, createBufferFromString, fetchBufferForUri, generatePngBlob} from '../testing/utils.js';
 import {cloneJson} from '../util/clone_json.js';
 import {createSafeObjectURL} from '../util/create_object_url.js';
+import {unpackGlb} from './unpack_glb.js';
 
 import {GltfModel, Material, SINGLE_PIXEL_PNG_BLOB, TextureHandle} from './gltf_model.js';
 import {GlTf, Material as GlTfMaterial} from './gltf_spec.js';
@@ -498,6 +499,12 @@ describe('gltf model test', () => {
     const glb1Tex = await model.packGlb();
     expect(glb1Tex.byteLength)
         .toBeLessThanOrEqual(glb2Tex.byteLength - bytesSavedA);
+    const {gltfJson: gltfJson1} = unpackGlb(glb1Tex);
+    expect(gltfJson1.buffers).toBeDefined();
+    if (gltfJson1.buffers) {
+      expect(gltfJson1.buffers[0].byteLength)
+          .toBeLessThanOrEqual(glb2Tex.byteLength - bytesSavedA);
+    }
 
     // Do it again to be sure.
     const bytesSavedB =
@@ -507,6 +514,12 @@ describe('gltf model test', () => {
     const glb0Tex = await model.packGlb();
     expect(glb0Tex.byteLength)
         .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSavedB);
+    const {gltfJson: gltfJson0} = unpackGlb(glb0Tex);
+    expect(gltfJson0.buffers).toBeDefined();
+    if (gltfJson0.buffers) {
+      expect(gltfJson0.buffers[0].byteLength)
+          .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSavedB);
+    }
   });
 
   it('exports a smaller GLB file after deleting a *newly added* texture',
@@ -529,6 +542,12 @@ describe('gltf model test', () => {
        const glb0Tex = await model.packGlb();
        expect(glb0Tex.byteLength)
            .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSaved);
+       const {gltfJson: gltfJson0} = unpackGlb(glb0Tex);
+       expect(gltfJson0.buffers).toBeDefined();
+       if (gltfJson0.buffers) {
+         expect(gltfJson0.buffers[0].byteLength)
+             .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSaved);
+       }
      });
 
   it('deletes textures and updates material references properly', async () => {

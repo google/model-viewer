@@ -808,6 +808,12 @@ export class GltfModel {
       }
       this.root.bufferViews[i].byteOffset! -= bytesSaved;
     }
+    // Adjust the corresponding buffer's byteLength also. 
+    if (view.buffer !== undefined &&
+        this.root.buffers &&
+        this.root.buffers[view.buffer]?.byteLength !== undefined) {
+      this.root.buffers[view.buffer].byteLength! -= bytesSaved;
+    }
     image.mimeType = SINGLE_PIXEL_PNG_BLOB.type;
 
     // Make sure we update the URL cache
