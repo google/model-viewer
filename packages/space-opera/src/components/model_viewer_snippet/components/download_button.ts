@@ -46,7 +46,6 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 
   @internalProperty() buttonLabel = '';
-  @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @internalProperty() preparePayload?: () => Promise<Payload|null>;
 
   // NOTE: Because this is async, it is possible for multiple downloads to be
@@ -79,6 +78,9 @@ async function prepareGlbPayload(
   };
 }
 
+/**
+ * Add elements to ZIP as necessary.
+ */
 async function prepareZipArchive(
     gltf: GltfModel,
     config: ModelViewerConfig,
@@ -89,6 +91,7 @@ async function prepareZipArchive(
   const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
   zip.file(glb.filename, glb.blob);
 
+  // check if legal envrionment url
   if (config.environmentImage) {
     const response = await fetch(config.environmentImage);
     if (!response.ok) {
@@ -97,6 +100,7 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.environmentName!, response.blob());
   }
 
+  // check if legal poster url
   if (config.poster) {
     const response = await fetch(config.poster);
     if (!response.ok) {
@@ -125,9 +129,9 @@ export class DownloadButton extends GenericDownloadButton {
 
   stateChanged(state: State) {
     const {gltf} = state.entities.gltf;
-    this.preparePayload = gltf ?
-        () => prepareGlbPayload(gltf, this.relativeFilePaths?.modelName!) :
-        undefined;
+    const modelName = getRelativeFilePaths(state).modelName!;
+    this.preparePayload =
+        gltf ? () => prepareGlbPayload(gltf, modelName) : undefined;
   }
 }
 
