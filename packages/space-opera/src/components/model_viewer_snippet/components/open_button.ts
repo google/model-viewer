@@ -197,13 +197,12 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
-    const files = await this.fileModal.open();
+    const files: any = await this.fileModal.open();
     if (!files) {
       /// The user canceled the previous upload
       return;
     }
     const arrayBuffer = await files[0].arrayBuffer();
-    // @ts-ignore
     const modelName = files[0].name;
     reduxStore.dispatch(dispatchSetModelName(modelName));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
@@ -222,13 +221,13 @@ export class ImportCard extends LitElement {
     const dropdown = event.target as Dropdown;
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
     let snippet = '';
-    const simpleMap = {
+    const simpleMap: any = {
       'Astronaut': 1,
       'Horse': 2,
       'RobotExpressive': 3,
       'alpha-blend-litmus': 4
     };
-    const advancedMap = {
+    const advancedMap: any = {
       'BoomBox': 5,
       'BrainStem': 6,
       'Corset': 7,
@@ -244,14 +243,12 @@ export class ImportCard extends LitElement {
         this.selectedDefaultOption = 0;
         return;
       } else if (value in simpleMap) {
-        // @ts-ignore
         this.selectedDefaultOption = simpleMap[value];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/${fileName}'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
       } else if (value in advancedMap) {
-        // @ts-ignore
         this.selectedDefaultOption = advancedMap[value];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
