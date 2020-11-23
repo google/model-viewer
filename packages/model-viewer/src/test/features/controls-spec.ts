@@ -20,8 +20,8 @@ import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
-import {Constructor, step, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, timePasses, until} from '../helpers.js';
+import {Constructor, step, timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
@@ -112,13 +112,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         element.src = assetPath('models/cube.gltf');
 
         await waitForEvent(element, 'load');
-        // NOTE(cdata): Sometimes the load event dispatches quickly enough to
-        // cause a race condition where property change occurs _after_ load.
-        // In this condition, it is possible for the controls to be "unsettled"
-        // by the time that the test begins. Awaiting for a microtask ensures
-        // that we always have time for one internal property change in the
-        // element:
-        await timePasses();
 
         settleControls(controls);
 

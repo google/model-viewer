@@ -22,7 +22,7 @@ import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce} from './utilities.js';
+import {debounce, timePasses} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -233,9 +233,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene] =
         new ModelScene({canvas: this[$canvas], element: this, width, height});
 
-    this[$scene].addEventListener('model-load', (event) => {
+    this[$scene].addEventListener('model-load', async (event) => {
       this[$markLoaded]();
       this[$onModelLoad]();
+
+      // Give loading async tasks a chance to complete.
+      await timePasses();
 
       this.dispatchEvent(
           new CustomEvent('load', {detail: {url: (event as any).url}}));

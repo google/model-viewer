@@ -16,7 +16,7 @@ import {Group} from 'three';
 import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
-import {deserializeUrl, PredicateFunction} from '../utilities.js';
+import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
@@ -37,9 +37,6 @@ export const pickShadowDescendant =
           elementFromLocalPoint(element.shadowRoot, x, y) :
           null;
     };
-
-export const timePasses = (ms: number = 0): Promise<void> =>
-    new Promise(resolve => setTimeout(resolve, ms));
 
 export const until =
     async (predicate: PredicateFunction) => {

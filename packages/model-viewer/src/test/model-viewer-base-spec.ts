@@ -16,9 +16,9 @@
 import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
-import {Constructor, waitForEvent} from '../utilities.js';
+import {Constructor, timePasses, waitForEvent} from '../utilities.js';
 
-import {assetPath, spy, timePasses, until} from './helpers.js';
+import {assetPath, spy, until} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 
