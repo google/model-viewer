@@ -21,7 +21,6 @@ import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_jso
 import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
-import {dispatchInitialCameraState, getInitialCamera} from '../components/camera_settings/reducer.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
@@ -767,11 +766,6 @@ describe('space opera base test', () => {
     applyCameraEdits(config, camera);
     expect(config.minCameraOrbit).toEqual('auto 10deg auto');
     expect(config.maxCameraOrbit).toEqual('auto 20deg auto');
-  });
-
-  it('correctly updates state upon dispatching camera fields', () => {
-    reduxStore.dispatch(dispatchInitialCameraState({fieldOfViewDeg: 451}));
-    expect(getInitialCamera(reduxStore.getState()).fieldOfViewDeg).toEqual(451);
   });
 
   it('sets correct attributes for FOV limits', () => {

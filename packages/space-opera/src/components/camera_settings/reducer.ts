@@ -22,30 +22,6 @@ import {Camera} from './camera_state.js';
 import {SphericalPositionDeg, Vector3D} from './types.js';
 import {Limits} from './types.js';
 
-// INITIAL CAMERA //////////////
-
-/**
- * Used to initialize camera state with model-viewer's initial state. This means
- * we can rely on it to parse things like camera orbit strings, rather than
- * doing it ourselves.
- */
-const SET_INITIAL_CAMERA_STATE = 'SET_INITIAL_CAMERA_STATE';
-export function dispatchInitialCameraState(initialCamera?: Camera) {
-  return {type: SET_INITIAL_CAMERA_STATE, payload: {...initialCamera}};
-}
-
-export const getInitialCamera = (state: State) => state.entities.initialCamera;
-
-export function initialCameraReducer(
-    state: Camera = INITIAL_CAMERA, action: Action): Camera {
-  switch (action.type) {
-    case SET_INITIAL_CAMERA_STATE:
-      return action.payload;
-    default:
-      return state;
-  }
-}
-
 // DIRTY CAMERA//////////////
 
 const IS_DIRTY_CAMERA = 'IS_DIRTY_CAMERA';

@@ -213,10 +213,8 @@ export class ImportCard extends LitElement {
       'BrainStem': 6,
       'Corset': 7,
       'DamagedHelmet': 8,
-      'FlightHelmet': 9,
-      'Lantern': 10,
-      'Suzanne': 11,
-      'SpecGlossVsMetalRough': 12
+      'Lantern': 9,
+      'SpecGlossVsMetalRough': 10
     };
     if (value !== undefined) {
       if (value === 'none') {

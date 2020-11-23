@@ -18,7 +18,7 @@
 import {combineReducers} from 'redux';
 
 import {animationNamesReducer} from './components/animation_controls/reducer.js';
-import {cameraReducer, initialCameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
+import {cameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
@@ -40,7 +40,6 @@ const entitiesReducer = combineReducers({
   environment: environmentReducer,
   gltf: gltfReducer,
   gltfEdits: gltfEditsReducer,
-  initialCamera: initialCameraReducer,
   modelViewerSnippet: modelViewerSnippetReducer
 });
 

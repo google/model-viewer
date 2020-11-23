@@ -34,7 +34,6 @@ import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
-import {dispatchInitialCameraState} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
@@ -263,8 +262,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (!this.modelViewer || !this.modelViewer.loaded) {
       throw new Error('onModelVisible called before mv was loaded');
     }
-    reduxStore.dispatch(
-        dispatchInitialCameraState(getCameraState(this.modelViewer)));
   }
 
   private onCameraChange() {

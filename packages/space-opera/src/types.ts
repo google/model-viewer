@@ -52,7 +52,6 @@ export interface EntitiesState {
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
-  initialCamera: Camera;
   modelViewerSnippet: ModelViewerSnippetState;
 }
 
@@ -80,7 +79,6 @@ export const INITIAL_STATE: State = {
       hotspots: [],
       camera: INITIAL_CAMERA,
     },
-    initialCamera: INITIAL_CAMERA,
   },
 };
 
