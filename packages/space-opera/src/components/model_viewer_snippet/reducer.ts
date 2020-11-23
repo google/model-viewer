@@ -24,12 +24,16 @@ import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchInitialCameraState, dispatchSetCamera} from '../camera_settings/reducer.js';
 import {dispatchSetConfig} from '../config/reducer.js';
 
+/**
+ * Sets the filepaths of a copy of the config.
+ * Used when displaying and exporting the snippet.
+ * NOT used inside the actual model-viewer element.
+ */
 export function applyRelativeFilePaths(
     editedConfig: ModelViewerConfig,
     gltfUrl: string|undefined,
     relativeFilePaths: RelativeFilePathsState,
     isEditSnippet: boolean) {
-  // If the last loaded URL use file name
   if (gltfUrl) {
     editedConfig.src = relativeFilePaths.modelName
   } else {

@@ -128,7 +128,7 @@ export class DownloadButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const {gltf} = state.entities.gltf;
+    const gltf = getGltfModel(state);
     const modelName = getRelativeFilePaths(state).modelName!;
     this.preparePayload =
         gltf ? () => prepareGlbPayload(gltf, modelName) : undefined;
