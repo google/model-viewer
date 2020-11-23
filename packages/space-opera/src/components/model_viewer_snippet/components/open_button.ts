@@ -101,14 +101,13 @@ export class OpenModal extends ConnectedLitElement {
         config.poster = undefined;
         dispatchSetPosterName(undefined);
 
-        // Keep environment image if is the env image wasn't updated
         if (config.environmentImage && isObjectUrl(config.environmentImage)) {
-          // If new environment image is legal, use it
+          // If new env image is legal, use it
           const engImageList = config.environmentImage.split('/');
           const envImageName = engImageList[engImageList.length - 1];
           reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
         } else if (this.config.environmentImage) {
-          // if there was an env image already in the state, leave it alone
+          // else, if there was an env image in the state, leave it alone
           config.environmentImage = this.config.environmentImage
         } else {
           // else, reset env image
@@ -205,8 +204,8 @@ export class ImportCard extends LitElement {
     }
     const arrayBuffer = await files[0].arrayBuffer();
     // @ts-ignore
-    const name = files[0].name;
-    reduxStore.dispatch(dispatchSetModelName(name));
+    const modelName = files[0].name;
+    reduxStore.dispatch(dispatchSetModelName(modelName));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchGltfUrl(url));
     dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
@@ -260,9 +259,7 @@ export class ImportCard extends LitElement {
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
       }
-
       reduxStore.dispatch(dispatchSetModelName(fileName));
-
       this.openModal.handleSubmitSnippet(snippet);
     }
   }

@@ -87,6 +87,7 @@ export class IblSelector extends ConnectedLitElement {
             this.config.environmentImage) {
       reduxStore.dispatch(dispatchEnvrionmentImage(
           dropdownElement.selectedItem.getAttribute('value') || undefined));
+      // dropdown value equals null when "Default" is selected
       if (dropdownElement.selectedItem.getAttribute('value') === null) {
         reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
       } else {

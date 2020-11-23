@@ -69,12 +69,12 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 }
 
-async function prepareGlbPayload(gltf: GltfModel): Promise<Payload> {
+async function prepareGlbPayload(
+    gltf: GltfModel, modelName: string): Promise<Payload> {
   const glbBuffer = await gltf.packGlb();
-  // TODO: Give filename that matches original upload/src
   return {
     blob: new Blob([glbBuffer], {type: 'model/gltf-binary'}),
-    filename: 'model.glb',
+    filename: modelName,
     contentType: ''
   };
 }
@@ -86,8 +86,8 @@ async function prepareZipArchive(
     relativeFilePaths: RelativeFilePathsState): Promise<Payload> {
   const zip = new JSZip();
 
-  const glb = await prepareGlbPayload(gltf);
-  zip.file(relativeFilePaths.modelName!, glb.blob);
+  const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
+  zip.file(glb.filename, glb.blob);
 
   if (config.environmentImage) {
     const response = await fetch(config.environmentImage);
@@ -125,7 +125,9 @@ export class DownloadButton extends GenericDownloadButton {
 
   stateChanged(state: State) {
     const {gltf} = state.entities.gltf;
-    this.preparePayload = gltf ? () => prepareGlbPayload(gltf) : undefined;
+    this.preparePayload = gltf ?
+        () => prepareGlbPayload(gltf, this.relativeFilePaths?.modelName!) :
+        undefined;
   }
 }
 
