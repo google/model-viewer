@@ -807,15 +807,12 @@ export class GltfModel {
         throw new Error(`Invalid bufferView at index ${i}?`);
       }
       this.root.bufferViews[i].byteOffset! -= bytesSaved;
-      // Adjust the corresponding buffer's byteLength also. 
-      if ((this.root.buffers === undefined) ||
-          (this.root.bufferViews[i]?.buffer === undefined)) {
-        throw new Error(`Invalid bufferView at index ${i}?`);
-      }
-      if (this.root.buffers[this.root.bufferViews[i].buffer].byteLength === undefined) {
-        throw new Error(`Invalid buffer for bufferView at index ${i}?`);
-      }
-      this.root.buffers[this.root.bufferViews[i].buffer].byteLength! -= bytesSaved;
+    }
+    // Adjust the corresponding buffer's byteLength also. 
+    if (view.buffer !== undefined &&
+        this.root.buffers &&
+        this.root.buffers[view.buffer]?.byteLength !== undefined) {
+      this.root.buffers[view.buffer].byteLength! -= bytesSaved;
     }
     image.mimeType = SINGLE_PIXEL_PNG_BLOB.type;
 
