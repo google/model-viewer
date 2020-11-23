@@ -24,7 +24,6 @@ import '@material/mwc-icon-button';
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
@@ -47,7 +46,7 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
-import {dispatchGltfUrl, getGltfModel, getGltfUrl} from './reducer.js';
+import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -55,32 +54,6 @@ const $origEdits = Symbol('origEdits');
 const $gltfUrl = Symbol('gltfUrl');
 const $gltf = Symbol('gltf');
 const $autoplay = Symbol('autoplay');
-
-export function getCameraState(viewer: ModelViewerElement) {
-  const orbitRad = viewer.getCameraOrbit();
-  return {
-    orbit: {
-      thetaDeg: radToDeg(orbitRad.theta),
-      phiDeg: radToDeg(orbitRad.phi),
-      radius: orbitRad.radius
-    },
-    target: viewer.getCameraTarget(),
-    fieldOfViewDeg: viewer.getFieldOfView(),
-  } as Camera;
-}
-
-async function downloadContents(url: string): Promise<ArrayBuffer> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch url ${url}`);
-  }
-  const blob = await response.blob();
-  if (!blob) {
-    throw new Error(`Could not extract binary blob from response of ${url}`);
-  }
-
-  return blob.arrayBuffer();
-}
 
 /**
  * Renders and updates the model-viewer tag, serving as a preview of the edits.

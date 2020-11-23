@@ -21,8 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {zoomStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
-import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
+import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMinZoom, dispatchZoomEnabled, getCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 

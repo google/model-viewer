@@ -33,9 +33,10 @@ function elementIsVisible(e: HTMLElement) {
 
 describe('<me-expandable-section>', () => {
   let section: ExpandableSection;
+  let container: HTMLDivElement;
 
   beforeEach(async () => {
-    const container = document.createElement('div');
+    container = document.createElement('div');
     document.body.appendChild(container);
     render(
         html`
@@ -47,6 +48,10 @@ describe('<me-expandable-section>', () => {
     section = container.querySelector('me-expandable-section')!;
     await section.updateComplete;
   });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  })
 
   it('is there', () => {
     expect(section instanceof HTMLElement).toBe(true);
@@ -72,9 +77,10 @@ describe('<me-expandable-section>', () => {
 
 describe('<me-expandable-tab>', () => {
   let tab: ExpandableTab;
+  let container: HTMLDivElement;
 
   beforeEach(async () => {
-    const container = document.createElement('div');
+    container = document.createElement('div');
     document.body.appendChild(container);
     render(
         html`
@@ -86,6 +92,10 @@ describe('<me-expandable-tab>', () => {
     tab = container.querySelector('me-expandable-tab')!;
     await tab.updateComplete;
   });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  })
 
   it('is there', () => {
     expect(tab instanceof HTMLElement).toBe(true);

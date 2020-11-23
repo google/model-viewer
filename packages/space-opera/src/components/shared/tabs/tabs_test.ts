@@ -24,9 +24,10 @@ import {Tabs} from './tabs.js';
 
 describe('<tabs>', () => {
   let tabs: Tabs;
+  let container: HTMLDivElement;
 
   beforeEach(async () => {
-    const container = document.createElement('div');
+    container = document.createElement('div');
     document.body.appendChild(container);
     render(
         html`
@@ -39,6 +40,10 @@ describe('<tabs>', () => {
     tabs = container.querySelector('me-tabs')!;
     expect(tabs).toBeDefined();
     await tabs.updateComplete;
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
   });
 
   it('exists', () => {

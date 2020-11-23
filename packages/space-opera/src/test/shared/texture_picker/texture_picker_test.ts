@@ -39,6 +39,10 @@ describe('texture picker test', () => {
     await texturePicker.updateComplete;
   });
 
+  afterEach(() => {
+    document.body.removeChild(texturePicker);
+  });
+
   it('exists', () => {
     expect(texturePicker instanceof HTMLElement).toBe(true);
     expect(texturePicker.tagName).toEqual('ME-TEXTURE-PICKER');

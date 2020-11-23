@@ -16,8 +16,42 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+
 import {Action, State} from '../../types.js';
+import {Camera} from '../camera_settings/camera_state.js';
 import {GltfState} from '../model_viewer_preview/types.js';
+
+export function getModelViewer() {
+  return document.querySelector('model-viewer-preview')?.modelViewer;
+}
+
+export function getCameraState(viewer: ModelViewerElement) {
+  const orbitRad = viewer.getCameraOrbit();
+  return {
+    orbit: {
+      thetaDeg: radToDeg(orbitRad.theta),
+      phiDeg: radToDeg(orbitRad.phi),
+      radius: orbitRad.radius
+    },
+    target: viewer.getCameraTarget(),
+    fieldOfViewDeg: viewer.getFieldOfView(),
+  } as Camera;
+}
+
+export async function downloadContents(url: string): Promise<ArrayBuffer> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch url ${url}`);
+  }
+  const blob = await response.blob();
+  if (!blob) {
+    throw new Error(`Could not extract binary blob from response of ${url}`);
+  }
+
+  return blob.arrayBuffer();
+}
 
 /** The user has requested a new GLTF/GLB for editing. */
 const SET_GLTF = 'SET_GLTF'

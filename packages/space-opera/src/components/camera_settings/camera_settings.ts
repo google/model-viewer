@@ -33,8 +33,7 @@ import {cameraSettingsStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
+import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
@@ -108,7 +107,11 @@ export class CameraTargetInput extends ConnectedLitElement {
 
   // @ts-ignore
   stateChanged(state: State) {
-    this.target = getCameraState(getModelViewer()!).target;
+    if (getModelViewer() !== undefined && getModelViewer() !== null) {
+      this.target = getCameraState(getModelViewer()!).target;
+    } else {
+      this.target = undefined;
+    }
   }
 
   protected onInputChange(event: Event) {

@@ -19,8 +19,7 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
-import {getModelViewer} from '../../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../../model_viewer_preview/model_viewer_preview.js';
+import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {dispatchYawLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
 import {Limits} from '../types.js';
 
