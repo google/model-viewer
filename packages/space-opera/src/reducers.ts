@@ -24,16 +24,18 @@ import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/red
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
 import {gltfReducer} from './components/model_viewer_preview/reducer.js';
+import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
 
 const gltfEditsReducer =
-    combineReducers({edits: editsReducer, origEdits: origEditsReducer})
+    combineReducers({edits: editsReducer, origEdits: origEditsReducer});
 
 const modelViewerSnippetReducer = combineReducers({
   animationNames: animationNamesReducer,
   camera: cameraReducer,
   config: configReducer,
-  hotspots: hotspotsReducer
-})
+  hotspots: hotspotsReducer,
+  relativeFilePaths: relativeFilePathsReducer,
+});
 
 const entitiesReducer = combineReducers({
   isDirtyCamera: isDirtyCameraReducer,

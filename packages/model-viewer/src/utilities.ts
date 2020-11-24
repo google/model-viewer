@@ -235,6 +235,9 @@ export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
 
 export type PredicateFunction<T = void> = (value: T) => boolean;
 
+export const timePasses = (ms: number = 0): Promise<void> =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * @param {EventTarget|EventDispatcher} target
  * @param {string} eventName

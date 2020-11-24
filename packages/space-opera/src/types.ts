@@ -31,6 +31,12 @@ interface UIState {
   hotspots: HotspotsUIState;
 }
 
+export interface RelativeFilePathsState {
+  modelName?: string|undefined;
+  environmentName?: string|undefined;
+  posterName?: string|undefined;
+}
+
 export interface EnvironmentState {
   environmentImages: EnvironmentImage[];
 }
@@ -45,6 +51,7 @@ interface ModelViewerSnippetState {
   camera: Camera;
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
+  relativeFilePaths: RelativeFilePathsState;
 }
 
 export interface EntitiesState {
@@ -78,6 +85,7 @@ export const INITIAL_STATE: State = {
       config: {},
       hotspots: [],
       camera: INITIAL_CAMERA,
+      relativeFilePaths: {},
     },
   },
 };

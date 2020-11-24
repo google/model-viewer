@@ -16,11 +16,40 @@
  */
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 
 import {reduxStore} from '../../space_opera_base.js';
+import {RelativeFilePathsState} from '../../types.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSetCamera} from '../camera_settings/reducer.js';
 import {dispatchSetConfig} from '../config/reducer.js';
+
+/**
+ * Sets the filepaths of a copy of the config.
+ * Used when displaying and exporting the snippet.
+ * NOT used inside the actual model-viewer element.
+ */
+export function applyRelativeFilePaths(
+    editedConfig: ModelViewerConfig,
+    gltfUrl: string|undefined,
+    relativeFilePaths: RelativeFilePathsState,
+    isEditSnippet: boolean) {
+  if (gltfUrl) {
+    editedConfig.src = relativeFilePaths.modelName
+  } else {
+    editedConfig.src = 'Upload model...';
+  }
+
+  if (editedConfig.environmentImage) {
+    editedConfig.environmentImage = relativeFilePaths.environmentName;
+  }
+
+  if (isEditSnippet) {
+    editedConfig.poster = undefined;
+  } else if (editedConfig.poster && isObjectUrl(editedConfig.poster)) {
+    editedConfig.poster = relativeFilePaths.posterName;
+  }
+}
 
 /** Use when the user wants to load a new config (probably from a snippet). */
 export function dispatchConfig(config?: ModelViewerConfig) {

@@ -32,6 +32,7 @@ import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js'
 import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {dispatchSetPosterName} from '../relative_file_paths/reducer.js';
 
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
@@ -100,6 +101,7 @@ export class PosterControlsElement extends ConnectedLitElement {
           createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
       reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
     }
+    reduxStore.dispatch(dispatchSetPosterName('poster.png'));
   }
 
   onDisplayPoster() {
@@ -122,6 +124,7 @@ export class PosterControlsElement extends ConnectedLitElement {
       URL.revokeObjectURL(this.poster);
     }
     reduxStore.dispatch(dispatchSetPoster(undefined));
+    reduxStore.dispatch(dispatchSetPosterName(undefined));
   }
 
   async onDownloadPoster() {

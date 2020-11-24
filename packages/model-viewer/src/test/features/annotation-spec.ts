@@ -19,8 +19,8 @@ import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
 import ModelViewerElementBase, {$loaded, $needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
-import {waitForEvent} from '../../utilities';
-import {assetPath, rafPasses, timePasses} from '../helpers';
+import {timePasses, waitForEvent} from '../../utilities';
+import {assetPath, rafPasses} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;

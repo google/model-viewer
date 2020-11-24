@@ -25,18 +25,19 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {extractStagingConfig, State} from '../../../types.js';
+import {extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {dispatchConfig} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchConfig} from '../reducer.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -47,6 +48,7 @@ export class OpenModal extends ConnectedLitElement {
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() errors: string[] = [];
   @internalProperty() gltfUrl?: string;
+  @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
 
@@ -54,6 +56,7 @@ export class OpenModal extends ConnectedLitElement {
     this.config = getConfig(state);
     this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
+    this.relativeFilePaths = getRelativeFilePaths(state);
   }
 
   async handleSubmitSnippet(value?: string) {
@@ -88,6 +91,28 @@ export class OpenModal extends ConnectedLitElement {
             setTimeout(resolve, 0);
           });
           reduxStore.dispatch(dispatchGltfUrl(config.src));
+          // dispatch new model name
+          const fileNameList = config.src.split('/');
+          const fileName = fileNameList[fileNameList.length - 1];
+          reduxStore.dispatch(dispatchSetModelName(fileName));
+        }
+
+        // reset poster
+        config.poster = undefined;
+        dispatchSetPosterName(undefined);
+
+        if (config.environmentImage && isObjectUrl(config.environmentImage)) {
+          // If new env image is legal, use it
+          const engImageList = config.environmentImage.split('/');
+          const envImageName = engImageList[engImageList.length - 1];
+          reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
+        } else if (this.config.environmentImage) {
+          // else, if there was an env image in the state, leave it alone
+          config.environmentImage = this.config.environmentImage
+        } else {
+          // else, reset env image
+          config.environmentImage = undefined;
+          reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
         }
 
         // NOTE: It's important to dispatch these *after* the URL dispatches. If
@@ -133,17 +158,9 @@ export class OpenModal extends ConnectedLitElement {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
     applyCameraEdits(editedConfig, this.camera);
-    if (this.gltfUrl && !isObjectUrl(this.gltfUrl)) {
-      editedConfig.src = this.gltfUrl;
-    } else {
-      // Uploaded GLB
-      editedConfig.src = `Change this to your GLB URL`;
-    }
-    if (editedConfig.environmentImage &&
-        isObjectUrl(editedConfig.environmentImage)) {
-      // Uploaded env image
-      editedConfig.environmentImage = `Change this to your HDR URL`;
-    }
+    applyRelativeFilePaths(
+        editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
+
     const exampleLoadableSnippet =
         renderModelViewer(editedConfig, {}, undefined);
 
@@ -155,9 +172,9 @@ export class OpenModal extends ConnectedLitElement {
     </div>
     <div style="font-size: 14px; font-weight: 500; margin-top: 10px; color: white">Edit or paste a &lt;model-viewer&gt snippet</div>
       <div class="InnerSnippetModal">
-      <snippet-viewer id="snippet-input" .renderedSnippet=${
+        <snippet-viewer id="snippet-input" .renderedSnippet=${
         exampleLoadableSnippet} .isReadOnly=${false}>
-      </snippet-viewer>
+        </snippet-viewer>
       </div>
     </div>
   <div class="FileModalCancel">
@@ -180,12 +197,13 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
-    const files = await this.fileModal.open();
+    const files: any = await this.fileModal.open();
     if (!files) {
       /// The user canceled the previous upload
       return;
     }
     const arrayBuffer = await files[0].arrayBuffer();
+    reduxStore.dispatch(dispatchSetModelName(files[0].name));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchGltfUrl(url));
     dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
@@ -200,15 +218,15 @@ export class ImportCard extends LitElement {
 
   onDefaultSelect(event: CustomEvent) {
     const dropdown = event.target as Dropdown;
-    const value = dropdown.selectedItem?.getAttribute('value') || undefined;
+    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
     let snippet = '';
-    const simpleMap = {
+    const simpleMap: any = {
       'Astronaut': 1,
       'Horse': 2,
       'RobotExpressive': 3,
       'alpha-blend-litmus': 4
     };
-    const advancedMap = {
+    const advancedMap: any = {
       'BoomBox': 5,
       'BrainStem': 6,
       'Corset': 7,
@@ -216,27 +234,26 @@ export class ImportCard extends LitElement {
       'Lantern': 9,
       'SpecGlossVsMetalRough': 10
     };
-    if (value !== undefined) {
-      if (value === 'none') {
+    const fileName = `${key}.glb`;
+    if (key !== undefined) {
+      if (key === 'none') {
         this.selectedDefaultOption = 0;
         return;
-      } else if (value in simpleMap) {
-        // @ts-ignore
-        this.selectedDefaultOption = simpleMap[value];
+      } else if (key in simpleMap) {
+        this.selectedDefaultOption = simpleMap[key];
         snippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/${value}.glb'
+  src='https://modelviewer.dev/shared-assets/models/${fileName}'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
-      } else if (value in advancedMap) {
-        // @ts-ignore
-        this.selectedDefaultOption = advancedMap[value];
+      } else if (key in advancedMap) {
+        this.selectedDefaultOption = advancedMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
-            value}/glTF-Binary/${value}.glb'
+            key}/glTF-Binary/${fileName}'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
       }
-
+      reduxStore.dispatch(dispatchSetModelName(fileName));
       this.openModal.handleSubmitSnippet(snippet);
     }
   }
