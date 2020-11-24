@@ -22,19 +22,20 @@ import {CameraSettings, CameraTargetInput} from '../../components/camera_setting
 import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
-import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-xdescribe('camera constraints test', () => {
+describe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
-  let preview: ModelViewerPreview;
 
   beforeEach(async () => {
     expect(getModelViewer()).toBeUndefined();
-    preview = new ModelViewerPreview();
-    document.body.appendChild(preview);
-    await preview.updateComplete;
+    document.body.innerHTML += `
+    <model-viewer-preview>
+      <model-viewer>
+      </model-viewer>
+    </model-viewer-preview>
+    `;
 
     cameraSettings = new CameraSettings();
     document.body.appendChild(cameraSettings);
@@ -44,6 +45,7 @@ xdescribe('camera constraints test', () => {
   afterEach(() => {
     cameraSettings.config = {};
     document.body.removeChild(cameraSettings);
+    const preview = document.querySelector('model-viewer-preview')!;
     document.body.removeChild(preview);
   });
 
@@ -75,7 +77,8 @@ xdescribe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    await cameraSettings.cameraOrbitEditor!.updateComplete;
+    // Commented out for flakiness. Kept in case this test begins to fail.
+    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
     expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
     expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
@@ -85,7 +88,8 @@ xdescribe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    await cameraSettings.cameraOrbitEditor!.updateComplete;
+    // Commented out for flakiness. Kept in case this test begins to fail.
+    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
