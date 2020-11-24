@@ -218,7 +218,7 @@ export class ImportCard extends LitElement {
 
   onDefaultSelect(event: CustomEvent) {
     const dropdown = event.target as Dropdown;
-    const value = dropdown.selectedItem?.getAttribute('value') || undefined;
+    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
     let snippet = '';
     const simpleMap: any = {
       'Astronaut': 1,
@@ -236,22 +236,22 @@ export class ImportCard extends LitElement {
       'Suzanne': 11,
       'SpecGlossVsMetalRough': 12
     };
-    const fileName = `${value}.glb`;
-    if (value !== undefined) {
-      if (value === 'none') {
+    const fileName = `${key}.glb`;
+    if (key !== undefined) {
+      if (key === 'none') {
         this.selectedDefaultOption = 0;
         return;
-      } else if (value in simpleMap) {
-        this.selectedDefaultOption = simpleMap[value];
+      } else if (key in simpleMap) {
+        this.selectedDefaultOption = simpleMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/${fileName}'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
-      } else if (value in advancedMap) {
-        this.selectedDefaultOption = advancedMap[value];
+      } else if (key in advancedMap) {
+        this.selectedDefaultOption = advancedMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
-            value}/glTF-Binary/${fileName}'
+            key}/glTF-Binary/${fileName}'
   shadow-intensity="1" camera-controls>
 </model-viewer>`;
       }
