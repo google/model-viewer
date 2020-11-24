@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$loaded, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$loaded, $needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -82,6 +82,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
+
+    @property({type: String, attribute: 'ar-placement'})
+    arPlacement: string = 'floor';
 
     @property({type: String, attribute: 'ar-modes'})
     arModes: string = DEFAULT_AR_MODES;
@@ -156,6 +159,15 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
             deserializeQuickLookBrowsers(this.quickLookBrowsers);
       }
 
+      if (changedProperties.has('arScale')) {
+        this[$scene].canScale = this.arScale !== 'fixed';
+      }
+
+      if (changedProperties.has('arPlacement')) {
+        this[$scene].setShadowIntensity(this[$scene].shadowIntensity);
+        this[$needsRender]();
+      }
+
       if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
           !changedProperties.has('iosSrc')) {
         return;
@@ -163,10 +175,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('arModes')) {
         this[$arModes] = deserializeARModes(this.arModes);
-      }
-
-      if (changedProperties.has('arScale')) {
-        this[$scene].canScale = this.arScale !== 'fixed';
       }
 
       this[$selectARMode]();
@@ -264,7 +272,9 @@ configuration or device capabilities');
       try {
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
-        await this[$renderer].arRenderer.present(this[$scene]);
+        const {arRenderer} = this[$renderer];
+        arRenderer.placeOnWall = this.arPlacement === 'wall';
+        await arRenderer.present(this[$scene]);
       } catch (error) {
         console.warn('Error while trying to present to AR');
         console.error(error);
@@ -307,6 +317,9 @@ configuration or device capabilities');
       }
       if (this.arScale === 'fixed') {
         intentParams += `&resizable=false`;
+      }
+      if (this.arPlacement === 'wall') {
+        intentParams += `&enable_vertical_placement=true`;
       }
 
       const intent = `intent://arvr.google.com/scene-viewer/1.0${

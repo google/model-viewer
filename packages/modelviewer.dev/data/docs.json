@@ -281,6 +281,18 @@
         }
       },
       {
+        "name": "ar-placement",
+        "htmlName": "arPlacement",
+        "description": "Selects whether to place the object on the floor (horizotal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#wall\"><span class='attribute'>ar-placement</span> example</a>"
+        ],
+        "default": {
+          "default": "floor",
+          "options": "floor, wall"
+        }
+      },
+      {
         "name": "ios-src",
         "htmlName": "iosSrc",
         "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari.",

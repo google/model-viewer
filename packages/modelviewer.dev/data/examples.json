@@ -66,6 +66,10 @@
         "name": "Scene Viewer"
       },
       {
+        "htmlId": "wall",
+        "name": "Place on a Wall"
+      },
+      {
         "htmlId": "customButton",
         "name": "Custom Button"
       },

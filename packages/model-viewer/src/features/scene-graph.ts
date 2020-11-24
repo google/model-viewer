@@ -17,7 +17,6 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-import {$shadow} from '../three-components/Model.js';
 import {Constructor} from '../utilities.js';
 
 import {Image, Material, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
@@ -108,7 +107,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         opts.animations = model.animations;
         opts.truncateDrawRange = true;
 
-        const shadow = model[$shadow];
+        const shadow = model.shadow;
         let visible = false;
         // Remove shadow from export
         if (shadow != null) {
