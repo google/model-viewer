@@ -318,6 +318,9 @@ configuration or device capabilities');
       if (this.arScale === 'fixed') {
         intentParams += `&resizable=false`;
       }
+      if (this.arPlacement === 'wall') {
+        intentParams += `&enable_vertical_placement=true`;
+      }
 
       const intent = `intent://arvr.google.com/scene-viewer/1.0${
           intentParams}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${

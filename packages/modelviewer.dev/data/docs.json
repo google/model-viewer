@@ -283,7 +283,7 @@
       {
         "name": "ar-placement",
         "htmlName": "arPlacement",
-        "description": "Selects whether to place the object on the floor (horizotal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well.",
+        "description": "Selects whether to place the object on the floor (horizotal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
         "links": [
           "<a href=\"../examples/augmentedreality/#wall\"><span class='attribute'>ar-placement</span> example</a>"
         ],
