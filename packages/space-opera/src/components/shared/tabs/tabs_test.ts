@@ -42,10 +42,6 @@ describe('<tabs>', () => {
     await tabs.updateComplete;
   });
 
-  afterEach(() => {
-    document.body.removeChild(container);
-  });
-
   it('exists', () => {
     expect(tabs instanceof HTMLElement).toBe(true);
     expect(tabs.tagName).toEqual('ME-TABS');
