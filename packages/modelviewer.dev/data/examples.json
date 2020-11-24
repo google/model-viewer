@@ -120,6 +120,10 @@
       {
         "htmlId": "addHotspots",
         "name": "Add Hotspots"
+      },
+      {
+        "htmlId": "dimensions",
+        "name": "Dimensions"
       }
     ]
   },
