@@ -30,6 +30,7 @@ describe('camera constraints test', () => {
 
   beforeEach(async () => {
     expect(getModelViewer()).toBeUndefined();
+    // Mock for the ModelViewerPreview component
     document.body.innerHTML += `
     <model-viewer-preview>
       <model-viewer>
@@ -77,8 +78,6 @@ describe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    // Commented out for flakiness. Kept in case this test begins to fail.
-    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
     expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
     expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
@@ -88,8 +87,6 @@ describe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    // Commented out for flakiness. Kept in case this test begins to fail.
-    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();

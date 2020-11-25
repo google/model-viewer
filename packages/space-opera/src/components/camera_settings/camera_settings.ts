@@ -107,8 +107,9 @@ export class CameraTargetInput extends ConnectedLitElement {
 
   // @ts-ignore
   stateChanged(state: State) {
-    if (getModelViewer() !== undefined && getModelViewer() !== null) {
-      this.target = getCameraState(getModelViewer()!).target;
+    const modelViewer = getModelViewer();
+    if (modelViewer != null) {
+      this.target = getCameraState(modelViewer).target;
     } else {
       this.target = undefined;
     }
