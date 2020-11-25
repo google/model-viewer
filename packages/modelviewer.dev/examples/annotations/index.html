@@ -201,19 +201,7 @@
     display: none;
   }
 </style>
-<model-viewer id="dimension-demo" ar ar-modes="webxr" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
-  <div id="controls" class="dim">
-    <label for="src">Product:</label>
-    <select id="src">
-      <option value="../../assets/ShopifyModels/Chair.glb">Chair</option>
-      <option value="../../assets/ShopifyModels/Mixer.glb">Mixer</option>
-      <option value="../../assets/ShopifyModels/GeoPlanter.glb">Cactus</option>
-    </select><br/>
-
-    <label for="show-dimensions">Show Dimensions:</label>
-    <input id="show-dimensions" type="checkbox" checked="true">
-  </div>
-
+<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
   <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
@@ -225,6 +213,18 @@
   <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
+
+  <div id="controls" class="dim">
+    <label for="src">Product:</label>
+    <select id="src">
+      <option value="../../assets/ShopifyModels/Chair.glb">Chair</option>
+      <option value="../../assets/ShopifyModels/Mixer.glb">Mixer</option>
+      <option value="../../assets/ShopifyModels/GeoPlanter.glb">Cactus</option>
+    </select><br/>
+
+    <label for="show-dimensions">Show Dimensions:</label>
+    <input id="show-dimensions" type="checkbox" checked="true">
+  </div>
 </model-viewer>
 
 <script type="module">
