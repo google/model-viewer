@@ -25,9 +25,10 @@ import {Dropdown} from '../../../components/shared/dropdown/dropdown.js';
 
 describe('dropdown test', () => {
   let dropdown: Dropdown;
+  let container: HTMLDivElement;
 
   beforeEach(async () => {
-    const container = document.createElement('div');
+    container = document.createElement('div');
     document.body.appendChild(container);
     render(
         html`
@@ -40,6 +41,10 @@ describe('dropdown test', () => {
     dropdown = container.querySelector('me-dropdown#dropdown')! as Dropdown;
     await dropdown.updateComplete;
   });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  })
 
   it('exists', () => {
     expect(dropdown instanceof HTMLElement).toBe(true);

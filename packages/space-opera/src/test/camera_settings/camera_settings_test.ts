@@ -22,19 +22,31 @@ import {CameraSettings, CameraTargetInput} from '../../components/camera_setting
 import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
+import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
 
   beforeEach(async () => {
+    expect(getModelViewer()).toBeUndefined();
+    document.body.innerHTML += `
+    <model-viewer-preview>
+      <model-viewer>
+      </model-viewer>
+    </model-viewer-preview>
+    `;
+
     cameraSettings = new CameraSettings();
     document.body.appendChild(cameraSettings);
+    await cameraSettings.updateComplete;
   });
 
   afterEach(() => {
     cameraSettings.config = {};
     document.body.removeChild(cameraSettings);
+    const preview = document.querySelector('model-viewer-preview')!;
+    document.body.removeChild(preview);
   });
 
   it('updates the camera target on camera target change', () => {
@@ -65,7 +77,8 @@ describe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    await cameraSettings.cameraOrbitEditor!.updateComplete;
+    // Commented out for flakiness. Kept in case this test begins to fail.
+    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
     expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
     expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
@@ -75,7 +88,8 @@ describe('camera constraints test', () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchInitialOrbit(orbit));
     await cameraSettings.updateComplete;
-    await cameraSettings.cameraOrbitEditor!.updateComplete;
+    // Commented out for flakiness. Kept in case this test begins to fail.
+    // await cameraSettings.cameraOrbitEditor!.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();

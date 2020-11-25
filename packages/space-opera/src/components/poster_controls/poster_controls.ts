@@ -31,8 +31,7 @@ import {Camera, getOrbitString} from '../camera_settings/camera_state.js';
 import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
 import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
+import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {dispatchSetPosterName} from '../relative_file_paths/reducer.js';
 
 /** Allow users to create / display a poster. */

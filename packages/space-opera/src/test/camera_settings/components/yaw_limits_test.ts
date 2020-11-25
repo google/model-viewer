@@ -20,8 +20,8 @@ import '../../../components/camera_settings/components/yaw_limits.js';
 
 import {DEFAULT_MAX_YAW, YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
 import {dispatchYawLimits, getCamera} from '../../../components/camera_settings/reducer.js';
-import {getModelViewer} from '../../../components/model_viewer_preview/model_viewer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
+import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 
 xdescribe('yaw limits editor test', () => {

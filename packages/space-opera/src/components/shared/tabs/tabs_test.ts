@@ -24,9 +24,10 @@ import {Tabs} from './tabs.js';
 
 describe('<tabs>', () => {
   let tabs: Tabs;
+  let container: HTMLDivElement;
 
   beforeEach(async () => {
-    const container = document.createElement('div');
+    container = document.createElement('div');
     document.body.appendChild(container);
     render(
         html`

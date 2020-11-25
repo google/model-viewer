@@ -33,6 +33,10 @@ describe('ibl selector test', () => {
     await iblSelector.updateComplete;
   });
 
+  afterEach(() => {
+    document.body.removeChild(iblSelector);
+  });
+
   it('dispatches exposure change when slider updates', async () => {
     iblSelector.exposureSlider.clickTo(2.1);
     expect(iblSelector.config.exposure).toBe(2.1);

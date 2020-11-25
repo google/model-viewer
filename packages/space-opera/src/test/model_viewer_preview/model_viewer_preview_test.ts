@@ -20,9 +20,8 @@ import '../../components/model_viewer_preview/model_viewer_preview.js';
 import {GlTf, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 
-import {getModelViewer} from '../../components/model_viewer_preview/model_viewer.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
-import {getGltfModel} from '../../components/model_viewer_preview/reducer.js';
+import {getGltfModel, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {dispatchGltfUrl} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {until} from '../utils/test_utils.js';

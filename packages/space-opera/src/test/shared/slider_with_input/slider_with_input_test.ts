@@ -30,6 +30,10 @@ describe('slider with input test', () => {
     await sliderWithInput.updateComplete;
   });
 
+  afterEach(() => {
+    document.body.removeChild(sliderWithInput);
+  });
+
   it('exists', () => {
     expect(sliderWithInput instanceof HTMLElement).toBe(true);
     expect(sliderWithInput.tagName).toEqual('ME-SLIDER-WITH-INPUT');

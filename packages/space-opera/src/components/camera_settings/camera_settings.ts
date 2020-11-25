@@ -33,14 +33,13 @@ import {cameraSettingsStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModelViewer} from '../model_viewer_preview/model_viewer.js';
-import {getCameraState} from '../model_viewer_preview/model_viewer_preview.js';
+import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera, getInitialCamera} from './reducer.js';
+import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -106,8 +105,13 @@ export class CameraTargetInput extends ConnectedLitElement {
   @property({attribute: false}) change?: (newValue: Vector3D) => void;
   @internalProperty() target?: Vector3D;
 
+  // @ts-ignore
   stateChanged(state: State) {
-    this.target = getCamera(state).target ?? getInitialCamera(state).target;
+    if (getModelViewer() !== undefined && getModelViewer() !== null) {
+      this.target = getCameraState(getModelViewer()!).target;
+    } else {
+      this.target = undefined;
+    }
   }
 
   protected onInputChange(event: Event) {
@@ -125,7 +129,6 @@ export class CameraTargetInput extends ConnectedLitElement {
   }
 
   render() {
-    // TODO, allow the ability to initialize target point...
     if (!this.target) {
       return html`<div class="note">Waiting for camera target...</div>`;
     }
@@ -167,7 +170,6 @@ export class CameraSettings extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.camera = getCamera(state);
-    this.initialCamera = getInitialCamera(state);
     this.cameraOutOfBounds = this.outOfBounds();
   }
 

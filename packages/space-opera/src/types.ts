@@ -59,7 +59,6 @@ export interface EntitiesState {
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
-  initialCamera: Camera;
   modelViewerSnippet: ModelViewerSnippetState;
 }
 
@@ -88,7 +87,6 @@ export const INITIAL_STATE: State = {
       camera: INITIAL_CAMERA,
       relativeFilePaths: {},
     },
-    initialCamera: INITIAL_CAMERA,
   },
 };
 

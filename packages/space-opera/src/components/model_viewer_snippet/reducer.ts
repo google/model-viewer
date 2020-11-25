@@ -21,7 +21,7 @@ import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_
 import {reduxStore} from '../../space_opera_base.js';
 import {RelativeFilePathsState} from '../../types.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchInitialCameraState, dispatchSetCamera} from '../camera_settings/reducer.js';
+import {dispatchSetCamera} from '../camera_settings/reducer.js';
 import {dispatchSetConfig} from '../config/reducer.js';
 
 /**
@@ -61,7 +61,4 @@ export function dispatchConfig(config?: ModelViewerConfig) {
 
   // Clear camera settings. This is optional!
   reduxStore.dispatch(dispatchSetCamera(INITIAL_CAMERA));
-
-  // Clear initialCamera too, as ModelViewerPreview will update this.
-  reduxStore.dispatch(dispatchInitialCameraState(INITIAL_CAMERA));
 }
