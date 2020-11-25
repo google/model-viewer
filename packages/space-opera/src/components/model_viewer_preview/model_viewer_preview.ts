@@ -42,6 +42,7 @@ import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
+import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
@@ -327,6 +328,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         return;
       if (file.name.match(/\.(glb)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
+        reduxStore.dispatch(dispatchSetModelName(file.name));
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
@@ -334,10 +336,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
         const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
-
         reduxStore.dispatch(
             dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
         reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+        reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
       }
     }
   }

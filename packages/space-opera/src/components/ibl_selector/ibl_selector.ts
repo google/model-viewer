@@ -33,6 +33,7 @@ import {State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
+import {dispatchSetEnvironmentName} from '../relative_file_paths/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -86,6 +87,15 @@ export class IblSelector extends ConnectedLitElement {
             this.config.environmentImage) {
       reduxStore.dispatch(dispatchEnvrionmentImage(
           dropdownElement.selectedItem.getAttribute('value') || undefined));
+      // dropdown value equals null when "Default" is selected
+      if (dropdownElement.selectedItem.getAttribute('value') === null) {
+        reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
+      } else {
+        const envImageList =
+            dropdownElement.selectedItem.getAttribute('value')?.split('/');
+        const envImageName = envImageList![envImageList!.length - 1];
+        reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
+      }
     }
   }
 
@@ -121,6 +131,7 @@ export class IblSelector extends ConnectedLitElement {
     reduxStore.dispatch(
         dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
     reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+    reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
   }
 
   // TODO: On snippet input if IBL is defined, select the

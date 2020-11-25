@@ -17,7 +17,7 @@ import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import {IS_IE11} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
-import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
+import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
@@ -97,10 +97,13 @@ suite('ARRenderer', () => {
   const stubWebXrInterface = (arRenderer: ARRenderer) => {
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
-        public renderState: XRRenderState = {baseLayer: {
-          getViewport: () => { return {x: 0, y: 0, width: 320, height: 240} as XRViewport }
-        } as XRLayer} as
-            XRRenderState;
+        public renderState: XRRenderState = {
+          baseLayer: {
+            getViewport: () => {
+              return {x: 0, y: 0, width: 320, height: 240} as XRViewport
+            }
+          } as XRLayer
+        } as XRRenderState;
 
         public hitTestSources: Set<XRHitTestSource> =
             new Set<XRHitTestSource>();
@@ -253,8 +256,7 @@ suite('ARRenderer', () => {
 
       setup(async () => {
         await arRenderer.present(modelScene);
-        arRenderer[$onWebXRFrame](
-            0, new MockXRFrame(arRenderer[$currentSession]!));
+        arRenderer.onWebXRFrame(0, new MockXRFrame(arRenderer.currentSession!));
         yaw = modelScene.yaw;
       });
 
@@ -280,8 +282,8 @@ suite('ARRenderer', () => {
           hitPosition = new Vector3(5, -1, 1);
           await arRenderer.placeModel(hitPosition);
           // Long enough time to settle at new position.
-          arRenderer[$onWebXRFrame](
-              SETTLING_TIME, new MockXRFrame(arRenderer[$currentSession]!));
+          arRenderer.onWebXRFrame(
+              SETTLING_TIME, new MockXRFrame(arRenderer.currentSession!));
         });
 
         test('scene has the same orientation', () => {

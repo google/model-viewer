@@ -238,6 +238,7 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
+    this.updateMatrixWorld(true);
     this.model.setShadowRotation(radiansY);
     this.isDirty = true;
   }
@@ -253,7 +254,9 @@ export class ModelScene extends Scene {
     shadowIntensity = Math.max(shadowIntensity, 0);
     this.shadowIntensity = shadowIntensity;
     if (this.model.hasModel()) {
-      this.model.setShadowIntensity(shadowIntensity, this.shadowSoftness);
+      const side =
+          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      this.model.setShadowIntensity(shadowIntensity, this.shadowSoftness, side);
     }
   }
 

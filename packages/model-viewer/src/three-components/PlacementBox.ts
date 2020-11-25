@@ -18,6 +18,7 @@ import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, Mesh
 import {Damper} from './Damper.js';
 import Model from './Model.js';
 import {ModelScene} from './ModelScene.js';
+import {Side} from './Shadow.js';
 
 const RADIUS = 0.2;
 const LINE_WIDTH = 0.03;
@@ -62,17 +63,18 @@ const addCorner =
 export class PlacementBox extends Mesh {
   private hitPlane: Mesh;
   private shadowHeight: number;
+  private side: Side;
   private goalOpacity: number;
   private opacityDamper: Damper;
 
-  constructor(model: Model) {
+  constructor(model: Model, side: Side) {
     const geometry = new BufferGeometry();
     const triangles: Array<number> = [];
     const vertices: Array<number> = [];
     const {size, boundingBox} = model;
 
     const x = size.x / 2;
-    const y = size.z / 2;
+    const y = (side === 'back' ? size.y : size.z) / 2;
     addCorner(vertices, x, y);
     addCorner(vertices, -x, y);
     addCorner(vertices, -x, -y);
@@ -90,6 +92,7 @@ export class PlacementBox extends Mesh {
 
     super(geometry);
 
+    this.side = side;
     const material = this.material as MeshBasicMaterial;
     material.side = DoubleSide;
     material.transparent = true;
@@ -97,15 +100,23 @@ export class PlacementBox extends Mesh {
     this.goalOpacity = 0;
     this.opacityDamper = new Damper();
 
-    this.hitPlane = new Mesh(
-        new PlaneBufferGeometry(size.x + 2 * RADIUS, size.z + 2 * RADIUS));
+    this.hitPlane =
+        new Mesh(new PlaneBufferGeometry(2 * (x + RADIUS), 2 * (y + RADIUS)));
     this.hitPlane.visible = false;
     this.add(this.hitPlane);
 
-    this.rotateX(-Math.PI / 2);
     boundingBox.getCenter(this.position);
-    this.shadowHeight = boundingBox.min.y;
-    this.position.y = this.shadowHeight;
+
+    switch (side) {
+      case 'bottom':
+        this.rotateX(-Math.PI / 2);
+        this.shadowHeight = boundingBox.min.y;
+        this.position.y = this.shadowHeight;
+        break;
+      case 'back':
+        this.shadowHeight = boundingBox.min.z;
+        this.position.z = this.shadowHeight;
+    }
 
     model.add(this);
   }
@@ -127,11 +138,19 @@ export class PlacementBox extends Mesh {
    * is up, so generally only negative values are used.
    */
   set offsetHeight(offset: number) {
-    this.position.y = this.shadowHeight + offset;
+    if (this.side === 'back') {
+      this.position.z = this.shadowHeight + offset;
+    } else {
+      this.position.y = this.shadowHeight + offset;
+    }
   }
 
   get offsetHeight(): number {
-    return this.position.y - this.shadowHeight;
+    if (this.side === 'back') {
+      return this.position.z - this.shadowHeight;
+    } else {
+      return this.position.y - this.shadowHeight;
+    }
   }
 
   /**
