@@ -388,6 +388,22 @@ export class ARRenderer extends EventDispatcher {
     // position is not updated when matrix is updated.
     camera.position.setFromMatrixPosition(cameraMatrix);
 
+    if (!this.initialized) {
+      camera.projectionMatrix.fromArray(view.projectionMatrix);
+      // Have to set the inverse manually when setting matrix directly. This is
+      // needed for raycasting.
+      camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+      // Orient model toward camera on first frame.
+      const scene = this.presentedScene!;
+      camera.getWorldDirection(vector3);
+      scene.yaw = Math.atan2(-vector3.x, -vector3.z);
+      this.goalYaw = scene.yaw;
+      this.initialModelToWorld.copy(scene.model.matrixWorld);
+      scene.model.setHotspotsVisibility(true);
+      this.initialized = true;
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+    }
+
     if (this.initialHitSource != null) {
       // Target locked to screen center
       const {position, model} = this.presentedScene!;
@@ -395,23 +411,6 @@ export class ARRenderer extends EventDispatcher {
       camera.getWorldDirection(position);
       position.multiplyScalar(radius);
       position.add(camera.position);
-    }
-
-    if (!this.initialized) {
-      camera.projectionMatrix.fromArray(view.projectionMatrix);
-      // Have to set the inverse manually when setting matrix directly. This is
-      // needed for raycasting.
-      camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
-      // Orient model toward camera on first frame.
-      const {x, z} = camera.position;
-      const scene = this.presentedScene!;
-      scene.pointTowards(x, z);
-      scene.model.updateMatrixWorld(true);
-      this.goalYaw = scene.yaw;
-      this.initialModelToWorld.copy(scene.model.matrixWorld);
-      scene.model.setHotspotsVisibility(true);
-      this.initialized = true;
-      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     // Use automatic dynamic viewport scaling if supported.
