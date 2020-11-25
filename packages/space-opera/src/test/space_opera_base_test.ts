@@ -21,7 +21,7 @@ import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_jso
 import {RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEdits, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
 import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../components/model_viewer_preview/reducer.js';
@@ -152,11 +152,12 @@ async function createGltfWithTexture() {
 
 async function applyEditsToStoredGltf() {
   const state = reduxStore.getState();
-  if (!state.entities.gltf.gltf) {
+  const gltf = getGltfModel(state);
+  if (!gltf) {
     throw new Error(`no GLTF in state to edit!`);
   }
-  await applyEdits(state.entities.gltf.gltf, state.entities.gltfEdits.edits);
-  return state.entities.gltf.gltf;
+  await applyEdits(gltf, getEdits(state));
+  return gltf;
 }
 
 describe('space opera base test', () => {
@@ -367,9 +368,8 @@ describe('space opera base test', () => {
      async () => {
        const model = (await createGltfWithTexture());
        dispatchGltfAndEdits(model);
-
-       const {texturesById, materials} =
-           reduxStore.getState().entities.gltfEdits.edits;
+       const state = reduxStore.getState();
+       const {texturesById, materials} = getEdits(state);
        expect(texturesById.size).toEqual(3);
        expect(materials.length).toEqual(2);
        expect(materials[1].baseColorTextureId).not.toBeDefined();
@@ -618,12 +618,13 @@ describe('space opera base test', () => {
   it('should reuse textures when applying edits to the same model',
      async () => {
        dispatchGltfAndEdits(await createGltfWithTexture());
+       const state = reduxStore.getState();
 
-       const gltf = getGltfModel(reduxStore.getState())!;
+       const gltf = getGltfModel(state)!;
        expect(gltf).toBeDefined();
        expect((gltf.textures).length).toEqual(3);
 
-       await applyEdits(gltf, reduxStore.getState().entities.gltfEdits.edits);
+       await applyEdits(gltf, getEdits(state));
        expect((gltf.textures).length).toEqual(3);
      });
 
