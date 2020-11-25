@@ -19,7 +19,7 @@
 import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
-import {dispatchCameraTarget, dispatchInitialOrbit} from '../../components/camera_settings/reducer.js';
+import {dispatchCameraTarget, dispatchSaveCameraOrbit} from '../../components/camera_settings/reducer.js';
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
 import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
@@ -76,7 +76,7 @@ describe('camera constraints test', () => {
 
   it('reflects the correct camera orbit in its editor UI', async () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    reduxStore.dispatch(dispatchInitialOrbit(orbit));
+    reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     await cameraSettings.updateComplete;
     const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
     expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
@@ -85,7 +85,7 @@ describe('camera constraints test', () => {
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    reduxStore.dispatch(dispatchInitialOrbit(orbit));
+    reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     await cameraSettings.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;

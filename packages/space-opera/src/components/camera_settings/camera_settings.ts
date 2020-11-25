@@ -39,7 +39,7 @@ import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchInitialOrbit, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
+import {dispatchCameraTarget, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 @customElement('me-camera-orbit-editor')
@@ -221,7 +221,7 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   resetInitialCamera() {
-    reduxStore.dispatch(dispatchInitialOrbit(undefined));
+    reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
     const modelViewer = getModelViewer()!;
     const cameraState = getCameraState(modelViewer);
     // set max radius to current value
