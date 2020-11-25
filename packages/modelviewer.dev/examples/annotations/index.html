@@ -138,37 +138,35 @@
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Show Dimensions. </span></h4>
           <p>
-            Use &lt;model-viewer&gt; to make your models interactive.
-            This page showcases how you can add hotspots to your scene. Child elements are hotspots if their slot begins with "hotspot".
-            The data-position attribute specifies the 3D position of the hotspot in model coordinates, using the same format as the
-            camera-target attribute. The data-normal attribute specifies the normal vector defining the "front" of the hotspot.
-            When this normal is pointed away from the viewer, the hotspot's opacity becomes --min-hotspot-opacity. The
-            <a href="../tester.html">interactive example</a> lets you drag and drop your own models and add hotspots by clicking
-            and displays the corresponding position and normal attributes which you can copy into your own page.
+            Hotspots don't have to be on the model; they can be at arbitrary
+            points in 3D space. Here we demonstrate using hotspots to show a
+            model's dimensions, entirely styled with CSS. A JavaScript function
+            is used to automatically set the dimension values by querying the
+            &lt;model-viewer&gt; element.
           </p>
           <p>
-            You can also specify an attribute to be toggled when the hotspot changes between hidden and visible with data-visibility-attribute.
-            For example, if you set data-visibility-attribute="visible", then &lt;model-viewer&gt; will toggle the data-visible attribute on
-            that hotspot element. This makes it easier to write CSS that styles a hotspot based on its visibility.
+            By using WebXR mode, this markup works equally well in AR. Note that
+            because the text is not part of the 3D rendering it is easier to
+            read and more accessible. 
           </p>
-          <p>
-            When a hotspot's visibility changes, it will dispatch a "hotspot-visibility" event, and event.detail.visible will be true or false
-            depending on whether the hotspot is facing the camera.
-          </p>
-          <div class="heading">
-            <h2 class="demo-title">Add hotspots</h2>
-            <h4></h4>
-          </div>
           <example-snippet stamp-to="dimensions" highlight-as="html">
             <template>
 <style>
+  #controls {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    max-width: unset;
+    transform: unset;
+  }
+
   .dot{
     display: block;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: none;
-    background-color: blue;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
     --min-hotspot-opacity: 0;
   }
 
@@ -203,9 +201,19 @@
     display: none;
   }
 </style>
-<model-viewer id="dimension-demo" ar ar-modes="webxr" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
-  <label for="show-dimensions">Show Dimensions:</label>
-  <input id="show-dimensions" type="checkbox" checked="true">
+<model-viewer id="dimension-demo" ar ar-modes="webxr" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
+  <div id="controls" class="dim">
+    <label for="src">Product:</label>
+    <select id="src">
+      <option value="../../assets/ShopifyModels/Chair.glb">Chair</option>
+      <option value="../../assets/ShopifyModels/Mixer.glb">Mixer</option>
+      <option value="../../assets/ShopifyModels/GeoPlanter.glb">Cactus</option>
+    </select><br/>
+
+    <label for="show-dimensions">Show Dimensions:</label>
+    <input id="show-dimensions" type="checkbox" checked="true">
+  </div>
+
   <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
@@ -220,7 +228,11 @@
 </model-viewer>
 
 <script type="module">
-  const modelViewer = document.querySelector("#dimension-demo");
+  const modelViewer = document.querySelector('#dimension-demo');
+
+  modelViewer.querySelector('#src').addEventListener('input', (event) => {
+    modelViewer.src = event.target.value;
+  });
 
   const checkbox = modelViewer.querySelector('#show-dimensions');
   checkbox.addEventListener('change', () => {
@@ -234,8 +246,8 @@
   });
 
   modelViewer.addEventListener('load', () => {
-    const size = modelViewer.getDimensions();
     const center = modelViewer.getCameraTarget();
+    const size = modelViewer.getDimensions();
     const x2 = size.x / 2;
     const y2 = size.y / 2;
     const z2 = size.z / 2;
