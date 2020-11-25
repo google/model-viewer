@@ -111,6 +111,7 @@ export class Hotspot extends CSS2DObject {
       this.position.setComponent(
           i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
     }
+    this.updateMatrixWorld();
   }
 
   /**
