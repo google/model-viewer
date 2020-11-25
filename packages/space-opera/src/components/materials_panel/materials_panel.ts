@@ -58,6 +58,11 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() originalMaterials: Material[] = [];
   @internalProperty() texturesById?: TexturesById;
 
+  @internalProperty() selectedMaterialsFirstCall: boolean = true;
+  @internalProperty() materialIsBlinking: boolean = false;
+  @internalProperty() beforeBlinkingColor?: RGBA;
+  @internalProperty() blinkingNumber: number = 0;
+
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
   roughnessFactorSlider!: SliderWithInputElement;
@@ -99,6 +104,11 @@ export class MaterialPanel extends ConnectedLitElement {
       this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
     }
+
+    // TODO: Fix when this is triggered.
+    if (this.materialIsBlinking) {
+      this.onBaseColorChange();
+    }
   }
 
   async performUpdate() {
@@ -131,6 +141,13 @@ export class MaterialPanel extends ConnectedLitElement {
     if (value !== undefined) {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
+      // Initiate blinking for selected material
+      if (!this.selectedMaterialsFirstCall) {
+        this.materialIsBlinking = true;
+        this.beforeBlinkingColor = this.selectedBaseColor;
+        this.onBaseColorChange();
+      }
+      this.selectedMaterialsFirstCall = false;
     }
   }
 
@@ -207,14 +224,44 @@ export class MaterialPanel extends ConnectedLitElement {
     return checkFinite(Number(this.alphaCutoffSlider.value));
   }
 
+  getInterpolatedColor(): RGBA {
+    const color = this.beforeBlinkingColor!;
+    const n = this.blinkingNumber;
+    if (n >= 1 && n <= 50) {
+      color[3] = color[3] - (color[3] * (n / 50));
+    } else if (n <= 100) {
+      color[3] = color[3] * ((this.blinkingNumber % 50) / 50);
+    }
+    return color;
+  }
+
   onBaseColorChange() {
     if (this.selectedMaterialId === undefined) {
       throw new Error('No material selected');
     }
     const index = this.selectedMaterialId;
-    const baseColorFactor = this.selectedBaseColor;
-    reduxStore.dispatch(dispatchMaterialBaseColor(
-        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
+
+    if (this.materialIsBlinking) {
+      this.blinkingNumber += 1;
+      const blinkingIsDone = this.blinkingNumber == 100;
+      if (blinkingIsDone) {
+        this.materialIsBlinking = false;
+        this.blinkingNumber = 0;
+        const baseColorFactor = this.beforeBlinkingColor!;
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+      } else {
+        const baseColorFactor = this.getInterpolatedColor();
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+      }
+    } else {
+      const baseColorFactor = this.selectedBaseColor;
+      reduxStore.dispatch(dispatchMaterialBaseColor(
+          getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
+    }
   }
 
   onRoughnessChange() {
