@@ -104,11 +104,6 @@ export class MaterialPanel extends ConnectedLitElement {
       this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
     }
-
-    // TODO: Fix when this is triggered.
-    if (this.materialIsBlinking) {
-      this.onBaseColorChange();
-    }
   }
 
   async performUpdate() {
@@ -135,17 +130,50 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
+  getColorQuick(id: number): RGBA {
+    if (id === undefined) {
+      throw new Error('No material selected');
+    }
+    return this.materials[id].baseColorFactor;
+  }
+
+  getInterpolatedColor(): RGBA {
+    const color: RGBA = [1, 0, 0, 1];
+    color[0] = this.blinkingNumber / 255;
+    return color;
+  }
+
+  flickerMaterial() {
+    const index = this.selectedMaterialId!;
+    this.beforeBlinkingColor = this.getColorQuick(index);
+
+    // flicker the colors
+    const interval = setInterval(() => {
+      this.blinkingNumber += 1;
+      if (this.blinkingNumber === 255) {
+        this.materialIsBlinking = false;
+        this.blinkingNumber = 0;
+        const baseColorFactor = this.beforeBlinkingColor!;
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+        clearInterval(interval);
+      } else {
+        const baseColorFactor = this.getInterpolatedColor();
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+      }
+    }, 5);
+  }
 
   onSelectMaterial() {
     const value = this.materialSelector?.selectedItem?.getAttribute('value');
     if (value !== undefined) {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
-      // Initiate blinking for selected material
       if (!this.selectedMaterialsFirstCall) {
-        this.materialIsBlinking = true;
-        this.beforeBlinkingColor = this.selectedBaseColor;
-        this.onBaseColorChange();
+        this.flickerMaterial();
       }
       this.selectedMaterialsFirstCall = false;
     }
@@ -178,6 +206,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const id = this.selectedMaterialId;
+    console.log('id within selected base color', id);
     if (id === undefined) {
       throw new Error('No material selected');
     }
@@ -224,44 +253,17 @@ export class MaterialPanel extends ConnectedLitElement {
     return checkFinite(Number(this.alphaCutoffSlider.value));
   }
 
-  getInterpolatedColor(): RGBA {
-    const color = this.beforeBlinkingColor!;
-    const n = this.blinkingNumber;
-    if (n >= 1 && n <= 50) {
-      color[3] = color[3] - (color[3] * (n / 50));
-    } else if (n <= 100) {
-      color[3] = color[3] * ((this.blinkingNumber % 50) / 50);
-    }
-    return color;
-  }
-
   onBaseColorChange() {
+    if (this.materialIsBlinking) {
+      return
+    }
     if (this.selectedMaterialId === undefined) {
       throw new Error('No material selected');
     }
     const index = this.selectedMaterialId;
-
-    if (this.materialIsBlinking) {
-      this.blinkingNumber += 1;
-      const blinkingIsDone = this.blinkingNumber == 100;
-      if (blinkingIsDone) {
-        this.materialIsBlinking = false;
-        this.blinkingNumber = 0;
-        const baseColorFactor = this.beforeBlinkingColor!;
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
-      } else {
-        const baseColorFactor = this.getInterpolatedColor();
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
-      }
-    } else {
-      const baseColorFactor = this.selectedBaseColor;
-      reduxStore.dispatch(dispatchMaterialBaseColor(
-          getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
-    }
+    const baseColorFactor = this.selectedBaseColor;
+    reduxStore.dispatch(dispatchMaterialBaseColor(
+        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
   }
 
   onRoughnessChange() {
@@ -852,8 +854,8 @@ export class MaterialPanel extends ConnectedLitElement {
         <div slot="content">
         ${this.renderDoubleSidedSection()}
         ${this.renderAlphaBlendModeSection()}
-        </div><
-        /me-expandable-tab>
+        </div>
+      </me-expandable-tab>
     `;
   }
 
