@@ -149,11 +149,11 @@ export class MaterialPanel extends ConnectedLitElement {
     ];
   }
 
-  interpolate() {
+  interpolateMaterial() {
     const index = this.selectedMaterialId!;
 
-    // TODO: Use emmisive factor when emissive factor no longer reloads model.
-    // (switch dispatches as well when moving onto emissive).
+    // TODO: Use emissive when changing said property won't reload the model.
+    // (switch dispatches as well when moving to emissive).
     const originalBaseFactor = this.materials[index].baseColorFactor;
 
     // The interval (in milliseconds) on how often to execute the code.
@@ -162,7 +162,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const maxN = 165;  // total number of executions
 
     // Interpolate from red to the original color.
-    // The time to complete depends on the intervalSpeed and maxN.
+    // Total time to complete depends on the intervalSpeed and maxN.
     const interval = setInterval(() => {
       n += 1;
       // interpolate maxN many times
@@ -189,7 +189,7 @@ export class MaterialPanel extends ConnectedLitElement {
       checkFinite(this.selectedMaterialId);
       // Don't interpolate on the initial model load.
       if (!this.isNewModel) {
-        this.interpolate();
+        this.interpolateMaterial();
       }
       this.isNewModel = false;
     }
