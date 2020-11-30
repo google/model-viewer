@@ -140,7 +140,7 @@ export class MaterialPanel extends ConnectedLitElement {
     ];
   }
 
-  blinkMaterial() {
+  interpolate() {
     const index = this.selectedMaterialId!;
 
     // TODO: Use emmisive factor when emissive factor no longer reloads model.
@@ -153,8 +153,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const maxN = 165;  // total number of executions
 
     // Interpolate from red to the original color.
-    // The total length of time for this to complete will depend on
-    // the intervalSpeed and maxBlinking number.
+    // The time to complete depends on the intervalSpeed and maxN.
     const interval = setInterval(() => {
       n += 1;
       // interpolate maxN many times
@@ -181,7 +180,7 @@ export class MaterialPanel extends ConnectedLitElement {
       checkFinite(this.selectedMaterialId);
       // Don't blink on the initial model load.
       if (!this.selectedMaterialsFirstCall) {
-        this.blinkMaterial();
+        this.interpolate();
       }
       this.selectedMaterialsFirstCall = false;
     }
