@@ -61,6 +61,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   @internalProperty() isNewModel: boolean = true;
   @internalProperty() currentGltfUrl: string = '';
+  @internalProperty() isTesting: boolean = false;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -188,7 +189,10 @@ export class MaterialPanel extends ConnectedLitElement {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
       // Don't interpolate on the initial model load.
-      if (!this.isNewModel) {
+      if (!this.isNewModel &&
+          !(this.selectedMaterialId >= this.materials.length ||
+            this.selectedMaterialId < 0) &&
+          !this.isTesting) {
         this.interpolateMaterial();
       }
       this.isNewModel = false;
