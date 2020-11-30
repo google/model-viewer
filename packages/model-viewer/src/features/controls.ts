@@ -376,10 +376,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     getCameraTarget(): Vector3D {
-      const targetIntrinsics = cameraTargetIntrinsics(this);
-      const evaluator = new StyleEvaluator([], targetIntrinsics);
-      const target = evaluator.evaluate();
-      return toVector3D(new Vector3(target[0], target[1], target[2]));
+      return toVector3D(
+          this[$renderer].isPresenting ? this[$renderer].arRenderer.target :
+                                         this[$scene].getTarget());
     }
 
     getFieldOfView(): number {
