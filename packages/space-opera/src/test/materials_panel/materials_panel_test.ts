@@ -75,10 +75,6 @@ describe('material panel test', () => {
     await dispatchGltfAndEdits(gltf);
   });
 
-  afterEach(() => {
-    document.body.removeChild(panel);
-  });
-
   it('selector reflects materials in GLTF', async () => {
     panel.selectedMaterialId = 0;
     await panel.updateComplete;
@@ -88,7 +84,7 @@ describe('material panel test', () => {
   });
 
   it('reflects textures in GLTF', async () => {
-    await panel.updateComplete;
+    // await panel.updateComplete;
     const actualTexturesById = panel.texturesById!.values().next().value;
     expect(actualTexturesById).toBeDefined();
     expect(actualTexturesById.uri).toBe('originalTexture.png');
