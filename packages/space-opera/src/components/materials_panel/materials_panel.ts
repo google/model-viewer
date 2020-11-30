@@ -36,6 +36,7 @@ import * as color from 'ts-closure-library/lib/color/color';  // from //third_pa
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -58,7 +59,8 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() originalMaterials: Material[] = [];
   @internalProperty() texturesById?: TexturesById;
 
-  @internalProperty() selectedMaterialsFirstCall: boolean = true;
+  @internalProperty() isNewModel: boolean = true;
+  @internalProperty() currentGltfUrl: string = '';
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -100,6 +102,13 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.texturesById !== getEditsTextures(state)) {
       this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
+    }
+
+    // If a new model is loaded, don't interpolate material
+    const gltfUrl = getGltfUrl(state);
+    if (gltfUrl !== undefined && this.currentGltfUrl !== getGltfUrl(state)) {
+      this.isNewModel = true;
+      this.currentGltfUrl = gltfUrl;
     }
   }
 
@@ -144,7 +153,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const index = this.selectedMaterialId!;
 
     // TODO: Use emmisive factor when emissive factor no longer reloads model.
-    // (switch dispatches as well when moving oto using emissive).
+    // (switch dispatches as well when moving onto emissive).
     const originalBaseFactor = this.materials[index].baseColorFactor;
 
     // The interval (in milliseconds) on how often to execute the code.
@@ -178,11 +187,11 @@ export class MaterialPanel extends ConnectedLitElement {
     if (value !== undefined) {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
-      // Don't blink on the initial model load.
-      if (!this.selectedMaterialsFirstCall) {
+      // Don't interpolate on the initial model load.
+      if (!this.isNewModel) {
         this.interpolate();
       }
-      this.selectedMaterialsFirstCall = false;
+      this.isNewModel = false;
     }
   }
 
