@@ -285,7 +285,7 @@ canvas.show {
   justify-content: center;
   position: absolute;
   top: 16px;
-  left: 16px;
+  right: 16px;
   width: 40px;
   height: 40px;
   box-sizing: border-box;
