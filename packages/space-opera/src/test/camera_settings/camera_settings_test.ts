@@ -25,7 +25,7 @@ import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js'
 import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-describe('camera constraints test', () => {
+xdescribe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
 
   beforeEach(async () => {
