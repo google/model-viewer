@@ -59,9 +59,6 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() texturesById?: TexturesById;
 
   @internalProperty() selectedMaterialsFirstCall: boolean = true;
-  @internalProperty() materialIsBlinking: boolean = false;
-  @internalProperty() beforeBlinkingColor?: RGBA;
-  @internalProperty() blinkingNumber: number = 0;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -130,41 +127,51 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
-  getColorQuick(id: number): RGBA {
-    if (id === undefined) {
-      throw new Error('No material selected');
-    }
-    return this.materials[id].baseColorFactor;
+  /* Interpolate from red to original color as n approaches maxN */
+  getInterpolatedColor(original: RGBA, n: number, maxN: number): RGBA {
+    const red: RGBA = [1, 0, 0, 1];
+    const percentRed = (maxN - n) / maxN;
+    const percentOriginal = 1 - percentRed;
+    return [
+      (percentRed * red[0]) + (percentOriginal * original[0]),
+      (percentRed * red[1]) + (percentOriginal * original[1]),
+      (percentRed * red[2]) + (percentOriginal * original[2]),
+      original[3],
+    ];
   }
 
-  getInterpolatedColor(): RGBA {
-    const color: RGBA = [1, 0, 0, 1];
-    color[0] = this.blinkingNumber / 255;
-    return color;
-  }
-
-  flickerMaterial() {
+  blinkMaterial() {
     const index = this.selectedMaterialId!;
-    this.beforeBlinkingColor = this.getColorQuick(index);
 
-    // flicker the colors
+    // TODO: Use emmisive factor when emissive factor no longer reloads model.
+    // (switch dispatches as well when moving oto using emissive).
+    const originalBaseFactor = this.materials[index].baseColorFactor;
+
+    // The interval (in milliseconds) on how often to execute the code.
+    const intervalSpeed = 10;  // setInterval() has a minimum val of 10
+    let n = 0;
+    const maxN = 165;  // total number of executions
+
+    // Interpolate from red to the original color.
+    // The total length of time for this to complete will depend on
+    // the intervalSpeed and maxBlinking number.
     const interval = setInterval(() => {
-      this.blinkingNumber += 1;
-      if (this.blinkingNumber === 255) {
-        this.materialIsBlinking = false;
-        this.blinkingNumber = 0;
-        const baseColorFactor = this.beforeBlinkingColor!;
+      n += 1;
+      // interpolate maxN many times
+      if (n <= maxN) {
+        const baseColorFactor =
+            this.getInterpolatedColor(originalBaseFactor, n, maxN);
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+      } else {
+        const baseColorFactor = originalBaseFactor!;
         reduxStore.dispatch(dispatchMaterialBaseColor(
             getEditsMaterials(reduxStore.getState()),
             {index, baseColorFactor}));
         clearInterval(interval);
-      } else {
-        const baseColorFactor = this.getInterpolatedColor();
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
       }
-    }, 5);
+    }, intervalSpeed);
   }
 
   onSelectMaterial() {
@@ -172,8 +179,9 @@ export class MaterialPanel extends ConnectedLitElement {
     if (value !== undefined) {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
+      // Don't blink on the initial model load.
       if (!this.selectedMaterialsFirstCall) {
-        this.flickerMaterial();
+        this.blinkMaterial();
       }
       this.selectedMaterialsFirstCall = false;
     }
@@ -206,7 +214,6 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const id = this.selectedMaterialId;
-    console.log('id within selected base color', id);
     if (id === undefined) {
       throw new Error('No material selected');
     }
@@ -254,9 +261,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    if (this.materialIsBlinking) {
-      return
-    }
     if (this.selectedMaterialId === undefined) {
       throw new Error('No material selected');
     }
