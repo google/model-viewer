@@ -137,16 +137,15 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
-  /* Interpolate from red to original color as n approaches maxN */
-  getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
-    const red: RGBA = [1, 0, 0, 1];
+  /* Interpolate from red to original color as curr approaches duration */
+  getInterpolatedColor(original: RGB, curr: number, duration: number): RGB {
+    const red: RGB = [1, 0, 0];
     const redRatio = (duration - curr) / duration;
     const originalRatio = 1 - redRatio;
     return [
       (redRatio * red[0]) + (originalRatio * original[0]),
       (redRatio * red[1]) + (originalRatio * original[1]),
       (redRatio * red[2]) + (originalRatio * original[2]),
-      original[3],
     ];
   }
 
@@ -156,14 +155,13 @@ export class MaterialPanel extends ConnectedLitElement {
         this.selectedMaterialId! < 0)
   }
 
+  // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
-    const index = this.selectedMaterialId!;
-    const originalBaseFactor = this.materials[index].baseColorFactor;
+    const id = this.selectedMaterialId!;
+    const originalEmissiveFactor = this.materials[id].emissiveFactor;
     let start: number = -1;
-    let duration = 1200;  // in milliseconds
+    let duration = 1100;  // in milliseconds
 
-    // Logic for interpolating from red to the original color of selected
-    // material.
     const interpolateStep = (timestamp: any) => {
       // New model is loaded mid interpolation
       if (!this.isLegalIndex()) {
@@ -173,17 +171,15 @@ export class MaterialPanel extends ConnectedLitElement {
         start = timestamp;
       }
       if (timestamp - start <= duration) {
-        const baseColorFactor = this.getInterpolatedColor(
-            originalBaseFactor, timestamp - start, duration);
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
+        const emissiveFactor = this.getInterpolatedColor(
+            originalEmissiveFactor, timestamp - start, duration);
+        reduxStore.dispatch(dispatchSetEmissiveFactor(
+            getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
         requestAnimationFrame(interpolateStep);
       } else {
-        const baseColorFactor = originalBaseFactor;
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
+        const emissiveFactor = originalEmissiveFactor;
+        reduxStore.dispatch(dispatchSetEmissiveFactor(
+            getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
       }
     };
     requestAnimationFrame(interpolateStep);
