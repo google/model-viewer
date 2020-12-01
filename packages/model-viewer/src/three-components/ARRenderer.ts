@@ -83,9 +83,9 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
+  private initialModelToWorld: Matrix4|null = null;
 
   private initialized = false;
-  private initialModelToWorld = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -415,7 +415,7 @@ export class ARRenderer extends EventDispatcher {
       camera.getWorldDirection(vector3);
       scene.yaw = Math.atan2(-vector3.x, -vector3.z);
       this.goalYaw = scene.yaw;
-      this.initialModelToWorld.copy(scene.model.matrixWorld);
+      this.initialModelToWorld = new Matrix4().copy(scene.model.matrixWorld);
       scene.model.setHotspotsVisibility(true);
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
@@ -529,12 +529,11 @@ export class ARRenderer extends EventDispatcher {
       origin.sub(direction.multiplyScalar(model.idealCameraDistance));
       const ray = new Ray(origin, direction.normalize());
 
-      const modelToWorld = this.initialModelToWorld;
+      const modelToWorld = this.initialModelToWorld!;
       const modelPosition =
           new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
       modelToWorld.setPosition(modelPosition);
-      const world2Model = new Matrix4().getInverse(modelToWorld);
-      ray.applyMatrix4(world2Model);
+      ray.applyMatrix4(modelToWorld.invert());
 
       // Make the box tall so that we don't intersect the top face.
       const {max} = model.boundingBox;
