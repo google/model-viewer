@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, DataTextureLoader, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {Cache, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {ProgressTracker} from '../utilities/progress-tracker.js';
@@ -64,7 +64,7 @@ export default class TextureUtils extends EventDispatcher {
       Promise<Texture> {
     try {
       const isHDR: boolean = HDR_FILE_RE.test(url);
-      const loader: DataTextureLoader = isHDR ? hdrLoader : ldrLoader;
+      const loader = isHDR ? hdrLoader : ldrLoader;
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
               url, resolve, (event: {loaded: number, total: number}) => {
