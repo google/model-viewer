@@ -137,15 +137,39 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
-  /* Interpolate from red to original color as curr approaches duration */
-  getInterpolatedColor(original: RGB, curr: number, duration: number): RGB {
-    const red: RGB = [1, 0, 0];
-    const redRatio = (duration - curr) / duration;
-    const originalRatio = 1 - redRatio;
+  /* Interpolate from b/w to original color as curr approaches duration */
+  getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
+    // Use white if Y < 0.4, black otherwise
+    // const Y =
+    //     0.2126 * original[0] + 0.7152 * original[1] + 0.0722 * original[2];
+    // const interpColor = Y > 0.4 ? [0, 0, 0] : [1, 1, 1];
+    const interpColor =
+        (original[0] > 0.4 && (original[1] < 0.4 || original[2] < 0.4)) ?
+        [0, 0, 1] :
+        [1, 0, 0];
+    // determine how much of interp color to use
+    const interpRatio = (duration - curr) / duration;
+    const originalRatio = 1 - interpRatio;
     return [
-      (redRatio * red[0]) + (originalRatio * original[0]),
-      (redRatio * red[1]) + (originalRatio * original[1]),
-      (redRatio * red[2]) + (originalRatio * original[2]),
+      (interpRatio * interpColor[0]) + (originalRatio * original[0]),
+      (interpRatio * interpColor[1]) + (originalRatio * original[1]),
+      (interpRatio * interpColor[2]) + (originalRatio * original[2]),
+      original[3],
+    ];
+  }
+
+  getInterpolatedEmissive(original: RGB, curr: number, duration: number): RGB {
+    const interpColor =
+        (original[0] > 0.4 && (original[1] < 0.4 || original[2] < 0.4)) ?
+        [0, 0, 1] :
+        [1, 0, 0];
+    // determine how much of interp color to use
+    const interpRatio = (duration - curr) / duration;
+    const originalRatio = 1 - interpRatio;
+    return [
+      (interpRatio * interpColor[0]) + (originalRatio * original[0]),
+      (interpRatio * interpColor[1]) + (originalRatio * original[1]),
+      (interpRatio * interpColor[2]) + (originalRatio * original[2]),
     ];
   }
 
@@ -157,10 +181,13 @@ export class MaterialPanel extends ConnectedLitElement {
 
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
+    const index = this.selectedMaterialId!;
     const id = this.selectedMaterialId!;
-    const originalEmissiveFactor = this.materials[id].emissiveFactor;
+    const originalBaseColor = this.materials[index].baseColorFactor;
+    const originalEmissiveFactor = this.materials[index].emissiveFactor;
+
     let start: number = -1;
-    let duration = 1100;  // in milliseconds
+    let duration = 1600;  // in milliseconds
 
     const interpolateStep = (timestamp: any) => {
       // New model is loaded mid interpolation
@@ -171,12 +198,21 @@ export class MaterialPanel extends ConnectedLitElement {
         start = timestamp;
       }
       if (timestamp - start <= duration) {
-        const emissiveFactor = this.getInterpolatedColor(
+        const baseColorFactor = this.getInterpolatedColor(
+            originalBaseColor, timestamp - start, duration);
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+        const emissiveFactor = this.getInterpolatedEmissive(
             originalEmissiveFactor, timestamp - start, duration);
         reduxStore.dispatch(dispatchSetEmissiveFactor(
             getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
         requestAnimationFrame(interpolateStep);
       } else {
+        const baseColorFactor = originalBaseColor;
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
         const emissiveFactor = originalEmissiveFactor;
         reduxStore.dispatch(dispatchSetEmissiveFactor(
             getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
