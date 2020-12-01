@@ -108,30 +108,30 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     for (const material of this[$threeMaterials]) {
       material.color.fromArray(rgba);
       material.opacity = (rgba)[3];
-      const pbrMetallicRoughness =
-          this[$sourceObject] as GLTFPBRMetallicRoughness;
-      pbrMetallicRoughness.baseColorFactor = rgba;
     }
+    const pbrMetallicRoughness =
+        this[$sourceObject] as GLTFPBRMetallicRoughness;
+    pbrMetallicRoughness.baseColorFactor = rgba;
     this[$onUpdate]();
   }
 
   setMetallicFactor(value: number) {
     for (const material of this[$threeMaterials]) {
       material.metalness = value;
-      const pbrMetallicRoughness =
-          this[$sourceObject] as GLTFPBRMetallicRoughness;
-      pbrMetallicRoughness.metallicFactor = value;
     }
+    const pbrMetallicRoughness =
+        this[$sourceObject] as GLTFPBRMetallicRoughness;
+    pbrMetallicRoughness.metallicFactor = value;
     this[$onUpdate]();
   }
 
   setRoughnessFactor(value: number) {
     for (const material of this[$threeMaterials]) {
       material.roughness = value;
-      const pbrMetallicRoughness =
-          this[$sourceObject] as GLTFPBRMetallicRoughness;
-      pbrMetallicRoughness.roughnessFactor = value;
     }
+    const pbrMetallicRoughness =
+        this[$sourceObject] as GLTFPBRMetallicRoughness;
+    pbrMetallicRoughness.roughnessFactor = value;
     this[$onUpdate]();
   }
 }

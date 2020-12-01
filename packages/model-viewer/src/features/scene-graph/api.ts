@@ -57,6 +57,9 @@ export declare interface Material {
   readonly occlusionTexture: TextureInfo|null;
   readonly emissiveTexture: TextureInfo|null;
 
+  readonly emissiveFactor: Readonly<RGB>;
+  setEmissiveFactor(rgb: RGB): void;
+
   /**
    * The PBRMetallicRoughness configuration of the material.
    */
@@ -236,3 +239,4 @@ export declare interface Image {
  * from [0,1].
  */
 export declare type RGBA = [number, number, number, number];
+export declare type RGB = [number, number, number];
