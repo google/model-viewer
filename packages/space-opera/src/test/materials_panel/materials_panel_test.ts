@@ -75,6 +75,10 @@ describe('material panel test', () => {
     await dispatchGltfAndEdits(gltf);
   });
 
+  afterEach(() => {
+    document.body.removeChild(panel);
+  });
+
   it('selector reflects materials in GLTF', async () => {
     panel.selectedMaterialId = 0;
     await panel.updateComplete;
