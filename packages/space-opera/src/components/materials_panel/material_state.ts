@@ -62,7 +62,7 @@ export interface Material {
   readonly metallicRoughnessTextureId?: string;
   readonly normalTextureId?: string;
   readonly emissiveTextureId?: string;
-  readonly emissiveFactor?: RGB;
+  readonly emissiveFactor: RGB;
   readonly occlusionTextureId?: string;
   readonly alphaMode?: string;
   readonly alphaCutoff?: number;

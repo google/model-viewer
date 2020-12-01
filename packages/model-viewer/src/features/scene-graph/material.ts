@@ -17,10 +17,10 @@ import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
-import {Material as MaterialInterface} from './api.js';
+import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo} from './texture-info.js';
-import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
@@ -105,5 +105,18 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get emissiveTexture(): TextureInfo|null {
     return this[$emissiveTexture];
+  }
+
+  get emissiveFactor(): RGB {
+    return (this[$sourceObject] as GLTFMaterial).emissiveFactor!;
+  }
+
+  setEmissiveFactor(rgb: RGB) {
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      material.emissive.fromArray(rgb);
+    }
+    (this[$sourceObject] as GLTFMaterial).emissiveFactor = rgb;
+    this[$onUpdate]();
   }
 }
