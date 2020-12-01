@@ -138,49 +138,55 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   /* Interpolate from red to original color as n approaches maxN */
-  getInterpolatedColor(original: RGBA, n: number, maxN: number): RGBA {
+  getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
     const red: RGBA = [1, 0, 0, 1];
-    const percentRed = (maxN - n) / maxN;
-    const percentOriginal = 1 - percentRed;
+    const redRatio = (duration - curr) / duration;
+    const originalRatio = 1 - redRatio;
     return [
-      (percentRed * red[0]) + (percentOriginal * original[0]),
-      (percentRed * red[1]) + (percentOriginal * original[1]),
-      (percentRed * red[2]) + (percentOriginal * original[2]),
+      (redRatio * red[0]) + (originalRatio * original[0]),
+      (redRatio * red[1]) + (originalRatio * original[1]),
+      (redRatio * red[2]) + (originalRatio * original[2]),
       original[3],
     ];
   }
 
+  isLegalIndex() {
+    return !(
+        this.selectedMaterialId! >= this.materials.length ||
+        this.selectedMaterialId! < 0)
+  }
+
   interpolateMaterial() {
     const index = this.selectedMaterialId!;
-
-    // TODO: Use emissive when changing said property won't reload the model.
-    // (switch dispatches as well when moving to emissive).
     const originalBaseFactor = this.materials[index].baseColorFactor;
+    let start: number = -1;
+    let duration = 1200;  // in milliseconds
 
-    // The interval (in milliseconds) on how often to execute the code.
-    const intervalSpeed = 10;  // setInterval() has a minimum val of 10
-    let n = 0;
-    const maxN = 165;  // total number of executions
-
-    // Interpolate from red to the original color.
-    // Total time to complete depends on the intervalSpeed and maxN.
-    const interval = setInterval(() => {
-      n += 1;
-      // interpolate maxN many times
-      if (n <= maxN) {
-        const baseColorFactor =
-            this.getInterpolatedColor(originalBaseFactor, n, maxN);
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
-      } else {
-        const baseColorFactor = originalBaseFactor!;
-        reduxStore.dispatch(dispatchMaterialBaseColor(
-            getEditsMaterials(reduxStore.getState()),
-            {index, baseColorFactor}));
-        clearInterval(interval);
+    // Logic for interpolating from red to the original color of selected
+    // material.
+    const interpolateStep = (timestamp: any) => {
+      // New model is loaded mid interpolation
+      if (!this.isLegalIndex()) {
+        return;
       }
-    }, intervalSpeed);
+      if (start === -1) {
+        start = timestamp;
+      }
+      if (timestamp - start <= duration) {
+        const baseColorFactor = this.getInterpolatedColor(
+            originalBaseFactor, timestamp - start, duration);
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+        requestAnimationFrame(interpolateStep);
+      } else {
+        const baseColorFactor = originalBaseFactor;
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+      }
+    };
+    requestAnimationFrame(interpolateStep);
   }
 
   onSelectMaterial() {
@@ -189,10 +195,7 @@ export class MaterialPanel extends ConnectedLitElement {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
       // Don't interpolate on the initial model load.
-      if (!this.isNewModel &&
-          !(this.selectedMaterialId >= this.materials.length ||
-            this.selectedMaterialId < 0) &&
-          !this.isTesting) {
+      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting) {
         this.interpolateMaterial();
       }
       this.isNewModel = false;
