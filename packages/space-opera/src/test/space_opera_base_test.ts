@@ -795,7 +795,7 @@ describe('space opera base test', () => {
     expect(reduxStore.getState()
                .entities.gltfEdits.edits.materials[1]
                .emissiveFactor)
-        .toBeUndefined();
+        .toEqual([0, 0, 0]);
 
     reduxStore.dispatch(dispatchSetEmissiveFactor(
         getEditsMaterials(reduxStore.getState()),
