@@ -18,7 +18,7 @@
 
 import {arrayBufferEqualityTester, createBufferFromString, generatePngBlob, GlTf, GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_json.js'
-import {RGBA} from '@google/model-viewer/lib/model-viewer';
+import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEdits, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
@@ -290,6 +290,7 @@ describe('space opera base test', () => {
            roughnessFactor: 0.4,
            // Changed
            metallicFactor: 0.3,
+           emissiveFactor: ([0, 0, 0] as RGB),
          },
        ];
 
@@ -795,7 +796,7 @@ describe('space opera base test', () => {
     expect(reduxStore.getState()
                .entities.gltfEdits.edits.materials[1]
                .emissiveFactor)
-        .toBeUndefined();
+        .toEqual([0, 0, 0]);
 
     reduxStore.dispatch(dispatchSetEmissiveFactor(
         getEditsMaterials(reduxStore.getState()),
