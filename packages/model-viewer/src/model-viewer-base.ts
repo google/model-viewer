@@ -346,7 +346,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
-      this[$scene].model.clear();
+      this[$scene].model.reset();
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
