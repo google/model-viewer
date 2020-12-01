@@ -22,10 +22,10 @@ import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {arrayBufferEqualityTester, createBufferFromString, fetchBufferForUri, generatePngBlob} from '../testing/utils.js';
 import {cloneJson} from '../util/clone_json.js';
 import {createSafeObjectURL} from '../util/create_object_url.js';
-import {unpackGlb} from './unpack_glb.js';
 
 import {GltfModel, Material, SINGLE_PIXEL_PNG_BLOB, TextureHandle} from './gltf_model.js';
 import {GlTf, Material as GlTfMaterial} from './gltf_spec.js';
+import {unpackGlb} from './unpack_glb.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =
@@ -333,11 +333,11 @@ describe('gltf model test', () => {
     expect(model.materials[0].alphaCutoff).toBe(0.5);
 
     expect(model.materials[0].emissiveFactor).toEqual([0.3, 0.4, 0.5]);
-    expect(model.materials[1].emissiveFactor).toBeUndefined();
+    expect(model.materials[1].emissiveFactor).toEqual([0, 0, 0]);
     await model.materials[0].setEmissiveFactor([0.6, 0.7, 0.8]);
     expect(model.materials[0].emissiveFactor).toEqual([0.6, 0.7, 0.8]);
     await model.materials[1].setEmissiveFactor([0, 0, 0]);
-    expect(model.materials[1].emissiveFactor).toBeUndefined();
+    expect(model.materials[1].emissiveFactor).toEqual([0, 0, 0]);
 
     // Re-use
     await pbr1.setBaseColorTexture(baseColorTex);
