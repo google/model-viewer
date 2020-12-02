@@ -137,16 +137,9 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
-  /* Interpolate from b/w to original color as curr approaches duration */
+  /* Interpolate base color as curr approaches duration */
   getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
-    // Use white if Y < 0.4, black otherwise
-    // const Y =
-    //     0.2126 * original[0] + 0.7152 * original[1] + 0.0722 * original[2];
-    // const interpColor = Y > 0.4 ? [0, 0, 0] : [1, 1, 1];
-    const interpColor =
-        (original[0] > 0.4 && (original[1] < 0.4 || original[2] < 0.4)) ?
-        [0, 0, 1] :
-        [1, 0, 0];
+    const interpColor = [0, 0, 0];
     // determine how much of interp color to use
     const interpRatio = (duration - curr) / duration;
     const originalRatio = 1 - interpRatio;
@@ -159,11 +152,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getInterpolatedEmissive(original: RGB, curr: number, duration: number): RGB {
-    const interpColor =
-        (original[0] > 0.4 && (original[1] < 0.4 || original[2] < 0.4)) ?
-        [0, 0, 1] :
-        [1, 0, 0];
-    // determine how much of interp color to use
+    const interpColor = [1, 0, 0];
     const interpRatio = (duration - curr) / duration;
     const originalRatio = 1 - interpRatio;
     return [
