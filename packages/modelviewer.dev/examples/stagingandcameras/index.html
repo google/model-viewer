@@ -332,6 +332,82 @@
       </div>
     </div>
 
+    <div class="sample">
+      <div id="turnSkybox" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Add other interactions like rotating environment map</h2>
+            <h4>Use parameters with rest turntable to rotate only the environment light</h4>
+            <p>By using shift key plus left click mouse or touch pad drag, one can rotate
+          the environment map to see how the environment background would cast light
+          onto the object from different angles when it is rotated. Updating orbit to 
+          new theta value and then reseting the theta value to stop turntable from 
+        rotating. </p>
+          </div>
+          <example-snippet stamp-to="turnSkybox" highlight-as="html">
+            <template>
+<model-viewer id="envlight-demo" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
+
+<script type="module">
+    
+  const modelViewer = document.querySelector("#envlight-demo");
+  modelViewer.addEventListener('contextmenu', event => event.preventDefault());
+  
+  let lastX;
+  var orbiting = false;
+  var orbit;
+      
+  const startOrbit = () => {
+    const orbit = modelViewer.getCameraOrbit();
+    const { theta, phi, radius } = orbit;
+    metersPerPixel = 0.15 * radius / modelViewer.getBoundingClientRect().height;
+    modelViewer.interactionPrompt = 'none';
+  };
+  
+  const updateOrbit = (thisX) => {      
+    const dx = (thisX - lastX) * metersPerPixel;
+    lastX = thisX;
+    orbit = modelViewer.getCameraOrbit();
+    orbit.theta += dx;
+    modelViewer.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad`;
+    modelViewer.resetTurntableRotation(orbit.theta);
+    modelViewer.jumpCameraToGoal();
+  }
+  
+  modelViewer.addEventListener('mousedown', (event) => {
+    startX = event.clientX;
+       
+    orbiting = event.shiftKey;
+    if (!orbiting)
+      return;
+  
+    lastX = startX;
+    startOrbit();
+    event.stopPropagation();
+  }, true);
+  
+  self.addEventListener('mouseup', (event) => {
+    orbiting = false;
+  }, true);
+  
+  modelViewer.addEventListener('mousemove', (event) => {
+    if (!orbiting)
+      return;
+    if (orbiting) {
+      requestAnimationFrame(() => updateOrbit(event.clientX));
+    }
+  
+    event.stopPropagation();
+  }, true);
+  
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>	
+
     <div class="footer">
       <ul>
         <li class="attribution">

@@ -114,6 +114,10 @@
       {
         "htmlId": "panning",
         "name": "Panning"
+      },
+      {
+        "htmlId": "turnSkybox",
+        "name": "Turn Skybox"
       }
     ]
   },
