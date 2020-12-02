@@ -355,50 +355,72 @@
   modelViewer.addEventListener('contextmenu', event => event.preventDefault());
   
   let lastX;
-  var orbiting = false;
-  var orbit;
+  let panning = false;
+  let skyboxAngle = 0;
+  let radiansPerPixel;
       
-  const startOrbit = () => {
+  const startPan = () => {
     const orbit = modelViewer.getCameraOrbit();
-    const { theta, phi, radius } = orbit;
-    metersPerPixel = 0.15 * radius / modelViewer.getBoundingClientRect().height;
+    const { radius } = orbit;
+    radiansPerPixel = -1 * radius / modelViewer.getBoundingClientRect().height;
     modelViewer.interactionPrompt = 'none';
   };
   
-  const updateOrbit = (thisX) => {      
-    const dx = (thisX - lastX) * metersPerPixel;
+  const updatePan = (thisX) => {      
+    const delta = (thisX - lastX) * radiansPerPixel;
     lastX = thisX;
-    orbit = modelViewer.getCameraOrbit();
-    orbit.theta += dx;
-    modelViewer.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad`;
-    modelViewer.resetTurntableRotation(orbit.theta);
+    skyboxAngle += delta;
+    const orbit = modelViewer.getCameraOrbit();
+    orbit.theta += delta;
+    modelViewer.cameraOrbit = orbit.toString();
+    modelViewer.resetTurntableRotation(skyboxAngle);
     modelViewer.jumpCameraToGoal();
   }
   
   modelViewer.addEventListener('mousedown', (event) => {
-    startX = event.clientX;
-       
-    orbiting = event.shiftKey;
-    if (!orbiting)
+    panning = event.button === 2 || event.ctrlKey || event.metaKey ||
+        event.shiftKey;
+    if (!panning)
       return;
-  
-    lastX = startX;
-    startOrbit();
+
+    lastX = event.clientX;
+    startPan();
     event.stopPropagation();
   }, true);
-  
-  self.addEventListener('mouseup', (event) => {
-    orbiting = false;
+
+  modelViewer.addEventListener('touchstart', (event) => {
+    panning = event.touches.length === 2;
+    if (!panning)
+      return;
+
+    const {touches} = event;
+    lastX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    startPan();
   }, true);
-  
+
   modelViewer.addEventListener('mousemove', (event) => {
-    if (!orbiting)
+    if (!panning)
       return;
-    if (orbiting) {
-      requestAnimationFrame(() => updateOrbit(event.clientX));
-    }
-  
+
+    updatePan(event.clientX);
     event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('touchmove', (event) => {
+    if (!panning || event.touches.length !== 2)
+      return;
+
+    const {touches} = event;
+    const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    updatePan(thisX);
+  }, true);
+
+  self.addEventListener('mouseup', (event) => {
+    panning=false;
+  }, true);
+  
+  self.addEventListener('touchend', (event) => {
+    panning=false;
   }, true);
   
 </script>
