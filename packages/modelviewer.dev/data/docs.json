@@ -784,6 +784,11 @@
         "description": "This property reports the current track time of the currently selected animation. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
       },
       {
+        "name": "duration",
+        "htmlName": "duration",
+        "description": "This property is read-only. It returns the duration of the currently selected animation. If no animations are available, the value is always 0."
+      },
+      {
         "name": "paused",
         "htmlName": "paused",
         "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked.",
