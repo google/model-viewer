@@ -244,8 +244,8 @@ export class Material {
     return this.gltfModel[$getTextureHandle](index);
   }
 
-  get emissiveFactor(): RGB|undefined {
-    return this.materialJson.emissiveFactor as RGB;
+  get emissiveFactor(): RGB {
+    return this.materialJson.emissiveFactor as RGB ?? DEFAULT_EMISSIVE_FACTOR;
   }
 
   get alphaMode(): string|undefined {
@@ -283,14 +283,16 @@ export class Material {
     await this.setTexture('emissiveTexture', handle);
   }
 
-  async setEmissiveFactor(emissiveFactor: RGB|undefined) {
+  async setEmissiveFactor(emissiveFactor: RGB) {
     if (this.materialJson.emissiveFactor === undefined && emissiveFactor &&
         areRgbEqual(emissiveFactor, DEFAULT_EMISSIVE_FACTOR)) {
       return;
     }
 
     this.materialJson.emissiveFactor = emissiveFactor;
-    await this.gltfModel[$onModelViewerDirty]();
+
+    const model = this.gltfModel.modelViewer?.model;
+    model?.materials[this.materialIndex].setEmissiveFactor(emissiveFactor);
   }
 
   async setOcclusionTexture(handle: TextureHandle|string|null) {
@@ -808,9 +810,8 @@ export class GltfModel {
       }
       this.root.bufferViews[i].byteOffset! -= bytesSaved;
     }
-    // Adjust the corresponding buffer's byteLength also. 
-    if (view.buffer !== undefined &&
-        this.root.buffers &&
+    // Adjust the corresponding buffer's byteLength also.
+    if (view.buffer !== undefined && this.root.buffers &&
         this.root.buffers[view.buffer]?.byteLength !== undefined) {
       this.root.buffers[view.buffer].byteLength! -= bytesSaved;
     }

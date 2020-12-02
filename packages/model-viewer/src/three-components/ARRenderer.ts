@@ -83,9 +83,10 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
+  private initialModelToWorld: Matrix4|null = null;
 
   private initialized = false;
-  private initialModelToWorld = new Matrix4();
+  private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
   private isRotating = false;
@@ -221,6 +222,8 @@ export class ARRenderer extends EventDispatcher {
     this.oldShadowIntensity = scene.shadowIntensity;
     scene.setShadowIntensity(0);
 
+    this.oldTarget.copy(scene.getTarget());
+
     scene.addEventListener('model-load', this.onUpdateScene);
 
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
@@ -275,12 +278,23 @@ export class ARRenderer extends EventDispatcher {
     return this.presentedScene != null;
   }
 
+  get target(): Vector3 {
+    return this.oldTarget;
+  }
+
   updateTarget() {
     const scene = this.presentedScene;
     if (scene != null) {
-      // Move the scene's target to the model's floor height.
       const target = scene.getTarget();
-      scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
+      this.oldTarget.copy(target);
+      if (this.placeOnWall) {
+        // Move the scene's target to the center of the back of the model's
+        // bounding box.
+        scene.setTarget(target.x, target.y, scene.model.boundingBox.min.z);
+      } else {
+        // Move the scene's target to the model's floor height.
+        scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
+      }
     }
   }
 
@@ -319,6 +333,9 @@ export class ARRenderer extends EventDispatcher {
       if (background != null) {
         scene.background = background;
       }
+      const target = this.oldTarget;
+      scene.setTarget(target.x, target.y, target.z);
+
       scene.removeEventListener('model-load', this.onUpdateScene);
       model.orientHotspots(0);
       element.requestUpdate('cameraTarget');
@@ -398,7 +415,7 @@ export class ARRenderer extends EventDispatcher {
       camera.getWorldDirection(vector3);
       scene.yaw = Math.atan2(-vector3.x, -vector3.z);
       this.goalYaw = scene.yaw;
-      this.initialModelToWorld.copy(scene.model.matrixWorld);
+      this.initialModelToWorld = new Matrix4().copy(scene.model.matrixWorld);
       scene.model.setHotspotsVisibility(true);
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
@@ -497,19 +514,13 @@ export class ARRenderer extends EventDispatcher {
   public placeModel(hit: Vector3) {
     const scene = this.presentedScene!;
     const {model} = scene;
-    const {min, max} = model.boundingBox;
-    const target = scene.getTarget();
 
     this.placementBox!.show = true;
 
     const goal = this.goalPosition;
     goal.copy(hit);
 
-    if (this.placeOnWall === true) {
-      // Move the scene's target to the center of the back of the model's
-      // bounding box.
-      scene.setTarget(target.x, target.y, min.z);
-    } else {
+    if (this.placeOnWall === false) {
       const floor = hit.y;
 
       const origin = this.camera.position.clone();
@@ -518,14 +529,14 @@ export class ARRenderer extends EventDispatcher {
       origin.sub(direction.multiplyScalar(model.idealCameraDistance));
       const ray = new Ray(origin, direction.normalize());
 
-      const modelToWorld = this.initialModelToWorld;
+      const modelToWorld = this.initialModelToWorld!;
       const modelPosition =
           new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
       modelToWorld.setPosition(modelPosition);
-      const world2Model = new Matrix4().getInverse(modelToWorld);
-      ray.applyMatrix4(world2Model);
+      ray.applyMatrix4(modelToWorld.invert());
 
       // Make the box tall so that we don't intersect the top face.
+      const {max} = model.boundingBox;
       max.y += 10;
       ray.intersectBox(model.boundingBox, modelPosition);
       max.y -= 10;
@@ -534,12 +545,11 @@ export class ARRenderer extends EventDispatcher {
         modelPosition.applyMatrix4(modelToWorld);
         goal.add(hit).sub(modelPosition);
       }
-
-      // Move the scene's target to the model's floor height.
-      scene.setTarget(target.x, min.y, target.z);
       // Ignore the y-coordinate and set on the floor instead.
       goal.y = floor;
     }
+
+    this.updateTarget();
 
     this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
   }

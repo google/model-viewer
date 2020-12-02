@@ -125,6 +125,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
+      this[$needsRender]();
     }
 
     /**

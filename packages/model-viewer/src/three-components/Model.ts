@@ -83,7 +83,7 @@ export default class Model extends Object3D {
    * by this model.
    */
   setObject(model: Object3D) {
-    this.clear();
+    this.reset();
     this.modelContainer.add(model);
     this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
@@ -131,7 +131,7 @@ export default class Model extends Object3D {
       throw error;
     }
 
-    this.clear();
+    this.reset();
     this._currentGLTF = gltf;
 
     if (gltf != null) {
@@ -229,7 +229,7 @@ export default class Model extends Object3D {
     this.mixer.update(step);
   }
 
-  clear() {
+  reset() {
     this.url = null;
     this.userData = {url: null};
     const gltf = this._currentGLTF;
