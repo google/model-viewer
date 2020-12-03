@@ -139,33 +139,33 @@ export class MaterialPanel extends ConnectedLitElement {
 
   /* Interpolate base color as curr approaches duration */
   getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
-    const interpColor = [0, 0, 0];
+    const INTERP_COLOR = [0, 0, 0];
     // determine how much of interp color to use
     const interpRatio = (duration - curr) / duration;
     const originalRatio = 1 - interpRatio;
     return [
-      (interpRatio * interpColor[0]) + (originalRatio * original[0]),
-      (interpRatio * interpColor[1]) + (originalRatio * original[1]),
-      (interpRatio * interpColor[2]) + (originalRatio * original[2]),
+      (interpRatio * INTERP_COLOR[0]) + (originalRatio * original[0]),
+      (interpRatio * INTERP_COLOR[1]) + (originalRatio * original[1]),
+      (interpRatio * INTERP_COLOR[2]) + (originalRatio * original[2]),
       original[3],
     ];
   }
 
   getInterpolatedEmissive(original: RGB, curr: number, duration: number): RGB {
-    const interpColor = [1, 0, 0];
+    const INTERP_COLOR = [1, 0, 0];
     const interpRatio = (duration - curr) / duration;
     const originalRatio = 1 - interpRatio;
     return [
-      (interpRatio * interpColor[0]) + (originalRatio * original[0]),
-      (interpRatio * interpColor[1]) + (originalRatio * original[1]),
-      (interpRatio * interpColor[2]) + (originalRatio * original[2]),
+      (interpRatio * INTERP_COLOR[0]) + (originalRatio * original[0]),
+      (interpRatio * INTERP_COLOR[1]) + (originalRatio * original[1]),
+      (interpRatio * INTERP_COLOR[2]) + (originalRatio * original[2]),
     ];
   }
 
   isLegalIndex() {
-    return !(
-        this.selectedMaterialId! >= this.materials.length ||
-        this.selectedMaterialId! < 0)
+    return (
+        this.selectedMaterialId! < this.materials.length &&
+        this.selectedMaterialId! >= 0)
   }
 
   // Logic for interpolating from red emissive factor to the original.
@@ -175,10 +175,10 @@ export class MaterialPanel extends ConnectedLitElement {
     const originalBaseColor = this.materials[index].baseColorFactor;
     const originalEmissiveFactor = this.materials[index].emissiveFactor;
 
-    let start: number = -1;
-    let duration = 1600;  // in milliseconds
+    let start = -1;
+    const DURATION = 1600;  // in milliseconds
 
-    const interpolateStep = (timestamp: any) => {
+    const interpolateStep = (timestamp: number) => {
       // New model is loaded mid interpolation
       if (!this.isLegalIndex()) {
         return;
@@ -186,14 +186,14 @@ export class MaterialPanel extends ConnectedLitElement {
       if (start === -1) {
         start = timestamp;
       }
-      if (timestamp - start <= duration) {
+      if (timestamp - start <= DURATION) {
         const baseColorFactor = this.getInterpolatedColor(
-            originalBaseColor, timestamp - start, duration);
+            originalBaseColor, timestamp - start, DURATION);
         reduxStore.dispatch(dispatchMaterialBaseColor(
             getEditsMaterials(reduxStore.getState()),
             {index, baseColorFactor}));
         const emissiveFactor = this.getInterpolatedEmissive(
-            originalEmissiveFactor, timestamp - start, duration);
+            originalEmissiveFactor, timestamp - start, DURATION);
         reduxStore.dispatch(dispatchSetEmissiveFactor(
             getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
         requestAnimationFrame(interpolateStep);
