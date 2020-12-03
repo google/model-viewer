@@ -101,23 +101,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
       });
     });
-  });
 
-  suite('when configured to autoplay', () => {
-    setup(() => {
-      element = new ModelViewerElement();
-      element.autoplay = true;
-      document.body.insertBefore(element, document.body.firstChild);
-    });
-
-    teardown(() => {
-      document.body.removeChild(element);
-    });
-
-    suite('a model with animations', () => {
-      setup(async () => {
-        element.src = ANIMATED_GLB_PATH;
-        await waitForEvent(element, 'load');
+    suite('when configured to autoplay', () => {
+      setup(() => {
+        element.autoplay = true;
       });
 
       test('plays an animation', () => {
@@ -140,26 +127,26 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
               .to.be.true;
         });
       });
-    });
 
-    suite('a model without animations', () => {
-      setup(async () => {
-        element.src = NON_ANIMATED_GLB_PATH;
-        await waitForEvent(element, 'load');
-      });
-
-      test('does not play an animation', () => {
-        expect(animationIsPlaying(element)).to.be.false;
-      });
-
-      suite('with a specified animation-name', () => {
+      suite('a model without animations', () => {
         setup(async () => {
-          element.animationName = element.availableAnimations[1];
-          await timePasses();
+          element.src = NON_ANIMATED_GLB_PATH;
+          await waitForEvent(element, 'load');
         });
 
         test('does not play an animation', () => {
           expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        suite('with a specified animation-name', () => {
+          setup(async () => {
+            element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('does not play an animation', () => {
+            expect(animationIsPlaying(element)).to.be.false;
+          });
         });
       });
     });
