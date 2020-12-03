@@ -103,8 +103,9 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     });
 
     suite('when configured to autoplay', () => {
-      setup(() => {
+      setup(async () => {
         element.autoplay = true;
+        await timePasses();
       });
 
       test('plays an animation', () => {
