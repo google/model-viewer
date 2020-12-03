@@ -695,7 +695,8 @@ paper-button {
 }
 
 .eg-image {
-    max-width: 40vw;
+    max-width: 20vw;
+    display: block;
 }
 
 @media only screen and (min-width: 1664px) {
@@ -712,6 +713,7 @@ paper-button {
   }
     .eg-image {
         max-width: 20vw;
+        display: block;
     }
 }
 
@@ -742,8 +744,8 @@ paper-button {
   }
 
   .examples-container {
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
   }
 
   .header {

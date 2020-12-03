@@ -85,23 +85,15 @@ export function dispatchZoomEnabled(isEnabled: boolean) {
   }
 }
 
-// Orbit
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit(currentOrbit: SphericalPositionDeg|
-                                        undefined) {
-  return {type: SAVE_CAMERA_ORBIT, payload: {orbit: {...currentOrbit}}};
+export function dispatchSaveCameraOrbit(orbit: SphericalPositionDeg|undefined) {
+  return {type: SAVE_CAMERA_ORBIT, payload: orbit};
 }
 
 /** Event dispatcher for changes to camera-target. */
 const SET_CAMERA_TARGET = 'SET_CAMERA_TARGET';
 export function dispatchCameraTarget(target?: Vector3D) {
   return {type: SET_CAMERA_TARGET, payload: target};
-}
-
-/** Dispatch initial orbit in camera state */
-const SET_CAMERA_STATE_INITIAL_ORBIT = 'SET_CAMERA_STATE_INITIAL_ORBIT';
-export function dispatchInitialOrbit(orbit: SphericalPositionDeg|undefined) {
-  return {type: SET_CAMERA_STATE_INITIAL_ORBIT, payload: orbit};
 }
 
 const SET_CAMERA = 'SET_CAMERA';
@@ -117,16 +109,12 @@ export function cameraReducer(
   switch (action.type) {
     case SET_CAMERA:
       return action.payload;
-    case SET_CAMERA_STATE_INITIAL_ORBIT:
-      return {...state, orbit: action.payload};
     case SET_CAMERA_TARGET:
       return {
         ...state, target: action.payload
       }
     case SAVE_CAMERA_ORBIT:
-      return {
-        ...state, orbit: {...action.payload.orbit}
-      }
+      return {...state, orbit: action.payload};
     case SET_CAMERA_FOV_LIMITS:
       return {
         ...state, fovLimitsDeg: action.payload
