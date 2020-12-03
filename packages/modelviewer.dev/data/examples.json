@@ -136,7 +136,7 @@
     ]
   },
   {
-    "name": "Lighting & Env",
+    "name": "Lighting & Skybox",
     "htmlName": "lightingandenv",
     "examples": [
       {

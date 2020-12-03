@@ -337,20 +337,16 @@
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Add other interactions like rotating environment map</h2>
-            <h4>Use parameters with rest turntable to rotate only the environment light</h4>
-            <p>By using shift key plus left click mouse or touch pad drag, one can rotate
-          the environment map to see how the environment background would cast light
-          onto the object from different angles when it is rotated. Updating orbit to 
-          new theta value and then reseting the theta value to stop turntable from 
-        rotating. </p>
+            <h2 class="demo-title">Add other interactions like rotating the skybox</h2>
+            <p>Using shift-drag or two-finger drag on mobile, one can rotate the
+            skybox to see how the environment would cast light onto the object
+            from different angles.</p>
           </div>
           <example-snippet stamp-to="turnSkybox" highlight-as="html">
             <template>
-<model-viewer id="envlight-demo" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer id="envlight-demo" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
 
 <script type="module">
-    
   const modelViewer = document.querySelector("#envlight-demo");
   modelViewer.addEventListener('contextmenu', event => event.preventDefault());
   
@@ -416,13 +412,12 @@
   }, true);
 
   self.addEventListener('mouseup', (event) => {
-    panning=false;
+    panning = false;
   }, true);
   
   self.addEventListener('touchend', (event) => {
-    panning=false;
+    panning = false;
   }, true);
-  
 </script>
             </template>
           </example-snippet>
@@ -435,6 +430,11 @@
         <li class="attribution">
           <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
         </li>
       </ul>
       <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
