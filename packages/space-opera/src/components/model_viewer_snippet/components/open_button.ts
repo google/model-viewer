@@ -135,7 +135,10 @@ export class OpenModal extends ConnectedLitElement {
   updated() {
     const textArea = this.snippetViewer.snippet;
     // Work-around closureZ issue.
-    textArea.style.backgroundColor = this.errors.length > 0 ? 'pink' : 'white';
+    if (textArea != null) {
+      textArea.style.backgroundColor =
+          this.errors.length > 0 ? 'pink' : 'white';
+    }
   }
 
   open() {

@@ -36,6 +36,7 @@ import * as color from 'ts-closure-library/lib/color/color';  // from //third_pa
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -57,6 +58,10 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() materials: Material[] = [];
   @internalProperty() originalMaterials: Material[] = [];
   @internalProperty() texturesById?: TexturesById;
+
+  @internalProperty() isNewModel: boolean = true;
+  @internalProperty() currentGltfUrl: string = '';
+  @internalProperty() isTesting: boolean = false;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -99,6 +104,13 @@ export class MaterialPanel extends ConnectedLitElement {
       this.texturesById = getEditsTextures(state);
       this.safeTextureUrlsDirty = true;
     }
+
+    // If a new model is loaded, don't interpolate material
+    const gltfUrl = getGltfUrl(state);
+    if (gltfUrl !== undefined && this.currentGltfUrl !== getGltfUrl(state)) {
+      this.isNewModel = true;
+      this.currentGltfUrl = gltfUrl;
+    }
   }
 
   async performUpdate() {
@@ -125,12 +137,89 @@ export class MaterialPanel extends ConnectedLitElement {
     this.safeUrlIds = safeUrlIds;
   }
 
+  /* Interpolate base color as curr approaches duration */
+  getInterpolatedColor(original: RGBA, curr: number, duration: number): RGBA {
+    const INTERP_COLOR = [0, 0, 0];
+    // determine how much of interp color to use
+    const interpRatio = (duration - curr) / duration;
+    const originalRatio = 1 - interpRatio;
+    return [
+      (interpRatio * INTERP_COLOR[0]) + (originalRatio * original[0]),
+      (interpRatio * INTERP_COLOR[1]) + (originalRatio * original[1]),
+      (interpRatio * INTERP_COLOR[2]) + (originalRatio * original[2]),
+      original[3],
+    ];
+  }
+
+  getInterpolatedEmissive(original: RGB, curr: number, duration: number): RGB {
+    const INTERP_COLOR = [1, 0, 0];
+    const interpRatio = (duration - curr) / duration;
+    const originalRatio = 1 - interpRatio;
+    return [
+      (interpRatio * INTERP_COLOR[0]) + (originalRatio * original[0]),
+      (interpRatio * INTERP_COLOR[1]) + (originalRatio * original[1]),
+      (interpRatio * INTERP_COLOR[2]) + (originalRatio * original[2]),
+    ];
+  }
+
+  isLegalIndex() {
+    return (
+        this.selectedMaterialId! < this.materials.length &&
+        this.selectedMaterialId! >= 0)
+  }
+
+  // Logic for interpolating from red emissive factor to the original.
+  interpolateMaterial() {
+    const index = this.selectedMaterialId!;
+    const id = this.selectedMaterialId!;
+    const originalBaseColor = this.materials[index].baseColorFactor;
+    const originalEmissiveFactor = this.materials[index].emissiveFactor;
+
+    let start = -1;
+    const DURATION = 1600;  // in milliseconds
+
+    const interpolateStep = (timestamp: number) => {
+      // New model is loaded mid interpolation
+      if (!this.isLegalIndex()) {
+        return;
+      }
+      if (start === -1) {
+        start = timestamp;
+      }
+      if (timestamp - start <= DURATION) {
+        const baseColorFactor = this.getInterpolatedColor(
+            originalBaseColor, timestamp - start, DURATION);
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+        const emissiveFactor = this.getInterpolatedEmissive(
+            originalEmissiveFactor, timestamp - start, DURATION);
+        reduxStore.dispatch(dispatchSetEmissiveFactor(
+            getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
+        requestAnimationFrame(interpolateStep);
+      } else {
+        const baseColorFactor = originalBaseColor;
+        reduxStore.dispatch(dispatchMaterialBaseColor(
+            getEditsMaterials(reduxStore.getState()),
+            {index, baseColorFactor}));
+        const emissiveFactor = originalEmissiveFactor;
+        reduxStore.dispatch(dispatchSetEmissiveFactor(
+            getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
+      }
+    };
+    requestAnimationFrame(interpolateStep);
+  }
 
   onSelectMaterial() {
     const value = this.materialSelector?.selectedItem?.getAttribute('value');
     if (value !== undefined) {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
+      // Don't interpolate on the initial model load.
+      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting) {
+        this.interpolateMaterial();
+      }
+      this.isNewModel = false;
     }
   }
 
@@ -805,8 +894,8 @@ export class MaterialPanel extends ConnectedLitElement {
         <div slot="content">
         ${this.renderDoubleSidedSection()}
         ${this.renderAlphaBlendModeSection()}
-        </div><
-        /me-expandable-tab>
+        </div>
+      </me-expandable-tab>
     `;
   }
 

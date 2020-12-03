@@ -157,8 +157,8 @@ function createSidebar(category: Category) {
   const categoryContainer = `
 <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
   <h3 id=${lowerCaseTitle.concat('-sidebar')}>
-    <a class="darken" href="#${lowerCaseTitle}" onclick="sidebarClick()">${
-      category.Title}</a>
+    <a class="darken" href="#${
+      lowerCaseTitle}" onclick="sidebarClick('title')">${category.Title}</a>
   </h3>
 </div>`;
 

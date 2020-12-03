@@ -328,7 +328,17 @@ export function sidebarObserver(docsOrExample: string) {
   }
 }
 
-export function sidebarClick() {
+export function sidebarClick(titleName: string = '') {
+  // if a title was supplied on the docs page as being clicked on, we want to
+  // decrease the --scroll-top css so that the top of the title is flush
+  // with the top of the window
+  const root = document.documentElement;
+  if (titleName !== '') {
+    root.style.setProperty('--scroll-top', '0px');
+  } else {
+    root.style.setProperty('--scroll-top', '65px');
+  }
+
   isSideBarClick = true;
   // close sidebar if click in sidebar on mobile
   if (window.innerWidth <= 800) {
