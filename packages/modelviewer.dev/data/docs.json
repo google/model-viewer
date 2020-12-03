@@ -575,7 +575,7 @@
       {
         "name": "getCameraOrbit()",
         "htmlName": "getCameraOrbit",
-        "description": "Returns the realtime orbital position of the camera. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime orbital position of the camera. The retuned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraOrbit</span> example</a>"
         ]
