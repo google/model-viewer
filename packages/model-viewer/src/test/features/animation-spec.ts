@@ -112,7 +112,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
       element = new ModelViewerElement();
       element.autoplay = true;
       document.body.insertBefore(element, document.body.firstChild);
-    });
+    })
 
     teardown(() => {
       document.body.removeChild(element);
