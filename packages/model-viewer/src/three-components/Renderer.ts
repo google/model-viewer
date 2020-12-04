@@ -44,12 +44,6 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
-export const $arRenderer = Symbol('arRenderer');
-
-const $onWebGLContextLost = Symbol('onWebGLContextLost');
-const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
-const $singleton = Symbol('singleton');
-
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
@@ -62,15 +56,15 @@ const $singleton = Symbol('singleton');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  static[$singleton] = new Renderer({debug: isDebugMode()});
+  static _singleton = new Renderer({debug: isDebugMode()});
 
   static get singleton() {
-    return this[$singleton];
+    return this._singleton;
   }
 
   static resetSingleton() {
-    this[$singleton].dispose();
-    this[$singleton] = new Renderer({debug: isDebugMode()});
+    this._singleton.dispose();
+    this._singleton = new Renderer({debug: isDebugMode()});
   }
 
   public threeRenderer!: WebGL1Renderer;
@@ -92,9 +86,6 @@ export class Renderer extends EventDispatcher {
   private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
-
-  private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
-      this[$onWebGLContextLost](event);
 
   get canRender() {
     return this.threeRenderer != null;
@@ -127,8 +118,7 @@ export class Renderer extends EventDispatcher {
         this.canvasElement.transferControlToOffscreen() :
         this.canvasElement;
 
-    this.canvas3D.addEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
+    this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
     try {
       this.threeRenderer = new WebGL1Renderer({
@@ -140,7 +130,6 @@ export class Renderer extends EventDispatcher {
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = GammaEncoding;
-      this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
       this.threeRenderer.shadowMap.enabled = true;
@@ -470,11 +459,11 @@ export class Renderer extends EventDispatcher {
     this.scenes.clear();
 
     this.canvas3D.removeEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
+        'webglcontextlost', this.onWebGLContextLost);
   }
 
-  [$onWebGLContextLost](event: WebGLContextEvent) {
+  onWebGLContextLost = (event: Event) => {
     this.dispatchEvent(
         {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
-  }
+  };
 }

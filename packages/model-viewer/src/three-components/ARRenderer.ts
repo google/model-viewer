@@ -124,7 +124,7 @@ export class ARRenderer extends EventDispatcher {
               {root: scene.element.shadowRoot!.querySelector('div.default')}
         });
 
-    const gl = this.threeRenderer.context;
+    const gl = this.threeRenderer.getContext();
     // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
     // #293, handle WebXR API changes. WARNING: this can cause a GL context
     // loss according to the spec, though current implementations don't do so.
@@ -409,7 +409,7 @@ export class ARRenderer extends EventDispatcher {
       camera.projectionMatrix.fromArray(view.projectionMatrix);
       // Have to set the inverse manually when setting matrix directly. This is
       // needed for raycasting.
-      camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+      camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
       // Orient model toward camera on first frame.
       const scene = this.presentedScene!;
       camera.getWorldDirection(vector3);
