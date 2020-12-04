@@ -84,6 +84,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
+      test('has a duration greater than 0', () => {
+        expect(element.duration).to.be.greaterThan(0);
+      });
+
       suite('when pause is invoked', () => {
         setup(async () => {
           const animationsPause = waitForEvent(element, 'pause');
@@ -112,6 +116,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
+      test('has a duration greater than 0', () => {
+        expect(element.duration).to.be.greaterThan(0);
+      });
+
       test('plays the first animation by default', () => {
         expect(animationIsPlaying(element, element.availableAnimations[0]))
             .to.be.true;
@@ -137,6 +145,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
 
         test('does not play an animation', () => {
           expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('has a duration of 0', () => {
+          expect(element.duration).to.be.equal(0);
         });
 
         suite('with a specified animation-name', () => {
