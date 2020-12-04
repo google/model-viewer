@@ -149,7 +149,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return null;
       }
 
-      worldToModel.getInverse(model.matrixWorld);
+      worldToModel.copy(model.matrixWorld).invert();
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
 
       worldToModelNormal.getNormalMatrix(worldToModel);

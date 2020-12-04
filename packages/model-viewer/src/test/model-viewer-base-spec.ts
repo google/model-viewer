@@ -163,7 +163,7 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
-    suite.skip('when losing the GL context', () => {
+    suite('when losing the GL context', () => {
       // We're skipping this test for now, as losing the context that was
       // created with transferControlToOffscreen() causes the Chrome tab to
       // crash.
@@ -180,13 +180,19 @@ suite('ModelViewerElementBase', () => {
       });
 
       test('dispatches a related error event', async () => {
-        const {threeRenderer} = Renderer.singleton;
+        const {threeRenderer, canvas3D} = Renderer.singleton;
+
+        canvas3D.addEventListener('webglcontextlost', function(event) {
+          event.preventDefault();
+          Renderer.resetSingleton();
+        }, false);
+
         const errorEventDispatches = waitForEvent(element, 'error');
         // We make a best effor to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,
         // so we simulate the scenario.
         // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
-        if (threeRenderer.context != null && !IS_IE11) {
+        if (threeRenderer.getContext() != null && !IS_IE11) {
           threeRenderer.forceContextLoss();
         } else {
           threeRenderer.domElement.dispatchEvent(
