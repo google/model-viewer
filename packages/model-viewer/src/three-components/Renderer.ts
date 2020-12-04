@@ -41,8 +41,8 @@ const DURATION_DECAY = 0.2;
 const LOW_FRAME_DURATION_MS = 18;
 const HIGH_FRAME_DURATION_MS = 26;
 const MAX_AVG_CHANGE_MS = 2;
-const SCALE_STEP = 0.79;
-const DEFAULT_MIN_SCALE = 0.5;
+const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
+const DEFAULT_LAST_STEP = 3;
 
 export const $arRenderer = Symbol('arRenderer');
 
@@ -83,13 +83,13 @@ export class Renderer extends EventDispatcher {
   public width = 0;
   public height = 0;
   public dpr = 1;
-  public minScale = DEFAULT_MIN_SCALE;
 
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
-  private scale = 1;
+  private scaleStep = 0;
+  private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
@@ -101,7 +101,18 @@ export class Renderer extends EventDispatcher {
   }
 
   get scaleFactor() {
-    return this.scale;
+    return SCALE_STEPS[this.scaleStep];
+  }
+
+  set minScale(scale: number) {
+    let i = 1;
+    while (i < SCALE_STEPS.length) {
+      if (SCALE_STEPS[i] < scale) {
+        break;
+      }
+      ++i;
+    }
+    this.lastStep = i - 1;
   }
 
   constructor(options?: RendererOptions) {
@@ -193,8 +204,9 @@ export class Renderer extends EventDispatcher {
     }
 
     // Expand the canvas size to make up for shrinking the viewport.
-    const widthCSS = width / this.scale;
-    const heightCSS = height / this.scale;
+    const scale = this.scaleFactor;
+    const widthCSS = width / scale;
+    const heightCSS = height / scale;
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
     this.canvasElement.style.width = `${widthCSS}px`;
@@ -214,20 +226,19 @@ export class Renderer extends EventDispatcher {
   }
 
   private updateRendererScale() {
-    let {scale} = this;
+    const scaleStep = this.scaleStep;
     if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS &&
-        scale > this.minScale) {
-      scale *= SCALE_STEP;
-    } else if (this.avgFrameDuration < LOW_FRAME_DURATION_MS && scale < 1) {
-      scale /= SCALE_STEP;
-      scale = Math.min(scale, 1);
+        this.scaleStep < this.lastStep) {
+      ++this.scaleStep;
+    } else if (
+        this.avgFrameDuration < LOW_FRAME_DURATION_MS && this.scaleStep > 0) {
+      --this.scaleStep;
     }
-    scale = Math.max(scale, this.minScale);
 
-    if (scale == this.scale) {
+    if (scaleStep == this.scaleStep) {
       return;
     }
-    this.scale = scale;
+    const scale = this.scaleFactor;
     this.avgFrameDuration =
         (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
@@ -247,12 +258,13 @@ export class Renderer extends EventDispatcher {
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
     const {canvas} = scene;
+    const scale = this.scaleFactor;
 
     canvas.width = Math.round(this.width * this.dpr);
     canvas.height = Math.round(this.height * this.dpr);
 
-    canvas.style.width = `${this.width / this.scale}px`;
-    canvas.style.height = `${this.height / this.scale}px`;
+    canvas.style.width = `${this.width / scale}px`;
+    canvas.style.height = `${this.height / scale}px`;
 
     if (this.multipleScenesVisible) {
       canvas.classList.add('show');
@@ -385,7 +397,7 @@ export class Renderer extends EventDispatcher {
     this.updateRendererSize();
     this.updateRendererScale();
 
-    const {dpr, scale} = this;
+    const {dpr, scaleFactor} = this;
 
     for (const scene of this.orderedScenes()) {
       if (!scene.element[$sceneIsReady]()) {
@@ -412,10 +424,10 @@ export class Renderer extends EventDispatcher {
 
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.
-      const width =
-          Math.min(Math.ceil(scene.width * scale * dpr), this.canvas3D.width);
-      const height =
-          Math.min(Math.ceil(scene.height * scale * dpr), this.canvas3D.height);
+      const width = Math.min(
+          Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
+      const height = Math.min(
+          Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer

@@ -152,7 +152,7 @@
         ],
         "default": {
           "default": "0.5",
-          "options": "number between 0 and 1"
+          "options": "number between 0.25 and 1"
         }
       },
       {
