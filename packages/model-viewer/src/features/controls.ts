@@ -73,6 +73,7 @@ export interface SphericalPosition {
   theta: number;  // equator angle around the y (up) axis.
   phi: number;    // polar angle from the y (up) axis.
   radius: number;
+  toString(): string;
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
@@ -372,7 +373,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
-      return {theta, phi, radius};
+      return {
+        theta,
+        phi,
+        radius,
+        toString() {
+          return `${this.theta}rad ${this.phi}rad ${this.radius}m`;
+        }
+      };
     }
 
     getCameraTarget(): Vector3D {

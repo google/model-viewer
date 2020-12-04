@@ -114,6 +114,10 @@
       {
         "htmlId": "panning",
         "name": "Panning"
+      },
+      {
+        "htmlId": "turnSkybox",
+        "name": "Turn Skybox"
       }
     ]
   },
@@ -132,7 +136,7 @@
     ]
   },
   {
-    "name": "Lighting & Env",
+    "name": "Lighting & Skybox",
     "htmlName": "lightingandenv",
     "examples": [
       {

@@ -174,30 +174,44 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     // Clone the textures manually since material cloning is shallow. The
     // underlying images are still shared.
-    clone.map = material.map?.clone() ?? null;
-    clone.normalMap = material.normalMap?.clone() ?? null;
-    clone.emissiveMap = material.emissiveMap?.clone() ?? null;
-    clone.aoMap = material.aoMap?.clone() ?? null;
+    if (material.map != null) {
+      clone.map = material.map.clone();
+      clone.map.needsUpdate = true;
+    }
+    if (material.normalMap != null) {
+      clone.normalMap = material.normalMap.clone();
+      clone.normalMap.needsUpdate = true;
+    }
+    if (material.emissiveMap != null) {
+      clone.emissiveMap = material.emissiveMap.clone();
+      clone.emissiveMap.needsUpdate = true;
+    }
 
     if ((material as any).isGLTFSpecularGlossinessMaterial) {
-      (clone as any).specularMap =
-          (material as any).specularMap?.clone() ?? null;
-      (clone as any).glossinessMap =
-          (material as any).glossinessMap?.clone() ?? null;
+      if ((material as any).specularMap != null) {
+        (clone as any).specularMap = (material as any).specularMap?.clone();
+        (clone as any).specularMap.needsUpdate = true;
+      }
+      if ((material as any).glossinessMap != null) {
+        (clone as any).glossinessMap = (material as any).glossinessMap?.clone();
+        (clone as any).glossinessMap.needsUpdate = true;
+      }
     } else {
       // ao, roughness and metalness sometimes share a texture.
       if (material.metalnessMap === material.aoMap) {
         clone.metalnessMap = clone.aoMap;
-      } else {
-        clone.metalnessMap = material.metalnessMap?.clone() ?? null;
+      } else if (material.metalnessMap != null) {
+        clone.metalnessMap = material.metalnessMap.clone();
+        clone.metalnessMap.needsUpdate = true;
       }
 
       if (material.roughnessMap === material.aoMap) {
         clone.roughnessMap = clone.aoMap;
       } else if (material.roughnessMap === material.metalnessMap) {
         clone.roughnessMap = clone.metalnessMap;
-      } else {
-        clone.roughnessMap = material.roughnessMap?.clone() ?? null;
+      } else if (material.roughnessMap != null) {
+        clone.roughnessMap = material.roughnessMap.clone();
+        clone.roughnessMap.needsUpdate = true;
       }
     }
 

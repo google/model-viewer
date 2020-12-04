@@ -66,6 +66,7 @@ describe('material panel test', () => {
 
   beforeEach(async () => {
     panel = new MaterialPanel();
+    panel.isTesting = true;
     document.body.appendChild(panel);
 
     await panel.updateComplete;

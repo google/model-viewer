@@ -16,11 +16,11 @@
  */
 
 
-import './tabs.js';
+import '../../../components/shared/tabs/tabs.js';
 
 import {html, render} from 'lit-html';
 
-import {Tabs} from './tabs.js';
+import {Tabs} from '../../../components/shared/tabs/tabs.js';
 
 describe('<tabs>', () => {
   let tabs: Tabs;
