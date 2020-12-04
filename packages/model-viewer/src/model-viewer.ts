@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import 'three/src/polyfills.js';
+
 import {AnimationMixin} from './features/animation.js';
 import {AnnotationMixin} from './features/annotation.js';
 import {ARMixin} from './features/ar.js';
