@@ -84,6 +84,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
+      test('has a duration greater than 0', () => {
+        expect(element.duration).to.be.greaterThan(0);
+      });
+
       suite('when pause is invoked', () => {
         setup(async () => {
           const animationsPause = waitForEvent(element, 'pause');
