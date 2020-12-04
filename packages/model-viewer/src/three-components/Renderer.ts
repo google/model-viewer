@@ -40,7 +40,7 @@ export interface ContextLostEvent extends Event {
 const DURATION_DECAY = 0.2;
 const LOW_FRAME_DURATION_MS = 18;
 const HIGH_FRAME_DURATION_MS = 26;
-const MAX_AVG_CHANGE_MS = 2;
+const MAX_AVG_CHANGE_MS = 1.9;
 const SCALE_STEP = 0.79;
 const DEFAULT_MIN_SCALE = 0.5;
 
