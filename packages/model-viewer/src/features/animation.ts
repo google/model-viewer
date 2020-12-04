@@ -29,6 +29,7 @@ export declare interface AnimationInterface {
   animationCrossfadeDuration: number;
   readonly availableAnimations: Array<string>;
   readonly paused: boolean;
+  readonly duration: number;
   currentTime: number;
   pause(): void;
   play(): void;
@@ -54,6 +55,10 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       return [];
+    }
+
+    get duration(): number {
+      return this[$scene].model.duration;
     }
 
     get paused(): boolean {
