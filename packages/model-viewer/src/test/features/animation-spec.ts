@@ -84,10 +84,6 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         expect(animationIsPlaying(element)).to.be.true;
       });
 
-      test('has a duration greater than 0', () => {
-        expect(element.duration).to.be.greaterThan(0);
-      });
-
       suite('when pause is invoked', () => {
         setup(async () => {
           const animationsPause = waitForEvent(element, 'pause');
@@ -105,23 +101,11 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
       });
     });
-  });
 
-  suite('when configured to autoplay', () => {
-    setup(() => {
-      element = new ModelViewerElement();
-      element.autoplay = true;
-      document.body.insertBefore(element, document.body.firstChild);
-    })
-
-    teardown(() => {
-      document.body.removeChild(element);
-    });
-
-    suite('a model with animations', () => {
+    suite('when configured to autoplay', () => {
       setup(async () => {
-        element.src = ANIMATED_GLB_PATH;
-        await waitForEvent(element, 'load');
+        element.autoplay = true;
+        await timePasses();
       });
 
       test('plays an animation', () => {
@@ -148,30 +132,30 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
               .to.be.true;
         });
       });
-    });
 
-    suite('a model without animations', () => {
-      setup(async () => {
-        element.src = NON_ANIMATED_GLB_PATH;
-        await waitForEvent(element, 'load');
-      });
-
-      test('does not play an animation', () => {
-        expect(animationIsPlaying(element)).to.be.false;
-      });
-
-      test('has a duration of 0', () => {
-        expect(element.duration).to.be.equal(0);
-      });
-
-      suite('with a specified animation-name', () => {
+      suite('a model without animations', () => {
         setup(async () => {
-          element.animationName = element.availableAnimations[1];
-          await timePasses();
+          element.src = NON_ANIMATED_GLB_PATH;
+          await waitForEvent(element, 'load');
         });
 
         test('does not play an animation', () => {
           expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('has a duration of 0', () => {
+          expect(element.duration).to.be.equal(0);
+        });
+
+        suite('with a specified animation-name', () => {
+          setup(async () => {
+            element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('does not play an animation', () => {
+            expect(animationIsPlaying(element)).to.be.false;
+          });
         });
       });
     });
