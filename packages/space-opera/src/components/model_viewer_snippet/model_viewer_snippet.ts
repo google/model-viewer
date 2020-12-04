@@ -18,7 +18,7 @@
 import '@material/mwc-button';
 import './components/open_button.js';
 import './components/download_button.js';
-import './components/mobile_view.js';
+import './components/open_mobile_view.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 

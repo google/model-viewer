@@ -94,6 +94,9 @@ export function dispatchSetConfig(config: ModelViewerConfig) {
 export const getConfig = (state: State) =>
     state.entities.modelViewerSnippet.config;
 
+export const getModelViewerSnippet = (state: State) =>
+    state.entities.modelViewerSnippet;
+
 export function configReducer(
     state: ModelViewerConfig = {}, action: Action): ModelViewerConfig {
   switch (action.type) {

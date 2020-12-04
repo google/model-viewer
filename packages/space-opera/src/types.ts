@@ -46,7 +46,7 @@ interface GltfEditsState {
   origEdits: GltfEdits;
 }
 
-interface ModelViewerSnippetState {
+export interface ModelViewerSnippetState {
   animationNames: string[];
   camera: Camera;
   config: ModelViewerConfig;
