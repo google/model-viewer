@@ -127,9 +127,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
     if (value <= 0) {
       console.warn(
-          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0. This could result in single-pixel renders on some devices; consider increasing.');
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0.25.');
     }
-    Renderer.singleton.minScale = Math.max(0, Math.min(1, value));
+    Renderer.singleton.minScale = value;
   }
 
   /** @export */
