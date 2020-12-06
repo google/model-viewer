@@ -15,10 +15,12 @@
  *
  */
 
-import {css, customElement, html, internalProperty} from 'lit-element';
+import {css, customElement, html, internalProperty, query} from 'lit-element';
+// @ts-ignore
+import QRious from 'qrious';
+
 import {INITIAL_STATE, ModelViewerSnippetState, State} from '../../../types.js';
 import {getConfig, getModelViewerSnippet} from '../../config/reducer.js';
-
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 
@@ -52,6 +54,9 @@ export class MobileView extends ConnectedLitElement {
   lastMobileSnippet: ModelViewerSnippetState =
       INITIAL_STATE.entities.modelViewerSnippet;
 
+  @query('canvas#qr') canvasQR!: HTMLCanvasElement;
+  @internalProperty() isNewQRCode = true;
+
   stateChanged(state: State) {
     const gltfURL = getGltfUrl(state);
     if (gltfURL !== undefined) {
@@ -73,6 +78,12 @@ export class MobileView extends ConnectedLitElement {
         JSON.stringify(this.lastMobileSnippet);
   }
 
+  get viewableSite(): string {
+    // TODO: modify to read current site, such as localhost or modelviewer
+    // first.
+    return `https://www.modelviewer.dev/editor/view/${this.pipingServerId}`;
+  }
+
   get srcPipeUrl(): string {
     return `https://ppng.io/modelviewereditor-srcs-${this.pipingServerId}`;
   }
@@ -82,6 +93,11 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async postInfo() {
+    if (this.isNewQRCode) {
+      new QRious({element: this.canvasQR, value: this.viewableSite});
+      this.isNewQRCode = false
+    }
+
     if (this.urlsHaveChanged()) {
       // sends model, env image, and poster image
       await fetch(this.srcPipeUrl, {
@@ -131,12 +147,11 @@ export class MobileView extends ConnectedLitElement {
   }
 
   renderMobileInfo() {
-    const aHref =
-        `https://www.modelviewer.dev/editor/view/${this.pipingServerId}`;
     return html`
-    <div>QR Code</div>
     <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
-      <a href=${aHref} style="color: white;">${aHref}</a>
+      <a href=${this.viewableSite} style="color: white;">
+        ${this.viewableSite}
+      </a>
     </div>
     <mwc-button unelevated icon="cached" @click=${this.postInfo}>
       Refresh Mobile
@@ -147,7 +162,9 @@ export class MobileView extends ConnectedLitElement {
   render() {
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">Mobile View:</div>
-    ${!this.isDeployed ? this.renderDeployButton() : this.renderMobileInfo()}
+    ${!this.isDeployed ? this.renderDeployButton() : html``}
+    <canvas id="qr"></canvas>
+    ${this.isDeployed ? this.renderMobileInfo() : html``}
   `;
   }
 }
