@@ -43,9 +43,13 @@ export class EditorMobile extends LitElement {
         .then(response => response.json())
         .then(json => console.log('urls', json));
 
+    // TODO: Add in dispatches for gltf, poster, env image
+
     fetch(this.snippetPipeUrl)
         .then(response => response.json())
         .then(json => console.log('snippet', json));
+
+    // TODO: Add in dispatches for new snippet
   }
 
   render() {

@@ -105,11 +105,6 @@ export class MobileView extends ConnectedLitElement {
 
       // update the urls last sent
       this.lastUrlsSent = {...this.urls};
-
-      // TODO: remove test fetch
-      // fetch(this.srcPipeUrl)
-      //     .then(response => response.json())
-      //     .then(json => console.log('urls', json));
     }
 
     if (this.snippetHasChanged()) {
@@ -121,11 +116,6 @@ export class MobileView extends ConnectedLitElement {
 
       // update snippet last sent
       this.lastSnippetSent = {...this.snippet};
-
-      // TODO: remove test fetch
-      // fetch(this.snippetPipeUrl)
-      //     .then(response => response.json())
-      //     .then(json => console.log('snippet', json));
     }
   }
 
@@ -157,12 +147,11 @@ export class MobileView extends ConnectedLitElement {
     `
   }
 
-  // TODO: Hide canvas when not yet deployed
   render() {
     return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">Mobile View:</div>
     ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <canvas id="qr"></canvas>
+    <canvas id="qr" style="display: ${
+        this.isDeployed ? 'block' : 'none'}"></canvas>
     ${this.isDeployed ? this.renderMobileInfo() : html``}
   `;
   }
