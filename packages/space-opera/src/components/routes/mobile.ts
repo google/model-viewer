@@ -15,7 +15,7 @@
  *
  */
 
-import {customElement, html, LitElement} from 'lit-element';
+import {customElement, html, internalProperty, LitElement} from 'lit-element';
 import {styles} from './styles.css.js';
 
 /**
@@ -24,6 +24,8 @@ import {styles} from './styles.css.js';
 @customElement('routes-mobile')
 export class EditorMobile extends LitElement {
   static styles = styles;
+
+  @internalProperty() gltfUrl: string|undefined;
 
   get pipingServerId(): any {
     // TODO: catch errors
@@ -39,9 +41,11 @@ export class EditorMobile extends LitElement {
   }
 
   waitForFetch() {
+    // TODO: change to promises so I an force them to not run...
+
     fetch(this.srcPipeUrl)
         .then(response => response.json())
-        .then(json => console.log('urls', json));
+        .then(json => this.gltfUrl = json.gltf);
 
     // TODO: Add in dispatches for gltf, poster, env image
 
@@ -58,12 +62,12 @@ export class EditorMobile extends LitElement {
     <div class="app">
       <div class="editor-body-root">
         <div class="mvContainer">
-          <model-viewer-preview id="editing_adapter">
-          </model-viewer-preview>
-        </div>
-      </div>
-    </div>
-  </model-editor>
+        ${typeof this.gltfUrl === 'string' && html`
+          <model-viewer src=${this.gltfUrl}> </model-viewer>
+        `}
+        </div></div>
+    </div><
+        /model-editor>
 `;
   }
 }

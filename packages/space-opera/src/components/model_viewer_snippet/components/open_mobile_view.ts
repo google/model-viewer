@@ -96,6 +96,8 @@ export class MobileView extends ConnectedLitElement {
       this.isNewQRCode = false
     }
 
+    // TODO: change such that we are sending the actual model, as opposed to the
+    // url, which is local...
     if (this.urlsHaveChanged()) {
       // sends model, env image, and poster image
       await fetch(this.srcPipeUrl, {
