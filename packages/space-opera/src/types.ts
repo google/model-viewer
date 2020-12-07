@@ -90,6 +90,10 @@ export const INITIAL_STATE: State = {
   },
 };
 
+export function getInitSnippet(): ModelViewerSnippetState {
+  return {...INITIAL_STATE.entities.modelViewerSnippet};
+};
+
 export interface Action extends Redux.Action {
   type: string;
   payload?: any;

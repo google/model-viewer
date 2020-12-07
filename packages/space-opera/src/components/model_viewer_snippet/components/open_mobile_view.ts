@@ -16,10 +16,10 @@
  */
 
 import {css, customElement, html, internalProperty, query} from 'lit-element';
-// @ts-ignore
+// @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
-import {INITIAL_STATE, ModelViewerSnippetState, State} from '../../../types.js';
+import {getInitSnippet, ModelViewerSnippetState, State} from '../../../types.js';
 import {getConfig, getModelViewerSnippet} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
@@ -46,13 +46,11 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() pipingServerId = 'bobcat';
 
   @internalProperty() urls: URLs = {gltf: '', env: '', poster: ''};
-  @internalProperty() lastMobileUrls: URLs = {gltf: '', env: '', poster: ''};
+  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', poster: ''};
 
+  @internalProperty() snippet: ModelViewerSnippetState = getInitSnippet();
   @internalProperty()
-  snippet: ModelViewerSnippetState = INITIAL_STATE.entities.modelViewerSnippet;
-  @internalProperty()
-  lastMobileSnippet: ModelViewerSnippetState =
-      INITIAL_STATE.entities.modelViewerSnippet;
+  lastSnippetSent: ModelViewerSnippetState = getInitSnippet();
 
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
   @internalProperty() isNewQRCode = true;
@@ -63,25 +61,16 @@ export class MobileView extends ConnectedLitElement {
       this.isNotDeployable = false;
     }
 
-    this.urls.gltf = gltfURL;
-    this.urls.env = getConfig(state).environmentImage;
-    this.urls.poster = getConfig(state).poster;
+    this.urls = {
+      gltf: gltfURL,
+      env: getConfig(state).environmentImage,
+      poster: getConfig(state).poster
+    };
     this.snippet = getModelViewerSnippet(state);
   }
 
-  urlsHaveChanged() {
-    return JSON.stringify(this.urls) !== JSON.stringify(this.lastMobileUrls);
-  }
-
-  snippetHasChanged() {
-    return JSON.stringify(this.snippet) !==
-        JSON.stringify(this.lastMobileSnippet);
-  }
-
   get viewableSite(): string {
-    // TODO: modify to read current site, such as localhost or modelviewer
-    // first.
-    return `https://www.modelviewer.dev/editor/view/${this.pipingServerId}`;
+    return `${window.location.href}view/${this.pipingServerId}`;
   }
 
   get srcPipeUrl(): string {
@@ -90,6 +79,15 @@ export class MobileView extends ConnectedLitElement {
 
   get snippetPipeUrl(): string {
     return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
+  }
+
+  urlsHaveChanged() {
+    return JSON.stringify(this.urls) !== JSON.stringify(this.lastUrlsSent);
+  }
+
+  snippetHasChanged() {
+    return JSON.stringify(this.snippet) !==
+        JSON.stringify(this.lastSnippetSent);
   }
 
   async postInfo() {
@@ -106,7 +104,7 @@ export class MobileView extends ConnectedLitElement {
       });
 
       // update the urls last sent
-      this.lastMobileUrls = {...this.urls};
+      this.lastUrlsSent = {...this.urls};
 
       // TODO: remove test fetch
       fetch(this.srcPipeUrl)
@@ -122,7 +120,7 @@ export class MobileView extends ConnectedLitElement {
       });
 
       // update snippet last sent
-      this.lastMobileSnippet = {...this.snippet};
+      this.lastSnippetSent = {...this.snippet};
 
       // TODO: remove test fetch
       fetch(this.snippetPipeUrl)
@@ -159,6 +157,7 @@ export class MobileView extends ConnectedLitElement {
     `
   }
 
+  // TODO: Hide canvas when not yet deployed
   render() {
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">Mobile View:</div>
