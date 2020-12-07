@@ -1,0 +1,89 @@
+/**
+ * @license
+ * Copyright 2020 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+
+import {css, CSSResult} from 'lit-element';
+export const styles: CSSResult = css`
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  height: 48px;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+/* Container for renderer (left) and tabs (right). */
+.editor-body-root {
+  display: flex;
+  flex: auto; /* Grows to fill space under header */
+  height: 0;
+}
+
+.mvContainer {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+model-viewer-preview {
+  height: 100%;
+}
+
+me-tabs {
+  background-color: #202124;  /* GOOGLE_GREY_900 */
+  padding: 0;
+  width: 360px;
+  min-width: 360px;
+  max-width: 360px;
+}
+
+me-tabs a {
+  color: #dadcff; /* GOOGLE_GREY_300, but.. bluer */
+}
+
+me-tabbed-panel {
+  max-height: calc(100vh - 45px);
+  overflow-y: auto;
+  display: block;
+}
+.privacy {
+  color:#BDBDBD;
+  margin: 5px 16px;
+  position: absolute;
+  bottom: 0;
+  font-size: small;
+  z-index: 0;
+}
+@media only screen and (max-height: 600px) {
+  .privacy {
+    z-index: -1;
+  }
+}
+.privacy-link {
+  color: #BDBDBD;
+}
+`;

@@ -70,7 +70,7 @@ export class MobileView extends ConnectedLitElement {
   }
 
   get viewableSite(): string {
-    return `${window.location.href}view/${this.pipingServerId}`;
+    return `${window.location.href}view/?id=${this.pipingServerId}`;
   }
 
   get srcPipeUrl(): string {
@@ -107,9 +107,9 @@ export class MobileView extends ConnectedLitElement {
       this.lastUrlsSent = {...this.urls};
 
       // TODO: remove test fetch
-      fetch(this.srcPipeUrl)
-          .then(response => response.json())
-          .then(json => console.log('urls', json));
+      // fetch(this.srcPipeUrl)
+      //     .then(response => response.json())
+      //     .then(json => console.log('urls', json));
     }
 
     if (this.snippetHasChanged()) {
@@ -123,9 +123,9 @@ export class MobileView extends ConnectedLitElement {
       this.lastSnippetSent = {...this.snippet};
 
       // TODO: remove test fetch
-      fetch(this.snippetPipeUrl)
-          .then(response => response.json())
-          .then(json => console.log('snippet', json));
+      // fetch(this.snippetPipeUrl)
+      //     .then(response => response.json())
+      //     .then(json => console.log('snippet', json));
     }
   }
 
