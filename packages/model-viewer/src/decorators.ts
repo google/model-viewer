@@ -79,42 +79,42 @@ export const style =
         const originalConnectedCallback = proto.connectedCallback;
         const originalDisconnectedCallback = proto.disconnectedCallback;
 
-        const $styleEffector = Symbol(`${propertyName}StyleEffector`);
-        const $styleEvaluator = Symbol(`${propertyName}StyleEvaluator`);
-        const $updateEvaluator = Symbol(`${propertyName}UpdateEvaluator`);
-        const $evaluateAndSync = Symbol(`${propertyName}EvaluateAndSync`);
+        const styleEffector = `${propertyName}StyleEffector`;
+        const styleEvaluator = `${propertyName}StyleEvaluator`;
+        const updateEvaluator = `${propertyName}UpdateEvaluator`;
+        const evaluateAndSync = `${propertyName}EvaluateAndSync`;
 
         Object.defineProperties(proto, {
-          [$styleEffector]:
+          [styleEffector]:
               {value: null as StyleEffector | null, writable: true},
-          [$styleEvaluator]:
+          [styleEvaluator]:
               {value: null as StyleEvaluator<T>| null, writable: true},
 
-          [$updateEvaluator]: {
+          [updateEvaluator]: {
             value: function() {
               const ast = parseExpressions(
                   this[propertyName as keyof UpdatingElement] as string);
-              this[$styleEvaluator] =
+              this[styleEvaluator] =
                   new StyleEvaluator(ast, getIntrinsics(this));
 
-              if (this[$styleEffector] == null && observeEffects) {
-                this[$styleEffector] =
-                    new StyleEffector(() => this[$evaluateAndSync]());
+              if (this[styleEffector] == null && observeEffects) {
+                this[styleEffector] =
+                    new StyleEffector(() => this[evaluateAndSync]());
               }
 
-              if (this[$styleEffector] != null) {
-                this[$styleEffector].observeEffectsFor(ast);
+              if (this[styleEffector] != null) {
+                this[styleEffector].observeEffectsFor(ast);
               }
             }
           },
 
-          [$evaluateAndSync]: {
+          [evaluateAndSync]: {
             value: function() {
-              if (this[$styleEvaluator] == null) {
+              if (this[styleEvaluator] == null) {
                 return;
               }
 
-              const result = this[$styleEvaluator].evaluate();
+              const result = this[styleEvaluator].evaluate();
 
               // @see https://github.com/microsoft/TypeScript/pull/30769
               // @see https://github.com/Microsoft/TypeScript/issues/1863
@@ -132,8 +132,8 @@ export const style =
               // uses this decorator the opportunity to override the effect, or
               // respond to it, in its own implementation of `updated`.
               if (changedProperties.has(propertyName)) {
-                this[$updateEvaluator]();
-                this[$evaluateAndSync]();
+                this[updateEvaluator]();
+                this[evaluateAndSync]();
               }
 
               originalUpdated.call(this, changedProperties);
@@ -150,9 +150,9 @@ export const style =
           disconnectedCallback: {
             value: function() {
               originalDisconnectedCallback.call(this);
-              if (this[$styleEffector] != null) {
-                this[$styleEffector].dispose();
-                this[$styleEffector] = null;
+              if (this[styleEffector] != null) {
+                this[styleEffector].dispose();
+                this[styleEffector] = null;
               }
             }
           }
