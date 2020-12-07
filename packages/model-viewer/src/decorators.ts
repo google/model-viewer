@@ -85,12 +85,19 @@ export const style =
         const evaluateAndSync = `${propertyName}EvaluateAndSync`;
 
         Object.defineProperties(proto, {
-          [styleEffector]:
-              {value: null as StyleEffector | null, writable: true},
-          [styleEvaluator]:
-              {value: null as StyleEvaluator<T>| null, writable: true},
+          [styleEffector]: {
+            value: null as StyleEffector | null,
+            writable: true,
+            enumerable: true
+          },
+          [styleEvaluator]: {
+            value: null as StyleEvaluator<T>| null,
+            writable: true,
+            enumerable: true
+          },
 
           [updateEvaluator]: {
+            enumerable: true,
             value: function() {
               const ast = parseExpressions(
                   this[propertyName as keyof UpdatingElement] as string);
@@ -109,6 +116,7 @@ export const style =
           },
 
           [evaluateAndSync]: {
+            enumerable: true,
             value: function() {
               if (this[styleEvaluator] == null) {
                 return;
