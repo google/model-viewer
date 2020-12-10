@@ -36,27 +36,4 @@ import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/model_viewer_snippet/model_viewer_snippet.js';
 import './components/inspector/inspector.js';
 import './components/shared/tabs/tabs.js';
-import './components/routes/editor.js';
-import './components/routes/mobile.js';
-
-import {Router} from '@vaadin/router';
-
-const router = new Router(document.getElementById('outlet'));  // in editor/
-router.setRoutes([
-  // deployment main
-  {path: '/', component: 'routes-editor'},
-  {path: '/editor/', component: 'routes-editor'},
-
-  // development main
-  {path: '/packages/space-opera/editor/', component: 'routes-editor'},
-
-  // deployment mobile view
-  {path: '/view/', component: 'routes-mobile'},
-  {path: '/editor/view/', component: 'routes-mobile'},
-
-  // development mobile view
-  {path: '/packages/space-opera/editor/view/', component: 'routes-mobile'},
-
-  // default, must be last
-  {path: '(.*)', component: 'routes-editor'},
-]);
+import './components/mobile_view/mobile_view.js';

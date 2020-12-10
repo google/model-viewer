@@ -37,8 +37,8 @@ import {styles} from './styles.css.js';
 /**
  * The main model-viewer editor component for routing.
  */
-@customElement('routes-mobile')
-export class EditorMobile extends ConnectedLitElement {
+@customElement('mobile-view')
+export class MobileView extends ConnectedLitElement {
   static styles = styles;
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
@@ -192,6 +192,6 @@ export class EditorMobile extends ConnectedLitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'routes-mobile': EditorMobile;
+    'mobile-view': MobileView;
   }
 }
