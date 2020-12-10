@@ -37,7 +37,7 @@ interface URLs {
  * Section for displaying QR Code and other info related to mobile
  */
 @customElement('open-mobile-view')
-export class MobileView extends ConnectedLitElement {
+export class OpenMobileView extends ConnectedLitElement {
   static get styles() {
     return css`
         :host {--mdc-button-disabled-fill-color: rgba(255,255,255,.88)}
@@ -89,73 +89,110 @@ export class MobileView extends ConnectedLitElement {
     return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
   }
 
+  get updatesPipeUrl(): string {
+    return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
+  }
+
+  get envIsHdr(): boolean {
+    return typeof this.urls.env === 'string' &&
+        this.urls.env.substr(this.urls.env.length - 4) === '.hdr';
+  }
+
+  stateHasChanged() {
+    return JSON.stringify(this.snippet) !==
+        JSON.stringify(this.lastSnippetSent);
+  }
+
   // https://dev.to/kingdaro/indexing-objects-in-typescript-1cgi
   hasKey<O>(obj1: O, obj2: O, key: keyof any): key is keyof O {
     return key in obj1 && key in obj2;
   }
 
-  snippetHasChanged() {
-    return JSON.stringify(this.snippet) !==
-        JSON.stringify(this.lastSnippetSent);
-  }
-
   async sendSrcBlob(url: string, srcType: string) {
+    // Get the blob from the url for glbs, posters or environment images
     const response = await fetch(url);
     if (!response.ok) {
+      // TODO: Throw up a popup that says this failed...
       throw new Error(`Failed to fetch url: ${url}`);
     }
     const blob = await response.blob();
 
+    // Send the blob to the url, which varies based on what is sent
     await fetch(this.getSrcPipeUrl(srcType), {
       method: 'POST',
       body: blob,
-    });
+    })
+        .then(response => {
+          console.log('Success:', response);
+        })
+        .catch((error) => {
+          // TODO: Throw up a popup that says this failed...
+          console.log('Error:', error);
+          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
+        });
 
+    // Update the lastUrlsSent object to equal the current url
     if (this.hasKey(this.lastUrlsSent, this.urls, srcType)) {
-      console.log('updated...', srcType);
       this.lastUrlsSent[srcType] = this.urls[srcType];
     }
-
-    console.log(`sent ${srcType}`);
   }
 
   isNewSource(src: string|undefined, lastSrc: string|undefined) {
     return src !== undefined && src !== lastSrc;
   }
 
+  getUpdatedContent() {
+    return {
+      gltfChanged: this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf),
+          stateChanged: this.stateHasChanged(),
+          posterChanged: this.isNewSource(
+              this.urls.poster, this.lastUrlsSent.poster),
+          envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
+          envIsHdr: this.envIsHdr
+    }
+  }
+
+  async sendObject(obj: Object, url: string) {
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(obj),
+    })
+        .then(response => {
+          console.log('Success:', response);
+        })
+        .catch((error) => {
+          // TODO: Throw up a popup that says this failed...
+          console.log('Error:', error);
+          throw new Error(`Failed to post: ${url}`);
+        });
+  }
+
+  /* Send any state, model, or image that has been updated since the last time
+   * the information was sent. */
   async postInfo() {
-    // Generate a new QR code and place it on the canvas provided.
+    // Generate a new QR code and place it on the canvas.
     if (this.isNewQRCode) {
       new QRious({element: this.canvasQR, value: this.viewableSite});
       this.isNewQRCode = false
     }
 
-    console.log('urls and sent', this.urls, this.lastUrlsSent);
+    const updatedContent = this.getUpdatedContent();
+    await this.sendObject(updatedContent, this.updatesPipeUrl)
 
-    // Send new gltf
-    if (this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf)) {
+    if (updatedContent.gltfChanged) {
       await this.sendSrcBlob(this.urls.gltf!, 'gltf');
     }
 
-    // Send new snippet. Must always be sent after a model (if applicable) and
-    // before the environment image / poster because it will override those
-    // values on the other view.
-    if (this.snippetHasChanged()) {
-      await fetch(this.snippetPipeUrl, {
-        method: 'POST',
-        body: JSON.stringify(this.snippet),
-      });
+    if (updatedContent.stateChanged) {
+      await this.sendObject(this.snippet, this.snippetPipeUrl);
       this.lastSnippetSent = {...this.snippet};
-      console.log('snippet sent');
     }
 
-    // Send new environment image
-    if (this.isNewSource(this.urls.env, this.lastUrlsSent.env)) {
+    if (updatedContent.envChanged) {
       await this.sendSrcBlob(this.urls.env!, 'env');
     }
 
-    // Send new poster
-    if (this.isNewSource(this.urls.poster, this.lastUrlsSent.poster)) {
+    if (updatedContent.posterChanged) {
       await this.sendSrcBlob(this.urls.poster!, 'poster');
     }
   }
@@ -188,8 +225,11 @@ export class MobileView extends ConnectedLitElement {
     `
   }
 
+  // TODO: only update when there is a successful send off...
+
   // TODO: Fix where the QR is positioned. Having it in the bottom right of
   // screen makes it hard to get the camera to view it correctly.
+  // TODO: Make into a modal...
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
@@ -202,6 +242,6 @@ export class MobileView extends ConnectedLitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'open-mobile-view': MobileView;
+    'open-mobile-view': OpenMobileView;
   }
 }

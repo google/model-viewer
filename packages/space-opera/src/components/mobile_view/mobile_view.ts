@@ -69,65 +69,77 @@ export class MobileView extends ConnectedLitElement {
     return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
   }
 
-  // Set model for the most recent model sent. Will partially reset the state,
-  // so the model should be sent before the new config is sent.
-  async waitForModel() {
-    // TODO: handle 404s
-    const response = await fetch(this.getSrcPipeUrl('gltf'));
-    const modelBlob = await response.blob();
-    const modelUrl = URL.createObjectURL(modelBlob);
-    reduxStore.dispatch(dispatchGltfUrl(modelUrl));
-    dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
-    reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-    reduxStore.dispatch(dispatchSetHotspots([]));
+  get updatesPipeUrl(): string {
+    return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
   }
 
-  // Set state according to newest partial state sent
-  async waitForState() {
+  async waitForModel() {
+    fetch(this.getSrcPipeUrl('gltf'))
+        .then(response => response.blob())
+        .then(blob => {
+          const modelUrl = URL.createObjectURL(blob);
+          reduxStore.dispatch(dispatchGltfUrl(modelUrl));
+          dispatchConfig(
+              extractStagingConfig(getConfig(reduxStore.getState())));
+          reduxStore.dispatch(dispatchCameraControlsEnabled(true));
+          reduxStore.dispatch(dispatchSetHotspots([]));
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
+  async waitForState(envChanged: boolean, posterChanged: boolean) {
     // TODO: handle 404s
     const stateResponse = await fetch(this.snippetPipeUrl);
     const partialState = await stateResponse.json();
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
 
-    // Fill in current links such that they are not erroneously updated.
-    if (this.config.environmentImage) {
+    // If any of these have changed, expect them to be updated in a soon to be
+    // executed fetch.
+    if (envChanged) {
+      partialState.config.environmentImage = undefined;
+    } else if (this.config.environmentImage) {
       partialState.config.environmentImage = this.config.environmentImage;
     }
-    if (this.config.poster) {
+
+    if (posterChanged) {
+      partialState.config.environmentImage = undefined;
+    } else if (this.config.poster) {
       partialState.config.poster = this.config.poster;
     }
+
+    // This will always be the most up to date src
     if (this.config.src) {
       partialState.config.src = this.config.src;
     }
-    reduxStore.dispatch(dispatchSetConfig(partialState.config));
-    reduxStore.dispatch(dispatchSetEdits(partialState.edits));
 
-    // TODO: figure out how to update model...
+    reduxStore.dispatch(dispatchSetConfig(partialState.config));
+
+    // TODO: Update model...
+    reduxStore.dispatch(dispatchSetEdits(partialState.edits));
     const gltf = this.gltf;
     dispatchGltfAndEdits(gltf, true);
     const previousEdits = undefined;
     if (gltf) {
       await applyEdits(gltf, partialState.edits, previousEdits);
     }
-
     console.log('dispatched and updated state');
   }
 
-  // Set environment image, based on most recent image sent
-  // This should be called after the snippet is updated such we can populate the
-  // correct environment image url in the config.
-  async waitForEnv() {
-    // TODO: handle 404s
-    const envResponse = await fetch(this.getSrcPipeUrl('env'));
-    const envBlob = await envResponse.blob();
-    // create safe url here...!!!
-    // createBlobUrlFromEnvironmentImage adds on hdr, so need to take that into
-    // account here as well...
-    // TODO: Figure out a way to determine whether or not the file sent is an
-    // hdr
-    const envUrl = URL.createObjectURL(envBlob) + '#.hdr';
-    reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
+  async waitForEnv(envIsHdr: boolean) {
+    fetch(this.getSrcPipeUrl('env'))
+        .then(response => response.blob())
+        .then(blob => {
+          // simulating createBlobUrlFromEnvironmentImage
+          const addOn = envIsHdr ? '#.hdr' : '';
+          const envUrl = URL.createObjectURL(blob) + addOn;
+          reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
   }
 
   // Set poster, based on most recent poster sent
@@ -135,16 +147,45 @@ export class MobileView extends ConnectedLitElement {
   // camera can be updated accordingly and we can populate the correct poster
   // url.
   async waitForPoster() {
-    // TODO: handle 404s
-    const posterResponse = await fetch(this.getSrcPipeUrl('poster'));
-    const posterBlob = await posterResponse.blob();
-    const posterUrl = URL.createObjectURL(posterBlob);
-    this.modelViewer?.jumpCameraToGoal();
-    requestAnimationFrame(async () => {
-      this.modelViewer!.reveal = 'interaction';
-      this.modelViewer!.showPoster();
-      reduxStore.dispatch(dispatchSetPoster(posterUrl));
-    });
+    fetch(this.getSrcPipeUrl('poster'))
+        .then(response => response.blob())
+        .then(blob => {
+          const posterUrl = URL.createObjectURL(blob);
+          this.modelViewer?.jumpCameraToGoal();
+          requestAnimationFrame(async () => {
+            this.modelViewer!.reveal = 'interaction';
+            this.modelViewer!.showPoster();
+            reduxStore.dispatch(dispatchSetPoster(posterUrl));
+          });
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
+  async waitForUpdates() {
+    const response = await fetch(this.updatesPipeUrl);
+    if (!response.ok) {
+      // TODO: Throw up a popup that says this failed...
+      throw new Error(`Failed to fetch url: ${this.updatesPipeUrl}`);
+    }
+
+    const json = await response.json();
+
+    if (json.gltfChanged) {
+      await this.waitForModel();
+    }
+    if (json.stateChanged) {
+      await this.waitForState(json.envChanged, json.posterChanged);
+    }
+    if (json.envChanged) {
+      await this.waitForEnv(json.envIsHdr);
+    }
+    if (json.posterChanged) {
+      await this.waitForPoster();
+    }
+
+    console.log('recall....');
   }
 
   // TODO: Add child elements like hotspots as is done in render model viewer.
@@ -157,10 +198,7 @@ export class MobileView extends ConnectedLitElement {
         config.useEnvAsSkybox ? config.environmentImage : undefined;
     return html`
     <div style="position: absolute; z-index: 20;">
-      <mwc-button unelevated @click=${this.waitForModel}> Model </mwc-button>
-      <mwc-button unelevated @click=${this.waitForState}> State </mwc-button>
-      <mwc-button unelevated @click=${this.waitForEnv}> Env </mwc-button>
-      <mwc-button unelevated @click=${this.waitForPoster}> Poster </mwc-button>
+    <mwc-button unelevated @click=${this.waitForUpdates}> Updates </mwc-button>
     </div>
     <div class="app">
       <div class="mvContainer">
