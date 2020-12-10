@@ -19,9 +19,12 @@ import {css, customElement, html, internalProperty, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
-import {getInitSnippet, ModelViewerSnippetState, State} from '../../../types.js';
-import {getConfig, getModelViewerSnippet} from '../../config/reducer.js';
+import {State} from '../../../types.js';
+import {getCamera} from '../../camera_settings/reducer.js';
+import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
+import {getHotspots} from '../../hotspot_panel/reducer.js';
+import {getEdits} from '../../materials_panel/reducer.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 
 interface URLs {
@@ -48,9 +51,8 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() urls: URLs = {gltf: '', env: '', poster: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', poster: ''};
 
-  @internalProperty() snippet: ModelViewerSnippetState = getInitSnippet();
-  @internalProperty()
-  lastSnippetSent: ModelViewerSnippetState = getInitSnippet();
+  @internalProperty() snippet = {};
+  @internalProperty() lastSnippetSent = {};
 
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
   @internalProperty() isNewQRCode = true;
@@ -66,23 +68,30 @@ export class MobileView extends ConnectedLitElement {
       env: getConfig(state).environmentImage,
       poster: getConfig(state).poster
     };
-    this.snippet = getModelViewerSnippet(state);
+    this.snippet = {
+      config: getConfig(state),
+      camera: getCamera(state),
+      hotspots: getHotspots(state),
+      edits: getEdits(state),
+    };
   }
 
   get viewableSite(): string {
     return `${window.location.href}view/?id=${this.pipingServerId}`;
   }
 
-  get srcPipeUrl(): string {
-    return `https://ppng.io/modelviewereditor-srcs-${this.pipingServerId}`;
+  getSrcPipeUrl(srcType: string): string {
+    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${
+        this.pipingServerId}`;
   }
 
   get snippetPipeUrl(): string {
     return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
   }
 
-  urlsHaveChanged() {
-    return JSON.stringify(this.urls) !== JSON.stringify(this.lastUrlsSent);
+  // https://dev.to/kingdaro/indexing-objects-in-typescript-1cgi
+  hasKey<O>(obj1: O, obj2: O, key: keyof any): key is keyof O {
+    return key in obj1 && key in obj2;
   }
 
   snippetHasChanged() {
@@ -90,34 +99,64 @@ export class MobileView extends ConnectedLitElement {
         JSON.stringify(this.lastSnippetSent);
   }
 
+  async sendSrcBlob(url: string, srcType: string) {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch url: ${url}`);
+    }
+    const blob = await response.blob();
+
+    await fetch(this.getSrcPipeUrl(srcType), {
+      method: 'POST',
+      body: blob,
+    });
+
+    if (this.hasKey(this.lastUrlsSent, this.urls, srcType)) {
+      console.log('updated...', srcType);
+      this.lastUrlsSent[srcType] = this.urls[srcType];
+    }
+
+    console.log(`sent ${srcType}`);
+  }
+
+  isNewSource(src: string|undefined, lastSrc: string|undefined) {
+    return src !== undefined && src !== lastSrc;
+  }
+
   async postInfo() {
+    // Generate a new QR code and place it on the canvas provided.
     if (this.isNewQRCode) {
       new QRious({element: this.canvasQR, value: this.viewableSite});
       this.isNewQRCode = false
     }
 
-    // TODO: change such that we are sending the actual model, as opposed to the
-    // url, which is local...
-    if (this.urlsHaveChanged()) {
-      // sends model, env image, and poster image
-      await fetch(this.srcPipeUrl, {
-        method: 'POST',
-        body: JSON.stringify(this.urls),
-      });
+    console.log('urls and sent', this.urls, this.lastUrlsSent);
 
-      // update the urls last sent
-      this.lastUrlsSent = {...this.urls};
+    // Send new gltf
+    if (this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf)) {
+      await this.sendSrcBlob(this.urls.gltf!, 'gltf');
     }
 
+    // Send new snippet. Must always be sent after a model (if applicable) and
+    // before the environment image / poster because it will override those
+    // values on the other view.
     if (this.snippetHasChanged()) {
-      // sends <model-viewer> snippet via relevant redux state
       await fetch(this.snippetPipeUrl, {
         method: 'POST',
         body: JSON.stringify(this.snippet),
       });
-
-      // update snippet last sent
       this.lastSnippetSent = {...this.snippet};
+      console.log('snippet sent');
+    }
+
+    // Send new environment image
+    if (this.isNewSource(this.urls.env, this.lastUrlsSent.env)) {
+      await this.sendSrcBlob(this.urls.env!, 'env');
+    }
+
+    // Send new poster
+    if (this.isNewSource(this.urls.poster, this.lastUrlsSent.poster)) {
+      await this.sendSrcBlob(this.urls.poster!, 'poster');
     }
   }
 
@@ -139,7 +178,7 @@ export class MobileView extends ConnectedLitElement {
   renderMobileInfo() {
     return html`
     <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
-      <a href=${this.viewableSite} style="color: white;">
+      <a href=${this.viewableSite} style="color: white;" target="_blank">
         ${this.viewableSite}
       </a>
     </div>
@@ -149,6 +188,8 @@ export class MobileView extends ConnectedLitElement {
     `
   }
 
+  // TODO: Fix where the QR is positioned. Having it in the bottom right of
+  // screen makes it hard to get the camera to view it correctly.
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}

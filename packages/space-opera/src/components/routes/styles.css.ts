@@ -24,66 +24,22 @@ export const styles: CSSResult = css`
   height: 100vh;
 }
 
-.header {
-  align-items: center;
-  display: flex;
-  flex: 0 0 auto;
-  height: 48px;
-  justify-content: space-between;
-  padding: 0 12px;
-}
-
-/* Container for renderer (left) and tabs (right). */
-.editor-body-root {
-  display: flex;
-  flex: auto; /* Grows to fill space under header */
-  height: 0;
-}
-
 .mvContainer {
-  align-items: stretch;
   display: flex;
-  flex-direction: column;
   height: 100%;
   position: relative;
   width: 100%;
 }
 
-model-viewer-preview {
+model-viewer {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  display: flex;
   height: 100%;
-}
-
-me-tabs {
-  background-color: #202124;  /* GOOGLE_GREY_900 */
-  padding: 0;
-  width: 360px;
-  min-width: 360px;
-  max-width: 360px;
-}
-
-me-tabs a {
-  color: #dadcff; /* GOOGLE_GREY_300, but.. bluer */
-}
-
-me-tabbed-panel {
-  max-height: calc(100vh - 45px);
-  overflow-y: auto;
-  display: block;
-}
-.privacy {
-  color:#BDBDBD;
-  margin: 5px 16px;
-  position: absolute;
-  bottom: 0;
-  font-size: small;
-  z-index: 0;
-}
-@media only screen and (max-height: 600px) {
-  .privacy {
-    z-index: -1;
-  }
-}
-.privacy-link {
-  color: #BDBDBD;
+  width: 90%;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  width: 100%;
 }
 `;

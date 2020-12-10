@@ -16,57 +16,15 @@
  */
 
 import {customElement, html, LitElement} from 'lit-element';
-import {styles} from './styles.css.js';
 
 /**
  * The main model-viewer editor component for routing.
+ * REQUIRED FOR ROUTING.
  */
 @customElement('routes-editor')
 export class EditorMain extends LitElement {
-  static styles = styles;
-
   render() {
-    return html`
-  <model-editor>
-    <div class="app">
-      <div class="editor-body-root">
-        <div class="mvContainer">
-          <model-viewer-preview id="editing_adapter">
-          </model-viewer-preview>
-        </div>
-        <me-tabs>
-          <me-tabbed-panel icon="import_export">
-            <me-export-panel></me-export-panel>
-            <div class="privacy">
-              This &lt;model-viewer&gt; editor does not send any imported content to servers:
-              <a href="https://policies.google.com/privacy" class="privacy-link">
-                Privacy
-              </a>
-            </div>
-          </me-tabbed-panel>
-          <me-tabbed-panel icon="create">
-            <me-export-panel header="true"></me-export-panel>
-            <me-transformation-controls></me-transformation-controls>
-            <me-ibl-selector></me-ibl-selector>
-            <me-animation-controls></me-animation-controls>
-            <me-hotspot-panel></me-hotspot-panel>
-            <me-poster-controls></me-poster-controls>
-          </me-tabbed-panel>
-          <me-tabbed-panel icon="photo_camera">
-            <me-export-panel header="true"></me-export-panel>
-            <me-camera-settings></me-camera-settings>
-          </me-tabbed-panel>
-          <me-tabbed-panel icon="color_lens">
-            <me-materials-panel></me-materials-panel>
-          </me-tabbed-panel>
-          <me-tabbed-panel icon="search">
-            <me-inspector-panel></me-inspector-panel>
-          </me-tabbed-panel>
-        </me-tabs>
-      </div>
-    </div>
-  </model-editor>
-`;
+    return html``;
   }
 }
 
