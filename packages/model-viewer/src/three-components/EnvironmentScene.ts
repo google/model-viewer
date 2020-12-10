@@ -29,12 +29,12 @@ export default class EnvironmentScene extends Scene {
     const boxMaterial = new MeshStandardMaterial({metalness: 0});
 
     const mainLight = new PointLight(0xffffff, 500.0, 28, 2);
-    mainLight.position.set(0.418, 16.199, 0.300);
+    mainLight.position.set(0.5, 18.0, 0.5);
     this.add(mainLight);
 
     const room = new Mesh(geometry, roomMaterial);
-    room.position.set(-0.757, 13.219, 0.717);
-    room.scale.set(31.713, 28.305, 28.591);
+    room.position.set(0.0, 13.0, 0.0);
+    room.scale.set(30.0, 30.0, 30.0);
     this.add(room);
 
     const box1 = new Mesh(geometry, boxMaterial);
@@ -74,40 +74,34 @@ export default class EnvironmentScene extends Scene {
     this.add(box6);
 
 
-    // -x right
-    const light1 = new Mesh(geometry, this.createAreaLightMaterial(50));
-    light1.position.set(-16.116, 14.37, 8.208);
-    light1.scale.set(0.1, 2.428, 2.739);
+    // -x
+    const light1 = new Mesh(geometry, this.createAreaLightMaterial(9.2));
+    light1.position.set(-14.0, 10.0, 0.1);
+    light1.scale.set(0.1, 10.0, 5.0);
     this.add(light1);
 
-    // -x left
-    const light2 = new Mesh(geometry, this.createAreaLightMaterial(50));
-    light2.position.set(-16.109, 18.021, -8.207);
-    light2.scale.set(0.1, 2.425, 2.751);
-    this.add(light2);
-
     // +x
-    const light3 = new Mesh(geometry, this.createAreaLightMaterial(17));
-    light3.position.set(14.904, 12.198, -1.832);
-    light3.scale.set(0.15, 4.265, 6.331);
+    const light3 = new Mesh(geometry, this.createAreaLightMaterial(9.2));
+    light3.position.set(14.0, 10.0, 0.1);
+    light3.scale.set(0.1, 10.0, 5.0);
     this.add(light3);
 
     // +z
-    const light4 = new Mesh(geometry, this.createAreaLightMaterial(43));
-    light4.position.set(-0.462, 8.89, 14.520);
-    light4.scale.set(4.38, 5.441, 0.088);
+    const light4 = new Mesh(geometry, this.createAreaLightMaterial(9.2));
+    light4.position.set(0.0, 10.0, 14.0);
+    light4.scale.set(5.0, 10.0, 0.1);
     this.add(light4);
 
     // -z
-    const light5 = new Mesh(geometry, this.createAreaLightMaterial(20));
-    light5.position.set(3.235, 11.486, -12.541);
-    light5.scale.set(2.5, 2.0, 0.1);
+    const light5 = new Mesh(geometry, this.createAreaLightMaterial(9.2));
+    light5.position.set(0, 10.0, -14.0);
+    light5.scale.set(5.0, 10.0, 0.1);
     this.add(light5);
 
     // +y
-    const light6 = new Mesh(geometry, this.createAreaLightMaterial(100));
+    const light6 = new Mesh(geometry, this.createAreaLightMaterial(4));
     light6.position.set(0.0, 20.0, 0.0);
-    light6.scale.set(1.0, 0.1, 1.0);
+    light6.scale.set(3.0, 0.1, 3.0);
     this.add(light6);
   }
 
