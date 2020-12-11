@@ -168,11 +168,12 @@ model-viewer {
 export const openModalStyles: CSSResult = css`
 paper-dialog {
   background: var(--expandable-section-background);
+  top: 20%;
 }
 
 .FileModalContainer {
   height: auto;
-  width: 800px;
+  max-width: 800px;
   margin-top: 20px;
   margin-bottom: 20px;
 }

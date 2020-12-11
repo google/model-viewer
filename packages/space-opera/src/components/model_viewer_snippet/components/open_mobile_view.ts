@@ -19,6 +19,7 @@ import {css, customElement, html, internalProperty, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
+import {openModalStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {getConfig} from '../../config/reducer.js';
@@ -31,6 +32,59 @@ interface URLs {
   gltf: string|undefined;
   env: string|undefined;
   poster: string|undefined;
+}
+
+@customElement('mobile-modal')
+export class MobileModal extends ConnectedLitElement {
+  static styles = openModalStyles;
+
+  @internalProperty() isOpen: boolean = false;
+  @internalProperty() pipingServerId = 'bobcat';
+
+  @internalProperty() isNewQRCode = true;
+  @query('canvas#qr') canvasQR!: HTMLCanvasElement;
+
+  // @property({type: String}) tabName = '';
+
+  get viewableSite(): string {
+    return `${window.location.href}view/?id=${this.pipingServerId}`;
+  }
+
+  open() {
+    if (this.isNewQRCode) {
+      new QRious({element: this.canvasQR, value: this.viewableSite, size: 200});
+      this.isNewQRCode = false
+    }
+    this.isOpen = true;
+  }
+
+  close() {
+    this.isOpen = false;
+  }
+
+  render() {
+    return html`
+<paper-dialog id="file-modal" modal ?opened=${this.isOpen} class="dialog">
+  <div class="FileModalContainer">
+    <div class="FileModalHeader">
+      <div>Mobile View</div>
+    </div>
+    <div style="font-size: 14px; font-weight: 500; margin: 10px 0px; color: white; word-wrap: break-word; width: 100%;">
+      Use QR Code to load your current glb, environment image, poster and &ltmodel-viewer&gt state. For every change afterwards, click the "Refresh Mobile" button. 
+    </div>
+    <canvas id="qr" style="display: block; margin-bottom: 20px;"></canvas>
+    <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
+      <a href=${this.viewableSite} style="color: white;" target="_blank">
+        ${this.viewableSite}
+      </a>
+    </div>
+  </div>
+  <div class="FileModalCancel">
+    <mwc-button unelevated icon="cancel" 
+      @click=${this.close}>Close</mwc-button>
+  </div>
+</paper-dialog>`;
+  }
 }
 
 /**
@@ -54,8 +108,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() snippet = {};
   @internalProperty() lastSnippetSent = {};
 
-  @query('canvas#qr') canvasQR!: HTMLCanvasElement;
-  @internalProperty() isNewQRCode = true;
+  @query('mobile-modal') mobileModal!: MobileModal;
 
   stateChanged(state: State) {
     const gltfURL = getGltfUrl(state);
@@ -170,12 +223,6 @@ export class OpenMobileView extends ConnectedLitElement {
   /* Send any state, model, or image that has been updated since the last time
    * the information was sent. */
   async postInfo() {
-    // Generate a new QR code and place it on the canvas.
-    if (this.isNewQRCode) {
-      new QRious({element: this.canvasQR, value: this.viewableSite});
-      this.isNewQRCode = false
-    }
-
     const updatedContent = this.getUpdatedContent();
     await this.sendObject(updatedContent, this.updatesPipeUrl)
 
@@ -197,7 +244,12 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
+  openModal() {
+    this.mobileModal.open();
+  }
+
   onDeploy() {
+    this.mobileModal.open();
     this.isDeployed = true;
     this.postInfo();
   }
@@ -219,6 +271,9 @@ export class OpenMobileView extends ConnectedLitElement {
         ${this.viewableSite}
       </a>
     </div>
+    <mwc-button unelevated @click=${this.openModal}>
+      Open Modal
+    </mwc-button>
     <mwc-button unelevated icon="cached" @click=${this.postInfo}>
       Refresh Mobile
     </mwc-button>
@@ -229,12 +284,14 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // TODO: Fix where the QR is positioned. Having it in the bottom right of
   // screen makes it hard to get the camera to view it correctly.
+
   // TODO: Make into a modal...
+
+  // TODO: Add event listener.. for rejected fetches...
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <canvas id="qr" style="display: ${
-        this.isDeployed ? 'block' : 'none'}"></canvas>
+    <mobile-modal></mobile-modal>
     ${this.isDeployed ? this.renderMobileInfo() : html``}
   `;
   }
@@ -243,5 +300,6 @@ export class OpenMobileView extends ConnectedLitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'open-mobile-view': OpenMobileView;
+    'mobile-modal': MobileModal;
   }
 }
