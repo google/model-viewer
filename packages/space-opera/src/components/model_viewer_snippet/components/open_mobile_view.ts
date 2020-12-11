@@ -108,35 +108,9 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() lastSnippetSent = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
+  @internalProperty() haveReceivedResponse: boolean = false;
 
-  // TODO: figure out what event is called when these aren't sent correctly...
-  constructor() {
-    super();
-    this.addEventListener('error', this._handleRejection);
-    this.addEventListener('click', this._handleClick);
-    this.addEventListener('post', this._handlePost);
-    this.addEventListener('abort', this._handlePost);
-    this.addEventListener('load', this._handlePost);
-    this.addEventListener('loadend', this._handlePost);
-    this.addEventListener('loadstart', this._handlePost);
-    this.addEventListener('progress', this._handlePost);
-    this.addEventListener('timeout', this._handlePost);
-    this.addEventListener('readystatechange', this._handlePost);
-  }
-
-  // TODO: only update when there is a successful send off...
-  // TODO: Add event listener.. for rejected fetches...
-  _handleRejection(e: any) {
-    console.log('error', e);
-  }
-
-  _handleClick(e: any) {
-    console.log('click', e);
-  }
-
-  _handlePost(e: any) {
-    console.log('post', e);
-  }
+  // TODO: Keep consistency between viewing and open session...
 
   stateChanged(state: State) {
     const gltfURL = getGltfUrl(state);
@@ -172,6 +146,10 @@ export class OpenMobileView extends ConnectedLitElement {
 
   get updatesPipeUrl(): string {
     return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
+  }
+
+  get mobilePing(): string {
+    return `https://ppng.io/modelviewereditor-ping-${this.pipingServerId}`;
   }
 
   get envIsHdr(): boolean {
@@ -254,6 +232,9 @@ export class OpenMobileView extends ConnectedLitElement {
     const updatedContent = this.getUpdatedContent();
     await this.sendObject(updatedContent, this.updatesPipeUrl)
 
+    // TODO: Add security features to ensure the objects received are of the
+    // correct type.
+
     if (updatedContent.gltfChanged) {
       await this.sendSrcBlob(this.urls.gltf!, 'gltf');
     }
@@ -272,14 +253,33 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
+  async waitForPing() {
+    await fetch(this.mobilePing)
+        .then(response => response.json())
+        .then(responseJson => {
+          if (responseJson.isPing) {
+            this.haveReceivedResponse = true;
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
   openModal() {
     this.mobileModal.open();
   }
 
-  onDeploy() {
+  async onDeploy() {
     this.mobileModal.open();
     this.isDeployed = true;
-    this.postInfo();
+    await this.waitForPing();
+    if (this.haveReceivedResponse) {
+      this.postInfo();
+    } else {
+      // TODO: Add a toasty thing to tell user to open other window...
+      this.onDeploy();
+    }
   }
 
   renderDeployButton() {

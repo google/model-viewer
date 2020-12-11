@@ -27,8 +27,9 @@ import {dispatchSetCamera, getCamera} from '../camera_settings/reducer.js';
 import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, dispatchSetConfig, dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots} from '../hotspot_panel/reducer.js';
-import {dispatchSetEdits} from '../materials_panel/reducer.js';
-import {applyEdits, dispatchGltfAndEdits} from '../model_viewer_preview/gltf_edits.js';
+// import {dispatchSetEdits} from '../materials_panel/reducer.js';
+// import {applyEdits, dispatchGltfAndEdits} from
+// '../model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 
@@ -73,6 +74,10 @@ export class MobileView extends ConnectedLitElement {
     return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
   }
 
+  get mobilePing(): string {
+    return `https://ppng.io/modelviewereditor-ping-${this.pipingServerId}`;
+  }
+
   async waitForModel() {
     fetch(this.getSrcPipeUrl('gltf'))
         .then(response => response.blob())
@@ -90,11 +95,21 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async waitForState(envChanged: boolean, posterChanged: boolean) {
-    // TODO: handle 404s
-    const stateResponse = await fetch(this.snippetPipeUrl);
-    const partialState = await stateResponse.json();
-    reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
-    reduxStore.dispatch(dispatchSetCamera(partialState.camera));
+    let partialState: any = {};
+    await fetch(this.snippetPipeUrl)
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Something went wrong');
+          }
+        })
+        .then((responseJson) => {
+          partialState = responseJson;
+        })
+        .catch((error) => {
+          console.log('error', error);
+        });
 
     // If any of these have changed, expect them to be updated in a soon to be
     // executed fetch.
@@ -115,16 +130,20 @@ export class MobileView extends ConnectedLitElement {
       partialState.config.src = this.config.src;
     }
 
+    console.log('partial state:', partialState);
+
+    reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
+    reduxStore.dispatch(dispatchSetCamera(partialState.camera));
     reduxStore.dispatch(dispatchSetConfig(partialState.config));
 
     // TODO: Update model...
-    reduxStore.dispatch(dispatchSetEdits(partialState.edits));
-    const gltf = this.gltf;
-    dispatchGltfAndEdits(gltf, true);
-    const previousEdits = undefined;
-    if (gltf) {
-      await applyEdits(gltf, partialState.edits, previousEdits);
-    }
+    // reduxStore.dispatch(dispatchSetEdits(partialState.edits));
+    // const gltf = this.gltf;
+    // dispatchGltfAndEdits(gltf, true);
+    // const previousEdits = undefined;
+    // if (gltf) {
+    //   await applyEdits(gltf, partialState.edits, previousEdits);
+    // }
     console.log('dispatched and updated state');
   }
 
@@ -163,15 +182,7 @@ export class MobileView extends ConnectedLitElement {
         });
   }
 
-  async waitForUpdates() {
-    const response = await fetch(this.updatesPipeUrl);
-    if (!response.ok) {
-      // TODO: Throw up a popup that says this failed...
-      throw new Error(`Failed to fetch url: ${this.updatesPipeUrl}`);
-    }
-
-    const json = await response.json();
-
+  async waitForUpdates(json: any) {
     if (json.gltfChanged) {
       await this.waitForModel();
     }
@@ -184,8 +195,22 @@ export class MobileView extends ConnectedLitElement {
     if (json.posterChanged) {
       await this.waitForPoster();
     }
+    return true;
+  }
 
-    console.log('recall....');
+  async fetchLoop() {
+    await fetch(this.updatesPipeUrl)
+        .then(response => response.json())
+        .then(json => this.waitForUpdates(json))
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
+  async triggerFetchLoop() {
+    // keep checking for updates...
+    await this.fetchLoop();
+    this.triggerFetchLoop();
   }
 
   // TODO: Add child elements like hotspots as is done in render model viewer.
@@ -225,6 +250,30 @@ export class MobileView extends ConnectedLitElement {
         ></model-viewer>
       </div>
     </div>`;
+  }
+
+  async ping() {
+    await fetch(this.mobilePing, {
+      method: 'POST',
+      body: JSON.stringify({isPing: true}),
+    })
+        .then(response => {
+          console.log('Success:', response);
+        })
+        .catch((error) => {
+          // TODO: Throw up a popup that says this failed...
+          console.log('Error:', error);
+          throw new Error(`Failed to post: ${this.mobilePing}`);
+        });
+  }
+
+  /**
+   * (Overriding default) Tell editor session that it is ready for data.
+   */
+  // @ts-ignore
+  firstUpdated(changedProperties: any) {
+    this.ping();
+    this.triggerFetchLoop();
   }
 }
 
