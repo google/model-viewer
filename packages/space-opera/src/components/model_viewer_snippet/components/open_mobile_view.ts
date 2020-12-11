@@ -28,12 +28,6 @@ import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getEdits} from '../../materials_panel/reducer.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 
-interface URLs {
-  gltf: string|undefined;
-  env: string|undefined;
-  poster: string|undefined;
-}
-
 @customElement('mobile-modal')
 export class MobileModal extends ConnectedLitElement {
   static styles = openModalStyles;
@@ -43,8 +37,6 @@ export class MobileModal extends ConnectedLitElement {
 
   @internalProperty() isNewQRCode = true;
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
-
-  // @property({type: String}) tabName = '';
 
   get viewableSite(): string {
     return `${window.location.href}view/?id=${this.pipingServerId}`;
@@ -87,6 +79,12 @@ export class MobileModal extends ConnectedLitElement {
   }
 }
 
+interface URLs {
+  gltf: string|undefined;
+  env: string|undefined;
+  poster: string|undefined;
+}
+
 /**
  * Section for displaying QR Code and other info related to mobile
  */
@@ -100,6 +98,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() isDeployed = false;
   @internalProperty() isNotDeployable = true;
+  // TODO: Create unique id for each session...
   @internalProperty() pipingServerId = 'bobcat';
 
   @internalProperty() urls: URLs = {gltf: '', env: '', poster: ''};
@@ -109,6 +108,35 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() lastSnippetSent = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
+
+  // TODO: figure out what event is called when these aren't sent correctly...
+  constructor() {
+    super();
+    this.addEventListener('error', this._handleRejection);
+    this.addEventListener('click', this._handleClick);
+    this.addEventListener('post', this._handlePost);
+    this.addEventListener('abort', this._handlePost);
+    this.addEventListener('load', this._handlePost);
+    this.addEventListener('loadend', this._handlePost);
+    this.addEventListener('loadstart', this._handlePost);
+    this.addEventListener('progress', this._handlePost);
+    this.addEventListener('timeout', this._handlePost);
+    this.addEventListener('readystatechange', this._handlePost);
+  }
+
+  // TODO: only update when there is a successful send off...
+  // TODO: Add event listener.. for rejected fetches...
+  _handleRejection(e: any) {
+    console.log('error', e);
+  }
+
+  _handleClick(e: any) {
+    console.log('click', e);
+  }
+
+  _handlePost(e: any) {
+    console.log('post', e);
+  }
 
   stateChanged(state: State) {
     const gltfURL = getGltfUrl(state);
@@ -264,6 +292,7 @@ export class OpenMobileView extends ConnectedLitElement {
     </mwc-button>`
   }
 
+  // TODO: Clean up buttons...
   renderMobileInfo() {
     return html`
     <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
@@ -280,14 +309,6 @@ export class OpenMobileView extends ConnectedLitElement {
     `
   }
 
-  // TODO: only update when there is a successful send off...
-
-  // TODO: Fix where the QR is positioned. Having it in the bottom right of
-  // screen makes it hard to get the camera to view it correctly.
-
-  // TODO: Make into a modal...
-
-  // TODO: Add event listener.. for rejected fetches...
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
