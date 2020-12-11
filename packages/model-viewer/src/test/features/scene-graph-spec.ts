@@ -14,7 +14,6 @@
  */
 
 import {Mesh, MeshStandardMaterial} from 'three';
-import {IS_IE11} from '../../constants.js';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
@@ -71,9 +70,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       });
 
       test('exports the loaded model to GLB', async () => {
-        if (IS_IE11) {
-          return;  // TODO: flaky
-        }
         const exported = await element.exportScene({binary: true});
         expect(exported).to.be.not.undefined;
         expect(exported.size).to.be.greaterThan(500);
