@@ -208,7 +208,7 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async triggerFetchLoop() {
-    // keep checking for updates...
+    // keep checking for updates..
     await this.fetchLoop();
     this.triggerFetchLoop();
   }
