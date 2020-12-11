@@ -164,9 +164,6 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('when losing the GL context', () => {
-      // We're skipping this test for now, as losing the context that was
-      // created with transferControlToOffscreen() causes the Chrome tab to
-      // crash.
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
