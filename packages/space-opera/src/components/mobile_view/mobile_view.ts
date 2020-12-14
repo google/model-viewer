@@ -118,11 +118,11 @@ export class MobileView extends ConnectedLitElement {
     }
 
     // This will always be the most up to date src
-    if (this.config.src) {
-      partialState.config.src = this.config.src;
-    }
+    // todo reset this with gltfurl
+    partialState.config.src = this.gltfUrl;
 
     console.log('partial state:', partialState);
+    console.log('gltf url', this.gltfUrl);
 
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
@@ -195,6 +195,7 @@ export class MobileView extends ConnectedLitElement {
         <model-viewer
           src=${config.src || ''}
           ?ar=${ifDefined(!!this.arConfig.ar)}
+          ar-modes="webxr scene-viewer quick-look"
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
@@ -236,8 +237,6 @@ export class MobileView extends ConnectedLitElement {
   // (Overriding default) Tell editor session that it is ready for data.
   // @ts-ignore changedProperties unused
   firstUpdated(changedProperties: any) {
-    console.log(Date.now(), Math.random());
-    console.log(Date.now() + Math.random());
     this.ping();
     this.triggerFetchLoop();
   }
