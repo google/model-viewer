@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
+import {property} from 'lit-element';
+import {MeshStandardMaterial} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
-import {Image, Material, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Image, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
 
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
+const $variants = Symbol('variants');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -33,6 +38,8 @@ interface SceneExportOptions {
 
 export interface SceneGraphInterface {
   readonly model?: Model;
+  variantName: string|undefined;
+  readonly availableVariants: Array<string>;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
@@ -45,11 +52,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
   class SceneGraphModelViewerElement extends ModelViewerElement {
     protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+    protected[$variants]: Array<string> = [];
+
+    @property({type: String, attribute: 'variant-name'})
+    variantName: string|undefined = undefined;
 
     // Scene-graph API:
     /** @export */
     get model() {
       return this[$model];
+    }
+
+    get availableVariants() {
+      return this[$variants];
     }
 
     /**
@@ -64,8 +79,43 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
+    updated(changedProperties: Map<string, any>) {
+      super.updated(changedProperties);
+
+      if (changedProperties.has('variantName')) {
+        const variants = this[$variants];
+        const threeGLTF = this[$currentGLTF];
+        const {variantName} = this;
+        if (threeGLTF != null && variantName != null) {
+          const variantIndex = variants.findIndex((v) => v === variantName);
+          if (variantIndex < 0) {
+            return;
+          }
+
+          const onUpdate = () => {
+            this[$needsRender]();
+          };
+
+          const updatedMaterials = threeGLTF.correlatedSceneGraph.loadVariant(
+              variantIndex, onUpdate);
+          const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
+
+          for (const index of updatedMaterials) {
+            const material = gltf.materials![index];
+            this[$model]!.materials[index] = new Material(
+                onUpdate,
+                gltf,
+                material,
+                gltfElementMap.get(material) as Set<MeshStandardMaterial>);
+          }
+        }
+      }
+    }
+
     [$onModelLoad]() {
       super[$onModelLoad]();
+
+      this[$variants] = [];
 
       const {currentGLTF} = this[$scene].model;
 
@@ -77,6 +127,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$model] = new Model(correlatedSceneGraph, () => {
             this[$needsRender]();
           });
+        }
+
+        // KHR_materials_variants extension spec:
+        // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+
+        const {gltfExtensions} = currentGLTF.userData;
+        if (gltfExtensions != null) {
+          const extension = gltfExtensions['KHR_materials_variants'];
+
+          if (extension != null) {
+            this[$variants] =
+                (extension.variants as Variants).map(variant => variant.name);
+          }
         }
       }
 

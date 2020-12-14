@@ -75,6 +75,45 @@ button {
   
   <div class="examples-container">
     <div class="sample">
+      <div id="variants" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Swap Model Variants</h2>
+          </div>
+          <example-snippet stamp-to="variants" highlight-as="html">
+            <template>
+<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" alt="A 3D model of a chair">
+  <div id="controls">
+    <p>Variant: </p>
+    <select id="variant"></select>
+  </div>
+</model-viewer>
+<script>
+const modelViewerVariants = document.querySelector("model-viewer#chair");
+const select = document.querySelector('#variant');
+
+modelViewerVariants.addEventListener('load', () => {
+  const names = modelViewerVariants.availableVariants;
+  for (const name of names) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+});
+
+select.addEventListener('input', (event) => {
+  modelViewerVariants.variantName = event.target.value;
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="changeColor" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -141,7 +180,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
 <script>
 const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
-modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
+modelViewerParameters.addEventListener("load", (ev) => {
 
   let material = modelViewerParameters.model.materials[0];
 
@@ -203,7 +242,7 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
-modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
+modelViewerTexture.addEventListener("load", (ev) => {
 
   let material = modelViewerTexture.model.materials[0];
 
@@ -266,7 +305,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
-modelViewerTexture.addEventListener("scene-graph-ready", () => {
+modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 

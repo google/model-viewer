@@ -32,6 +32,14 @@ export type ExtensionDictionary = {
   [index: string]: unknown;
 };
 
+export type VariantMapping = {
+  material: number; variants: Array<number>;
+}
+
+export type VariantMappings = Array<VariantMapping>;
+
+export type Variants = Array<{name: string}>;
+
 export interface PerspectiveCameraIntrinsics {
   aspectRatio?: number;
   yfov: number;
