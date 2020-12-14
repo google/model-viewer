@@ -39,7 +39,8 @@ export class MobileModal extends ConnectedLitElement {
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
 
   get viewableSite(): string {
-    return `${window.location.href}view/?id=${this.pipingServerId}`;
+    const path = window.location.origin + window.location.pathname;
+    return `${path}view/?id=${this.pipingServerId}`;
   }
 
   open() {
@@ -82,7 +83,6 @@ export class MobileModal extends ConnectedLitElement {
 interface URLs {
   gltf: string|undefined;
   env: string|undefined;
-  poster: string|undefined;
 }
 
 /**
@@ -101,8 +101,8 @@ export class OpenMobileView extends ConnectedLitElement {
   // TODO: Create unique id for each session...
   @internalProperty() pipingServerId = 'bobcat';
 
-  @internalProperty() urls: URLs = {gltf: '', env: '', poster: ''};
-  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', poster: ''};
+  @internalProperty() urls: URLs = {gltf: '', env: ''};
+  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
 
   @internalProperty() snippet = {};
   @internalProperty() lastSnippetSent = {};
@@ -121,7 +121,6 @@ export class OpenMobileView extends ConnectedLitElement {
     this.urls = {
       gltf: gltfURL,
       env: getConfig(state).environmentImage,
-      poster: getConfig(state).poster
     };
     this.snippet = {
       config: getConfig(state),
@@ -204,8 +203,6 @@ export class OpenMobileView extends ConnectedLitElement {
     return {
       gltfChanged: this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf),
           stateChanged: this.stateHasChanged(),
-          posterChanged: this.isNewSource(
-              this.urls.poster, this.lastUrlsSent.poster),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
           envIsHdr: this.envIsHdr
     }
@@ -246,10 +243,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
     if (updatedContent.envChanged) {
       await this.sendSrcBlob(this.urls.env!, 'env');
-    }
-
-    if (updatedContent.posterChanged) {
-      await this.sendSrcBlob(this.urls.poster!, 'poster');
     }
   }
 
@@ -301,7 +294,7 @@ export class OpenMobileView extends ConnectedLitElement {
       </a>
     </div>
     <mwc-button unelevated @click=${this.openModal}>
-      Open Modal
+      View QR Code
     </mwc-button>
     <mwc-button unelevated icon="cached" @click=${this.postInfo}>
       Refresh Mobile
