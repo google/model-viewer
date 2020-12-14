@@ -25,12 +25,13 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
+import {dispatchAr, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
@@ -45,6 +46,7 @@ export class OpenModal extends ConnectedLitElement {
 
   @internalProperty() isOpen: boolean = false;
   @internalProperty() config: ModelViewerConfig = {};
+  @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() errors: string[] = [];
   @internalProperty() gltfUrl?: string;
@@ -54,9 +56,22 @@ export class OpenModal extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.config = getConfig(state);
+    this.arConfig = getArConfig(state);
     this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
+  }
+
+  // logic similar to parseSnippet inside of editing adapter.
+  parseSnippetAr(snippet: string): ArConfigState {
+    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
+    const modelViewer =
+        parsedInput.body.getElementsByTagName('model-viewer')[0];
+    const arConfig: ArConfigState = {};
+    arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
+    arConfig.arModes =
+        modelViewer.getAttribute('ar-modes')?.split(' ') || undefined;
+    return arConfig
   }
 
   async handleSubmitSnippet(value?: string) {
@@ -74,6 +89,7 @@ export class OpenModal extends ConnectedLitElement {
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
+      const arConfig = this.parseSnippetAr(inputText);
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
@@ -122,6 +138,8 @@ export class OpenModal extends ConnectedLitElement {
         // triggering a change event selecting none).
         dispatchConfig(config);
         reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
+        reduxStore.dispatch(dispatchAr(arConfig.ar!));
+
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
@@ -165,11 +183,11 @@ export class OpenModal extends ConnectedLitElement {
         editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
 
     const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, {}, undefined);
+        renderModelViewer(editedConfig, {}, undefined, this.arConfig);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
-  <div class="FileModalContainer">
+  <div class="FileModalContainer SnippetModal">
     <div class="FileModalHeader">
       <div>Edit Snippet</div>
     </div>

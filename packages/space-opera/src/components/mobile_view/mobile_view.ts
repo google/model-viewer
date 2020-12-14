@@ -20,7 +20,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {State} from '../../types.js';
+import {ArConfigState, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSetCamera, getCamera} from '../camera_settings/reducer.js';
 import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/reducer.js';
@@ -31,6 +31,7 @@ import {HotspotConfig} from '../hotspot_panel/types.js';
 // import {applyEdits} from '../model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
+import {dispatchAr, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
 
@@ -43,6 +44,7 @@ export class MobileView extends ConnectedLitElement {
 
   @internalProperty() gltfUrl: string|undefined;
   @internalProperty() config: ModelViewerConfig = {};
+  @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() gltf?: GltfModel;
@@ -50,6 +52,7 @@ export class MobileView extends ConnectedLitElement {
   stateChanged(state: State) {
     this.gltfUrl = getGltfUrl(state);
     this.config = getConfig(state);
+    this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.camera = getCamera(state);
     this.gltf = getGltfModel(state);
@@ -124,6 +127,7 @@ export class MobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
     reduxStore.dispatch(dispatchSetConfig(partialState.config));
+    reduxStore.dispatch(dispatchAr(partialState.arConfig.ar));
 
     // TODO: Update model...
     // reduxStore.dispatch(dispatchSetEdits(partialState.edits));
@@ -190,6 +194,7 @@ export class MobileView extends ConnectedLitElement {
       <div class="mvContainer">
         <model-viewer
           src=${config.src || ''}
+          ?ar=${ifDefined(!!this.arConfig.ar)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}

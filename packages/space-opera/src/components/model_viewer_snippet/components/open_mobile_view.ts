@@ -19,14 +19,17 @@ import {css, customElement, html, internalProperty, property, query} from 'lit-e
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {State} from '../../../types.js';
+import {ArConfigState, State} from '../../../types.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getEdits} from '../../materials_panel/reducer.js';
+import {dispatchAr, getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {CheckboxElement} from '../../shared/checkbox/checkbox.js';
 
 @customElement('mobile-modal')
 export class MobileModal extends ConnectedLitElement {
@@ -62,7 +65,7 @@ export class MobileModal extends ConnectedLitElement {
       <div>Mobile View</div>
     </div>
     <div style="font-size: 14px; font-weight: 500; margin: 10px 0px; color: white; word-wrap: break-word; width: 100%;">
-      Use QR Code to load your current glb, environment image, poster and &ltmodel-viewer&gt state. For every change afterwards, click the "Refresh Mobile" button. 
+      Use QR Code to load your current glb, environment image, and &ltmodel-viewer&gt state. After every subsequent change, click the "Refresh Mobile" button. 
     </div>
     <canvas id="qr" style="display: block; margin-bottom: 20px;"></canvas>
     <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
@@ -107,12 +110,15 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
+  @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
+  @internalProperty() arConfig?: ArConfigState;
 
   getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
   }
 
   stateChanged(state: State) {
+    this.arConfig = getArConfig(state);
     const gltfURL = getGltfUrl(state);
     if (gltfURL !== undefined) {
       this.isNotDeployable = false;
@@ -124,6 +130,7 @@ export class OpenMobileView extends ConnectedLitElement {
     };
     this.snippet = {
       config: getConfig(state),
+      arConfig: this.arConfig,
       camera: getCamera(state),
       hotspots: getHotspots(state),
       edits: getEdits(state),
@@ -263,7 +270,12 @@ export class OpenMobileView extends ConnectedLitElement {
     this.mobileModal.open();
   }
 
+  // Gets recalled every time the page hasn't received a ping, so will
+  // reopen the modal.
   async onDeploy() {
+    // if they are deploying mobile set ar to anticipated defaults
+    reduxStore.dispatch(dispatchAr(true));
+
     this.mobileModal.open();
     this.isDeployed = true;
     await this.waitForPing();
@@ -285,20 +297,31 @@ export class OpenMobileView extends ConnectedLitElement {
     </mwc-button>`
   }
 
-  // TODO: Clean up buttons...
+
+  onEnableARChange() {
+    reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
+  }
+
+  // TODO: Dynamically color the refresh button when out of date...
   renderMobileInfo() {
     return html`
-    <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
-      <a href=${this.viewableSite} style="color: white;" target="_blank">
-        ${this.viewableSite}
-      </a>
+    <div>
+      <mwc-button unelevated @click=${this.openModal}>
+        View QR Code
+      </mwc-button>
+      <mwc-button unelevated icon="cached" @click=${this.postInfo}>
+        Refresh Mobile
+      </mwc-button>
     </div>
-    <mwc-button unelevated @click=${this.openModal}>
-      View QR Code
-    </mwc-button>
-    <mwc-button unelevated icon="cached" @click=${this.postInfo}>
-      Refresh Mobile
-    </mwc-button>
+
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Snippet Settings:</div>
+    <me-checkbox 
+      id="ar" 
+      label="Enable AR"
+      ?checked="${!!this.arConfig!.ar}"
+      @change=${this.onEnableARChange}
+      >
+    </me-checkbox>
     `
   }
 

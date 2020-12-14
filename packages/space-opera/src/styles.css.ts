@@ -171,6 +171,10 @@ paper-dialog {
   top: 20%;
 }
 
+.SnippetModal {
+  min-width: 800px;
+}
+
 .FileModalContainer {
   height: auto;
   max-width: 800px;
