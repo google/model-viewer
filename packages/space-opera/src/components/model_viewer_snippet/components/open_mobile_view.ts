@@ -15,7 +15,7 @@
  *
  */
 
-import {css, customElement, html, internalProperty, query} from 'lit-element';
+import {css, customElement, html, internalProperty, property, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -32,9 +32,8 @@ import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 export class MobileModal extends ConnectedLitElement {
   static styles = openModalStyles;
 
+  @property({type: Number}) pipingServerId = 0;
   @internalProperty() isOpen: boolean = false;
-  @internalProperty() pipingServerId = 'bobcat';
-
   @internalProperty() isNewQRCode = true;
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
 
@@ -98,8 +97,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() isDeployed = false;
   @internalProperty() isNotDeployable = true;
-  // TODO: Create unique id for each session...
-  @internalProperty() pipingServerId = 'bobcat';
+  @internalProperty() pipingServerId = this.getRandomInt(1e+20);
 
   @internalProperty() urls: URLs = {gltf: '', env: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
@@ -110,7 +108,9 @@ export class OpenMobileView extends ConnectedLitElement {
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
 
-  // TODO: Keep consistency between viewing and open session...
+  getRandomInt(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
 
   stateChanged(state: State) {
     const gltfURL = getGltfUrl(state);
@@ -305,7 +305,7 @@ export class OpenMobileView extends ConnectedLitElement {
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <mobile-modal></mobile-modal>
+    <mobile-modal .pipingServerId=${this.pipingServerId}></mobile-modal>
     ${this.isDeployed ? this.renderMobileInfo() : html``}
   `;
   }

@@ -56,7 +56,6 @@ export class MobileView extends ConnectedLitElement {
   }
 
   get pipingServerId(): any {
-    // TODO: catch errors
     return window.location.search.replace('?id=', '');
   };
 
@@ -232,6 +231,8 @@ export class MobileView extends ConnectedLitElement {
   // (Overriding default) Tell editor session that it is ready for data.
   // @ts-ignore changedProperties unused
   firstUpdated(changedProperties: any) {
+    console.log(Date.now(), Math.random());
+    console.log(Date.now() + Math.random());
     this.ping();
     this.triggerFetchLoop();
   }
