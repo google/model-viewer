@@ -29,12 +29,12 @@ export default class EnvironmentScene extends Scene {
     const boxMaterial = new MeshStandardMaterial({metalness: 0});
 
     const mainLight = new PointLight(0xffffff, 500.0, 28, 2);
-    mainLight.position.set(0.5, 18.0, 0.5);
+    mainLight.position.set(0.5, 16.5, 0.5);
     this.add(mainLight);
 
     const room = new Mesh(geometry, roomMaterial);
-    room.position.set(0.0, 13.0, 0.0);
-    room.scale.set(30.0, 30.0, 30.0);
+    room.position.set(0.0, 13.2, 0.0);
+    room.scale.set(31.5, 28.5, 31.5);
     this.add(room);
 
     const box1 = new Mesh(geometry, boxMaterial);
