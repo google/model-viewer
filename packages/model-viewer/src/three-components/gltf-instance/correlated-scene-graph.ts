@@ -244,31 +244,31 @@ export class CorrelatedSceneGraph {
       }
 
       let materialIndex = -1;
-
       for (const mapping of (meshVariantData.mappings as VariantMappings)) {
         if (mapping.variants.indexOf(variantIndex) >= 0) {
           materialIndex = mapping.material;
           break;
         }
       }
-
-      if (materialIndex >= 0) {
-        const material = await this.threeGLTF.parser.getDependency(
-            'material', materialIndex);
-        updatedMaterials.add(materialIndex);
-        (object as Mesh).material = material;
-        onUpdate();
-
-        const gltfElement = this.gltf.materials![materialIndex];
-        let threeObjects = this.gltfElementMap.get(gltfElement);
-
-        if (threeObjects == null) {
-          threeObjects = new Set();
-          this.gltfElementMap.set(gltfElement, threeObjects);
-        }
-
-        threeObjects.add(material);
+      if (materialIndex < 0) {
+        return;
       }
+
+      const material =
+          await this.threeGLTF.parser.getDependency('material', materialIndex);
+      updatedMaterials.add(materialIndex);
+      (object as Mesh).material = material;
+      onUpdate();
+
+      const gltfElement = this.gltf.materials![materialIndex];
+      let threeObjects = this.gltfElementMap.get(gltfElement);
+
+      if (threeObjects == null) {
+        threeObjects = new Set();
+        this.gltfElementMap.set(gltfElement, threeObjects);
+      }
+
+      threeObjects.add(material);
     });
 
     return updatedMaterials;
