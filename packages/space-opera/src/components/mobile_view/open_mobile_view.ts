@@ -16,74 +16,24 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
-import {customElement, html, internalProperty, property, query} from 'lit-element';
+import {customElement, html, internalProperty, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
-import {reduxStore} from '../../../space_opera_base.js';
-import {openMobileViewStyles, openModalStyles} from '../../../styles.css.js';
-import {ArConfigState, State} from '../../../types.js';
-import {getCamera} from '../../camera_settings/reducer.js';
-import {getConfig} from '../../config/reducer.js';
-import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
-import {getHotspots} from '../../hotspot_panel/reducer.js';
-import {getEdits} from '../../materials_panel/reducer.js';
-import {dispatchAr, dispatchArModes, getArConfig} from '../../mobile_view/reducer.js';
-import {getGltfModel, getGltfUrl} from '../../model_viewer_preview/reducer.js';
-import {CheckboxElement} from '../../shared/checkbox/checkbox.js';
-import {Dropdown} from '../../shared/dropdown/dropdown.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {openMobileViewStyles} from '../../styles.css.js';
+import {ArConfigState, State} from '../../types.js';
+import {getCamera} from '../camera_settings/reducer.js';
+import {getConfig} from '../config/reducer.js';
+import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getHotspots} from '../hotspot_panel/reducer.js';
+import {getEdits} from '../materials_panel/reducer.js';
+import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {CheckboxElement} from '../shared/checkbox/checkbox.js';
+import {Dropdown} from '../shared/dropdown/dropdown.js';
+import {MobileModal} from './components/mobile_modal.js';
 
-@customElement('mobile-modal')
-export class MobileModal extends ConnectedLitElement {
-  static styles = openModalStyles;
-
-  @property({type: Number}) pipeId = 0;
-  @internalProperty() isOpen: boolean = false;
-  @internalProperty() isNewQRCode = true;
-  @query('canvas#qr') canvasQR!: HTMLCanvasElement;
-
-  get viewableSite(): string {
-    const path = window.location.origin + window.location.pathname;
-    // use https...
-    return `${path}view/?id=${this.pipeId}`;
-  }
-
-  open() {
-    if (this.isNewQRCode) {
-      new QRious({element: this.canvasQR, value: this.viewableSite, size: 200});
-      this.isNewQRCode = false
-    }
-    this.isOpen = true;
-  }
-
-  close() {
-    this.isOpen = false;
-  }
-
-  render() {
-    return html`
-<paper-dialog id="file-modal" modal ?opened=${this.isOpen} class="dialog">
-  <div class="FileModalContainer">
-    <div class="FileModalHeader">
-      <div>Mobile View</div>
-    </div>
-    <div style="font-size: 14px; font-weight: 500; margin: 10px 0px; color: white; word-wrap: break-word; width: 100%;">
-      Use QR Code to load your current glb, environment image, and &ltmodel-viewer&gt state. After every subsequent change, click the "Refresh Mobile" button. 
-    </div>
-    <canvas id="qr" style="display: block; margin-bottom: 20px;"></canvas>
-    <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
-      <a href=${this.viewableSite} style="color: white;" target="_blank">
-        ${this.viewableSite}
-      </a>
-    </div>
-  </div>
-  <div class="FileModalCancel">
-    <mwc-button unelevated icon="cancel" 
-      @click=${this.close}>Close</mwc-button>
-  </div>
-</paper-dialog>`;
-  }
-}
+import {dispatchAr, dispatchArModes, getArConfig} from './reducer.js';
 
 interface URLs {
   gltf: string|undefined;
@@ -396,6 +346,5 @@ export class OpenMobileView extends ConnectedLitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'open-mobile-view': OpenMobileView;
-    'mobile-modal': MobileModal;
   }
 }
