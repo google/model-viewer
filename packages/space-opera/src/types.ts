@@ -48,7 +48,7 @@ interface GltfEditsState {
 
 export interface ArConfigState {
   ar?: boolean;
-  arModes?: string[]
+  arModes?: string;
 }
 
 export interface ModelViewerSnippetState {

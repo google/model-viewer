@@ -16,7 +16,8 @@
  */
 
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {customElement, html, internalProperty} from 'lit-element';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {customElement, html, internalProperty, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -31,7 +32,7 @@ import {HotspotConfig} from '../hotspot_panel/types.js';
 // import {applyEdits} from '../model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {dispatchAr, getArConfig} from './reducer.js';
+import {dispatchArConfig, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
 
@@ -42,6 +43,7 @@ import {styles} from './styles.css.js';
 export class MobileView extends ConnectedLitElement {
   static styles = styles;
 
+  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() gltfUrl: string|undefined;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -119,7 +121,7 @@ export class MobileView extends ConnectedLitElement {
 
     // This will always be the most up to date src
     // todo reset this with gltfurl
-    partialState.config.src = this.gltfUrl;
+    partialState.config.src = this.gltfUrl;  // this may not be updated yet...
 
     console.log('partial state:', partialState);
     console.log('gltf url', this.gltfUrl);
@@ -127,14 +129,7 @@ export class MobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
     reduxStore.dispatch(dispatchSetConfig(partialState.config));
-    reduxStore.dispatch(dispatchAr(partialState.arConfig.ar));
-
-    // TODO: Update model...
-    // reduxStore.dispatch(dispatchSetEdits(partialState.edits));
-    // const previousEdits = undefined;
-    // if (this.gltf) {
-    //   await applyEdits(this.gltf, partialState.edits, previousEdits);
-    // }
+    reduxStore.dispatch(dispatchArConfig(partialState.arConfig));
   }
 
   async waitForEnv(envIsHdr: boolean) {
@@ -154,15 +149,12 @@ export class MobileView extends ConnectedLitElement {
   async waitForUpdates(json: any) {
     if (json.gltfChanged) {
       await this.waitForModel();
-      console.log('model updated');
     }
     if (json.stateChanged) {
       await this.waitForState(json.envChanged);
-      console.log('state updated');
     }
     if (json.envChanged) {
       await this.waitForEnv(json.envIsHdr);
-      console.log('env updated');
     }
   }
 
@@ -195,7 +187,7 @@ export class MobileView extends ConnectedLitElement {
         <model-viewer
           src=${config.src || ''}
           ?ar=${ifDefined(!!this.arConfig.ar)}
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes=${ifDefined(this.arConfig!.arModes)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}

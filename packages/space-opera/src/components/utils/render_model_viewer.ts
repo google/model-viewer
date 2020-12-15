@@ -45,6 +45,7 @@ export function renderModelViewer(
   return html`<model-viewer
         src=${config.src || ''}
         ?ar=${ifDefined(!!arConfig!.ar)}
+        ar-modes=${ifDefined(arConfig!.arModes)}
         ?autoplay=${!!config.autoplay}
         ?auto-rotate=${!!config.autoRotate}
         ?camera-controls=${!!config.cameraControls}

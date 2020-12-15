@@ -69,8 +69,7 @@ export class OpenModal extends ConnectedLitElement {
         parsedInput.body.getElementsByTagName('model-viewer')[0];
     const arConfig: ArConfigState = {};
     arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
-    arConfig.arModes =
-        modelViewer.getAttribute('ar-modes')?.split(' ') || undefined;
+    arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
     return arConfig
   }
 

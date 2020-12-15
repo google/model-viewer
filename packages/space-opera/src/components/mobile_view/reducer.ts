@@ -22,18 +22,28 @@ export function dispatchAr(isAr: boolean) {
   return {type: SET_AR, payload: isAr};
 }
 
+const SET_AR_MODES = 'SET_AR_MODES';
+export function dispatchArModes(arModes: string) {
+  return {type: SET_AR_MODES, payload: arModes};
+}
+
+const SET_AR_CONFIG = 'SET_AR_CONFIG';
+export function dispatchArConfig(arConfig: ArConfigState) {
+  return {type: SET_AR_CONFIG, payload: arConfig};
+}
+
 export const getArConfig = (state: State) =>
     state.entities.modelViewerSnippet.arConfig;
 
 export function arReducer(
-    state: ArConfigState = {
-      ar: false,
-      arModes: []
-    },
-    action: Action): ArConfigState {
+    state: ArConfigState = {}, action: Action): ArConfigState {
   switch (action.type) {
+    case SET_AR_CONFIG:
+      return action.payload;
     case SET_AR:
       return {...state, ar: action.payload};
+    case SET_AR_MODES:
+      return {...state, arModes: action.payload};
     default:
       return state;
   }

@@ -27,9 +27,10 @@ import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getEdits} from '../../materials_panel/reducer.js';
-import {dispatchAr, getArConfig} from '../../mobile_view/reducer.js';
+import {dispatchAr, dispatchArModes, getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../../shared/checkbox/checkbox.js';
+import {Dropdown} from '../../shared/dropdown/dropdown.js';
 
 @customElement('mobile-modal')
 export class MobileModal extends ConnectedLitElement {
@@ -102,6 +103,8 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() isNotDeployable = true;
   @internalProperty() pipingServerId = this.getRandomInt(1e+20);
 
+  @internalProperty() hasChanged = false;
+
   @internalProperty() urls: URLs = {gltf: '', env: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
 
@@ -110,11 +113,20 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
+
   @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
   @internalProperty() arConfig?: ArConfigState;
+  @internalProperty() selectedArMode: number = 0;
 
   getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  getHasChanged(): boolean {
+    return (
+        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+        this.stateHasChanged() ||
+        this.isNewSource(this.urls.env, this.lastUrlsSent.env));
   }
 
   stateChanged(state: State) {
@@ -135,6 +147,8 @@ export class OpenMobileView extends ConnectedLitElement {
       hotspots: getHotspots(state),
       edits: getEdits(state),
     };
+
+    this.hasChanged = this.getHasChanged();
   }
 
   get viewableSite(): string {
@@ -275,6 +289,7 @@ export class OpenMobileView extends ConnectedLitElement {
   async onDeploy() {
     // if they are deploying mobile set ar to anticipated defaults
     reduxStore.dispatch(dispatchAr(true));
+    reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
 
     this.mobileModal.open();
     this.isDeployed = true;
@@ -302,19 +317,49 @@ export class OpenMobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
   }
 
-  // TODO: Dynamically color the refresh button when out of date...
+  onSelectArMode(event: CustomEvent) {
+    const dropdown = event.target as Dropdown;
+    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
+    if (key === 'default' || key === 'webxr') {
+      reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
+    } else if (key === 'scene-viewer') {
+      reduxStore.dispatch(dispatchArModes('scene-viewer webxr quick-look'));
+    } else if (key === 'quick-look') {
+      reduxStore.dispatch(dispatchArModes('quick-look webxr scene-viewer'));
+    }
+  }
+
   renderMobileInfo() {
+    const outOfSync = this.hasChanged ? '#DC143C' : '#4285F4';
     return html`
     <div>
-      <mwc-button unelevated @click=${this.openModal}>
+      <mwc-button unelevated @click=${
+        this.openModal} style="margin-bottom: 10px;">
         View QR Code
       </mwc-button>
-      <mwc-button unelevated icon="cached" @click=${this.postInfo}>
+      <mwc-button unelevated icon="cached" @click=${this.postInfo} 
+        style="--mdc-theme-primary:${outOfSync}">
         Refresh Mobile
       </mwc-button>
+      ${
+        this.hasChanged ? html`
+        <div style="color:#DC143C;">
+          Your mobile view is out of sync with the editor.
+        </div>` :
+                          html``}
     </div>
 
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Snippet Settings:</div>
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Settings:</div>
+    <me-dropdown
+        .selectedIndex=${this.selectedArMode}
+        slot="content" style="width: 71%;"
+        @select=${this.onSelectArMode}
+      >
+      <paper-item value='default'>Default AR Mode</paper-item>
+      <paper-item value='webxr'>WebXR</paper-item>
+      <paper-item value='scene-viewer'>Scene Viewer</paper-item>
+      <paper-item value='quick-look'>Quick Look</paper-item>
+    </me-dropdown>
     <me-checkbox 
       id="ar" 
       label="Enable AR"
