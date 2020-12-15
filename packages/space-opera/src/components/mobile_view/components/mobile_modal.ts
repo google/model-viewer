@@ -22,6 +22,9 @@ import QRious from 'qrious';
 import {openModalStyles} from '../../../styles.css.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 
+/**
+ * Modal for displaying the QR Code & link
+ */
 @customElement('mobile-modal')
 export class MobileModal extends ConnectedLitElement {
   static styles = openModalStyles;

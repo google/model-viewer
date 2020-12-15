@@ -41,7 +41,6 @@ export class MobileView extends ConnectedLitElement {
   static styles = styles;
 
   @internalProperty() gltfUrl: string|undefined;
-  @internalProperty() localModelUrl: string|undefined;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -73,7 +72,6 @@ export class MobileView extends ConnectedLitElement {
         .then(response => response.blob())
         .then(blob => {
           const modelUrl = URL.createObjectURL(blob);
-          this.localModelUrl = modelUrl;
           reduxStore.dispatch(dispatchGltfUrl(modelUrl));
           reduxStore.dispatch(dispatchSetHotspots([]));
         })
