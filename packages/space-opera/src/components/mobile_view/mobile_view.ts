@@ -16,8 +16,7 @@
  */
 
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {customElement, html, internalProperty} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -28,8 +27,6 @@ import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-// import {dispatchSetEdits} from '../materials_panel/reducer.js';
-// import {applyEdits} from '../model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {dispatchArConfig, getArConfig} from './reducer.js';
@@ -37,19 +34,25 @@ import {dispatchArConfig, getArConfig} from './reducer.js';
 import {styles} from './styles.css.js';
 
 /**
- * The main model-viewer editor component for routing.
+ * The view loaded at /editor/view/?id=xyz
  */
 @customElement('mobile-view')
 export class MobileView extends ConnectedLitElement {
   static styles = styles;
 
-  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() gltfUrl: string|undefined;
+  @internalProperty() localModelUrl: string|undefined;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() gltf?: GltfModel;
+
+  @internalProperty() pipeId = window.location.search.replace('?id=', '');
+  @internalProperty() base = 'https://ppng.io/modelviewereditor';
+  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
+  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
 
   stateChanged(state: State) {
     this.gltfUrl = getGltfUrl(state);
@@ -60,32 +63,17 @@ export class MobileView extends ConnectedLitElement {
     this.gltf = getGltfModel(state);
   }
 
-  get pipingServerId(): any {
-    return window.location.search.replace('?id=', '');
-  };
-
   getSrcPipeUrl(srcType: string): string {
-    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${
-        this.pipingServerId}`;
+    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${this.pipeId}`;
   }
 
-  get snippetPipeUrl(): string {
-    return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
-  }
-
-  get updatesPipeUrl(): string {
-    return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
-  }
-
-  get mobilePing(): string {
-    return `https://ppng.io/modelviewereditor-ping-${this.pipingServerId}`;
-  }
-
+  // TODO: https://javascript.info/fetch-progress
   async waitForModel() {
     await fetch(this.getSrcPipeUrl('gltf'))
         .then(response => response.blob())
         .then(blob => {
           const modelUrl = URL.createObjectURL(blob);
+          this.localModelUrl = modelUrl;
           reduxStore.dispatch(dispatchGltfUrl(modelUrl));
           reduxStore.dispatch(dispatchSetHotspots([]));
         })
@@ -111,20 +99,13 @@ export class MobileView extends ConnectedLitElement {
           console.log('error', error);
         });
 
-    // If any of these have changed, expect them to be updated in a soon to be
-    // executed fetch.
+    // These links would be corresponding to the original editor's link.
     if (envChanged) {
       partialState.config.environmentImage = undefined;
     } else if (this.config.environmentImage) {
       partialState.config.environmentImage = this.config.environmentImage;
     }
-
-    // This will always be the most up to date src
-    // todo reset this with gltfurl
-    partialState.config.src = this.gltfUrl;  // this may not be updated yet...
-
-    console.log('partial state:', partialState);
-    console.log('gltf url', this.gltfUrl);
+    partialState.config.src = this.gltfUrl;
 
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
@@ -146,7 +127,7 @@ export class MobileView extends ConnectedLitElement {
         });
   }
 
-  async waitForUpdates(json: any) {
+  async waitForData(json: any) {
     if (json.gltfChanged) {
       await this.waitForModel();
     }
@@ -161,19 +142,16 @@ export class MobileView extends ConnectedLitElement {
   async fetchLoop() {
     await fetch(this.updatesPipeUrl)
         .then(response => response.json())
-        .then(json => this.waitForUpdates(json))
+        .then(json => this.waitForData(json))
         .catch((error) => {
           console.error('Error:', error);
         });
   }
 
   async triggerFetchLoop() {
-    // keep checking for updates..
     await this.fetchLoop();
     await this.triggerFetchLoop();
   }
-
-  // TODO: Add loading circle...
 
   render() {
     const config = {...this.config};
@@ -185,7 +163,7 @@ export class MobileView extends ConnectedLitElement {
     <div class="app">
       <div class="mvContainer">
         <model-viewer
-          src=${config.src || ''}
+          src=${this.gltfUrl || ''}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
           ?autoplay=${!!config.autoplay}
@@ -212,7 +190,7 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async ping() {
-    await fetch(this.mobilePing, {
+    await fetch(this.mobilePingUrl, {
       method: 'POST',
       body: JSON.stringify({isPing: true}),
     })
@@ -220,14 +198,13 @@ export class MobileView extends ConnectedLitElement {
           console.log('Success:', response);
         })
         .catch((error) => {
-          // TODO: Throw up a popup that says this failed...
           console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.mobilePing}`);
+          throw new Error(`Failed to post: ${this.mobilePingUrl}`);
         });
   }
 
   // (Overriding default) Tell editor session that it is ready for data.
-  // @ts-ignore changedProperties unused
+  // @ts-ignore changedProperties is unused
   firstUpdated(changedProperties: any) {
     this.ping();
     this.triggerFetchLoop();

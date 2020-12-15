@@ -16,12 +16,12 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
-import {css, customElement, html, internalProperty, property, query} from 'lit-element';
+import {customElement, html, internalProperty, property, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
 import {reduxStore} from '../../../space_opera_base.js';
-import {openModalStyles} from '../../../styles.css.js';
+import {openMobileViewStyles, openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, State} from '../../../types.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {getConfig} from '../../config/reducer.js';
@@ -37,14 +37,15 @@ import {Dropdown} from '../../shared/dropdown/dropdown.js';
 export class MobileModal extends ConnectedLitElement {
   static styles = openModalStyles;
 
-  @property({type: Number}) pipingServerId = 0;
+  @property({type: Number}) pipeId = 0;
   @internalProperty() isOpen: boolean = false;
   @internalProperty() isNewQRCode = true;
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
 
   get viewableSite(): string {
     const path = window.location.origin + window.location.pathname;
-    return `${path}view/?id=${this.pipingServerId}`;
+    // use https...
+    return `${path}view/?id=${this.pipeId}`;
   }
 
   open() {
@@ -94,17 +95,14 @@ interface URLs {
  */
 @customElement('open-mobile-view')
 export class OpenMobileView extends ConnectedLitElement {
-  static get styles() {
-    return css`
-        :host {--mdc-button-disabled-fill-color: rgba(255,255,255,.88)}
-        `;
-  }
+  static styles = openMobileViewStyles;
 
   @internalProperty() isDeployed = false;
-  @internalProperty() isNotDeployable = true;
-  @internalProperty() pipingServerId = this.getRandomInt(1e+20);
+  @internalProperty() isDeployable = false;
+  @internalProperty() isSendingData = false;
+  @internalProperty() pipeId = this.getRandomInt(1e+20);
 
-  @internalProperty() hasChanged = false;
+  @internalProperty() contentHasChanged = false;
 
   @internalProperty() urls: URLs = {gltf: '', env: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
@@ -120,29 +118,24 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() arConfig?: ArConfigState;
   @internalProperty() selectedArMode: number = 0;
 
-  getRandomInt(max: number): number {
-    return Math.floor(Math.random() * Math.floor(max));
-  }
-
-  getHasChanged(): boolean {
-    return (
-        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
-        this.stateHasChanged() ||
-        this.isNewSource(this.urls.env, this.lastUrlsSent.env));
-  }
+  @internalProperty() base = 'https://ppng.io/modelviewereditor';
+  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
+  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
     this.gltfModel = getGltfModel(state);
     const gltfURL = getGltfUrl(state);
     if (gltfURL !== undefined) {
-      this.isNotDeployable = false;
+      this.isDeployable = true;
     }
 
     this.urls = {
       gltf: gltfURL,
       env: getConfig(state).environmentImage,
     };
+
     this.snippet = {
       config: getConfig(state),
       arConfig: this.arConfig,
@@ -151,31 +144,26 @@ export class OpenMobileView extends ConnectedLitElement {
       edits: getEdits(state),
     };
 
-    this.hasChanged = this.getHasChanged();
+    this.contentHasChanged = this.getHasChanged();
   }
 
-  get viewableSite(): string {
-    return `${window.location.href}view/?id=${this.pipingServerId}`;
+  getRandomInt(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  // Returns true if any information sent to the mobile view has changed.
+  getHasChanged(): boolean {
+    return (
+        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+        this.stateHasChanged() ||
+        this.isNewSource(this.urls.env, this.lastUrlsSent.env));
   }
 
   getSrcPipeUrl(srcType: string): string {
-    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${
-        this.pipingServerId}`;
+    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${this.pipeId}`;
   }
 
-  get snippetPipeUrl(): string {
-    return `https://ppng.io/modelviewereditor-state-${this.pipingServerId}`;
-  }
-
-  get updatesPipeUrl(): string {
-    return `https://ppng.io/modelviewereditor-updates-${this.pipingServerId}`;
-  }
-
-  get mobilePing(): string {
-    return `https://ppng.io/modelviewereditor-ping-${this.pipingServerId}`;
-  }
-
-  get envIsHdr(): boolean {
+  envIsHdr(): boolean {
     return typeof this.urls.env === 'string' &&
         this.urls.env.substr(this.urls.env.length - 4) === '.hdr';
   }
@@ -194,53 +182,6 @@ export class OpenMobileView extends ConnectedLitElement {
         JSON.stringify(this.lastSnippetSent);
   }
 
-  // https://dev.to/kingdaro/indexing-objects-in-typescript-1cgi
-  hasKey<O>(obj1: O, obj2: O, key: keyof any): key is keyof O {
-    return key in obj1 && key in obj2;
-  }
-
-  async prepareGlbBlob(gltf: GltfModel) {
-    const glbBuffer = await gltf.packGlb();
-    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
-  }
-
-  async postBlob(blob: Blob, srcType: string) {
-    // Send the blob to the url, which varies based on what is sent
-    await fetch(this.getSrcPipeUrl(srcType), {
-      method: 'POST',
-      body: blob,
-    })
-        .then(response => {
-          console.log('Success:', response);
-        })
-        .catch((error) => {
-          // TODO: Throw up a popup that says this failed...
-          console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
-        });
-  }
-
-  async sendSrcBlob(url: string, srcType: string) {
-    // Get the blob from the url for glbs, posters or environment images
-    if (srcType === 'gltf') {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postBlob(blob, srcType);
-    } else {
-      const response = await fetch(url);
-      if (!response.ok) {
-        // TODO: Throw up a popup that says this failed...
-        throw new Error(`Failed to fetch url: ${url}`);
-      }
-      const blob = await response.blob();
-      await this.postBlob(blob, srcType);
-    }
-
-    // Update the lastUrlsSent object to equal the current url
-    if (this.hasKey(this.lastUrlsSent, this.urls, srcType)) {
-      this.lastUrlsSent[srcType] = this.urls[srcType];
-    }
-  }
-
   isNewSource(src: string|undefined, lastSrc: string|undefined) {
     return src !== undefined && src !== lastSrc;
   }
@@ -250,6 +191,42 @@ export class OpenMobileView extends ConnectedLitElement {
         this.editsHaveChanged();
   }
 
+  async prepareGlbBlob(gltf: GltfModel) {
+    const glbBuffer = await gltf.packGlb();
+    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
+  }
+
+  async postBlob(blob: Blob, srcType: string) {
+    await fetch(this.getSrcPipeUrl(srcType), {
+      method: 'POST',
+      body: blob,
+    })
+        .then(response => {
+          console.log('Success:', response);
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
+        });
+  }
+
+  async sendBlob(url: string, srcType: 'gltf'|'env') {
+    if (srcType === 'gltf') {
+      const blob = await this.prepareGlbBlob(this.gltfModel!);
+      await this.postBlob(blob, srcType);
+    } else {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch url: ${url}`);
+      }
+      const blob = await response.blob();
+      await this.postBlob(blob, srcType);
+    }
+    this.lastUrlsSent[srcType] = this.urls[srcType];
+  }
+
+  // Create object to tell mobile what information is being sent so it can
+  // dynamically send certain GET requests
   getUpdatedContent() {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
@@ -258,7 +235,7 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-  async sendObject(obj: Object, url: string) {
+  async postObject(obj: Object, url: string) {
     await fetch(url, {
       method: 'POST',
       body: JSON.stringify(obj),
@@ -267,35 +244,36 @@ export class OpenMobileView extends ConnectedLitElement {
           console.log('Success:', response);
         })
         .catch((error) => {
-          // TODO: Throw up a popup that says this failed...
           console.log('Error:', error);
           throw new Error(`Failed to post: ${url}`);
         });
   }
 
-  /* Send any state, model, or image that has been updated since the last time
-   * the information was sent. */
+  // Send any state, model, or image that has been updated since the last update
   async postInfo() {
+    this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
-    await this.sendObject(updatedContent, this.updatesPipeUrl)
+    await this.postObject(updatedContent, this.updatesPipeUrl)
 
     if (updatedContent.gltfChanged) {
-      await this.sendSrcBlob(this.urls.gltf!, 'gltf');
+      await this.sendBlob(this.urls.gltf!, 'gltf');
     }
 
     if (updatedContent.stateChanged) {
-      await this.sendObject(this.snippet, this.snippetPipeUrl);
+      await this.postObject(this.snippet, this.snippetPipeUrl);
       this.lastSnippetSent = {...this.snippet};
     }
 
     if (updatedContent.envChanged) {
-      await this.sendSrcBlob(this.urls.env!, 'env');
+      await this.sendBlob(this.urls.env!, 'env');
     }
-    this.hasChanged = this.getHasChanged();
+
+    this.contentHasChanged = this.getHasChanged();
+    this.isSendingData = false;
   }
 
   async waitForPing() {
-    await fetch(this.mobilePing)
+    await fetch(this.mobilePingUrl)
         .then(response => response.json())
         .then(responseJson => {
           if (responseJson.isPing) {
@@ -307,38 +285,39 @@ export class OpenMobileView extends ConnectedLitElement {
         });
   }
 
+  // Opens the modal that displays the QR Code
   openModal() {
     this.mobileModal.open();
   }
 
-  // Gets recalled every time the page hasn't received a ping, so will
-  // reopen the modal.
+  // Called each time the editor hasn't received a ping from mobile
   async onDeploy() {
-    // if they are deploying mobile set ar to anticipated defaults
-    reduxStore.dispatch(dispatchAr(true));
-    reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
-
-    this.mobileModal.open();
-    this.isDeployed = true;
+    this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
       this.postInfo();
     } else {
-      // TODO: Add a toasty thing to tell user to open other window...
       this.onDeploy();
     }
+  }
+
+  // Initialize AR values and start deploy loop
+  async onInitialDeploy() {
+    this.isDeployed = true;
+    reduxStore.dispatch(dispatchAr(true));
+    reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
+    await this.onDeploy();
   }
 
   renderDeployButton() {
     return html`
     <mwc-button unelevated
       icon="file_download"
-      ?disabled=${this.isNotDeployable}
-      @click=${this.onDeploy}>
+      ?disabled=${!this.isDeployable}
+      @click=${this.onInitialDeploy}>
         Deploy Mobile
     </mwc-button>`
   }
-
 
   onEnableARChange() {
     reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
@@ -357,7 +336,8 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   renderMobileInfo() {
-    const outOfSync = this.hasChanged ? '#DC143C' : '#4285F4';
+    const isOutOfSync = !this.isSendingData && this.contentHasChanged;
+    const outOfSyncColor = isOutOfSync ? '#DC143C' : '#4285F4';
     return html`
     <div>
       <mwc-button unelevated @click=${
@@ -365,15 +345,22 @@ export class OpenMobileView extends ConnectedLitElement {
         View QR Code
       </mwc-button>
       <mwc-button unelevated icon="cached" @click=${this.postInfo} 
-        style="--mdc-theme-primary:${outOfSync}">
+        ?disabled=${this.isSendingData}
+        style="--mdc-theme-primary: ${outOfSyncColor}">
         Refresh Mobile
       </mwc-button>
       ${
-        this.hasChanged ? html`
-        <div style="color:#DC143C;">
+        isOutOfSync ? html`
+        <div style="color: #DC143C; margin-top: 5px;">
           Your mobile view is out of sync with the editor.
         </div>` :
-                          html``}
+                      html``}
+      ${
+        this.isSendingData ? html`
+        <div style="color: white; margin-top: 5px;">
+          Sending data to mobile device... Textured models will take some time.
+        </div>` :
+                             html``}
     </div>
 
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Settings:</div>
@@ -400,7 +387,7 @@ export class OpenMobileView extends ConnectedLitElement {
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <mobile-modal .pipingServerId=${this.pipingServerId}></mobile-modal>
+    <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     ${this.isDeployed ? this.renderMobileInfo() : html``}
   `;
   }

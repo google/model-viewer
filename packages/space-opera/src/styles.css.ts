@@ -165,6 +165,12 @@ model-viewer {
 }
 `;
 
+export const openMobileViewStyles: CSSResult = css`
+:host {
+  --mdc-button-disabled-fill-color: rgba(255,255,255,.88);
+}
+`;
+
 export const openModalStyles: CSSResult = css`
 paper-dialog {
   background: var(--expandable-section-background);
