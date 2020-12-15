@@ -56,7 +56,8 @@ export class MobileModal extends ConnectedLitElement {
       <div>Mobile View</div>
     </div>
     <div style="font-size: 14px; font-weight: 500; margin: 10px 0px; color: white; word-wrap: break-word; width: 100%;">
-      Use QR Code to load your current glb, environment image, and &ltmodel-viewer&gt state. After every subsequent change, click the "Refresh Mobile" button. 
+      Use the QR Code to open your edited model, environment image, and &ltmodel-viewer&gt snippet on a mobile device to test out AR features. 
+      After every subsequent change, click the "Refresh Mobile" button.
     </div>
     <canvas id="qr" style="display: block; margin-bottom: 20px;"></canvas>
     <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
