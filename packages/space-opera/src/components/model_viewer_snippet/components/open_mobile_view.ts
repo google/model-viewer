@@ -15,6 +15,7 @@
  *
  */
 
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 import {css, customElement, html, internalProperty, property, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
@@ -28,7 +29,7 @@ import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_ele
 import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getEdits} from '../../materials_panel/reducer.js';
 import {dispatchAr, dispatchArModes, getArConfig} from '../../mobile_view/reducer.js';
-import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {getGltfModel, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../../shared/checkbox/checkbox.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 
@@ -107,9 +108,10 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() urls: URLs = {gltf: '', env: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
+  @internalProperty() gltfModel?: GltfModel;
 
-  @internalProperty() snippet = {};
-  @internalProperty() lastSnippetSent = {};
+  @internalProperty() snippet: any = {};
+  @internalProperty() lastSnippetSent: any = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
@@ -131,6 +133,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
+    this.gltfModel = getGltfModel(state);
     const gltfURL = getGltfUrl(state);
     if (gltfURL !== undefined) {
       this.isNotDeployable = false;
@@ -177,6 +180,15 @@ export class OpenMobileView extends ConnectedLitElement {
         this.urls.env.substr(this.urls.env.length - 4) === '.hdr';
   }
 
+  editsHaveChanged() {
+    if (this.snippet.edits !== undefined &&
+        this.lastSnippetSent.edits !== undefined) {
+      return JSON.stringify(this.snippet.edits) !==
+          JSON.stringify(this.lastSnippetSent.edits);
+    }
+    return false;
+  }
+
   stateHasChanged() {
     return JSON.stringify(this.snippet) !==
         JSON.stringify(this.lastSnippetSent);
@@ -187,15 +199,12 @@ export class OpenMobileView extends ConnectedLitElement {
     return key in obj1 && key in obj2;
   }
 
-  async sendSrcBlob(url: string, srcType: string) {
-    // Get the blob from the url for glbs, posters or environment images
-    const response = await fetch(url);
-    if (!response.ok) {
-      // TODO: Throw up a popup that says this failed...
-      throw new Error(`Failed to fetch url: ${url}`);
-    }
-    const blob = await response.blob();
+  async prepareGlbBlob(gltf: GltfModel) {
+    const glbBuffer = await gltf.packGlb();
+    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
+  }
 
+  async postBlob(blob: Blob, srcType: string) {
     // Send the blob to the url, which varies based on what is sent
     await fetch(this.getSrcPipeUrl(srcType), {
       method: 'POST',
@@ -209,6 +218,22 @@ export class OpenMobileView extends ConnectedLitElement {
           console.log('Error:', error);
           throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
         });
+  }
+
+  async sendSrcBlob(url: string, srcType: string) {
+    // Get the blob from the url for glbs, posters or environment images
+    if (srcType === 'gltf') {
+      const blob = await this.prepareGlbBlob(this.gltfModel!);
+      await this.postBlob(blob, srcType);
+    } else {
+      const response = await fetch(url);
+      if (!response.ok) {
+        // TODO: Throw up a popup that says this failed...
+        throw new Error(`Failed to fetch url: ${url}`);
+      }
+      const blob = await response.blob();
+      await this.postBlob(blob, srcType);
+    }
 
     // Update the lastUrlsSent object to equal the current url
     if (this.hasKey(this.lastUrlsSent, this.urls, srcType)) {
@@ -220,10 +245,14 @@ export class OpenMobileView extends ConnectedLitElement {
     return src !== undefined && src !== lastSrc;
   }
 
+  isNewModel() {
+    return this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+        this.editsHaveChanged();
+  }
+
   getUpdatedContent() {
     return {
-      gltfChanged: this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf),
-          stateChanged: this.stateHasChanged(),
+      gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
           envIsHdr: this.envIsHdr
     }
@@ -250,9 +279,6 @@ export class OpenMobileView extends ConnectedLitElement {
     const updatedContent = this.getUpdatedContent();
     await this.sendObject(updatedContent, this.updatesPipeUrl)
 
-    // TODO: Add security features to ensure the objects received are of the
-    // correct type.
-
     if (updatedContent.gltfChanged) {
       await this.sendSrcBlob(this.urls.gltf!, 'gltf');
     }
@@ -265,6 +291,7 @@ export class OpenMobileView extends ConnectedLitElement {
     if (updatedContent.envChanged) {
       await this.sendSrcBlob(this.urls.env!, 'env');
     }
+    this.hasChanged = this.getHasChanged();
   }
 
   async waitForPing() {
