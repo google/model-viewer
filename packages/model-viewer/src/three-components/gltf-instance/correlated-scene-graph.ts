@@ -239,34 +239,35 @@ export class CorrelatedSceneGraph {
       }
 
       const meshVariantData = gltfExtensions['KHR_materials_variants'];
+      if (meshVariantData == null) {
+        return;
+      }
 
-      if (meshVariantData != null) {
-        let materialIndex = -1;
+      let materialIndex = -1;
 
-        for (const mapping of (meshVariantData.mappings as VariantMappings)) {
-          if (mapping.variants.indexOf(variantIndex) >= 0) {
-            materialIndex = mapping.material;
-            break;
-          }
+      for (const mapping of (meshVariantData.mappings as VariantMappings)) {
+        if (mapping.variants.indexOf(variantIndex) >= 0) {
+          materialIndex = mapping.material;
+          break;
+        }
+      }
+
+      if (materialIndex >= 0) {
+        const material = await this.threeGLTF.parser.getDependency(
+            'material', materialIndex);
+        updatedMaterials.add(materialIndex);
+        (object as Mesh).material = material;
+        onUpdate();
+
+        const gltfElement = this.gltf.materials![materialIndex];
+        let threeObjects = this.gltfElementMap.get(gltfElement);
+
+        if (threeObjects == null) {
+          threeObjects = new Set();
+          this.gltfElementMap.set(gltfElement, threeObjects);
         }
 
-        if (materialIndex >= 0) {
-          const material = await this.threeGLTF.parser.getDependency(
-              'material', materialIndex);
-          updatedMaterials.add(materialIndex);
-          (object as Mesh).material = material;
-          onUpdate();
-
-          const gltfElement = this.gltf.materials![materialIndex];
-          let threeObjects = this.gltfElementMap.get(gltfElement);
-
-          if (threeObjects == null) {
-            threeObjects = new Set();
-            this.gltfElementMap.set(gltfElement, threeObjects);
-          }
-
-          threeObjects.add(material);
-        }
+        threeObjects.add(material);
       }
     });
 
