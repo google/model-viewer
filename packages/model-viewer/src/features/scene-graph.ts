@@ -86,28 +86,27 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const variants = this[$variants];
         const threeGLTF = this[$currentGLTF];
         const {variantName} = this;
-        if (threeGLTF != null && variantName != null) {
-          const variantIndex = variants.findIndex((v) => v === variantName);
-          if (variantIndex < 0) {
-            return;
-          }
 
-          const onUpdate = () => {
-            this[$needsRender]();
-          };
+        const variantIndex = variants.findIndex((v) => v === variantName);
+        if (threeGLTF == null || variantIndex < 0) {
+          return;
+        }
 
-          const updatedMaterials = threeGLTF.correlatedSceneGraph.loadVariant(
-              variantIndex, onUpdate);
-          const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
+        const onUpdate = () => {
+          this[$needsRender]();
+        };
 
-          for (const index of updatedMaterials) {
-            const material = gltf.materials![index];
-            this[$model]!.materials[index] = new Material(
-                onUpdate,
-                gltf,
-                material,
-                gltfElementMap.get(material) as Set<MeshStandardMaterial>);
-          }
+        const updatedMaterials =
+            threeGLTF.correlatedSceneGraph.loadVariant(variantIndex, onUpdate);
+        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
+
+        for (const index of updatedMaterials) {
+          const material = gltf.materials![index];
+          this[$model]!.materials[index] = new Material(
+              onUpdate,
+              gltf,
+              material,
+              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
         }
       }
     }
@@ -144,6 +143,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$currentGLTF] = currentGLTF;
+      // TODO: remove this event, as it is synonymous with the load event.
       this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
