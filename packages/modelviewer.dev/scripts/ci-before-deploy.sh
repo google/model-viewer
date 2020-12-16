@@ -111,6 +111,7 @@ mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
 cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
+cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
 
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
