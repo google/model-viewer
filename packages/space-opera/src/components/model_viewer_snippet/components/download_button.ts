@@ -68,7 +68,7 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 }
 
-async function prepareGlbPayload(
+export async function prepareGlbPayload(
     gltf: GltfModel, modelName: string): Promise<Payload> {
   const glbBuffer = await gltf.packGlb();
   return {

@@ -36,3 +36,6 @@ import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/model_viewer_snippet/model_viewer_snippet.js';
 import './components/inspector/inspector.js';
 import './components/shared/tabs/tabs.js';
+import './components/mobile_view/mobile_view.js';
+import './components/mobile_view/open_mobile_view.js';
+import './components/mobile_view/components/mobile_modal.js';

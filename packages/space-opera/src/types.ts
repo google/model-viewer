@@ -46,7 +46,13 @@ interface GltfEditsState {
   origEdits: GltfEdits;
 }
 
-interface ModelViewerSnippetState {
+export interface ArConfigState {
+  ar?: boolean;
+  arModes?: string;
+}
+
+export interface ModelViewerSnippetState {
+  arConfig: ArConfigState;
   animationNames: string[];
   camera: Camera;
   config: ModelViewerConfig;
@@ -81,6 +87,7 @@ export const INITIAL_STATE: State = {
       origEdits: INITIAL_GLTF_EDITS,
     },
     modelViewerSnippet: {
+      arConfig: {},
       animationNames: [],
       config: {},
       hotspots: [],

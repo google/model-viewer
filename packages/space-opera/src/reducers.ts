@@ -23,6 +23,7 @@ import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
+import {arReducer} from './components/mobile_view/reducer.js';
 import {gltfReducer} from './components/model_viewer_preview/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
 
@@ -30,6 +31,7 @@ const gltfEditsReducer =
     combineReducers({edits: editsReducer, origEdits: origEditsReducer});
 
 const modelViewerSnippetReducer = combineReducers({
+  arConfig: arReducer,
   animationNames: animationNamesReducer,
   camera: cameraReducer,
   config: configReducer,
