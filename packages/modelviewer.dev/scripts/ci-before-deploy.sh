@@ -105,6 +105,7 @@ set -x
 # Copy the latest fidelity testing results:
 mkdir -p $DEPLOY_ROOT/fidelity
 mkdir -p $DEPLOY_ROOT/editor
+mkdir -p $DEPLOY_ROOT/editor/view/
 mkdir -p $DEPLOY_ROOT/dist
 
 mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
