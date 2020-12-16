@@ -71,6 +71,8 @@ export class MobileView extends ConnectedLitElement {
     await fetch(this.getSrcPipeUrl('gltf'))
         .then(response => response.blob())
         .then(blob => {
+          // TODO: URL.createObjectURL() creates a:
+          // blob:https://... which scene viewer doesn't recognize
           const modelUrl = URL.createObjectURL(blob);
           reduxStore.dispatch(dispatchGltfUrl(modelUrl));
           reduxStore.dispatch(dispatchSetHotspots([]));
