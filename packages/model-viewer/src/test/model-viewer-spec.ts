@@ -19,6 +19,8 @@ const setupModelViewer = async (modelViewer: ModelViewerElement) => {
 
   modelViewer.style.backgroundColor = 'rgba(255,255,255,0)';
 
+  const modelLoaded = waitForEvent(modelViewer, 'load');
+
   modelViewer.src = assetPath(
       'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf');
 
@@ -27,6 +29,8 @@ const setupModelViewer = async (modelViewer: ModelViewerElement) => {
   modelViewer.cameraOrbit = '0deg 90deg 12m';
   modelViewer.cameraTarget = '0m 0m 0m';
   modelViewer.fieldOfView = '45deg';
+
+  await modelLoaded;
 };
 
 const setupLighting =
@@ -123,19 +127,19 @@ suite('ModelViewerElement', () => {
 
     test('Metal roughness sphere', async () => {
       await setupLighting(element, LIGHTROOM_PATH);
-      const screenshotContext = element[$renderer].threeRenderer.context;
+      const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
 
     test('Metal roughness sphere HDR', async () => {
       await setupLighting(element, SUNRISE_HDR_PATH);
-      const screenshotContext = element[$renderer].threeRenderer.context;
+      const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
 
     test('Metal roughness sphere LDR', async () => {
       await setupLighting(element, SUNRISE_LDR_PATH);
-      const screenshotContext = element[$renderer].threeRenderer.context;
+      const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
   });

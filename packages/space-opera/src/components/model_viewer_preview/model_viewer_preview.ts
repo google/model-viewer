@@ -192,6 +192,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
           `<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
+    const emptyARConfig = {};
+
     return html`${
         renderModelViewer(
             editedConfig,
@@ -220,7 +222,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
                 }
               }
             },
-            childElements)}`;
+            childElements,
+            emptyARConfig)}`;
   }
 
   // Handle the case when the model is loaded for the first time.

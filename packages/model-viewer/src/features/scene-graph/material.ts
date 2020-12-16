@@ -40,8 +40,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   constructor(
       onUpdate: () => void, gltf: GLTF, material: GLTFMaterial,
-      correlatedMaterials: Set<MeshStandardMaterial>) {
+      correlatedMaterials: Set<MeshStandardMaterial>|undefined) {
     super(onUpdate, material, correlatedMaterials);
+
+    if (correlatedMaterials == null) {
+      return;
+    }
 
     if (material.pbrMetallicRoughness == null) {
       material.pbrMetallicRoughness = {};

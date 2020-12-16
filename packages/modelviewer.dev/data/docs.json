@@ -152,7 +152,7 @@
         ],
         "default": {
           "default": "0.5",
-          "options": "number between 0 and 1"
+          "options": "number between 0.25 and 1"
         }
       },
       {
@@ -784,6 +784,11 @@
         "description": "This property reports the current track time of the currently selected animation. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
       },
       {
+        "name": "duration",
+        "htmlName": "duration",
+        "description": "This property is read-only. It returns the duration of the currently selected animation. If no animations are available, the value is always 0."
+      },
+      {
         "name": "paused",
         "htmlName": "paused",
         "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked.",
@@ -819,7 +824,25 @@
   },
   {
     "Title": "Scene Graph",
+    "Attributes": [
+      {
+        "name": "variant-name",
+        "htmlName": "variantName",
+        "description": "Selects a model variant by name.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      }
+    ],
     "Properties": [
+      {
+        "name": "availableVariants",
+        "htmlName": "availableVariants",
+        "description": "This property reports an array of strings, corresponding to variants in the loaded model that can be selected with <span class='attribute'>variant-name</span>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
       {
         "name": "model",
         "htmlName": "model",
@@ -843,7 +866,7 @@
       {
         "name": "scene-graph-ready",
         "htmlName": "sceneGraphReady",
-        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details.",
+        "description": "THIS EVENT IS DEPRECATED, as it now fires at the same time as 'load', so please use that event instead.",
         "links": [
           "<a href=\"../examples/scenegraph/#changeMaterial\">Related examples</a>"
         ]

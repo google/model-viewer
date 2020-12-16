@@ -204,6 +204,10 @@
     "htmlName": "scenegraph",
     "examples": [
       {
+        "htmlId": "variants",
+        "name": "Variants"
+      },
+      {
         "htmlId": "changeColor",
         "name": "Change Color"
       },

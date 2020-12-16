@@ -170,6 +170,15 @@ export default class Model extends Object3D {
     return 0;
   }
 
+  get duration(): number {
+    if (this.currentAnimationAction != null &&
+        this.currentAnimationAction.getClip()) {
+      return this.currentAnimationAction.getClip().duration;
+    }
+
+    return 0;
+  }
+
   get hasActiveAnimation(): boolean {
     return this.currentAnimationAction != null;
   }

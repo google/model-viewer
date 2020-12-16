@@ -50,7 +50,7 @@
   <script async src='https://www.google-analytics.com/analytics.js'></script>
 
   <style>
-#controls {
+.controls {
   position: absolute;
   display: flex;
   flex-direction: row;
@@ -75,6 +75,45 @@ button {
   
   <div class="examples-container">
     <div class="sample">
+      <div id="variants" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Swap Model Variants</h2>
+          </div>
+          <example-snippet stamp-to="variants" highlight-as="html">
+            <template>
+<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" alt="A 3D model of a chair">
+  <div class="controls">
+    <p>Variant: </p>
+    <select id="variant"></select>
+  </div>
+</model-viewer>
+<script>
+const modelViewerVariants = document.querySelector("model-viewer#chair");
+const select = document.querySelector('#variant');
+
+modelViewerVariants.addEventListener('load', () => {
+  const names = modelViewerVariants.availableVariants;
+  for (const name of names) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+});
+
+select.addEventListener('input', (event) => {
+  modelViewerVariants.variantName = event.target.value;
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="changeColor" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -85,17 +124,17 @@ button {
           </div>
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
-<model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <div id="controls">
+<model-viewer id="color" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <div class="controls", id="color-controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
     <button data-color="0,0,1,1">Blue</button>
   </div>
 </model-viewer>
 <script>
-const modelViewer = document.querySelector("model-viewer");
+const modelViewerColor = document.querySelector("model-viewer#color");
 
-document.querySelector('#controls').addEventListener('click', (event) => {
+document.querySelector('#color-controls').addEventListener('click', (event) => {
   const colorString = event.target.dataset.color;
 
   if (!colorString) {
@@ -106,7 +145,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
       .map(numberString => parseFloat(numberString));
 
   console.log('Changing color to: ', color);
-  const [material] = modelViewer.model.materials;
+  const [material] = modelViewerColor.model.materials;
   material.pbrMetallicRoughness.setBaseColorFactor(color);
 });
 </script>
@@ -127,7 +166,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
 <model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Metalness: <span id="metalness-value"></span></p>
       <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
@@ -141,7 +180,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
 <script>
 const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
-modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
+modelViewerParameters.addEventListener("load", (ev) => {
 
   let material = modelViewerParameters.model.materials[0];
 
@@ -181,7 +220,7 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
 <model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Diffuse</p>
       <select id="diffuse">
@@ -203,7 +242,7 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
-modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
+modelViewerTexture.addEventListener("load", (ev) => {
 
   let material = modelViewerTexture.model.materials[0];
 
@@ -237,7 +276,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
           <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
 <model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Normals</p>
       <select id="normals">
@@ -266,7 +305,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
-modelViewerTexture.addEventListener("scene-graph-ready", () => {
+modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
@@ -306,7 +345,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
           <example-snippet stamp-to="exporter" highlight-as="html">
             <template>
 <model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
-  <div id="controls">
+  <div class="controls">
     <button onclick="exportGLB()">Export GLB</button>
   </div>
 </model-viewer>
@@ -337,7 +376,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
           <example-snippet stamp-to="exporterWithOptions" highlight-as="html">
             <template>
 <model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
-  <div id="controls">
+  <div class="controls">
     <button onclick="exportScene(true)">Export GLB</button>
     <button onclick="exportScene(false)">Export GLTF</button>
   </div>
