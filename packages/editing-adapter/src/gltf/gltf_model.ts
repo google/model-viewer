@@ -59,15 +59,16 @@ function replaceBufferRange(
     buffer: ArrayBuffer,
     replaceOffset: number,
     replaceLength: number,
-    newBytes: ArrayBuffer) {
+    newBytes: ArrayBuffer,
+    padding: number = 0) {
   const before = new Uint8Array(buffer, 0, replaceOffset);
   const after = new Uint8Array(buffer, replaceOffset + replaceLength);
   const newBuffer = new ArrayBuffer(
-      before.byteLength + newBytes.byteLength + after.byteLength);
+      before.byteLength + newBytes.byteLength + after.byteLength + padding);
   const newView = new Uint8Array(newBuffer);
   newView.set(before, 0);
   newView.set(new Uint8Array(newBytes), before.byteLength);
-  newView.set(after, before.byteLength + newBytes.byteLength);
+  newView.set(after, before.byteLength + newBytes.byteLength + padding);
   return newBuffer;
 }
 
@@ -798,12 +799,14 @@ export class GltfModel {
 
     const view = this.root.bufferViews[bufferViewId];
     const dummyBuffer: ArrayBuffer = SINGLE_PIXEL_PNG_BYTES.buffer;
+    let bytesSaved = view.byteLength - dummyBuffer.byteLength;
+    let padding = bytesSaved % 4;
+    bytesSaved -= padding;
     this.buffer = replaceBufferRange(
-        this.buffer, view.byteOffset!, view.byteLength, dummyBuffer);
+        this.buffer, view.byteOffset || 0, view.byteLength, dummyBuffer, padding);
 
     // Update the view and all views after it.
-    const bytesSaved = view.byteLength - dummyBuffer.byteLength;
-    view.byteLength = dummyBuffer.byteLength;
+    view.byteLength = dummyBuffer.byteLength + padding;
     for (let i = bufferViewId + 1; i < this.root.bufferViews.length; i++) {
       if (this.root.bufferViews[i]?.byteOffset === undefined) {
         throw new Error(`Invalid bufferView at index ${i}?`);
