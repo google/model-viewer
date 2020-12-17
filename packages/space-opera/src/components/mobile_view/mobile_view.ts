@@ -15,8 +15,9 @@
  *
  */
 
-import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {customElement, html, internalProperty} from 'lit-element';
+import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {customElement, html, internalProperty, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -27,7 +28,7 @@ import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, downloadContents, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {dispatchArConfig, getArConfig} from './reducer.js';
 
@@ -40,7 +41,13 @@ import {styles} from './styles.css.js';
 export class MobileView extends ConnectedLitElement {
   static styles = styles;
 
+  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
+  @internalProperty() modelViewerUrl: string = '';
+
   @internalProperty() gltfUrl: string|undefined;
+  @internalProperty() useGltfUrl = true;
+  @internalProperty() sceneViewerUrl: string = '';
+
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -59,7 +66,6 @@ export class MobileView extends ConnectedLitElement {
     this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.camera = getCamera(state);
-    this.gltf = getGltfModel(state);
   }
 
   getSrcPipeUrl(srcType: string): string {
@@ -67,7 +73,9 @@ export class MobileView extends ConnectedLitElement {
   }
 
   // TODO: https://javascript.info/fetch-progress
+  // todo: make this receive an ID that is then used in the render
   async waitForModel() {
+    this.useGltfUrl = true;
     await fetch(this.getSrcPipeUrl('gltf'))
         .then(response => response.blob())
         .then(blob => {
@@ -111,6 +119,20 @@ export class MobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
     reduxStore.dispatch(dispatchSetConfig(partialState.config));
     reduxStore.dispatch(dispatchArConfig(partialState.arConfig));
+
+    await this.updateComplete;
+
+    if (partialState.arConfig.ar) {
+      const arButton =
+          this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
+      // @ts-ignore
+      arButton.addEventListener('click', async (event: MouseEvent) => {
+        this.useGltfUrl = false;
+        this.sceneViewerUrl = this.getSrcPipeUrl('scene-viewer');
+        this.sendSceneViewerPost();
+        await this.updateComplete;
+      });
+    }
   }
 
   async waitForEnv(envIsHdr: boolean) {
@@ -153,17 +175,55 @@ export class MobileView extends ConnectedLitElement {
     await this.triggerFetchLoop();
   }
 
+  async prepareGlbBlob(gltf: GltfModel) {
+    const glbBuffer = await gltf.packGlb();
+    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
+  }
+
+  async postBlob(blob: Blob, srcType: string) {
+    await fetch(this.getSrcPipeUrl(srcType), {
+      method: 'POST',
+      body: blob,
+    })
+        .then(response => {
+          console.log('Success:', response);
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
+        });
+  }
+
+  async sendSceneViewerPost() {
+    // remove dependency on url...
+    const glbContents = await downloadContents(this.gltfUrl!);
+    const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
+    const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
+    const blob = await this.prepareGlbBlob(gltf);
+    await this.postBlob(blob, 'scene-viewer');
+    await this.postBlob(blob, 'scene-viewer');
+  }
+
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
     const skyboxImage =
         config.useEnvAsSkybox ? config.environmentImage : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
+
+    // todo; remove
+    const modelViewerSrc =
+        this.useGltfUrl ? (this.gltfUrl || '') : this.sceneViewerUrl
+
     return html`
+    <div style="position: absolute; z-index: 20;">
+      <mwc-button unelevated @click=${
+        this.sendSceneViewerPost}> Scene Viewer Post </mwc-button>
+    </div>
     <div class="app">
       <div class="mvContainer">
         <model-viewer
-          src=${this.gltfUrl || ''}
+          src=${modelViewerSrc}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
           ?autoplay=${!!config.autoplay}
