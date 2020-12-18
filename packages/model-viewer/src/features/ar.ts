@@ -354,7 +354,10 @@ configuration or device capabilities');
     [$openIOSARQuickLook]() {
       const modelUrl = new URL(this.iosSrc!, self.location.toString());
       if (this.arScale === 'fixed') {
-        modelUrl.hash = 'allowsContentScaling=0';
+        if (modelUrl.hash) {
+          modelUrl.hash += '&';
+        }
+        modelUrl.hash += 'allowsContentScaling=0';
       }
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');

@@ -131,6 +131,22 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.pathname).equal('/model.usdz');
           expect(url.hash).to.equal('#allowsContentScaling=0');
         });
+
+        test('keeps original hash too', () => {
+          element.src = 'https://example.com/model.gltf';
+          element.iosSrc =
+              'https://example.com/model.usdz#custom=path-to-banner.html';
+          element.arScale = 'fixed';
+          (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.pathname).equal('/model.usdz');
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html&allowsContentScaling=0');
+        });
       });
     });
 
