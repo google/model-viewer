@@ -34,6 +34,21 @@ import {dispatchArConfig, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
 
+// TODO: New Plan for Scene Viewer
+// 1) Changing Model Fetches
+// 1.a) The model will have an associated ID with each new model that is sent
+// from the editor to mobile view. The mobile view will retrieve the ID,
+// then set the new modelviewer src attribute to that ID. Model viewer will
+// handle retrieving that blob.
+// 1.b) When a user clicks on the AR button for scene viewer, a POST will be
+// made from the model viewer's ar buttn event listener for the most recent
+// model's ID.
+// 1.c) Model viewer is now handling the mobile's GET request, which means
+// we wouldn't have a direct connection to the blob. After every model viewer
+// load, we need to prepareGLB blob to send in (1.b)'s POST. We can do this
+// using the @load=${callback} and then access the model directly from the
+// modelviewer state. (may need to use model visibility if load doesn't fire)
+
 /**
  * The view loaded at /editor/view/?id=xyz
  */
