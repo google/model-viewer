@@ -58,6 +58,7 @@ export class MobileView extends ConnectedLitElement {
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
+  @internalProperty() currentBlob?: Blob;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -115,12 +116,13 @@ export class MobileView extends ConnectedLitElement {
 
     await this.updateComplete;
 
+    // Send a new POST out for each scene-viewer button press
     if (partialState.arConfig.ar) {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       // @ts-ignore
       arButton.addEventListener('click', (event: MouseEvent) => {
-        this.sendSceneViewerPost();
+        this.postSceneViewerBlob(this.currentBlob!);
       });
     }
   }
@@ -172,7 +174,7 @@ export class MobileView extends ConnectedLitElement {
   }
 
   // Post new blob for scene-viewer
-  async postBlob(blob: Blob) {
+  async postSceneViewerBlob(blob: Blob) {
     await fetch(this.modelViewerUrl, {
       method: 'POST',
       body: blob,
@@ -186,18 +188,17 @@ export class MobileView extends ConnectedLitElement {
         });
   }
 
-  async sendSceneViewerPost() {
-    // remove dependency on url... (test: will this use cache?, no I think this
-    // needs some help...)
-    const glbContents = await downloadContents(this.modelViewerUrl!);
+  async newModel() {
+    const glTF = await this.modelViewer!.exportScene();
+    const file = new File([glTF], 'model.glb');
+    const url = URL.createObjectURL(file);
+
+    const glbContents = await downloadContents(url);
     const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-    const blob = await this.prepareGlbBlob(gltf);
-    await this.postBlob(blob);
-  }
+    this.currentBlob = await this.prepareGlbBlob(gltf);
 
-  newModel() {
-    console.log('new model:', this.modelViewerUrl);
+    await this.postSceneViewerBlob(this.currentBlob);
   }
 
   render() {
