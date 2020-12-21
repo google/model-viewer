@@ -72,6 +72,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
   @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
   @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
+  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
@@ -109,8 +110,8 @@ export class OpenMobileView extends ConnectedLitElement {
         this.isNewSource(this.urls.env, this.lastUrlsSent.env));
   }
 
-  getSrcPipeUrl(srcType: string): string {
-    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${this.pipeId}`;
+  newModelPipeUrl(id: number): string {
+    return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
   envIsHdr(): boolean {
@@ -146,8 +147,8 @@ export class OpenMobileView extends ConnectedLitElement {
     return new Blob([glbBuffer], {type: 'model/gltf-binary'});
   }
 
-  async postBlob(blob: Blob, srcType: string) {
-    await fetch(this.getSrcPipeUrl(srcType), {
+  async postBlob(blob: Blob, url: string) {
+    await fetch(url, {
       method: 'POST',
       body: blob,
     })
@@ -156,33 +157,8 @@ export class OpenMobileView extends ConnectedLitElement {
         })
         .catch((error) => {
           console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
+          throw new Error(`Failed to post: ${url}`);
         });
-  }
-
-  async sendBlob(url: string, srcType: 'gltf'|'env') {
-    if (srcType === 'gltf') {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postBlob(blob, srcType);
-    } else {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch url: ${url}`);
-      }
-      const blob = await response.blob();
-      await this.postBlob(blob, srcType);
-    }
-    this.lastUrlsSent[srcType] = this.urls[srcType];
-  }
-
-  // Create object to tell mobile what information is being sent so it can
-  // dynamically send certain GET requests
-  getUpdatedContent() {
-    return {
-      gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
-          envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr
-    }
   }
 
   async postObject(obj: Object, url: string) {
@@ -199,6 +175,16 @@ export class OpenMobileView extends ConnectedLitElement {
         });
   }
 
+  // Create object to tell mobile what information is being sent so it can
+  // dynamically send certain GET requests
+  getUpdatedContent() {
+    return {
+      gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
+          envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
+          envIsHdr: this.envIsHdr, gltfId: this.getRandomInt(1e+20),
+    }
+  }
+
   // Send any state, model, or image that has been updated since the last update
   async postInfo() {
     this.isSendingData = true;
@@ -206,7 +192,9 @@ export class OpenMobileView extends ConnectedLitElement {
     await this.postObject(updatedContent, this.updatesPipeUrl)
 
     if (updatedContent.gltfChanged) {
-      await this.sendBlob(this.urls.gltf!, 'gltf');
+      const blob = await this.prepareGlbBlob(this.gltfModel!);
+      await this.postBlob(blob, this.newModelPipeUrl(updatedContent.gltfId));
+      this.lastUrlsSent['gltf'] = this.urls['gltf'];
     }
 
     if (updatedContent.stateChanged) {
@@ -215,7 +203,13 @@ export class OpenMobileView extends ConnectedLitElement {
     }
 
     if (updatedContent.envChanged) {
-      await this.sendBlob(this.urls.env!, 'env');
+      const response = await fetch(this.urls.env!);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch url: ${this.urls.env!}`);
+      }
+      const blob = await response.blob();
+      await this.postBlob(blob, this.envPipeUrl);
+      this.lastUrlsSent['env'] = this.urls['env'];
     }
 
     this.contentHasChanged = this.getHasChanged();

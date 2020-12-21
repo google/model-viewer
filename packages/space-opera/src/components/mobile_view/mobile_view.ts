@@ -28,7 +28,7 @@ import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {dispatchGltfUrl, downloadContents, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {dispatchArConfig, getArConfig} from './reducer.js';
 
@@ -59,10 +59,6 @@ export class MobileView extends ConnectedLitElement {
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
 
-  @internalProperty() gltfUrl: string|undefined;
-  @internalProperty() useGltfUrl = true;
-  @internalProperty() sceneViewerUrl: string = '';
-
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -74,35 +70,18 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
   @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
   @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
+  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
 
   stateChanged(state: State) {
-    this.gltfUrl = getGltfUrl(state);
     this.config = getConfig(state);
     this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.camera = getCamera(state);
   }
 
-  getSrcPipeUrl(srcType: string): string {
-    return `https://ppng.io/modelviewereditor-srcs-${srcType}-${this.pipeId}`;
-  }
-
-  // TODO: https://javascript.info/fetch-progress
-  // todo: make this receive an ID that is then used in the render
-  async waitForModel() {
-    this.useGltfUrl = true;
-    await fetch(this.getSrcPipeUrl('gltf'))
-        .then(response => response.blob())
-        .then(blob => {
-          // Modelviewer blob won't work with scene viewer
-          // https://github.com/google/model-viewer/issues/617
-          const modelUrl = URL.createObjectURL(blob);
-          reduxStore.dispatch(dispatchGltfUrl(modelUrl));
-          reduxStore.dispatch(dispatchSetHotspots([]));
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+  setNewModelSrc(id: number) {
+    this.modelViewerUrl =
+        `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
   async waitForState(envChanged: boolean) {
@@ -128,7 +107,6 @@ export class MobileView extends ConnectedLitElement {
     } else if (this.config.environmentImage) {
       partialState.config.environmentImage = this.config.environmentImage;
     }
-    partialState.config.src = this.gltfUrl;
 
     reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
     reduxStore.dispatch(dispatchSetCamera(partialState.camera));
@@ -141,17 +119,14 @@ export class MobileView extends ConnectedLitElement {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       // @ts-ignore
-      arButton.addEventListener('click', async (event: MouseEvent) => {
-        this.useGltfUrl = false;
-        this.sceneViewerUrl = this.getSrcPipeUrl('scene-viewer');
+      arButton.addEventListener('click', (event: MouseEvent) => {
         this.sendSceneViewerPost();
-        await this.updateComplete;
       });
     }
   }
 
   async waitForEnv(envIsHdr: boolean) {
-    await fetch(this.getSrcPipeUrl('env'))
+    await fetch(this.envPipeUrl)
         .then(response => response.blob())
         .then(blob => {
           // simulating createBlobUrlFromEnvironmentImage
@@ -166,7 +141,8 @@ export class MobileView extends ConnectedLitElement {
 
   async waitForData(json: any) {
     if (json.gltfChanged) {
-      await this.waitForModel();
+      await this.setNewModelSrc(json.gltfId);
+      await this.updateComplete;
     }
     if (json.stateChanged) {
       await this.waitForState(json.envChanged);
@@ -195,8 +171,9 @@ export class MobileView extends ConnectedLitElement {
     return new Blob([glbBuffer], {type: 'model/gltf-binary'});
   }
 
-  async postBlob(blob: Blob, srcType: string) {
-    await fetch(this.getSrcPipeUrl(srcType), {
+  // Post new blob for scene-viewer
+  async postBlob(blob: Blob) {
+    await fetch(this.modelViewerUrl, {
       method: 'POST',
       body: blob,
     })
@@ -205,18 +182,22 @@ export class MobileView extends ConnectedLitElement {
         })
         .catch((error) => {
           console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.getSrcPipeUrl(srcType)}`);
+          throw new Error(`Failed to post: ${this.modelViewerUrl}`);
         });
   }
 
   async sendSceneViewerPost() {
-    // remove dependency on url...
-    const glbContents = await downloadContents(this.gltfUrl!);
+    // remove dependency on url... (test: will this use cache?, no I think this
+    // needs some help...)
+    const glbContents = await downloadContents(this.modelViewerUrl!);
     const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
     const blob = await this.prepareGlbBlob(gltf);
-    await this.postBlob(blob, 'scene-viewer');
-    await this.postBlob(blob, 'scene-viewer');
+    await this.postBlob(blob);
+  }
+
+  newModel() {
+    console.log('new model:', this.modelViewerUrl);
   }
 
   render() {
@@ -226,19 +207,11 @@ export class MobileView extends ConnectedLitElement {
         config.useEnvAsSkybox ? config.environmentImage : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
 
-    // todo; remove
-    const modelViewerSrc =
-        this.useGltfUrl ? (this.gltfUrl || '') : this.sceneViewerUrl
-
     return html`
-    <div style="position: absolute; z-index: 20;">
-      <mwc-button unelevated @click=${
-        this.sendSceneViewerPost}> Scene Viewer Post </mwc-button>
-    </div>
     <div class="app">
       <div class="mvContainer">
         <model-viewer
-          src=${modelViewerSrc}
+          src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
           ?autoplay=${!!config.autoplay}
@@ -259,11 +232,13 @@ export class MobileView extends ConnectedLitElement {
           min-field-of-view=${ifDefined(config.minFov)}
           max-field-of-view=${ifDefined(config.maxFov)}
           animation-name=${ifDefined(config.animationName)}
+          @load=${this.newModel}
         >${childElements}</model-viewer>
       </div>
     </div>`;
   }
 
+  // ping back to the editor session
   async ping() {
     await fetch(this.mobilePingUrl, {
       method: 'POST',
