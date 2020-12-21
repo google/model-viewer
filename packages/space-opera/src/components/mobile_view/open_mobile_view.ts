@@ -168,7 +168,7 @@ export class OpenMobileView extends ConnectedLitElement {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr, gltfId: this.getRandomInt(1e+20),
+          envIsHdr: this.envIsHdr(), gltfId: this.getRandomInt(1e+20)
     }
   }
 
