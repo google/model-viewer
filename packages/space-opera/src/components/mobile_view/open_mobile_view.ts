@@ -16,7 +16,7 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {customElement, html, internalProperty, query, TemplateResult} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -30,7 +30,6 @@ import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
-import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, getArConfig} from './reducer.js';
@@ -65,7 +64,9 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() haveReceivedResponse: boolean = false;
 
   @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
+  @query('me-checkbox#ar-modes') arModesCheckbox!: CheckboxElement;
   @internalProperty() arConfig?: ArConfigState;
+  @internalProperty() defaultToSceneViewer: boolean = false;
   @internalProperty() selectedArMode: number = 0;
 
   @internalProperty() base = 'https://ppng.io/modelviewereditor';
@@ -96,6 +97,8 @@ export class OpenMobileView extends ConnectedLitElement {
     };
 
     this.contentHasChanged = this.getContentHasChanged();
+    this.defaultToSceneViewer =
+        this.arConfig.arModes === 'scene-viewer webxr quick-look';
   }
 
   newModelPipeUrl(id: number): string {
@@ -249,20 +252,40 @@ export class OpenMobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
   }
 
-  onSelectArMode(event: CustomEvent) {
-    const dropdown = event.target as Dropdown;
-    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
-    if (key === 'default' || key === 'webxr') {
-      reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
-    } else if (key === 'scene-viewer') {
+  onSelectArMode() {
+    this.defaultToSceneViewer = this.arModesCheckbox.checked;
+    if (this.defaultToSceneViewer) {
       reduxStore.dispatch(dispatchArModes('scene-viewer webxr quick-look'));
-    } else if (key === 'quick-look') {
-      reduxStore.dispatch(dispatchArModes('quick-look webxr scene-viewer'));
+    } else {
+      reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
     }
   }
 
+  get optionalMessage(): TemplateResult {
+    const isOutOfSync = this.haveReceivedResponse &&
+        (!this.isSendingData && this.contentHasChanged);
+    if (isOutOfSync) {
+      return html`
+    <div style="color: #DC143C; margin-top: 5px;">
+      Your mobile view is out of sync with the editor.
+    </div>`;
+    } else if (this.isSendingData) {
+      return html`
+    <div style="color: white; margin-top: 5px;">
+      Sending data to mobile device. Textured models will take some time.
+    </div>`
+    } else if (!this.haveReceivedResponse) {
+      return html`
+      <div style="color: white; margin-top: 5px;">
+        Use the QR Code to open the mobile viewing page on a mobile device.
+      </div>`
+    }
+    return html``;
+  }
+
   renderMobileInfo() {
-    const isOutOfSync = !this.isSendingData && this.contentHasChanged;
+    const isOutOfSync = this.haveReceivedResponse &&
+        (!this.isSendingData && this.contentHasChanged);
     const outOfSyncColor = isOutOfSync ? '#DC143C' : '#4285F4';
     return html`
     <div>
@@ -271,35 +294,20 @@ export class OpenMobileView extends ConnectedLitElement {
         View QR Code
       </mwc-button>
       <mwc-button unelevated icon="cached" @click=${this.postInfo} 
-        ?disabled=${this.isSendingData}
+        ?disabled=${!this.haveReceivedResponse || this.isSendingData}
         style="--mdc-theme-primary: ${outOfSyncColor}">
         Refresh Mobile
       </mwc-button>
-      ${
-        isOutOfSync ? html`
-        <div style="color: #DC143C; margin-top: 5px;">
-          Your mobile view is out of sync with the editor.
-        </div>` :
-                      html``}
-      ${
-        this.isSendingData ? html`
-        <div style="color: white; margin-top: 5px;">
-          Sending data to mobile device... Textured models will take some time.
-        </div>` :
-                             html``}
+      ${this.optionalMessage}
     </div>
-
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Settings:</div>
-    <me-dropdown
-        .selectedIndex=${this.selectedArMode}
-        slot="content" style="width: 71%;"
-        @select=${this.onSelectArMode}
+    <me-checkbox 
+      id="ar-modes" 
+      label="Default AR Modes to Scene Viewer"
+      ?checked="${this.defaultToSceneViewer}"
+      @change=${this.onSelectArMode}
       >
-      <paper-item value='default'>Default AR Mode</paper-item>
-      <paper-item value='webxr'>WebXR</paper-item>
-      <paper-item value='scene-viewer'>Scene Viewer</paper-item>
-      <paper-item value='quick-look'>Quick Look</paper-item>
-    </me-dropdown>
+    </me-checkbox>
     <me-checkbox 
       id="ar" 
       label="Enable AR"
