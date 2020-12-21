@@ -87,20 +87,12 @@ export class MobileView extends ConnectedLitElement {
 
   async waitForState(envChanged: boolean) {
     let partialState: any = {};
-    await fetch(this.snippetPipeUrl)
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Something went wrong');
-          }
-        })
-        .then((responseJson) => {
-          partialState = responseJson;
-        })
-        .catch((error) => {
-          console.log('error', error);
-        });
+    const response = await fetch(this.snippetPipeUrl);
+    if (response.ok) {
+      partialState = await response.json();
+    } else {
+      throw new Error('Something went wrong');
+    }
 
     // These links would be corresponding to the original editor's link.
     if (envChanged) {
@@ -128,17 +120,14 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async waitForEnv(envIsHdr: boolean) {
-    await fetch(this.envPipeUrl)
-        .then(response => response.blob())
-        .then(blob => {
-          // simulating createBlobUrlFromEnvironmentImage
-          const addOn = envIsHdr ? '#.hdr' : '';
-          const envUrl = URL.createObjectURL(blob) + addOn;
-          reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+    const response = await fetch(this.envPipeUrl);
+    if (response.ok) {
+      const blob = await response.blob();
+      // simulating createBlobUrlFromEnvironmentImage
+      const addOn = envIsHdr ? '#.hdr' : '';
+      const envUrl = URL.createObjectURL(blob) + addOn;
+      reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
+    }
   }
 
   async waitForData(json: any) {
@@ -155,12 +144,13 @@ export class MobileView extends ConnectedLitElement {
   }
 
   async fetchLoop() {
-    await fetch(this.updatesPipeUrl)
-        .then(response => response.json())
-        .then(json => this.waitForData(json))
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+    const response = await fetch(this.updatesPipeUrl);
+    if (response.ok) {
+      const json = await response.json();
+      this.waitForData(json)
+    } else {
+      console.error('Error:', response);
+    }
   }
 
   async triggerFetchLoop() {
@@ -175,17 +165,16 @@ export class MobileView extends ConnectedLitElement {
 
   // Post new blob for scene-viewer
   async postSceneViewerBlob(blob: Blob) {
-    await fetch(this.modelViewerUrl, {
+    const response = await fetch(this.modelViewerUrl, {
       method: 'POST',
       body: blob,
     })
-        .then(response => {
-          console.log('Success:', response);
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.modelViewerUrl}`);
-        });
+    if (response.ok) {
+      console.log('Success:', response);
+    }
+    else {
+      throw new Error(`Failed to post: ${this.modelViewerUrl}`);
+    }
   }
 
   async newModel() {
@@ -241,17 +230,16 @@ export class MobileView extends ConnectedLitElement {
 
   // ping back to the editor session
   async ping() {
-    await fetch(this.mobilePingUrl, {
+    const response = await fetch(this.mobilePingUrl, {
       method: 'POST',
       body: JSON.stringify({isPing: true}),
     })
-        .then(response => {
-          console.log('Success:', response);
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-          throw new Error(`Failed to post: ${this.mobilePingUrl}`);
-        });
+    if (response.ok) {
+      console.log('Success:', response);
+    }
+    else {
+      throw new Error(`Failed to post: ${this.mobilePingUrl}`);
+    }
   }
 
   // (Overriding default) Tell editor session that it is ready for data.

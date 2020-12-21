@@ -95,7 +95,11 @@ export class OpenMobileView extends ConnectedLitElement {
       edits: getEdits(state),
     };
 
-    this.contentHasChanged = this.getHasChanged();
+    this.contentHasChanged = this.getContentHasChanged();
+  }
+
+  newModelPipeUrl(id: number): string {
+    return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
   getRandomInt(max: number): number {
@@ -103,15 +107,11 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   // Returns true if any information sent to the mobile view has changed.
-  getHasChanged(): boolean {
+  getContentHasChanged(): boolean {
     return (
         this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
         this.stateHasChanged() ||
         this.isNewSource(this.urls.env, this.lastUrlsSent.env));
-  }
-
-  newModelPipeUrl(id: number): string {
-    return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
   envIsHdr(): boolean {
@@ -147,32 +147,16 @@ export class OpenMobileView extends ConnectedLitElement {
     return new Blob([glbBuffer], {type: 'model/gltf-binary'});
   }
 
-  async postBlob(blob: Blob, url: string) {
-    await fetch(url, {
+  async postContent(content: string|Blob, url: string) {
+    const response = await fetch(url, {
       method: 'POST',
-      body: blob,
-    })
-        .then(response => {
-          console.log('Success:', response);
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-          throw new Error(`Failed to post: ${url}`);
-        });
-  }
-
-  async postObject(obj: Object, url: string) {
-    await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(obj),
-    })
-        .then(response => {
-          console.log('Success:', response);
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-          throw new Error(`Failed to post: ${url}`);
-        });
+      body: content,
+    });
+    if (response.ok) {
+      console.log('Success:', response);
+    } else {
+      throw new Error(`Failed to post: ${url}`);
+    }
   }
 
   // Create object to tell mobile what information is being sent so it can
@@ -189,16 +173,16 @@ export class OpenMobileView extends ConnectedLitElement {
   async postInfo() {
     this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
-    await this.postObject(updatedContent, this.updatesPipeUrl)
+    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl)
 
     if (updatedContent.gltfChanged) {
       const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postBlob(blob, this.newModelPipeUrl(updatedContent.gltfId));
+      await this.postContent(blob, this.newModelPipeUrl(updatedContent.gltfId));
       this.lastUrlsSent['gltf'] = this.urls['gltf'];
     }
 
     if (updatedContent.stateChanged) {
-      await this.postObject(this.snippet, this.snippetPipeUrl);
+      await this.postContent(JSON.stringify(this.snippet), this.snippetPipeUrl);
       this.lastSnippetSent = {...this.snippet};
     }
 
@@ -208,25 +192,23 @@ export class OpenMobileView extends ConnectedLitElement {
         throw new Error(`Failed to fetch url: ${this.urls.env!}`);
       }
       const blob = await response.blob();
-      await this.postBlob(blob, this.envPipeUrl);
+      await this.postContent(blob, this.envPipeUrl);
       this.lastUrlsSent['env'] = this.urls['env'];
     }
 
-    this.contentHasChanged = this.getHasChanged();
+    this.contentHasChanged = this.getContentHasChanged();
     this.isSendingData = false;
   }
 
+  // update haveReceivedResponse when a ping was received from the mobile view
   async waitForPing() {
-    await fetch(this.mobilePingUrl)
-        .then(response => response.json())
-        .then(responseJson => {
-          if (responseJson.isPing) {
-            this.haveReceivedResponse = true;
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+    const response = await fetch(this.mobilePingUrl);
+    if (response.ok) {
+      const json = await response.json();
+      if (json.isPing) {
+        this.haveReceivedResponse = true;
+      }
+    }
   }
 
   // Opens the modal that displays the QR Code
