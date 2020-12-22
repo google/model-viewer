@@ -37,15 +37,15 @@ export interface ModelViewerEventHandlers {
  */
 export function renderModelViewer(
     config: ModelViewerConfig,
+    arConfig: ArConfigState,
     eventHandlers?: ModelViewerEventHandlers,
-    childElements?: Array<TemplateResult|HTMLElement>,
-    arConfig?: ArConfigState) {
+    childElements?: Array<TemplateResult|HTMLElement>) {
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
   return html`<model-viewer
         src=${config.src || ''}
-        ?ar=${ifDefined(!!arConfig!.ar)}
-        ar-modes=${ifDefined(arConfig!.arModes)}
+        ?ar=${!!arConfig.ar}
+        ar-modes=${ifDefined(arConfig.arModes)}
         ?autoplay=${!!config.autoplay}
         ?auto-rotate=${!!config.autoRotate}
         ?camera-controls=${!!config.cameraControls}

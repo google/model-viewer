@@ -91,7 +91,7 @@ export class ExportPanel extends ConnectedLitElement {
         editedConfig, this.gltfUrl, this.relativeFilePaths!, false);
 
     const snippet = renderModelViewer(
-        editedConfig, {}, renderHotspots(this.hotspots), this.arConfig);
+        editedConfig, this.arConfig, {}, renderHotspots(this.hotspots));
 
     if (this.isJustOutput) {
       return html`
