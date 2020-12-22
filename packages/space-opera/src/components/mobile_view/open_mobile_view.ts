@@ -43,16 +43,6 @@ interface URLs {
   env: string|undefined;
 }
 
-// TODOs for enabling iOS Support:
-// 1) Create a button in the mobile view for uploading a USDZ/.reality file.
-// 2) If a new model is uploaded
-// 2) If the ping from the mobile device sends back that the device is an ios.
-// 2.a) Pause the sending of the data until a USDZ file is uploaded.
-// 2.b) Send the USDZ file instead of the GLB.
-// 3) When downloading the ZIP file, include the USDZ file as well.
-// 4) Update the redux state to include a link to the USDZ file as well as
-// relative file path.
-
 /**
  * Section for displaying QR Code and other info related to mobile
  */
