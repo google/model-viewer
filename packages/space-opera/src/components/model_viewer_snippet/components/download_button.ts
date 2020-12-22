@@ -23,9 +23,10 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, RelativeFilePathsState, State} from '../../../types.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
+import {getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfModel} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 
@@ -84,6 +85,7 @@ export async function prepareGlbPayload(
 async function prepareZipArchive(
     gltf: GltfModel,
     config: ModelViewerConfig,
+    arConfig: ArConfigState,
     data: {snippetText: string},
     relativeFilePaths: RelativeFilePathsState): Promise<Payload> {
   const zip = new JSZip();
@@ -107,6 +109,15 @@ async function prepareZipArchive(
       throw new Error(`Failed to fetch url ${config.poster}`);
     }
     zip.file(relativeFilePaths.posterName!, response.blob());
+  }
+
+  // check if legal ios src
+  if (arConfig.iosSrc) {
+    const response = await fetch(arConfig.iosSrc);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch url ${arConfig.iosSrc}`);
+    }
+    zip.file(relativeFilePaths.iosName!, response.blob());
   }
 
   zip.file('snippet.txt', data.snippetText);
@@ -151,6 +162,7 @@ export class ExportZipButton extends GenericDownloadButton {
     const config = getConfig(state);
     const gltf = getGltfModel(state);
     const relativeFilePaths = getRelativeFilePaths(state);
+    const arConfig = getArConfig(state);
     if (!gltf) {
       this.preparePayload = undefined;
       return;
@@ -165,7 +177,7 @@ export class ExportZipButton extends GenericDownloadButton {
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
     this.preparePayload = () =>
-        prepareZipArchive(gltf, config, this, relativeFilePaths);
+        prepareZipArchive(gltf, config, arConfig, this, relativeFilePaths);
   }
 }
 

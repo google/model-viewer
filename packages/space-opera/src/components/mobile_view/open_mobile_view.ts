@@ -39,6 +39,7 @@ import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reduce
 
 interface URLs {
   gltf: string|undefined;
+  usdz: string|undefined;
   env: string|undefined;
 }
 
@@ -69,8 +70,8 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() contentHasChanged = false;
 
-  @internalProperty() urls: URLs = {gltf: '', env: ''};
-  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
+  @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
+  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() gltfModel?: GltfModel;
 
   @internalProperty() snippet: any = {};
@@ -102,6 +103,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.urls = {
       gltf: gltfURL,
       env: getConfig(state).environmentImage,
+      usdz: this.arConfig.iosSrc
     };
 
     this.snippet = {
@@ -128,10 +130,13 @@ export class OpenMobileView extends ConnectedLitElement {
     return Math.floor(Math.random() * Math.floor(max));
   }
 
-  // Returns true if any information sent to the mobile view has changed.
+  // Returns true if information sent to the mobile view has changed.
+  // The usdz and gltf have a dependcy on one another though, where only one is
+  // sent, so only one needs to be consistent when checking here.
   getContentHasChanged(): boolean {
     return (
-        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+        (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
+         this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf)) ||
         this.stateHasChanged() ||
         this.isNewSource(this.urls.env, this.lastUrlsSent.env));
   }
@@ -169,6 +174,14 @@ export class OpenMobileView extends ConnectedLitElement {
     return new Blob([glbBuffer], {type: 'model/gltf-binary'});
   }
 
+  async prepareUSDZ(url: string): Promise<Blob> {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch url ${url}`);
+    }
+    return await response.blob();
+  }
+
   async postContent(content: string|Blob, url: string) {
     const response = await fetch(url, {
       method: 'POST',
@@ -187,7 +200,8 @@ export class OpenMobileView extends ConnectedLitElement {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr(), gltfId: this.getRandomInt(1e+20)
+          envIsHdr: this.envIsHdr(), gltfId: this.getRandomInt(1e+20),
+          iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
     }
   }
 
@@ -197,11 +211,21 @@ export class OpenMobileView extends ConnectedLitElement {
     const updatedContent = this.getUpdatedContent();
     await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl)
 
-    // TODO: if ping is from ios device, use usdz
-    if (updatedContent.gltfChanged) {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postContent(blob, this.newModelPipeUrl(updatedContent.gltfId));
-      this.lastUrlsSent['gltf'] = this.urls['gltf'];
+    if (this.mobileOS === 'iOS') {
+      if (updatedContent.iosChanged) {
+        const blob = await this.prepareUSDZ(this.urls.usdz!);
+        await this.postContent(
+            blob, this.newModelPipeUrl(updatedContent.gltfId));
+        this.lastUrlsSent['usdz'] = this.urls['usdz'];
+      }
+    }
+    else {
+      if (updatedContent.gltfChanged) {
+        const blob = await this.prepareGlbBlob(this.gltfModel!);
+        await this.postContent(
+            blob, this.newModelPipeUrl(updatedContent.gltfId));
+        this.lastUrlsSent['gltf'] = this.urls['gltf'];
+      }
     }
 
     if (updatedContent.stateChanged) {
@@ -245,7 +269,9 @@ export class OpenMobileView extends ConnectedLitElement {
     this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
-      this.postInfo();
+      if (this.mobileOS === 'iOS' && this.arConfig?.iosSrc) {
+        this.postInfo();
+      }
     } else {
       this.onDeploy();
     }
@@ -288,7 +314,7 @@ export class OpenMobileView extends ConnectedLitElement {
     if (this.iosAndNoUsdz) {
       return html`
       <div style="color: white; margin-top: 5px;">
-        Upload a usdz or .reality file to see your model on your iOS device.
+        Upload a .usdz to view on an iOS device.
       </div>`
     } else if (isOutOfSync) {
       return html`
@@ -358,13 +384,16 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   renderIos() {
+    const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
+    const needUsdzText = this.iosAndNoUsdz ? '#DC143C' : 'white';
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">iOS Settings:</div>
-    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ}>
+    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
+    style="--mdc-theme-primary: ${needUsdzButton}">
       USDZ
     </mwc-button>
-    <div style="color: white; margin-top: 5px;">
-      You must upload a USDZ model to view on an iOS device.
+    <div style="color: ${needUsdzText}; margin-top: 5px;">
+      Upload a .usdz to view on an iOS device.
     </div>
     `
   }

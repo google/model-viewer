@@ -70,6 +70,9 @@ export class OpenModal extends ConnectedLitElement {
     const arConfig: ArConfigState = {};
     arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
     arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
+    arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
+    console.log(arConfig);
+    console.log(modelViewer);
     return arConfig
   }
 
@@ -177,12 +180,16 @@ export class OpenModal extends ConnectedLitElement {
   render() {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
+    const editedArConfig = {...this.arConfig};
     applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
+    if (editedArConfig.iosSrc) {
+      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
+    }
 
     const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, this.arConfig, {}, undefined);
+        renderModelViewer(editedConfig, editedArConfig, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>

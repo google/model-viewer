@@ -50,7 +50,7 @@ export function arReducer(
     case SET_AR_MODES:
       return {...state, arModes: action.payload};
     case SET_IOS_SRC:
-      return {...state, arModes: action.payload};
+      return {...state, iosSrc: action.payload};
     default:
       return state;
   }
