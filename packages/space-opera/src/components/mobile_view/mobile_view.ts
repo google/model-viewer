@@ -217,6 +217,7 @@ export class MobileView extends ConnectedLitElement {
    * Determine the mobile operating system.
    * This function returns one of 'iOS', 'Android', 'Windows Phone', or
    * 'unknown'.
+   * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
    */
   getMobileOperatingSystem(): string {
     // @ts-ignore

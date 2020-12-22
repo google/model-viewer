@@ -32,6 +32,7 @@ interface UIState {
 }
 
 export interface RelativeFilePathsState {
+  iosName?: string|undefined;
   modelName?: string|undefined;
   environmentName?: string|undefined;
   posterName?: string|undefined;
@@ -49,6 +50,7 @@ interface GltfEditsState {
 export interface ArConfigState {
   ar?: boolean;
   arModes?: string;
+  iosSrc?: string;
 }
 
 export interface ModelViewerSnippetState {

@@ -16,6 +16,7 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
 import {customElement, html, internalProperty, query, TemplateResult} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
@@ -26,13 +27,15 @@ import {ArConfigState, State} from '../../types.js';
 import {getCamera} from '../camera_settings/reducer.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {FileModalElement} from '../file_modal/file_modal.js';
 import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
-import {dispatchAr, dispatchArModes, getArConfig} from './reducer.js';
+import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
 
 interface URLs {
   gltf: string|undefined;
@@ -41,6 +44,7 @@ interface URLs {
 
 // TODOs for enabling iOS Support:
 // 1) Create a button in the mobile view for uploading a USDZ/.reality file.
+// 2) If a new model is uploaded
 // 2) If the ping from the mobile device sends back that the device is an ios.
 // 2.a) Pause the sending of the data until a USDZ file is uploaded.
 // 2.b) Send the USDZ file instead of the GLB.
@@ -57,6 +61,8 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() isDeployed = false;
   @internalProperty() mobileOS: string = '';
+  @internalProperty() iosAndNoUsdz = false;
+  @query('me-file-modal') fileModal!: FileModalElement;
   @internalProperty() isDeployable = false;
   @internalProperty() isSendingData = false;
   @internalProperty() pipeId = this.getRandomInt(1e+20);
@@ -109,6 +115,9 @@ export class OpenMobileView extends ConnectedLitElement {
     this.contentHasChanged = this.getContentHasChanged();
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
+
+    this.iosAndNoUsdz =
+        this.mobileOS === 'iOS' && this.arConfig.iosSrc === undefined;
   }
 
   newModelPipeUrl(id: number): string {
@@ -188,6 +197,7 @@ export class OpenMobileView extends ConnectedLitElement {
     const updatedContent = this.getUpdatedContent();
     await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl)
 
+    // TODO: if ping is from ios device, use usdz
     if (updatedContent.gltfChanged) {
       const blob = await this.prepareGlbBlob(this.gltfModel!);
       await this.postContent(blob, this.newModelPipeUrl(updatedContent.gltfId));
@@ -275,7 +285,12 @@ export class OpenMobileView extends ConnectedLitElement {
   get optionalMessage(): TemplateResult {
     const isOutOfSync = this.haveReceivedResponse &&
         (!this.isSendingData && this.contentHasChanged);
-    if (isOutOfSync) {
+    if (this.iosAndNoUsdz) {
+      return html`
+      <div style="color: white; margin-top: 5px;">
+        Upload a usdz or .reality file to see your model on your iOS device.
+      </div>`
+    } else if (isOutOfSync) {
       return html`
     <div style="color: #DC143C; margin-top: 5px;">
       Your mobile view is out of sync with the editor.
@@ -305,7 +320,8 @@ export class OpenMobileView extends ConnectedLitElement {
         View QR Code
       </mwc-button>
       <mwc-button unelevated icon="cached" @click=${this.postInfo} 
-        ?disabled=${!this.haveReceivedResponse || this.isSendingData}
+        ?disabled=${
+    !this.haveReceivedResponse || this.isSendingData || this.iosAndNoUsdz}
         style="--mdc-theme-primary: ${outOfSyncColor}">
         Refresh Mobile
       </mwc-button>
@@ -329,11 +345,38 @@ export class OpenMobileView extends ConnectedLitElement {
     `
   }
 
+  async onUploadUSDZ() {
+    const files: any = await this.fileModal.open();
+    if (!files) {
+      /// The user canceled the previous upload
+      return;
+    }
+    const arrayBuffer = await files[0].arrayBuffer();
+    reduxStore.dispatch(dispatchSetIosName(files[0].name));
+    const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+    reduxStore.dispatch(dispatchIosSrc(url));
+  }
+
+  renderIos() {
+    return html`
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">iOS Settings:</div>
+    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ}>
+      USDZ
+    </mwc-button>
+    <div style="color: white; margin-top: 5px;">
+      You must upload a USDZ model to view on an iOS device.
+    </div>
+    `
+  }
+
   render() {
     return html`
     ${!this.isDeployed ? this.renderDeployButton() : html``}
     <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     ${this.isDeployed ? this.renderMobileInfo() : html``}
+    ${this.renderIos()}
+    <me-file-modal accept=".usdz"></me-file-modal>
+    <div style="margin-bottom: 40px;"></div>
   `;
   }
 }
