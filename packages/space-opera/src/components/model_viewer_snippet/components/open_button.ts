@@ -31,7 +31,7 @@ import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
-import {getArConfig} from '../../mobile_view/reducer.js';
+import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
@@ -62,6 +62,17 @@ export class OpenModal extends ConnectedLitElement {
     this.relativeFilePaths = getRelativeFilePaths(state);
   }
 
+  // logic similar to parseSnippet inside of editing adapter.
+  parseSnippetAr(snippet: string): ArConfigState {
+    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
+    const modelViewer =
+        parsedInput.body.getElementsByTagName('model-viewer')[0];
+    const arConfig: ArConfigState = {};
+    arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
+    arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
+    return arConfig
+  }
+
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
     if (!textArea)
@@ -77,6 +88,7 @@ export class OpenModal extends ConnectedLitElement {
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
+      const arConfig = this.parseSnippetAr(inputText);
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
@@ -125,6 +137,7 @@ export class OpenModal extends ConnectedLitElement {
         // triggering a change event selecting none).
         dispatchConfig(config);
         reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
+        reduxStore.dispatch(dispatchArConfig(arConfig));
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
