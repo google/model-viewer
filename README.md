@@ -18,8 +18,9 @@ Check out the README.md files for specific projects to get more details:
 
 ## Development
 
-When developing across all the projects in this repository, first install git,
-Node.js and npm.
+All projects are intended to be developed on Linux. Developing in other environments (macOS, Windows or WSL) may be possible but isn't guaranteed to work, and may result in unexpected errors.
+
+When developing across all the projects in this repository, first install git, Node.js and npm.
 
 Then, perform the following steps to get set up for development:
 
