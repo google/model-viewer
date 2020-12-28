@@ -116,6 +116,10 @@ export class OpenMobileView extends ConnectedLitElement {
     return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
+  newUSDZPipeUrl(id: number): string {
+    return `https://ppng.io/modelviewereditor-usdz-${this.pipeId}-${id}`;
+  }
+
   getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
   }
@@ -190,7 +194,7 @@ export class OpenMobileView extends ConnectedLitElement {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr(), gltfId: this.getRandomInt(1e+20),
+          envIsHdr: this.envIsHdr(), modelIds: this.getRandomInt(1e+20),
           iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
     }
   }
@@ -205,17 +209,16 @@ export class OpenMobileView extends ConnectedLitElement {
       if (updatedContent.iosChanged) {
         const blob = await this.prepareUSDZ(this.urls.usdz!);
         await this.postContent(
-            blob, this.newModelPipeUrl(updatedContent.gltfId));
+            blob, this.newUSDZPipeUrl(updatedContent.modelIds));
         this.lastUrlsSent['usdz'] = this.urls['usdz'];
       }
     }
-    else {
-      if (updatedContent.gltfChanged) {
-        const blob = await this.prepareGlbBlob(this.gltfModel!);
-        await this.postContent(
-            blob, this.newModelPipeUrl(updatedContent.gltfId));
-        this.lastUrlsSent['gltf'] = this.urls['gltf'];
-      }
+
+    if (updatedContent.gltfChanged) {
+      const blob = await this.prepareGlbBlob(this.gltfModel!);
+      await this.postContent(
+          blob, this.newModelPipeUrl(updatedContent.modelIds));
+      this.lastUrlsSent['gltf'] = this.urls['gltf'];
     }
 
     if (updatedContent.stateChanged) {
@@ -259,9 +262,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
-      if (this.mobileOS === 'iOS' && this.arConfig?.iosSrc) {
-        this.postInfo();
-      }
+      this.postInfo();
     } else {
       this.onDeploy();
     }
@@ -304,7 +305,7 @@ export class OpenMobileView extends ConnectedLitElement {
     if (this.iosAndNoUsdz) {
       return html`
       <div style="color: white; margin-top: 5px;">
-        Upload a .usdz to view on an iOS device.
+        Upload a .usdz to view model in AR on an iOS device.
       </div>`
     } else if (isOutOfSync) {
       return html`
@@ -337,7 +338,7 @@ export class OpenMobileView extends ConnectedLitElement {
       </mwc-button>
       <mwc-button unelevated icon="cached" @click=${this.postInfo} 
         ?disabled=${
-    !this.haveReceivedResponse || this.isSendingData || this.iosAndNoUsdz}
+    !this.haveReceivedResponse || this.isSendingData}
         style="--mdc-theme-primary: ${outOfSyncColor}">
         Refresh Mobile
       </mwc-button>
@@ -383,7 +384,7 @@ export class OpenMobileView extends ConnectedLitElement {
       USDZ
     </mwc-button>
     <div style="color: ${needUsdzText}; margin-top: 5px;">
-      Upload a .usdz to view on an iOS device.
+      Upload a .usdz to view model in AR on an iOS device.
     </div>
     `
   }

@@ -30,7 +30,7 @@ import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {dispatchArConfig, getArConfig} from './reducer.js';
+import {dispatchArConfig, dispatchIosSrc, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
 
@@ -43,6 +43,7 @@ export class MobileView extends ConnectedLitElement {
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
+  @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
 
   @internalProperty() config: ModelViewerConfig = {};
@@ -63,11 +64,6 @@ export class MobileView extends ConnectedLitElement {
     this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.camera = getCamera(state);
-  }
-
-  setNewModelSrc(id: number) {
-    this.modelViewerUrl =
-        `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
   }
 
   async waitForState(envChanged: boolean) {
@@ -115,9 +111,26 @@ export class MobileView extends ConnectedLitElement {
     }
   }
 
+  async waitForUSDZ(modelIds: number) {
+    const response = await fetch(
+        `https://ppng.io/modelviewereditor-usdz-${this.pipeId}-${modelIds}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const usdzUrl = URL.createObjectURL(blob);
+      reduxStore.dispatch(dispatchIosSrc(usdzUrl));
+    } else {
+      console.error('Error:', response);
+    }
+  }
+
   async waitForData(json: any) {
+    if (json.iosChanged) {
+      this.waitForUSDZ(json.modelIds);
+      await this.updateComplete;
+    }
     if (json.gltfChanged) {
-      await this.setNewModelSrc(json.gltfId);
+      this.modelViewerUrl = `https://ppng.io/modelviewereditor-model-${
+          this.pipeId}-${json.modelIds}`;
       await this.updateComplete;
     }
     if (json.stateChanged) {
@@ -189,6 +202,7 @@ export class MobileView extends ConnectedLitElement {
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
+          ios-src=${ifDefined(this.arConfig!.iosSrc)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
@@ -220,6 +234,7 @@ export class MobileView extends ConnectedLitElement {
    * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
    */
   getMobileOperatingSystem(): string {
+    return 'iOS';
     // @ts-ignore
     var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
