@@ -71,8 +71,6 @@ export class OpenModal extends ConnectedLitElement {
     arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
     arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
     arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
-    console.log(arConfig);
-    console.log(modelViewer);
     return arConfig
   }
 
