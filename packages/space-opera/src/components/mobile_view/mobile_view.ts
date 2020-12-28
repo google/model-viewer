@@ -125,7 +125,7 @@ export class MobileView extends ConnectedLitElement {
 
   async waitForData(json: any) {
     if (json.iosChanged) {
-      this.waitForUSDZ(json.modelIds);
+      await this.waitForUSDZ(json.modelIds);
       await this.updateComplete;
     }
     if (json.gltfChanged) {
