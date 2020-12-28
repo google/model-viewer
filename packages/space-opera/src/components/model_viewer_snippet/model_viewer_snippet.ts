@@ -86,12 +86,16 @@ export class ExportPanel extends ConnectedLitElement {
 
   render() {
     const editedConfig = {...this.config};
+    const editedArConfig = {...this.arConfig};
     applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, false);
+    if (editedArConfig.iosSrc) {
+      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
+    }
 
     const snippet = renderModelViewer(
-        editedConfig, {}, renderHotspots(this.hotspots), this.arConfig);
+        editedConfig, editedArConfig, {}, renderHotspots(this.hotspots));
 
     if (this.isJustOutput) {
       return html`
