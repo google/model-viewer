@@ -234,7 +234,6 @@ export class MobileView extends ConnectedLitElement {
    * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
    */
   getMobileOperatingSystem(): string {
-    return 'iOS';
     // @ts-ignore
     var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 

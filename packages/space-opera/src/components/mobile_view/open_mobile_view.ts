@@ -302,12 +302,7 @@ export class OpenMobileView extends ConnectedLitElement {
   get optionalMessage(): TemplateResult {
     const isOutOfSync = this.haveReceivedResponse &&
         (!this.isSendingData && this.contentHasChanged);
-    if (this.iosAndNoUsdz) {
-      return html`
-      <div style="color: white; margin-top: 5px;">
-        Upload a .usdz to view model in AR on an iOS device.
-      </div>`
-    } else if (isOutOfSync) {
+    if (isOutOfSync) {
       return html`
     <div style="color: #DC143C; margin-top: 5px;">
       Your mobile view is out of sync with the editor.
@@ -376,16 +371,18 @@ export class OpenMobileView extends ConnectedLitElement {
 
   renderIos() {
     const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
-    const needUsdzText = this.iosAndNoUsdz ? '#DC143C' : 'white';
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">iOS Settings:</div>
     <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
     style="--mdc-theme-primary: ${needUsdzButton}">
       USDZ
     </mwc-button>
-    <div style="color: ${needUsdzText}; margin-top: 5px;">
-      Upload a .usdz to view model in AR on an iOS device.
-    </div>
+    ${
+        this.iosAndNoUsdz ? html`
+  <div style="color: #DC143C; margin-top: 5px;">
+    Upload a .usdz to view model in AR on an iOS device.
+  </div>` :
+                            html``}
     `
   }
 
