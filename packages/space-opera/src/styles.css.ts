@@ -244,6 +244,30 @@ export const toastStyles: CSSResult = css`
   animation: fadein 0.5s, fadeout 0.5s 3.5s;
 }
 
+#snackbar-mobile {
+  visibility: hidden;
+  max-width: 250px;
+  min-width: 250px;
+  margin-left: -150px;
+  background-color: #455a64;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 30px;
+  font-size: 14px;
+  font-family: Roboto;
+}
+
+#snackbar-mobile.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 3.5s;
+  animation: fadein 0.5s, fadeout 0.5s 3.5s;
+}
+
 @-webkit-keyframes fadein {
   from {bottom: 0; opacity: 0;} 
   to {bottom: 30px; opacity: 1;}

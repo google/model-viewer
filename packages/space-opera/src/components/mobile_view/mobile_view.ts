@@ -21,7 +21,7 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {posterControlsStyles} from '../../styles.css.js';
+import {toastStyles} from '../../styles.css.js';
 import {ArConfigState, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSetCamera, getCamera} from '../camera_settings/reducer.js';
@@ -40,7 +40,7 @@ import {styles} from './styles.css.js';
  */
 @customElement('mobile-view')
 export class MobileView extends ConnectedLitElement {
-  static styles = [styles, posterControlsStyles];
+  static styles = [styles, toastStyles];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
@@ -138,8 +138,6 @@ export class MobileView extends ConnectedLitElement {
       this.modelViewerUrl =
           `https://piping.nwtgck.repl.co/modelviewereditor-model-${
               this.pipeId}-${json.modelIds}`;
-      // await fetch(`https://ppng.io/modelviewereditor-model-${this.pipeId}-${
-      //     json.modelIds}`);
       await this.updateComplete;
     }
     if (json.stateChanged) {
@@ -149,31 +147,24 @@ export class MobileView extends ConnectedLitElement {
       await this.waitForEnv(json.envIsHdr);
     }
   }
-  async initToast(json: any) {
+
+  initToast(json: any) {
     let body = json.gltfChanged ? 'gltf model, ' : '';
     body = json.envChanged ? body.concat('environment image, ') : body;
     body = json.stateChanged ? body.concat('snippet, ') : body;
     body = json.iosChanged ? body.concat('usdz model, ') : body;
     body = body.slice(0, body.length - 2).concat('.');
-    // this.toastBody = `Retrieving ${body}`;
-    // this.toastClassName = 'show';
-    // setTimeout(() => {
-    //   if (this.updatingIsDone) {
-    //     this.toastClassName = '';
-    //   } else {
-    //     this.initToast(json);
-    //   }
-    // }, 1000);
+    this.toastBody = `Loading ${body}`;
+    this.toastClassName = 'show';
   }
 
   async fetchLoop() {
     const response = await fetch(this.updatesPipeUrl);
     if (response.ok) {
-      this.updatingIsDone = false;
       const json = await response.json();
       this.initToast(json);
       await this.waitForData(json);
-      this.updatingIsDone = true;
+      this.toastClassName = '';
     } else {
       console.error('Error:', response);
     }
@@ -253,7 +244,8 @@ export class MobileView extends ConnectedLitElement {
         >${childElements}</model-viewer>
       </div>
     </div>
-    <div class="${this.toastClassName}" id="snackbar">${this.toastBody}</div>`;
+    <div class="${this.toastClassName}" id="snackbar-mobile">${
+        this.toastBody}</div>`;
   }
 
   /**
