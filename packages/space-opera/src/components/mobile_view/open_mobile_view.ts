@@ -250,8 +250,20 @@ export class OpenMobileView extends ConnectedLitElement {
       if (json.isPing) {
         this.haveReceivedResponse = true;
         this.mobileOS = json.os;
+        return true;
       }
     }
+    return false;
+  }
+
+  async pingLoop() {
+    // if ping is received, then a new page has been opened or the original
+    // page was refreshed.
+    const pinged = await this.waitForPing();
+    if (pinged) {
+      console.log('hello world!');
+    }
+    this.pingLoop();
   }
 
   // Opens the modal that displays the QR Code
@@ -265,6 +277,7 @@ export class OpenMobileView extends ConnectedLitElement {
     await this.waitForPing();
     if (this.haveReceivedResponse) {
       this.postInfo();
+      this.pingLoop();
     } else {
       this.onDeploy();
     }
