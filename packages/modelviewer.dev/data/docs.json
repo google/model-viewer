@@ -299,15 +299,6 @@
         "links": [
           "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
         ]
-      },
-      {
-        "name": "quick-look-browsers",
-        "htmlName": "quickLookBrowsers",
-        "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
-        "default": {
-          "default": "safari",
-          "options": "safari chrome"
-        }
       }
     ],
     "CSS": [
