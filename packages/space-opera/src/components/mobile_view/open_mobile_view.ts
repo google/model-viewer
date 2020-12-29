@@ -76,7 +76,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() defaultToSceneViewer: boolean = false;
   @internalProperty() selectedArMode: number = 0;
 
-  @internalProperty() base = 'https://ppng.io/modelviewereditor';
+  @internalProperty() base = 'https://piping.nwtgck.repl.co/modelviewereditor';
   @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
   @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
   @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
@@ -113,11 +113,13 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   newModelPipeUrl(id: number): string {
-    return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
+    return `https://piping.nwtgck.repl.co/modelviewereditor-model-${
+        this.pipeId}-${id}`;
   }
 
   newUSDZPipeUrl(id: number): string {
-    return `https://ppng.io/modelviewereditor-usdz-${this.pipeId}-${id}`;
+    return `https://piping.nwtgck.repl.co/modelviewereditor-usdz-${
+        this.pipeId}-${id}`;
   }
 
   getRandomInt(max: number): number {
@@ -150,17 +152,16 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   stateHasChanged() {
-    return this.haveReceivedResponse ||
-        JSON.stringify(this.snippet) !== JSON.stringify(this.lastSnippetSent);
+    return JSON.stringify(this.snippet) !==
+        JSON.stringify(this.lastSnippetSent);
   }
 
   isNewSource(src: string|undefined, lastSrc: string|undefined) {
-    return src !== undefined && (src !== lastSrc || this.haveReceivedResponse);
+    return src !== undefined && (src !== lastSrc);
   }
 
   isNewModel() {
-    return this.haveReceivedResponse ||
-        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+    return this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
         this.editsHaveChanged();
   }
 
@@ -258,15 +259,15 @@ export class OpenMobileView extends ConnectedLitElement {
     this.mobileModal.open();
   }
 
-  // An "open port" that waits for
+  // An "open port" that waits for mobile to ping the editor
   async onDeploy() {
     this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
-      await this.postInfo();
-      this.haveReceivedResponse = false;
+      this.postInfo();
+    } else {
+      this.onDeploy();
     }
-    this.onDeploy();
   }
 
   // Initialize AR values and start deploy loop
