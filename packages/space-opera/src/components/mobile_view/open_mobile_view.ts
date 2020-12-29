@@ -150,16 +150,17 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   stateHasChanged() {
-    return JSON.stringify(this.snippet) !==
-        JSON.stringify(this.lastSnippetSent);
+    return this.haveReceivedResponse ||
+        JSON.stringify(this.snippet) !== JSON.stringify(this.lastSnippetSent);
   }
 
   isNewSource(src: string|undefined, lastSrc: string|undefined) {
-    return src !== undefined && src !== lastSrc;
+    return src !== undefined && (src !== lastSrc || this.haveReceivedResponse);
   }
 
   isNewModel() {
-    return this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
+    return this.haveReceivedResponse ||
+        this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
         this.editsHaveChanged();
   }
 
@@ -257,15 +258,15 @@ export class OpenMobileView extends ConnectedLitElement {
     this.mobileModal.open();
   }
 
-  // Called each time the editor hasn't received a ping from mobile
+  // An "open port" that waits for
   async onDeploy() {
     this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
-      this.postInfo();
-    } else {
-      this.onDeploy();
+      await this.postInfo();
+      this.haveReceivedResponse = false;
     }
+    this.onDeploy();
   }
 
   // Initialize AR values and start deploy loop
