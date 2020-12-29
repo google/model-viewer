@@ -69,9 +69,6 @@ const $transitioned = Symbol('transitioned');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
-const $clickHandler = Symbol('clickHandler');
-const $keydownHandler = Symbol('keydownHandler');
-const $progressHandler = Symbol('processHandler');
 const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
@@ -263,12 +260,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$ariaLabelCallToAction] =
         this[$defaultPosterElement].getAttribute('aria-label');
 
-    protected[$clickHandler]: () => void = () => this[$onClick]();
-    protected[$keydownHandler]:
-        (event: KeyboardEvent) => void = (event) => this[$onKeydown](event);
-    protected[$progressHandler]:
-        (event: Event) => void = (event) => this[$onProgress](event);
-
     protected[$updateProgressBar] = throttle((progress: number) => {
       const parentNode = this[$defaultProgressBarElement].parentNode as Element;
 
@@ -317,12 +308,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
+      this[$posterContainerElement].addEventListener('click', this[$onClick]);
       this[$posterContainerElement].addEventListener(
-          'click', this[$clickHandler]);
-      this[$posterContainerElement].addEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].addEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].addEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.registerInstance(this);
     }
@@ -331,11 +320,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$posterContainerElement].removeEventListener(
-          'click', this[$clickHandler]);
+          'click', this[$onClick]);
       this[$posterContainerElement].removeEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].removeEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].removeEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.unregisterInstance(this)
     }
@@ -361,14 +349,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onClick]() {
+    [$onClick] = () => {
       if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
       this.dismissPoster();
-    }
+    };
 
-    [$onKeydown](event: KeyboardEvent) {
+    [$onKeydown] = (event: KeyboardEvent) => {
       if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
@@ -382,9 +370,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         default:
           break;
       }
-    }
+    };
 
-    [$onProgress](event: Event) {
+    [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
       this[$lastReportedProgress] =
           Math.max(progress, this[$lastReportedProgress]);
@@ -402,7 +390,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this.dispatchEvent(
           new CustomEvent('progress', {detail: {totalProgress: progress}}));
-    }
+    };
 
     [$shouldAttemptPreload](): boolean {
       return !!this.src &&
