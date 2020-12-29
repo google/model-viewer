@@ -281,11 +281,8 @@ configuration or device capabilities');
       // modelUrl can contain title/link/sound etc.
       // These are already URL-encoded, so we shouldn't do that again here.
       let intentParams = `?file=${modelUrl.toString()}&mode=ar_only`;
-      if (!gltfSrc.includes('&link=')) {
-        intentParams += `&link=${location}`;
-      }
-      if (!gltfSrc.includes('&title=')) {
-        intentParams += `&title=${encodeURIComponent(this.alt || '')}`;
+      if (!gltfSrc.includes('&disable_occlusion=')) {
+        intentParams += `&disable_occlusion=true`;
       }
       if (this.arScale === 'fixed') {
         intentParams += `&resizable=false`;
