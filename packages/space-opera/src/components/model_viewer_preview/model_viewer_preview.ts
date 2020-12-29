@@ -197,6 +197,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     return html`${
         renderModelViewer(
             editedConfig,
+            emptyARConfig,
             {
               load: () => {
                 this.onModelLoaded();
@@ -222,8 +223,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
                 }
               }
             },
-            childElements,
-            emptyARConfig)}`;
+            childElements)}`;
   }
 
   // Handle the case when the model is loaded for the first time.

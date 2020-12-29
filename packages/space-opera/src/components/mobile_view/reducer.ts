@@ -17,6 +17,11 @@
 
 import {Action, ArConfigState, State} from '../../types.js';
 
+const SET_IOS_SRC = 'SET_IOS_SRC';
+export function dispatchIosSrc(iosSrc: string) {
+  return {type: SET_IOS_SRC, payload: iosSrc};
+}
+
 const SET_AR = 'SET_AR';
 export function dispatchAr(isAr: boolean) {
   return {type: SET_AR, payload: isAr};
@@ -44,6 +49,8 @@ export function arReducer(
       return {...state, ar: action.payload};
     case SET_AR_MODES:
       return {...state, arModes: action.payload};
+    case SET_IOS_SRC:
+      return {...state, iosSrc: action.payload};
     default:
       return state;
   }

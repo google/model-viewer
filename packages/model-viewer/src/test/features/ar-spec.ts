@@ -150,13 +150,6 @@ suite('ModelViewerElementBase with ARMixin', () => {
       });
     });
 
-    suite('quick-look-browsers', () => {
-      // TODO(#624,#625): We cannot implement these tests without the ability
-      // to mock our constants
-      test('shows the AR button for allowed browsers');
-      test('hides the AR button for non-allowed browsers');
-    });
-
     suite('with webxr', () => {
       let element: ModelViewerElementBase&ARInterface;
 

@@ -31,7 +31,7 @@ import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
-import {dispatchAr, getArConfig} from '../../mobile_view/reducer.js';
+import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
@@ -70,6 +70,7 @@ export class OpenModal extends ConnectedLitElement {
     const arConfig: ArConfigState = {};
     arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
     arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
+    arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
     return arConfig
   }
 
@@ -111,39 +112,39 @@ export class OpenModal extends ConnectedLitElement {
           const fileName = fileNameList[fileNameList.length - 1];
           reduxStore.dispatch(dispatchSetModelName(fileName));
         }
-
-        // reset poster
-        config.poster = undefined;
-        dispatchSetPosterName(undefined);
-
-        if (config.environmentImage && isObjectUrl(config.environmentImage)) {
-          // If new env image is legal, use it
-          const engImageList = config.environmentImage.split('/');
-          const envImageName = engImageList[engImageList.length - 1];
-          reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
-        } else if (this.config.environmentImage) {
-          // else, if there was an env image in the state, leave it alone
-          config.environmentImage = this.config.environmentImage
-        } else {
-          // else, reset env image
-          config.environmentImage = undefined;
-          reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
-        }
-
-        // NOTE: It's important to dispatch these *after* the URL dispatches. If
-        // we dispatch the config and THEN clear the model URL, then
-        // config.animationName is cleared too (animation UI tries to find the
-        // anim by name, can't find it because the model is empty, thus
-        // triggering a change event selecting none).
-        dispatchConfig(config);
-        reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
-        reduxStore.dispatch(dispatchAr(arConfig.ar!));
-
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
                 e.message}`);
       }
+
+      // reset poster
+      config.poster = undefined;
+      dispatchSetPosterName(undefined);
+
+      if (config.environmentImage && isObjectUrl(config.environmentImage)) {
+        // If new env image is legal, use it
+        const engImageList = config.environmentImage.split('/');
+        const envImageName = engImageList[engImageList.length - 1];
+        reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
+      } else if (this.config.environmentImage) {
+        // else, if there was an env image in the state, leave it alone
+        config.environmentImage = this.config.environmentImage
+      } else {
+        // else, reset env image
+        config.environmentImage = undefined;
+        reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
+      }
+
+      // NOTE: It's important to dispatch these *after* the URL dispatches. If
+      // we dispatch the config and THEN clear the model URL, then
+      // config.animationName is cleared too (animation UI tries to find the
+      // anim by name, can't find it because the model is empty, thus
+      // triggering a change event selecting none).
+      dispatchConfig(config);
+      reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
+      reduxStore.dispatch(dispatchArConfig(arConfig));
+
     } else {
       this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
@@ -177,12 +178,16 @@ export class OpenModal extends ConnectedLitElement {
   render() {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
+    const editedArConfig = {...this.arConfig};
     applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
+    if (editedArConfig.iosSrc) {
+      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
+    }
 
     const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, {}, undefined, this.arConfig);
+        renderModelViewer(editedConfig, editedArConfig, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
