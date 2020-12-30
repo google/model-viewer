@@ -85,6 +85,7 @@ export default class Model extends Object3D {
   setObject(model: Object3D) {
     this.reset();
     this.modelContainer.add(model);
+    this.updateBoundingBox();
     this.updateFraming();
     this.dispatchEvent({type: 'model-load'});
   }
@@ -153,7 +154,8 @@ export default class Model extends Object3D {
 
     this.userData.url = url;
 
-    this.updateFraming();
+    this.updateBoundingBox();
+    this.updateFraming();  // element[$scene].getTarget());
 
     this.dispatchEvent({type: 'model-load', url});
   }
@@ -260,6 +262,15 @@ export default class Model extends Object3D {
     this.mixer.uncacheRoot(this);
   }
 
+  updateBoundingBox() {
+    this.remove(this.modelContainer);
+
+    this.boundingBox.setFromObject(this.modelContainer);
+    this.boundingBox.getSize(this.size);
+
+    this.add(this.modelContainer);
+  }
+
   /**
    * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
@@ -272,8 +283,6 @@ export default class Model extends Object3D {
     this.remove(this.modelContainer);
 
     if (center == null) {
-      this.boundingBox.setFromObject(this.modelContainer);
-      this.boundingBox.getSize(this.size);
       center = this.boundingBox.getCenter(new Vector3);
     }
 

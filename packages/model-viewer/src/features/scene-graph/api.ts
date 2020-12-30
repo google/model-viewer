@@ -35,8 +35,9 @@ export declare interface ThreeDOMElementMap {
  */
 export declare interface Model {
   /**
-   * An ordered set of unique Materials found in this model. The Materials are
-   * listed in scene graph traversal order.
+   * An ordered set of unique Materials found in this model. The Materials
+   * correspond to the listing of materials in the glTF, with the possible
+   * addition of a default material at the end.
    */
   readonly materials: Readonly<Material[]>;
 }
