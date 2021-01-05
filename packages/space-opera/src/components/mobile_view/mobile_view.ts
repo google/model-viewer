@@ -17,30 +17,24 @@
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
-import {reduxStore} from '../../space_opera_base.js';
 import {toastStyles} from '../../styles.css.js';
-import {ArConfigState, State} from '../../types.js';
+import {ArConfigState} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchSetCamera, getCamera} from '../camera_settings/reducer.js';
-import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/reducer.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {dispatchArConfig, dispatchIosSrc, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
-import {MobileSession} from './types.js';
+import {getRandomInt, MobileSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
  */
 @customElement('mobile-view')
-export class MobileView extends ConnectedLitElement {
+export class MobileView extends LitElement {
   static styles = [styles, toastStyles];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
@@ -52,7 +46,7 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() gltf?: GltfModel;
+  @internalProperty() envImageUrl: string = '';
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
   @internalProperty() base = 'https://piping.nwtgck.repl.co/modelviewereditor';
@@ -65,19 +59,7 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() toastBody: string = '';
   @internalProperty() updatingIsDone: boolean = true;
 
-  @internalProperty() sessionId = this.getRandomInt(1e+20);
-
-  stateChanged(state: State) {
-    this.config = getConfig(state);
-    this.arConfig = getArConfig(state);
-    this.hotspots = getHotspots(state);
-    this.camera = getCamera(state);
-  }
-
-  getRandomInt(max: number): number {
-    return Math.floor(Math.random() * Math.floor(max));
-  }
-
+  @internalProperty() sessionId = getRandomInt(1e+20);
 
   async waitForState(envChanged: boolean) {
     let partialState: any = {};
@@ -95,12 +77,10 @@ export class MobileView extends ConnectedLitElement {
       partialState.config.environmentImage = this.config.environmentImage;
     }
 
-    reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
-    reduxStore.dispatch(dispatchSetCamera(partialState.camera));
-    reduxStore.dispatch(dispatchSetConfig(partialState.config));
-    reduxStore.dispatch(dispatchArConfig(partialState.arConfig));
-
-    await this.updateComplete;
+    this.hotspots = partialState.hotspots;
+    this.arConfig = partialState.arConfig;
+    this.config = partialState.config;
+    this.camera = partialState.camera;
 
     // Send a new POST out for each scene-viewer button press
     if (partialState.arConfig.ar) {
@@ -120,7 +100,7 @@ export class MobileView extends ConnectedLitElement {
       // simulating createBlobUrlFromEnvironmentImage
       const addOn = envIsHdr ? '#.hdr' : '';
       const envUrl = URL.createObjectURL(blob) + addOn;
-      reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
+      this.envImageUrl = envUrl;
     }
   }
 
@@ -131,7 +111,7 @@ export class MobileView extends ConnectedLitElement {
     if (response.ok) {
       const blob = await response.blob();
       const usdzUrl = URL.createObjectURL(blob);
-      reduxStore.dispatch(dispatchIosSrc(usdzUrl));
+      this.arConfig.iosSrc = usdzUrl;
     } else {
       console.error('Error:', response);
     }
@@ -167,6 +147,8 @@ export class MobileView extends ConnectedLitElement {
   }
 
   // TODO: Update with a unique ID;
+  // TODO: Fix logic, for things like env image, so we know if we should delete
+  // it or not.
   async fetchLoop() {
     const response = await fetch(this.updatesPipeUrl);
     if (response.ok) {
@@ -234,7 +216,7 @@ export class MobileView extends ConnectedLitElement {
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
-          environment-image=${ifDefined(config.environmentImage)}
+          environment-image=${ifDefined(this.envImageUrl)}
           skybox-image=${ifDefined(skyboxImage)}
           exposure=${ifDefined(config.exposure)}
           poster=${ifDefined(config.poster)}

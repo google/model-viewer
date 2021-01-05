@@ -36,10 +36,11 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {MobileSession, URLs} from './types.js';
+import {getRandomInt, MobileSession, URLs} from './types.js';
 
 /**
- * Section for displaying QR Code and other info related to mobile
+ * Section for displaying QR Code and other info related for mobile devices.
+ * This is the section on the editor under the File Manager.
  */
 @customElement('open-mobile-view')
 export class OpenMobileView extends ConnectedLitElement {
@@ -51,7 +52,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @query('me-file-modal') fileModal!: FileModalElement;
   @internalProperty() isDeployable = false;
   @internalProperty() isSendingData = false;
-  @internalProperty() pipeId = this.getRandomInt(1e+20);
+  @internalProperty() pipeId = getRandomInt(1e+20);
 
   @internalProperty() contentHasChanged = false;
 
@@ -117,10 +118,6 @@ export class OpenMobileView extends ConnectedLitElement {
   newUSDZPipeUrl(id: number): string {
     return `https://piping.nwtgck.repl.co/modelviewereditor-usdz-${
         this.pipeId}-${id}`;
-  }
-
-  getRandomInt(max: number): number {
-    return Math.floor(Math.random() * Math.floor(max));
   }
 
   // Returns true if information sent to the mobile view has changed.
@@ -193,7 +190,7 @@ export class OpenMobileView extends ConnectedLitElement {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr(), modelIds: this.getRandomInt(1e+20),
+          envIsHdr: this.envIsHdr(), modelIds: getRandomInt(1e+20),
           iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
     }
   }
