@@ -15,6 +15,8 @@
  *
  */
 
+export const DOMAIN = 'https://piping.nwtgck.repl.co/';
+
 export interface URLs {
   gltf: string|undefined;
   usdz: string|undefined;
@@ -28,6 +30,40 @@ export interface MobileSession {
   isPing: boolean;
 }
 
+export interface EditorUpdates {
+  gltfChanged: boolean;
+  gltfId: number;
+  iosChanged: boolean;
+  usdzId: number;
+  stateChanged: boolean;
+  envChanged: boolean;
+  envIsHdr: boolean;
+}
+
+export interface MobilePacket {
+  updatedContent: EditorUpdates;
+  snippet?: any;
+  environmentImage?: Blob;
+}
+
 export function getRandomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
+}
+
+// ex: 'https://piping.nwtgck.repl.co/123-456'
+export function getSessionUrl(
+    pipeId: number|string, sessionId: number): string {
+  return `${DOMAIN}${pipeId}-${sessionId}`;
+}
+
+// ex: 'https://piping.nwtgck.repl.co/123-456-789'
+export function gltfToSession(
+    pipeId: number|string, sessionID: number, modelId: number): string {
+  return `${DOMAIN}${pipeId}-${sessionID}-${modelId}`;
+}
+
+// ex: 'https://piping.nwtgck.repl.co/123-456-789'
+export function usdzToSession(
+    pipeId: number|string, sessionID: number, modelId: number): string {
+  return `${DOMAIN}${pipeId}-${sessionID}-${modelId}`;
 }

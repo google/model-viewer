@@ -28,7 +28,7 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {getRandomInt, MobileSession} from './types.js';
+import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, usdzToSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -49,41 +49,31 @@ export class MobileView extends LitElement {
   @internalProperty() envImageUrl: string = '';
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
-  @internalProperty() base = 'https://piping.nwtgck.repl.co/modelviewereditor';
-  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
-  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
-  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
-  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
+  @internalProperty() base = `${DOMAIN}modelviewereditor`;
+  @internalProperty() mobilePingUrl = `${DOMAIN}ping-${this.pipeId}`;
 
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';
   @internalProperty() updatingIsDone: boolean = true;
 
   @internalProperty() sessionId = getRandomInt(1e+20);
+  @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
 
-  async waitForState(envChanged: boolean) {
-    let partialState: any = {};
-    const response = await fetch(this.snippetPipeUrl);
-    if (response.ok) {
-      partialState = await response.json();
-    } else {
-      throw new Error('Something went wrong');
-    }
-
+  updateState(snippet: any, envChanged: boolean) {
     // The partialState env link correspondes to the editor's link.
     if (envChanged) {
-      partialState.config.environmentImage = undefined;
+      snippet.config.environmentImage = undefined;
     } else if (this.config.environmentImage) {
-      partialState.config.environmentImage = this.config.environmentImage;
+      snippet.config.environmentImage = this.config.environmentImage;
     }
 
-    this.hotspots = partialState.hotspots;
-    this.arConfig = partialState.arConfig;
-    this.config = partialState.config;
-    this.camera = partialState.camera;
+    this.hotspots = snippet.hotspots;
+    this.arConfig = snippet.arConfig;
+    this.config = snippet.config;
+    this.camera = snippet.camera;
 
     // Send a new POST out for each scene-viewer button press
-    if (partialState.arConfig.ar) {
+    if (snippet.arConfig.ar) {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       // @ts-ignore
@@ -93,21 +83,18 @@ export class MobileView extends LitElement {
     }
   }
 
-  async waitForEnv(envIsHdr: boolean) {
-    const response = await fetch(this.envPipeUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      // simulating createBlobUrlFromEnvironmentImage
-      const addOn = envIsHdr ? '#.hdr' : '';
-      const envUrl = URL.createObjectURL(blob) + addOn;
-      this.envImageUrl = envUrl;
-    }
+  updateEnvironmentImage(environmentImage: any, envIsHdr: boolean) {
+    // simulating createBlobUrlFromEnvironmentImage
+    const addOn = envIsHdr ? '#.hdr' : '';
+    const envUrl = URL.createObjectURL(environmentImage) + addOn;
+    this.envImageUrl = envUrl;
   }
 
-  async waitForUSDZ(modelIds: number) {
+  // Figure out how exactly I should do this, whether I should do it like glb or
+  // not?
+  async waitForUSDZ(usdzId: number) {
     const response =
-        await fetch(`https://piping.nwtgck.repl.co/modelviewereditor-usdz-${
-            this.pipeId}-${modelIds}`);
+        await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
     if (response.ok) {
       const blob = await response.blob();
       const usdzUrl = URL.createObjectURL(blob);
@@ -117,26 +104,29 @@ export class MobileView extends LitElement {
     }
   }
 
-  async waitForData(json: any) {
-    if (json.iosChanged) {
-      await this.waitForUSDZ(json.modelIds);
-      await this.updateComplete;
+  async waitForData(json: MobilePacket) {
+    const updatedContent: EditorUpdates = json.updatedContent;
+
+    if (updatedContent.iosChanged) {
+      this.waitForUSDZ(updatedContent.usdzId);
     }
-    if (json.gltfChanged) {
+
+    if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
-          `https://piping.nwtgck.repl.co/modelviewereditor-model-${
-              this.pipeId}-${json.modelIds}`;
-      await this.updateComplete;
+          gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
     }
-    if (json.stateChanged) {
-      await this.waitForState(json.envChanged);
+
+    if (updatedContent.stateChanged) {
+      this.updateState(json.snippet, updatedContent.envChanged);
     }
-    if (json.envChanged) {
-      await this.waitForEnv(json.envIsHdr);
+
+    if (updatedContent.envChanged) {
+      this.updateEnvironmentImage(
+          json.environmentImage, updatedContent.envIsHdr);
     }
   }
 
-  initToast(json: any) {
+  initToast(json: EditorUpdates) {
     let body = json.gltfChanged ? 'gltf model, ' : '';
     body = json.envChanged ? body.concat('environment image, ') : body;
     body = json.stateChanged ? body.concat('snippet, ') : body;
@@ -146,15 +136,22 @@ export class MobileView extends LitElement {
     this.toastClassName = 'show';
   }
 
+  async cleanPacket(response: Response): MobilePacket {
+    const json = await response.json();
+    // extract updated conent, snippet, environment image
+    const blob = await environmentImage.blob();
+    return {};
+  }
+
   // TODO: Update with a unique ID;
   // TODO: Fix logic, for things like env image, so we know if we should delete
   // it or not.
   async fetchLoop() {
-    const response = await fetch(this.updatesPipeUrl);
+    const response = await fetch(this.sessionUrl);
     if (response.ok) {
-      const json = await response.json();
-      this.initToast(json);
-      await this.waitForData(json);
+      const jsonCleaned: MobilePacket = await this.cleanPacket(response);
+      this.initToast(jsonCleaned.updatedContent);
+      await this.waitForData(jsonCleaned);
       this.toastClassName = '';
     } else {
       console.error('Error:', response);

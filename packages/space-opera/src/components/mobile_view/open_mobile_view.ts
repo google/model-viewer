@@ -36,7 +36,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {getRandomInt, MobileSession, URLs} from './types.js';
+import {DOMAIN, EditorUpdates, getRandomInt, MobileSession, URLs} from './types.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -74,11 +74,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() sessionList: MobileSession[] = [];
 
-  @internalProperty() base = 'https://piping.nwtgck.repl.co/modelviewereditor';
-  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
-  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
-  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
-  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = `${DOMAIN}-ping-${this.pipeId}`;
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
@@ -110,15 +106,13 @@ export class OpenMobileView extends ConnectedLitElement {
         this.mobileOS === 'iOS' && this.arConfig.iosSrc === undefined;
   }
 
-  newModelPipeUrl(id: number): string {
-    return `https://piping.nwtgck.repl.co/modelviewereditor-model-${
-        this.pipeId}-${id}`;
-  }
+  // newModelPipeUrl(id: number): string {
+  //   return `${DOMAIN}modelviewereditor-model-${this.pipeId}-${id}`;
+  // }
 
-  newUSDZPipeUrl(id: number): string {
-    return `https://piping.nwtgck.repl.co/modelviewereditor-usdz-${
-        this.pipeId}-${id}`;
-  }
+  // newUSDZPipeUrl(id: number): string {
+  //   return `${DOMAIN}modelviewereditor-usdz-${this.pipeId}-${id}`;
+  // }
 
   // Returns true if information sent to the mobile view has changed.
   // The usdz and gltf have a dependcy on one another though, where only one is
@@ -186,13 +180,58 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // Create object to tell mobile what information is being sent so it can
   // dynamically send certain GET requests
-  getUpdatedContent() {
+  getUpdatedContent(): EditorUpdates {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr(), modelIds: getRandomInt(1e+20),
+          envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
+          usdzId: getRandomInt(1e+20),
           iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
     }
+  }
+
+
+  async sendSessionContent(session: MobileSession) {
+    // TODO: Zip into single file that is sent out containing:
+    // * updatedContent
+    // * usdz url --> isn't calling if not initially deployed atm
+    // * gltf url
+    // * snippet
+    // * env image
+
+    // TODO: get updated content for a session
+    const updatedContent = this.getUpdatedContent();
+
+    if (session.isStale) {
+      // Send Everything
+    } else {
+      session.isStale = true;
+      // send to sessionUrl(pipeId, sessionId)
+      // pack relevant content
+      // blah blah
+    }
+
+    // TODO: Update with a unique ID;
+    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl);
+
+    // TODO: if sessions have these properties
+    if (this.mobileOS === 'iOS') {
+      if (updatedContent.iosChanged) {
+        const blob = await this.prepareUSDZ(this.urls.usdz!);
+        await this.postContent(
+            blob, this.newUSDZPipeUrl(updatedContent.usdzId));
+        this.lastUrlsSent['usdz'] = this.urls['usdz'];
+      }
+    }
+
+    if (updatedContent.gltfChanged) {
+      const blob = await this.prepareGlbBlob(this.gltfModel!);
+      await this.postContent(blob, this.newModelPipeUrl(updatedContent.gltfId));
+      this.lastUrlsSent['gltf'] = this.urls['gltf'];
+    }
+
+    // Send content;
+    session.isStale = false;
   }
 
   // Send any state, model, or image that has been updated since the last update
@@ -202,34 +241,16 @@ export class OpenMobileView extends ConnectedLitElement {
   // early.
   async postInfo() {
     this.isSendingData = true;
-    const updatedContent = this.getUpdatedContent();
 
-    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl);
-
-    // TODO: Update with a unique ID;
     // TODO: Loop through mobile session list.
-    // TODO: Zip into single file that is sent out containing:
-    // * updatedContent
-    // * usdz
-    // * gltf
-    // * snippet
-    // * env image
-
-    if (this.mobileOS === 'iOS') {
-      if (updatedContent.iosChanged) {
-        const blob = await this.prepareUSDZ(this.urls.usdz!);
-        await this.postContent(
-            blob, this.newUSDZPipeUrl(updatedContent.modelIds));
-        this.lastUrlsSent['usdz'] = this.urls['usdz'];
-      }
+    for (let session of this.sessionList) {
+      this.sendSessionContent(session);
     }
 
-    if (updatedContent.gltfChanged) {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postContent(
-          blob, this.newModelPipeUrl(updatedContent.modelIds));
-      this.lastUrlsSent['gltf'] = this.urls['gltf'];
-    }
+    this.contentHasChanged = this.getContentHasChanged();
+    this.isSendingData = false;
+
+    return;
 
     if (updatedContent.stateChanged) {
       await this.postContent(JSON.stringify(this.snippet), this.snippetPipeUrl);
@@ -245,9 +266,6 @@ export class OpenMobileView extends ConnectedLitElement {
       await this.postContent(blob, this.envPipeUrl);
       this.lastUrlsSent['env'] = this.urls['env'];
     }
-
-    this.contentHasChanged = this.getContentHasChanged();
-    this.isSendingData = false;
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
