@@ -34,6 +34,7 @@ import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {dispatchArConfig, dispatchIosSrc, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
+import {MobileSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -64,12 +65,19 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() toastBody: string = '';
   @internalProperty() updatingIsDone: boolean = true;
 
+  @internalProperty() sessionId = this.getRandomInt(1e+20);
+
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.camera = getCamera(state);
   }
+
+  getRandomInt(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
 
   async waitForState(envChanged: boolean) {
     let partialState: any = {};
@@ -158,6 +166,7 @@ export class MobileView extends ConnectedLitElement {
     this.toastClassName = 'show';
   }
 
+  // TODO: Update with a unique ID;
   async fetchLoop() {
     const response = await fetch(this.updatesPipeUrl);
     if (response.ok) {
@@ -277,9 +286,15 @@ export class MobileView extends ConnectedLitElement {
 
   // ping back to the editor session
   async ping() {
+    const ping: MobileSession = {
+      os: this.getMobileOperatingSystem(),
+      id: this.sessionId,
+      isPing: true,
+      isStale: true,
+    };
     const response = await fetch(this.mobilePingUrl, {
       method: 'POST',
-      body: JSON.stringify({isPing: true, os: this.getMobileOperatingSystem()}),
+      body: JSON.stringify(ping),
     })
     if (response.ok) {
       console.log('Success:', response);

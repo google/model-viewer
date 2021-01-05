@@ -36,12 +36,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-
-interface URLs {
-  gltf: string|undefined;
-  usdz: string|undefined;
-  env: string|undefined;
-}
+import {MobileSession, URLs} from './types.js';
 
 /**
  * Section for displaying QR Code and other info related to mobile
@@ -75,6 +70,8 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() arConfig?: ArConfigState;
   @internalProperty() defaultToSceneViewer: boolean = false;
   @internalProperty() selectedArMode: number = 0;
+
+  @internalProperty() sessionList: MobileSession[] = [];
 
   @internalProperty() base = 'https://piping.nwtgck.repl.co/modelviewereditor';
   @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
@@ -202,10 +199,24 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   // Send any state, model, or image that has been updated since the last update
+  // TODO: Anywhere I postInfo, I need to await that call for all of the
+  // messages to either send or terminate.
+  // This will in essence stop a user from clicking the refresh button too
+  // early.
   async postInfo() {
     this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
-    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl)
+
+    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl);
+
+    // TODO: Update with a unique ID;
+    // TODO: Loop through mobile session list.
+    // TODO: Zip into single file that is sent out containing:
+    // * updatedContent
+    // * usdz
+    // * gltf
+    // * snippet
+    // * env image
 
     if (this.mobileOS === 'iOS') {
       if (updatedContent.iosChanged) {
@@ -246,10 +257,12 @@ export class OpenMobileView extends ConnectedLitElement {
   async waitForPing() {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
-      const json = await response.json();
+      const json: MobileSession = await response.json();
       if (json.isPing) {
         this.haveReceivedResponse = true;
-        this.mobileOS = json.os;
+        this.sessionList.concat(json);
+        this.mobileOS = json.os;  // TODO: We only need to know if there exists
+                                  // a iOS device opened.
         return true;
       }
     }
@@ -259,10 +272,7 @@ export class OpenMobileView extends ConnectedLitElement {
   async pingLoop() {
     // if ping is received, then a new page has been opened or the original
     // page was refreshed.
-    const pinged = await this.waitForPing();
-    if (pinged) {
-      console.log('hello world!');
-    }
+    await this.waitForPing();
     this.pingLoop();
   }
 
