@@ -57,6 +57,10 @@ export function getSessionUrl(
   return `${DOMAIN}${pipeId}-${sessionId}`;
 }
 
+export function getPingUrl(pipeId: number|string) {
+  return `${DOMAIN}ping-${pipeId}`;
+}
+
 // ex: 'https://piping.nwtgck.repl.co/123-456-789'
 export function gltfToSession(
     pipeId: number|string, sessionID: number, modelId: number): string {

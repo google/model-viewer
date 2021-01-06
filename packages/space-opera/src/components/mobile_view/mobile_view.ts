@@ -28,7 +28,7 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
+import {EditorUpdates, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -49,8 +49,7 @@ export class MobileView extends LitElement {
   @internalProperty() envImageUrl: string = '';
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
-  @internalProperty() base = `${DOMAIN}modelviewereditor`;
-  @internalProperty() mobilePingUrl = `${DOMAIN}ping-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';

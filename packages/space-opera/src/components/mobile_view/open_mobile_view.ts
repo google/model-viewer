@@ -17,7 +17,7 @@
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
-import {customElement, html, internalProperty, query, TemplateResult} from 'lit-element';
+import {customElement, html, internalProperty, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -36,7 +36,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
+import {EditorUpdates, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -46,15 +46,16 @@ import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, Mobil
 export class OpenMobileView extends ConnectedLitElement {
   static styles = openMobileViewStyles;
 
+  @internalProperty() pipeId = getRandomInt(1e+20);
+
   @internalProperty() isDeployed = false;
+  @internalProperty() isDeployable = false;
+  @internalProperty() isSendingData = false;
+  @internalProperty() contentHasChanged = false;
+
   @internalProperty() openedIOS: boolean = false;
   @internalProperty() iosAndNoUsdz = false;
   @query('me-file-modal') fileModal!: FileModalElement;
-  @internalProperty() isDeployable = false;
-  @internalProperty() isSendingData = false;
-  @internalProperty() pipeId = getRandomInt(1e+20);
-
-  @internalProperty() contentHasChanged = false;
 
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
@@ -74,7 +75,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() sessionList: MobileSession[] = [];
 
-  @internalProperty() mobilePingUrl = `${DOMAIN}-ping-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
@@ -101,7 +102,6 @@ export class OpenMobileView extends ConnectedLitElement {
     this.contentHasChanged = this.getContentHasChanged();
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
-
     this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
   }
 
@@ -154,7 +154,7 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-  // If a session never received content last time, force everything to update
+  // If a session didn't received content last time, force everything to update
   // this time.
   getStaleContent(): EditorUpdates {
     return {
@@ -223,6 +223,11 @@ export class OpenMobileView extends ConnectedLitElement {
     this.isSendingData = false;
   }
 
+  async triggerPost() {
+    await this.postInfo();
+    this.postInfoCleanup();
+  }
+
   // update haveReceivedResponse when a ping was received from the mobile view
   async waitForPing() {
     const response = await fetch(this.mobilePingUrl);
@@ -233,7 +238,9 @@ export class OpenMobileView extends ConnectedLitElement {
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }
+      return true;
     }
+    return false;
   }
 
   async pingLoop() {
@@ -248,13 +255,13 @@ export class OpenMobileView extends ConnectedLitElement {
     this.mobileModal.open();
   }
 
-  // An "open port" that waits for mobile to ping the editor
+  // An "open port" is waiting for at least one mobile session to ping the
+  // editor
   async onDeploy() {
     this.openModal();
-    await this.waitForPing();
-    if (this.haveReceivedResponse) {
-      await this.postInfo();
-      this.postInfoCleanup();
+    const wasPinged = await this.waitForPing();
+    if (wasPinged) {
+      this.triggerPost();
       this.pingLoop();
     } else {
       this.onDeploy();
@@ -267,16 +274,6 @@ export class OpenMobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchAr(true));
     reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
     await this.onDeploy();
-  }
-
-  renderDeployButton() {
-    return html`
-    <mwc-button unelevated
-      icon="file_download"
-      ?disabled=${!this.isDeployable}
-      @click=${this.onInitialDeploy}>
-        Deploy Mobile
-    </mwc-button>`
   }
 
   onEnableARChange() {
@@ -292,64 +289,6 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-  get optionalMessage(): TemplateResult {
-    const isOutOfSync = this.haveReceivedResponse &&
-        (!this.isSendingData && this.contentHasChanged);
-    if (isOutOfSync) {
-      return html`
-    <div style="color: #DC143C; margin-top: 5px;">
-      Your mobile view is out of sync with the editor.
-    </div>`;
-    } else if (this.isSendingData) {
-      return html`
-    <div style="color: white; margin-top: 5px;">
-      Sending data to mobile device. Textured models will take some time.
-    </div>`
-    } else if (!this.haveReceivedResponse) {
-      return html`
-      <div style="color: white; margin-top: 5px;">
-        Use the QR Code to open the mobile viewing page on a mobile device.
-      </div>`
-    }
-    return html``;
-  }
-
-  renderMobileInfo() {
-    const isOutOfSync = this.haveReceivedResponse &&
-        (!this.isSendingData && this.contentHasChanged);
-    const outOfSyncColor = isOutOfSync ? '#DC143C' : '#4285F4';
-    return html`
-    <div>
-      <mwc-button unelevated @click=${
-        this.openModal} style="margin-bottom: 10px;">
-        View QR Code
-      </mwc-button>
-      <mwc-button unelevated icon="cached" @click=${this.postInfo} 
-        ?disabled=${
-    !this.haveReceivedResponse || this.isSendingData}
-        style="--mdc-theme-primary: ${outOfSyncColor}">
-        Refresh Mobile
-      </mwc-button>
-      ${this.optionalMessage}
-    </div>
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Settings:</div>
-    <me-checkbox 
-      id="ar-modes" 
-      label="Default AR Modes to Scene Viewer"
-      ?checked="${this.defaultToSceneViewer}"
-      @change=${this.onSelectArMode}
-      >
-    </me-checkbox>
-    <me-checkbox 
-      id="ar" 
-      label="Enable AR"
-      ?checked="${!!this.arConfig!.ar}"
-      @change=${this.onEnableARChange}
-      >
-    </me-checkbox>
-    `
-  }
-
   async onUploadUSDZ() {
     const files: any = await this.fileModal.open();
     if (!files) {
@@ -362,30 +301,27 @@ export class OpenMobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchIosSrc(url));
   }
 
-  renderIos() {
-    const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
-    return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">iOS Settings:</div>
-    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
-    style="--mdc-theme-primary: ${needUsdzButton}">
-      USDZ
-    </mwc-button>
-    ${
-        this.iosAndNoUsdz ? html`
-  <div style="color: #DC143C; margin-top: 5px;">
-    Upload a .usdz to view model in AR on an iOS device.
-  </div>` :
-                            html``}
-    `
-  }
-
   render() {
     return html`
-    ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
-    ${this.isDeployed ? this.renderMobileInfo() : html``}
-    ${this.renderIos()}
+    <mobile-expandable-section 
+      .isDeployed=${this.isDeployed} 
+      .isDeployable=${this.isDeployable}
+      .onInitialDeploy=${this.onInitialDeploy.bind(this)}
+      .haveReceivedResponse=${this.haveReceivedResponse}
+      .isSendingData=${this.isSendingData}
+      .contentHasChanged=${this.contentHasChanged}
+      .openModal=${this.openModal.bind(this)}
+      .triggerPost=${this.triggerPost.bind(this)}
+      .defaultToSceneViewer=${this.defaultToSceneViewer}
+      .onSelectArMode=${this.onSelectArMode.bind(this)}
+      .arConfig=${this.arConfig}
+      .onEnableARChange=${this.onEnableARChange.bind(this)}
+      .iosAndNoUsdz=${this.iosAndNoUsdz}
+      .onUploadUSDZ=${this.onUploadUSDZ.bind(this)}
+    >
+    </mobile-expandable-section>
     <me-file-modal accept=".usdz"></me-file-modal>
+    <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     <div style="margin-bottom: 40px;"></div>
   `;
   }

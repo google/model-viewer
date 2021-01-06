@@ -38,7 +38,6 @@ export class ExpandableTab extends LitElement {
 
   render() {
     const stickyClass = this.sticky ? 'sticky' : '';
-    // const noIconClass = this.copyFunction === undefined ? 'no-icon' : '';
     const copy = this.copyFunction !== undefined ? html`
         <mwc-button class="upload" id="uploadButton"
           icon="file_copy" @click="${this.copyFunction}">
