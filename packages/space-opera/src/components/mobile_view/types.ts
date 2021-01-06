@@ -15,6 +15,8 @@
  *
  */
 
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
+
 export const DOMAIN = 'https://piping.nwtgck.repl.co/';
 
 export interface URLs {
@@ -27,7 +29,6 @@ export interface MobileSession {
   id: number;
   isStale: boolean;
   os: string;
-  isPing: boolean;
 }
 
 export interface EditorUpdates {
@@ -66,4 +67,29 @@ export function gltfToSession(
 export function usdzToSession(
     pipeId: number|string, sessionID: number, modelId: number): string {
   return `${DOMAIN}${pipeId}-${sessionID}-${modelId}`;
+}
+
+export async function prepareGlbBlob(gltf: GltfModel) {
+  const glbBuffer = await gltf.packGlb();
+  return new Blob([glbBuffer], {type: 'model/gltf-binary'});
+}
+
+export async function prepareUSDZ(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch url ${url}`);
+  }
+  return await response.blob();
+}
+
+export async function post(content: Blob|string, url: string) {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: content,
+  });
+  if (response.ok) {
+    console.log('Success:', response);
+  } else {
+    throw new Error(`Failed to post: ${url}`);
+  }
 }

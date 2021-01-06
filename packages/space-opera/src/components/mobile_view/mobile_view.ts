@@ -28,7 +28,7 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, usdzToSession} from './types.js';
+import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -78,7 +78,7 @@ export class MobileView extends LitElement {
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       // @ts-ignore
       arButton.addEventListener('click', (event: MouseEvent) => {
-        this.postSceneViewerBlob(this.currentBlob!);
+        post(this.currentBlob!, this.modelViewerUrl);
       });
     }
   }
@@ -136,11 +136,18 @@ export class MobileView extends LitElement {
     this.toastClassName = 'show';
   }
 
-  async cleanPacket(response: Response): MobilePacket {
+  async cleanPacket(response: Response): Promise<MobilePacket> {
     const json = await response.json();
-    // extract updated conent, snippet, environment image
-    const blob = await environmentImage.blob();
-    return {};
+
+    let cleanedJson: MobilePacket = {updatedContent: json.updatedContent};
+    if (json.snippet) {
+      cleanedJson.snippet = json.snippet;
+    }
+    if (json.environmentImage) {
+      cleanedJson.environmentImage = await json.environmentImage.blob();
+    }
+
+    return cleanedJson
   }
 
   // TODO: Update with a unique ID;
@@ -163,25 +170,6 @@ export class MobileView extends LitElement {
     await this.triggerFetchLoop();
   }
 
-  async prepareGlbBlob(gltf: GltfModel) {
-    const glbBuffer = await gltf.packGlb();
-    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
-  }
-
-  // Post new blob for scene-viewer
-  async postSceneViewerBlob(blob: Blob) {
-    const response = await fetch(this.modelViewerUrl, {
-      method: 'POST',
-      body: blob,
-    })
-    if (response.ok) {
-      console.log('Success:', response);
-    }
-    else {
-      throw new Error(`Failed to post: ${this.modelViewerUrl}`);
-    }
-  }
-
   async newModel() {
     const glTF = await this.modelViewer!.exportScene();
     const file = new File([glTF], 'model.glb');
@@ -190,9 +178,9 @@ export class MobileView extends LitElement {
     const glbContents = await downloadContents(url);
     const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-    this.currentBlob = await this.prepareGlbBlob(gltf);
+    this.currentBlob = await prepareGlbBlob(gltf);
 
-    await this.postSceneViewerBlob(this.currentBlob);
+    await post(this.currentBlob, this.modelViewerUrl);
   }
 
   render() {
@@ -268,7 +256,6 @@ export class MobileView extends LitElement {
     const ping: MobileSession = {
       os: this.getMobileOperatingSystem(),
       id: this.sessionId,
-      isPing: true,
       isStale: true,
     };
     const response = await fetch(this.mobilePingUrl, {

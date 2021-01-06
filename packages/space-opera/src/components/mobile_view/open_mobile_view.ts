@@ -36,7 +36,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {DOMAIN, EditorUpdates, getRandomInt, MobileSession, URLs} from './types.js';
+import {DOMAIN, EditorUpdates, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -47,7 +47,7 @@ export class OpenMobileView extends ConnectedLitElement {
   static styles = openMobileViewStyles;
 
   @internalProperty() isDeployed = false;
-  @internalProperty() mobileOS: string = '';
+  @internalProperty() openedIOS: boolean = false;
   @internalProperty() iosAndNoUsdz = false;
   @query('me-file-modal') fileModal!: FileModalElement;
   @internalProperty() isDeployable = false;
@@ -102,21 +102,10 @@ export class OpenMobileView extends ConnectedLitElement {
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
 
-    this.iosAndNoUsdz =
-        this.mobileOS === 'iOS' && this.arConfig.iosSrc === undefined;
+    this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
   }
 
-  // newModelPipeUrl(id: number): string {
-  //   return `${DOMAIN}modelviewereditor-model-${this.pipeId}-${id}`;
-  // }
-
-  // newUSDZPipeUrl(id: number): string {
-  //   return `${DOMAIN}modelviewereditor-usdz-${this.pipeId}-${id}`;
-  // }
-
   // Returns true if information sent to the mobile view has changed.
-  // The usdz and gltf have a dependcy on one another though, where only one is
-  // sent, so only one needs to be consistent when checking here.
   getContentHasChanged(): boolean {
     return (
         (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
@@ -153,31 +142,6 @@ export class OpenMobileView extends ConnectedLitElement {
         this.editsHaveChanged();
   }
 
-  async prepareGlbBlob(gltf: GltfModel) {
-    const glbBuffer = await gltf.packGlb();
-    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
-  }
-
-  async prepareUSDZ(url: string): Promise<Blob> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch url ${url}`);
-    }
-    return await response.blob();
-  }
-
-  async postContent(content: string|Blob, url: string) {
-    const response = await fetch(url, {
-      method: 'POST',
-      body: content,
-    });
-    if (response.ok) {
-      console.log('Success:', response);
-    } else {
-      throw new Error(`Failed to post: ${url}`);
-    }
-  }
-
   // Create object to tell mobile what information is being sent so it can
   // dynamically send certain GET requests
   getUpdatedContent(): EditorUpdates {
@@ -190,82 +154,73 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-
-  async sendSessionContent(session: MobileSession) {
-    // TODO: Zip into single file that is sent out containing:
-    // * updatedContent
-    // * usdz url --> isn't calling if not initially deployed atm
-    // * gltf url
-    // * snippet
-    // * env image
-
-    // TODO: get updated content for a session
-    const updatedContent = this.getUpdatedContent();
-
-    if (session.isStale) {
-      // Send Everything
-    } else {
-      session.isStale = true;
-      // send to sessionUrl(pipeId, sessionId)
-      // pack relevant content
-      // blah blah
+  // If a session never received content last time, force everything to update
+  // this time.
+  getStaleContent(): EditorUpdates {
+    return {
+      gltfChanged: true, stateChanged: true,
+          envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
+          gltfId: getRandomInt(1e+20), usdzId: getRandomInt(1e+20),
+          iosChanged: this.urls.usdz !== undefined
     }
-
-    // TODO: Update with a unique ID;
-    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl);
-
-    // TODO: if sessions have these properties
-    if (this.mobileOS === 'iOS') {
-      if (updatedContent.iosChanged) {
-        const blob = await this.prepareUSDZ(this.urls.usdz!);
-        await this.postContent(
-            blob, this.newUSDZPipeUrl(updatedContent.usdzId));
-        this.lastUrlsSent['usdz'] = this.urls['usdz'];
-      }
-    }
-
-    if (updatedContent.gltfChanged) {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postContent(blob, this.newModelPipeUrl(updatedContent.gltfId));
-      this.lastUrlsSent['gltf'] = this.urls['gltf'];
-    }
-
-    // Send content;
-    session.isStale = false;
   }
 
-  // Send any state, model, or image that has been updated since the last update
-  // TODO: Anywhere I postInfo, I need to await that call for all of the
-  // messages to either send or terminate.
-  // This will in essence stop a user from clicking the refresh button too
-  // early.
-  async postInfo() {
-    this.isSendingData = true;
+  async sendSessionContent(session: MobileSession) {
+    let updatedContent = this.getUpdatedContent();
 
-    // TODO: Loop through mobile session list.
-    for (let session of this.sessionList) {
-      this.sendSessionContent(session);
+    if (session.isStale) {
+      updatedContent = this.getStaleContent();
     }
+    session.isStale = true;
 
-    this.contentHasChanged = this.getContentHasChanged();
-    this.isSendingData = false;
-
-    return;
-
+    // send to sessionUrl(pipeId, sessionId)
+    const packet: MobilePacket = {updatedContent: updatedContent};
     if (updatedContent.stateChanged) {
-      await this.postContent(JSON.stringify(this.snippet), this.snippetPipeUrl);
-      this.lastSnippetSent = {...this.snippet};
+      packet.snippet = this.snippet;
     }
-
     if (updatedContent.envChanged) {
       const response = await fetch(this.urls.env!);
       if (!response.ok) {
         throw new Error(`Failed to fetch url: ${this.urls.env!}`);
       }
       const blob = await response.blob();
-      await this.postContent(blob, this.envPipeUrl);
-      this.lastUrlsSent['env'] = this.urls['env'];
+      packet.environmentImage = blob;
     }
+
+    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+
+    if (session.os === 'iOS' && updatedContent.iosChanged) {
+      const blob = await prepareUSDZ(this.urls.usdz!);
+      await post(
+          blob, usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+    }
+
+    if (updatedContent.gltfChanged) {
+      const blob = await prepareGlbBlob(this.gltfModel!);
+      await post(
+          blob, gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
+    }
+
+    // Content sent
+    session.isStale = false;
+  }
+
+  // Send any state, model, or image that has been updated since the last update
+  async postInfo() {
+    this.isSendingData = true;
+    for (let session of this.sessionList) {
+      this.sendSessionContent(session);
+    }
+  }
+
+  postInfoCleanup() {
+    this.lastSnippetSent = {...this.snippet};
+    this.lastUrlsSent['env'] = this.urls['env'];
+    this.lastUrlsSent['usdz'] = this.urls['usdz'];
+    this.lastUrlsSent['gltf'] = this.urls['gltf'];
+
+    this.contentHasChanged = this.getContentHasChanged();
+    this.isSendingData = false;
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
@@ -273,15 +228,12 @@ export class OpenMobileView extends ConnectedLitElement {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
       const json: MobileSession = await response.json();
-      if (json.isPing) {
-        this.haveReceivedResponse = true;
-        this.sessionList.concat(json);
-        this.mobileOS = json.os;  // TODO: We only need to know if there exists
-                                  // a iOS device opened.
-        return true;
+      this.haveReceivedResponse = true;
+      this.sessionList.concat(json);
+      if (json.os === 'iOS') {
+        this.openedIOS = true;
       }
     }
-    return false;
   }
 
   async pingLoop() {
@@ -301,7 +253,8 @@ export class OpenMobileView extends ConnectedLitElement {
     this.openModal();
     await this.waitForPing();
     if (this.haveReceivedResponse) {
-      this.postInfo();
+      await this.postInfo();
+      this.postInfoCleanup();
       this.pingLoop();
     } else {
       this.onDeploy();
