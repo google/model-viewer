@@ -38,6 +38,11 @@ import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
 import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
+// TODOS;
+// * Testing on multiple devices, iOS & Android at the same time.
+// * Figure out why iOS won't show AR button after sending.
+// * Verify logic for sessions.
+
 /**
  * Section for displaying QR Code and other info related for mobile devices.
  * This is the section on the editor under the File Manager.
@@ -181,7 +186,7 @@ export class OpenMobileView extends ConnectedLitElement {
       packet.snippet = this.snippet;
     }
 
-    post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
 
     if (session.os === 'iOS' && updatedContent.iosChanged) {
       const blob = await prepareUSDZ(this.urls.usdz!);
@@ -209,9 +214,7 @@ export class OpenMobileView extends ConnectedLitElement {
   // Send any state, model, or image that has been updated since the last update
   async postInfo() {
     this.isSendingData = true;
-    console.log('posted session list', this.sessionList);
     for (let session of this.sessionList) {
-      console.log('session loop:', session);
       this.sendSessionContent(session);
     }
   }
@@ -227,7 +230,6 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   async triggerPost() {
-    console.log('triggered!');
     await this.postInfo();
     this.postInfoCleanup();
   }
@@ -239,10 +241,10 @@ export class OpenMobileView extends ConnectedLitElement {
       const json: MobileSession = await response.json();
       this.haveReceivedResponse = true;
       this.sessionList.push(json);
-      console.log('pinged json', json);
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }
+      this.triggerPost();  // TODO: received resposne and not current sending...
       return true;
     }
     return false;
@@ -261,12 +263,11 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   // An "open port" is waiting for at least one mobile session to ping the
-  // editor
+  // editor.
   async onDeploy() {
     this.openModal();
     const wasPinged = await this.waitForPing();
     if (wasPinged) {
-      this.triggerPost();
       this.pingLoop();
     } else {
       this.onDeploy();

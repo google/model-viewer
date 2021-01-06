@@ -214,16 +214,7 @@ export class MobileView extends LitElement {
       id: this.sessionId,
       isStale: true,
     };
-    const response = await fetch(this.mobilePingUrl, {
-      method: 'POST',
-      body: JSON.stringify(ping),
-    })
-    if (response.ok) {
-      console.log('Success:', response);
-    }
-    else {
-      throw new Error(`Failed to post: ${this.mobilePingUrl}`);
-    }
+    await post(JSON.stringify(ping), this.mobilePingUrl);
   }
 
   // (Overriding default) Tell editor session that it is ready for data.
