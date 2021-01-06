@@ -36,7 +36,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {EditorUpdates, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
+import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -165,6 +165,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
+  // TODO: Refactor so all of the Mobile Packets are sent at once, and then
+  // the models are sent at once.
   async sendSessionContent(session: MobileSession) {
     let updatedContent = this.getUpdatedContent();
 
@@ -178,27 +180,26 @@ export class OpenMobileView extends ConnectedLitElement {
     if (updatedContent.stateChanged) {
       packet.snippet = this.snippet;
     }
+
+    post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+
+    if (session.os === 'iOS' && updatedContent.iosChanged) {
+      const blob = await prepareUSDZ(this.urls.usdz!);
+      post(blob, usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+    }
+
+    if (updatedContent.gltfChanged) {
+      const blob = await prepareGlbBlob(this.gltfModel!);
+      post(blob, gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
+    }
+
     if (updatedContent.envChanged) {
       const response = await fetch(this.urls.env!);
       if (!response.ok) {
         throw new Error(`Failed to fetch url: ${this.urls.env!}`);
       }
       const blob = await response.blob();
-      packet.environmentImage = blob;
-    }
-
-    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
-
-    if (session.os === 'iOS' && updatedContent.iosChanged) {
-      const blob = await prepareUSDZ(this.urls.usdz!);
-      await post(
-          blob, usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
-    }
-
-    if (updatedContent.gltfChanged) {
-      const blob = await prepareGlbBlob(this.gltfModel!);
-      await post(
-          blob, gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
+      post(blob, envToSession(this.pipeId, session.id));
     }
 
     // Content sent
@@ -208,7 +209,9 @@ export class OpenMobileView extends ConnectedLitElement {
   // Send any state, model, or image that has been updated since the last update
   async postInfo() {
     this.isSendingData = true;
+    console.log('posted session list', this.sessionList);
     for (let session of this.sessionList) {
+      console.log('session loop:', session);
       this.sendSessionContent(session);
     }
   }
@@ -224,6 +227,7 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   async triggerPost() {
+    console.log('triggered!');
     await this.postInfo();
     this.postInfoCleanup();
   }
@@ -234,7 +238,8 @@ export class OpenMobileView extends ConnectedLitElement {
     if (response.ok) {
       const json: MobileSession = await response.json();
       this.haveReceivedResponse = true;
-      this.sessionList.concat(json);
+      this.sessionList.push(json);
+      console.log('pinged json', json);
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }

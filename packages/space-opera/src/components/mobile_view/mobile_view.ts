@@ -28,7 +28,7 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {EditorUpdates, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
+import {EditorUpdates, envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -82,15 +82,7 @@ export class MobileView extends LitElement {
     }
   }
 
-  updateEnvironmentImage(environmentImage: any, envIsHdr: boolean) {
-    // simulating createBlobUrlFromEnvironmentImage
-    const addOn = envIsHdr ? '#.hdr' : '';
-    const envUrl = URL.createObjectURL(environmentImage) + addOn;
-    this.envImageUrl = envUrl;
-  }
-
-  // Figure out how exactly I should do this, whether I should do it like glb or
-  // not?
+  // TODO: Fix ios not showing ar button
   async waitForUSDZ(usdzId: number) {
     const response =
         await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
@@ -100,6 +92,17 @@ export class MobileView extends LitElement {
       this.arConfig.iosSrc = usdzUrl;
     } else {
       console.error('Error:', response);
+    }
+  }
+
+  async waitForEnv(envIsHdr: boolean) {
+    const response = await fetch(envToSession(this.pipeId, this.sessionId));
+    if (response.ok) {
+      const blob = await response.blob();
+      // simulating createBlobUrlFromEnvironmentImage
+      const addOn = envIsHdr ? '#.hdr' : '';
+      const envUrl = URL.createObjectURL(blob) + addOn;
+      this.envImageUrl = envUrl;
     }
   }
 
@@ -120,8 +123,7 @@ export class MobileView extends LitElement {
     }
 
     if (updatedContent.envChanged) {
-      this.updateEnvironmentImage(
-          json.environmentImage, updatedContent.envIsHdr);
+      this.waitForEnv(updatedContent.envIsHdr);
     }
   }
 
@@ -135,29 +137,12 @@ export class MobileView extends LitElement {
     this.toastClassName = 'show';
   }
 
-  async cleanPacket(response: Response): Promise<MobilePacket> {
-    const json = await response.json();
-
-    let cleanedJson: MobilePacket = {updatedContent: json.updatedContent};
-    if (json.snippet) {
-      cleanedJson.snippet = json.snippet;
-    }
-    if (json.environmentImage) {
-      cleanedJson.environmentImage = await json.environmentImage.blob();
-    }
-
-    return cleanedJson
-  }
-
-  // TODO: Update with a unique ID;
-  // TODO: Fix logic, for things like env image, so we know if we should delete
-  // it or not.
   async fetchLoop() {
     const response = await fetch(this.sessionUrl);
     if (response.ok) {
-      const jsonCleaned: MobilePacket = await this.cleanPacket(response);
-      this.initToast(jsonCleaned.updatedContent);
-      await this.waitForData(jsonCleaned);
+      const json: MobilePacket = await response.json();
+      this.initToast(json.updatedContent);
+      await this.waitForData(json);
       this.toastClassName = '';
     } else {
       console.error('Error:', response);
@@ -185,8 +170,7 @@ export class MobileView extends LitElement {
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
-    const skyboxImage =
-        config.useEnvAsSkybox ? config.environmentImage : undefined;
+    const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
 
     return html`
@@ -223,37 +207,10 @@ export class MobileView extends LitElement {
         this.toastBody}</div>`;
   }
 
-  /**
-   * Determine the mobile operating system.
-   * This function returns one of 'iOS', 'Android', 'Windows Phone', or
-   * 'unknown'.
-   * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
-   */
-  getMobileOperatingSystem(): string {
-    // @ts-ignore
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-    // Windows Phone must come first because its UA also contains "Android"
-    if (/windows phone/i.test(userAgent)) {
-      return 'Windows Phone';
-    }
-
-    if (/android/i.test(userAgent)) {
-      return 'Android';
-    }
-
-    // iOS detection from: http://stackoverflow.com/a/9039885/177710
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-      return 'iOS';
-    }
-
-    return 'unknown';
-  }
-
   // ping back to the editor session
   async ping() {
     const ping: MobileSession = {
-      os: this.getMobileOperatingSystem(),
+      os: getMobileOperatingSystem(),
       id: this.sessionId,
       isStale: true,
     };
