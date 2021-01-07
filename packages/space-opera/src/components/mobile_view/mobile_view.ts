@@ -173,7 +173,6 @@ export class MobileView extends LitElement {
     applyCameraEdits(config, this.camera);
     const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
-    console.log('toastname', this.toastClassName);
     return html`
     <div class="app">
       <div class="mvContainer">

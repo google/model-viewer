@@ -37,11 +37,6 @@ import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
 import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
-// TODOS;
-// * Testing on multiple devices, iOS & Android at the same time.
-// * Figure out why iOS won't show AR button after sending.
-// * Verify logic for sessions.
-
 /**
  * Section for displaying QR Code and other info related for mobile devices.
  * This is the section on the editor under the File Manager.
@@ -200,15 +195,12 @@ export class OpenMobileView extends ConnectedLitElement {
       await post(envBlob, envToSession(this.pipeId, session.id));
     }
 
-    console.log('Unstale session: ', session.id);
-
     // Content sent
     session.isStale = false;
   }
 
   // Send any state, model, or image that has been updated since the last update
   async postInfo() {
-    console.log('Posting Info...');
     this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
@@ -238,10 +230,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
 
     for (let session of this.sessionList) {
-      console.log('Begin For Loop session: ', session.id);
       this.sendSessionContent(
           session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
-      console.log('End For Loop session: ', session.id);
     }
   }
 
@@ -256,11 +246,8 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   async triggerPost() {
-    console.log('Trigger Post!');
     await this.postInfo();
-    console.log('After Post Info...');
     this.postInfoCleanup();
-    console.log('Cleaned!');
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view

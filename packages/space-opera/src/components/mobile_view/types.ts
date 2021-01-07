@@ -17,7 +17,7 @@
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 
-export const DOMAIN = 'https://piping.nwtgck.repl.co/';
+export const DOMAIN = 'https://piping.glitch.me/';
 
 export interface URLs {
   gltf: string|undefined;
