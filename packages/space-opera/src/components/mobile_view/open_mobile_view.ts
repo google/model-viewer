@@ -42,6 +42,7 @@ import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gl
 // * Testing on multiple devices, iOS & Android at the same time.
 // * Figure out why iOS won't show AR button after sending.
 // * Verify logic for sessions.
+// * Increase sending efficiency and test it, by pre blobing everything.
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -170,17 +171,15 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-  // TODO: Refactor so all of the Mobile Packets are sent at once, and then
-  // the models are sent at once.
-  async sendSessionContent(session: MobileSession) {
-    let updatedContent = this.getUpdatedContent();
-
+  async sendSessionContent(
+      session: MobileSession, updatedContent: EditorUpdates,
+      usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
+      envBlob: Blob|undefined) {
     if (session.isStale) {
       updatedContent = this.getStaleContent();
     }
     session.isStale = true;
 
-    // send to sessionUrl(pipeId, sessionId)
     const packet: MobilePacket = {updatedContent: updatedContent};
     if (updatedContent.stateChanged) {
       packet.snippet = this.snippet;
@@ -188,24 +187,23 @@ export class OpenMobileView extends ConnectedLitElement {
 
     await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
 
-    if (session.os === 'iOS' && updatedContent.iosChanged) {
-      const blob = await prepareUSDZ(this.urls.usdz!);
-      post(blob, usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+    if (session.os === 'iOS' && updatedContent.iosChanged && usdzBlob) {
+      await post(
+          usdzBlob,
+          usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
     }
 
-    if (updatedContent.gltfChanged) {
-      const blob = await prepareGlbBlob(this.gltfModel!);
-      post(blob, gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
+    if (updatedContent.gltfChanged && gltfBlob) {
+      await post(
+          gltfBlob,
+          gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
     }
 
-    if (updatedContent.envChanged) {
-      const response = await fetch(this.urls.env!);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch url: ${this.urls.env!}`);
-      }
-      const blob = await response.blob();
-      post(blob, envToSession(this.pipeId, session.id));
+    if (updatedContent.envChanged && envBlob) {
+      await post(envBlob, envToSession(this.pipeId, session.id));
     }
+
+    console.log('Unstale session: ', session.id);
 
     // Content sent
     session.isStale = false;
@@ -213,9 +211,40 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // Send any state, model, or image that has been updated since the last update
   async postInfo() {
+    console.log('Posting Info...');
     this.isSendingData = true;
+    const updatedContent = this.getUpdatedContent();
+    const staleContent = this.getStaleContent();
+
+    let haveStale = false;
     for (let session of this.sessionList) {
-      this.sendSessionContent(session);
+      haveStale = haveStale || session.isStale;
+    }
+
+    const usdzBlob =
+        (updatedContent.iosChanged || (haveStale && staleContent.iosChanged)) ?
+        await prepareUSDZ(this.urls.usdz!) :
+        undefined;
+
+    const gltfBlob = (updatedContent.gltfChanged ||
+                      (haveStale && staleContent.gltfChanged)) ?
+        await prepareGlbBlob(this.gltfModel!) :
+        undefined;
+
+    let envBlob = undefined;
+    if (updatedContent.envChanged || (haveStale && staleContent.envChanged)) {
+      const response = await fetch(this.urls.env!);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch url: ${this.urls.env!}`);
+      }
+      envBlob = await response.blob();
+    }
+
+    for (let session of this.sessionList) {
+      console.log('Begin For Loop session: ', session.id);
+      this.sendSessionContent(
+          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+      console.log('End For Loop session: ', session.id);
     }
   }
 
@@ -230,8 +259,11 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   async triggerPost() {
+    console.log('Trigger Post!');
     await this.postInfo();
+    console.log('After Post Info...');
     this.postInfoCleanup();
+    console.log('Cleaned!');
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
