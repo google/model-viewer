@@ -30,7 +30,7 @@ export class MobileExpanadableSection extends LitElement {
   @property({type: Boolean}) contentHasChanged?: boolean;
 
   @property({type: Function}) openModal?: Function;
-  @property({type: Function}) triggerPost?: Function;
+  @property({type: Function}) postInfo?: Function;
 
   @property({type: Boolean}) defaultToSceneViewer?: boolean;
   @property({type: Function}) onSelectArMode?: Function;
@@ -94,7 +94,7 @@ export class MobileExpanadableSection extends LitElement {
         this.openModal} style="margin-bottom: 10px;">
         View QR Code
       </mwc-button>
-      <mwc-button unelevated icon="cached" @click=${this.triggerPost}
+      <mwc-button unelevated icon="cached" @click=${this.postInfo}
         ?disabled=${
     !this.haveReceivedResponse || this.isSendingData}
         style="--mdc-theme-primary: ${outOfSyncColor}">

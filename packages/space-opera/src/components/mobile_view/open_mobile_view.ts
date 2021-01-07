@@ -59,20 +59,16 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() gltfModel?: GltfModel;
-
   @internalProperty() snippet: any = {};
   @internalProperty() lastSnippetSent: any = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
 
-
   @internalProperty() arConfig?: ArConfigState;
   @internalProperty() defaultToSceneViewer: boolean = false;
-  @internalProperty() selectedArMode: number = 0;
 
   @internalProperty() sessionList: MobileSession[] = [];
-
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   stateChanged(state: State) {
@@ -83,6 +79,9 @@ export class OpenMobileView extends ConnectedLitElement {
       this.isDeployable = true;
     }
 
+    // Update urls with most recent from redux state.
+    // If the values are different from this.lastUrlsSent, values are sent when
+    // the refresh button is pressed.
     this.urls = {
       gltf: gltfURL,
       env: getConfig(state).environmentImage,
@@ -103,7 +102,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
   }
 
-  // Returns true if information sent to the mobile view has changed.
+  // True if any content we'd send to the mobile view has changed.
   getContentHasChanged(): boolean {
     return (
         (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
@@ -140,8 +139,7 @@ export class OpenMobileView extends ConnectedLitElement {
         this.editsHaveChanged();
   }
 
-  // Create object to tell mobile what information is being sent so it can
-  // dynamically send certain GET requests
+  // Used for non-stale sessions, to only send updated content.
   getUpdatedContent(): EditorUpdates {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
@@ -152,8 +150,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
-  // If a session didn't received content last time, force everything to update
-  // this time.
+  // If a session didn't received content last time (isStale), we'll force
+  // everything to update.
   getStaleContent(): EditorUpdates {
     return {
       gltfChanged: true, stateChanged: true,
@@ -163,6 +161,11 @@ export class OpenMobileView extends ConnectedLitElement {
     }
   }
 
+  // For a single session, POST all of the relevant content that needs to be
+  // updated for that session.
+  // A session will remain stale if any of the POSTs fail. A stale session will
+  // be forced to send all of the content the next time the refresh button is
+  // clicked.
   async sendSessionContent(
       session: MobileSession, updatedContent: EditorUpdates,
       usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
@@ -195,21 +198,29 @@ export class OpenMobileView extends ConnectedLitElement {
       await post(envBlob, envToSession(this.pipeId, session.id));
     }
 
-    // Content sent
+    // The isStale flag will stay true if all of the requests are not delivered.
     session.isStale = false;
   }
 
-  // Send any state, model, or image that has been updated since the last update
+  // Send any state, model, or environment iamge that has been updated since the
+  // last refresh.
+  // TODO: Now that the posts are asynchronous, need to find a new way to deal
+  // with knowing when isSendingData should be set to false.
   async postInfo() {
     this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
 
+    // If any of the sessions are stale, we want to prepare the relavent blobs
+    // to POST before we loop through the sessions
     let haveStale = false;
     for (let session of this.sessionList) {
       haveStale = haveStale || session.isStale;
     }
 
+    // Blobs will be defined if their content has changed since the last
+    // refresh, or if any session is stale -- a stale session requires us to
+    // send all content to that session.
     const usdzBlob =
         (updatedContent.iosChanged || (haveStale && staleContent.iosChanged)) ?
         await prepareUSDZ(this.urls.usdz!) :
@@ -229,13 +240,13 @@ export class OpenMobileView extends ConnectedLitElement {
       envBlob = await response.blob();
     }
 
+    // Iterate through the list of active mobile sessions, and allow them to
+    // post their information asynchronously.
     for (let session of this.sessionList) {
       this.sendSessionContent(
           session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
     }
-  }
 
-  postInfoCleanup() {
     this.lastSnippetSent = {...this.snippet};
     this.lastUrlsSent['env'] = this.urls['env'];
     this.lastUrlsSent['usdz'] = this.urls['usdz'];
@@ -243,11 +254,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
     this.contentHasChanged = this.getContentHasChanged();
     this.isSendingData = false;
-  }
-
-  async triggerPost() {
-    await this.postInfo();
-    this.postInfoCleanup();
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
@@ -260,26 +266,24 @@ export class OpenMobileView extends ConnectedLitElement {
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }
-      this.triggerPost();  // TODO: received resposne and not current sending...
+      this.postInfo();
       return true;
     }
     return false;
   }
 
+  // If a ping was received, then a new page has been opened or a page was
+  // refreshed.
   async pingLoop() {
-    // if ping is received, then a new page has been opened or the original
-    // page was refreshed.
     await this.waitForPing();
     this.pingLoop();
   }
 
-  // Opens the modal that displays the QR Code
   openModal() {
     this.mobileModal.open();
   }
 
-  // An "open port" is waiting for at least one mobile session to ping the
-  // editor.
+  // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
     this.openModal();
     const wasPinged = await this.waitForPing();
@@ -333,7 +337,7 @@ export class OpenMobileView extends ConnectedLitElement {
       .isSendingData=${this.isSendingData}
       .contentHasChanged=${this.contentHasChanged}
       .openModal=${this.openModal.bind(this)}
-      .triggerPost=${this.triggerPost.bind(this)}
+      .postInfo=${this.postInfo.bind(this)}
       .defaultToSceneViewer=${this.defaultToSceneViewer}
       .onSelectArMode=${this.onSelectArMode.bind(this)}
       .arConfig=${this.arConfig}

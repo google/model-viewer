@@ -32,6 +32,7 @@ import {EditorUpdates, envToSession, getMobileOperatingSystem, getPingUrl, getRa
 
 /**
  * The view loaded at /editor/view/?id=xyz
+ * The id links the editor to this mobile session.
  */
 @customElement('mobile-view')
 export class MobileView extends LitElement {
@@ -81,7 +82,7 @@ export class MobileView extends LitElement {
     }
   }
 
-  // TODO: Fix ios not showing ar button
+  // TODO: Fix iOS not loading USDZ.
   async waitForUSDZ(usdzId: number) {
     const response =
         await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
@@ -97,14 +98,18 @@ export class MobileView extends LitElement {
   async waitForEnv(envIsHdr: boolean) {
     const response = await fetch(envToSession(this.pipeId, this.sessionId));
     if (response.ok) {
+      // Simulating createBlobUrlFromEnvironmentImage
       const blob = await response.blob();
-      // simulating createBlobUrlFromEnvironmentImage
       const addOn = envIsHdr ? '#.hdr' : '';
       const envUrl = URL.createObjectURL(blob) + addOn;
       this.envImageUrl = envUrl;
     }
   }
 
+  // We set modelViewerUrl instead of directly fetching it because scene-viewer
+  // requires the same url from the current model-viewer state, and we need to
+  // make a POST request to that URL when scene-viewer is triggered.
+  // TODO: Look into if that is the same issue with quick-look.
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
 
@@ -112,21 +117,18 @@ export class MobileView extends LitElement {
       this.modelViewerUrl =
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
     }
-
     if (updatedContent.stateChanged) {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
-
     if (updatedContent.iosChanged) {
       await this.waitForUSDZ(updatedContent.usdzId);
     }
-
     if (updatedContent.envChanged) {
       await this.waitForEnv(updatedContent.envIsHdr);
     }
   }
 
-  initToast(json: EditorUpdates) {
+  initializeToast(json: EditorUpdates) {
     let body = json.gltfChanged ? 'gltf model, ' : '';
     body = json.envChanged ? body.concat('environment image, ') : body;
     body = json.stateChanged ? body.concat('snippet, ') : body;
@@ -136,11 +138,12 @@ export class MobileView extends LitElement {
     this.toastClassName = 'show';
   }
 
+  // Keep listening for a new update from the editor.
   async fetchLoop() {
     const response = await fetch(this.sessionUrl);
     if (response.ok) {
       const json: MobilePacket = await response.json();
-      this.initToast(json.updatedContent);
+      this.initializeToast(json.updatedContent);
       setTimeout(() => {
         this.toastClassName = '';
       }, 5000);
@@ -155,7 +158,10 @@ export class MobileView extends LitElement {
     await this.triggerFetchLoop();
   }
 
-  async newModel() {
+  // When the model is loaded, we make a post for this specific model for
+  // scene-viewer. Subsequently, everytime scene-viewer is opened, we send the
+  // POST again.
+  async modelIsLoaded() {
     const glTF = await this.modelViewer!.exportScene();
     const file = new File([glTF], 'model.glb');
     const url = URL.createObjectURL(file);
@@ -199,7 +205,7 @@ export class MobileView extends LitElement {
           min-field-of-view=${ifDefined(config.minFov)}
           max-field-of-view=${ifDefined(config.maxFov)}
           animation-name=${ifDefined(config.animationName)}
-          @load=${this.newModel}
+          @load=${this.modelIsLoaded}
         >${childElements}</model-viewer>
       </div>
     </div>
@@ -207,7 +213,7 @@ export class MobileView extends LitElement {
         this.toastBody}</div>`;
   }
 
-  // ping back to the editor session
+  // Ping the editor
   async ping() {
     const ping: MobileSession = {
       os: getMobileOperatingSystem(),

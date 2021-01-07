@@ -36,6 +36,7 @@ export class MobileModal extends ConnectedLitElement {
 
   get viewableSite(): string {
     const path = window.location.origin + window.location.pathname;
+    console.log(path);
     return `${path}view/?id=${this.pipeId}`;
   }
 
