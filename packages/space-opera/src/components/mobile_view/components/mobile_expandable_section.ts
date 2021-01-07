@@ -19,6 +19,9 @@ import {customElement, html, LitElement, property, query, TemplateResult} from '
 import {ArConfigState} from '../../../types';
 import {CheckboxElement} from '../../shared/checkbox/checkbox';
 
+/**
+ * The delegated rendered component for the open mobile view.
+ */
 @customElement('mobile-expandable-section')
 export class MobileExpanadableSection extends LitElement {
   @property({type: Boolean}) isDeployed?: boolean;
