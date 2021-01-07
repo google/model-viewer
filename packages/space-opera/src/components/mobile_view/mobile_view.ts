@@ -53,7 +53,6 @@ export class MobileView extends LitElement {
 
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';
-  @internalProperty() updatingIsDone: boolean = true;
 
   @internalProperty() sessionId = getRandomInt(1e+20);
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
@@ -109,10 +108,6 @@ export class MobileView extends LitElement {
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
 
-    if (updatedContent.iosChanged) {
-      this.waitForUSDZ(updatedContent.usdzId);
-    }
-
     if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
@@ -122,8 +117,12 @@ export class MobileView extends LitElement {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
 
+    if (updatedContent.iosChanged) {
+      await this.waitForUSDZ(updatedContent.usdzId);
+    }
+
     if (updatedContent.envChanged) {
-      this.waitForEnv(updatedContent.envIsHdr);
+      await this.waitForEnv(updatedContent.envIsHdr);
     }
   }
 
@@ -142,8 +141,10 @@ export class MobileView extends LitElement {
     if (response.ok) {
       const json: MobilePacket = await response.json();
       this.initToast(json.updatedContent);
+      setTimeout(() => {
+        this.toastClassName = '';
+      }, 5000);
       await this.waitForData(json);
-      this.toastClassName = '';
     } else {
       console.error('Error:', response);
     }
@@ -172,7 +173,7 @@ export class MobileView extends LitElement {
     applyCameraEdits(config, this.camera);
     const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
-
+    console.log('toastname', this.toastClassName);
     return html`
     <div class="app">
       <div class="mvContainer">

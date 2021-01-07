@@ -264,8 +264,8 @@ export const toastStyles: CSSResult = css`
 
 #snackbar-mobile.show {
   visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 3.5s;
-  animation: fadein 0.5s, fadeout 0.5s 3.5s;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 4.5s;
+  animation: fadein 0.5s, fadeout 0.5s 4.5s;
 }
 
 @-webkit-keyframes fadein {

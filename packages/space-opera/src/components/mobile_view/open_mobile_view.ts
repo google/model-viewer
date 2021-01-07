@@ -32,7 +32,6 @@ import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
-import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
@@ -42,7 +41,6 @@ import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gl
 // * Testing on multiple devices, iOS & Android at the same time.
 // * Figure out why iOS won't show AR button after sending.
 // * Verify logic for sessions.
-// * Increase sending efficiency and test it, by pre blobing everything.
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -73,8 +71,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
 
-  @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
-  @query('me-checkbox#ar-modes') arModesCheckbox!: CheckboxElement;
+
   @internalProperty() arConfig?: ArConfigState;
   @internalProperty() defaultToSceneViewer: boolean = false;
   @internalProperty() selectedArMode: number = 0;
@@ -314,12 +311,12 @@ export class OpenMobileView extends ConnectedLitElement {
     await this.onDeploy();
   }
 
-  onEnableARChange() {
-    reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
+  onEnableARChange(isEnabled: boolean) {
+    reduxStore.dispatch(dispatchAr(isEnabled));
   }
 
-  onSelectArMode() {
-    this.defaultToSceneViewer = this.arModesCheckbox.checked;
+  onSelectArMode(isSceneViewer: boolean) {
+    this.defaultToSceneViewer = isSceneViewer;
     if (this.defaultToSceneViewer) {
       reduxStore.dispatch(dispatchArModes('scene-viewer webxr quick-look'));
     } else {
