@@ -17,29 +17,26 @@
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
-import {reduxStore} from '../../space_opera_base.js';
-import {ArConfigState, State} from '../../types.js';
+import {toastStyles} from '../../styles.css.js';
+import {ArConfigState} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchSetCamera, getCamera} from '../camera_settings/reducer.js';
-import {dispatchEnvrionmentImage, dispatchSetConfig, getConfig} from '../config/reducer.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchSetHotspots, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {dispatchArConfig, dispatchIosSrc, getArConfig} from './reducer.js';
 
 import {styles} from './styles.css.js';
+import {EditorUpdates, envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
+ * The id links the editor to this mobile session.
  */
 @customElement('mobile-view')
-export class MobileView extends ConnectedLitElement {
-  static styles = styles;
+export class MobileView extends LitElement {
+  static styles = [styles, toastStyles];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
@@ -50,102 +47,107 @@ export class MobileView extends ConnectedLitElement {
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() gltf?: GltfModel;
+  @internalProperty() envImageUrl: string = '';
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
-  @internalProperty() base = 'https://ppng.io/modelviewereditor';
-  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
-  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
-  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
-  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
+  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
-  stateChanged(state: State) {
-    this.config = getConfig(state);
-    this.arConfig = getArConfig(state);
-    this.hotspots = getHotspots(state);
-    this.camera = getCamera(state);
-  }
+  @internalProperty() toastClassName: string = '';
+  @internalProperty() toastBody: string = '';
 
-  async waitForState(envChanged: boolean) {
-    let partialState: any = {};
-    const response = await fetch(this.snippetPipeUrl);
-    if (response.ok) {
-      partialState = await response.json();
-    } else {
-      throw new Error('Something went wrong');
-    }
+  @internalProperty() sessionId = getRandomInt(1e+20);
+  @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
 
+  updateState(snippet: any, envChanged: boolean) {
     // The partialState env link correspondes to the editor's link.
     if (envChanged) {
-      partialState.config.environmentImage = undefined;
+      snippet.config.environmentImage = undefined;
     } else if (this.config.environmentImage) {
-      partialState.config.environmentImage = this.config.environmentImage;
+      snippet.config.environmentImage = this.config.environmentImage;
     }
 
-    reduxStore.dispatch(dispatchSetHotspots(partialState.hotspots));
-    reduxStore.dispatch(dispatchSetCamera(partialState.camera));
-    reduxStore.dispatch(dispatchSetConfig(partialState.config));
-    reduxStore.dispatch(dispatchArConfig(partialState.arConfig));
-
-    await this.updateComplete;
+    this.hotspots = snippet.hotspots;
+    this.arConfig = snippet.arConfig;
+    this.config = snippet.config;
+    this.camera = snippet.camera;
 
     // Send a new POST out for each scene-viewer button press
-    if (partialState.arConfig.ar) {
+    if (snippet.arConfig.ar) {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       // @ts-ignore
       arButton.addEventListener('click', (event: MouseEvent) => {
-        this.postSceneViewerBlob(this.currentBlob!);
+        post(this.currentBlob!, this.modelViewerUrl);
       });
     }
   }
 
-  async waitForEnv(envIsHdr: boolean) {
-    const response = await fetch(this.envPipeUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      // simulating createBlobUrlFromEnvironmentImage
-      const addOn = envIsHdr ? '#.hdr' : '';
-      const envUrl = URL.createObjectURL(blob) + addOn;
-      reduxStore.dispatch(dispatchEnvrionmentImage(envUrl));
-    }
-  }
-
-  async waitForUSDZ(modelIds: number) {
-    const response = await fetch(
-        `https://ppng.io/modelviewereditor-usdz-${this.pipeId}-${modelIds}`);
+  // TODO: Fix iOS not loading USDZ.
+  async waitForUSDZ(usdzId: number) {
+    const response =
+        await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
     if (response.ok) {
       const blob = await response.blob();
       const usdzUrl = URL.createObjectURL(blob);
-      reduxStore.dispatch(dispatchIosSrc(usdzUrl));
+      this.arConfig.iosSrc = usdzUrl;
     } else {
       console.error('Error:', response);
     }
   }
 
-  async waitForData(json: any) {
-    if (json.iosChanged) {
-      await this.waitForUSDZ(json.modelIds);
-      await this.updateComplete;
-    }
-    if (json.gltfChanged) {
-      this.modelViewerUrl = `https://ppng.io/modelviewereditor-model-${
-          this.pipeId}-${json.modelIds}`;
-      await this.updateComplete;
-    }
-    if (json.stateChanged) {
-      await this.waitForState(json.envChanged);
-    }
-    if (json.envChanged) {
-      await this.waitForEnv(json.envIsHdr);
+  async waitForEnv(envIsHdr: boolean) {
+    const response = await fetch(envToSession(this.pipeId, this.sessionId));
+    if (response.ok) {
+      // Simulating createBlobUrlFromEnvironmentImage
+      const blob = await response.blob();
+      const addOn = envIsHdr ? '#.hdr' : '';
+      const envUrl = URL.createObjectURL(blob) + addOn;
+      this.envImageUrl = envUrl;
     }
   }
 
+  // We set modelViewerUrl instead of directly fetching it because scene-viewer
+  // requires the same url from the current model-viewer state, and we need to
+  // make a POST request to that URL when scene-viewer is triggered.
+  // TODO: Look into if that is the same issue with quick-look.
+  async waitForData(json: MobilePacket) {
+    const updatedContent: EditorUpdates = json.updatedContent;
+
+    if (updatedContent.gltfChanged) {
+      this.modelViewerUrl =
+          gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
+    }
+    if (updatedContent.stateChanged) {
+      this.updateState(json.snippet, updatedContent.envChanged);
+    }
+    if (updatedContent.iosChanged) {
+      await this.waitForUSDZ(updatedContent.usdzId);
+    }
+    if (updatedContent.envChanged) {
+      await this.waitForEnv(updatedContent.envIsHdr);
+    }
+  }
+
+  initializeToast(json: EditorUpdates) {
+    let body = json.gltfChanged ? 'gltf model, ' : '';
+    body = json.envChanged ? body.concat('environment image, ') : body;
+    body = json.stateChanged ? body.concat('snippet, ') : body;
+    body = json.iosChanged ? body.concat('usdz model, ') : body;
+    body = body.slice(0, body.length - 2).concat('.');
+    this.toastBody = `Loading ${body}`;
+    this.toastClassName = 'show';
+  }
+
+  // Keep listening for a new update from the editor.
   async fetchLoop() {
-    const response = await fetch(this.updatesPipeUrl);
+    const response = await fetch(this.sessionUrl);
     if (response.ok) {
-      const json = await response.json();
-      this.waitForData(json)
+      const json: MobilePacket = await response.json();
+      this.initializeToast(json.updatedContent);
+      setTimeout(() => {
+        this.toastClassName = '';
+      }, 5000);
+      await this.waitForData(json);
     } else {
       console.error('Error:', response);
     }
@@ -156,26 +158,10 @@ export class MobileView extends ConnectedLitElement {
     await this.triggerFetchLoop();
   }
 
-  async prepareGlbBlob(gltf: GltfModel) {
-    const glbBuffer = await gltf.packGlb();
-    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
-  }
-
-  // Post new blob for scene-viewer
-  async postSceneViewerBlob(blob: Blob) {
-    const response = await fetch(this.modelViewerUrl, {
-      method: 'POST',
-      body: blob,
-    })
-    if (response.ok) {
-      console.log('Success:', response);
-    }
-    else {
-      throw new Error(`Failed to post: ${this.modelViewerUrl}`);
-    }
-  }
-
-  async newModel() {
+  // When the model is loaded, we make a post for this specific model for
+  // scene-viewer. Subsequently, everytime scene-viewer is opened, we send the
+  // POST again.
+  async modelIsLoaded() {
     const glTF = await this.modelViewer!.exportScene();
     const file = new File([glTF], 'model.glb');
     const url = URL.createObjectURL(file);
@@ -183,18 +169,16 @@ export class MobileView extends ConnectedLitElement {
     const glbContents = await downloadContents(url);
     const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-    this.currentBlob = await this.prepareGlbBlob(gltf);
+    this.currentBlob = await prepareGlbBlob(gltf);
 
-    await this.postSceneViewerBlob(this.currentBlob);
+    await post(this.currentBlob, this.modelViewerUrl);
   }
 
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
-    const skyboxImage =
-        config.useEnvAsSkybox ? config.environmentImage : undefined;
+    const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
-
     return html`
     <div class="app">
       <div class="mvContainer">
@@ -206,7 +190,7 @@ export class MobileView extends ConnectedLitElement {
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
-          environment-image=${ifDefined(config.environmentImage)}
+          environment-image=${ifDefined(this.envImageUrl)}
           skybox-image=${ifDefined(skyboxImage)}
           exposure=${ifDefined(config.exposure)}
           poster=${ifDefined(config.poster)}
@@ -221,51 +205,22 @@ export class MobileView extends ConnectedLitElement {
           min-field-of-view=${ifDefined(config.minFov)}
           max-field-of-view=${ifDefined(config.maxFov)}
           animation-name=${ifDefined(config.animationName)}
-          @load=${this.newModel}
+          @load=${this.modelIsLoaded}
         >${childElements}</model-viewer>
       </div>
-    </div>`;
+    </div>
+    <div class="${this.toastClassName}" id="snackbar-mobile">${
+        this.toastBody}</div>`;
   }
 
-  /**
-   * Determine the mobile operating system.
-   * This function returns one of 'iOS', 'Android', 'Windows Phone', or
-   * 'unknown'.
-   * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
-   */
-  getMobileOperatingSystem(): string {
-    // @ts-ignore
-    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-    // Windows Phone must come first because its UA also contains "Android"
-    if (/windows phone/i.test(userAgent)) {
-      return 'Windows Phone';
-    }
-
-    if (/android/i.test(userAgent)) {
-      return 'Android';
-    }
-
-    // iOS detection from: http://stackoverflow.com/a/9039885/177710
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-      return 'iOS';
-    }
-
-    return 'unknown';
-  }
-
-  // ping back to the editor session
+  // Ping the editor
   async ping() {
-    const response = await fetch(this.mobilePingUrl, {
-      method: 'POST',
-      body: JSON.stringify({isPing: true, os: this.getMobileOperatingSystem()}),
-    })
-    if (response.ok) {
-      console.log('Success:', response);
-    }
-    else {
-      throw new Error(`Failed to post: ${this.mobilePingUrl}`);
-    }
+    const ping: MobileSession = {
+      os: getMobileOperatingSystem(),
+      id: this.sessionId,
+      isStale: true,
+    };
+    await post(JSON.stringify(ping), this.mobilePingUrl);
   }
 
   // (Overriding default) Tell editor session that it is ready for data.

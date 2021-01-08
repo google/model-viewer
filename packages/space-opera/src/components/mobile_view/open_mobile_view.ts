@@ -17,7 +17,7 @@
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
-import {customElement, html, internalProperty, query, TemplateResult} from 'lit-element';
+import {customElement, html, internalProperty, query} from 'lit-element';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -32,55 +32,44 @@ import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
-import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-
-interface URLs {
-  gltf: string|undefined;
-  usdz: string|undefined;
-  env: string|undefined;
-}
+import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
 
 /**
- * Section for displaying QR Code and other info related to mobile
+ * Section for displaying QR Code and other info related for mobile devices.
+ * This is the section on the editor under the File Manager.
  */
 @customElement('open-mobile-view')
 export class OpenMobileView extends ConnectedLitElement {
   static styles = openMobileViewStyles;
 
+  @internalProperty() pipeId = getRandomInt(1e+20);
+
   @internalProperty() isDeployed = false;
-  @internalProperty() mobileOS: string = '';
-  @internalProperty() iosAndNoUsdz = false;
-  @query('me-file-modal') fileModal!: FileModalElement;
   @internalProperty() isDeployable = false;
   @internalProperty() isSendingData = false;
-  @internalProperty() pipeId = this.getRandomInt(1e+20);
-
   @internalProperty() contentHasChanged = false;
+
+  @internalProperty() openedIOS: boolean = false;
+  @internalProperty() iosAndNoUsdz = false;
+  @query('me-file-modal') fileModal!: FileModalElement;
 
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() gltfModel?: GltfModel;
-
   @internalProperty() snippet: any = {};
   @internalProperty() lastSnippetSent: any = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
 
-  @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
-  @query('me-checkbox#ar-modes') arModesCheckbox!: CheckboxElement;
   @internalProperty() arConfig?: ArConfigState;
   @internalProperty() defaultToSceneViewer: boolean = false;
-  @internalProperty() selectedArMode: number = 0;
 
-  @internalProperty() base = 'https://ppng.io/modelviewereditor';
-  @internalProperty() snippetPipeUrl = `${this.base}-state-${this.pipeId}`;
-  @internalProperty() updatesPipeUrl = `${this.base}-updates-${this.pipeId}`;
-  @internalProperty() mobilePingUrl = `${this.base}-ping-${this.pipeId}`;
-  @internalProperty() envPipeUrl = `${this.base}-env-${this.pipeId}`;
+  @internalProperty() sessionList: MobileSession[] = [];
+  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
@@ -90,6 +79,9 @@ export class OpenMobileView extends ConnectedLitElement {
       this.isDeployable = true;
     }
 
+    // Update urls with most recent from redux state.
+    // If the values are different from this.lastUrlsSent, values are sent when
+    // the refresh button is pressed.
     this.urls = {
       gltf: gltfURL,
       env: getConfig(state).environmentImage,
@@ -107,26 +99,10 @@ export class OpenMobileView extends ConnectedLitElement {
     this.contentHasChanged = this.getContentHasChanged();
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
-
-    this.iosAndNoUsdz =
-        this.mobileOS === 'iOS' && this.arConfig.iosSrc === undefined;
+    this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
   }
 
-  newModelPipeUrl(id: number): string {
-    return `https://ppng.io/modelviewereditor-model-${this.pipeId}-${id}`;
-  }
-
-  newUSDZPipeUrl(id: number): string {
-    return `https://ppng.io/modelviewereditor-usdz-${this.pipeId}-${id}`;
-  }
-
-  getRandomInt(max: number): number {
-    return Math.floor(Math.random() * Math.floor(max));
-  }
-
-  // Returns true if information sent to the mobile view has changed.
-  // The usdz and gltf have a dependcy on one another though, where only one is
-  // sent, so only one needs to be consistent when checking here.
+  // True if any content we'd send to the mobile view has changed.
   getContentHasChanged(): boolean {
     return (
         (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
@@ -155,7 +131,7 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   isNewSource(src: string|undefined, lastSrc: string|undefined) {
-    return src !== undefined && src !== lastSrc;
+    return src !== undefined && (src !== lastSrc);
   }
 
   isNewModel() {
@@ -163,78 +139,118 @@ export class OpenMobileView extends ConnectedLitElement {
         this.editsHaveChanged();
   }
 
-  async prepareGlbBlob(gltf: GltfModel) {
-    const glbBuffer = await gltf.packGlb();
-    return new Blob([glbBuffer], {type: 'model/gltf-binary'});
-  }
-
-  async prepareUSDZ(url: string): Promise<Blob> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch url ${url}`);
-    }
-    return await response.blob();
-  }
-
-  async postContent(content: string|Blob, url: string) {
-    const response = await fetch(url, {
-      method: 'POST',
-      body: content,
-    });
-    if (response.ok) {
-      console.log('Success:', response);
-    } else {
-      throw new Error(`Failed to post: ${url}`);
-    }
-  }
-
-  // Create object to tell mobile what information is being sent so it can
-  // dynamically send certain GET requests
-  getUpdatedContent() {
+  // Used for non-stale sessions, to only send updated content.
+  getUpdatedContent(): EditorUpdates {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
-          envIsHdr: this.envIsHdr(), modelIds: this.getRandomInt(1e+20),
+          envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
+          usdzId: getRandomInt(1e+20),
           iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
     }
   }
 
-  // Send any state, model, or image that has been updated since the last update
+  // If a session didn't received content last time (isStale), we'll force
+  // everything to update.
+  getStaleContent(): EditorUpdates {
+    return {
+      gltfChanged: true, stateChanged: true,
+          envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
+          gltfId: getRandomInt(1e+20), usdzId: getRandomInt(1e+20),
+          iosChanged: this.urls.usdz !== undefined
+    }
+  }
+
+  // For a single session, POST all of the relevant content that needs to be
+  // updated for that session.
+  // A session will remain stale if any of the POSTs fail. A stale session will
+  // be forced to send all of the content the next time the refresh button is
+  // clicked.
+  async sendSessionContent(
+      session: MobileSession, updatedContent: EditorUpdates,
+      usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
+      envBlob: Blob|undefined) {
+    if (session.isStale) {
+      updatedContent = this.getStaleContent();
+    }
+    session.isStale = true;
+
+    const packet: MobilePacket = {updatedContent: updatedContent};
+    if (updatedContent.stateChanged) {
+      packet.snippet = this.snippet;
+    }
+
+    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+
+    if (session.os === 'iOS' && updatedContent.iosChanged && usdzBlob) {
+      await post(
+          usdzBlob,
+          usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+    }
+
+    if (updatedContent.gltfChanged && gltfBlob) {
+      await post(
+          gltfBlob,
+          gltfToSession(this.pipeId, session.id, updatedContent.gltfId));
+    }
+
+    if (updatedContent.envChanged && envBlob) {
+      await post(envBlob, envToSession(this.pipeId, session.id));
+    }
+
+    // The isStale flag will stay true if all of the requests are not delivered.
+    session.isStale = false;
+  }
+
+  // Send any state, model, or environment iamge that has been updated since the
+  // last refresh.
+  // TODO: Now that the posts are asynchronous, need to find a new way to deal
+  // with knowing when isSendingData should be set to false.
   async postInfo() {
     this.isSendingData = true;
     const updatedContent = this.getUpdatedContent();
-    await this.postContent(JSON.stringify(updatedContent), this.updatesPipeUrl)
+    const staleContent = this.getStaleContent();
 
-    if (this.mobileOS === 'iOS') {
-      if (updatedContent.iosChanged) {
-        const blob = await this.prepareUSDZ(this.urls.usdz!);
-        await this.postContent(
-            blob, this.newUSDZPipeUrl(updatedContent.modelIds));
-        this.lastUrlsSent['usdz'] = this.urls['usdz'];
-      }
+    // If any of the sessions are stale, we want to prepare the relavent blobs
+    // to POST before we loop through the sessions
+    let haveStale = false;
+    for (let session of this.sessionList) {
+      haveStale = haveStale || session.isStale;
     }
 
-    if (updatedContent.gltfChanged) {
-      const blob = await this.prepareGlbBlob(this.gltfModel!);
-      await this.postContent(
-          blob, this.newModelPipeUrl(updatedContent.modelIds));
-      this.lastUrlsSent['gltf'] = this.urls['gltf'];
-    }
+    // Blobs will be defined if their content has changed since the last
+    // refresh, or if any session is stale -- a stale session requires us to
+    // send all content to that session.
+    const usdzBlob =
+        (updatedContent.iosChanged || (haveStale && staleContent.iosChanged)) ?
+        await prepareUSDZ(this.urls.usdz!) :
+        undefined;
 
-    if (updatedContent.stateChanged) {
-      await this.postContent(JSON.stringify(this.snippet), this.snippetPipeUrl);
-      this.lastSnippetSent = {...this.snippet};
-    }
+    const gltfBlob = (updatedContent.gltfChanged ||
+                      (haveStale && staleContent.gltfChanged)) ?
+        await prepareGlbBlob(this.gltfModel!) :
+        undefined;
 
-    if (updatedContent.envChanged) {
+    let envBlob = undefined;
+    if (updatedContent.envChanged || (haveStale && staleContent.envChanged)) {
       const response = await fetch(this.urls.env!);
       if (!response.ok) {
         throw new Error(`Failed to fetch url: ${this.urls.env!}`);
       }
-      const blob = await response.blob();
-      await this.postContent(blob, this.envPipeUrl);
-      this.lastUrlsSent['env'] = this.urls['env'];
+      envBlob = await response.blob();
     }
+
+    // Iterate through the list of active mobile sessions, and allow them to
+    // post their information asynchronously.
+    for (let session of this.sessionList) {
+      this.sendSessionContent(
+          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+    }
+
+    this.lastSnippetSent = {...this.snippet};
+    this.lastUrlsSent['env'] = this.urls['env'];
+    this.lastUrlsSent['usdz'] = this.urls['usdz'];
+    this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
     this.contentHasChanged = this.getContentHasChanged();
     this.isSendingData = false;
@@ -244,25 +260,35 @@ export class OpenMobileView extends ConnectedLitElement {
   async waitForPing() {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
-      const json = await response.json();
-      if (json.isPing) {
-        this.haveReceivedResponse = true;
-        this.mobileOS = json.os;
+      const json: MobileSession = await response.json();
+      this.haveReceivedResponse = true;
+      this.sessionList.push(json);
+      if (json.os === 'iOS') {
+        this.openedIOS = true;
       }
+      this.postInfo();
+      return true;
     }
+    return false;
   }
 
-  // Opens the modal that displays the QR Code
+  // If a ping was received, then a new page has been opened or a page was
+  // refreshed.
+  async pingLoop() {
+    await this.waitForPing();
+    this.pingLoop();
+  }
+
   openModal() {
     this.mobileModal.open();
   }
 
-  // Called each time the editor hasn't received a ping from mobile
+  // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
     this.openModal();
-    await this.waitForPing();
-    if (this.haveReceivedResponse) {
-      this.postInfo();
+    const wasPinged = await this.waitForPing();
+    if (wasPinged) {
+      this.pingLoop();
     } else {
       this.onDeploy();
     }
@@ -276,85 +302,17 @@ export class OpenMobileView extends ConnectedLitElement {
     await this.onDeploy();
   }
 
-  renderDeployButton() {
-    return html`
-    <mwc-button unelevated
-      icon="file_download"
-      ?disabled=${!this.isDeployable}
-      @click=${this.onInitialDeploy}>
-        Deploy Mobile
-    </mwc-button>`
+  onEnableARChange(isEnabled: boolean) {
+    reduxStore.dispatch(dispatchAr(isEnabled));
   }
 
-  onEnableARChange() {
-    reduxStore.dispatch(dispatchAr(this.arCheckbox.checked));
-  }
-
-  onSelectArMode() {
-    this.defaultToSceneViewer = this.arModesCheckbox.checked;
+  onSelectArMode(isSceneViewer: boolean) {
+    this.defaultToSceneViewer = isSceneViewer;
     if (this.defaultToSceneViewer) {
       reduxStore.dispatch(dispatchArModes('scene-viewer webxr quick-look'));
     } else {
       reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
     }
-  }
-
-  get optionalMessage(): TemplateResult {
-    const isOutOfSync = this.haveReceivedResponse &&
-        (!this.isSendingData && this.contentHasChanged);
-    if (isOutOfSync) {
-      return html`
-    <div style="color: #DC143C; margin-top: 5px;">
-      Your mobile view is out of sync with the editor.
-    </div>`;
-    } else if (this.isSendingData) {
-      return html`
-    <div style="color: white; margin-top: 5px;">
-      Sending data to mobile device. Textured models will take some time.
-    </div>`
-    } else if (!this.haveReceivedResponse) {
-      return html`
-      <div style="color: white; margin-top: 5px;">
-        Use the QR Code to open the mobile viewing page on a mobile device.
-      </div>`
-    }
-    return html``;
-  }
-
-  renderMobileInfo() {
-    const isOutOfSync = this.haveReceivedResponse &&
-        (!this.isSendingData && this.contentHasChanged);
-    const outOfSyncColor = isOutOfSync ? '#DC143C' : '#4285F4';
-    return html`
-    <div>
-      <mwc-button unelevated @click=${
-        this.openModal} style="margin-bottom: 10px;">
-        View QR Code
-      </mwc-button>
-      <mwc-button unelevated icon="cached" @click=${this.postInfo} 
-        ?disabled=${
-    !this.haveReceivedResponse || this.isSendingData}
-        style="--mdc-theme-primary: ${outOfSyncColor}">
-        Refresh Mobile
-      </mwc-button>
-      ${this.optionalMessage}
-    </div>
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">AR Settings:</div>
-    <me-checkbox 
-      id="ar-modes" 
-      label="Default AR Modes to Scene Viewer"
-      ?checked="${this.defaultToSceneViewer}"
-      @change=${this.onSelectArMode}
-      >
-    </me-checkbox>
-    <me-checkbox 
-      id="ar" 
-      label="Enable AR"
-      ?checked="${!!this.arConfig!.ar}"
-      @change=${this.onEnableARChange}
-      >
-    </me-checkbox>
-    `
   }
 
   async onUploadUSDZ() {
@@ -369,30 +327,27 @@ export class OpenMobileView extends ConnectedLitElement {
     reduxStore.dispatch(dispatchIosSrc(url));
   }
 
-  renderIos() {
-    const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
-    return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">iOS Settings:</div>
-    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
-    style="--mdc-theme-primary: ${needUsdzButton}">
-      USDZ
-    </mwc-button>
-    ${
-        this.iosAndNoUsdz ? html`
-  <div style="color: #DC143C; margin-top: 5px;">
-    Upload a .usdz to view model in AR on an iOS device.
-  </div>` :
-                            html``}
-    `
-  }
-
   render() {
     return html`
-    ${!this.isDeployed ? this.renderDeployButton() : html``}
-    <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
-    ${this.isDeployed ? this.renderMobileInfo() : html``}
-    ${this.renderIos()}
+    <mobile-expandable-section 
+      .isDeployed=${this.isDeployed} 
+      .isDeployable=${this.isDeployable}
+      .onInitialDeploy=${this.onInitialDeploy.bind(this)}
+      .haveReceivedResponse=${this.haveReceivedResponse}
+      .isSendingData=${this.isSendingData}
+      .contentHasChanged=${this.contentHasChanged}
+      .openModal=${this.openModal.bind(this)}
+      .postInfo=${this.postInfo.bind(this)}
+      .defaultToSceneViewer=${this.defaultToSceneViewer}
+      .onSelectArMode=${this.onSelectArMode.bind(this)}
+      .arConfig=${this.arConfig}
+      .onEnableARChange=${this.onEnableARChange.bind(this)}
+      .iosAndNoUsdz=${this.iosAndNoUsdz}
+      .onUploadUSDZ=${this.onUploadUSDZ.bind(this)}
+    >
+    </mobile-expandable-section>
     <me-file-modal accept=".usdz"></me-file-modal>
+    <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     <div style="margin-bottom: 40px;"></div>
   `;
   }
