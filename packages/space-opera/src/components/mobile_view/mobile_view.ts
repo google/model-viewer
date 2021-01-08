@@ -95,17 +95,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  async waitForEnv(envIsHdr: boolean) {
-    const response = await fetch(envToSession(this.pipeId, this.sessionId));
-    if (response.ok) {
-      // Simulating createBlobUrlFromEnvironmentImage
-      const blob = await response.blob();
-      const addOn = envIsHdr ? '#.hdr' : '';
-      const envUrl = URL.createObjectURL(blob) + addOn;
-      this.envImageUrl = envUrl;
-    }
-  }
-
   // We set modelViewerUrl instead of directly fetching it because scene-viewer
   // requires the same url from the current model-viewer state, and we need to
   // make a POST request to that URL when scene-viewer is triggered.
@@ -124,7 +113,8 @@ export class MobileView extends LitElement {
       await this.waitForUSDZ(updatedContent.usdzId);
     }
     if (updatedContent.envChanged) {
-      await this.waitForEnv(updatedContent.envIsHdr);
+      this.envImageUrl =
+          envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
     }
   }
 

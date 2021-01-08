@@ -196,7 +196,9 @@ export class OpenMobileView extends ConnectedLitElement {
     }
 
     if (updatedContent.envChanged && envBlob) {
-      await post(envBlob, envToSession(this.pipeId, session.id));
+      await post(
+          envBlob,
+          envToSession(this.pipeId, session.id, updatedContent.envIsHdr));
     }
 
     // The isStale flag will stay true if all of the requests are not delivered.
@@ -258,6 +260,7 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
+  // TODO: First ping is delayed? Possibly its the server.
   async waitForPing() {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {

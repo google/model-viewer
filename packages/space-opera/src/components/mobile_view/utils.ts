@@ -41,8 +41,10 @@ export function gltfToSession(
 }
 
 // ex: 'https://piping.nwtgck.repl.co/123-456-env'
-export function envToSession(pipeId: number|string, sessionID: number): string {
-  return `${DOMAIN}${pipeId}-${sessionID}-env`;
+export function envToSession(
+    pipeId: number|string, sessionID: number, envIsHdr: boolean): string {
+  const addOn = envIsHdr ? '#.hdr' : '';
+  return `${DOMAIN}${pipeId}-${sessionID}-env${addOn}`;
 }
 
 // ex: 'https://piping.nwtgck.repl.co/123-456-789'
