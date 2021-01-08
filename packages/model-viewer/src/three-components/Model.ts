@@ -290,7 +290,7 @@ export default class Model extends Object3D {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
     const framedRadius =
-        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared));
+        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
     this.idealCameraDistance = framedRadius / SAFE_RADIUS_RATIO;
 
@@ -301,7 +301,7 @@ export default class Model extends Object3D {
           value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
     };
     this.fieldOfViewAspect =
-        reduceVertices(this.modelContainer, horizontalFov) / DEFAULT_TAN_FOV;
+        reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
 
     this.add(this.modelContainer);
   }

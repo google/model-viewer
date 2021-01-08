@@ -246,7 +246,7 @@ export declare interface ControlsInterface {
   getMinimumFieldOfView(): number;
   getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
-  updateFraming(): void;
+  updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
 }
 
@@ -497,16 +497,25 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    updateFraming() {
+    async updateFraming() {
       const scene = this[$scene];
-      scene.model.updateFraming();
+      const oldFramedFieldOfView = scene.framedFieldOfView;
+
+      await this.requestUpdate('cameraTarget');
+
+      scene.model.updateFraming(scene.getTarget());
       scene.frameModel();
+
+      const newFramedFieldOfView = scene.framedFieldOfView;
+      const zoom = this[$controls].getFieldOfView() / oldFramedFieldOfView;
+      this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
+      this[$maintainThetaPhi] = true;
+
       this.requestUpdate('maxFieldOfView');
       this.requestUpdate('fieldOfView');
       this.requestUpdate('minCameraOrbit');
       this.requestUpdate('maxCameraOrbit');
-      this.requestUpdate('cameraOrbit');
-      this.requestUpdate('cameraTarget');
+      await this.requestUpdate('cameraOrbit');
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
