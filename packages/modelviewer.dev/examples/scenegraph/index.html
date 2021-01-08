@@ -54,11 +54,9 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
   bottom: 8px;
-  left: 0;
-  width: 100%;
+  left: 8px;
 }
 
 button {
@@ -79,13 +77,21 @@ button {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Swap Model Variants</h2>
+            <p>This demonstrates the use of the glTF <a
+            href="https://www.khronos.org/blog/streamlining-3d-commerce-with-material-variant-support-in-gltf-assets">materials
+            variants extension</a> which allows multiple materials and textures
+            to be packed with a single geometry in a GLB. Our API exposes these
+            variant names as <code>availableVariants</code> and you can select
+            one using the <code>variantName</code> attribute. This is similar
+            functionality to the lower-level scene-graph API below, but in that
+            case it is up to you to choose the right texture URL, rather than
+            having that information stored in the GLB. </p>
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
 <model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" alt="A 3D model of a chair">
   <div class="controls">
-    <p>Variant: </p>
-    <select id="variant"></select>
+    <div>Variant: <select id="variant"></select></div>
   </div>
 </model-viewer>
 <script>
@@ -118,16 +124,21 @@ select.addEventListener('input', (event) => {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Model Transformations</h2>
+            <p>This demonstrates the <code>orientation</code> and
+            <code>scale</code> attributes which allow the model to be
+            transformed. Note that if specified before the model loads, they
+            will be taken into account by the automatic camera framing. If they
+            are changed afterwards the camera will not move, so to get new
+            automatic framing the <code>updateFraming()</code> method must be
+            called.</p>
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>
 <model-viewer id="transform" orientation="20deg 0 0" camera-controls ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
   <div class="controls">
-    <div>
-      Roll: <input id="roll" value="20" size="3" class="number"> degrees, 
-      Pitch: <input id="pitch" value="0" size="3" class="number"> degrees, 
-      Yaw: <input id="yaw" value="0" size="3" class="number"> degrees
-    </div>
+    <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
+    <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
+    <div>Yaw: <input id="yaw" value="0" size="3" class="number"> degrees</div>
     <div>
       Scale: X: <input id="x" value="1" size="3" class="number">, 
       Y: <input id="y" value="1" size="3" class="number">, 
