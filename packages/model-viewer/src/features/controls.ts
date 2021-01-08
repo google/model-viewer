@@ -246,6 +246,7 @@ export declare interface ControlsInterface {
   getMinimumFieldOfView(): number;
   getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
+  updateFraming(): void;
   resetInteractionPrompt(): void;
 }
 
@@ -494,6 +495,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$jumpCamera] = false;
         });
       }
+    }
+
+    updateFraming() {
+      const scene = this[$scene];
+      scene.model.updateFraming();
+      scene.frameModel();
+      this.requestUpdate('maxFieldOfView');
+      this.requestUpdate('fieldOfView');
+      this.requestUpdate('minCameraOrbit');
+      this.requestUpdate('maxCameraOrbit');
+      this.requestUpdate('cameraOrbit');
+      this.requestUpdate('cameraTarget');
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {

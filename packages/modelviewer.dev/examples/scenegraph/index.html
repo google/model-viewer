@@ -53,17 +53,16 @@
 .controls {
   position: absolute;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  bottom: 0;
+  bottom: 8px;
   left: 0;
   width: 100%;
-  height: 64px;
 }
 
 button {
-  font-size: 2em;
+  font-size: 1.3em;
   margin: 0 0.25em;
 }
   </style>
@@ -105,6 +104,77 @@ modelViewerVariants.addEventListener('load', () => {
 
 select.addEventListener('input', (event) => {
   modelViewerVariants.variantName = event.target.value;
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="transforms" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Model Transformations</h2>
+          </div>
+          <example-snippet stamp-to="transforms" highlight-as="html">
+            <template>
+<model-viewer id="transform" orientation="20deg 0 0" camera-controls ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
+  <div class="controls">
+    <div>
+      Roll: <input id="roll" value="20" size="3" class="number"> degrees, 
+      Pitch: <input id="pitch" value="0" size="3" class="number"> degrees, 
+      Yaw: <input id="yaw" value="0" size="3" class="number"> degrees
+    </div>
+    <div>
+      Scale: X: <input id="x" value="1" size="3" class="number">, 
+      Y: <input id="y" value="1" size="3" class="number">, 
+      Z: <input id="z" value="1" size="3" class="number">
+    </div>
+    <button id="frame">Update Framing</button>
+  </div>
+</model-viewer>
+<script>
+const modelViewerTransform = document.querySelector("model-viewer#transform");
+const roll = document.querySelector('#roll');
+const pitch = document.querySelector('#pitch');
+const yaw = document.querySelector('#yaw');
+const x = document.querySelector('#x');
+const y = document.querySelector('#y');
+const z = document.querySelector('#z');
+const frame = document.querySelector('#frame');
+
+frame.addEventListener('click', () => {
+  modelViewerTransform.updateFraming();
+});
+
+const updateOrientation = () => {
+  modelViewerTransform.orientation = `${roll.value}deg ${pitch.value}deg ${yaw.value}deg`;
+};
+
+const updateScale = () => {
+  modelViewerTransform.scale = `${x.value} ${y.value} ${z.value}`;
+};
+
+roll.addEventListener('input', () => {
+  updateOrientation();
+});
+pitch.addEventListener('input', () => {
+  updateOrientation();
+});
+yaw.addEventListener('input', () => {
+  updateOrientation();
+});
+x.addEventListener('input', () => {
+  updateScale();
+});
+y.addEventListener('input', () => {
+  updateScale();
+});
+z.addEventListener('input', () => {
+  updateScale();
 });
 </script>
             </template>
