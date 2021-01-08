@@ -364,7 +364,7 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    if (model.updateShadow()) {
+    if (model.isShadowDirty()) {
       this.threeRenderer.shadowMap.needsUpdate = true;
     }
   }

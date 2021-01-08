@@ -298,6 +298,14 @@ export class ARRenderer extends EventDispatcher {
     }
   }
 
+  onUpdateScene = () => {
+    if (this.placementBox != null && this.isPresenting) {
+      this.placementBox!.dispose();
+      this.placementBox = new PlacementBox(
+          this.presentedScene!.model, this.placeOnWall ? 'back' : 'bottom');
+    }
+  };
+
   private postSessionCleanup() {
     // The offscreen WebXR framebuffer is now invalid, switch
     // back to the default framebuffer for canvas output.
@@ -387,14 +395,6 @@ export class ARRenderer extends EventDispatcher {
 
     this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
-
-  private onUpdateScene = () => {
-    if (this.placementBox != null && this.isPresenting) {
-      this.placementBox!.dispose();
-      this.placementBox = new PlacementBox(
-          this.presentedScene!.model, this.placeOnWall ? 'back' : 'bottom');
-    }
-  };
 
   private updateCamera(view: XRView) {
     const {camera} = this;

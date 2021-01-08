@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Euler, MeshStandardMaterial} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
@@ -143,6 +143,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
             scale[0].number, scale[1].number, scale[2].number);
 
         model.updateBoundingBox();
+        this[$scene].updateShadow();
+        this[$renderer].arRenderer.onUpdateScene();
         this[$needsRender]();
       }
     }

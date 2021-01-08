@@ -346,10 +346,10 @@ export default class Model extends Object3D {
   }
 
   /**
-   * Call when updating the shadow; returns true if an update is needed and
-   * resets the state.
+   * Call to check if the shadow needs an updated render; returns true if an
+   * update is needed and resets the state.
    */
-  updateShadow(): boolean {
+  isShadowDirty(): boolean {
     const shadow = this.shadow;
     if (shadow == null) {
       return false;
