@@ -74,7 +74,7 @@
   ],
   "devDependencies": {
     "lit-element": "^2.4.0",
-    "three": "^0.123.0",
+    "three": "^0.124.0",
     "@types/resize-observer-browser": "^0.1.2",
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@jsantell/event-target": "^1.1.2",

@@ -42,7 +42,6 @@ const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
-const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
@@ -168,9 +167,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$intersectionObserver]: IntersectionObserver|null = null;
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
-
-  protected[$contextLostHandler] = (event: ContextLostEvent) =>
-      this[$onContextLost](event);
 
   /** @export */
   get loaded() {
@@ -312,8 +308,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
     renderer.addEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.registerScene(this[$scene]);
 
@@ -340,8 +335,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
     renderer.removeEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.unregisterScene(this[$scene]);
 
@@ -507,11 +501,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene].setSize(e.width, e.height);
   }
 
-  [$onContextLost](event: ContextLostEvent) {
+  [$onContextLost] = (event: ContextLostEvent) => {
     this.dispatchEvent(new CustomEvent(
         'error',
         {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
-  }
+  };
 
   /**
    * Parses the element for an appropriate source URL and

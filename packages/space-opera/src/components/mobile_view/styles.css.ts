@@ -21,7 +21,7 @@ export const styles: CSSResult = css`
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 80vh;
 }
 
 .mvContainer {

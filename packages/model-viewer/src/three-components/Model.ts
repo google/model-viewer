@@ -190,6 +190,9 @@ export default class Model extends Object3D {
    * to playing the first animation.
    */
   playAnimation(name: string|null = null, crossfadeTime: number = 0) {
+    if (this.currentGLTF == null) {
+      return;
+    }
     const {animations} = this;
     if (animations == null || animations.length === 0) {
       console.warn(
