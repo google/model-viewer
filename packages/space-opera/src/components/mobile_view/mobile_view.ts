@@ -43,6 +43,7 @@ export class MobileView extends LitElement {
   @internalProperty() modelViewerUrl: string = '';
   @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
+  @internalProperty() usdzBlob?: Blob;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -79,17 +80,34 @@ export class MobileView extends LitElement {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       arButton.addEventListener('click', () => {
-        post(this.currentBlob!, this.modelViewerUrl);
+        if (this.sessionOs === 'iOS') {
+          post(this.usdzBlob!, this.arConfig.iosSrc!);
+        } else {
+          post(this.currentBlob!, this.modelViewerUrl);
+        }
       });
+    }
+  }
+
+  // Need to fetch the USDZ first, such that we can POST the USDZ again if
+  // someone closes quick-look and then chooses to reopen it.
+  async waitForUSDZ(usdzId: number) {
+    const usdzUrl = usdzToSession(this.pipeId, this.sessionId, usdzId);
+    const response = await fetch(usdzUrl);
+    if (response.ok) {
+      this.usdzBlob = await response.blob();
+      this.arConfig.iosSrc = usdzUrl;
+    } else {
+      console.error('Error:', response);
     }
   }
 
   // We set modelViewerUrl instead of directly fetching it because scene-viewer
   // requires the same url from the current model-viewer state, and we need to
   // make a POST request to that URL when scene-viewer is triggered.
-  // TODO: Look into if that is the same issue with quick-look.
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
+    this.overlay!.style.display = 'block';
 
     if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
@@ -99,13 +117,14 @@ export class MobileView extends LitElement {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
     if (updatedContent.iosChanged) {
-      this.arConfig.iosSrc =
-          usdzToSession(this.pipeId, this.sessionId, updatedContent.usdzId);
+      await this.waitForUSDZ(updatedContent.usdzId);
     }
     if (updatedContent.envChanged) {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
     }
+
+    this.overlay!.style.display = 'none';
   }
 
   initializeToast(json: EditorUpdates) {

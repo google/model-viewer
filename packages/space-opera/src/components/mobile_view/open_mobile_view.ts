@@ -38,6 +38,9 @@ import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reduce
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, postWithTimeout, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
+// TODO: When there is a massive failure, i.e. no response, the whole system
+// seems to be shutting down.
+
 /**
  * Section for displaying QR Code and other info related for mobile devices.
  * This is the section on the editor under the File Manager.
@@ -184,6 +187,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     const completed = await postWithTimeout(
         JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+    // Wait for a response, if response continue, else, give up?
 
     console.log('session completed', completed, session.id)
 
