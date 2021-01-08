@@ -78,6 +78,20 @@ export async function post(content: Blob|string, url: string) {
   }
 }
 
+// https://dmitripavlutin.com/timeout-fetch-request/#2-timeout-a-fetch-request
+export async function postWithTimeout(content: Blob|string, url: string) {
+  const timeout = 10000;
+
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(
+      url, {method: 'POST', body: content, signal: controller.signal});
+  clearTimeout(id);
+
+  return response.ok ? true : false;
+}
+
 /**
  * Determine the mobile operating system.
  * This function returns one of 'iOS', 'Android', 'Windows Phone', or

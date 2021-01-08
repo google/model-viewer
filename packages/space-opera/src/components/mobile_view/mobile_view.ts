@@ -55,9 +55,11 @@ export class MobileView extends LitElement {
 
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';
+  @query('div#overlay') overlay?: HTMLElement;
 
   @internalProperty() sessionId = getRandomInt(1e+20);
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
+  @internalProperty() sessionOs = getMobileOperatingSystem();
 
   updateState(snippet: any, envChanged: boolean) {
     // The partialState env link correspondes to the editor's link.
@@ -82,19 +84,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  // TODO: Fix iOS not loading USDZ.
-  async waitForUSDZ(usdzId: number) {
-    const response =
-        await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
-    if (response.ok) {
-      const blob = await response.blob();
-      const usdzUrl = URL.createObjectURL(blob);
-      this.arConfig.iosSrc = usdzUrl;
-    } else {
-      console.error('Error:', response);
-    }
-  }
-
   // We set modelViewerUrl instead of directly fetching it because scene-viewer
   // requires the same url from the current model-viewer state, and we need to
   // make a POST request to that URL when scene-viewer is triggered.
@@ -110,7 +99,8 @@ export class MobileView extends LitElement {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
     if (updatedContent.iosChanged) {
-      await this.waitForUSDZ(updatedContent.usdzId);
+      this.arConfig.iosSrc =
+          usdzToSession(this.pipeId, this.sessionId, updatedContent.usdzId);
     }
     if (updatedContent.envChanged) {
       this.envImageUrl =
@@ -161,7 +151,7 @@ export class MobileView extends LitElement {
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
     this.currentBlob = await prepareGlbBlob(gltf);
 
-    await post(this.currentBlob, this.modelViewerUrl);
+    post(this.currentBlob, this.modelViewerUrl);
   }
 
   render() {
@@ -170,6 +160,7 @@ export class MobileView extends LitElement {
     const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
     return html`
+    <div id="overlay"></div>
     <div class="app">
       <div class="mvContainer">
         <model-viewer
@@ -199,8 +190,9 @@ export class MobileView extends LitElement {
         >${childElements}</model-viewer>
       </div>
     </div>
-    <div class="${this.toastClassName}" id="snackbar-mobile">${
-        this.toastBody}</div>`;
+    <div class="${this.toastClassName}" id="snackbar-mobile">
+      ${this.toastBody}
+    </div>`;
   }
 
   // Ping the editor
