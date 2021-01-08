@@ -28,7 +28,8 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {EditorUpdates, envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
+import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -75,8 +76,7 @@ export class MobileView extends LitElement {
     if (snippet.arConfig.ar) {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
-      // @ts-ignore
-      arButton.addEventListener('click', (event: MouseEvent) => {
+      arButton.addEventListener('click', () => {
         post(this.currentBlob!, this.modelViewerUrl);
       });
     }
@@ -224,8 +224,7 @@ export class MobileView extends LitElement {
   }
 
   // (Overriding default) Tell editor session that it is ready for data.
-  // @ts-ignore changedProperties is unused
-  firstUpdated(changedProperties: any) {
+  firstUpdated() {
     this.ping();
     this.triggerFetchLoop();
   }

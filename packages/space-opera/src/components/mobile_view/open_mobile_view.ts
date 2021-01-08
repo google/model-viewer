@@ -35,7 +35,8 @@ import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
+import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
