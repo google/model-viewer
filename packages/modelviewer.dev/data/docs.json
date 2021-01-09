@@ -532,6 +532,15 @@
           "default": "25deg",
           "options": "angle between 0 and 180 degrees"
         }
+      },
+      {
+        "name": "bounds",
+        "htmlName": "bounds",
+        "description": "Sets the method of calculating the model's bounding box, which affects its shadow's position and default camera framing. Legacy mode is conservative and occasionally results in a bounding box that is too large, especially when used with the orientation attribute. Tight will give precise results and will also account for a custom camera-target, keeping the model always in frame by default. Tight will become the default value in a future release, so check if your seamless poster images need updating.",
+        "default": {
+          "default": "legacy",
+          "options": "tight, legacy"
+        }
       }
     ],
     "CSS": [
