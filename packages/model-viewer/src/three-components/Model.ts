@@ -19,6 +19,7 @@ import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
+import {ModelScene} from './ModelScene.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow, Side} from './Shadow.js';
 
@@ -52,6 +53,7 @@ export default class Model extends Object3D {
   public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
+  public tightBounds = false;
 
   get currentGLTF() {
     return this._currentGLTF;
@@ -82,11 +84,15 @@ export default class Model extends Object3D {
    * Pass in a THREE.Object3D to be controlled
    * by this model.
    */
-  setObject(model: Object3D) {
+  async setObject(model: Object3D) {
     this.reset();
     this.modelContainer.add(model);
     this.updateBoundingBox();
-    this.updateFraming();
+    const scene = this.parent as ModelScene;
+    await scene.element.requestUpdate('cameraTarget');
+    this.updateFraming(
+        this.tightBounds === true ? (this.parent as ModelScene).getTarget() :
+                                    undefined);
     this.dispatchEvent({type: 'model-load'});
   }
 
@@ -155,7 +161,10 @@ export default class Model extends Object3D {
     this.userData.url = url;
 
     this.updateBoundingBox();
-    this.updateFraming();  // element[$scene].getTarget());
+    const scene = this.parent as ModelScene;
+    await scene.element.requestUpdate('cameraTarget');
+    this.updateFraming(
+        this.tightBounds === true ? scene.getTarget() : undefined);
 
     this.dispatchEvent({type: 'model-load', url});
   }
@@ -265,7 +274,14 @@ export default class Model extends Object3D {
   updateBoundingBox() {
     this.remove(this.modelContainer);
 
-    this.boundingBox.setFromObject(this.modelContainer);
+    if (this.tightBounds === true) {
+      const bound = (box: Box3, vertex: Vector3): Box3 => {
+        return box.expandByPoint(vertex);
+      };
+      this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+    } else {
+      this.boundingBox.setFromObject(this.modelContainer);
+    }
     this.boundingBox.getSize(this.size);
 
     this.add(this.modelContainer);
