@@ -274,7 +274,6 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
-  // TODO: First ping is delayed? Possibly its the server.
   async waitForPing() {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
@@ -295,7 +294,11 @@ export class OpenMobileView extends ConnectedLitElement {
   // If a ping was received, then a new page has been opened or a page was
   // refreshed.
   async pingLoop() {
-    await this.waitForPing();
+    try {
+      await this.waitForPing();
+    } catch (error) {
+      console.log('error...', error);
+    }
     this.pingLoop();
   }
 
@@ -306,7 +309,12 @@ export class OpenMobileView extends ConnectedLitElement {
   // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
     this.openModal();
-    const wasPinged = await this.waitForPing();
+    let wasPinged = false;
+    try {
+      wasPinged = await this.waitForPing();
+    } catch (error) {
+      console.log('error...', error);
+    }
     if (wasPinged) {
       this.pingLoop();
     } else {
