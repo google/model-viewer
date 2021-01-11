@@ -62,12 +62,7 @@ export class MobileModal extends ConnectedLitElement {
       Use the QR Code to open your edited model, environment image, and &ltmodel-viewer&gt snippet on a mobile device to test out AR features. 
       After every subsequent change, click the "Refresh Mobile" button.
     </div>
-    <canvas id="qr" style="display: block; margin-bottom: 20px;"></canvas>
-    <div style="margin: 10px 0px; overflow-wrap: break-word; word-wrap: break-word;">
-      <a href=${this.viewableSite} style="color: white;" target="_blank">
-        ${this.viewableSite}
-      </a>
-    </div>
+    <canvas id="qr" style="display: block; margin-bottom: 90px;"></canvas>
   </div>
   <div class="FileModalCancel">
     <mwc-button unelevated icon="cancel" 
