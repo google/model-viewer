@@ -153,7 +153,11 @@ export class MobileView extends LitElement {
   }
 
   async triggerFetchLoop() {
-    await this.fetchLoop();
+    try {
+      await this.fetchLoop();
+    } catch (e) {
+      console.log('error...');
+    }
     await this.triggerFetchLoop();
   }
 
