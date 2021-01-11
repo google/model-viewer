@@ -36,7 +36,7 @@ import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, postWithTimeout, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -181,9 +181,8 @@ export class OpenMobileView extends ConnectedLitElement {
       packet.snippet = this.snippet;
     }
 
-    const completed = await postWithTimeout(
+    const completed = await post(
         JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
-    // Wait for a response, if response continue, else, give up?
 
     console.log('session completed', completed, session.id)
 
