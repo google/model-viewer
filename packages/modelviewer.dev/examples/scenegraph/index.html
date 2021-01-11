@@ -130,7 +130,9 @@ select.addEventListener('input', (event) => {
             will be taken into account by the automatic camera framing. If they
             are changed afterwards the camera will not move, so to get new
             automatic framing the <code>updateFraming()</code> method must be
-            called.</p>
+            called. Also, the <code>bounds</code> attribute is set to
+            <code>"tight"</code> to keep the transformed model from floating
+            over its shadow.</p>
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>

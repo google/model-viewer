@@ -540,7 +540,10 @@
         "default": {
           "default": "legacy",
           "options": "tight, legacy"
-        }
+        },
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ]
       }
     ],
     "CSS": [
