@@ -31,6 +31,8 @@ import {styles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
+const TOAST_TIME = 7000;  // 7s
+
 /**
  * The view loaded at /editor/view/?id=xyz
  * The id links the editor to this mobile session.
@@ -149,7 +151,7 @@ export class MobileView extends LitElement {
       this.initializeToast(json.updatedContent);
       setTimeout(() => {
         this.toastClassName = '';
-      }, 7000);
+      }, TOAST_TIME);
       await this.waitForData(json);
     } else {
       console.error('Error:', response);

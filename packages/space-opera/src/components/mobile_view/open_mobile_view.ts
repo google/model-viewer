@@ -38,6 +38,8 @@ import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reduce
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
+const REFRESH_DELAY = 20000;  // 20s
+
 /**
  * Section for displaying QR Code and other info related for mobile devices.
  * This is the section on the editor under the File Manager.
@@ -181,10 +183,7 @@ export class OpenMobileView extends ConnectedLitElement {
       packet.snippet = this.snippet;
     }
 
-    const completed = await post(
-        JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
-
-    console.log('session completed', completed, session.id)
+    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
 
     if (updatedContent.iosChanged && usdzBlob) {
       await post(
@@ -230,7 +229,7 @@ export class OpenMobileView extends ConnectedLitElement {
     const sessionList = [...this.sessionList];
     setTimeout(() => {
       this.isSendingData = false;
-    }, 20000);
+    }, REFRESH_DELAY);
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
 
