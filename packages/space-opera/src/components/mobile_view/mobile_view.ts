@@ -29,7 +29,7 @@ import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
-import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -143,7 +143,7 @@ export class MobileView extends LitElement {
 
   // Keep listening for a new update from the editor.
   async fetchLoop() {
-    const response = await fetch(this.sessionUrl);
+    const response = await getWithTimeout(this.sessionUrl);
     if (response.ok) {
       const json: MobilePacket = await response.json();
       this.initializeToast(json.updatedContent);
