@@ -28,7 +28,8 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {EditorUpdates, envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, usdzToSession} from './types.js';
+import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -42,6 +43,7 @@ export class MobileView extends LitElement {
   @internalProperty() modelViewerUrl: string = '';
   @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
+  @internalProperty() usdzBlob?: Blob;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -54,9 +56,11 @@ export class MobileView extends LitElement {
 
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';
+  @query('div#overlay') overlay?: HTMLElement;
 
   @internalProperty() sessionId = getRandomInt(1e+20);
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
+  @internalProperty() sessionOs = getMobileOperatingSystem();
 
   updateState(snippet: any, envChanged: boolean) {
     // The partialState env link correspondes to the editor's link.
@@ -75,43 +79,39 @@ export class MobileView extends LitElement {
     if (snippet.arConfig.ar) {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
-      // @ts-ignore
-      arButton.addEventListener('click', (event: MouseEvent) => {
-        post(this.currentBlob!, this.modelViewerUrl);
+      arButton.addEventListener('click', () => {
+        try {
+          if (this.sessionOs === 'iOS') {
+            post(this.usdzBlob!, this.arConfig.iosSrc!);
+          } else {
+            post(this.currentBlob!, this.modelViewerUrl);
+          }
+        } catch (error) {
+          console.log('Post failed on ar button press...');
+        }
       });
     }
   }
 
-  // TODO: Fix iOS not loading USDZ.
+  // Need to fetch the USDZ first so we can POST the USDZ again if
+  // someone closes quick-look and then chooses to reopen it.
   async waitForUSDZ(usdzId: number) {
-    const response =
-        await fetch(usdzToSession(this.pipeId, this.sessionId, usdzId));
+    const usdzUrl = usdzToSession(this.pipeId, this.sessionId, usdzId);
+    const response = await fetch(usdzUrl);
     if (response.ok) {
-      const blob = await response.blob();
-      const usdzUrl = URL.createObjectURL(blob);
+      this.usdzBlob = await response.blob();
       this.arConfig.iosSrc = usdzUrl;
     } else {
       console.error('Error:', response);
     }
   }
 
-  async waitForEnv(envIsHdr: boolean) {
-    const response = await fetch(envToSession(this.pipeId, this.sessionId));
-    if (response.ok) {
-      // Simulating createBlobUrlFromEnvironmentImage
-      const blob = await response.blob();
-      const addOn = envIsHdr ? '#.hdr' : '';
-      const envUrl = URL.createObjectURL(blob) + addOn;
-      this.envImageUrl = envUrl;
-    }
-  }
-
   // We set modelViewerUrl instead of directly fetching it because scene-viewer
   // requires the same url from the current model-viewer state, and we need to
   // make a POST request to that URL when scene-viewer is triggered.
-  // TODO: Look into if that is the same issue with quick-look.
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
+    this.overlay!.style.display = 'block';
 
     if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
@@ -120,12 +120,15 @@ export class MobileView extends LitElement {
     if (updatedContent.stateChanged) {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
+    if (updatedContent.envChanged) {
+      this.envImageUrl =
+          envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
+    }
     if (updatedContent.iosChanged) {
       await this.waitForUSDZ(updatedContent.usdzId);
     }
-    if (updatedContent.envChanged) {
-      await this.waitForEnv(updatedContent.envIsHdr);
-    }
+
+    this.overlay!.style.display = 'none';
   }
 
   initializeToast(json: EditorUpdates) {
@@ -146,7 +149,7 @@ export class MobileView extends LitElement {
       this.initializeToast(json.updatedContent);
       setTimeout(() => {
         this.toastClassName = '';
-      }, 5000);
+      }, 7000);
       await this.waitForData(json);
     } else {
       console.error('Error:', response);
@@ -154,7 +157,11 @@ export class MobileView extends LitElement {
   }
 
   async triggerFetchLoop() {
-    await this.fetchLoop();
+    try {
+      await this.fetchLoop();
+    } catch (error) {
+      console.log('error...', error);
+    }
     await this.triggerFetchLoop();
   }
 
@@ -171,7 +178,11 @@ export class MobileView extends LitElement {
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
     this.currentBlob = await prepareGlbBlob(gltf);
 
-    await post(this.currentBlob, this.modelViewerUrl);
+    try {
+      await post(this.currentBlob, this.modelViewerUrl);
+    } catch (error) {
+      console.log('Post failed on model loaded...');
+    }
   }
 
   render() {
@@ -180,6 +191,7 @@ export class MobileView extends LitElement {
     const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
     const childElements = [...renderHotspots(this.hotspots)];
     return html`
+    <div id="overlay"></div>
     <div class="app">
       <div class="mvContainer">
         <model-viewer
@@ -209,8 +221,9 @@ export class MobileView extends LitElement {
         >${childElements}</model-viewer>
       </div>
     </div>
-    <div class="${this.toastClassName}" id="snackbar-mobile">${
-        this.toastBody}</div>`;
+    <div class="${this.toastClassName}" id="snackbar-mobile">
+      ${this.toastBody}
+    </div>`;
   }
 
   // Ping the editor
@@ -224,8 +237,7 @@ export class MobileView extends LitElement {
   }
 
   // (Overriding default) Tell editor session that it is ready for data.
-  // @ts-ignore changedProperties is unused
-  firstUpdated(changedProperties: any) {
+  firstUpdated() {
     this.ping();
     this.triggerFetchLoop();
   }

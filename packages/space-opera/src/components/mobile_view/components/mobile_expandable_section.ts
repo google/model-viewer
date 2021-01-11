@@ -105,8 +105,10 @@ export class MobileExpanadableSection extends LitElement {
       </mwc-button>
       ${this.optionalMessage}
     </div>
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px
-    0px;">AR Settings:</div> <me-checkbox
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
+      AR Settings:
+    </div> 
+    <me-checkbox
       id="ar-modes"
       label="Default AR Modes to Scene Viewer"
       ?checked="${this.defaultToSceneViewer}"
@@ -125,20 +127,21 @@ export class MobileExpanadableSection extends LitElement {
 
   renderIos() {
     const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
+    const uploadUsdzText = this.iosAndNoUsdz ? html`
+    <div style="color: #DC143C; margin-top: 5px;">
+      Upload a .usdz to view model in AR on an iOS device.
+    </div>` :
+                                               html``
     return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px
-    0px;">iOS Settings:</div> <mwc-button unelevated icon="file_upload"
-    @click=${this.onUploadUSDZ} style="--mdc-theme-primary:
-    ${needUsdzButton}">
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
+      iOS Settings:
+    </div> 
+    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
+      style="--mdc-theme-primary: ${needUsdzButton}">
       USDZ
     </mwc-button>
-    ${
-        this.iosAndNoUsdz ? html`
-  <div style="color: #DC143C; margin-top: 5px;">
-    Upload a .usdz to view model in AR on an iOS device.
-  </div>` :
-                            html``}
-    `
+    ${uploadUsdzText}
+    `;
   }
 
   render() {
