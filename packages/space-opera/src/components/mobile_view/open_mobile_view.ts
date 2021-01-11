@@ -35,7 +35,8 @@ import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
 import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
-import {EditorUpdates, envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, MobilePacket, MobileSession, post, prepareGlbBlob, prepareUSDZ, URLs, usdzToSession} from './types.js';
+import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
 /**
  * Section for displaying QR Code and other info related for mobile devices.
@@ -180,9 +181,12 @@ export class OpenMobileView extends ConnectedLitElement {
       packet.snippet = this.snippet;
     }
 
-    await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+    const completed = await post(
+        JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
 
-    if (session.os === 'iOS' && updatedContent.iosChanged && usdzBlob) {
+    console.log('session completed', completed, session.id)
+
+    if (updatedContent.iosChanged && usdzBlob) {
       await post(
           usdzBlob,
           usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
@@ -195,19 +199,38 @@ export class OpenMobileView extends ConnectedLitElement {
     }
 
     if (updatedContent.envChanged && envBlob) {
-      await post(envBlob, envToSession(this.pipeId, session.id));
+      await post(
+          envBlob,
+          envToSession(this.pipeId, session.id, updatedContent.envIsHdr));
     }
 
     // The isStale flag will stay true if all of the requests are not delivered.
     session.isStale = false;
   }
 
+  async sendSessionContentHolder(
+      session: MobileSession, updatedContent: EditorUpdates,
+      usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
+      envBlob: Blob|undefined) {
+    try {
+      await this.sendSessionContent(
+          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+    } catch (e) {
+      console.log('error posting...');
+    }
+  }
+
   // Send any state, model, or environment iamge that has been updated since the
   // last refresh.
-  // TODO: Now that the posts are asynchronous, need to find a new way to deal
-  // with knowing when isSendingData should be set to false.
   async postInfo() {
+    if (this.isSendingData) {
+      return;
+    }
     this.isSendingData = true;
+    const sessionList = [...this.sessionList];
+    setTimeout(() => {
+      this.isSendingData = false;
+    }, 20000);
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
 
@@ -242,8 +265,8 @@ export class OpenMobileView extends ConnectedLitElement {
 
     // Iterate through the list of active mobile sessions, and allow them to
     // post their information asynchronously.
-    for (let session of this.sessionList) {
-      this.sendSessionContent(
+    for (let session of sessionList) {
+      this.sendSessionContentHolder(
           session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
     }
 
@@ -253,7 +276,6 @@ export class OpenMobileView extends ConnectedLitElement {
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
     this.contentHasChanged = this.getContentHasChanged();
-    this.isSendingData = false;
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
@@ -261,12 +283,15 @@ export class OpenMobileView extends ConnectedLitElement {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
       const json: MobileSession = await response.json();
-      this.haveReceivedResponse = true;
       this.sessionList.push(json);
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }
-      this.postInfo();
+      // Only update if not currently updating...
+      if (!this.isSendingData) {
+        this.postInfo();
+      }
+      this.haveReceivedResponse = true;
       return true;
     }
     return false;
@@ -275,7 +300,11 @@ export class OpenMobileView extends ConnectedLitElement {
   // If a ping was received, then a new page has been opened or a page was
   // refreshed.
   async pingLoop() {
-    await this.waitForPing();
+    try {
+      await this.waitForPing();
+    } catch (error) {
+      console.log('error...', error);
+    }
     this.pingLoop();
   }
 
@@ -286,7 +315,12 @@ export class OpenMobileView extends ConnectedLitElement {
   // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
     this.openModal();
-    const wasPinged = await this.waitForPing();
+    let wasPinged = false;
+    try {
+      wasPinged = await this.waitForPing();
+    } catch (error) {
+      console.log('error...', error);
+    }
     if (wasPinged) {
       this.pingLoop();
     } else {
