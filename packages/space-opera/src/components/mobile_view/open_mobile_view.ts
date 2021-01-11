@@ -278,14 +278,15 @@ export class OpenMobileView extends ConnectedLitElement {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
       const json: MobileSession = await response.json();
+      // Only update if not currently updating...
+      if (!this.isSendingData) {
+        this.postInfo();
+      }
       this.haveReceivedResponse = true;
       this.sessionList.push(json);
       if (json.os === 'iOS') {
         this.openedIOS = true;
       }
-      // TODO: If not first ping, make sure to only push update if there isn't
-      // one already being pushed out.
-      this.postInfo();
       return true;
     }
     return false;

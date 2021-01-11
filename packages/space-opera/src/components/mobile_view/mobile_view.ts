@@ -80,10 +80,14 @@ export class MobileView extends LitElement {
       const arButton =
           this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
       arButton.addEventListener('click', () => {
-        if (this.sessionOs === 'iOS') {
-          post(this.usdzBlob!, this.arConfig.iosSrc!);
-        } else {
-          post(this.currentBlob!, this.modelViewerUrl);
+        try {
+          if (this.sessionOs === 'iOS') {
+            post(this.usdzBlob!, this.arConfig.iosSrc!);
+          } else {
+            post(this.currentBlob!, this.modelViewerUrl);
+          }
+        } catch (error) {
+          console.log('Post failed on ar button press...');
         }
       });
     }
@@ -155,8 +159,8 @@ export class MobileView extends LitElement {
   async triggerFetchLoop() {
     try {
       await this.fetchLoop();
-    } catch (e) {
-      console.log('error...');
+    } catch (error) {
+      console.log('error...', error);
     }
     await this.triggerFetchLoop();
   }
@@ -174,7 +178,11 @@ export class MobileView extends LitElement {
     const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
     this.currentBlob = await prepareGlbBlob(gltf);
 
-    post(this.currentBlob, this.modelViewerUrl);
+    try {
+      await post(this.currentBlob, this.modelViewerUrl);
+    } catch (error) {
+      console.log('Post failed on model loaded...');
+    }
   }
 
   render() {
