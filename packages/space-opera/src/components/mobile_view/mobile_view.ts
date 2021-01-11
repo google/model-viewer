@@ -120,12 +120,12 @@ export class MobileView extends LitElement {
     if (updatedContent.stateChanged) {
       this.updateState(json.snippet, updatedContent.envChanged);
     }
-    if (updatedContent.iosChanged) {
-      await this.waitForUSDZ(updatedContent.usdzId);
-    }
     if (updatedContent.envChanged) {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
+    }
+    if (updatedContent.iosChanged) {
+      await this.waitForUSDZ(updatedContent.usdzId);
     }
 
     this.overlay!.style.display = 'none';
