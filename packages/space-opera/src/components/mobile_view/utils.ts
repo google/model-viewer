@@ -78,6 +78,21 @@ export async function post(content: Blob|string, url: string) {
   }
 }
 
+// Aborting the get request as opposed to failing will keep the site pipe
+// running smoother.
+// https://dmitripavlutin.com/timeout-fetch-request/#2-timeout-a-fetch-request
+export async function getWithTimeout(url: string) {
+  const timeout = 30000;
+
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(url, {method: 'GET', signal: controller.signal});
+  clearTimeout(id);
+
+  return response;
+}
+
 /**
  * Determine the mobile operating system.
  * This function returns one of 'iOS', 'Android', 'Windows Phone', or
@@ -85,8 +100,8 @@ export async function post(content: Blob|string, url: string) {
  * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
  */
 export function getMobileOperatingSystem(): string {
-  // @ts-ignore
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent =
+      navigator.userAgent || navigator.vendor || (window as any).opera;
 
   // Windows Phone must come first because its UA also contains "Android"
   if (/windows phone/i.test(userAgent)) {
