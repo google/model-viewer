@@ -131,10 +131,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const pitch = normalizeUnit(orientation[1]).number;
         const yaw = normalizeUnit(orientation[2]).number;
 
-        // This does airplane-style roll, pitch, yaw, where positive pitch is up
-        // and yaw is clockwise like a compass.
         modelContainer.quaternion.setFromEuler(
-            new Euler(-pitch, -yaw, roll, 'YXZ'));
+            new Euler(pitch, yaw, roll, 'YXZ'));
 
         const scale = parseExpressions(this.scale)[0]
                           .terms as [NumberNode, NumberNode, NumberNode];

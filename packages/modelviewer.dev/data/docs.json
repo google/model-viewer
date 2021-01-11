@@ -847,7 +847,7 @@
       {
         "name": "orientation",
         "htmlName": "orientation",
-        "description": "Rotates the model to the orientation specified by roll, pitch, yaw Euler angles. Positive pitch moves the front of the object up and yaw turns it clockwise like a compass when looking from above. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "description": "Rotates the model to the orientation specified by roll, pitch, yaw Euler angles, where yaw is first applied about the Y-axis, then pitch about the new local X-axis (positive is front-down), then roll about the new local Z-axis. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
         "links": [
           "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
         ],
