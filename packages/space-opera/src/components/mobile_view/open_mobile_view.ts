@@ -228,6 +228,7 @@ export class OpenMobileView extends ConnectedLitElement {
       return;
     }
     this.isSendingData = true;
+    const sessionList = [...this.sessionList];
     setTimeout(() => {
       this.isSendingData = false;
     }, 20000);
@@ -265,7 +266,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     // Iterate through the list of active mobile sessions, and allow them to
     // post their information asynchronously.
-    for (let session of this.sessionList) {
+    for (let session of sessionList) {
       this.sendSessionContentHolder(
           session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
     }
